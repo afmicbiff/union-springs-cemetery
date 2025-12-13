@@ -40,8 +40,8 @@ export default function Layout({ children }) {
                 className="h-14 w-auto rounded-full"
               />
               <div className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
-                <span className="text-xs md:text-sm text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery</span>
+                <span className="text-xl md:text-2xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
+                <span className="text-[0.65rem] md:text-xs text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery</span>
               </div>
             </Link>
 
