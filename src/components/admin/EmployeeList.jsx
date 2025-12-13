@@ -11,9 +11,9 @@ import { Search, Users, Mail, Phone, MapPin } from 'lucide-react';
 export default function EmployeeList() {
     const [searchTerm, setSearchTerm] = useState("");
 
-    const { data: employees, isLoading } = useQuery({
+    const { data: employees, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => base44.entities.Employee.list('-employee_number'),
+        queryFn: () => base44.entities.Employee.list('-created_date'),
         initialData: [],
     });
 
@@ -39,14 +39,19 @@ export default function EmployeeList() {
                             View and manage registered employee records.
                         </CardDescription>
                     </div>
-                    <div className="relative w-full md:w-64">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
-                        <Input
-                            placeholder="Search employees..."
-                            className="pl-9"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
+                            <Input
+                                placeholder="Search employees..."
+                                className="pl-9"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button variant="outline" size="icon" onClick={() => refetch()} title="Refresh List">
+                            <Users className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
             </CardHeader>
@@ -67,6 +72,12 @@ export default function EmployeeList() {
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-8 text-stone-500">
                                         Loading records...
+                                    </TableCell>
+                                </TableRow>
+                            ) : isError ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8 text-red-500">
+                                        Error loading employees: {error?.message || "Unknown error"}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredEmployees.length === 0 ? (
