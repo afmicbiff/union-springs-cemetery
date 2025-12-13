@@ -15,7 +15,7 @@ export default function EmployeeList() {
 
     const { data: employees, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => base44.entities.Employee.list('-created_date'),
+        queryFn: () => base44.entities.Employee.list('-created_date', 1000),
         initialData: [],
     });
 
