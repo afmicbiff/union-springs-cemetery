@@ -23,12 +23,12 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <Link to={createPageUrl('Search')}>
-              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
+              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-8 py-3 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
                 <Search className="mr-2 h-5 w-5" /> Find a Loved One
               </Button>
             </Link>
             <Link to={createPageUrl('Plots')}>
-              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
+              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-8 py-3 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
                 <MapPin className="mr-2 h-5 w-5" /> View Plots
               </Button>
             </Link>
