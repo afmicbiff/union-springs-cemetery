@@ -120,9 +120,9 @@ export default function ContactPage() {
                                     <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <CheckCircle2 className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-2xl font-serif text-stone-800">Thank You!</h3>
+                                    <h3 className="text-2xl font-serif text-stone-800">Message Sent</h3>
                                     <p className="text-stone-600 max-w-sm mx-auto">
-                                        Your message has been sent successfully. We have sent a confirmation email to <strong>{formData.email}</strong>.
+                                        The message "<strong>{formData.subject}</strong>" was successfully sent, and within 24 hours, a team member will get back to you about your question.
                                     </p>
                                     <Button 
                                         variant="outline" 
