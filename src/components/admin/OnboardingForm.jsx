@@ -43,10 +43,7 @@ export default function OnboardingForm() {
     const createEmployeeMutation = useMutation({
         mutationFn: async (data) => {
             // 1. Fetch latest employee to get the next number
-            const employees = await base44.entities.Employee.list({
-                sort: { created_date: -1 },
-                limit: 1
-            });
+            const employees = await base44.entities.Employee.list('-created_date', 1);
 
             let nextNum = 1;
             if (employees.length > 0 && employees[0].employee_number) {

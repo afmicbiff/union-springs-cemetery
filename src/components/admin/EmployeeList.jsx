@@ -13,7 +13,7 @@ export default function EmployeeList() {
 
     const { data: employees, isLoading } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => base44.entities.Employee.list({ sort: { employee_number: -1 } }),
+        queryFn: () => base44.entities.Employee.list('-employee_number'),
         initialData: [],
     });
 
