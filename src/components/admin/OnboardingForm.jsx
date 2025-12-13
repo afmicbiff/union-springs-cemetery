@@ -78,6 +78,10 @@ export default function OnboardingForm() {
         createEmployeeMutation.mutate(data);
     };
 
+    const onError = (errors) => {
+        toast.error("Please check all required fields marked in red");
+    };
+
     // Helper to get input class based on state
     const getInputClass = (fieldName) => {
         const hasError = !!errors[fieldName];
@@ -102,7 +106,7 @@ export default function OnboardingForm() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
                     {/* Personal Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -187,11 +191,8 @@ export default function OnboardingForm() {
                         )}
                         <Button 
                             type="submit" 
-                            className={cn(
-                                "min-w-[150px] transition-all duration-300",
-                                isValid ? "bg-teal-700 hover:bg-teal-800" : "bg-stone-300 cursor-not-allowed hover:bg-stone-300"
-                            )} 
-                            disabled={createEmployeeMutation.isPending || !isValid}
+                            className="min-w-[150px] transition-all duration-300 bg-teal-700 hover:bg-teal-800"
+                            disabled={createEmployeeMutation.isPending}
                         >
                             {createEmployeeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : null}
                             Register Employee
