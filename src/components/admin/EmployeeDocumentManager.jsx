@@ -6,9 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, File, Loader2, Trash2, ExternalLink, CheckSquare, Square } from 'lucide-react';
+import { Upload, File, Loader2, Trash2, ExternalLink, CheckSquare, Square, User } from 'lucide-react';
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from "@/components/ui/button";
 
 export default function EmployeeDocumentManager() {
     const queryClient = useQueryClient();
