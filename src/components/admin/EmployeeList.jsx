@@ -20,12 +20,21 @@ export default function EmployeeList() {
     });
 
     const filteredEmployees = employees.filter(emp => {
-        const term = searchTerm.toLowerCase();
+        const term = searchTerm.toLowerCase().trim();
+        if (!term) return true;
+
+        const firstName = emp.first_name?.toLowerCase() || "";
+        const lastName = emp.last_name?.toLowerCase() || "";
+        const fullName = `${firstName} ${lastName}`;
+        const email = emp.email?.toLowerCase() || "";
+        const empNum = emp.employee_number ? String(emp.employee_number) : "";
+
         return (
-            emp.first_name?.toLowerCase().includes(term) ||
-            emp.last_name?.toLowerCase().includes(term) ||
-            emp.employee_number?.includes(term) ||
-            emp.email?.toLowerCase().includes(term)
+            firstName.includes(term) ||
+            lastName.includes(term) ||
+            fullName.includes(term) ||
+            email.includes(term) ||
+            empNum.includes(term)
         );
     });
 
