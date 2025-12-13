@@ -15,7 +15,7 @@ export default function ServicesPage() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-teal-700">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md">
                 <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Traditional Burial</h3>
                 <p className="text-stone-600 mb-4">
                     Our traditional burial services include full plot preparation, maintenance, and coordination with funeral directors.
@@ -28,7 +28,7 @@ export default function ServicesPage() {
                 </ul>
             </div>
 
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-stone-500">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md">
                 <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Cremation Services</h3>
                 <p className="text-stone-600 mb-4">
                     For those choosing cremation, we offer several respectful options including columbarium niches,
@@ -41,7 +41,7 @@ export default function ServicesPage() {
                 </ul>
             </div>
             
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-red-700 md:col-span-2">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md md:col-span-2">
                 <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Memorial Planning</h3>
                 <p className="text-stone-600 mb-4">
                     Our dedicated staff is here to help you create a lasting tribute. We assist with:

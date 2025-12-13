@@ -39,7 +39,7 @@ export default function SearchPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white p-6 rounded-sm shadow-md border-t-4 border-teal-600">
+        <div className="bg-white p-6 rounded-sm shadow-md">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />

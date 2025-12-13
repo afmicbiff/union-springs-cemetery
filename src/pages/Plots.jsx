@@ -70,9 +70,9 @@ export default function PlotsPage() {
      if (isMultiStatus) return "bg-purple-100 border-purple-300 text-purple-900";
      
      switch(plot.status) {
-         case 'available': return "bg-stone-50 border-stone-200 hover:border-teal-500";
-         case 'reserved': return "bg-teal-100 border-teal-300 text-teal-900";
-         case 'occupied': return "bg-red-100 border-red-300 text-red-900";
+         case 'available': return "bg-stone-50 text-stone-600";
+         case 'reserved': return "bg-teal-100 text-teal-900";
+         case 'occupied': return "bg-red-100 text-red-900";
          default: return "bg-stone-50";
      }
   };
@@ -172,7 +172,7 @@ export default function PlotsPage() {
                                     <DialogTrigger asChild>
                                         <div 
                                             className={`
-                                                relative p-4 border rounded-sm transition-all duration-300 hover:shadow-lg group cursor-pointer
+                                                relative p-4 rounded-sm transition-all duration-300 hover:shadow-lg group cursor-pointer
                                                 flex flex-col justify-between min-h-[140px]
                                                 ${getStatusColor(plot, occupants)}
                                             `}

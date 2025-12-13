@@ -119,7 +119,7 @@ export default function AdminDashboard() {
 
         {/* Alerts Section */}
         {notifications.length > 0 && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-sm shadow-sm">
+          <div className="bg-red-50 p-4 rounded-sm shadow-sm">
             <h3 className="text-red-800 font-bold flex items-center gap-2">
               <Bell className="w-5 h-5" /> Recent Alerts
             </h3>
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        <div className="p-4 bg-stone-50 rounded-sm border border-stone-200">
+                        <div className="p-4 bg-stone-50 rounded-sm">
                             <h4 className="font-bold text-stone-800 mb-2">Maintenance Required</h4>
                             <p className="text-stone-600">
                                 3 Plots flagged for leveling. <br/>
@@ -193,11 +193,11 @@ export default function AdminDashboard() {
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 border rounded-sm">
+                            <div className="p-4 bg-white rounded-sm shadow-sm">
                                 <span className="block text-sm text-stone-500">Lawn Maintenance</span>
                                 <span className="font-bold text-green-600 flex items-center gap-1"><CheckCircle className="w-4 h-4"/> Up to Date</span>
                             </div>
-                            <div className="p-4 border rounded-sm">
+                            <div className="p-4 bg-white rounded-sm shadow-sm">
                                 <span className="block text-sm text-stone-500">Site Inspections</span>
                                 <span className="font-bold text-amber-600 flex items-center gap-1"><AlertTriangle className="w-4 h-4"/> Due in 2 days</span>
                             </div>
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
                             Regularly review who has access credentials.
                         </p>
                     </div>
-                    <div className="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+                    <div className="p-4 bg-yellow-50 text-yellow-800 rounded-sm">
                         <strong>Security Tip:</strong> When downloading reports containing personal information (names, donations), 
                         ensure they are stored in encrypted folders on your personal device.
                     </div>

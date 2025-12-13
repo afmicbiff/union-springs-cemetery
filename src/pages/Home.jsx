@@ -8,10 +8,10 @@ export default function Home() {
   return (
     <div className="space-y-0">
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[500px] flex items-center justify-center bg-stone-900 text-center px-4 overflow-hidden">
-        {/* Abstract "Granite" Background Effect */}
-        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-transparent to-stone-900/50"></div>
+      <section className="relative h-[60vh] md:h-[500px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden">
+        {/* Abstract "Granite" Background Effect - Darkened */}
+        <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80"></div>
         
         <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up">
           <h1 className="text-4xl md:text-6xl font-serif text-stone-100 tracking-wide">
@@ -23,12 +23,12 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <Link to={createPageUrl('Search')}>
-              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm border-l-4 border-teal-500 shadow-lg transition-transform hover:-translate-y-1">
+              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
                 <Search className="mr-2 h-5 w-5" /> Find a Loved One
               </Button>
             </Link>
             <Link to={createPageUrl('Plots')}>
-              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm border-l-4 border-stone-400 shadow-lg transition-transform hover:-translate-y-1">
+              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
                 <MapPin className="mr-2 h-5 w-5" /> View Plots
               </Button>
             </Link>
@@ -41,7 +41,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 -mt-24 relative z-20">
           
           {/* Card 1 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-teal-600 hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
             <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-teal-700 transition-colors duration-300">
               <Search className="w-6 h-6 text-teal-700 group-hover:text-white" />
             </div>
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
 
           {/* Card 2 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-stone-500 hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
             <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mb-6 group-hover:bg-stone-700 transition-colors duration-300">
               <Flower2 className="w-6 h-6 text-stone-700 group-hover:text-white" />
             </div>
@@ -69,7 +69,7 @@ export default function Home() {
           </div>
 
           {/* Card 3 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md border-t-4 border-red-700 hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-red-700 transition-colors duration-300">
               <MapPin className="w-6 h-6 text-red-700 group-hover:text-white" />
             </div>
