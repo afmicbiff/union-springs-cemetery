@@ -97,9 +97,11 @@ export default function Home() {
             rest here and supporting families with compassion.
           </p>
           <div className="pt-8">
-             <Button variant="outline" className="border-2 border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white font-serif uppercase tracking-widest px-8 py-4 h-auto rounded-sm">
-               Read Our History
-             </Button>
+             <Link to={createPageUrl('History')}>
+               <Button variant="outline" className="border-2 border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white font-serif uppercase tracking-widest px-8 py-4 h-auto rounded-sm">
+                 Read Our History
+               </Button>
+             </Link>
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@ import Search from './pages/Search';
 import Plots from './pages/Plots';
 import Services from './pages/Services';
 import Admin from './pages/Admin';
+import History from './pages/History';
 import __Layout from './Layout.jsx';
 
 
@@ -12,6 +13,7 @@ export const PAGES = {
     "Plots": Plots,
     "Services": Services,
     "Admin": Admin,
+    "History": History,
 }
 
 export const pagesConfig = {
