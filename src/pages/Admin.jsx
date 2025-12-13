@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import OnboardingForm from "@/components/admin/OnboardingForm";
 import OnboardingGuide from "@/components/admin/OnboardingGuide";
 import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
+import EmployeeList from "@/components/admin/EmployeeList";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -309,6 +310,11 @@ export default function AdminDashboard() {
                   <div>
                       <OnboardingGuide />
                   </div>
+              </div>
+              
+              {/* Full Width: Employee List */}
+              <div className="pt-6 border-t border-stone-200">
+                  <EmployeeList />
               </div>
           </TabsContent>
 
