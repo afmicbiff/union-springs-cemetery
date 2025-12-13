@@ -11,11 +11,11 @@ export default function Home() {
       <section className="relative h-[60vh] md:h-[500px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden">
         {/* Abstract "Granite" Background Effect - Darkened */}
         <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80"></div>
+        <div className="bg-zinc-700 absolute inset-0 from-black via-transparent to-black/80"></div>
         
-        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up -mt-10">
+        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up">
           <h1 className="text-4xl md:text-6xl font-serif text-stone-100 tracking-wide">
-            Peaceful Resting <br/> <span className="text-teal-500">In Union Springs</span>
+            Peaceful Resting <br /> <span className="text-teal-500 italic">In Union Springs</span>
           </h1>
           <p className="text-lg md:text-xl text-stone-300 font-light max-w-xl mx-auto leading-relaxed">
             A historic sanctuary of remembrance, honoring lives with dignity in a setting of natural granite beauty.
@@ -23,13 +23,13 @@ export default function Home() {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <Link to={createPageUrl('Search')}>
-              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-5 py-3 h-auto text-base rounded-sm shadow-lg transition-transform hover:-translate-y-1">
-                <Search className="mr-2 h-4 w-4" /> Find a Loved One
+              <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
+                <Search className="mr-2 h-5 w-5" /> Find a Loved One
               </Button>
             </Link>
             <Link to={createPageUrl('Plots')}>
-              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-5 py-3 h-auto text-base rounded-sm shadow-lg transition-transform hover:-translate-y-1">
-                <MapPin className="mr-2 h-4 w-4" /> View Plots
+              <Button variant="secondary" className="w-full sm:w-auto bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-wider px-8 py-6 h-auto text-lg rounded-sm shadow-lg transition-transform hover:-translate-y-1">
+                <MapPin className="mr-2 h-5 w-5" /> View Plots
               </Button>
             </Link>
           </div>
@@ -108,11 +108,11 @@ export default function Home() {
       <section className="py-16 bg-stone-100 border-t border-stone-200">
          <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-                <img 
-                  src="https://images.unsplash.com/photo-1464979681340-bdd28a61699e?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Peaceful cemetery grounds" 
-                  className="rounded-sm shadow-xl border-8 border-white grayscale hover:grayscale-0 transition-all duration-700"
-                />
+                <img
+              src="https://images.unsplash.com/photo-1464979681340-bdd28a61699e?q=80&w=1000&auto=format&fit=crop"
+              alt="Peaceful cemetery grounds"
+              className="rounded-sm shadow-xl border-8 border-white grayscale hover:grayscale-0 transition-all duration-700" />
+
             </div>
             <div className="md:w-1/2 space-y-6">
                 <h2 className="text-3xl font-serif text-stone-800">Pre-Planning Services</h2>
@@ -139,6 +139,6 @@ export default function Home() {
             </div>
          </div>
       </section>
-    </div>
-  );
+    </div>);
+
 }
