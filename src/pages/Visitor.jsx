@@ -10,7 +10,7 @@ export default function VisitorPage() {
     <div className="space-y-0">
       
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[274px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden">
+      <section className="relative h-[60vh] md:h-[386px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden">
         {/* Background - using a fitting cemetery image */}
         <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518709328825-4d2d4eb72c1c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"></div>
         <div className="bg-zinc-600 absolute inset-0 from-black/80 via-transparent to-black/80"></div>
