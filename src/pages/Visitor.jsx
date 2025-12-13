@@ -7,19 +7,29 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function VisitorPage() {
   return (
-    <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-12">
-        <Breadcrumbs items={[{ label: 'Plan a Visit' }]} />
+    <div className="space-y-0">
+      
+      {/* Hero Section */}
+      <section className="relative h-[60vh] md:h-[500px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden">
+        {/* Background - using a fitting cemetery image */}
+        <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518709328825-4d2d4eb72c1c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div className="bg-zinc-900 absolute inset-0 from-black/80 via-transparent to-black/80"></div>
         
-        {/* Header */}
-        <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Plan Your Visit</h1>
+        <div className="relative z-10 max-w-4xl space-y-6 animate-fade-in-up pb-20">
+          <div className="flex justify-center">
+            <Breadcrumbs items={[{ label: 'Plan a Visit' }]} className="text-stone-300" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-serif text-stone-100">Plan Your Visit</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
-          <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="text-stone-200 max-w-2xl mx-auto text-lg leading-relaxed font-light">
             We welcome you to Union Springs Cemetery. Whether you are visiting a loved one or exploring our historic grounds, we ask that you respect the sanctity of this place.
           </p>
         </div>
+      </section>
 
+      {/* Main Content - Moved Up to overlap Hero */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-[224px] relative z-20 pb-12 space-y-8">
+        
         <div className="grid md:grid-cols-2 gap-8">
             
             {/* Hours & Location */}

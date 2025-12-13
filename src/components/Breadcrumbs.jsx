@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
-export default function Breadcrumbs({ items }) {
+export default function Breadcrumbs({ items, className = "" }) {
   return (
-    <nav className="flex items-center text-sm text-stone-500 mb-6 font-serif" aria-label="Breadcrumb">
+    <nav className={`flex items-center text-sm mb-6 font-serif ${className || 'text-stone-500'}`} aria-label="Breadcrumb">
       <Link to={createPageUrl('Home')} className="hover:text-teal-700 flex items-center transition-colors">
         <Home className="w-4 h-4 mr-1" />
         Home
@@ -18,7 +18,7 @@ export default function Breadcrumbs({ items }) {
                {item.label}
              </Link>
           ) : (
-             <span className="font-medium text-stone-800">{item.label}</span>
+             <span className="font-medium opacity-90">{item.label}</span>
           )}
         </React.Fragment>
       ))}
