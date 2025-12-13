@@ -245,13 +245,27 @@ export default function OnboardingForm() {
                             </div>
                             
                             <div className="space-y-2">
-                                <Label htmlFor="spouse_name">Spouse Name</Label>
+                                <Label htmlFor="spouse_name" className={errors.spouse_name ? "text-red-500" : ""}>Spouse Name {["Married", "Separated"].includes(maritalStatus) ? "*" : ""}</Label>
                                 <Input 
                                     id="spouse_name" 
                                     {...register("spouse_name")} 
-                                    disabled={maritalStatus === "Single" || maritalStatus === "Divorced" || maritalStatus === "Widowed"}
-                                    placeholder={maritalStatus === "Single" ? "N/A" : ""}
+                                    disabled={!["Married", "Separated"].includes(maritalStatus)}
+                                    placeholder={!["Married", "Separated"].includes(maritalStatus) ? "N/A" : ""}
+                                    className={getInputClass("spouse_name")}
                                 />
+                                {errors.spouse_name && <p className="text-xs text-red-500">{errors.spouse_name.message}</p>}
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label htmlFor="spouse_phone" className={errors.spouse_phone ? "text-red-500" : ""}>Spouse Phone {["Married", "Separated"].includes(maritalStatus) ? "*" : ""}</Label>
+                                <Input 
+                                    id="spouse_phone" 
+                                    {...register("spouse_phone")} 
+                                    disabled={!["Married", "Separated"].includes(maritalStatus)}
+                                    placeholder={!["Married", "Separated"].includes(maritalStatus) ? "N/A" : "e.g. 555-0199"}
+                                    className={getInputClass("spouse_phone")}
+                                />
+                                {errors.spouse_phone && <p className="text-xs text-red-500">{errors.spouse_phone.message}</p>}
                             </div>
                         </div>
                         <div className="space-y-2">
