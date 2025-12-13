@@ -7,9 +7,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search, Loader2, Calendar, MapPin, User, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Filter, X } from 'lucide-react';
+
+// Simple Levenshtein distance for "Did you mean?"
+const getLevenshteinDistance = (a, b) => {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+  for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+};
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [deathYear, setDeathYear] = useState('');
+  const [section, setSection] = useState('all');
   
   const { data: deceasedList, isLoading } = useQuery({
     queryKey: ['deceased'],
@@ -19,12 +44,39 @@ export default function SearchPage() {
     initialData: [],
   });
 
-  // Client-side filtering for simplicity given the small dataset
+  let suggestion = null;
+
+  // Client-side filtering
   const filteredResults = deceasedList.filter(person => {
     const term = searchTerm.toLowerCase();
     const fullName = `${person.first_name} ${person.last_name}`.toLowerCase();
-    return fullName.includes(term) || person.last_name.toLowerCase().includes(term);
+    const matchesName = !term || fullName.includes(term) || person.last_name.toLowerCase().includes(term);
+    
+    const matchesYear = !deathYear || (person.date_of_death && person.date_of_death.includes(deathYear));
+    
+    const matchesSection = section === 'all' || (person.plot_location && person.plot_location.startsWith(section));
+
+    return matchesName && matchesYear && matchesSection;
   });
+
+  // "Did you mean?" logic
+  if (filteredResults.length === 0 && searchTerm.length > 2) {
+    let closestMatch = null;
+    let minDistance = Infinity;
+    
+    deceasedList.forEach(person => {
+      const fullName = `${person.first_name} ${person.last_name}`;
+      const dist = getLevenshteinDistance(searchTerm.toLowerCase(), fullName.toLowerCase());
+      if (dist < minDistance && dist < 4) { // Threshold of 4
+        minDistance = dist;
+        closestMatch = fullName;
+      }
+    });
+
+    if (closestMatch) {
+      suggestion = closestMatch;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
@@ -38,8 +90,8 @@ export default function SearchPage() {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="bg-white p-6 rounded-sm shadow-md">
+        {/* Search Bar & Filters */}
+        <div className="bg-white p-6 rounded-sm shadow-md space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
@@ -51,14 +103,62 @@ export default function SearchPage() {
                 className="pl-10 h-12 text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
               />
             </div>
-            <Button className="h-12 px-8 bg-teal-700 hover:bg-teal-800 text-white font-serif tracking-wider text-lg rounded-sm shadow-sm">
-              Search
+            <Button 
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="h-12 px-4 border-stone-300 text-stone-700 hover:bg-stone-50 font-serif"
+            >
+              <Filter className="w-4 h-4 mr-2" /> Filters
             </Button>
           </div>
+
+          {/* Advanced Filters */}
+          {showFilters && (
+            <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-stone-100 animate-in slide-in-from-top-2">
+              <div className="space-y-2">
+                <Label className="text-stone-600">Plot Section</Label>
+                <Select value={section} onValueChange={setSection}>
+                  <SelectTrigger className="bg-stone-50 border-stone-300">
+                    <SelectValue placeholder="Select Section" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sections</SelectItem>
+                    <SelectItem value="North">North</SelectItem>
+                    <SelectItem value="South">South</SelectItem>
+                    <SelectItem value="East">East</SelectItem>
+                    <SelectItem value="West">West</SelectItem>
+                    <SelectItem value="Garden of Peace">Garden of Peace</SelectItem>
+                    <SelectItem value="Old Historic">Old Historic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-stone-600">Year of Passing</Label>
+                <Input 
+                  placeholder="e.g. 1995" 
+                  value={deathYear}
+                  onChange={(e) => setDeathYear(e.target.value)}
+                  className="bg-stone-50 border-stone-300"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Results */}
         <div className="space-y-4">
+          {suggestion && (
+            <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-sm flex items-center gap-2">
+              <span className="text-stone-600">Did you mean:</span>
+              <button 
+                onClick={() => setSearchTerm(suggestion)}
+                className="font-bold underline hover:text-teal-900"
+              >
+                {suggestion}
+              </button>?
+            </div>
+          )}
+
           {isLoading ? (
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
