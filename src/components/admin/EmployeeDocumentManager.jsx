@@ -4,19 +4,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, File, Loader2, Trash2, ExternalLink, CheckSquare, Square, User } from 'lucide-react';
+import { Upload, User, CheckSquare } from 'lucide-react';
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import DocumentUploader from "@/components/documents/DocumentUploader";
+import DocumentList from "@/components/documents/DocumentList";
 
 export default function EmployeeDocumentManager() {
     const queryClient = useQueryClient();
     const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
-    const [uploading, setUploading] = useState(false);
-    const [fileType, setFileType] = useState("Other");
 
     // Fetch Employees
     const { data: employees } = useQuery({
@@ -27,72 +26,60 @@ export default function EmployeeDocumentManager() {
 
     const selectedEmployee = employees.find(e => e.id === selectedEmployeeId);
 
-    // Update Employee Mutation (for adding/removing documents)
+    // Update Employee Mutation
     const updateEmployeeMutation = useMutation({
         mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['employees'] });
             toast.success("Employee record updated");
-            setUploading(false);
         },
         onError: (err) => toast.error("Failed to update: " + err.message)
     });
 
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file || !selectedEmployee) return;
+    const handleUploadComplete = async (newDoc) => {
+        if (!selectedEmployee) return;
 
-        setUploading(true);
-        try {
-            // 1. Upload file
-            const { file_url } = await base44.integrations.Core.UploadFile({ file });
-            
-            // 2. Add to employee documents list
-            const newDoc = {
-                name: file.name,
-                url: file_url,
-                type: fileType,
-                uploaded_at: new Date().toISOString()
-            };
+        const currentDocs = selectedEmployee.documents || [];
+        const currentChecklist = selectedEmployee.checklist || {};
+        
+        // Auto-update checklist
+        const updatedChecklist = { ...currentChecklist };
+        // Check if the uploaded type matches any checklist item key
+        const checklistKeys = Object.keys(currentChecklist);
+        if (checklistKeys.includes(newDoc.type)) {
+             updatedChecklist[newDoc.type] = true;
+        } else if (["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "Minor Cert"].includes(newDoc.type)) {
+             updatedChecklist[newDoc.type] = true;
+        }
 
-            const currentDocs = selectedEmployee.documents || [];
-            const currentChecklist = selectedEmployee.checklist || {};
-            
-            // Auto-update checklist
-            const updatedChecklist = { ...currentChecklist };
-            if (fileType !== "Other") {
-                updatedChecklist[fileType] = true;
+        updateEmployeeMutation.mutate({
+            id: selectedEmployeeId,
+            data: {
+                ...selectedEmployee,
+                documents: [...currentDocs, newDoc],
+                checklist: updatedChecklist
             }
-            
-            updateEmployeeMutation.mutate({
-                id: selectedEmployeeId,
-                data: {
-                    ...selectedEmployee,
-                    documents: [...currentDocs, newDoc],
-                    checklist: updatedChecklist
-                }
-            });
-            
-            if (fileType !== "Other") {
-                toast.success(`Marked '${fileType}' as complete`);
-            }
-
-        } catch (error) {
-            console.error(error);
-            toast.error("Upload failed: " + error.message);
-            setUploading(false);
+        });
+        
+        // If it was a checklist item, notify user
+        if (["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "Minor Cert"].includes(newDoc.type)) {
+            toast.success(`Marked '${newDoc.type}' as complete`);
         }
     };
 
-    const handleDeleteDoc = (docIndex) => {
+    const handleDeleteDoc = (docToDelete) => {
         if (!selectedEmployee) return;
+        // Match by uploaded_at and name to be unique enough
         const currentDocs = selectedEmployee.documents || [];
-        const newDocs = currentDocs.filter((_, idx) => idx !== docIndex);
+        const newDocs = currentDocs.filter(d => 
+            !(d.name === docToDelete.name && d.uploaded_at === docToDelete.uploaded_at)
+        );
         
         updateEmployeeMutation.mutate({
             id: selectedEmployeeId,
             data: { ...selectedEmployee, documents: newDocs }
         });
+        toast.success("Document removed");
     };
 
     const handleChecklistToggle = (item) => {
@@ -110,8 +97,6 @@ export default function EmployeeDocumentManager() {
             }
         });
     };
-
-    const docTypes = ["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "Minor Cert", "Other"];
     
     const checklistItems = [
         { name: "Form I-9", mandatory: true, type: "Federal" },
@@ -129,7 +114,7 @@ export default function EmployeeDocumentManager() {
                     <Upload className="w-5 h-5 text-teal-600"/> Employee Documents
                 </CardTitle>
                 <CardDescription>
-                    Upload and manage mandatory forms for specific employees.
+                    Securely upload and manage employee files.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -153,8 +138,8 @@ export default function EmployeeDocumentManager() {
 
                 {selectedEmployee ? (
                     <div className="space-y-6 animate-in fade-in-50">
-                        {/* Profile Link */}
-                        <div className="flex justify-end">
+                        <div className="flex justify-between items-center">
+                            <h3 className="font-semibold text-stone-900">{selectedEmployee.first_name} {selectedEmployee.last_name}</h3>
                             <Link to={`${createPageUrl('EmployeeProfile')}?id=${selectedEmployee.id}`}>
                                 <Button variant="outline" size="sm" className="gap-2 text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100">
                                     <User className="w-4 h-4" /> View Full Profile
@@ -162,93 +147,30 @@ export default function EmployeeDocumentManager() {
                             </Link>
                         </div>
 
-                        {/* Upload Section */}
-                        <div className="bg-stone-50 p-4 rounded-md border border-stone-200 space-y-4">
-                            <h4 className="font-semibold text-stone-800 text-sm">Upload New Document</h4>
-                            <div className="flex gap-2">
-                                <Select value={fileType} onValueChange={setFileType}>
-                                    <SelectTrigger className="w-[180px] bg-white">
-                                        <SelectValue placeholder="Doc Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {docTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <div className="relative flex-grow">
-                                    <Input 
-                                        type="file" 
-                                        onChange={handleFileUpload}
-                                        disabled={uploading}
-                                        className="bg-white"
-                                    />
-                                    {uploading && (
-                                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                                            <Loader2 className="w-4 h-4 animate-spin text-teal-600" />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Document List */}
+                        {/* New Robust Components */}
+                        <DocumentUploader onUploadComplete={handleUploadComplete} />
+                        
                         <div className="space-y-2">
-                            <h4 className="font-semibold text-stone-800 text-sm flex justify-between">
-                                <span>Attached Files</span>
-                                <span className="text-stone-500 font-normal">{selectedEmployee.documents?.length || 0} files</span>
-                            </h4>
-                            
-                            {(!selectedEmployee.documents || selectedEmployee.documents.length === 0) && (
-                                <p className="text-sm text-stone-500 italic">No documents uploaded yet.</p>
-                            )}
-
-                            <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                                {selectedEmployee.documents?.map((doc, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-white border rounded-sm hover:shadow-sm transition-shadow">
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            <div className="bg-teal-50 p-2 rounded">
-                                                <File className="w-4 h-4 text-teal-700" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium text-stone-900 truncate">{doc.name}</p>
-                                                <div className="flex gap-2 text-xs text-stone-500">
-                                                    <Badge variant="outline" className="text-[10px] h-5 px-1">{doc.type}</Badge>
-                                                    <span>Uploaded: {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleString() : 'N/A'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-stone-400 hover:text-teal-700" asChild>
-                                                <a href={doc.url} target="_blank" rel="noreferrer">
-                                                    <ExternalLink className="w-4 h-4" />
-                                                </a>
-                                            </Button>
-                                            <Button 
-                                                size="icon" 
-                                                variant="ghost" 
-                                                className="h-8 w-8 text-stone-400 hover:text-red-700"
-                                                onClick={() => handleDeleteDoc(idx)}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <h4 className="font-semibold text-stone-800 text-sm">Attached Files</h4>
+                            <DocumentList 
+                                documents={selectedEmployee.documents} 
+                                onDelete={handleDeleteDoc} 
+                            />
                         </div>
 
                         {/* Summary Checklist */}
                         <div className="space-y-2 pt-4 border-t">
-                            <h4 className="font-semibold text-stone-800 text-sm">Summary Checklist</h4>
-                            <p className="text-xs text-stone-500 mb-2">Check off mandatory forms as they are verified/uploaded.</p>
-                            
+                            <h4 className="font-semibold text-stone-800 text-sm flex items-center gap-2">
+                                <CheckSquare className="w-4 h-4 text-teal-600" /> Onboarding Checklist
+                            </h4>
                             <div className="bg-stone-50 rounded-md border overflow-hidden">
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-stone-100 text-stone-600">
                                         <tr>
                                             <th className="p-3 w-10">Done</th>
-                                            <th className="p-3">Document</th>
+                                            <th className="p-3">Item</th>
                                             <th className="p-3">Type</th>
-                                            <th className="p-3">Mandatory?</th>
+                                            <th className="p-3">Required</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y">
@@ -277,8 +199,9 @@ export default function EmployeeDocumentManager() {
                         </div>
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-stone-400 bg-stone-50 rounded border border-dashed">
-                        Select an employee to manage documents
+                    <div className="text-center py-12 text-stone-400 bg-stone-50 rounded border border-dashed">
+                        <User className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                        <p>Select an employee to manage their secure documents.</p>
                     </div>
                 )}
             </CardContent>
