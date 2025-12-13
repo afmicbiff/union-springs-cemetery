@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, AlertCircle, Car, Dog, Flower2 } from 'lucide-react';
+import { Clock, MapPin, AlertCircle, Car, Dog, Flower2, Phone } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function VisitorPage() {
@@ -43,6 +43,17 @@ export default function VisitorPage() {
                         <h3 className="text-xl font-serif font-bold text-stone-800 mb-2">Office Location</h3>
                         <p className="text-stone-600">123 Granite Way<br/>Union Springs, USA</p>
                         <p className="text-stone-600 mt-2">Mon-Fri: 9am - 5pm<br/>Sat: 10am - 2pm</p>
+                    </div>
+                </div>
+
+                <div className="border-t border-stone-100 pt-6 flex items-start gap-4">
+                    <div className="p-3 bg-teal-100 rounded-full">
+                        <Phone className="w-6 h-6 text-teal-700" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-serif font-bold text-stone-800 mb-2">Contact Us</h3>
+                        <p className="text-stone-600">To get in touch with the Union Springs board:</p>
+                        <a href="tel:2222222222" className="text-teal-700 font-bold hover:underline block mt-1">222-222-2222</a>
                     </div>
                 </div>
             </div>
