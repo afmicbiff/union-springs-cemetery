@@ -54,10 +54,20 @@ export default function HistoryPage() {
 
         </div>
 
-        <div className="text-center pt-8">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-8">
             <Link to={createPageUrl('Search')}>
-                <Button className="bg-teal-700 hover:bg-teal-800 text-white font-serif px-8 py-6 text-lg rounded-sm">
+                <Button className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white font-serif px-8 py-6 text-lg rounded-sm">
                     Search Our Records
+                </Button>
+            </Link>
+            <Link to={createPageUrl('Plots')}>
+                <Button variant="outline" className="w-full sm:w-auto border-2 border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white font-serif px-8 py-6 text-lg rounded-sm">
+                    Plots & Maps
+                </Button>
+            </Link>
+            <Link to={createPageUrl('Services')}>
+                <Button variant="outline" className="w-full sm:w-auto border-2 border-stone-800 text-stone-800 hover:bg-stone-800 hover:text-white font-serif px-8 py-6 text-lg rounded-sm">
+                    Services
                 </Button>
             </Link>
         </div>
