@@ -5,6 +5,7 @@ import Services from './pages/Services';
 import Admin from './pages/Admin';
 import History from './pages/History';
 import Visitor from './pages/Visitor';
+import Contact from './pages/Contact';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "Admin": Admin,
     "History": History,
     "Visitor": Visitor,
+    "Contact": Contact,
 }
 
 export const pagesConfig = {
