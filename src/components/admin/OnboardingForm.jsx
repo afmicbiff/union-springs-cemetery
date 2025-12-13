@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -24,7 +26,14 @@ const employeeSchema = z.object({
     phone_primary: z.string().min(10, "Phone number must be at least 10 digits"),
     phone_secondary: z.string().optional(),
     date_of_birth: z.string().min(1, "Date of birth is required"),
-    ssn: z.string().min(9, "SSN is required").regex(/^\d{3}-?\d{2}-?\d{4}$/, "Invalid SSN format (XXX-XX-XXXX)")
+    ssn: z.string().min(9, "SSN is required").regex(/^\d{3}-?\d{2}-?\d{4}$/, "Invalid SSN format (XXX-XX-XXXX)"),
+    marital_status: z.string().min(1, "Marital status is required"),
+    spouse_name: z.string().optional(),
+    children_details: z.string().optional(),
+    emergency_contact_first_name: z.string().min(1, "Emergency contact first name is required"),
+    emergency_contact_last_name: z.string().min(1, "Emergency contact last name is required"),
+    emergency_contact_phone: z.string().min(10, "Emergency contact phone is required"),
+    emergency_contact_relationship: z.string().min(1, "Relationship is required")
 });
 
 export default function OnboardingForm() {
@@ -34,11 +43,15 @@ export default function OnboardingForm() {
         register, 
         handleSubmit, 
         reset, 
+        setValue,
+        watch,
         formState: { errors, touchedFields, isValid } 
     } = useForm({
         resolver: zodResolver(employeeSchema),
         mode: "onChange"
     });
+
+    const maritalStatus = watch("marital_status");
 
     const createEmployeeMutation = useMutation({
         mutationFn: async (data) => {
@@ -171,6 +184,75 @@ export default function OnboardingForm() {
                                 <Label htmlFor="address_zip" className={errors.address_zip ? "text-red-500" : ""}>Zip Code *</Label>
                                 <Input id="address_zip" {...register("address_zip")} className={getInputClass("address_zip")} />
                                 {errors.address_zip && <p className="text-xs text-red-500">{errors.address_zip.message}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Family & Status */}
+                    <div className="space-y-4 border-t pt-4">
+                        <h4 className="text-sm font-medium text-stone-900">Family & Status</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="marital_status" className={errors.marital_status ? "text-red-500" : ""}>Marital Status *</Label>
+                                <Select onValueChange={(value) => setValue("marital_status", value)}>
+                                    <SelectTrigger className={getInputClass("marital_status")}>
+                                        <SelectValue placeholder="Select Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Single">Single</SelectItem>
+                                        <SelectItem value="Married">Married</SelectItem>
+                                        <SelectItem value="Divorced">Divorced</SelectItem>
+                                        <SelectItem value="Widowed">Widowed</SelectItem>
+                                        <SelectItem value="Separated">Separated</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {errors.marital_status && <p className="text-xs text-red-500">{errors.marital_status.message}</p>}
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label htmlFor="spouse_name">Spouse Name</Label>
+                                <Input 
+                                    id="spouse_name" 
+                                    {...register("spouse_name")} 
+                                    disabled={maritalStatus === "Single" || maritalStatus === "Divorced" || maritalStatus === "Widowed"}
+                                    placeholder={maritalStatus === "Single" ? "N/A" : ""}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="children_details">Children (Names & Ages)</Label>
+                            <Textarea 
+                                id="children_details" 
+                                {...register("children_details")} 
+                                placeholder="List any children you care for..."
+                                className="h-20"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Emergency Contact */}
+                    <div className="space-y-4 border-t pt-4">
+                        <h4 className="text-sm font-medium text-stone-900">Emergency Contact</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="emergency_contact_first_name" className={errors.emergency_contact_first_name ? "text-red-500" : ""}>Contact First Name *</Label>
+                                <Input id="emergency_contact_first_name" {...register("emergency_contact_first_name")} className={getInputClass("emergency_contact_first_name")} />
+                                {errors.emergency_contact_first_name && <p className="text-xs text-red-500">{errors.emergency_contact_first_name.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="emergency_contact_last_name" className={errors.emergency_contact_last_name ? "text-red-500" : ""}>Contact Last Name *</Label>
+                                <Input id="emergency_contact_last_name" {...register("emergency_contact_last_name")} className={getInputClass("emergency_contact_last_name")} />
+                                {errors.emergency_contact_last_name && <p className="text-xs text-red-500">{errors.emergency_contact_last_name.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="emergency_contact_phone" className={errors.emergency_contact_phone ? "text-red-500" : ""}>Contact Phone *</Label>
+                                <Input id="emergency_contact_phone" type="tel" {...register("emergency_contact_phone")} className={getInputClass("emergency_contact_phone")} />
+                                {errors.emergency_contact_phone && <p className="text-xs text-red-500">{errors.emergency_contact_phone.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="emergency_contact_relationship" className={errors.emergency_contact_relationship ? "text-red-500" : ""}>Relationship *</Label>
+                                <Input id="emergency_contact_relationship" {...register("emergency_contact_relationship")} className={getInputClass("emergency_contact_relationship")} placeholder="e.g. Spouse, Parent, Sibling" />
+                                {errors.emergency_contact_relationship && <p className="text-xs text-red-500">{errors.emergency_contact_relationship.message}</p>}
                             </div>
                         </div>
                     </div>
