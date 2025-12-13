@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-12">
+      <div className="max-w-4xl mx-auto space-y-12 -mt-[124px]">
         
         <Breadcrumbs items={[{ label: 'Our History' }]} />
         
