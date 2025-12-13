@@ -1,27 +1,43 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { cn } from "@/lib/utils";
+
+// Define validation schema
+const employeeSchema = z.object({
+    first_name: z.string().min(1, "First name is required"),
+    last_name: z.string().min(1, "Last name is required"),
+    email: z.string().min(1, "Email is required").email("Invalid email address"),
+    secondary_email: z.string().email("Invalid email address").optional().or(z.literal("")),
+    address_street: z.string().min(1, "Street address is required"),
+    address_state: z.string().min(1, "State is required"),
+    address_zip: z.string().min(5, "Zip code must be at least 5 digits"),
+    phone_primary: z.string().min(10, "Phone number must be at least 10 digits"),
+    phone_secondary: z.string().optional(),
+    date_of_birth: z.string().min(1, "Date of birth is required"),
+    ssn: z.string().min(9, "SSN is required").regex(/^\d{3}-?\d{2}-?\d{4}$/, "Invalid SSN format (XXX-XX-XXXX)")
+});
 
 export default function OnboardingForm() {
     const queryClient = useQueryClient();
-    const [formData, setFormData] = useState({
-        first_name: "",
-        last_name: "",
-        email: "",
-        secondary_email: "",
-        address_street: "",
-        address_state: "",
-        address_zip: "",
-        phone_primary: "",
-        phone_secondary: "",
-        date_of_birth: "",
-        ssn: ""
+    
+    const { 
+        register, 
+        handleSubmit, 
+        reset, 
+        formState: { errors, touchedFields, isValid } 
+    } = useForm({
+        resolver: zodResolver(employeeSchema),
+        mode: "onChange"
     });
 
     const createEmployeeMutation = useMutation({
@@ -50,19 +66,7 @@ export default function OnboardingForm() {
         },
         onSuccess: (data) => {
             toast.success(`Employee ${data.first_name} ${data.last_name} onboarded! Assigned ID: ${data.employee_number}`);
-            setFormData({
-                first_name: "",
-                last_name: "",
-                email: "",
-                secondary_email: "",
-                address_street: "",
-                address_state: "",
-                address_zip: "",
-                phone_primary: "",
-                phone_secondary: "",
-                date_of_birth: "",
-                ssn: ""
-            });
+            reset();
             queryClient.invalidateQueries({ queryKey: ['employees'] });
         },
         onError: (error) => {
@@ -70,14 +74,21 @@ export default function OnboardingForm() {
         }
     });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const onSubmit = (data) => {
+        createEmployeeMutation.mutate(data);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        createEmployeeMutation.mutate(formData);
+    // Helper to get input class based on state
+    const getInputClass = (fieldName) => {
+        const hasError = !!errors[fieldName];
+        const isTouched = !!touchedFields[fieldName];
+        const isSuccess = isTouched && !hasError;
+
+        return cn(
+            "transition-all duration-200",
+            hasError && "border-red-500 focus-visible:ring-red-500 bg-red-50",
+            isSuccess && "border-green-500 focus-visible:ring-green-500 bg-green-50"
+        );
     };
 
     return (
@@ -87,50 +98,57 @@ export default function OnboardingForm() {
                     <UserPlus className="w-5 h-5 text-teal-600"/> New Employee Onboarding
                 </CardTitle>
                 <CardDescription>
-                    Enter mandatory employee details. Employee number will be auto-assigned.
+                    Enter mandatory employee details. Fields turn green when valid.
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Personal Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="first_name">First Name *</Label>
-                            <Input id="first_name" name="first_name" required value={formData.first_name} onChange={handleChange} />
+                            <Label htmlFor="first_name" className={errors.first_name ? "text-red-500" : ""}>First Name *</Label>
+                            <Input id="first_name" {...register("first_name")} className={getInputClass("first_name")} />
+                            {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="last_name">Last Name *</Label>
-                            <Input id="last_name" name="last_name" required value={formData.last_name} onChange={handleChange} />
+                            <Label htmlFor="last_name" className={errors.last_name ? "text-red-500" : ""}>Last Name *</Label>
+                            <Input id="last_name" {...register("last_name")} className={getInputClass("last_name")} />
+                            {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
                         </div>
                         
                         <div className="space-y-2">
-                            <Label htmlFor="date_of_birth">Date of Birth *</Label>
-                            <Input id="date_of_birth" name="date_of_birth" type="date" required value={formData.date_of_birth} onChange={handleChange} />
+                            <Label htmlFor="date_of_birth" className={errors.date_of_birth ? "text-red-500" : ""}>Date of Birth *</Label>
+                            <Input id="date_of_birth" type="date" {...register("date_of_birth")} className={getInputClass("date_of_birth")} />
+                            {errors.date_of_birth && <p className="text-xs text-red-500">{errors.date_of_birth.message}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="ssn">SSN *</Label>
-                            <Input id="ssn" name="ssn" required placeholder="XXX-XX-XXXX" value={formData.ssn} onChange={handleChange} />
+                            <Label htmlFor="ssn" className={errors.ssn ? "text-red-500" : ""}>SSN *</Label>
+                            <Input id="ssn" placeholder="XXX-XX-XXXX" {...register("ssn")} className={getInputClass("ssn")} />
+                            {errors.ssn && <p className="text-xs text-red-500">{errors.ssn.message}</p>}
                         </div>
                     </div>
 
                     {/* Contact Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="space-y-2">
-                            <Label htmlFor="email">Email (Primary) *</Label>
-                            <Input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} />
+                            <Label htmlFor="email" className={errors.email ? "text-red-500" : ""}>Email (Primary) *</Label>
+                            <Input id="email" type="email" {...register("email")} className={getInputClass("email")} />
+                            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="secondary_email">Email (Secondary)</Label>
-                            <Input id="secondary_email" name="secondary_email" type="email" value={formData.secondary_email} onChange={handleChange} />
+                            <Label htmlFor="secondary_email" className={errors.secondary_email ? "text-red-500" : ""}>Email (Secondary)</Label>
+                            <Input id="secondary_email" type="email" {...register("secondary_email")} className={getInputClass("secondary_email")} />
+                            {errors.secondary_email && <p className="text-xs text-red-500">{errors.secondary_email.message}</p>}
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone_primary">Phone (Primary) *</Label>
-                            <Input id="phone_primary" name="phone_primary" type="tel" required value={formData.phone_primary} onChange={handleChange} />
+                            <Label htmlFor="phone_primary" className={errors.phone_primary ? "text-red-500" : ""}>Phone (Primary) *</Label>
+                            <Input id="phone_primary" type="tel" {...register("phone_primary")} className={getInputClass("phone_primary")} />
+                            {errors.phone_primary && <p className="text-xs text-red-500">{errors.phone_primary.message}</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="phone_secondary">Phone (Secondary)</Label>
-                            <Input id="phone_secondary" name="phone_secondary" type="tel" value={formData.phone_secondary} onChange={handleChange} />
+                            <Label htmlFor="phone_secondary" className={errors.phone_secondary ? "text-red-500" : ""}>Phone (Secondary)</Label>
+                            <Input id="phone_secondary" type="tel" {...register("phone_secondary")} className={getInputClass("phone_secondary")} />
                         </div>
                     </div>
 
@@ -138,23 +156,43 @@ export default function OnboardingForm() {
                     <div className="space-y-4 border-t pt-4">
                         <h4 className="text-sm font-medium text-stone-900">Address</h4>
                         <div className="space-y-2">
-                            <Label htmlFor="address_street">Street Address *</Label>
-                            <Input id="address_street" name="address_street" required value={formData.address_street} onChange={handleChange} />
+                            <Label htmlFor="address_street" className={errors.address_street ? "text-red-500" : ""}>Street Address *</Label>
+                            <Input id="address_street" {...register("address_street")} className={getInputClass("address_street")} />
+                            {errors.address_street && <p className="text-xs text-red-500">{errors.address_street.message}</p>}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="address_state">State *</Label>
-                                <Input id="address_state" name="address_state" required value={formData.address_state} onChange={handleChange} />
+                                <Label htmlFor="address_state" className={errors.address_state ? "text-red-500" : ""}>State *</Label>
+                                <Input id="address_state" {...register("address_state")} className={getInputClass("address_state")} />
+                                {errors.address_state && <p className="text-xs text-red-500">{errors.address_state.message}</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="address_zip">Zip Code *</Label>
-                                <Input id="address_zip" name="address_zip" required value={formData.address_zip} onChange={handleChange} />
+                                <Label htmlFor="address_zip" className={errors.address_zip ? "text-red-500" : ""}>Zip Code *</Label>
+                                <Input id="address_zip" {...register("address_zip")} className={getInputClass("address_zip")} />
+                                {errors.address_zip && <p className="text-xs text-red-500">{errors.address_zip.message}</p>}
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4">
-                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800 text-white min-w-[150px]" disabled={createEmployeeMutation.isPending}>
+                    <div className="flex justify-end pt-4 items-center gap-4">
+                        {!isValid && Object.keys(touchedFields).length > 0 && (
+                            <div className="flex items-center text-red-500 text-sm animate-pulse">
+                                <AlertCircle className="w-4 h-4 mr-1"/> Please fix invalid fields
+                            </div>
+                        )}
+                        {isValid && (
+                             <div className="flex items-center text-green-600 text-sm animate-in fade-in slide-in-from-left-4">
+                                <CheckCircle2 className="w-4 h-4 mr-1"/> Ready to submit
+                            </div>
+                        )}
+                        <Button 
+                            type="submit" 
+                            className={cn(
+                                "min-w-[150px] transition-all duration-300",
+                                isValid ? "bg-teal-700 hover:bg-teal-800" : "bg-stone-300 cursor-not-allowed hover:bg-stone-300"
+                            )} 
+                            disabled={createEmployeeMutation.isPending || !isValid}
+                        >
                             {createEmployeeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : null}
                             Register Employee
                         </Button>
