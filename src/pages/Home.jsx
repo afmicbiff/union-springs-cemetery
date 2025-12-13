@@ -77,7 +77,7 @@ export default function Home() {
             <p className="text-stone-600 leading-relaxed mb-6">
               Our grounds are open daily. View our map, hours, and visitor guidelines to plan your respectful visit.
             </p>
-            <Link to={createPageUrl('Plots')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1">
+            <Link to={createPageUrl('Visitor')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1">
               Visitor Info &rarr;
             </Link>
           </div>
