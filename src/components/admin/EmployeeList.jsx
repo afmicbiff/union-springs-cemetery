@@ -12,31 +12,32 @@ import { Search, Users, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 
 export default function EmployeeList() {
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedTerm, setDebouncedTerm] = useState("");
+
+    // Debounce search term
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedTerm(searchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
 
     const { data: employees, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['employees'],
-        queryFn: () => base44.entities.Employee.list('-created_date', 1000),
+        queryKey: ['employees', debouncedTerm],
+        queryFn: async () => {
+            if (!debouncedTerm) {
+                return base44.entities.Employee.list('-created_date', 1000);
+            } else {
+                const { data } = await base44.functions.invoke('searchEmployees', { searchTerm: debouncedTerm });
+                if (data.error) throw new Error(data.error);
+                return data.employees || [];
+            }
+        },
         initialData: [],
     });
 
-    const filteredEmployees = (employees || []).filter(emp => {
-        const term = searchTerm.toLowerCase().trim();
-        if (!term) return true;
-
-        const firstName = emp.first_name?.toLowerCase() || "";
-        const lastName = emp.last_name?.toLowerCase() || "";
-        const fullName = `${firstName} ${lastName}`;
-        const email = emp.email?.toLowerCase() || "";
-        const empNum = emp.employee_number ? String(emp.employee_number) : "";
-
-        return (
-            firstName.includes(term) ||
-            lastName.includes(term) ||
-            fullName.includes(term) ||
-            email.includes(term) ||
-            empNum.includes(term)
-        );
-    });
+    // Use server-returned employees directly (they are already filtered)
+    const filteredEmployees = employees || [];
 
     return (
         <Card>
