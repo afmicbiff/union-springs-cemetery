@@ -19,11 +19,13 @@ export default function VisitorPage() {
           <div className="flex justify-start mt-[112px]">
             <Breadcrumbs items={[{ label: 'Plan a Visit' }]} className="text-stone-300" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-100">Plan Your Visit</h1>
-          <div className="w-24 h-1 bg-red-700 mx-auto"></div>
-          <p className="text-stone-200 max-w-2xl mx-auto text-lg leading-relaxed font-light">
-            We welcome you to Union Springs Cemetery. Whether you are visiting a loved one or exploring our historic grounds, we ask that you respect the sanctity of this place.
-          </p>
+          <div className="-mt-24 space-y-6">
+            <h1 className="text-4xl md:text-5xl font-serif text-stone-100">Plan Your Visit</h1>
+            <div className="w-24 h-1 bg-red-700 mx-auto"></div>
+            <p className="text-stone-200 max-w-2xl mx-auto text-lg leading-relaxed font-light">
+              We welcome you to Union Springs Cemetery. Whether you are visiting a loved one or exploring our historic grounds, we ask that you respect the sanctity of this place.
+            </p>
+          </div>
         </div>
       </section>
 
