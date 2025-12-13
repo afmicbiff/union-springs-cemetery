@@ -15,7 +15,7 @@ export default function VisitorPage() {
         <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518709328825-4d2d4eb72c1c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center"></div>
         <div className="bg-zinc-900 absolute inset-0 from-black/80 via-transparent to-black/80"></div>
         
-        <div className="relative z-10 max-w-4xl space-y-6 animate-fade-in-up pb-20">
+        <div className="relative z-10 max-w-4xl space-y-6 animate-fade-in-up pb-20 -mt-[224px]">
           <div className="flex justify-center">
             <Breadcrumbs items={[{ label: 'Plan a Visit' }]} className="text-stone-300" />
           </div>
