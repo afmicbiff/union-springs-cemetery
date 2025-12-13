@@ -56,14 +56,26 @@ export default function EmployeeDocumentManager() {
             };
 
             const currentDocs = selectedEmployee.documents || [];
+            const currentChecklist = selectedEmployee.checklist || {};
+            
+            // Auto-update checklist
+            const updatedChecklist = { ...currentChecklist };
+            if (fileType !== "Other") {
+                updatedChecklist[fileType] = true;
+            }
             
             updateEmployeeMutation.mutate({
                 id: selectedEmployeeId,
                 data: {
                     ...selectedEmployee,
-                    documents: [...currentDocs, newDoc]
+                    documents: [...currentDocs, newDoc],
+                    checklist: updatedChecklist
                 }
             });
+            
+            if (fileType !== "Other") {
+                toast.success(`Marked '${fileType}' as complete`);
+            }
 
         } catch (error) {
             console.error(error);

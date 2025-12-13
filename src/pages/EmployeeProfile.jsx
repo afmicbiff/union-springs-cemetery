@@ -25,6 +25,7 @@ export default function EmployeeProfile() {
     const queryClient = useQueryClient();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSendingReminder, setIsSendingReminder] = useState(false);
     const [uploadType, setUploadType] = useState("Other");
 
     const { data: employee, isLoading, error } = useQuery({
@@ -61,8 +62,24 @@ export default function EmployeeProfile() {
                 type: uploadType,
                 uploaded_at: new Date().toISOString()
             };
+            
             const currentDocs = employee.documents || [];
-            updateMutation.mutate({ documents: [...currentDocs, newDoc] });
+            const currentChecklist = employee.checklist || {};
+            
+            // Auto-update checklist if uploaded type matches a checklist item
+            const updatedChecklist = { ...currentChecklist };
+            if (uploadType !== "Other") {
+                updatedChecklist[uploadType] = true;
+            }
+
+            updateMutation.mutate({ 
+                documents: [...currentDocs, newDoc],
+                checklist: updatedChecklist
+            });
+            
+            if (uploadType !== "Other") {
+                toast.success(`Marked '${uploadType}' as complete`);
+            }
         } catch (err) {
             toast.error("Upload error: " + err.message);
             setIsUploading(false);
@@ -80,6 +97,29 @@ export default function EmployeeProfile() {
         updateMutation.mutate({ 
             checklist: { ...currentChecklist, [item]: !currentChecklist[item] }
         });
+    };
+
+    const sendReminder = async () => {
+        if (!employee || !employee.email) {
+            toast.error("Employee has no email address");
+            return;
+        }
+        
+        setIsSendingReminder(true);
+        try {
+            const { data } = await base44.functions.invoke('sendOnboardingReminder', { employeeId: employee.id });
+            if (data.error) throw new Error(data.error);
+            
+            if (data.sent) {
+                toast.success(data.message);
+            } else {
+                toast.info(data.message);
+            }
+        } catch (err) {
+            toast.error("Failed to send reminder: " + err.message);
+        } finally {
+            setIsSendingReminder(false);
+        }
     };
 
     if (isLoading) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
@@ -150,6 +190,16 @@ export default function EmployeeProfile() {
 
                             <Button className="w-full mt-4 gap-2" onClick={() => setIsEditOpen(true)}>
                                 <Edit className="w-4 h-4" /> Edit Profile
+                            </Button>
+                            
+                            <Button 
+                                variant="outline" 
+                                className="w-full mt-2 gap-2 text-stone-600" 
+                                onClick={sendReminder}
+                                disabled={isSendingReminder}
+                            >
+                                {isSendingReminder ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                                Send Reminder
                             </Button>
                         </CardContent>
                     </Card>
