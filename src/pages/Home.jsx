@@ -15,7 +15,7 @@ export default function Home() {
         
         <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up -mt-[84px]">
           <h1 className="text-4xl md:text-6xl font-serif text-stone-100 tracking-wide">
-            Peaceful Resting <br /> <span className="text-teal-500 italic">In Union Springs</span>
+            Peaceful Resting <br /> <span className="text-teal-500">In Union Springs</span>
           </h1>
           <p className="text-lg md:text-xl text-stone-300 font-light max-w-xl mx-auto leading-relaxed">
             A historic sanctuary of remembrance, honoring lives with dignity in a setting of natural granite beauty.
