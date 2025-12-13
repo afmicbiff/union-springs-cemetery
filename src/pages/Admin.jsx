@@ -23,6 +23,7 @@ import OnboardingForm from "@/components/admin/OnboardingForm";
 import OnboardingGuide from "@/components/admin/OnboardingGuide";
 import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
 import EmployeeList from "@/components/admin/EmployeeList";
+import OnboardingProgress from "@/components/admin/OnboardingProgress";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -299,19 +300,24 @@ export default function AdminDashboard() {
 
           {/* ONBOARDING TAB */}
           <TabsContent value="onboarding" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Column: Actions */}
-                  <div className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  {/* Left Column: New Hire Form */}
+                  <div className="xl:col-span-1 space-y-6">
                       <OnboardingForm />
+                  </div>
+
+                  {/* Middle Column: Tracker & Docs */}
+                  <div className="xl:col-span-1 space-y-6">
+                      <OnboardingProgress />
                       <EmployeeDocumentManager />
                   </div>
-                  
-                  {/* Right Column: Information/Guide */}
-                  <div>
+
+                  {/* Right Column: Guide */}
+                  <div className="xl:col-span-1">
                       <OnboardingGuide />
                   </div>
               </div>
-              
+
               {/* Full Width: Employee List */}
               <div className="pt-6 border-t border-stone-200">
                   <EmployeeList />
