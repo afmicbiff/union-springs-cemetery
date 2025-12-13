@@ -41,7 +41,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 -mt-[112px] relative z-20">
           
           {/* Card 1 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
             <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-teal-700 transition-colors duration-300">
               <Search className="w-6 h-6 text-teal-700 group-hover:text-white" />
             </div>
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
 
           {/* Card 2 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
             <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mb-6 group-hover:bg-stone-700 transition-colors duration-300">
               <Flower2 className="w-6 h-6 text-stone-700 group-hover:text-white" />
             </div>
@@ -69,7 +69,7 @@ export default function Home() {
           </div>
 
           {/* Card 3 */}
-          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group">
+          <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-red-700 transition-colors duration-300">
               <MapPin className="w-6 h-6 text-red-700 group-hover:text-white" />
             </div>
