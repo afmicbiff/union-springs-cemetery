@@ -87,6 +87,18 @@ export default function OnboardingForm() {
             
             const employeeNumber = String(nextNum).padStart(3, '0');
 
+            // Check for duplicate employee_number
+            const existingNumber = await base44.entities.Employee.list({ employee_number: employeeNumber });
+            if (existingNumber.length > 0) {
+                throw new Error(`Employee ID ${employeeNumber} already exists. Please try again.`);
+            }
+
+            // Check for duplicate SSN
+            const existingSSN = await base44.entities.Employee.list({ ssn: data.ssn });
+            if (existingSSN.length > 0) {
+                throw new Error(`An employee with SSN ${data.ssn} already exists.`);
+            }
+
             // 2. Create the new employee
             return base44.entities.Employee.create({
                 ...data,
