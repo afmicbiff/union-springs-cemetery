@@ -13,13 +13,13 @@ import { Search, Users, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 export default function EmployeeList() {
     const [searchTerm, setSearchTerm] = useState("");
 
-    const { data: employees, isLoading, isError, error, refetch } = useQuery({
+    const { data: employees = [], isLoading, isError, error, refetch } = useQuery({
         queryKey: ['employees'],
-        queryFn: () => base44.entities.Employee.list('-created_date', 1000),
+        queryFn: () => base44.entities.Employee.list({ sort: { created_date: -1 }, limit: 1000 }),
         initialData: [],
     });
 
-    const filteredEmployees = employees.filter(emp => {
+    const filteredEmployees = (employees || []).filter(emp => {
         const term = searchTerm.toLowerCase().trim();
         if (!term) return true;
 
