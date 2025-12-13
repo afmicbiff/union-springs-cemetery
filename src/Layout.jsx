@@ -39,16 +39,16 @@ export default function Layout({ children }) {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-4">
               {navItems.map((item) => (
                 <Link
                   key={item.label}
                   to={createPageUrl(item.path.replace('/', '')) || '/'}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-300 hover:text-teal-400 ${
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 ${
                     location.pathname === item.path ? 'text-teal-500 font-semibold bg-stone-800' : 'text-stone-300'
                   }`}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-3.5 h-3.5" />
                   {item.label}
                 </Link>
               ))}
