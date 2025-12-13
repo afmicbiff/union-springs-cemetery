@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { Search, Users, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 
 export default function EmployeeList() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -65,6 +67,7 @@ export default function EmployeeList() {
                                 <TableHead>Contact</TableHead>
                                 <TableHead className="hidden md:table-cell">Address</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -115,6 +118,13 @@ export default function EmployeeList() {
                                             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                                                 Active
                                             </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Link to={`${createPageUrl('EmployeeProfile')}?id=${emp.id}`}>
+                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                    <ExternalLink className="h-4 w-4 text-stone-500 hover:text-teal-600" />
+                                                </Button>
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 ))

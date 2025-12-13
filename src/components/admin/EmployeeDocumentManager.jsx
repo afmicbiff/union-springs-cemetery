@@ -139,6 +139,15 @@ export default function EmployeeDocumentManager() {
 
                 {selectedEmployee ? (
                     <div className="space-y-6 animate-in fade-in-50">
+                        {/* Profile Link */}
+                        <div className="flex justify-end">
+                            <Link to={`${createPageUrl('EmployeeProfile')}?id=${selectedEmployee.id}`}>
+                                <Button variant="outline" size="sm" className="gap-2 text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100">
+                                    <User className="w-4 h-4" /> View Full Profile
+                                </Button>
+                            </Link>
+                        </div>
+
                         {/* Upload Section */}
                         <div className="bg-stone-50 p-4 rounded-md border border-stone-200 space-y-4">
                             <h4 className="font-semibold text-stone-800 text-sm">Upload New Document</h4>

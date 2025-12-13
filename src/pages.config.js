@@ -6,6 +6,7 @@ import Admin from './pages/Admin';
 import History from './pages/History';
 import Visitor from './pages/Visitor';
 import Contact from './pages/Contact';
+import EmployeeProfile from './pages/EmployeeProfile';
 import __Layout from './Layout.jsx';
 
 
@@ -18,6 +19,7 @@ export const PAGES = {
     "History": History,
     "Visitor": Visitor,
     "Contact": Contact,
+    "EmployeeProfile": EmployeeProfile,
 }
 
 export const pagesConfig = {
