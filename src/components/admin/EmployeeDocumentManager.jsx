@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, File, Loader2, Trash2, ExternalLink } from 'lucide-react';
+import { Upload, File, Loader2, Trash2, ExternalLink, CheckSquare, Square } from 'lucide-react';
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function EmployeeDocumentManager() {
     const queryClient = useQueryClient();
@@ -80,7 +81,32 @@ export default function EmployeeDocumentManager() {
         });
     };
 
+    const handleChecklistToggle = (item) => {
+        if (!selectedEmployee) return;
+        const currentChecklist = selectedEmployee.checklist || {};
+        
+        updateEmployeeMutation.mutate({
+            id: selectedEmployeeId,
+            data: { 
+                ...selectedEmployee, 
+                checklist: {
+                    ...currentChecklist,
+                    [item]: !currentChecklist[item]
+                }
+            }
+        });
+    };
+
     const docTypes = ["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "Minor Cert", "Other"];
+    
+    const checklistItems = [
+        { name: "Form I-9", mandatory: true, type: "Federal" },
+        { name: "Form W-4", mandatory: true, type: "Federal" },
+        { name: "Form L-4", mandatory: true, type: "State" },
+        { name: "Offer Letter", mandatory: true, type: "Notice" },
+        { name: "New Hire Reporting", mandatory: true, type: "Task" },
+        { name: "Minor Cert", mandatory: false, type: "Permit" }
+    ];
 
     return (
         <Card className="h-full">
@@ -163,7 +189,7 @@ export default function EmployeeDocumentManager() {
                                                 <p className="text-sm font-medium text-stone-900 truncate">{doc.name}</p>
                                                 <div className="flex gap-2 text-xs text-stone-500">
                                                     <Badge variant="outline" className="text-[10px] h-5 px-1">{doc.type}</Badge>
-                                                    <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                                    <span>Uploaded: {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleString() : 'N/A'}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -184,6 +210,46 @@ export default function EmployeeDocumentManager() {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Summary Checklist */}
+                        <div className="space-y-2 pt-4 border-t">
+                            <h4 className="font-semibold text-stone-800 text-sm">Summary Checklist</h4>
+                            <p className="text-xs text-stone-500 mb-2">Check off mandatory forms as they are verified/uploaded.</p>
+                            
+                            <div className="bg-stone-50 rounded-md border overflow-hidden">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-stone-100 text-stone-600">
+                                        <tr>
+                                            <th className="p-3 w-10">Done</th>
+                                            <th className="p-3">Document</th>
+                                            <th className="p-3">Type</th>
+                                            <th className="p-3">Mandatory?</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {checklistItems.map((item) => (
+                                            <tr key={item.name} className="hover:bg-stone-100/50">
+                                                <td className="p-3">
+                                                    <Checkbox 
+                                                        checked={selectedEmployee.checklist?.[item.name] || false}
+                                                        onCheckedChange={() => handleChecklistToggle(item.name)}
+                                                    />
+                                                </td>
+                                                <td className="p-3 font-medium">{item.name}</td>
+                                                <td className="p-3 text-stone-500">{item.type}</td>
+                                                <td className="p-3">
+                                                    {item.mandatory ? (
+                                                        <span className="text-red-600 font-bold text-xs">Yes</span>
+                                                    ) : (
+                                                        <span className="text-stone-400 text-xs">Optional</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

@@ -124,33 +124,6 @@ export default function OnboardingGuide() {
                         </AccordionContent>
                     </AccordionItem>
 
-                    {/* Step 5: Checklist */}
-                    <AccordionItem value="item-5">
-                        <AccordionTrigger className="text-stone-800 font-semibold">
-                            Summary Checklist
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-stone-100 text-stone-600">
-                                        <tr>
-                                            <th className="p-2">Document</th>
-                                            <th className="p-2">Type</th>
-                                            <th className="p-2">Mandatory?</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y">
-                                        <tr><td className="p-2">Form I-9</td><td className="p-2 text-stone-500">Form</td><td className="p-2 font-bold text-red-600">Yes (Federal)</td></tr>
-                                        <tr><td className="p-2">Form W-4</td><td className="p-2 text-stone-500">Form</td><td className="p-2 font-bold text-red-600">Yes (Federal)</td></tr>
-                                        <tr><td className="p-2">Form L-4</td><td className="p-2 text-stone-500">Form</td><td className="p-2 font-bold text-red-600">Yes (State)</td></tr>
-                                        <tr><td className="p-2">Offer Letter</td><td className="p-2 text-stone-500">Notice</td><td className="p-2 font-bold text-red-600">Yes (R.S. 23:633)</td></tr>
-                                        <tr><td className="p-2">New Hire Reporting</td><td className="p-2 text-stone-500">Task</td><td className="p-2 font-bold text-red-600">Yes (20 Days)</td></tr>
-                                        <tr><td className="p-2">Minor Cert.</td><td className="p-2 text-stone-500">Permit</td><td className="p-2">If under 18</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
                 </Accordion>
             </CardContent>
         </Card>
