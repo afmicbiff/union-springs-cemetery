@@ -25,7 +25,7 @@ export default function HistoryPage() {
         <div className="space-y-12">
             
             {/* Origins */}
-            <div className="bg-slate-50 p-8 md:p-12 rounded-sm shadow-md">
+            <div className="bg-slate-50 p-8 md:p-12 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
                 <h2 className="text-2xl md:text-3xl font-serif text-stone-800 mb-6 border-b border-stone-200 pb-4">The Origins</h2>
                 <div className="prose prose-stone max-w-none text-stone-700 leading-loose">
                     <p className="mb-4">
@@ -40,7 +40,7 @@ export default function HistoryPage() {
 
 
             {/* Today */}
-            <div className="bg-slate-50 p-8 md:p-12 rounded-sm shadow-md">
+            <div className="bg-slate-50 p-8 md:p-12 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
                 <h2 className="text-2xl md:text-3xl font-serif text-stone-800 mb-6 border-b border-stone-200 pb-4">Union Springs Today</h2>
                 <div className="prose prose-stone max-w-none text-stone-700 leading-loose">
                     <p>
