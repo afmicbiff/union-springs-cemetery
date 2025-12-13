@@ -13,7 +13,7 @@ export default function Home() {
         <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="bg-zinc-700 absolute inset-0 from-black via-transparent to-black/80"></div>
         
-        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up">
+        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up -mt-[84px]">
           <h1 className="text-4xl md:text-6xl font-serif text-stone-100 tracking-wide">
             Peaceful Resting <br /> <span className="text-teal-500 italic">In Union Springs</span>
           </h1>
