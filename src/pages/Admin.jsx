@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
+import OnboardingForm from "@/components/admin/OnboardingForm";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -139,6 +140,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="overview">Overview & Reports</TabsTrigger>
             <TabsTrigger value="reservations">Reservations & Sales</TabsTrigger>
             <TabsTrigger value="plots">Plot Management</TabsTrigger>
+            <TabsTrigger value="onboarding">Employee Onboarding</TabsTrigger>
             <TabsTrigger value="security">Data & Security</TabsTrigger>
           </TabsList>
 
@@ -290,6 +292,11 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* ONBOARDING TAB */}
+          <TabsContent value="onboarding">
+              <OnboardingForm />
           </TabsContent>
 
           {/* SECURITY TAB */}
