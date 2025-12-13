@@ -35,7 +35,7 @@ export default function VisitorPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Card 1: Hours & Location */}
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-teal-700 transition-colors duration-300">
                 <Clock className="w-6 h-6 text-teal-700 group-hover:text-white" />
               </div>
@@ -57,7 +57,7 @@ export default function VisitorPage() {
             </div>
 
             {/* Card 2: Guidelines */}
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
               <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mb-6 group-hover:bg-stone-700 transition-colors duration-300">
                 <AlertCircle className="w-6 h-6 text-stone-700 group-hover:text-white" />
               </div>
@@ -73,7 +73,7 @@ export default function VisitorPage() {
             </div>
 
             {/* Card 3: Contact & Map */}
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-xl transition-shadow duration-300 group flex flex-col">
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-red-700 transition-colors duration-300">
                 <Phone className="w-6 h-6 text-red-700 group-hover:text-white" />
               </div>
