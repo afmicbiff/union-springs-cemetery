@@ -37,22 +37,7 @@ export default function HistoryPage() {
                 </div>
             </div>
 
-            {/* Architecture */}
-            <div className="flex flex-col md:flex-row gap-8 items-center">
-                <div className="md:w-1/2">
-                    <img 
-                        src="https://images.unsplash.com/photo-1518709328825-4d2d4eb72c1c?q=80&w=1000&auto=format&fit=crop" 
-                        alt="Historic Gates" 
-                        className="rounded-sm shadow-xl grayscale hover:grayscale-0 transition-all duration-700"
-                    />
-                </div>
-                <div className="md:w-1/2 bg-white p-8 rounded-sm shadow-md">
-                    <h2 className="text-2xl font-serif text-stone-800 mb-4">Architecture & Landscape</h2>
-                    <p className="text-stone-700 leading-relaxed">
-                        The cemetery is renowned for its Victorian-era landscaping and stonework. The original iron gates, installed in 1905, still stand at the main entrance. The grounds feature several notable examples of funerary art, including hand-carved granite obelisks and mausoleums that showcase the craftsmanship of the era.
-                    </p>
-                </div>
-            </div>
+
 
             {/* Today */}
             <div className="bg-slate-50 p-8 md:p-12 rounded-sm shadow-md">
