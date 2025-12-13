@@ -27,13 +27,32 @@ const employeeSchema = z.object({
     phone_secondary: z.string().optional(),
     date_of_birth: z.string().min(1, "Date of birth is required"),
     ssn: z.string().min(9, "SSN is required").regex(/^\d{3}-?\d{2}-?\d{4}$/, "Invalid SSN format (XXX-XX-XXXX)"),
+    employment_type: z.string().min(1, "Employment type is required"),
     marital_status: z.string().min(1, "Marital status is required"),
     spouse_name: z.string().optional(),
+    spouse_phone: z.string().optional(),
     children_details: z.string().optional(),
     emergency_contact_first_name: z.string().min(1, "Emergency contact first name is required"),
     emergency_contact_last_name: z.string().min(1, "Emergency contact last name is required"),
     emergency_contact_phone: z.string().min(10, "Emergency contact phone is required"),
     emergency_contact_relationship: z.string().min(1, "Relationship is required")
+}).superRefine((data, ctx) => {
+    if (["Married", "Separated"].includes(data.marital_status)) {
+        if (!data.spouse_name || data.spouse_name.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Spouse name is required when married",
+                path: ["spouse_name"]
+            });
+        }
+        if (!data.spouse_phone || data.spouse_phone.trim() === "") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Spouse phone is required when married",
+                path: ["spouse_phone"]
+            });
+        }
+    }
 });
 
 export default function OnboardingForm() {
@@ -120,6 +139,22 @@ export default function OnboardingForm() {
                     {/* Personal Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
+                            <Label htmlFor="employment_type" className={errors.employment_type ? "text-red-500" : ""}>Employment Role *</Label>
+                            <Select onValueChange={(value) => setValue("employment_type", value)}>
+                                <SelectTrigger className={getInputClass("employment_type")}>
+                                    <SelectValue placeholder="Select Role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Administrator">Administrator</SelectItem>
+                                    <SelectItem value="Paid Employee">Paid Employee</SelectItem>
+                                    <SelectItem value="Volunteer">Volunteer</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {errors.employment_type && <p className="text-xs text-red-500">{errors.employment_type.message}</p>}
+                        </div>
+                        <div className="hidden md:block"></div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="first_name" className={errors.first_name ? "text-red-500" : ""}>First Name *</Label>
                             <Input id="first_name" {...register("first_name")} className={getInputClass("first_name")} />
                             {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
@@ -129,7 +164,7 @@ export default function OnboardingForm() {
                             <Input id="last_name" {...register("last_name")} className={getInputClass("last_name")} />
                             {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
                         </div>
-                        
+
                         <div className="space-y-2">
                             <Label htmlFor="date_of_birth" className={errors.date_of_birth ? "text-red-500" : ""}>Date of Birth *</Label>
                             <Input id="date_of_birth" type="date" {...register("date_of_birth")} className={getInputClass("date_of_birth")} />
