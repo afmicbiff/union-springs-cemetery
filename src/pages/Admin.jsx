@@ -20,6 +20,8 @@ import {
 import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
 import OnboardingForm from "@/components/admin/OnboardingForm";
+import OnboardingGuide from "@/components/admin/OnboardingGuide";
+import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -295,8 +297,19 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* ONBOARDING TAB */}
-          <TabsContent value="onboarding">
-              <OnboardingForm />
+          <TabsContent value="onboarding" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column: Actions */}
+                  <div className="space-y-6">
+                      <OnboardingForm />
+                      <EmployeeDocumentManager />
+                  </div>
+                  
+                  {/* Right Column: Information/Guide */}
+                  <div>
+                      <OnboardingGuide />
+                  </div>
+              </div>
           </TabsContent>
 
           {/* SECURITY TAB */}
