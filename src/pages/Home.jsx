@@ -13,9 +13,9 @@ export default function Home() {
         <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80"></div>
         
-        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up">
+        <div className="relative z-10 max-w-3xl space-y-6 animate-fade-in-up -mt-10">
           <h1 className="text-4xl md:text-6xl font-serif text-stone-100 tracking-wide">
-            Peaceful Resting <br/> <span className="text-teal-500 italic">In Union Springs</span>
+            Peaceful Resting <br/> <span className="text-teal-500">In Union Springs</span>
           </h1>
           <p className="text-lg md:text-xl text-stone-300 font-light max-w-xl mx-auto leading-relaxed">
             A historic sanctuary of remembrance, honoring lives with dignity in a setting of natural granite beauty.
