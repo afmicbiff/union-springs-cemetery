@@ -112,7 +112,7 @@ export default function EmployeeProfile() {
                 {/* Main Profile Card */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column: ID Card style info */}
-                    <Card className="lg:col-span-1 border-t-4 border-t-teal-600 h-fit">
+                    <Card className="lg:col-span-1 border-t-4 border-t-teal-600 h-fit shadow-lg border-x-0 border-b-0">
                         <CardContent className="pt-6 flex flex-col items-center text-center space-y-4">
                             <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
                                 <AvatarFallback className="text-4xl bg-teal-100 text-teal-800">
@@ -164,7 +164,7 @@ export default function EmployeeProfile() {
                             
                             {/* Personal Details Tab */}
                             <TabsContent value="details">
-                                <Card>
+                                <Card className="shadow-lg">
                                     <CardHeader>
                                         <CardTitle>Detailed Information</CardTitle>
                                     </CardHeader>
