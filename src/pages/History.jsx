@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from 'lucide-react';
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
         
+        <Breadcrumbs items={[{ label: 'Our History' }]} />
+        
         {/* Header */}
         <div className="text-center space-y-6">
-          <Link to={createPageUrl('Home')} className="inline-flex items-center text-teal-700 hover:text-teal-900 mb-4">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
-          </Link>
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Our History</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
           <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed italic">

@@ -1,9 +1,11 @@
 import React from 'react';
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
+        <Breadcrumbs items={[{ label: 'Services' }]} />
         
         <div className="text-center space-y-6">
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Our Services</h1>

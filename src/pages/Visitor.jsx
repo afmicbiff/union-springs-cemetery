@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin, AlertCircle, Car, Dog, Flower2 } from 'lucide-react';
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function VisitorPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-12">
+        <Breadcrumbs items={[{ label: 'Plan a Visit' }]} />
         
         {/* Header */}
         <div className="text-center space-y-6">

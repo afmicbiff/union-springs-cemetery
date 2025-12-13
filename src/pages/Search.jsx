@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Filter, X } from 'lucide-react';
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 // Simple Levenshtein distance for "Did you mean?"
 const getLevenshteinDistance = (a, b) => {
@@ -81,6 +82,7 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
+        <Breadcrumbs items={[{ label: 'Deceased Search' }]} />
         
         {/* Header */}
         <div className="text-center space-y-4">

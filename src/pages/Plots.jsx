@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Map, Grid, Info, QrCode, Search as SearchIcon, List } from 'lucide-react';
 import QRCode from "react-qr-code";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function PlotsPage() {
   const [activeSection, setActiveSection] = useState("all");
@@ -85,6 +86,7 @@ export default function PlotsPage() {
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-[1240px] mx-auto space-y-8">
+        <Breadcrumbs items={[{ label: 'Plots & Map' }]} />
         
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-stone-300 pb-6">
