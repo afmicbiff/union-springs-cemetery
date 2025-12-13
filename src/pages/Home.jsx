@@ -135,9 +135,11 @@ export default function Home() {
                         Family Estates
                     </li>
                 </ul>
-                <Button className="bg-red-700 hover:bg-red-800 text-white font-serif mt-4">
-                    <Phone className="w-4 h-4 mr-2" /> Contact an Advisor
-                </Button>
+                <Link to={createPageUrl('Contact')}>
+                    <Button className="bg-red-700 hover:bg-red-800 text-white font-serif mt-4">
+                        <Phone className="w-4 h-4 mr-2" /> Contact an Advisor
+                    </Button>
+                </Link>
             </div>
          </div>
       </section>
