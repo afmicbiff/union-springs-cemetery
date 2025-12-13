@@ -31,8 +31,8 @@ export default function EmployeeProfile() {
         queryKey: ['employee', id],
         queryFn: async () => {
             if (!id) return null;
-            const res = await base44.entities.Employee.list({ filter: { id } });
-            return res[0];
+            const res = await base44.entities.Employee.filter({ id });
+            return res?.[0] || null;
         },
         enabled: !!id
     });
