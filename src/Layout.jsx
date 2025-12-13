@@ -33,9 +33,16 @@ export default function Layout({ children }) {
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo / Title */}
-            <Link to={createPageUrl('Home')} className="flex flex-col">
-              <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
-              <span className="text-xs md:text-sm text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery</span>
+            <Link to={createPageUrl('Home')} className="flex items-center gap-3">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
+                alt="Union Springs Logo" 
+                className="h-14 w-auto rounded-full"
+              />
+              <div className="flex flex-col">
+                <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
+                <span className="text-xs md:text-sm text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery</span>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
