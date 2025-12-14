@@ -299,9 +299,17 @@ function VendorProfile({ vendor, onBack }) {
 function InvoiceManager({ vendorId, invoices }) {
     const queryClient = useQueryClient();
     const [isAddOpen, setIsAddOpen] = useState(false);
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+    // Refresh Overdue Status on Mount
+    React.useEffect(() => {
+        base44.functions.invoke('checkOverdueInvoices')
+            .then(() => queryClient.invalidateQueries({ queryKey: ['invoices', vendorId] }))
+            .catch(console.error);
+    }, []);
 
     const addInvoice = useMutation({
-        mutationFn: (data) => base44.entities.VendorInvoice.create({ ...data, vendor_id: vendorId }),
+        mutationFn: (data) => base44.entities.VendorInvoice.create({ ...data, vendor_id: vendorId, status: 'Pending' }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['invoices', vendorId] });
             setIsAddOpen(false);
@@ -373,11 +381,12 @@ function InvoiceManager({ vendorId, invoices }) {
                             <TableHead className="text-right">Amount</TableHead>
                             <TableHead className="text-right">Paid</TableHead>
                             <TableHead className="text-right">Balance</TableHead>
+                            <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoices.length === 0 ? (
-                            <TableRow><TableCell colSpan={6} className="text-center text-stone-500">No invoices recorded.</TableCell></TableRow>
+                            <TableRow><TableCell colSpan={7} className="text-center text-stone-500">No invoices recorded.</TableCell></TableRow>
                         ) : (
                             invoices.map(inv => {
                                 const owed = parseFloat(inv.amount_owed || 0);
@@ -385,23 +394,203 @@ function InvoiceManager({ vendorId, invoices }) {
                                 const balance = owed - paid;
 
                                 return (
-                                    <TableRow key={inv.id}>
-                                        <TableCell>{format(new Date(inv.invoice_date), 'MMM d, yyyy')}</TableCell>
-                                        <TableCell className="font-mono">{inv.invoice_number}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={balance <= 0 ? "default" : "secondary"} className={balance <= 0 ? "bg-green-600" : ""}>
-                                                {balance <= 0 ? "Paid" : "Pending"}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">${owed.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right">${paid.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right font-bold text-stone-900">${balance.toFixed(2)}</TableCell>
-                                    </TableRow>
+                                    <React.Fragment key={inv.id}>
+                                        <TableRow 
+                                            className="cursor-pointer hover:bg-stone-50" 
+                                            onClick={() => setSelectedInvoice(selectedInvoice === inv.id ? null : inv.id)}
+                                        >
+                                            <TableCell>{format(new Date(inv.invoice_date), 'MMM d, yyyy')}</TableCell>
+                                            <TableCell className="font-mono">{inv.invoice_number}</TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline" className={`
+                                                    ${inv.status === 'Paid' ? 'bg-green-100 text-green-800 border-green-200' : ''}
+                                                    ${inv.status === 'Overdue' ? 'bg-red-100 text-red-800 border-red-200' : ''}
+                                                    ${inv.status === 'Partial' ? 'bg-amber-100 text-amber-800 border-amber-200' : ''}
+                                                `}>
+                                                    {inv.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">${owed.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right">${paid.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right font-bold text-stone-900">${balance.toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                    {selectedInvoice === inv.id ? '-' : '+'}
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                        {selectedInvoice === inv.id && (
+                                            <TableRow className="bg-stone-50/50 hover:bg-stone-50/50">
+                                                <TableCell colSpan={7} className="p-4">
+                                                    <InvoiceDetailView invoice={inv} onUpdate={(data) => updateInvoice.mutate({ id: inv.id, data })} />
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
                                 );
                             })
                         )}
                     </TableBody>
                 </Table>
+            </div>
+        </div>
+    );
+}
+
+function InvoiceDetailView({ invoice, onUpdate }) {
+    const [uploading, setUploading] = useState(false);
+    
+    // Payments Logic
+    const handleAddPayment = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newPayment = {
+            id: crypto.randomUUID(),
+            payment_date: formData.get('payment_date'),
+            amount: parseFloat(formData.get('amount')),
+            method: formData.get('method'),
+            reference_number: formData.get('reference_number'),
+            notes: formData.get('notes')
+        };
+
+        const currentPayments = invoice.payments || [];
+        const updatedPayments = [...currentPayments, newPayment];
+        
+        // Recalculate totals
+        const newTotalPaid = updatedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const owed = parseFloat(invoice.amount_owed || 0);
+        
+        let newStatus = invoice.status;
+        if (newTotalPaid >= owed) newStatus = 'Paid';
+        else if (newTotalPaid > 0) newStatus = 'Partial';
+        else if (invoice.status !== 'Overdue') newStatus = 'Pending'; // Keep overdue if 0 paid and overdue
+
+        onUpdate({
+            payments: updatedPayments,
+            amount_paid: newTotalPaid,
+            status: newStatus
+        });
+        
+        e.target.reset();
+    };
+
+    // Document Logic
+    const handleInvoiceUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+            const newDoc = {
+                name: file.name,
+                file_uri: file_uri,
+                uploaded_at: new Date().toISOString()
+            };
+            const currentDocs = invoice.documents || [];
+            onUpdate({ documents: [...currentDocs, newDoc] });
+            toast.success("Document attached");
+        } catch (err) {
+            toast.error("Upload failed: " + err.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleViewDoc = async (doc) => {
+        try {
+            const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: doc.file_uri });
+            window.open(signed_url, '_blank');
+        } catch (err) {
+            toast.error("Failed to open document");
+        }
+    };
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Payments Section */}
+            <div className="space-y-4">
+                <h4 className="font-semibold text-sm text-stone-700">Payment History</h4>
+                
+                {/* Add Payment Form */}
+                <form onSubmit={handleAddPayment} className="bg-white p-3 border rounded-md space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                        <Input name="payment_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="h-8 text-sm" />
+                        <Input name="amount" type="number" step="0.01" placeholder="Amount" required className="h-8 text-sm" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Select name="method" defaultValue="Check">
+                            <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Check">Check</SelectItem>
+                                <SelectItem value="Credit Card">Credit Card</SelectItem>
+                                <SelectItem value="ACH">ACH</SelectItem>
+                                <SelectItem value="Cash">Cash</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Input name="reference_number" placeholder="Ref/Check #" className="h-8 text-sm" />
+                    </div>
+                    <Input name="notes" placeholder="Notes..." className="h-8 text-sm" />
+                    <Button type="submit" size="sm" variant="secondary" className="w-full h-7">Record Payment</Button>
+                </form>
+
+                {/* Payments List */}
+                <div className="space-y-2">
+                    {(invoice.payments || []).length === 0 ? (
+                        <p className="text-xs text-stone-500 italic">No payments recorded.</p>
+                    ) : (
+                        (invoice.payments || []).map((p, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-sm p-2 bg-white border rounded">
+                                <div>
+                                    <div className="font-medium">${p.amount?.toFixed(2)} <span className="text-stone-400 font-normal">via {p.method}</span></div>
+                                    <div className="text-xs text-stone-500">{p.payment_date} • Ref: {p.reference_number || 'N/A'}</div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Documents Section */}
+            <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                    <h4 className="font-semibold text-sm text-stone-700">Invoice Documents</h4>
+                    <div className="relative">
+                        <input 
+                            type="file" 
+                            id={`upload-${invoice.id}`} 
+                            className="hidden" 
+                            onChange={handleInvoiceUpload}
+                            disabled={uploading}
+                        />
+                        <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="h-7" 
+                            onClick={() => document.getElementById(`upload-${invoice.id}`).click()}
+                            disabled={uploading}
+                        >
+                            {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3 mr-2" />}
+                            Upload
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    {(invoice.documents || []).length === 0 ? (
+                        <p className="text-xs text-stone-500 italic">No documents attached.</p>
+                    ) : (
+                        (invoice.documents || []).map((doc, idx) => (
+                            <div key={idx} className="flex justify-between items-center text-sm p-2 bg-white border rounded">
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <FileText className="w-4 h-4 text-stone-400 flex-shrink-0" />
+                                    <span className="truncate">{doc.name}</span>
+                                </div>
+                                <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => handleViewDoc(doc)}>View</Button>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );
