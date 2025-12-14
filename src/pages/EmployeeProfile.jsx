@@ -38,10 +38,11 @@ export default function EmployeeProfile() {
 
     const updateMutation = useMutation({
         mutationFn: (data) => base44.entities.Employee.update(id, data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['employee', id] });
+        onSuccess: (data) => {
+            if (data) {
+                queryClient.setQueryData(['employee', id], data);
+            }
             queryClient.invalidateQueries({ queryKey: ['employees'] });
-            toast.success("Updated successfully");
         },
         onError: (err) => toast.error("Update failed: " + err.message)
     });
