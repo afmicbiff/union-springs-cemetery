@@ -92,8 +92,8 @@ export default function Layout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow">
-        <div className="max-w-[1240px] mx-auto w-full">
+      <main className="flex-grow flex flex-col">
+        <div className="max-w-[1240px] mx-auto w-full flex-grow flex flex-col">
           {children}
         </div>
       </main>
