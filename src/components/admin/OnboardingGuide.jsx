@@ -1,8 +1,23 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
+import { Accordion, AccordionContent, AccordionItem } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { CheckSquare, FileText, AlertTriangle, Info } from 'lucide-react';
+import { CheckSquare, FileText, AlertTriangle, Info, ChevronDown } from 'lucide-react';
+
+const CustomAccordionTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
+  <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Trigger
+      ref={ref}
+      className={`flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180 ${className || ''}`}
+      {...props}
+    >
+      {children}
+      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+    </AccordionPrimitive.Trigger>
+  </AccordionPrimitive.Header>
+));
+CustomAccordionTrigger.displayName = "CustomAccordionTrigger";
 
 export default function OnboardingGuide() {
     return (
@@ -20,9 +35,9 @@ export default function OnboardingGuide() {
                     
                     {/* Step 1: Mandatory Forms */}
                     <AccordionItem value="item-1">
-                        <AccordionTrigger className="text-stone-800 font-semibold">
+                        <CustomAccordionTrigger className="text-stone-800 font-semibold">
                             1. Forms the Employee Must Complete
-                        </AccordionTrigger>
+                        </CustomAccordionTrigger>
                         <AccordionContent className="space-y-4 text-stone-600">
                             <p className="text-sm">These are essential for payroll and legal verification.</p>
                             <ul className="space-y-3">
@@ -62,9 +77,9 @@ export default function OnboardingGuide() {
 
                     {/* Step 2: Notifications */}
                     <AccordionItem value="item-2">
-                        <AccordionTrigger className="text-stone-800 font-semibold">
+                        <CustomAccordionTrigger className="text-stone-800 font-semibold">
                             2. Notices You Must Provide
-                        </AccordionTrigger>
+                        </CustomAccordionTrigger>
                         <AccordionContent className="space-y-4 text-stone-600">
                             <ul className="space-y-3">
                                 <li className="flex gap-2 items-start">
@@ -89,9 +104,9 @@ export default function OnboardingGuide() {
 
                     {/* Step 3: Employer Actions */}
                     <AccordionItem value="item-3">
-                        <AccordionTrigger className="text-stone-800 font-semibold">
+                        <CustomAccordionTrigger className="text-stone-800 font-semibold">
                             3. Employer Action Items
-                        </AccordionTrigger>
+                        </CustomAccordionTrigger>
                         <AccordionContent className="space-y-4 text-stone-600">
                             <div className="bg-stone-50 p-3 rounded-md border border-stone-200">
                                 <h4 className="font-bold text-stone-800 mb-1">Report to Louisiana Directory of New Hires</h4>
@@ -106,9 +121,9 @@ export default function OnboardingGuide() {
 
                     {/* Step 4: Posters */}
                     <AccordionItem value="item-4">
-                        <AccordionTrigger className="text-stone-800 font-semibold">
+                        <CustomAccordionTrigger className="text-stone-800 font-semibold">
                             4. Mandatory Workplace Posters
-                        </AccordionTrigger>
+                        </CustomAccordionTrigger>
                         <AccordionContent className="space-y-2 text-stone-600">
                             <p className="text-sm">Post in visible area (break room) or provide digital copies for remote workers.</p>
                             <div className="grid grid-cols-2 gap-2 text-sm">
