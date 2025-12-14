@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, Calendar, MapPin, User, ChevronRight } from 'lucide-react';
+import { Search, Loader2, Calendar, MapPin, User, ChevronRight, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -86,7 +86,14 @@ export default function SearchPage() {
         
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Deceased Search</h1>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Deceased Search</h1>
+            <a href="https://www.findagrave.com/" target="_blank" rel="noreferrer">
+              <Button variant="outline" className="border-stone-400 text-stone-600 hover:bg-stone-100 hover:text-stone-900" size="sm">
+                 Find a Grave <ExternalLink className="w-3 h-3 ml-2" />
+              </Button>
+            </a>
+          </div>
           <p className="text-stone-600 max-w-2xl mx-auto text-lg">
             Search our directory to find resting places, obituaries, and memorials of those interred at Union Springs.
           </p>
