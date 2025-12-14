@@ -146,6 +146,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="reservations">Reservations & Sales</TabsTrigger>
             <TabsTrigger value="plots">Plot Management</TabsTrigger>
             <TabsTrigger value="onboarding">Employee Onboarding</TabsTrigger>
+            <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
             <TabsTrigger value="security">Data & Security</TabsTrigger>
           </TabsList>
 
@@ -323,6 +324,11 @@ export default function AdminDashboard() {
               <div className="pt-6 border-t border-stone-200">
                   <EmployeeList />
               </div>
+          </TabsContent>
+
+          {/* VENDORS TAB */}
+          <TabsContent value="vendors">
+             <VendorManager />
           </TabsContent>
 
           {/* SECURITY TAB */}
