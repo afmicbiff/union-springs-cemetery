@@ -538,10 +538,16 @@ function InvoiceDetailView({ invoice, onUpdate }) {
     const handleAddPayment = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        const amount = parseFloat(formData.get('amount'));
+
+        if (amount < 0) {
+            if (!window.confirm("You have entered a negative payment amount. Is this intended?")) return;
+        }
+
         const newPayment = {
             id: crypto.randomUUID(),
             payment_date: formData.get('payment_date'),
-            amount: parseFloat(formData.get('amount')),
+            amount: amount,
             method: formData.get('method'),
             reference_number: formData.get('reference_number'),
             notes: formData.get('notes')
@@ -609,7 +615,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
                 <form onSubmit={handleAddPayment} className="bg-white p-3 border rounded-md space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                         <Input name="payment_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="h-8 text-sm" />
-                        <Input name="amount" type="number" step="0.01" min="0" placeholder="Amount" required className="h-8 text-sm" />
+                        <Input name="amount" type="number" step="0.01" placeholder="Amount" required className="h-8 text-sm" />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         <Select name="method" defaultValue="Check">
