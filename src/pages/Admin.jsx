@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
     Bell, 
     Download, 
@@ -17,6 +18,7 @@ import {
     Database,
     Lock
 } from 'lucide-react';
+import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
 import OnboardingForm from "@/components/admin/OnboardingForm";
@@ -114,31 +116,57 @@ export default function AdminDashboard() {
         
         {/* Header */}
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-stone-900">Admin Dashboard</h1>
-            <p className="text-stone-600">Administrative Overview & Management</p>
-          </div>
-          <Button onClick={exportData} variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
-            <Database className="w-4 h-4 mr-2" /> Backup Data
-          </Button>
+        <div>
+          <h1 className="text-3xl font-serif font-bold text-stone-900">Admin Dashboard</h1>
+          <p className="text-stone-600">Administrative Overview & Management</p>
         </div>
 
-        {/* Alerts Section */}
-        {notifications.length > 0 && (
-          <div className="bg-red-50 p-4 rounded-sm shadow-sm">
-            <h3 className="text-red-800 font-bold flex items-center gap-2">
-              <Bell className="w-5 h-5" /> Recent Alerts
-            </h3>
-            <div className="mt-2 space-y-1">
-              {notifications.map((note) => (
-                <div key={note.id} className="text-sm text-red-700 flex justify-between">
-                  <span>{note.message}</span>
-                  <span className="text-xs opacity-70">{format(new Date(note.created_at), 'MM/dd HH:mm')}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+           {/* Bell Alert System */}
+           <Popover>
+              <PopoverTrigger asChild>
+                  <motion.button
+                      className="relative p-2 rounded-full hover:bg-stone-100 transition-colors"
+                      animate={notifications.some(n => !n.is_read) ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
+                      transition={{ repeat: Infinity, repeatDelay: 2, duration: 0.5 }}
+                  >
+                      <Bell 
+                          className={`w-6 h-6 ${notifications.some(n => !n.is_read) ? 'text-red-600 fill-red-100' : 'text-green-600'}`} 
+                      />
+                      {notifications.some(n => !n.is_read) && (
+                          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white" />
+                      )}
+                  </motion.button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 border-b bg-stone-50">
+                      <h4 className="font-semibold text-stone-900">Notifications</h4>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                          <p className="p-4 text-center text-sm text-stone-500">No new notifications</p>
+                      ) : (
+                          notifications.map((note) => (
+                              <div key={note.id} className={`p-4 border-b last:border-0 hover:bg-stone-50 ${!note.is_read ? 'bg-red-50/50' : ''}`}>
+                                  <div className="flex gap-3">
+                                      <AlertTriangle className={`w-4 h-4 mt-0.5 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />
+                                      <div>
+                                          <p className="text-sm text-stone-800">{note.message}</p>
+                                          <p className="text-xs text-stone-400 mt-1">{format(new Date(note.created_at), 'MMM d, HH:mm')}</p>
+                                      </div>
+                                  </div>
+                              </div>
+                          ))
+                      )}
+                  </div>
+              </PopoverContent>
+           </Popover>
+
+           <Button onClick={exportData} variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
+              <Database className="w-4 h-4 mr-2" /> Backup Data
+           </Button>
+        </div>
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white p-1 shadow-sm border border-stone-200">

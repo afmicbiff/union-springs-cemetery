@@ -9,8 +9,6 @@ export default Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 1. Get all invoices that are NOT 'Paid'
-        // We'll filter client-side or use query if supported for efficiency
         const allInvoices = await base44.entities.VendorInvoice.list({ limit: 1000 });
         
         const today = new Date();
@@ -18,6 +16,7 @@ export default Deno.serve(async (req) => {
 
         let updatedCount = 0;
         const updates = [];
+        const notifications = [];
 
         for (const inv of allInvoices) {
             if (inv.status === 'Paid') continue;
@@ -25,34 +24,52 @@ export default Deno.serve(async (req) => {
             const dueDate = inv.due_date ? new Date(inv.due_date) : null;
             if (!dueDate) continue;
 
-            // Check if overdue
-            // If due date is BEFORE today (not including today)
-            if (dueDate < today) {
-                // Should be 'Overdue'
-                if (inv.status !== 'Overdue') {
-                    updates.push(base44.entities.VendorInvoice.update(inv.id, { status: 'Overdue' }));
-                    updatedCount++;
+            // Calculate diff in days
+            const diffTime = dueDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            let newStatus = inv.status;
+            let shouldNotify = false;
+
+            if (diffDays < 0) {
+                newStatus = 'Overdue';
+            } else if (diffDays <= 2) {
+                newStatus = 'Due Soon';
+                // Only notify if status wasn't already Due Soon (to avoid spam, though simple check)
+                if (inv.status !== 'Due Soon') {
+                    shouldNotify = true;
                 }
             } else {
-                // If it was overdue but date changed or it's not overdue anymore (e.g. extension)
-                // Re-evaluate status based on payment
+                // Re-evaluate based on payment if it was previously marked overdue/soon but dates changed
                 const owed = inv.amount_owed || 0;
                 const paid = inv.amount_paid || 0;
-                let newStatus = 'Pending';
                 
                 if (paid >= owed) newStatus = 'Paid';
                 else if (paid > 0) newStatus = 'Partial';
-                
-                if (inv.status !== newStatus) {
-                    updates.push(base44.entities.VendorInvoice.update(inv.id, { status: newStatus }));
-                    updatedCount++;
-                }
+                else newStatus = 'Pending';
+            }
+
+            // Update if changed
+            if (inv.status !== newStatus) {
+                updates.push(base44.entities.VendorInvoice.update(inv.id, { status: newStatus }));
+                updatedCount++;
+            }
+
+            // Generate Notification
+            if (shouldNotify) {
+                const msg = `Invoice #${inv.invoice_number} is due in ${diffDays <= 0 ? '0' : diffDays} days.`;
+                notifications.push(base44.entities.Notification.create({
+                    message: msg,
+                    type: 'alert',
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                }));
             }
         }
 
-        await Promise.all(updates);
+        await Promise.all([...updates, ...notifications]);
 
-        return Response.json({ success: true, updated: updatedCount });
+        return Response.json({ success: true, updated: updatedCount, notifications: notifications.length });
 
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
