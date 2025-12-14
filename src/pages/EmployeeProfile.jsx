@@ -78,10 +78,22 @@ export default function EmployeeProfile() {
         toast.success("Document removed");
     };
 
-    const handleChecklistToggle = (item) => {
+    const handleChecklistToggle = (item, checked) => {
         const currentChecklist = employee.checklist || {};
+        const updatedChecklist = { ...currentChecklist, [item]: checked };
+
+        // Optimistically update UI
+        queryClient.setQueryData(['employee', id], (old) => ({
+             ...old,
+             checklist: updatedChecklist
+        }));
+
         updateMutation.mutate({ 
-            checklist: { ...currentChecklist, [item]: !currentChecklist[item] }
+            checklist: updatedChecklist
+        }, {
+            onError: () => {
+                queryClient.invalidateQueries(['employee', id]);
+            }
         });
     };
 
@@ -283,8 +295,8 @@ export default function EmployeeProfile() {
                                                         <tr key={item.name} className="hover:bg-stone-100/50">
                                                             <td className="p-3">
                                                                 <Checkbox 
-                                                                    checked={employee.checklist?.[item.name] || false}
-                                                                    onCheckedChange={() => handleChecklistToggle(item.name)}
+                                                                    checked={!!employee.checklist?.[item.name]}
+                                                                    onCheckedChange={(checked) => handleChecklistToggle(item.name, checked)}
                                                                 />
                                                             </td>
                                                             <td className="p-3 font-medium">{item.name}</td>
