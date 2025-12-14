@@ -142,12 +142,12 @@ export default function AdminDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white p-1 shadow-sm border border-stone-200">
-            <TabsTrigger value="overview">Overview & Reports</TabsTrigger>
-            <TabsTrigger value="reservations">Reservations & Sales</TabsTrigger>
-            <TabsTrigger value="plots">Plot Management</TabsTrigger>
-            <TabsTrigger value="onboarding">Employee Onboarding</TabsTrigger>
-            <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
-            <TabsTrigger value="security">Data & Security</TabsTrigger>
+            <TabsTrigger value="overview" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Overview & Reports</TabsTrigger>
+            <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Reservations & Sales</TabsTrigger>
+            <TabsTrigger value="plots" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Plot Management</TabsTrigger>
+            <TabsTrigger value="onboarding" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employee Onboarding</TabsTrigger>
+            <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
+            <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
