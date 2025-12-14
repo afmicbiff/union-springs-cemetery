@@ -19,7 +19,11 @@ import {
 } from 'lucide-react';
 import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
-
+import OnboardingForm from "@/components/admin/OnboardingForm";
+import OnboardingGuide from "@/components/admin/OnboardingGuide";
+import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
+import EmployeeList from "@/components/admin/EmployeeList";
+import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import VendorManager from "@/components/admin/VendorManager";
 
 export default function AdminDashboard() {
@@ -141,7 +145,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="overview" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Overview & Reports</TabsTrigger>
             <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Reservations & Sales</TabsTrigger>
             <TabsTrigger value="plots" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Plot Management</TabsTrigger>
-
+            <TabsTrigger value="onboarding" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employee Onboarding</TabsTrigger>
             <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
           </TabsList>
@@ -296,7 +300,31 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
+          {/* ONBOARDING TAB */}
+          <TabsContent value="onboarding" className="space-y-6">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  {/* Left Column: New Hire Form */}
+                  <div className="xl:col-span-1 space-y-6">
+                      <OnboardingForm />
+                  </div>
 
+                  {/* Middle Column: Tracker & Docs */}
+                  <div className="xl:col-span-1 space-y-6">
+                      <OnboardingProgress />
+                      <EmployeeDocumentManager />
+                  </div>
+
+                  {/* Right Column: Guide */}
+                  <div className="xl:col-span-1">
+                      <OnboardingGuide />
+                  </div>
+              </div>
+
+              {/* Full Width: Employee List */}
+              <div className="pt-6 border-t border-stone-200">
+                  <EmployeeList />
+              </div>
+          </TabsContent>
 
           {/* VENDORS TAB */}
           <TabsContent value="vendors">

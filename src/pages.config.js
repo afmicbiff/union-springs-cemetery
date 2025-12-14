@@ -7,7 +7,6 @@ import History from './pages/History';
 import Visitor from './pages/Visitor';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
-import Employees from './pages/Employees';
 import __Layout from './Layout.jsx';
 
 
@@ -21,7 +20,6 @@ export const PAGES = {
     "Visitor": Visitor,
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
-    "Employees": Employees,
 }
 
 export const pagesConfig = {
