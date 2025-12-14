@@ -21,7 +21,7 @@ import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
 import OnboardingForm from "@/components/admin/OnboardingForm";
 import OnboardingGuide from "@/components/admin/OnboardingGuide";
-import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
+
 import EmployeeList from "@/components/admin/EmployeeList";
 import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import VendorManager from "@/components/admin/VendorManager";
@@ -312,7 +312,6 @@ export default function AdminDashboard() {
                   {/* Middle Column: Tracker & Docs */}
                   <div className="xl:col-span-1 space-y-6">
                       <OnboardingProgress />
-                      <EmployeeDocumentManager />
                   </div>
 
                   {/* Right Column: Guide */}
