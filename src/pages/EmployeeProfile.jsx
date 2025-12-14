@@ -56,11 +56,11 @@ export default function EmployeeProfile() {
         const checklistKeys = Object.keys(currentChecklist);
         
         if (checklistKeys.includes(newDoc.type) || 
-           ["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "Minor Cert"].includes(newDoc.type)) {
+           ["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "New Hire Reporting", "Minor Cert"].includes(newDoc.type)) {
              updatedChecklist[newDoc.type] = true;
         }
 
-        updateMutation.mutate({ 
+        await updateMutation.mutateAsync({ 
             documents: [...currentDocs, newDoc],
             checklist: updatedChecklist
         });
