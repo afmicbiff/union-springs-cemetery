@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, Loader2, FileText, DollarSign, Upload, Search } from 'lucide-react';
+import { Building2, Plus, Loader2, FileText, DollarSign, Upload, Search, Edit } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
 import DocumentUploader from '@/components/documents/DocumentUploader';
@@ -210,6 +210,7 @@ function VendorOnboardingForm({ onSuccess }) {
 
 function VendorProfile({ vendor, onBack }) {
     const queryClient = useQueryClient();
+    const [isEditOpen, setIsEditOpen] = useState(false);
     
     // Invoices Query
     const { data: invoices } = useQuery({
@@ -248,10 +249,13 @@ function VendorProfile({ vendor, onBack }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Info Card */}
                 <Card className="md:col-span-1">
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>Details</CardTitle>
+                        <Button variant="ghost" size="sm" onClick={() => setIsEditOpen(true)}>
+                            <Edit className="w-4 h-4 text-stone-500" />
+                        </Button>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-sm">
+                    <CardContent className="space-y-4 text-sm pt-4">
                         <div>
                             <Label className="text-stone-500">Contact</Label>
                             <p>{vendor.contact_name}</p>
@@ -292,6 +296,94 @@ function VendorProfile({ vendor, onBack }) {
                     </Tabs>
                 </Card>
             </div>
+
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <DialogContent className="max-w-2xl">
+                    <VendorEditForm vendor={vendor} onSuccess={() => setIsEditOpen(false)} />
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}
+
+function VendorEditForm({ vendor, onSuccess }) {
+    const queryClient = useQueryClient();
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData);
+
+        try {
+            await base44.entities.Vendor.update(vendor.id, data);
+            toast.success(`Vendor updated!`);
+            queryClient.invalidateQueries({ queryKey: ['vendors'] });
+            onSuccess();
+        } catch (err) {
+            toast.error("Failed to update: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+                Edit Vendor Details
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Company Name *</Label>
+                        <Input name="company_name" required defaultValue={vendor.company_name} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Tax ID / EIN</Label>
+                        <Input name="tax_id" defaultValue={vendor.tax_id} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Contact Name</Label>
+                        <Input name="contact_name" defaultValue={vendor.contact_name} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Email</Label>
+                        <Input name="email" type="email" defaultValue={vendor.email} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Phone</Label>
+                        <Input name="phone" defaultValue={vendor.phone} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Payment Terms</Label>
+                        <Select name="payment_terms" defaultValue={vendor.payment_terms || "Net 30"}>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Due on Receipt">Due on Receipt</SelectItem>
+                                <SelectItem value="Net 15">Net 15</SelectItem>
+                                <SelectItem value="Net 30">Net 30</SelectItem>
+                                <SelectItem value="Net 60">Net 60</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                        <Label>Address</Label>
+                        <Input name="address_street" placeholder="Street" className="mb-2" defaultValue={vendor.address_street} />
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input name="address_city" placeholder="City" defaultValue={vendor.address_city} />
+                            <Input name="address_state" placeholder="State" defaultValue={vendor.address_state} />
+                            <Input name="address_zip" placeholder="Zip" defaultValue={vendor.address_zip} />
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                    <Button type="button" variant="outline" onClick={onSuccess}>Cancel</Button>
+                    <Button type="submit" className="bg-teal-700" disabled={loading}>
+                        {loading ? <Loader2 className="animate-spin"/> : "Save Changes"}
+                    </Button>
+                </div>
+            </form>
         </div>
     );
 }
