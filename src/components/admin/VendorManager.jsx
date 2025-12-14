@@ -421,6 +421,7 @@ function InvoiceManager({ vendorId, invoices }) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
+        if (data.amount_owed) data.amount_owed = parseFloat(data.amount_owed);
         addInvoice.mutate(data);
     };
 
@@ -442,7 +443,7 @@ function InvoiceManager({ vendorId, invoices }) {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Amount Owed</Label>
-                                    <Input name="amount_owed" type="number" step="0.01" required />
+                                    <Input name="amount_owed" type="number" step="0.01" min="0" required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Invoice Date</Label>
@@ -550,7 +551,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
         const updatedPayments = [...currentPayments, newPayment];
         
         // Recalculate totals
-        const newTotalPaid = updatedPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const newTotalPaid = updatedPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
         const owed = parseFloat(invoice.amount_owed || 0);
         
         let newStatus = invoice.status;
@@ -608,7 +609,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
                 <form onSubmit={handleAddPayment} className="bg-white p-3 border rounded-md space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                         <Input name="payment_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="h-8 text-sm" />
-                        <Input name="amount" type="number" step="0.01" placeholder="Amount" required className="h-8 text-sm" />
+                        <Input name="amount" type="number" step="0.01" min="0" placeholder="Amount" required className="h-8 text-sm" />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                         <Select name="method" defaultValue="Check">
