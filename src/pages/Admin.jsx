@@ -146,6 +146,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Reservations & Sales</TabsTrigger>
             <TabsTrigger value="plots" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Plot Management</TabsTrigger>
             <TabsTrigger value="onboarding" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employee Onboarding</TabsTrigger>
+            <TabsTrigger value="employees" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employees</TabsTrigger>
             <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
           </TabsList>
@@ -320,10 +321,11 @@ export default function AdminDashboard() {
                   </div>
               </div>
 
-              {/* Full Width: Employee List */}
-              <div className="pt-6 border-t border-stone-200">
-                  <EmployeeList />
-              </div>
+          </TabsContent>
+
+          {/* EMPLOYEES TAB */}
+          <TabsContent value="employees">
+              <EmployeeList />
           </TabsContent>
 
           {/* VENDORS TAB */}
