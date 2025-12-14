@@ -61,7 +61,7 @@ export default function EmployeeList() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <Button variant="outline" size="icon" onClick={() => refetch()} title="Refresh List">
+                        <Button className="bg-teal-700 hover:bg-teal-800 text-white" size="icon" onClick={() => refetch()} title="Refresh List">
                             <Users className="h-4 w-4" />
                         </Button>
                     </div>
@@ -131,8 +131,8 @@ export default function EmployeeList() {
                                         </TableCell>
                                         <TableCell>
                                             <Link to={`${createPageUrl('EmployeeProfile')}?id=${emp.id}`}>
-                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                    <ExternalLink className="h-4 w-4 text-stone-500 hover:text-teal-600" />
+                                                <Button size="sm" className="h-8 w-8 p-0 bg-teal-700 hover:bg-teal-800 text-white">
+                                                    <ExternalLink className="h-4 w-4" />
                                                 </Button>
                                             </Link>
                                         </TableCell>
