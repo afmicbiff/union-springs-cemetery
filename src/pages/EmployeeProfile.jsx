@@ -126,7 +126,7 @@ export default function EmployeeProfile() {
                 {/* Header Navigation */}
                 <div className="flex items-center gap-4 mb-6">
                     <Link to={createPageUrl('Admin')}>
-                        <Button variant="outline" size="sm" className="gap-2">
+                        <Button size="sm" className="gap-2 bg-teal-700 hover:bg-teal-800 text-white">
                             <ChevronLeft className="w-4 h-4" /> Back to Admin
                         </Button>
                     </Link>
@@ -139,7 +139,7 @@ export default function EmployeeProfile() {
                     <Card className="lg:col-span-1 h-fit shadow-lg border-0">
                         <CardContent className="pt-6 flex flex-col items-center text-center space-y-4">
                             <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-                                <AvatarFallback className="text-4xl bg-teal-100 text-teal-800">
+                                <AvatarFallback className="text-4xl bg-teal-700 text-white">
                                     {employee.first_name?.[0]}{employee.last_name?.[0]}
                                 </AvatarFallback>
                             </Avatar>
@@ -152,7 +152,7 @@ export default function EmployeeProfile() {
                                 <Badge variant="secondary" className="bg-teal-100 text-teal-800 hover:bg-teal-200">
                                     {employee.employment_type}
                                 </Badge>
-                                <Badge variant="outline" className="text-stone-600">
+                                <Badge className="bg-teal-700 text-white hover:bg-teal-800 border-none">
                                     Active
                                 </Badge>
                             </div>
@@ -192,8 +192,8 @@ export default function EmployeeProfile() {
                     <div className="lg:col-span-2 space-y-6">
                         <Tabs defaultValue="details" className="w-full">
                             <TabsList className="w-full justify-start bg-white border p-1 h-auto flex-wrap">
-                                <TabsTrigger value="details" className="data-[state=active]:bg-teal-50 data-[state=active]:text-teal-700">Personal Details</TabsTrigger>
-                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-50 data-[state=active]:text-teal-700">Documents & Checklist</TabsTrigger>
+                                <TabsTrigger value="details" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Personal Details</TabsTrigger>
+                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Documents & Checklist</TabsTrigger>
                             </TabsList>
                             
                             {/* Personal Details Tab */}
