@@ -242,7 +242,7 @@ function VendorProfile({ vendor, onBack }) {
     return (
         <div className="space-y-6 animate-in slide-in-from-right-4">
             <div className="flex items-center gap-4">
-                <Button variant="outline" onClick={onBack}>Back to List</Button>
+                <Button onClick={onBack} className="bg-teal-700 hover:bg-teal-800 text-white">Back to List</Button>
                 <h1 className="text-2xl font-bold">{vendor.company_name} <span className="text-stone-400 text-lg font-normal">#{vendor.vendor_id}</span></h1>
             </div>
 
@@ -431,7 +431,7 @@ function InvoiceManager({ vendorId, invoices }) {
                     <DollarSign className="w-4 h-4"/> Financial History
                 </h3>
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                    <DialogTrigger asChild><Button size="sm">Add Invoice</Button></DialogTrigger>
+                    <DialogTrigger asChild><Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white">Add Invoice</Button></DialogTrigger>
                     <DialogContent>
                         <h3 className="font-bold mb-4">Record New Invoice</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -498,6 +498,7 @@ function InvoiceManager({ vendorId, invoices }) {
                                                     ${inv.status === 'Paid' ? 'bg-green-100 text-green-800 border-green-200' : ''}
                                                     ${inv.status === 'Overdue' ? 'bg-red-100 text-red-800 border-red-200' : ''}
                                                     ${inv.status === 'Partial' ? 'bg-amber-100 text-amber-800 border-amber-200' : ''}
+                                                    ${inv.status === 'Pending' ? 'bg-yellow-300 text-black border-yellow-400' : ''}
                                                 `}>
                                                     {inv.status}
                                                 </Badge>
@@ -623,7 +624,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
                         <Input name="reference_number" placeholder="Ref/Check #" className="h-8 text-sm" />
                     </div>
                     <Input name="notes" placeholder="Notes..." className="h-8 text-sm" />
-                    <Button type="submit" size="sm" variant="secondary" className="w-full h-7">Record Payment</Button>
+                    <Button type="submit" size="sm" className="w-full h-7 bg-teal-700 hover:bg-teal-800 text-white">Record Payment</Button>
                 </form>
 
                 {/* Payments List */}
@@ -657,8 +658,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
                         />
                         <Button 
                             size="sm" 
-                            variant="outline" 
-                            className="h-7" 
+                            className="h-7 bg-teal-700 hover:bg-teal-800 text-white" 
                             onClick={() => document.getElementById(`upload-${invoice.id}`).click()}
                             disabled={uploading}
                         >
@@ -678,7 +678,7 @@ function InvoiceDetailView({ invoice, onUpdate }) {
                                     <FileText className="w-4 h-4 text-stone-400 flex-shrink-0" />
                                     <span className="truncate">{doc.name}</span>
                                 </div>
-                                <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => handleViewDoc(doc)}>View</Button>
+                                <Button size="sm" className="h-6 px-2 bg-teal-700 hover:bg-teal-800 text-white" onClick={() => handleViewDoc(doc)}>View</Button>
                             </div>
                         ))
                     )}

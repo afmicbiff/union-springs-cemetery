@@ -52,7 +52,7 @@ export default function Layout({ children }) {
                   key={item.label}
                   to={createPageUrl(item.path.replace('/', '')) || '/'}
                   className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 ${
-                    location.pathname === item.path ? 'text-teal-500 font-semibold bg-stone-800' : 'text-stone-300'
+                    location.pathname === item.path ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
                   }`}
                 >
                   <item.icon className="w-3.5 h-3.5" />
