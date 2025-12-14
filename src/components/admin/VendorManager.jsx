@@ -105,7 +105,7 @@ function VendorList({ onSelect, onCreate, isCreateOpen, setIsCreateOpen }) {
                                         </TableCell>
                                         <TableCell><Badge variant="outline">{v.payment_terms}</Badge></TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" onClick={() => onSelect(v)}>View</Button>
+                                            <Button size="sm" onClick={() => onSelect(v)} className="bg-teal-700 hover:bg-teal-800 text-white">View</Button>
                                         </TableCell>
                                     </TableRow>
                                 ))
