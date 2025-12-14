@@ -279,9 +279,9 @@ function VendorProfile({ vendor, onBack }) {
                 <Card className="md:col-span-2">
                     <Tabs defaultValue="financials">
                         <CardHeader className="pb-0">
-                            <TabsList>
-                                <TabsTrigger value="financials" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Invoices & Payments</TabsTrigger>
-                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Documents</TabsTrigger>
+                            <TabsList className="bg-transparent p-0 gap-2">
+                                <TabsTrigger value="financials" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white bg-white text-teal-700 border border-teal-200">Invoices & Payments</TabsTrigger>
+                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white bg-white text-teal-700 border border-teal-200">Documents</TabsTrigger>
                             </TabsList>
                         </CardHeader>
                         <CardContent className="pt-6">
