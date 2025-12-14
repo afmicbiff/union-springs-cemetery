@@ -109,8 +109,8 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 p-6">
-      <div className="max-w-[1400px] mx-auto space-y-8">
+    <div className="bg-stone-100 p-6 min-h-full">
+      <div className="mx-auto space-y-8">
         
         {/* Header */}
         <div className="flex justify-between items-center">
