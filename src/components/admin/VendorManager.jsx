@@ -506,7 +506,7 @@ function InvoiceManager({ vendorId, invoices }) {
                                             <TableCell className="text-right">${paid.toFixed(2)}</TableCell>
                                             <TableCell className="text-right font-bold text-stone-900">${balance.toFixed(2)}</TableCell>
                                             <TableCell>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                <Button size="icon" className="h-6 w-6 bg-teal-700 hover:bg-teal-800 text-white">
                                                     {selectedInvoice === inv.id ? '-' : '+'}
                                                 </Button>
                                             </TableCell>
