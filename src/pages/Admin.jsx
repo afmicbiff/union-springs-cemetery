@@ -24,6 +24,7 @@ import OnboardingGuide from "@/components/admin/OnboardingGuide";
 import EmployeeDocumentManager from "@/components/admin/EmployeeDocumentManager";
 import EmployeeList from "@/components/admin/EmployeeList";
 import OnboardingProgress from "@/components/admin/OnboardingProgress";
+import VendorManager from "@/components/admin/VendorManager";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
