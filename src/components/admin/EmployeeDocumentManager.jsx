@@ -199,8 +199,7 @@ export default function EmployeeDocumentManager() {
                         </div>
                     </div> :
 
-        <div className="bg-slate-500 text-stone-400 py-12 text-center rounded border border-dashed">
-                        <User className="w-12 h-12 mx-auto mb-2 opacity-20" />
+        <div className="bg-stone-50 text-stone-400 py-12 text-center rounded border border-dashed">
                         <p>Select an employee to manage their secure documents.</p>
                     </div>
         }
