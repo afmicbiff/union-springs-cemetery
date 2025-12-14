@@ -95,14 +95,14 @@ export default function Layout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col">
-        <div className="max-w-[1240px] mx-auto w-full flex-grow flex flex-col">
+      <main className="flex-1 flex flex-col">
+        <div className="max-w-[1240px] mx-auto w-full flex-1 flex flex-col">
           {children}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+      <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800 mt-auto">
         <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
           <div>
             <h3 className="text-teal-500 font-serif text-lg mb-4 uppercase tracking-widest">Union Springs</h3>
