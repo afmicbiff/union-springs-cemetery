@@ -56,7 +56,7 @@ export default function OnboardingProgress() {
     const incompleteEmployees = employees.filter(emp => getProgress(emp) < 100);
 
     return (
-        <Card className="h-full">
+        <Card>
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
@@ -86,7 +86,7 @@ export default function OnboardingProgress() {
                             <p className="text-green-700 text-sm">All active employees have completed their onboarding.</p>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
                             {incompleteEmployees.map(emp => {
                                 const progress = getProgress(emp);
                                 const missing = getMissingItems(emp);
