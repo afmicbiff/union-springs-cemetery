@@ -251,8 +251,8 @@ function VendorProfile({ vendor, onBack }) {
                 <Card className="md:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>Details</CardTitle>
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditOpen(true)}>
-                            <Edit className="w-4 h-4 text-stone-500" />
+                        <Button size="sm" onClick={() => setIsEditOpen(true)} className="bg-teal-700 hover:bg-teal-800 text-white">
+                            <Edit className="w-4 h-4 text-white" />
                         </Button>
                     </CardHeader>
                     <CardContent className="space-y-4 text-sm pt-4">
