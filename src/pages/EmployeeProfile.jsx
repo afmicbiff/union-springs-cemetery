@@ -185,7 +185,7 @@ export default function EmployeeProfile() {
                                 </div>
                             </div>
 
-                            <Button className="w-full mt-4 gap-2" onClick={() => setIsEditOpen(true)}>
+                            <Button className="w-full mt-4 gap-2 bg-teal-700 hover:bg-teal-800 text-white" onClick={() => setIsEditOpen(true)}>
                                 <Edit className="w-4 h-4" /> Edit Profile
                             </Button>
                             
