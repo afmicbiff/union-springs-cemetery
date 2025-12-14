@@ -18,6 +18,9 @@ export default function Layout({ children }) {
     border: 'border-stone-300'
   };
 
+  const isAdmin = location.pathname.startsWith('/admin');
+  const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
+
   const navItems = [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Deceased Search', path: '/search', icon: Search },
@@ -27,7 +30,7 @@ export default function Layout({ children }) {
   ];
 
   return (
-    <div className={`min-h-screen ${colors.background} font-serif text-stone-900 flex flex-col`}>
+    <div className={`min-h-screen ${pageBackground} font-serif text-stone-900 flex flex-col`}>
       {/* Header */}
       <header className="bg-stone-900 text-stone-100 shadow-md sticky top-0 z-50 border-b-4 border-teal-700">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">

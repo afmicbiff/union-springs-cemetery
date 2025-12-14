@@ -109,7 +109,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="bg-stone-100 p-6 flex-grow">
+    <div className="p-6 flex-grow w-full">
       <div className="mx-auto space-y-8">
         
         {/* Header */}
