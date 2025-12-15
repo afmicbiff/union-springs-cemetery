@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, Timer, Repeat } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, Timer, Repeat, Link2 } from 'lucide-react';
 import { format, isPast, parseISO } from 'date-fns';
 import { toast } from "sonner";
 import {
@@ -382,6 +382,20 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                             <h3 className={`font-semibold text-stone-900 ${task.status === 'Completed' ? 'line-through text-stone-500' : ''}`}>
                                                 {task.title}
                                             </h3>
+                                            {task.dependencies && task.dependencies.length > 0 && (
+                                                <div className="flex gap-1">
+                                                    {task.dependencies.map(depId => {
+                                                        const depTask = tasks.find(t => t.id === depId);
+                                                        if (!depTask) return null;
+                                                        return (
+                                                            <Badge key={depId} variant="outline" className={`text-[10px] px-1 py-0 h-5 border-dashed flex items-center gap-1 ${depTask.status === 'Completed' ? 'text-green-600 border-green-200 bg-green-50' : 'text-amber-600 border-amber-200 bg-amber-50'}`}>
+                                                                <Link2 className="w-2.5 h-2.5" />
+                                                                <span className="max-w-[80px] truncate">{depTask.title}</span>
+                                                            </Badge>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
                                             <Badge variant="outline" className={`text-xs font-normal ${getPriorityColor(task.priority)}`}>
                                                 {task.priority}
                                             </Badge>
@@ -490,6 +504,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                 task={editingTask}
                 onSave={handleSave}
                 employees={employees}
+                allTasks={tasks}
             />
 
             {loggingTask && (

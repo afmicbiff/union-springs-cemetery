@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
-import { Check, Search, User, Repeat } from 'lucide-react';
+import { Check, Search, User, Repeat, Link2, X } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-export default function TaskDialog({ isOpen, onClose, task, onSave, employees = [] }) {
+export default function TaskDialog({ isOpen, onClose, task, onSave, employees = [], allTasks = [] }) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -19,7 +19,8 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
         status: "To Do",
         priority: "Medium",
         recurrence: "none",
-        update_note: ""
+        update_note: "",
+        dependencies: []
     });
 
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -35,7 +36,8 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                 status: task.status || "To Do",
                 priority: task.priority || "Medium",
                 recurrence: task.recurrence || "none",
-                update_note: ""
+                update_note: "",
+                dependencies: task.dependencies || []
                 });
                 } else {
                 setFormData({
@@ -46,7 +48,8 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                 status: "To Do",
                 priority: "Medium",
                 recurrence: "none",
-                update_note: ""
+                update_note: "",
+                dependencies: []
                 });
                 }
     }, [task, isOpen]);
@@ -240,6 +243,48 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                             value={formData.description} 
                             onChange={(e) => setFormData({...formData, description: e.target.value})} 
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="flex items-center gap-2"><Link2 className="w-3.5 h-3.5" /> Dependencies (Waiting on...)</Label>
+                        <Select 
+                            onValueChange={(val) => {
+                                if (!formData.dependencies.includes(val)) {
+                                    setFormData(prev => ({ ...prev, dependencies: [...prev.dependencies, val] }));
+                                }
+                            }}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Add dependency..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {allTasks
+                                    .filter(t => t.id !== task?.id && !formData.dependencies.includes(t.id))
+                                    .map(t => (
+                                    <SelectItem key={t.id} value={t.id}>{t.title}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        
+                        {formData.dependencies.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {formData.dependencies.map(depId => {
+                                    const depTask = allTasks.find(t => t.id === depId);
+                                    return (
+                                        <div key={depId} className="flex items-center gap-1 bg-stone-100 px-2 py-1 rounded text-xs">
+                                            <span className="truncate max-w-[150px]">{depTask?.title || 'Unknown Task'}</span>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, dependencies: prev.dependencies.filter(id => id !== depId) }))}
+                                                className="hover:text-red-500"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {task && (
