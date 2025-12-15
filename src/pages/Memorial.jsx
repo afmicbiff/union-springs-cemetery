@@ -123,7 +123,7 @@ export default function MemorialPage() {
                         <img 
                             src={deceased.image_url} 
                             alt={`${deceased.first_name} ${deceased.last_name}`}
-                            className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-stone-100 shadow-xl mx-auto mb-6 object-cover"
+                            className="h-auto max-h-64 md:max-h-96 w-auto max-w-full rounded-lg border-4 border-stone-100 shadow-xl mx-auto mb-6"
                         />
                     )}
                     
