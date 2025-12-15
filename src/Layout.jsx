@@ -40,7 +40,7 @@ export default function Layout({ children }) {
       isDropdown: true,
       items: [
         { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
-        { label: 'Employees', path: '/employee-resources', icon: Users }
+        { label: 'Employees', path: '/EmployeeResources', icon: Users }
       ]
     },
   ];
@@ -70,7 +70,7 @@ export default function Layout({ children }) {
                 item.isDropdown ? (
                   <DropdownMenu key={item.label}>
                     <DropdownMenuTrigger className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 focus:outline-none ${
-                      location.pathname.startsWith('/admin') || location.pathname === '/employee-resources' ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
+                      location.pathname.startsWith('/admin') || location.pathname === '/EmployeeResources' ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
                     }`}>
                       <item.icon className="w-3.5 h-3.5" />
                       {item.label}
