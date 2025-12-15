@@ -31,6 +31,7 @@ import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import VendorManager from "@/components/admin/VendorManager";
 import EventCalendar from "@/components/admin/EventCalendar";
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
+import AnnouncementManager from "@/components/admin/AnnouncementManager";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -212,6 +213,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
             <TabsTrigger value="bylaws" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Bylaws</TabsTrigger>
             <TabsTrigger value="calendar" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Event Calendar</TabsTrigger>
+            <TabsTrigger value="announcements" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Announcements</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -467,6 +469,11 @@ export default function AdminDashboard() {
           {/* CALENDAR TAB */}
           <TabsContent value="calendar">
               <EventCalendar />
+          </TabsContent>
+
+          {/* ANNOUNCEMENTS TAB */}
+          <TabsContent value="announcements">
+              <AnnouncementManager />
           </TabsContent>
         </Tabs>
       </div>

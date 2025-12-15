@@ -7,7 +7,19 @@ import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 import EmployeeSchedule from "@/components/employee/EmployeeSchedule";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
+import { format } from 'date-fns';
+
 export default function EmployeesPage() {
+    const { data: announcements } = useQuery({
+        queryKey: ['announcements-public'],
+        queryFn: () => base44.entities.Announcement.list({ limit: 20 }, '-date'),
+        initialData: []
+    });
+
+    const activeAnnouncements = announcements.filter(a => a.is_active !== false);
+
     return (
         <div className="min-h-screen bg-stone-50 py-12 px-4 sm:px-6 lg:px-8 font-serif">
             <div className="max-w-6xl mx-auto space-y-8">
@@ -43,20 +55,21 @@ export default function EmployeesPage() {
                             <CardContent>
                                 <ScrollArea className="h-[400px] pr-4">
                                     <div className="space-y-6">
-                                        {[
-                                            { title: "Winter Maintenance Schedule", date: "Dec 10, 2025", content: "Snow removal teams will be operating on a revised schedule starting next week. Please ensure all maintenance paths are marked." },
-                                            { title: "Holiday Hours", date: "Dec 1, 2025", content: "The office will be closed on December 25th and January 1st. Grounds remain open sunrise to sunset." },
-                                            { title: "New Safety Equipment", date: "Nov 15, 2025", content: "New PPE gear has arrived for the groundskeeping team. Please see the maintenance supervisor to collect your kit." },
-                                            { title: "Quarterly Staff Meeting", date: "Nov 1, 2025", content: "Join us in the main hall on Friday at 9 AM for our quarterly review and breakfast." }
-                                        ].map((update, i) => (
-                                            <div key={i} className="pb-6 border-b border-stone-100 last:border-0">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="font-semibold text-stone-900">{update.title}</h3>
-                                                    <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded">{update.date}</span>
+                                        {activeAnnouncements.length === 0 ? (
+                                            <p className="text-center text-stone-500 py-8">No recent announcements.</p>
+                                        ) : (
+                                            activeAnnouncements.map((update) => (
+                                                <div key={update.id} className="pb-6 border-b border-stone-100 last:border-0">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h3 className="font-semibold text-stone-900">{update.title}</h3>
+                                                        <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded">
+                                                            {format(new Date(update.date), 'MMM d, yyyy')}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-stone-600 text-sm leading-relaxed">{update.content}</p>
                                                 </div>
-                                                <p className="text-stone-600 text-sm leading-relaxed">{update.content}</p>
-                                            </div>
-                                        ))}
+                                            ))
+                                        )}
                                     </div>
                                 </ScrollArea>
                             </CardContent>
