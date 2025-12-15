@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
+import { Check, Search, User } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 export default function TaskDialog({ isOpen, onClose, task, onSave, employees }) {
     const [formData, setFormData] = useState({
@@ -16,6 +19,9 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees })
         status: "To Do",
         priority: "Medium"
     });
+
+    const [employeeSearch, setEmployeeSearch] = useState("");
+    const [isAssigneeOpen, setIsAssigneeOpen] = useState(false);
 
     useEffect(() => {
         if (task) {
@@ -46,9 +52,20 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees })
         onSave(dataToSave);
     };
 
+    const filteredEmployees = employees.filter(emp => 
+        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(employeeSearch.toLowerCase()) ||
+        (emp.email && emp.email.toLowerCase().includes(employeeSearch.toLowerCase()))
+    );
+
+    const getAssigneeLabel = () => {
+        if (formData.assignee_id === "unassigned" || !formData.assignee_id) return "Unassigned";
+        const emp = employees.find(e => e.id === formData.assignee_id);
+        return emp ? `${emp.first_name} ${emp.last_name}` : "Unknown Employee";
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{task ? 'Edit Task' : 'Create New Task'}</DialogTitle>
                 </DialogHeader>
@@ -58,6 +75,7 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees })
                         <Input 
                             id="title" 
                             required 
+                            placeholder="e.g. Weekly Report"
                             value={formData.title} 
                             onChange={(e) => setFormData({...formData, title: e.target.value})} 
                         />
@@ -99,23 +117,72 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees })
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="assignee">Assignee</Label>
-                        <Select 
-                            value={formData.assignee_id} 
-                            onValueChange={(val) => setFormData({...formData, assignee_id: val})}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Employee" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="unassigned">Unassigned</SelectItem>
-                                {employees.map(emp => (
-                                    <SelectItem key={emp.id} value={emp.id}>
-                                        {emp.first_name} {emp.last_name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label>Assignee</Label>
+                        <div className="relative">
+                            <div 
+                                className="flex items-center justify-between w-full p-2 border rounded-md cursor-pointer hover:bg-stone-50"
+                                onClick={() => setIsAssigneeOpen(!isAssigneeOpen)}
+                            >
+                                <span className={formData.assignee_id === "unassigned" ? "text-stone-500" : "font-medium"}>
+                                    {getAssigneeLabel()}
+                                </span>
+                                <User className="w-4 h-4 text-stone-400" />
+                            </div>
+
+                            {isAssigneeOpen && (
+                                <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg p-2">
+                                    <div className="flex items-center border-b px-2 pb-2 mb-2">
+                                        <Search className="w-4 h-4 text-stone-400 mr-2" />
+                                        <input
+                                            className="w-full text-sm outline-none"
+                                            placeholder="Search employees..."
+                                            value={employeeSearch}
+                                            onChange={(e) => setEmployeeSearch(e.target.value)}
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <ScrollArea className="h-[200px]">
+                                        <div className="space-y-1">
+                                            <div 
+                                                className={cn(
+                                                    "flex items-center justify-between px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-stone-100",
+                                                    formData.assignee_id === "unassigned" && "bg-stone-100 font-medium"
+                                                )}
+                                                onClick={() => {
+                                                    setFormData({...formData, assignee_id: "unassigned"});
+                                                    setIsAssigneeOpen(false);
+                                                }}
+                                            >
+                                                <span>Unassigned</span>
+                                                {formData.assignee_id === "unassigned" && <Check className="w-4 h-4 text-teal-600" />}
+                                            </div>
+                                            {filteredEmployees.map(emp => (
+                                                <div 
+                                                    key={emp.id}
+                                                    className={cn(
+                                                        "flex items-center justify-between px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-stone-100",
+                                                        formData.assignee_id === emp.id && "bg-stone-100 font-medium"
+                                                    )}
+                                                    onClick={() => {
+                                                        setFormData({...formData, assignee_id: emp.id});
+                                                        setIsAssigneeOpen(false);
+                                                    }}
+                                                >
+                                                    <div>
+                                                        <div>{emp.first_name} {emp.last_name}</div>
+                                                        <div className="text-xs text-stone-400">{emp.email}</div>
+                                                    </div>
+                                                    {formData.assignee_id === emp.id && <Check className="w-4 h-4 text-teal-600" />}
+                                                </div>
+                                            ))}
+                                            {filteredEmployees.length === 0 && (
+                                                <div className="text-center py-4 text-xs text-stone-500">No employees found</div>
+                                            )}
+                                        </div>
+                                    </ScrollArea>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -133,6 +200,7 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees })
                         <Textarea 
                             id="description" 
                             rows={3}
+                            placeholder="Task details..."
                             value={formData.description} 
                             onChange={(e) => setFormData({...formData, description: e.target.value})} 
                         />
