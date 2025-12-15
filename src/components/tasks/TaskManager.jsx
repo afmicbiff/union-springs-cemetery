@@ -41,14 +41,18 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
     // Mutations
     const createTaskMutation = useMutation({
-        mutationFn: (data) => base44.entities.Task.create(data),
+        mutationFn: async (data) => {
+            const res = await base44.functions.invoke('createTask', data);
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries(['tasks']);
             setIsDialogOpen(false);
             setEditingTask(null);
-            toast.success("Task created");
+            toast.success("Task created & notification sent");
         },
-        onError: (err) => toast.error("Failed to create task")
+        onError: (err) => toast.error("Failed to create task: " + err.message)
     });
 
     const updateTaskMutation = useMutation({

@@ -1,0 +1,58 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+
+Deno.serve(async (req) => {
+    try {
+        const base44 = createClientFromRequest(req);
+        const taskData = await req.json();
+
+        const user = await base44.auth.me();
+        if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+
+        // Create Task
+        const task = await base44.entities.Task.create(taskData);
+
+        // Send Email if assigned
+        if (task.assignee_id) {
+            // Fetch assignee details (using service role to ensure access to email)
+            const employees = await base44.asServiceRole.entities.Employee.filter({ id: task.assignee_id });
+            const assignee = employees[0];
+
+            if (assignee && assignee.email) {
+                await base44.integrations.Core.SendEmail({
+                    to: assignee.email,
+                    subject: `New Task Assigned: ${task.title}`,
+                    body: `Hello ${assignee.first_name},
+
+You have been assigned a new task by ${user.full_name || 'Administrator'}.
+
+Task: ${task.title}
+Priority: ${task.priority}
+Due Date: ${task.due_date || 'Not specified'}
+Status: ${task.status}
+
+Description:
+${task.description || 'No description provided.'}
+
+Please log in to the employee portal to view and manage this task.
+
+Best regards,
+Union Springs Cemetery Management`
+                });
+
+                // Also create an in-app notification
+                await base44.entities.Notification.create({
+                    message: `New Task Assigned: "${task.title}"`,
+                    type: 'task',
+                    user_email: assignee.email,
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                });
+            }
+        }
+
+        return Response.json(task);
+
+    } catch (error) {
+        return Response.json({ error: error.message }, { status: 500 });
+    }
+});
