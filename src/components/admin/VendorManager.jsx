@@ -286,7 +286,7 @@ function VendorProfile({ vendor, onBack }) {
                         </CardHeader>
                         <CardContent className="pt-6">
                             <TabsContent value="financials">
-                                <InvoiceManager vendorId={vendor.id} invoices={invoices} />
+                                <InvoiceManager vendorId={vendor.id} vendorName={vendor.company_name} invoices={invoices} />
                             </TabsContent>
                             <TabsContent value="documents" className="space-y-4">
                                 <DocumentUploader onUploadComplete={handleDocUpload} />
@@ -388,7 +388,7 @@ function VendorEditForm({ vendor, onSuccess }) {
     );
 }
 
-function InvoiceManager({ vendorId, invoices }) {
+function InvoiceManager({ vendorId, vendorName, invoices }) {
     const queryClient = useQueryClient();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -402,10 +402,38 @@ function InvoiceManager({ vendorId, invoices }) {
 
     const addInvoice = useMutation({
         mutationFn: (data) => base44.entities.VendorInvoice.create({ ...data, vendor_id: vendorId, status: 'Pending' }),
-        onSuccess: () => {
+        onSuccess: async (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['invoices', vendorId] });
             setIsAddOpen(false);
-            toast.success("Invoice added");
+            
+            // Auto-create Calendar Event if due_date is set
+            if (variables.due_date) {
+                try {
+                     // Find admins to notify
+                     const employees = await base44.entities.Employee.list({ limit: 100 });
+                     const admins = employees.filter(emp => emp.employment_type === 'Administrator').map(emp => emp.id);
+
+                     const dueDate = new Date(variables.due_date);
+                     dueDate.setHours(9, 0, 0, 0); // Default to 9 AM
+
+                     await base44.entities.Event.create({
+                         title: `Invoice Due: ${vendorName || 'Vendor'} (#${variables.invoice_number})`,
+                         description: `Amount: $${variables.amount_owed}. ${variables.notes || ''}`,
+                         start_time: dueDate.toISOString(),
+                         end_time: new Date(dueDate.getTime() + 60 * 60 * 1000).toISOString(),
+                         type: 'invoice_due',
+                         recurrence: 'none',
+                         attendee_ids: admins,
+                         reminders_sent: {}
+                     });
+                     toast.success("Invoice added & Calendar event scheduled");
+                } catch (err) {
+                    console.error(err);
+                    toast.success("Invoice added (Event creation failed)");
+                }
+            } else {
+                toast.success("Invoice added");
+            }
         }
     });
 
