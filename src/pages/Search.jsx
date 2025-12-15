@@ -220,7 +220,7 @@ export default function SearchPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Search by name..."
+                placeholder="Search by name, use natural language or terms..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
@@ -231,9 +231,9 @@ export default function SearchPage() {
               <Dialog open={isAiOpen} onOpenChange={setIsAiOpen}>
                   <DialogTrigger asChild>
                       <Button 
-                          className="h-12 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-serif border-none"
+                          className="h-12 px-4 bg-teal-700 hover:bg-teal-800 text-white font-serif border-none"
                       >
-                          <Sparkles className="w-4 h-4 mr-2" /> AI Search
+                          <Sparkles className="w-4 h-4 mr-2" /> Search
                       </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -346,16 +346,17 @@ export default function SearchPage() {
               </div>
 
               {/* Date Ranges */}
-              <div className="space-y-2 col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                      <Label className="text-stone-600">Birth Year Range</Label>
-                      <div className="flex gap-2">
+              <div className="col-span-1 md:col-span-2 pt-2">
+                  <div className="flex flex-col md:flex-row gap-6">
+                      <div className="flex-1 flex items-center gap-3">
+                          <Label className="text-stone-600 whitespace-nowrap min-w-[80px]">Birth Year:</Label>
                           <Input 
                               placeholder="From" 
                               value={birthYearMin}
                               onChange={(e) => setBirthYearMin(e.target.value)}
                               className="bg-stone-50 border-stone-300"
                           />
+                          <span className="text-stone-400 font-medium">-</span>
                           <Input 
                               placeholder="To" 
                               value={birthYearMax}
@@ -363,16 +364,15 @@ export default function SearchPage() {
                               className="bg-stone-50 border-stone-300"
                           />
                       </div>
-                  </div>
-                  <div className="space-y-2">
-                      <Label className="text-stone-600">Passing Year Range</Label>
-                      <div className="flex gap-2">
+                      <div className="flex-1 flex items-center gap-3">
+                          <Label className="text-stone-600 whitespace-nowrap min-w-[90px]">Passing Year:</Label>
                           <Input 
                               placeholder="From" 
                               value={deathYearMin}
                               onChange={(e) => setDeathYearMin(e.target.value)}
                               className="bg-stone-50 border-stone-300"
                           />
+                          <span className="text-stone-400 font-medium">-</span>
                           <Input 
                               placeholder="To" 
                               value={deathYearMax}
