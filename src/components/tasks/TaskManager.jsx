@@ -244,8 +244,8 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <MoreHorizontal className="w-4 h-4 text-stone-400" />
+                                        <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white shadow-sm font-medium">
+                                            Actions <MoreHorizontal className="w-4 h-4 ml-2" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
