@@ -36,7 +36,12 @@ const employeeSchema = z.object({
     emergency_contact_first_name: z.string().min(1, "Emergency contact name required"),
     emergency_contact_last_name: z.string().min(1, "Emergency contact name required"),
     emergency_contact_phone: z.string().min(10, "Emergency contact phone required"),
-    emergency_contact_relationship: z.string().min(1, "Relationship required")
+    emergency_contact_relationship: z.string().min(1, "Relationship required"),
+    department: z.string().optional(),
+    job_title: z.string().optional(),
+    bio: z.string().optional(),
+    skills: z.array(z.string()).optional(),
+    classes_taking: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => {
     if (["Married", "Separated"].includes(data.marital_status)) {
         if (!data.spouse_name || data.spouse_name.trim() === "") {
@@ -103,6 +108,24 @@ export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
                         <div className="space-y-2">
                              <Label>Date of Birth</Label>
                              <Input type="date" {...register("date_of_birth")} />
+                        </div>
+                        <div className="space-y-2">
+                             <Label>Department</Label>
+                             <Select defaultValue={employee.department} onValueChange={(v) => setValue("department", v)}>
+                                <SelectTrigger><SelectValue placeholder="Select Department" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Administration">Administration</SelectItem>
+                                    <SelectItem value="Groundskeeping">Groundskeeping</SelectItem>
+                                    <SelectItem value="Sales">Sales</SelectItem>
+                                    <SelectItem value="Maintenance">Maintenance</SelectItem>
+                                    <SelectItem value="Security">Security</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                             <Label>Job Title</Label>
+                             <Input {...register("job_title")} placeholder="e.g. Senior Groundskeeper" />
                         </div>
                         <div className="space-y-2">
                             <Label>First Name</Label>
@@ -189,6 +212,35 @@ export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
                         <div className="space-y-2 mt-2">
                             <Label>Children Details</Label>
                             <Textarea {...register("children_details")} className="h-20" />
+                        </div>
+                    </div>
+
+                    {/* Professional Info */}
+                    <div className="border-t pt-4">
+                        <h4 className="text-sm font-semibold mb-3">Professional Profile</h4>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Professional Bio</Label>
+                                <Textarea {...register("bio")} placeholder="Brief professional summary..." className="h-24" />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Skills (comma separated)</Label>
+                                    <Input 
+                                        defaultValue={employee.skills?.join(", ") || ""} 
+                                        onChange={(e) => setValue("skills", e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
+                                        placeholder="e.g. Landscaping, heavy machinery..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Classes/Training (comma separated)</Label>
+                                    <Input 
+                                        defaultValue={employee.classes_taking?.join(", ") || ""} 
+                                        onChange={(e) => setValue("classes_taking", e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
+                                        placeholder="e.g. OSHA Safety, First Aid..."
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -10,13 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export default function EmployeeSchedule() {
+export default function EmployeeSchedule({ employeeId }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState(null);
     const queryClient = useQueryClient();
 
-    // Get Current User
+    // Get Current User (only needed if we are looking at "my" schedule and need to create profile)
     const { data: user } = useQuery({
         queryKey: ['me'],
         queryFn: () => base44.auth.me().catch(() => null),
@@ -24,13 +24,17 @@ export default function EmployeeSchedule() {
 
     // Get Employee Record
     const { data: employee } = useQuery({
-        queryKey: ['my-employee-profile', user?.email],
+        queryKey: ['employee-schedule-profile', employeeId || user?.email],
         queryFn: async () => {
+            if (employeeId) {
+                const res = await base44.entities.Employee.filter({ id: employeeId });
+                return res[0] || null;
+            }
             if (!user?.email) return null;
             const res = await base44.entities.Employee.list({ limit: 1000 });
             return res.find(e => e.email === user.email);
         },
-        enabled: !!user?.email
+        enabled: !!employeeId || !!user?.email
     });
 
     // Get Events
@@ -180,28 +184,33 @@ export default function EmployeeSchedule() {
         return <div className="border rounded-lg overflow-hidden">{rows}</div>;
     };
 
-    if (!user) return <div className="p-4 text-center">Please log in to view your schedule.</div>;
+    // Only show "Create Profile" if we are viewing "my" schedule (no employeeId prop)
+    if (!employeeId) {
+        if (!user) return <div className="p-4 text-center">Please log in to view your schedule.</div>;
     
-    if (!employee) {
-        return (
-            <div className="p-12 text-center bg-stone-50 rounded-lg border border-stone-200 border-dashed">
-                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <UserPlus className="w-8 h-8 text-stone-400" />
+        if (!employee) {
+            return (
+                <div className="p-12 text-center bg-stone-50 rounded-lg border border-stone-200 border-dashed">
+                    <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <UserPlus className="w-8 h-8 text-stone-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-stone-900 mb-2">Profile Missing</h3>
+                    <p className="text-stone-500 max-w-md mx-auto mb-6">
+                        No employee record was found for <span className="font-medium text-stone-700">{user.email}</span>. 
+                        Create a profile to access your schedule and tasks.
+                    </p>
+                    <Button 
+                        onClick={() => createProfileMutation.mutate()}
+                        className="bg-teal-700 hover:bg-teal-800"
+                        disabled={createProfileMutation.isPending}
+                    >
+                        {createProfileMutation.isPending ? "Creating..." : "Create My Profile"}
+                    </Button>
                 </div>
-                <h3 className="text-lg font-semibold text-stone-900 mb-2">Profile Missing</h3>
-                <p className="text-stone-500 max-w-md mx-auto mb-6">
-                    No employee record was found for <span className="font-medium text-stone-700">{user.email}</span>. 
-                    Create a profile to access your schedule and tasks.
-                </p>
-                <Button 
-                    onClick={() => createProfileMutation.mutate()}
-                    className="bg-teal-700 hover:bg-teal-800"
-                    disabled={createProfileMutation.isPending}
-                >
-                    {createProfileMutation.isPending ? "Creating..." : "Create My Profile"}
-                </Button>
-            </div>
-        );
+            );
+        }
+    } else if (!employee) {
+        return <div className="p-8 text-center text-stone-500">Employee not found.</div>;
     }
 
     return (

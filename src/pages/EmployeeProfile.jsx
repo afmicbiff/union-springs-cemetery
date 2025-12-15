@@ -12,12 +12,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { 
     User, Mail, Phone, MapPin, Heart, 
     AlertTriangle, FileText, Edit, 
-    ChevronLeft, Loader2, CheckSquare
+    ChevronLeft, Loader2, CheckSquare,
+    Briefcase, GraduationCap, Building
 } from 'lucide-react';
 import { toast } from "sonner";
 import EmployeeEditDialog from '@/components/admin/EmployeeEditDialog';
 import DocumentUploader from '@/components/documents/DocumentUploader';
 import DocumentList from '@/components/documents/DocumentList';
+import TaskManager from "@/components/tasks/TaskManager";
+import EmployeeSchedule from "@/components/employee/EmployeeSchedule";
 
 export default function EmployeeProfile() {
     const [searchParams] = useSearchParams();
@@ -204,9 +207,12 @@ export default function EmployeeProfile() {
                     {/* Right Column: Details Tabs */}
                     <div className="lg:col-span-2 space-y-6">
                         <Tabs defaultValue="details" className="w-full">
-                            <TabsList className="w-full justify-start bg-white border p-1 h-auto flex-wrap">
+                            <TabsList className="w-full justify-start bg-white border p-1 h-auto flex-wrap gap-1">
                                 <TabsTrigger value="details" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Personal Details</TabsTrigger>
-                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Documents & Checklist</TabsTrigger>
+                                <TabsTrigger value="professional" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Professional</TabsTrigger>
+                                <TabsTrigger value="schedule" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Schedule</TabsTrigger>
+                                <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Tasks</TabsTrigger>
+                                <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Documents</TabsTrigger>
                             </TabsList>
                             
                             {/* Personal Details Tab */}
@@ -269,6 +275,82 @@ export default function EmployeeProfile() {
                                         </div>
                                     </CardContent>
                                 </Card>
+                            </TabsContent>
+
+                            {/* Professional Tab */}
+                            <TabsContent value="professional">
+                                <Card className="shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle>Professional Profile</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                                                    <Building className="w-4 h-4 text-teal-600" /> Role & Department
+                                                </h3>
+                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                    <span className="text-stone-500">Department:</span>
+                                                    <span>{employee.department || "Unassigned"}</span>
+                                                    <span className="text-stone-500">Job Title:</span>
+                                                    <span>{employee.job_title || "N/A"}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                                                    <Briefcase className="w-4 h-4 text-teal-600" /> Skills
+                                                </h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {employee.skills && employee.skills.length > 0 ? (
+                                                        employee.skills.map((skill, idx) => (
+                                                            <Badge key={idx} variant="secondary">{skill}</Badge>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-sm text-stone-500 italic">No skills listed</span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4 md:col-span-2">
+                                                <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                                                    <GraduationCap className="w-4 h-4 text-teal-600" /> Professional Development
+                                                </h3>
+                                                <div className="space-y-2">
+                                                    <p className="text-sm font-medium text-stone-700">Classes & Certifications in Progress:</p>
+                                                    {employee.classes_taking && employee.classes_taking.length > 0 ? (
+                                                        <ul className="list-disc list-inside text-sm text-stone-600">
+                                                            {employee.classes_taking.map((item, idx) => (
+                                                                <li key={idx}>{item}</li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <p className="text-sm text-stone-500 italic">No active training</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {employee.bio && (
+                                                <div className="space-y-4 md:col-span-2 border-t pt-4">
+                                                    <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                                                        <FileText className="w-4 h-4 text-teal-600" /> Bio
+                                                    </h3>
+                                                    <p className="text-sm text-stone-600 leading-relaxed bg-stone-50 p-4 rounded-md">
+                                                        {employee.bio}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            <TabsContent value="schedule">
+                                <EmployeeSchedule employeeId={employee.id} />
+                            </TabsContent>
+
+                            <TabsContent value="tasks">
+                                <TaskManager isAdmin={true} currentEmployeeId={employee.id} />
                             </TabsContent>
 
                             {/* Documents & Checklist Tab */}
