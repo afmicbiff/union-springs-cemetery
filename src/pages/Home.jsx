@@ -111,7 +111,7 @@ export default function Home() {
          <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
                 <img
-              src="https://images.unsplash.com/photo-1464979681340-bdd28a61699e?q=80&w=1000&auto=format&fit=crop"
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg"
               alt="Peaceful cemetery grounds"
               className="rounded-sm shadow-xl border-8 border-white grayscale hover:grayscale-0 transition-all duration-700" />
 
