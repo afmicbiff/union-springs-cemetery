@@ -141,7 +141,7 @@ export default function SearchPage() {
         </div>
 
         {/* Search Bar & Filters */}
-        <div className="bg-white p-6 rounded-sm shadow-md space-y-4">
+        <div className="bg-white p-6 rounded-sm shadow-xl space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
@@ -280,7 +280,7 @@ export default function SearchPage() {
               ) : filteredResults.length > 0 ? (
                 <div className="grid gap-6">
                    {filteredResults.map((person) => (
-                     <Card key={person.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 bg-slate-50">
+                     <Card key={person.id} className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-slate-50">
                        <div className="flex flex-col md:flex-row">
                          {/* Image Section */}
                          <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
@@ -341,7 +341,7 @@ export default function SearchPage() {
                                 to={`${createPageUrl('Memorial')}?id=${person.id}`}
                                 state={{ search: location.search }}
                               >
-                                  <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
+                                  <Button className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
                                      View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
                                   </Button>
                               </Link>
