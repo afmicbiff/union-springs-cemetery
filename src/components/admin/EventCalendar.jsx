@@ -27,14 +27,14 @@ export default function EventCalendar() {
     // Fetch Events
     const { data: events, isLoading } = useQuery({
         queryKey: ['events'],
-        queryFn: () => base44.entities.Event.list({ limit: 500 }),
+        queryFn: () => base44.entities.Event.list('-created_date', 500),
         initialData: []
     });
 
     // Fetch Employees for Attendees
     const { data: employees } = useQuery({
         queryKey: ['employees-list-all'],
-        queryFn: () => base44.entities.Employee.list(null, 1000), // Ensure correct arguments for list
+        queryFn: () => base44.entities.Employee.list('-created_date', 1000),
         initialData: []
     });
 
@@ -483,7 +483,9 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
             return matrix[b.length][a.length];
         };
 
-        return employees.filter(emp => {
+        const uniqueEmployees = Array.from(new Map(employees.map(item => [item.id, item])).values());
+        
+        return uniqueEmployees.filter(emp => {
             const first = (emp.first_name || "").toLowerCase();
             const last = (emp.last_name || "").toLowerCase();
             const email = (emp.email || "").toLowerCase();
