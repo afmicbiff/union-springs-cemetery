@@ -13,8 +13,21 @@ export default Deno.serve(async (req) => {
         const fileText = await fileRes.text();
 
         console.log("Parsing CSV/TSV...");
+        
+        // Pre-process: Find the header row (skipping title lines)
+        const lines = fileText.split('\n');
+        const headerIndex = lines.findIndex(line => 
+            line.includes('Grave') && line.includes('Row') && line.includes('Status')
+        );
+        
+        if (headerIndex === -1) {
+            throw new Error("Could not find header row (Grave, Row, Status) in file");
+        }
+
+        const cleanCsvContent = lines.slice(headerIndex).join('\n');
+
         // Parse TSV data
-        const { data: records, errors } = Papa.parse(fileText, {
+        const { data: records, errors } = Papa.parse(cleanCsvContent, {
             header: true,
             skipEmptyLines: true,
             delimiter: '\t', // Explicitly setting tab delimiter based on the file content
