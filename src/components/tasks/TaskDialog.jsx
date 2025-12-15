@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from 'date-fns';
-import { Check, Search, User } from 'lucide-react';
+import { Check, Search, User, Repeat } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,8 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
         due_date: "",
         assignee_id: "unassigned",
         status: "To Do",
-        priority: "Medium"
+        priority: "Medium",
+        recurrence: "none"
     });
 
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -31,18 +32,20 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                 due_date: task.due_date ? format(new Date(task.due_date), 'yyyy-MM-dd') : "",
                 assignee_id: task.assignee_id || "unassigned",
                 status: task.status || "To Do",
-                priority: task.priority || "Medium"
+                priority: task.priority || "Medium",
+                recurrence: task.recurrence || "none"
             });
-        } else {
+            } else {
             setFormData({
                 title: "",
                 description: "",
                 due_date: "",
                 assignee_id: "unassigned",
                 status: "To Do",
-                priority: "Medium"
+                priority: "Medium",
+                recurrence: "none"
             });
-        }
+            }
     }, [task, isOpen]);
 
     const handleSubmit = (e) => {
@@ -194,14 +197,35 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="due_date">Due Date</Label>
-                        <Input 
-                            id="due_date" 
-                            type="date"
-                            value={formData.due_date} 
-                            onChange={(e) => setFormData({...formData, due_date: e.target.value})} 
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="due_date">Due Date</Label>
+                            <Input 
+                                id="due_date" 
+                                type="date"
+                                value={formData.due_date} 
+                                onChange={(e) => setFormData({...formData, due_date: e.target.value})} 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="recurrence" className="flex items-center gap-1">
+                                <Repeat className="w-3 h-3" /> Repeats
+                            </Label>
+                            <Select 
+                                value={formData.recurrence} 
+                                onValueChange={(val) => setFormData({...formData, recurrence: val})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">Does not repeat</SelectItem>
+                                    <SelectItem value="daily">Daily</SelectItem>
+                                    <SelectItem value="weekly">Weekly</SelectItem>
+                                    <SelectItem value="monthly">Monthly</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="space-y-2">

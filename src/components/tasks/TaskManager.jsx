@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, Timer, Repeat } from 'lucide-react';
 import { format, isPast, parseISO } from 'date-fns';
 import { toast } from "sonner";
 import {
@@ -21,10 +21,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"; 
 import { CalendarIcon, X } from "lucide-react";
 import TaskDialog from './TaskDialog';
+import TaskTimeLogDialog from './TaskTimeLogDialog';
 
 export default function TaskManager({ isAdmin = false, currentEmployeeId = null }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
+    const [loggingTask, setLoggingTask] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [showArchived, setShowArchived] = useState(false);
@@ -76,6 +78,23 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
             toast.success("Task updated");
         },
         onError: (err) => toast.error("Failed to update task")
+    });
+
+    const toggleStatusMutation = useMutation({
+        mutationFn: async ({ id, status }) => {
+            const res = await base44.functions.invoke('updateTaskStatus', { id, status });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries(['tasks']);
+            if (data.status === 'Completed' && data.recurrence && data.recurrence !== 'none') {
+                toast.success("Task completed. Next occurrence created.");
+            } else {
+                toast.success("Task status updated");
+            }
+        },
+        onError: (err) => toast.error("Failed to update status: " + err.message)
     });
 
     const deleteTaskMutation = useMutation({
@@ -328,11 +347,12 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                             <div key={task.id} className="flex items-start justify-between p-4 rounded-lg border border-stone-200 bg-white hover:shadow-md transition-shadow group">
                                 <div className="flex items-start gap-3 flex-1">
                                     <button 
-                                        className="mt-1 flex-shrink-0"
-                                        onClick={() => updateTaskMutation.mutate({ 
+                                        className="mt-1 flex-shrink-0 hover:scale-110 transition-transform"
+                                        onClick={() => toggleStatusMutation.mutate({ 
                                             id: task.id, 
-                                            data: { status: task.status === 'Completed' ? 'To Do' : 'Completed' } 
+                                            status: task.status === 'Completed' ? 'To Do' : 'Completed' 
                                         })}
+                                        title="Toggle Status"
                                     >
                                         {getStatusIcon(task.status)}
                                     </button>
@@ -354,10 +374,16 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                         
                                         <div className="flex items-center gap-4 pt-1 text-xs text-stone-400">
                                             {task.due_date && (
-                                                <span className={`flex items-center gap-1 ${!task.status === 'Completed' && isPast(parseISO(task.due_date)) ? 'text-red-500 font-medium' : ''}`}>
+                                                <span className={`flex items-center gap-1 ${task.status !== 'Completed' && isPast(parseISO(task.due_date)) ? 'text-red-500 font-medium' : ''}`}>
                                                     <Clock className="w-3 h-3" />
                                                     {format(parseISO(task.due_date), 'MMM d, yyyy')}
-                                                    {!task.status === 'Completed' && isPast(parseISO(task.due_date)) && ' (Overdue)'}
+                                                    {task.status !== 'Completed' && isPast(parseISO(task.due_date)) && ' (Overdue)'}
+                                                </span>
+                                            )}
+                                            {task.recurrence && task.recurrence !== 'none' && (
+                                                <span className="flex items-center gap-1 text-teal-600 font-medium capitalize">
+                                                    <Repeat className="w-3 h-3" />
+                                                    {task.recurrence}
                                                 </span>
                                             )}
                                         </div>
@@ -371,6 +397,12 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        {!task.is_archived && (
+                                            <DropdownMenuItem onClick={() => { setLoggingTask(task); }}>
+                                                <Timer className="w-4 h-4 mr-2" /> Log Time
+                                            </DropdownMenuItem>
+                                        )}
+
                                         {!task.is_archived && (
                                             <DropdownMenuItem onClick={() => { setEditingTask(task); setIsDialogOpen(true); }}>
                                                 <Pencil className="w-4 h-4 mr-2" /> Edit
@@ -415,6 +447,15 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                 onSave={handleSave}
                 employees={employees}
             />
-        </Card>
-    );
-}
+
+            {loggingTask && (
+                <TaskTimeLogDialog
+                    isOpen={!!loggingTask}
+                    onClose={() => setLoggingTask(null)}
+                    task={loggingTask}
+                    currentEmployeeId={currentEmployeeId}
+                />
+            )}
+            </Card>
+            );
+            }
