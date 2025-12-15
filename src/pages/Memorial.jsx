@@ -146,7 +146,7 @@ export default function MemorialPage() {
                     
                     <h1 className="text-4xl md:text-6xl font-bold mb-2">{deceased.first_name} {deceased.last_name}</h1>
                     {(deceased.date_of_birth || deceased.date_of_death) && (
-                        <p className="text-xl md:text-2xl text-teal-400 mb-6 italic">
+                        <p className="text-xl md:text-2xl text-white mb-6 font-bold">
                             {deceased.date_of_birth ? format(new Date(deceased.date_of_birth), 'MMMM d, yyyy') : 'Unknown'} – {deceased.date_of_death ? format(new Date(deceased.date_of_death), 'MMMM d, yyyy') : 'Unknown'}
                         </p>
                     )}
