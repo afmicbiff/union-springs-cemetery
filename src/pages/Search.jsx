@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,7 +38,6 @@ export default function SearchPage() {
   const [showFilters, setShowFilters] = useState(!!hasAdvancedFilters);
 
   // Debounce state
-  const [currentPage, setCurrentPage] = useState(1);
   const [debouncedParams, setDebouncedParams] = useState({
       term: searchParams.get('q') || '',
       family: searchParams.get('family') || '',
@@ -64,9 +63,6 @@ export default function SearchPage() {
               dMax: deathYearMax
           });
           
-          // Only reset page if it's a new search interaction, but here we just simplify
-          if (currentPage !== 1) setCurrentPage(1);
-
           // Update URL
           const params = {};
           if (searchTerm) params.q = searchTerm;
@@ -84,33 +80,69 @@ export default function SearchPage() {
       return () => clearTimeout(timer);
   }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
 
-  const { data: queryData, isLoading, error } = useQuery({
-    queryKey: ['searchDeceased', debouncedParams, currentPage],
-    queryFn: async () => {
-        try {
-            const response = await base44.functions.invoke('searchDeceased', {
-                query: debouncedParams.term,
-                family_name: debouncedParams.family,
-                section: debouncedParams.section,
-                veteran_status: debouncedParams.veteran,
-                birth_year_min: debouncedParams.bMin,
-                birth_year_max: debouncedParams.bMax,
-                death_year_min: debouncedParams.dMin,
-                death_year_max: debouncedParams.dMax,
-                page: currentPage,
-                limit: 12
-            });
-            return response.data || { results: [], pagination: { total: 0, totalPages: 0 } };
-        } catch (err) {
-            console.error("Failed to search deceased records:", err);
-            return { results: [], pagination: { total: 0, totalPages: 0 } };
-        }
-    },
-    initialData: { results: [], pagination: { total: 0, totalPages: 0 } },
+  const {
+      data,
+      fetchNextPage,
+      hasNextPage,
+      isFetchingNextPage,
+      isLoading,
+      error
+  } = useInfiniteQuery({
+      queryKey: ['searchDeceased', debouncedParams],
+      queryFn: async ({ pageParam = 1 }) => {
+          try {
+              const response = await base44.functions.invoke('searchDeceased', {
+                  query: debouncedParams.term,
+                  family_name: debouncedParams.family,
+                  section: debouncedParams.section,
+                  veteran_status: debouncedParams.veteran,
+                  birth_year_min: debouncedParams.bMin,
+                  birth_year_max: debouncedParams.bMax,
+                  death_year_min: debouncedParams.dMin,
+                  death_year_max: debouncedParams.dMax,
+                  page: pageParam,
+                  limit: 12
+              });
+              return response.data || { results: [], pagination: { total: 0, totalPages: 0, page: pageParam } };
+          } catch (err) {
+              console.error("Failed to search deceased records:", err);
+              return { results: [], pagination: { total: 0, totalPages: 0 } };
+          }
+      },
+      getNextPageParam: (lastPage, allPages) => {
+          const current = lastPage.pagination.page || allPages.length;
+          const total = lastPage.pagination.totalPages;
+          return current < total ? current + 1 : undefined;
+      },
+      initialPageParam: 1,
   });
 
-  const filteredResults = queryData.results || [];
-  const pagination = queryData.pagination || { total: 0, totalPages: 0, page: 1 };
+  const observer = useRef();
+  const lastElementRef = useCallback(node => {
+      if (isLoading || isFetchingNextPage) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting && hasNextPage) {
+              fetchNextPage();
+          }
+      });
+      if (node) observer.current.observe(node);
+  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
+
+  const totalResults = data?.pages?.[0]?.pagination?.total || 0;
+
+  const handleClearFilters = () => {
+      setSection('all');
+      setFamilyName('');
+      setVeteranStatus('all');
+      setBirthYearMin('');
+      setBirthYearMax('');
+      setDeathYearMin('');
+      setDeathYearMax('');
+      // Search term is usually separate, but let's clear it too if requested, though user said "advanced filters"
+      // Usually "Clear All Filters" keeps the main search term, but often it clears everything. 
+      // I'll clear advanced filters only as they are in that section.
+  };
 
   const hasActiveSearch = searchTerm || familyName || section !== 'all' || veteranStatus !== 'all' || birthYearMin || birthYearMax || deathYearMin || deathYearMax;
 
@@ -164,7 +196,19 @@ export default function SearchPage() {
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-stone-100 animate-in slide-in-from-top-2">
+            <div className="pt-4 border-t border-stone-100 animate-in slide-in-from-top-2">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wider">Advanced Options</h3>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleClearFilters}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8"
+                    >
+                        <X className="w-3 h-3 mr-1" /> Clear all filters
+                    </Button>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-stone-600">Plot Section</Label>
                 <Select value={section} onValueChange={setSection}>
@@ -243,9 +287,10 @@ export default function SearchPage() {
                       </div>
                   </div>
               </div>
-            </div>
-          )}
-        </div>
+              </div>
+              </div>
+              )}
+              </div>
 
         {/* Results */}
         <div className="space-y-4">
@@ -257,129 +302,106 @@ export default function SearchPage() {
           ) : (
             <>
               <div className="flex justify-between items-center text-sm text-stone-500 px-2">
-                <span>Found {pagination.total} results</span>
+                <span>Found {totalResults} results</span>
                 {error && <span className="text-red-500">Error loading data</span>}
               </div>
-
-              {suggestion && (
-                <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-sm flex items-center gap-2">
-                  <span className="text-stone-600">Did you mean:</span>
-                  <button 
-                    onClick={() => setSearchTerm(suggestion)}
-                    className="font-bold underline hover:text-teal-900"
-                  >
-                    {suggestion}
-                  </button>?
-                </div>
-              )}
 
               {isLoading ? (
                 <div className="flex justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
                 </div>
-              ) : filteredResults.length > 0 ? (
+              ) : (data?.pages?.[0]?.results?.length > 0 || data?.pages?.length > 0) ? (
                 <div className="grid gap-6">
-                   {filteredResults.map((person) => (
-                     <Card key={person.id} className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-slate-50">
-                       <div className="flex flex-col md:flex-row">
-                         {/* Image Section */}
-                         <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
-                           {person.image_url ? (
-                             <img src={person.image_url} alt={`${person.first_name} ${person.last_name}`} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
-                           ) : (
-                             <div className="w-full h-full flex items-center justify-center text-stone-400">
-                               <User className="w-12 h-12" />
-                             </div>
-                           )}
-                         </div>
-                         
-                         {/* Content Section */}
-                         <CardContent className="p-6 flex-grow flex flex-col justify-between">
-                           <div className="flex justify-between items-start">
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <h3 className="text-2xl font-serif font-bold text-stone-900">
-                                        {person.first_name} {person.last_name}
-                                    </h3>
-                                    {person.family_name && (
-                                        <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
-                                            {person.family_name} Family
-                                        </Badge>
-                                    )}
-                                    {person.veteran_status && (
-                                        <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
-                                    )}
-                                </div>
-                                <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
-                                    {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
-                                    {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
-                                    {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
-                                </p>
-                              </div>
-                              <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
-                                 Section {person.plot_location?.split('-')[0] || 'Main'}
-                              </Badge>
-                           </div>
+                   {data.pages.map((page, pageIndex) => (
+                       <React.Fragment key={pageIndex}>
+                           {page.results.map((person, index) => {
+                               const isLastElement = pageIndex === data.pages.length - 1 && index === page.results.length - 1;
+                               return (
+                                 <div key={person.id} ref={isLastElement ? lastElementRef : null}>
+                                   <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-slate-50">
+                                     <div className="flex flex-col md:flex-row">
+                                       {/* Image Section */}
+                                       <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
+                                         {person.image_url ? (
+                                           <img src={person.image_url} alt={`${person.first_name} ${person.last_name}`} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
+                                         ) : (
+                                           <div className="w-full h-full flex items-center justify-center text-stone-400">
+                                             <User className="w-12 h-12" />
+                                           </div>
+                                         )}
+                                       </div>
 
-                           <div className="space-y-3">
-                             <div className="flex items-center text-stone-600">
-                               <MapPin className="w-4 h-4 mr-2 text-red-600" />
-                               <span>Plot Location: {person.plot_location}</span>
-                             </div>
-                             {person.notes && (
-                               <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
-                                  Note: {person.notes}
-                               </p>
-                             )}
-                             <p className="text-stone-600 text-sm line-clamp-2 italic">
-                                "{person.obituary}"
-                             </p>
-                           </div>
+                                       {/* Content Section */}
+                                       <CardContent className="p-6 flex-grow flex flex-col justify-between">
+                                         <div className="flex justify-between items-start">
+                                            <div>
+                                              <div className="flex items-center gap-2 mb-1">
+                                                  <h3 className="text-2xl font-serif font-bold text-stone-900">
+                                                      {person.first_name} {person.last_name}
+                                                  </h3>
+                                                  {person.family_name && (
+                                                      <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
+                                                          {person.family_name} Family
+                                                      </Badge>
+                                                  )}
+                                                  {person.veteran_status && (
+                                                      <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
+                                                  )}
+                                              </div>
+                                              <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
+                                                  {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
+                                                  {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
+                                                  {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
+                                              </p>
+                                            </div>
+                                            <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
+                                               Section {person.plot_location?.split('-')[0] || 'Main'}
+                                            </Badge>
+                                         </div>
 
-                           <div className="mt-4 flex justify-end">
-                              <Link 
-                                to={`${createPageUrl('Memorial')}?id=${person.id}`}
-                                state={{ search: location.search }}
-                              >
-                                  <Button className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
-                                     View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
-                                  </Button>
-                              </Link>
-                           </div>
-                         </CardContent>
-                       </div>
-                     </Card>
+                                         <div className="space-y-3">
+                                           <div className="flex items-center text-stone-600">
+                                             <MapPin className="w-4 h-4 mr-2 text-red-600" />
+                                             <span>Plot Location: {person.plot_location}</span>
+                                           </div>
+                                           {person.notes && (
+                                             <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
+                                                Note: {person.notes}
+                                             </p>
+                                           )}
+                                           <p className="text-stone-600 text-sm line-clamp-2 italic">
+                                              "{person.obituary}"
+                                           </p>
+                                         </div>
+
+                                         <div className="mt-4 flex justify-end">
+                                            <Link 
+                                              to={`${createPageUrl('Memorial')}?id=${person.id}`}
+                                              state={{ search: location.search }}
+                                            >
+                                                <Button className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
+                                                   View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
+                                                </Button>
+                                            </Link>
+                                         </div>
+                                       </CardContent>
+                                     </div>
+                                   </Card>
+                                 </div>
+                               );
+                           })}
+                       </React.Fragment>
                    ))}
+                   {isFetchingNextPage && (
+                       <div className="flex justify-center py-6">
+                           <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
+                       </div>
+                   )}
                 </div>
               ) : (
                 <div className="text-center py-12 bg-white rounded-sm border border-stone-200">
                  <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
                  <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
-                </div>
-              )}
-
-              {/* Pagination Controls */}
-              {pagination.total > 0 && (
-                <div className="flex justify-center items-center gap-4 pt-4 border-t border-stone-200">
-                   <Button 
-                       variant="outline" 
-                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                       disabled={currentPage === 1 || isLoading}
-                       className="w-24"
-                   >
-                       Previous
-                   </Button>
-                   <span className="text-stone-600 font-medium">
-                       Page {currentPage} of {pagination.totalPages || 1}
-                   </span>
-                   <Button 
-                       variant="outline" 
-                       onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
-                       disabled={currentPage >= pagination.totalPages || isLoading}
-                       className="w-24"
-                   >
-                       Next
-                   </Button>
                 </div>
               )}
             </>
