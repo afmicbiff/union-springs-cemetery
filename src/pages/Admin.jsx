@@ -169,25 +169,19 @@ export default function AdminDashboard() {
            </Button>
            <Button 
               onClick={async () => {
-                  console.log("Starting import...");
                   const loadingToastId = toast.loading('Importing data... this may take a minute...');
                   try {
-                      console.log("Invoking importCemeteryData...");
-                      const { data, status } = await base44.functions.invoke('importCemeteryData', {}, { timeout: 60000 }); // Increase timeout to 60s
-                      console.log("Function response:", status, data);
+                      const { data } = await base44.functions.invoke('importCemeteryData', {}, { timeout: 60000 });
                       
                       if (data && data.error) {
                           throw new Error(data.error);
                       }
 
                       toast.success(`Imported ${data.plots_created} plots and ${data.deceased_created} records!`, { id: loadingToastId });
+                      queryClient.invalidateQueries({ queryKey: ['plots-admin'] });
                   } catch (err) {
-                      console.error("Full error object:", err);
-                      if (err.response) {
-                          console.error("Response data:", err.response.data);
-                          console.error("Response status:", err.response.status);
-                      }
-                      toast.error(err.message || 'Import failed. Check console for details.', { id: loadingToastId });
+                      console.error("Import error:", err);
+                      toast.error(err.message || 'Import failed.', { id: loadingToastId });
                   }
               }} 
               className="bg-stone-800 text-white hover:bg-stone-900"
