@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, Image as ImageIcon, MessageCircle, Share2, Upload, Facebook, Twitter, Link as LinkIcon, PlayCircle, Loader2 } from 'lucide-react';
+import { Heart, Image as ImageIcon, MessageCircle, Share2, Upload, Facebook, Twitter, Link as LinkIcon, PlayCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
 
@@ -117,6 +117,9 @@ export default function MemorialPage() {
         <div className="min-h-screen bg-stone-50 font-serif">
             {/* Hero / Header */}
             <div className="bg-stone-900 text-stone-100 py-12 md:py-20 relative overflow-hidden">
+                <Link to={createPageUrl('Search')} className="absolute top-4 left-4 md:top-8 md:left-8 z-20 text-stone-300 hover:text-white flex items-center gap-2 transition-colors bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                    <ArrowLeft className="w-4 h-4" /> <span className="text-sm font-medium">Back to Search</span>
+                </Link>
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
                     {deceased.image_url ? (
