@@ -38,25 +38,38 @@ export default function SearchPage() {
   const [familyName, setFamilyName] = useState('');
   const [section, setSection] = useState('all');
   
-  const { data: deceasedList, isLoading } = useQuery({
+  const { data: deceasedList = [], isLoading, error } = useQuery({
     queryKey: ['deceased'],
-    queryFn: () => base44.entities.Deceased.list('-created_date', 5000),
+    queryFn: async () => {
+        try {
+            const data = await base44.entities.Deceased.list('-created_date', 5000);
+            return Array.isArray(data) ? data : [];
+        } catch (err) {
+            console.error("Failed to fetch deceased records:", err);
+            return [];
+        }
+    },
     initialData: [],
   });
 
   let suggestion = null;
 
   // Client-side filtering
-  const filteredResults = deceasedList.filter(person => {
-    const term = searchTerm.toLowerCase();
-    const fullName = `${person.first_name} ${person.last_name}`.toLowerCase();
-    const matchesName = !term || fullName.includes(term) || person.last_name.toLowerCase().includes(term);
+  const filteredResults = (deceasedList || []).filter(person => {
+    if (!person) return false;
+    const term = (searchTerm || '').toLowerCase();
+    const firstName = person.first_name || '';
+    const lastName = person.last_name || '';
+    const fullName = `${firstName} ${lastName}`.toLowerCase();
+    const matchesName = !term || fullName.includes(term) || lastName.toLowerCase().includes(term);
     
     const matchesYear = !deathYear || (person.date_of_death && person.date_of_death.includes(deathYear));
     
-    const matchesFamily = !familyName || (person.family_name && person.family_name.toLowerCase().includes(familyName.toLowerCase()));
+    const familyNameField = person.family_name || '';
+    const matchesFamily = !familyName || familyNameField.toLowerCase().includes(familyName.toLowerCase());
 
-    const matchesSection = section === 'all' || (person.plot_location && person.plot_location.startsWith(section));
+    const plotLoc = person.plot_location || '';
+    const matchesSection = section === 'all' || plotLoc.startsWith(section);
 
     return matchesName && matchesYear && matchesFamily && matchesSection;
   });
