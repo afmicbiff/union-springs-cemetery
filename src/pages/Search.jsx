@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -17,28 +17,36 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 
 export default function SearchPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  // Filters
-  const [familyName, setFamilyName] = useState('');
-  const [section, setSection] = useState('all');
-  const [veteranStatus, setVeteranStatus] = useState('all');
-  const [birthYearMin, setBirthYearMin] = useState('');
-  const [birthYearMax, setBirthYearMax] = useState('');
-  const [deathYearMin, setDeathYearMin] = useState('');
-  const [deathYearMax, setDeathYearMax] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [familyName, setFamilyName] = useState(searchParams.get('family') || '');
+  const [section, setSection] = useState(searchParams.get('section') || 'all');
+  const [veteranStatus, setVeteranStatus] = useState(searchParams.get('veteran') || 'all');
+  const [birthYearMin, setBirthYearMin] = useState(searchParams.get('bMin') || '');
+  const [birthYearMax, setBirthYearMax] = useState(searchParams.get('bMax') || '');
+  const [deathYearMin, setDeathYearMin] = useState(searchParams.get('dMin') || '');
+  const [deathYearMax, setDeathYearMax] = useState(searchParams.get('dMax') || '');
+
+  const hasAdvancedFilters = searchParams.get('family') || 
+                             (searchParams.get('section') && searchParams.get('section') !== 'all') || 
+                             (searchParams.get('veteran') && searchParams.get('veteran') !== 'all') ||
+                             searchParams.get('bMin') || searchParams.get('bMax') ||
+                             searchParams.get('dMin') || searchParams.get('dMax');
+
+  const [showFilters, setShowFilters] = useState(!!hasAdvancedFilters);
 
   // Debounce state
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedParams, setDebouncedParams] = useState({
-      term: '',
-      family: '',
-      section: 'all',
-      veteran: 'all',
-      bMin: '',
-      bMax: '',
-      dMin: '',
-      dMax: ''
+      term: searchParams.get('q') || '',
+      family: searchParams.get('family') || '',
+      section: searchParams.get('section') || 'all',
+      veteran: searchParams.get('veteran') || 'all',
+      bMin: searchParams.get('bMin') || '',
+      bMax: searchParams.get('bMax') || '',
+      dMin: searchParams.get('dMin') || '',
+      dMax: searchParams.get('dMax') || ''
   });
 
   // Effect to debounce inputs
@@ -54,7 +62,22 @@ export default function SearchPage() {
               dMin: deathYearMin,
               dMax: deathYearMax
           });
-          setCurrentPage(1);
+          
+          // Only reset page if it's a new search interaction, but here we just simplify
+          if (currentPage !== 1) setCurrentPage(1);
+
+          // Update URL
+          const params = {};
+          if (searchTerm) params.q = searchTerm;
+          if (familyName) params.family = familyName;
+          if (section && section !== 'all') params.section = section;
+          if (veteranStatus && veteranStatus !== 'all') params.veteran = veteranStatus;
+          if (birthYearMin) params.bMin = birthYearMin;
+          if (birthYearMax) params.bMax = birthYearMax;
+          if (deathYearMin) params.dMin = deathYearMin;
+          if (deathYearMax) params.dMax = deathYearMax;
+          
+          setSearchParams(params, { replace: true });
       }, 500);
 
       return () => clearTimeout(timer);
