@@ -29,6 +29,7 @@ import OnboardingGuide from "@/components/admin/OnboardingGuide";
 import EmployeeList from "@/components/admin/EmployeeList";
 import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import VendorManager from "@/components/admin/VendorManager";
+import EventCalendar from "@/components/admin/EventCalendar";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -201,6 +202,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
             <TabsTrigger value="bylaws" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Bylaws</TabsTrigger>
+            <TabsTrigger value="calendar" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Event Calendar</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -450,6 +452,11 @@ export default function AdminDashboard() {
                       </div>
                   </CardContent>
               </Card>
+          </TabsContent>
+
+          {/* CALENDAR TAB */}
+          <TabsContent value="calendar">
+              <EventCalendar />
           </TabsContent>
         </Tabs>
       </div>
