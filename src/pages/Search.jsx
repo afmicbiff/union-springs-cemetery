@@ -40,9 +40,7 @@ export default function SearchPage() {
   
   const { data: deceasedList, isLoading } = useQuery({
     queryKey: ['deceased'],
-    queryFn: () => base44.entities.Deceased.list({
-        limit: 100
-    }),
+    queryFn: () => base44.entities.Deceased.list('-created_date', 5000),
     initialData: [],
   });
 
