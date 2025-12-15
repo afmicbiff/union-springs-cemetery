@@ -38,41 +38,52 @@ export default function SearchPage() {
   const [familyName, setFamilyName] = useState('');
   const [section, setSection] = useState('all');
   
-  const { data: deceasedList = [], isLoading, error } = useQuery({
-    queryKey: ['deceased'],
+  // Debounce state to avoid too many API calls
+  const [debouncedParams, setDebouncedParams] = useState({
+      term: '',
+      year: '',
+      family: '',
+      section: 'all'
+  });
+
+  // Effect to debounce inputs
+  React.useEffect(() => {
+      const timer = setTimeout(() => {
+          setDebouncedParams({
+              term: searchTerm,
+              year: deathYear,
+              family: familyName,
+              section: section
+          });
+      }, 500); // 500ms delay
+
+      return () => clearTimeout(timer);
+  }, [searchTerm, deathYear, familyName, section]);
+
+  const { data: searchResults, isLoading, error } = useQuery({
+    queryKey: ['searchDeceased', debouncedParams],
     queryFn: async () => {
         try {
-            const data = await base44.entities.Deceased.list('-created_date', 5000);
-            return Array.isArray(data) ? data : [];
+            const response = await base44.functions.invoke('searchDeceased', {
+                query: debouncedParams.term,
+                year: debouncedParams.year,
+                family_name: debouncedParams.family,
+                section: debouncedParams.section
+            });
+            return response.data?.results || [];
         } catch (err) {
-            console.error("Failed to fetch deceased records:", err);
+            console.error("Failed to search deceased records:", err);
             return [];
         }
     },
     initialData: [],
   });
 
+  const filteredResults = searchResults;
+
   let suggestion = null;
-
-  // Client-side filtering
-  const filteredResults = (deceasedList || []).filter(person => {
-    if (!person) return false;
-    const term = (searchTerm || '').toLowerCase();
-    const firstName = person.first_name || '';
-    const lastName = person.last_name || '';
-    const fullName = `${firstName} ${lastName}`.toLowerCase();
-    const matchesName = !term || fullName.includes(term) || lastName.toLowerCase().includes(term);
-    
-    const matchesYear = !deathYear || (person.date_of_death && person.date_of_death.includes(deathYear));
-    
-    const familyNameField = person.family_name || '';
-    const matchesFamily = !familyName || familyNameField.toLowerCase().includes(familyName.toLowerCase());
-
-    const plotLoc = person.plot_location || '';
-    const matchesSection = section === 'all' || plotLoc.startsWith(section);
-
-    return matchesName && matchesYear && matchesFamily && matchesSection;
-  });
+  // suggestion logic removed or needs update (client side suggestion requires full list or backend support)
+  // For now we keep it simple as requested - server side filtering.
 
   // "Did you mean?" logic
   if (filteredResults.length === 0 && searchTerm.length > 2) {
@@ -180,7 +191,7 @@ export default function SearchPage() {
         {/* Results */}
         <div className="space-y-4">
           <div className="flex justify-between items-center text-sm text-stone-500 px-2">
-            <span>Showing {filteredResults.length} of {deceasedList.length} records</span>
+            <span>Found {filteredResults.length} results</span>
             {error && <span className="text-red-500">Error loading data</span>}
           </div>
 
