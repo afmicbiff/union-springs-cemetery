@@ -449,7 +449,8 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
         recurrence_end_type: "never", // never, on_date, after_occurrences
         recurrence_end_date: "",
         recurrence_count: "",
-        attendee_ids: []
+        attendee_ids: [],
+        external_attendees: []
     });
 
     React.useEffect(() => {
@@ -464,7 +465,8 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
                 recurrence_end_type: eventToEdit.recurrence_end_date ? 'on_date' : (eventToEdit.recurrence_count ? 'after_occurrences' : 'never'),
                 recurrence_end_date: eventToEdit.recurrence_end_date ? format(parseISO(eventToEdit.recurrence_end_date), 'yyyy-MM-dd') : "",
                 recurrence_count: eventToEdit.recurrence_count || "",
-                attendee_ids: eventToEdit.attendee_ids || []
+                attendee_ids: eventToEdit.attendee_ids || [],
+                external_attendees: eventToEdit.external_attendees || []
             });
         } else {
             setFormData({
@@ -476,7 +478,8 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
                 recurrence_end_type: "never",
                 recurrence_end_date: "",
                 recurrence_count: "",
-                attendee_ids: []
+                attendee_ids: [],
+                external_attendees: []
             });
         }
     }, [eventToEdit, isOpen]);

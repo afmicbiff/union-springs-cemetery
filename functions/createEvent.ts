@@ -92,8 +92,8 @@ ${description ? `Description: ${description}` : ''}
 
 Please confirm your attendance:
 
-[ACCEPT](${acceptLink})
-[DECLINE](${declineLink})
+Accept: ${acceptLink}
+Decline: ${declineLink}
 
 Best regards,
 Union Springs Cemetery Admin`
