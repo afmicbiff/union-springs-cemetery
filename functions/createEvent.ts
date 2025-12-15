@@ -23,7 +23,15 @@ Deno.serve(async (req) => {
             reminders_sent: reminders_sent || {}
         });
 
-        // 2. Send Emails to Attendees
+        // 2. Create System Notification
+        await base44.entities.Notification.create({
+            message: `New event created: "${title}" by ${user.full_name || 'Admin'}`,
+            type: 'info',
+            created_at: new Date().toISOString(),
+            is_read: false
+        });
+
+        // 3. Send Emails to Attendees
         if (attendee_ids && attendee_ids.length > 0) {
             // Fetch all employees to find emails
             // Optimization: In a real app with many users, we'd filter by IDs. 

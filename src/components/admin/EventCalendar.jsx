@@ -45,6 +45,7 @@ export default function EventCalendar() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['events'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Refresh notifications
             setIsDialogOpen(false);
             toast.success("Event created & invitations sent");
         },
@@ -54,10 +55,15 @@ export default function EventCalendar() {
     });
 
     const updateEventMutation = useMutation({
-        mutationFn: ({ id, data }) => base44.entities.Event.update(id, data),
+        mutationFn: async ({ id, data }) => {
+            const res = await base44.functions.invoke('updateEvent', { id, data });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['events'] });
-            toast.success("Event updated");
+            queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Refresh notifications
+            toast.success("Event updated & notifications sent");
             setIsDialogOpen(false);
             setEditingEvent(null);
             setViewEvent(null);
@@ -66,10 +72,15 @@ export default function EventCalendar() {
     });
 
     const deleteEventMutation = useMutation({
-        mutationFn: (id) => base44.entities.Event.delete(id),
+        mutationFn: async (id) => {
+            const res = await base44.functions.invoke('deleteEvent', { id });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['events'] });
-            toast.success("Event deleted");
+            queryClient.invalidateQueries({ queryKey: ['notifications'] }); // Refresh notifications
+            toast.success("Event deleted & notifications sent");
             setViewEvent(null);
         },
         onError: (err) => toast.error("Failed to delete event: " + err.message)
