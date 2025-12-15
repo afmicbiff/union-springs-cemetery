@@ -203,18 +203,20 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white p-1 shadow-sm border border-stone-200">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Overview & Reports</TabsTrigger>
-            <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Reservations & Sales</TabsTrigger>
-            <TabsTrigger value="plots" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Plot Management</TabsTrigger>
-            <TabsTrigger value="onboarding" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employee Onboarding</TabsTrigger>
-            <TabsTrigger value="employees" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employees</TabsTrigger>
-            <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
-            <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
-            <TabsTrigger value="bylaws" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Bylaws</TabsTrigger>
-            <TabsTrigger value="calendar" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Event Calendar</TabsTrigger>
-            <TabsTrigger value="announcements" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Announcements</TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center">
+            <TabsList className="bg-white p-2 shadow-sm border border-stone-200 h-auto grid grid-cols-2 md:grid-cols-5 gap-2 w-full max-w-5xl">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Overview & Reports</TabsTrigger>
+              <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Reservations & Sales</TabsTrigger>
+              <TabsTrigger value="plots" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Plot Management</TabsTrigger>
+              <TabsTrigger value="onboarding" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employee Onboarding</TabsTrigger>
+              <TabsTrigger value="employees" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Employees</TabsTrigger>
+              <TabsTrigger value="vendors" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Vendor Management</TabsTrigger>
+              <TabsTrigger value="security" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Data & Security</TabsTrigger>
+              <TabsTrigger value="bylaws" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Bylaws</TabsTrigger>
+              <TabsTrigger value="calendar" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Event Calendar</TabsTrigger>
+              <TabsTrigger value="announcements" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Announcements</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview" className="space-y-6">
