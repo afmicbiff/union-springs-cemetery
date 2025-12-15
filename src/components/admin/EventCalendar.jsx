@@ -20,6 +20,8 @@ export default function EventCalendar() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [viewEvent, setViewEvent] = useState(null);
     const [editingEvent, setEditingEvent] = useState(null);
+    const [dayViewOpen, setDayViewOpen] = useState(false);
+    const [dayEventsData, setDayEventsData] = useState([]);
     const queryClient = useQueryClient();
 
     // Fetch Events
@@ -89,10 +91,15 @@ export default function EventCalendar() {
     // Calendar Navigation
     const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
     const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-    const onDateClick = (day) => {
+    const onDateClick = (day, events = []) => {
         setSelectedDate(day);
-        setEditingEvent(null);
-        setIsDialogOpen(true);
+        if (events.length > 0) {
+            setDayEventsData(events);
+            setDayViewOpen(true);
+        } else {
+            setEditingEvent(null);
+            setIsDialogOpen(true);
+        }
     };
 
     const handleEventClick = (e, ev) => {
@@ -205,7 +212,7 @@ export default function EventCalendar() {
                               dayEvents.length > 0 ? "bg-green-100" : "bg-white"}
                             ${isSameDay(day, new Date()) ? "ring-2 ring-teal-600 ring-inset" : ""}
                         `}
-                        onClick={() => onDateClick(cloneDay)}
+                        onClick={() => onDateClick(cloneDay, dayEvents)}
                     >
                         <span className={`text-sm font-semibold ${!isSameMonth(day, monthStart) ? "text-stone-300" : "text-stone-700"}`}>
                             {formattedDate}
@@ -284,6 +291,49 @@ export default function EventCalendar() {
                         setIsDialogOpen(true);
                     }}
                 />
+
+                <Dialog open={dayViewOpen} onOpenChange={setDayViewOpen}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Events for {format(selectedDate, 'MMMM d, yyyy')}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-2 my-2 max-h-[60vh] overflow-y-auto pr-1">
+                            {dayEventsData.map((ev) => (
+                                <div 
+                                    key={ev.id} 
+                                    className={`
+                                        p-3 rounded-md border cursor-pointer hover:shadow-sm transition-all
+                                        ${ev.type === 'meeting' ? 'bg-blue-50 border-blue-100 hover:bg-blue-100' : ''}
+                                        ${ev.type === 'vendor_service' ? 'bg-green-50 border-green-100 hover:bg-green-100' : ''}
+                                        ${ev.type === 'invoice_due' ? 'bg-red-50 border-red-100 hover:bg-red-100' : ''}
+                                        ${ev.type === 'other' ? 'bg-stone-50 border-stone-100 hover:bg-stone-100' : ''}
+                                    `}
+                                    onClick={() => setViewEvent(ev)}
+                                >
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Badge variant="outline" className="text-[10px] h-5 px-1 bg-white/50">{ev.type}</Badge>
+                                        <span className="text-xs text-stone-500 font-medium">
+                                            {format(parseISO(ev.start_time), 'h:mm a')}
+                                        </span>
+                                    </div>
+                                    <h4 className="font-semibold text-stone-900 text-sm leading-tight">{ev.title}</h4>
+                                    {ev.description && (
+                                        <p className="text-xs text-stone-500 mt-1 line-clamp-2">{ev.description}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                        <DialogFooter>
+                            <Button className="w-full bg-teal-700 hover:bg-teal-800" onClick={() => {
+                                setDayViewOpen(false);
+                                setEditingEvent(null);
+                                setIsDialogOpen(true);
+                            }}>
+                                <Plus className="w-4 h-4 mr-2" /> Add Another Event
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </CardContent>
         </Card>
     );
