@@ -230,6 +230,12 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
         recurrence: "none",
         attendee_ids: []
     });
+    const [employeeSearch, setEmployeeSearch] = useState("");
+
+    const filteredEmployees = employees.filter(emp => 
+        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(employeeSearch.toLowerCase()) ||
+        emp.email?.toLowerCase().includes(employeeSearch.toLowerCase())
+    );
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -335,11 +341,17 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
 
                     <div className="space-y-2">
                         <Label>Attendees (Company Employees)</Label>
-                        <div className="border rounded-md p-3 max-h-32 overflow-y-auto bg-stone-50 space-y-2">
-                            {employees.length === 0 ? (
+                        <Input 
+                            placeholder="Search employees..." 
+                            value={employeeSearch}
+                            onChange={(e) => setEmployeeSearch(e.target.value)}
+                            className="mb-2 h-8 text-sm"
+                        />
+                        <div className="border rounded-md p-3 max-h-48 overflow-y-auto bg-stone-50 space-y-2">
+                            {filteredEmployees.length === 0 ? (
                                 <p className="text-xs text-stone-500 italic">No employees found.</p>
                             ) : (
-                                employees.map(emp => (
+                                filteredEmployees.map(emp => (
                                     <div key={emp.id} className="flex items-center space-x-2">
                                         <Checkbox 
                                             id={`emp-${emp.id}`} 
@@ -348,9 +360,9 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
                                         />
                                         <label 
                                             htmlFor={`emp-${emp.id}`} 
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            className="text-sm font-medium leading-none cursor-pointer"
                                         >
-                                            {emp.first_name} {emp.last_name}
+                                            {emp.first_name} {emp.last_name} <span className="text-stone-400 text-xs">({emp.employment_type})</span>
                                         </label>
                                     </div>
                                 ))
