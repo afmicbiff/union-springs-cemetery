@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, parseISO, getDay, getDate, getMonth } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, parseISO, getDay, getDate, getMonth, startOfDay, isValid } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -113,15 +113,21 @@ export default function EventCalendar() {
                 
                 // Recurrence & Date Match Logic
                 const dayEvents = events.filter(e => {
+                    if (!e.start_time) return false;
                     const eventStart = parseISO(e.start_time);
-                    
+                    if (!isValid(eventStart)) return false;
+
                     // 1. Exact Date Match (One-time)
+                    // Note: isSameDay compares local dates
                     if (isSameDay(eventStart, day)) return true;
 
                     // 2. Recurrence Logic
                     if (e.recurrence && e.recurrence !== 'none') {
-                        // Don't show recurring events before they started
-                        if (day < eventStart && !isSameDay(day, eventStart)) return false;
+                        const dayStart = startOfDay(day);
+                        const eventStartDay = startOfDay(eventStart);
+
+                        // Don't show recurring events before the start date
+                        if (dayStart < eventStartDay) return false;
 
                         if (e.recurrence === 'daily') return true;
                         if (e.recurrence === 'weekly') return getDay(day) === getDay(eventStart);

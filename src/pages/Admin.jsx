@@ -54,6 +54,14 @@ export default function AdminDashboard() {
     initialData: [],
   });
 
+  // Poll for event reminders every minute
+  useQuery({
+    queryKey: ['check-reminders'],
+    queryFn: () => base44.functions.invoke('checkEventReminders'),
+    refetchInterval: 60 * 1000, // Check every minute
+    refetchOnWindowFocus: true
+  });
+
   // PDF Generation for Reservation Receipt
   const generateReceipt = (reservation) => {
     const doc = new jsPDF();
