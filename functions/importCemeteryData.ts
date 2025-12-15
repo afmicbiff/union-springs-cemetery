@@ -2,47 +2,113 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 export default Deno.serve(async (req) => {
     try {
-        console.log("Function started");
-        const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/310123335_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251.pdf";
-        
-        // Diagnostic: Check if file is reachable
-        const headRes = await fetch(fileUrl, { method: 'HEAD' });
-        const size = headRes.headers.get('content-length');
-        const type = headRes.headers.get('content-type');
-        console.log(`File check: ${headRes.status} ${size} bytes ${type}`);
-
-        if (!headRes.ok) {
-            return Response.json({ error: "File not reachable", status: headRes.status }, { status: 400 });
-        }
-
-        // If file is too large (> 10MB), warn the user
-        if (size && parseInt(size) > 10 * 1024 * 1024) {
-            return Response.json({ error: "File is too large for automatic processing. Please convert to CSV." }, { status: 400 });
-        }
-
-        // Proceed with simplified extraction attempt
         const base44 = createClientFromRequest(req);
-        
-        // Try to use InvokeLLM with a simplified prompt and NO schema to avoid complexity first
-        // We just want to see if we can get ANY text back.
-        // If this works, we know we can process the file.
-        
-        /*
-        // COMMENTING OUT EXTRACTION FOR DIAGNOSTIC RUN
-        // If this diagnostic passes (returns 200), we know the deployment is fine.
-        
-        const extractRes = await base44.integrations.Core.ExtractDataFromUploadedFile({
-            file_url: fileUrl,
-            json_schema: { "type": "object", "properties": { "records": { "type": "array" } } }
+        const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/310123335_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251.pdf";
+
+        // Use InvokeLLM to extract a sample of data (safer for timeouts)
+        // We limit to 50 records to ensure the function finishes within the 60s limit.
+        const extractRes = await base44.integrations.Core.InvokeLLM({
+            prompt: `
+                Extract data from this cemetery registry PDF. 
+                Focus on the table containing: Row, Grave, Status, Last Name, First Name, Birth Date, Death Date, Notes.
+                
+                IMPORTANT LIMITATION: Extract only the FIRST 50 records found to ensure quick processing.
+                
+                Return a JSON object with a "records" array.
+                Each record should have: "row", "grave", "status", "first_name", "last_name", "birth_date", "death_date", "notes".
+                Normalize status to one of: "Available", "Occupied", "Reserved", "Unavailable".
+            `,
+            file_urls: [fileUrl],
+            response_json_schema: {
+                "type": "object",
+                "properties": {
+                    "records": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "row": { "type": "string" },
+                                "grave": { "type": "string" },
+                                "status": { "type": "string" },
+                                "first_name": { "type": "string" },
+                                "last_name": { "type": "string" },
+                                "birth_date": { "type": "string" },
+                                "death_date": { "type": "string" },
+                                "notes": { "type": "string" }
+                            }
+                        }
+                    }
+                }
+            }
         });
-        */
+
+        if (!extractRes.records) {
+             // Fallback if LLM returns raw string or error
+             console.error("LLM Extraction failed or returned invalid format:", extractRes);
+             return Response.json({ error: "Could not extract records from PDF. Try converting to CSV." }, { status: 500 });
+        }
+
+        const records = extractRes.records;
+        let plotsCreated = 0;
+        let deceasedCreated = 0;
+
+        for (const record of records) {
+            const row = record.row || "Unknown";
+            const grave = record.grave || "Unknown";
+            const plotLocation = `${row}-${grave}`;
+            
+            // 1. Create/Update Plot
+            // Check if plot exists
+            const existingPlots = await base44.entities.Plot.filter({ row_number: row, plot_number: grave }, 1);
+            let plotId;
+
+            if (existingPlots.length > 0) {
+                // Update status if needed, but don't overwrite if already occupied
+                if (existingPlots[0].status === 'Available' && record.status !== 'Available') {
+                     await base44.entities.Plot.update(existingPlots[0].id, { status: record.status });
+                }
+                plotId = existingPlots[0].id;
+            } else {
+                const newPlot = await base44.entities.Plot.create({
+                    section: row.split('-')[0] || "Main",
+                    row_number: row,
+                    plot_number: grave,
+                    status: record.status || "Available",
+                    notes: "Imported from Legacy PDF"
+                });
+                plotId = newPlot.id;
+                plotsCreated++;
+            }
+
+            // 2. Create Deceased Record if Occupied and has name
+            if (record.status === 'Occupied' && record.last_name) {
+                // Check for duplicates
+                const existingDeceased = await base44.entities.Deceased.filter({
+                    last_name: record.last_name,
+                    plot_location: plotLocation
+                }, 1);
+
+                if (existingDeceased.length === 0) {
+                    await base44.entities.Deceased.create({
+                        first_name: record.first_name || "Unknown",
+                        last_name: record.last_name,
+                        date_of_birth: record.birth_date, // LLM usually formats this well, but validation could be added
+                        date_of_death: record.death_date,
+                        plot_location: plotLocation,
+                        notes: record.notes,
+                        burial_type: "Casket" // Default
+                    });
+                    deceasedCreated++;
+                }
+            }
+        }
 
         return Response.json({ 
             success: true, 
-            message: "Diagnostic passed. File is reachable.",
-            file_info: { size, type },
-            plots_created: 0,
-            deceased_created: 0
+            message: "Sample import successful",
+            plots_processed: records.length, 
+            plots_created: plotsCreated, 
+            deceased_created: deceasedCreated 
         });
 
     } catch (error) {
