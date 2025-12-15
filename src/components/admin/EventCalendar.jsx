@@ -53,11 +53,24 @@ export default function EventCalendar() {
         }
     });
 
+    const updateEventMutation = useMutation({
+        mutationFn: ({ id, data }) => base44.entities.Event.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            toast.success("Event updated");
+            setIsDialogOpen(false);
+            setEditingEvent(null);
+            setViewEvent(null);
+        },
+        onError: (err) => toast.error("Failed to update event: " + err.message)
+    });
+
     const deleteEventMutation = useMutation({
         mutationFn: (id) => base44.entities.Event.delete(id),
         onSuccess: () => {
-            queryClient.invalidateQueries(['events']);
+            queryClient.invalidateQueries({ queryKey: ['events'] });
             toast.success("Event deleted");
+            setViewEvent(null);
         },
         onError: (err) => toast.error("Failed to delete event: " + err.message)
     });
