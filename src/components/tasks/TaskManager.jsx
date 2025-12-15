@@ -28,7 +28,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     // 1. Fetch Tasks
     const { data: tasks, isLoading: isLoadingTasks } = useQuery({
         queryKey: ['tasks'],
-        queryFn: () => base44.entities.Task.list({ limit: 100 }, '-created_date'), // Sort by newest
+        queryFn: () => base44.entities.Task.list('-created_date', 100), // Sort by newest
         initialData: []
     });
 
