@@ -12,6 +12,7 @@ import {
     Download, 
     FileText, 
     Users, 
+    Upload,
     DollarSign, 
     CheckCircle, 
     AlertTriangle, 
@@ -164,6 +165,18 @@ export default function AdminDashboard() {
 
            <Button onClick={exportData} variant="outline" className="border-teal-600 text-teal-700 hover:bg-teal-50">
               <Database className="w-4 h-4 mr-2" /> Backup Data
+           </Button>
+           <Button 
+              onClick={async () => {
+                  toast.promise(base44.functions.invoke('importCemeteryData'), {
+                      loading: 'Importing data... this may take a minute...',
+                      success: (data) => `Imported ${data.data.plots_created} plots and ${data.data.deceased_created} records!`,
+                      error: 'Import failed'
+                  });
+              }} 
+              className="bg-stone-800 text-white hover:bg-stone-900"
+           >
+              <Download className="w-4 h-4 mr-2" /> Import Legacy Data
            </Button>
         </div>
         </div>
