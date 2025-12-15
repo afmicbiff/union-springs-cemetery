@@ -32,7 +32,7 @@ export default function EventCalendar() {
     // Fetch Employees for Attendees
     const { data: employees } = useQuery({
         queryKey: ['employees-list-all'],
-        queryFn: () => base44.entities.Employee.list({ limit: 1000 }),
+        queryFn: () => base44.entities.Employee.list(null, 1000), // Ensure correct arguments for list
         initialData: []
     });
 
@@ -409,7 +409,6 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
     const filteredEmployees = React.useMemo(() => {
         if (!employeeSearch.trim()) return employees;
         const search = employeeSearch.toLowerCase().trim();
-        const searchTerms = search.split(/\s+/);
 
         // Levenshtein distance
         const getDist = (a, b) => {
@@ -440,25 +439,19 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
             const email = (emp.email || "").toLowerCase();
             const full = `${first} ${last}`.trim();
             
-            // 1. Direct match
+            // 1. Direct match (includes)
             if (full.includes(search) || email.includes(search)) return true;
 
             // 2. Fuzzy match parts
-            const targets = [first, last, full, ...email.split(/[@.]/)];
+            const targets = [first, last, full];
             
-            // Allow more leniency
+            // Allow leniency based on search length
             const maxDist = search.length <= 3 ? 1 : (search.length <= 6 ? 2 : 3);
 
             return targets.some(target => {
-                // If target is empty, skip
                 if (!target) return false;
-                // If target contains search term
-                if (target.includes(search)) return true;
-                // If search term is long enough, try fuzzy
-                if (search.length > 1) {
-                   return getDist(target, search) <= maxDist;
-                }
-                return false;
+                // If close enough
+                return getDist(target, search) <= maxDist;
             });
         });
     }, [employees, employeeSearch]);
