@@ -14,7 +14,7 @@ export default function HistoryPage() {
         
         {/* Header */}
         <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Our History</h1>
+          <h1 className="text-4xl md:text-5xl font-serif text-stone-900 mt-[112px]">Our History</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
           <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed italic">
             "Preserving the memories of our community since 1892."
