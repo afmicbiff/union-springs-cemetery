@@ -179,6 +179,11 @@ export default function SearchPage() {
 
         {/* Results */}
         <div className="space-y-4">
+          <div className="flex justify-between items-center text-sm text-stone-500 px-2">
+            <span>Showing {filteredResults.length} of {deceasedList.length} records</span>
+            {error && <span className="text-red-500">Error loading data</span>}
+          </div>
+
           {suggestion && (
             <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-sm flex items-center gap-2">
               <span className="text-stone-600">Did you mean:</span>
