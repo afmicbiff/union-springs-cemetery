@@ -152,21 +152,21 @@ export default function MemorialPage() {
                     )}
                     
                     <div className="flex justify-center gap-4">
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10" onClick={() => handleShare('facebook')}>
+                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('facebook')}>
                             <Facebook className="w-4 h-4 mr-2" /> Share
                         </Button>
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10" onClick={() => handleShare('twitter')}>
+                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('twitter')}>
                             <Twitter className="w-4 h-4 mr-2" /> Tweet
                         </Button>
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10" onClick={() => handleShare('copy')}>
+                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('copy')}>
                             <LinkIcon className="w-4 h-4 mr-2" /> Copy Link
                         </Button>
                         <Link to={createPageUrl('Profile')}>
-                            <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10">
+                            <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white">
                                 <UserCircle className="w-4 h-4 mr-2" /> Profile
                             </Button>
                         </Link>
-                        </div>
+                    </div>
                         </div>
                         </div>
 
