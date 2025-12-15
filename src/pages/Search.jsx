@@ -259,130 +259,139 @@ export default function SearchPage() {
 
         {/* Results */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center text-sm text-stone-500 px-2">
-            <span>Found {pagination.total} results</span>
-            {error && <span className="text-red-500">Error loading data</span>}
-          </div>
-
-          {suggestion && (
-            <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-sm flex items-center gap-2">
-              <span className="text-stone-600">Did you mean:</span>
-              <button 
-                onClick={() => setSearchTerm(suggestion)}
-                className="font-bold underline hover:text-teal-900"
-              >
-                {suggestion}
-              </button>?
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
-            </div>
-          ) : filteredResults.length > 0 ? (
-            <div className="grid gap-6">
-               {filteredResults.map((person) => (
-                 <Card key={person.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 bg-slate-50">
-                   <div className="flex flex-col md:flex-row">
-                     {/* Image Section */}
-                     <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
-                       {person.image_url ? (
-                         <img src={person.image_url} alt={`${person.first_name} ${person.last_name}`} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
-                       ) : (
-                         <div className="w-full h-full flex items-center justify-center text-stone-400">
-                           <User className="w-12 h-12" />
-                         </div>
-                       )}
-                     </div>
-                     
-                     {/* Content Section */}
-                     <CardContent className="p-6 flex-grow flex flex-col justify-between">
-                       <div className="flex justify-between items-start">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-2xl font-serif font-bold text-stone-900">
-                                    {person.first_name} {person.last_name}
-                                </h3>
-                                {person.family_name && (
-                                    <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
-                                        {person.family_name} Family
-                                    </Badge>
-                                )}
-                                {person.veteran_status && (
-                                    <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
-                                )}
-                            </div>
-                            <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
-                                {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
-                                {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
-                                {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
-                             Section {person.plot_location?.split('-')[0] || 'Main'}
-                          </Badge>
-                       </div>
-
-                       <div className="space-y-3">
-                         <div className="flex items-center text-stone-600">
-                           <MapPin className="w-4 h-4 mr-2 text-red-600" />
-                           <span>Plot Location: {person.plot_location}</span>
-                         </div>
-                         {person.notes && (
-                           <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
-                              Note: {person.notes}
-                           </p>
-                         )}
-                         <p className="text-stone-600 text-sm line-clamp-2 italic">
-                            "{person.obituary}"
-                         </p>
-                       </div>
-
-                       <div className="mt-4 flex justify-end">
-                          <Link to={`${createPageUrl('Memorial')}?id=${person.id}`}>
-                              <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
-                                 View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
-                              </Button>
-                          </Link>
-                       </div>
-                     </CardContent>
-                   </div>
-                 </Card>
-               ))}
-            </div>
+          {!hasActiveSearch ? (
+             <div className="text-center py-24 bg-stone-50/50 rounded-sm border border-stone-200 border-dashed">
+                 <Search className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+                 <p className="text-stone-500 text-lg font-serif">Enter a name or use filters to search the directory.</p>
+             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-sm border border-stone-200">
-             <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
-             <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
-            </div>
-            )}
+            <>
+              <div className="flex justify-between items-center text-sm text-stone-500 px-2">
+                <span>Found {pagination.total} results</span>
+                {error && <span className="text-red-500">Error loading data</span>}
+              </div>
 
-            {/* Pagination Controls */}
-            {pagination.total > 0 && (
-            <div className="flex justify-center items-center gap-4 pt-4 border-t border-stone-200">
-               <Button 
-                   variant="outline" 
-                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                   disabled={currentPage === 1 || isLoading}
-                   className="w-24"
-               >
-                   Previous
-               </Button>
-               <span className="text-stone-600 font-medium">
-                   Page {currentPage} of {pagination.totalPages || 1}
-               </span>
-               <Button 
-                   variant="outline" 
-                   onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
-                   disabled={currentPage >= pagination.totalPages || isLoading}
-                   className="w-24"
-               >
-                   Next
-               </Button>
-            </div>
-            )}
-            </div>
+              {suggestion && (
+                <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-sm flex items-center gap-2">
+                  <span className="text-stone-600">Did you mean:</span>
+                  <button 
+                    onClick={() => setSearchTerm(suggestion)}
+                    className="font-bold underline hover:text-teal-900"
+                  >
+                    {suggestion}
+                  </button>?
+                </div>
+              )}
+
+              {isLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+                </div>
+              ) : filteredResults.length > 0 ? (
+                <div className="grid gap-6">
+                   {filteredResults.map((person) => (
+                     <Card key={person.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow duration-300 bg-slate-50">
+                       <div className="flex flex-col md:flex-row">
+                         {/* Image Section */}
+                         <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
+                           {person.image_url ? (
+                             <img src={person.image_url} alt={`${person.first_name} ${person.last_name}`} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
+                           ) : (
+                             <div className="w-full h-full flex items-center justify-center text-stone-400">
+                               <User className="w-12 h-12" />
+                             </div>
+                           )}
+                         </div>
+                         
+                         {/* Content Section */}
+                         <CardContent className="p-6 flex-grow flex flex-col justify-between">
+                           <div className="flex justify-between items-start">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-2xl font-serif font-bold text-stone-900">
+                                        {person.first_name} {person.last_name}
+                                    </h3>
+                                    {person.family_name && (
+                                        <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
+                                            {person.family_name} Family
+                                        </Badge>
+                                    )}
+                                    {person.veteran_status && (
+                                        <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
+                                    )}
+                                </div>
+                                <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
+                                    {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
+                                    {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
+                                    {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
+                                 Section {person.plot_location?.split('-')[0] || 'Main'}
+                              </Badge>
+                           </div>
+
+                           <div className="space-y-3">
+                             <div className="flex items-center text-stone-600">
+                               <MapPin className="w-4 h-4 mr-2 text-red-600" />
+                               <span>Plot Location: {person.plot_location}</span>
+                             </div>
+                             {person.notes && (
+                               <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
+                                  Note: {person.notes}
+                               </p>
+                             )}
+                             <p className="text-stone-600 text-sm line-clamp-2 italic">
+                                "{person.obituary}"
+                             </p>
+                           </div>
+
+                           <div className="mt-4 flex justify-end">
+                              <Link to={`${createPageUrl('Memorial')}?id=${person.id}`}>
+                                  <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
+                                     View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
+                                  </Button>
+                              </Link>
+                           </div>
+                         </CardContent>
+                       </div>
+                     </Card>
+                   ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-white rounded-sm border border-stone-200">
+                 <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
+                 <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              {pagination.total > 0 && (
+                <div className="flex justify-center items-center gap-4 pt-4 border-t border-stone-200">
+                   <Button 
+                       variant="outline" 
+                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                       disabled={currentPage === 1 || isLoading}
+                       className="w-24"
+                   >
+                       Previous
+                   </Button>
+                   <span className="text-stone-600 font-medium">
+                       Page {currentPage} of {pagination.totalPages || 1}
+                   </span>
+                   <Button 
+                       variant="outline" 
+                       onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                       disabled={currentPage >= pagination.totalPages || isLoading}
+                       className="w-24"
+                   >
+                       Next
+                   </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
             </div>
             </div>
