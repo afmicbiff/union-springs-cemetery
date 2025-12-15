@@ -119,16 +119,12 @@ export default function MemorialPage() {
             <div className="bg-stone-900 text-stone-100 py-12 md:py-20 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-                    {deceased.image_url ? (
+                    {deceased.image_url && (
                         <img 
                             src={deceased.image_url} 
                             alt={`${deceased.first_name} ${deceased.last_name}`}
                             className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-stone-100 shadow-xl mx-auto mb-6 object-cover"
                         />
-                    ) : (
-                        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-stone-700 border-4 border-stone-100 shadow-xl mx-auto mb-6 flex items-center justify-center">
-                            <span className="text-4xl">{deceased.first_name[0]}{deceased.last_name[0]}</span>
-                        </div>
                     )}
                     
                     <h1 className="text-4xl md:text-6xl font-bold mb-2">{deceased.first_name} {deceased.last_name}</h1>
