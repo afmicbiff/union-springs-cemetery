@@ -15,6 +15,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"; 
+import { CalendarIcon, X } from "lucide-react";
 import TaskDialog from './TaskDialog';
 
 export default function TaskManager({ isAdmin = false, currentEmployeeId = null }) {
@@ -23,6 +28,12 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [showArchived, setShowArchived] = useState(false);
+    
+    // Advanced Filters
+    const [priorityFilter, setPriorityFilter] = useState("all");
+    const [dateFilterType, setDateFilterType] = useState("due_date");
+    const [dateRange, setDateRange] = useState({ start: null, end: null });
+    const [showFilters, setShowFilters] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -115,14 +126,39 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
         // Status Filter
         if (statusFilter !== "all" && task.status !== statusFilter) return false;
 
-        // Search Filter
-        const searchLower = searchTerm.toLowerCase();
-        const matchesSearch = 
-            task.title.toLowerCase().includes(searchLower) ||
-            (task.description && task.description.toLowerCase().includes(searchLower)) ||
-            getAssigneeName(task.assignee_id).toLowerCase().includes(searchLower);
+        // Priority Filter
+        if (priorityFilter !== "all" && task.priority !== priorityFilter) return false;
 
-        return matchesSearch;
+        // Date Range Filter
+        if (dateRange.start || dateRange.end) {
+            const dateStr = dateFilterType === 'created_date' ? task.created_date : task.due_date;
+            if (!dateStr) return false; // If filtering by date but task has none, exclude it
+            
+            const taskDate = new Date(dateStr);
+            // Reset times for date-only comparison
+            taskDate.setHours(0, 0, 0, 0);
+
+            if (dateRange.start) {
+                const start = new Date(dateRange.start);
+                start.setHours(0, 0, 0, 0);
+                if (taskDate < start) return false;
+            }
+            if (dateRange.end) {
+                const end = new Date(dateRange.end);
+                end.setHours(23, 59, 59, 999);
+                if (taskDate > end) return false;
+            }
+        }
+
+        // Fuzzy Search
+        if (searchTerm) {
+            const searchTerms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+            const textToSearch = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
+            // All terms must match (AND logic)
+            return searchTerms.every(term => textToSearch.includes(term));
+        }
+
+        return true;
     });
 
     const getPriorityColor = (p) => {
@@ -174,24 +210,110 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
             </CardHeader>
             <CardContent>
                 {/* Toolbar */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
-                        <Input
-                            placeholder="Search tasks..."
-                            className="pl-9"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                <div className="space-y-4 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
+                            <Input
+                                placeholder="Search by title, description, or assignee..."
+                                className="pl-9"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={showFilters ? "bg-stone-100" : ""}
+                        >
+                            <Filter className="w-4 h-4 mr-2" /> Filters
+                            {(priorityFilter !== 'all' || dateRange.start || dateRange.end) && (
+                                <Badge variant="secondary" className="ml-2 px-1 h-5 bg-teal-100 text-teal-800">!</Badge>
+                            )}
+                        </Button>
+                        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto hidden md:block">
+                            <TabsList>
+                                <TabsTrigger value="all">All</TabsTrigger>
+                                <TabsTrigger value="To Do">To Do</TabsTrigger>
+                                <TabsTrigger value="In Progress">Doing</TabsTrigger>
+                                <TabsTrigger value="Completed">Done</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
                     </div>
-                    <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
-                        <TabsList>
-                            <TabsTrigger value="all">All</TabsTrigger>
-                            <TabsTrigger value="To Do">To Do</TabsTrigger>
-                            <TabsTrigger value="In Progress">Doing</TabsTrigger>
-                            <TabsTrigger value="Completed">Done</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+
+                    {/* Mobile Tabs */}
+                    <div className="md:hidden">
+                        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
+                            <TabsList className="w-full">
+                                <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
+                                <TabsTrigger value="To Do" className="flex-1">To Do</TabsTrigger>
+                                <TabsTrigger value="In Progress" className="flex-1">Doing</TabsTrigger>
+                                <TabsTrigger value="Completed" className="flex-1">Done</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                    </div>
+
+                    {/* Advanced Filters */}
+                    {showFilters && (
+                        <div className="p-4 bg-stone-50 rounded-lg border border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-top-2">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase text-stone-500">Priority</Label>
+                                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="All Priorities" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Priorities</SelectItem>
+                                        <SelectItem value="High">High</SelectItem>
+                                        <SelectItem value="Medium">Medium</SelectItem>
+                                        <SelectItem value="Low">Low</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase text-stone-500">Filter Date By</Label>
+                                <Select value={dateFilterType} onValueChange={setDateFilterType}>
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="due_date">Due Date</SelectItem>
+                                        <SelectItem value="created_date">Creation Date</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase text-stone-500">Date Range</Label>
+                                <div className="flex gap-2 items-center">
+                                    <Input 
+                                        type="date" 
+                                        className="bg-white"
+                                        value={dateRange.start || ''}
+                                        onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                                    />
+                                    <span className="text-stone-400">-</span>
+                                    <Input 
+                                        type="date" 
+                                        className="bg-white"
+                                        value={dateRange.end || ''}
+                                        onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                                    />
+                                    {(dateRange.start || dateRange.end) && (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 text-stone-400 hover:text-red-500"
+                                            onClick={() => setDateRange({ start: null, end: null })}
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Task List */}
