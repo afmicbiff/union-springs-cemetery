@@ -147,7 +147,8 @@ export default function EventCalendar() {
                     <div
                         key={day}
                         className={`min-h-[120px] p-2 border border-stone-100 relative group transition-colors hover:bg-stone-50
-                            ${!isSameMonth(day, monthStart) ? "bg-stone-50/50 text-stone-400" : "bg-white"}
+                            ${!isSameMonth(day, monthStart) ? "bg-stone-50/50 text-stone-400" : 
+                              dayEvents.length > 0 ? "bg-green-50" : "bg-white"}
                             ${isSameDay(day, new Date()) ? "ring-2 ring-teal-600 ring-inset" : ""}
                         `}
                         onClick={() => onDateClick(cloneDay)}
@@ -351,6 +352,7 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
                             placeholder="Search employees..." 
                             value={employeeSearch}
                             onChange={(e) => setEmployeeSearch(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
                             className="mb-2 h-8 text-sm"
                         />
                         <div className="border rounded-md p-3 max-h-48 overflow-y-auto bg-stone-50 space-y-2">
@@ -360,6 +362,7 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
                                 filteredEmployees.map(emp => (
                                     <div key={emp.id} className="flex items-center space-x-2">
                                         <Checkbox 
+                                            type="button"
                                             id={`emp-${emp.id}`} 
                                             checked={formData.attendee_ids.includes(emp.id)}
                                             onCheckedChange={() => toggleAttendee(emp.id)}
