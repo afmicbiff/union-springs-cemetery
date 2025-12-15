@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileText, Bell, Shield, BookOpen } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
+import EmployeeSchedule from "@/components/employee/EmployeeSchedule";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function EmployeesPage() {
     return (
@@ -17,7 +20,16 @@ export default function EmployeesPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <UserSummaryWidget />
+
+                <Tabs defaultValue="resources" className="w-full">
+                    <TabsList className="mb-4">
+                        <TabsTrigger value="resources">Resources & News</TabsTrigger>
+                        <TabsTrigger value="schedule">My Schedule</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="resources">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Updates & Announcements */}
                     <div className="md:col-span-2">
                         <Card className="h-full border-stone-200 shadow-sm">
@@ -104,6 +116,12 @@ export default function EmployeesPage() {
                         </Card>
                     </div>
                 </div>
+                </TabsContent>
+                
+                <TabsContent value="schedule">
+                    <EmployeeSchedule />
+                </TabsContent>
+                </Tabs>
             </div>
         </div>
     );
