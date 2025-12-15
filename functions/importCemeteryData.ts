@@ -5,19 +5,20 @@ import { format, parse } from 'npm:date-fns@3.6.0';
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
+        // Using the text file URL from the user's latest context
         const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/31609118e_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251ssssss.txt";
 
-        console.log("Fetching file...");
+        // 1. Fetch File
         const fileRes = await fetch(fileUrl);
-        if (!fileRes.ok) throw new Error("Failed to fetch file");
+        if (!fileRes.ok) throw new Error(`Failed to fetch file: ${fileRes.status}`);
         const fileText = await fileRes.text();
 
-        console.log("Parsing CSV/TSV...");
-        
-        // Pre-process: Find the header row (skipping title lines)
-        const lines = fileText.split('\n');
+        // 2. Pre-process text (find header)
+        const lines = fileText.split(/\r?\n/); // Handle both \n and \r\n
         const headerIndex = lines.findIndex(line => 
-            line.includes('Grave') && line.includes('Row') && line.includes('Status')
+            line.toLowerCase().includes('grave') && 
+            line.toLowerCase().includes('row') && 
+            line.toLowerCase().includes('status')
         );
         
         if (headerIndex === -1) {
@@ -26,125 +27,200 @@ export default Deno.serve(async (req) => {
 
         const cleanCsvContent = lines.slice(headerIndex).join('\n');
 
-        // Parse TSV data
+        // 3. Parse CSV/TSV
         const { data: records, errors } = Papa.parse(cleanCsvContent, {
             header: true,
             skipEmptyLines: true,
-            delimiter: '\t', // Explicitly setting tab delimiter based on the file content
-            transformHeader: (h) => h.trim() // Clean headers
+            delimiter: "", // Auto-detect delimiter (tab or comma)
+            transformHeader: (h) => h.trim()
         });
 
-        if (errors.length > 0) {
-            console.warn("Parse errors:", errors);
+        if (records.length === 0) {
+            return Response.json({ success: false, message: "No records found after parsing." });
         }
 
-        console.log(`Parsed ${records.length} records. Processing...`);
-
-        let plotsCreated = 0;
-        let plotsUpdated = 0;
-        let deceasedCreated = 0;
-
-        // Fetch existing plots to minimize DB calls (batch fetching)
-        // Optimization: Fetch all plots. If too many, might need pagination, but for <5000 it's usually fine in memory.
+        // 4. Fetch Existing Data for De-duplication
+        // Fetching all might be heavy, but necessary for de-dup. 
+        // We'll limit to 2000 recent ones or rely on loop checks if bulk fetch fails.
+        // Assuming < 5000 total plots for now.
         const allPlots = await base44.entities.Plot.list({ limit: 5000 });
-        const plotMap = new Map(allPlots.map(p => [`${p.row_number}-${p.plot_number}`, p]));
+        const plotMap = new Map();
+        allPlots.forEach(p => plotMap.set(`${p.row_number}-${p.plot_number}`, p));
 
-        // Helper to format date from M/D/YYYY to YYYY-MM-DD
+        // 5. Prepare Batches
+        const plotsToCreate = [];
+        const plotsToUpdate = []; // We'll process these one-by-one later or skip
+        const deceasedToCreate = [];
+        
+        // Helper: Date Formatter
         const formatDate = (dateStr) => {
-            if (!dateStr) return undefined;
+            if (!dateStr || dateStr.trim() === '') return undefined;
             try {
-                // Try parsing M/D/YYYY
-                const parsed = parse(dateStr, 'M/d/yyyy', new Date());
-                if (isNaN(parsed)) return undefined;
+                // Remove potential typos like 6/151938 -> 6/15/1938 if needed, but let's stick to standard parsing first
+                // Fix missing slash year typo (e.g. 4/262011 -> 4/26/2011)
+                let cleanStr = dateStr.trim();
+                if (/^\d{1,2}\/\d{1,2}\d{4}$/.test(cleanStr)) {
+                    // insert slash before last 4 digits
+                    cleanStr = cleanStr.slice(0, -4) + '/' + cleanStr.slice(-4);
+                }
+
+                const parsed = parse(cleanStr, 'M/d/yyyy', new Date());
+                if (isNaN(parsed.getTime())) return undefined;
                 return format(parsed, 'yyyy-MM-dd');
             } catch (e) {
                 return undefined;
             }
         };
 
-        // Process in chunks to avoid overwhelming the loop
+        const newPlotIds = new Map(); // Key: "Row-Grave", Value: "temp_id" (not real ID, used for correlation if needed)
+        // Note: For deceased creation, we need the REAL plot ID. 
+        // So we must create plots FIRST, get their IDs, then create deceased.
+        
+        // Processing Loop
         for (const record of records) {
-            // Clean keys (sometimes headers have artifacts)
             const getVal = (key) => record[key]?.trim();
-
             const row = getVal('Row');
             const grave = getVal('Grave');
+            
             if (!row || !grave) continue;
 
             const plotKey = `${row}-${grave}`;
-            const statusRaw = getVal('Status') || 'Available';
             
-            // Normalize status
+            // Normalize Status
+            const statusRaw = getVal('Status') || 'Available';
             let status = 'Available';
-            if (statusRaw.toLowerCase().includes('occupied')) status = 'Occupied';
-            else if (statusRaw.toLowerCase().includes('reserved')) status = 'Reserved';
-            else if (statusRaw.toLowerCase().includes('unavailable')) status = 'Unavailable';
-            else if (statusRaw.toLowerCase().includes('not usable')) status = 'Not Usable';
+            const sLower = statusRaw.toLowerCase();
+            if (sLower.includes('occupied')) status = 'Occupied';
+            else if (sLower.includes('reserved')) status = 'Reserved';
+            else if (sLower.includes('unavailable')) status = 'Unavailable';
+            else if (sLower.includes('not usable')) status = 'Not Usable';
 
-            // 1. Handle Plot
-            let plotId;
+            // Plot Logic
+            let plotId = null;
             if (plotMap.has(plotKey)) {
                 const existingPlot = plotMap.get(plotKey);
-                // Only update if status changed significantly or logic dictates
-                // For this import, we assume the file is the source of truth
-                if (existingPlot.status !== status) {
-                    await base44.entities.Plot.update(existingPlot.id, { status });
-                    plotsUpdated++;
-                }
                 plotId = existingPlot.id;
+                // Check if update needed
+                if (existingPlot.status !== status) {
+                    plotsToUpdate.push({ id: existingPlot.id, status });
+                }
             } else {
-                const newPlot = await base44.entities.Plot.create({
-                    section: row.split('-')[0] || "Main",
-                    row_number: row,
-                    plot_number: grave,
-                    status: status,
-                    notes: "Imported via CSV"
-                });
-                plotMap.set(plotKey, newPlot); // Add to map for future ref
-                plotId = newPlot.id;
-                plotsCreated++;
+                // Prepare for creation
+                // We'll create them one-by-one in the next step to get IDs
+                // Or use bulkCreate but we won't get IDs mapped back easily to "Row-Grave" without re-fetching.
+                // Strategy: Add to a processing list.
             }
 
-            // 2. Handle Deceased (Only if Occupied and has name)
+            // Deceased Logic Preparation
             const lastName = getVal('Last Name');
-            const firstName = getVal('First Name');
-            
             if (status === 'Occupied' && lastName) {
-                // Simple duplicate check: Last Name + Plot Location
-                // Note: Ideally we'd fetch all deceased too, but let's check one-by-one for safety or optimistically create
-                // To save time, we'll check existence.
-                const existingDeceased = await base44.entities.Deceased.filter({
+                deceasedToCreate.push({
+                    plotKey, // Temporary link
+                    first_name: getVal('First Name') || "Unknown",
                     last_name: lastName,
-                    plot_location: plotKey
-                }, 1);
+                    family_name: getVal('Family Name'),
+                    date_of_birth: formatDate(getVal('Birth')),
+                    date_of_death: formatDate(getVal('Death')),
+                    notes: getVal('Notes'),
+                    plot_location: plotKey,
+                    burial_type: "Casket",
+                    veteran_status: (getVal('Notes') || "").toLowerCase().includes('vet')
+                });
+            }
+        }
 
-                if (existingDeceased.length === 0) {
-                    await base44.entities.Deceased.create({
-                        first_name: firstName || "Unknown",
-                        last_name: lastName,
-                        family_name: getVal('Family Name'),
-                        date_of_birth: formatDate(getVal('Birth')),
-                        date_of_death: formatDate(getVal('Death')),
-                        plot_location: plotKey,
-                        notes: getVal('Notes'),
-                        burial_type: "Casket",
-                        veteran_status: (getVal('Notes') || "").toLowerCase().includes('vet')
+        // 6. Execution Phase - Plots
+        
+        // A. Create New Plots (One by one to get IDs? Or bulk then re-fetch?)
+        // To be safe and simple: Create one by one if not too many. 
+        // If many, bulk create then re-fetch all.
+        // Let's re-fetch strategy.
+        
+        const plotsToCreatePayload = [];
+        const recordsToProcess = records.filter(r => r['Row'] && r['Grave']);
+        
+        for (const record of recordsToProcess) {
+            const row = record['Row']?.trim();
+            const grave = record['Grave']?.trim();
+            const plotKey = `${row}-${grave}`;
+            if (!plotMap.has(plotKey)) {
+                // Avoid duplicates in payload
+                if (!plotsToCreatePayload.find(p => p.row_number === row && p.plot_number === grave)) {
+                    let status = 'Available';
+                    const sRaw = record['Status']?.toLowerCase() || '';
+                    if (sRaw.includes('occupied')) status = 'Occupied';
+                    else if (sRaw.includes('reserved')) status = 'Reserved';
+                    else if (sRaw.includes('unavailable')) status = 'Unavailable';
+
+                    plotsToCreatePayload.push({
+                        section: row.split('-')[0] || "Main",
+                        row_number: row,
+                        plot_number: grave,
+                        status: status,
+                        notes: "Imported"
                     });
-                    deceasedCreated++;
                 }
             }
         }
 
+        if (plotsToCreatePayload.length > 0) {
+            // Bulk Create
+            // Note: split into chunks of 100 to be safe
+            for (let i = 0; i < plotsToCreatePayload.length; i += 100) {
+                const chunk = plotsToCreatePayload.slice(i, i + 100);
+                await base44.entities.Plot.bulkCreate(chunk);
+            }
+            
+            // Re-fetch all plots to update map with new IDs
+            const updatedAllPlots = await base44.entities.Plot.list({ limit: 5000 });
+            updatedAllPlots.forEach(p => plotMap.set(`${p.row_number}-${p.plot_number}`, p));
+        }
+
+        // B. Update Existing Plots (Concurrent limit)
+        // Use a concurrency limiter helper
+        const updatePlot = async (p) => base44.entities.Plot.update(p.id, { status: p.status });
+        // Process in chunks of 20
+        for (let i = 0; i < plotsToUpdate.length; i += 20) {
+            const chunk = plotsToUpdate.slice(i, i + 20);
+            await Promise.all(chunk.map(updatePlot));
+        }
+
+        // 7. Execution Phase - Deceased
+        // Filter out existing deceased to avoid duplicates
+        // We'll list all deceased first
+        const allDeceased = await base44.entities.Deceased.list({ limit: 5000 });
+        const deceasedMap = new Set(allDeceased.map(d => `${d.last_name}|${d.plot_location}`));
+
+        const finalDeceasedPayload = [];
+        for (const d of deceasedToCreate) {
+            const key = `${d.last_name}|${d.plot_location}`;
+            if (!deceasedMap.has(key)) {
+                // Ensure plot exists (it should now)
+                // We don't strictly need the plot ID relation in the Deceased entity based on schema 
+                // (it uses "plot_location" string), but if it did, we'd use plotMap.
+                finalDeceasedPayload.push(d);
+                deceasedMap.add(key); // Prevent double adding in same batch
+            }
+        }
+
+        // Bulk Create Deceased
+        for (let i = 0; i < finalDeceasedPayload.length; i += 100) {
+            const chunk = finalDeceasedPayload.slice(i, i + 100);
+            // Remove 'plotKey' helper prop before creating
+            const cleanChunk = chunk.map(({ plotKey, ...rest }) => rest);
+            await base44.entities.Deceased.bulkCreate(cleanChunk);
+        }
+
         return Response.json({ 
             success: true, 
-            message: "Full import completed",
-            plots_created: plotsCreated, 
-            plots_updated: plotsUpdated,
-            deceased_created: deceasedCreated 
+            message: "Import completed",
+            plots_created: plotsToCreatePayload.length, 
+            plots_updated: plotsToUpdate.length,
+            deceased_created: finalDeceasedPayload.length 
         });
 
     } catch (error) {
         console.error("Function error:", error);
-        return Response.json({ error: error.message }, { status: 500 });
+        return Response.json({ error: error.message, stack: error.stack }, { status: 500 });
     }
 });
