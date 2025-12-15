@@ -12,11 +12,13 @@ export default Deno.serve(async (req) => {
                 Extract data from this cemetery registry PDF. 
                 Focus on the table containing: Row, Grave, Status, Last Name, First Name, Birth Date, Death Date, Notes.
                 
-                IMPORTANT LIMITATION: Extract only the FIRST 50 records found to ensure quick processing.
+                IMPORTANT: Extract as many records as possible (up to 150) from the table.
                 
                 Return a JSON object with a "records" array.
                 Each record should have: "row", "grave", "status", "first_name", "last_name", "birth_date", "death_date", "notes".
                 Normalize status to one of: "Available", "Occupied", "Reserved", "Unavailable".
+                
+                If the document is very large, prioritizing recent or top rows is acceptable.
             `,
             file_urls: [fileUrl],
             response_json_schema: {
