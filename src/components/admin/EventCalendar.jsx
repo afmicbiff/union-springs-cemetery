@@ -162,7 +162,7 @@ export default function EventCalendar() {
                         key={day}
                         className={`min-h-[120px] p-2 border border-stone-100 relative group transition-colors hover:bg-stone-50
                             ${!isSameMonth(day, monthStart) ? "bg-stone-50/50 text-stone-400" : 
-                              dayEvents.length > 0 ? "bg-green-50" : "bg-white"}
+                              dayEvents.length > 0 ? "bg-green-100" : "bg-white"}
                             ${isSameDay(day, new Date()) ? "ring-2 ring-teal-600 ring-inset" : ""}
                         `}
                         onClick={() => onDateClick(cloneDay)}
