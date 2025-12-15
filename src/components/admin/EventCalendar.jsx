@@ -36,13 +36,19 @@ export default function EventCalendar() {
 
     // Mutations
     const createEventMutation = useMutation({
-        mutationFn: (data) => base44.entities.Event.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['events']);
-            toast.success("Event created successfully");
-            setIsDialogOpen(false);
+        mutationFn: async (data) => {
+            const res = await base44.functions.invoke('createEvent', data);
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
         },
-        onError: (err) => toast.error("Failed to create event: " + err.message)
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['events'] });
+            setIsDialogOpen(false);
+            toast.success("Event created & invitations sent");
+        },
+        onError: (err) => {
+            toast.error("Failed to create event: " + err.message);
+        }
     });
 
     const deleteEventMutation = useMutation({
