@@ -52,9 +52,9 @@ export default function EmployeesPage() {
 
                 <Tabs defaultValue="resources" className="w-full">
                     <TabsList className="mb-4">
-                        <TabsTrigger value="resources">Resources & News</TabsTrigger>
-                        <TabsTrigger value="schedule">My Schedule</TabsTrigger>
-                        <TabsTrigger value="tasks">My Tasks</TabsTrigger>
+                        <TabsTrigger value="resources" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Resources & News</TabsTrigger>
+                        <TabsTrigger value="schedule" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Schedule</TabsTrigger>
+                        <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Tasks</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="resources">
