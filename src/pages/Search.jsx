@@ -18,6 +18,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [familyName, setFamilyName] = useState(searchParams.get('family') || '');
