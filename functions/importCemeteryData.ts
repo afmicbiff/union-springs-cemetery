@@ -7,32 +7,39 @@ export default Deno.serve(async (req) => {
         // 1. Extract Data
         const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/310123335_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251.pdf";
         
-        const extractRes = await base44.integrations.Core.ExtractDataFromUploadedFile({
-            file_url: fileUrl,
-            json_schema: {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "Grave": {"type": "string"},
-                        "Row": {"type": "string"},
-                        "Status": {"type": "string"},
-                        "Last Name": {"type": "string"},
-                        "First Name": {"type": "string"},
-                        "Birth": {"type": "string"},
-                        "Death": {"type": "string"},
-                        "Family Name": {"type": "string"},
-                        "Notes": {"type": "string"}
+        // Use InvokeLLM for potentially better handling of PDF tables
+        const extractRes = await base44.integrations.Core.InvokeLLM({
+            prompt: "Extract the tabular data from the cemetery records file. Return a JSON object with a 'records' key containing an array of objects. Fields: Grave, Row, Status, Last Name, First Name, Birth, Death, Family Name, Notes. \n\nIMPORTANT: Return ALL rows found in the file.",
+            file_urls: [fileUrl],
+            response_json_schema: {
+                "type": "object",
+                "properties": {
+                    "records": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Grave": {"type": "string"},
+                                "Row": {"type": "string"},
+                                "Status": {"type": "string"},
+                                "Last Name": {"type": "string"},
+                                "First Name": {"type": "string"},
+                                "Birth": {"type": "string"},
+                                "Death": {"type": "string"},
+                                "Family Name": {"type": "string"},
+                                "Notes": {"type": "string"}
+                            }
+                        }
                     }
                 }
             }
         });
 
-        if (extractRes.status === 'error' || !extractRes.output) {
-            return Response.json({ error: "Extraction failed", details: extractRes.details }, { status: 500 });
+        if (!extractRes.records) {
+            return Response.json({ error: "Extraction failed", details: extractRes }, { status: 500 });
         }
 
-        const records = extractRes.output;
+        const records = extractRes.records;
         let plotsCreated = 0;
         let deceasedCreated = 0;
 
