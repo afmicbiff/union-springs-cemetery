@@ -1,104 +1,121 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import Papa from 'npm:papaparse@5.4.1';
+import { format, parse } from 'npm:date-fns@3.6.0';
 
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/310123335_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251.pdf";
+        const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/31609118e_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251ssssss.txt";
 
-        // Use InvokeLLM to extract a sample of data (safer for timeouts)
-        // We limit to 50 records to ensure the function finishes within the 60s limit.
-        const extractRes = await base44.integrations.Core.InvokeLLM({
-            prompt: `
-                Extract data from this cemetery registry PDF. 
-                Focus on the table containing: Row, Grave, Status, Last Name, First Name, Birth Date, Death Date, Notes.
-                
-                IMPORTANT: Extract as many records as possible (up to 150) from the table.
-                
-                Return a JSON object with a "records" array.
-                Each record should have: "row", "grave", "status", "first_name", "last_name", "birth_date", "death_date", "notes".
-                Normalize status to one of: "Available", "Occupied", "Reserved", "Unavailable".
-                
-                If the document is very large, prioritizing recent or top rows is acceptable.
-            `,
-            file_urls: [fileUrl],
-            response_json_schema: {
-                "type": "object",
-                "properties": {
-                    "records": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "row": { "type": "string" },
-                                "grave": { "type": "string" },
-                                "status": { "type": "string" },
-                                "first_name": { "type": "string" },
-                                "last_name": { "type": "string" },
-                                "birth_date": { "type": "string" },
-                                "death_date": { "type": "string" },
-                                "notes": { "type": "string" }
-                            }
-                        }
-                    }
-                }
-            }
+        console.log("Fetching file...");
+        const fileRes = await fetch(fileUrl);
+        if (!fileRes.ok) throw new Error("Failed to fetch file");
+        const fileText = await fileRes.text();
+
+        console.log("Parsing CSV/TSV...");
+        // Parse TSV data
+        const { data: records, errors } = Papa.parse(fileText, {
+            header: true,
+            skipEmptyLines: true,
+            delimiter: '\t', // Explicitly setting tab delimiter based on the file content
+            transformHeader: (h) => h.trim() // Clean headers
         });
 
-        if (!extractRes.records) {
-             // Fallback if LLM returns raw string or error
-             console.error("LLM Extraction failed or returned invalid format:", extractRes);
-             return Response.json({ error: "Could not extract records from PDF. Try converting to CSV." }, { status: 500 });
+        if (errors.length > 0) {
+            console.warn("Parse errors:", errors);
         }
 
-        const records = extractRes.records;
+        console.log(`Parsed ${records.length} records. Processing...`);
+
         let plotsCreated = 0;
+        let plotsUpdated = 0;
         let deceasedCreated = 0;
 
-        for (const record of records) {
-            const row = record.row || "Unknown";
-            const grave = record.grave || "Unknown";
-            const plotLocation = `${row}-${grave}`;
-            
-            // 1. Create/Update Plot
-            // Check if plot exists
-            const existingPlots = await base44.entities.Plot.filter({ row_number: row, plot_number: grave }, 1);
-            let plotId;
+        // Fetch existing plots to minimize DB calls (batch fetching)
+        // Optimization: Fetch all plots. If too many, might need pagination, but for <5000 it's usually fine in memory.
+        const allPlots = await base44.entities.Plot.list({ limit: 5000 });
+        const plotMap = new Map(allPlots.map(p => [`${p.row_number}-${p.plot_number}`, p]));
 
-            if (existingPlots.length > 0) {
-                // Update status if needed, but don't overwrite if already occupied
-                if (existingPlots[0].status === 'Available' && record.status !== 'Available') {
-                     await base44.entities.Plot.update(existingPlots[0].id, { status: record.status });
+        // Helper to format date from M/D/YYYY to YYYY-MM-DD
+        const formatDate = (dateStr) => {
+            if (!dateStr) return undefined;
+            try {
+                // Try parsing M/D/YYYY
+                const parsed = parse(dateStr, 'M/d/yyyy', new Date());
+                if (isNaN(parsed)) return undefined;
+                return format(parsed, 'yyyy-MM-dd');
+            } catch (e) {
+                return undefined;
+            }
+        };
+
+        // Process in chunks to avoid overwhelming the loop
+        for (const record of records) {
+            // Clean keys (sometimes headers have artifacts)
+            const getVal = (key) => record[key]?.trim();
+
+            const row = getVal('Row');
+            const grave = getVal('Grave');
+            if (!row || !grave) continue;
+
+            const plotKey = `${row}-${grave}`;
+            const statusRaw = getVal('Status') || 'Available';
+            
+            // Normalize status
+            let status = 'Available';
+            if (statusRaw.toLowerCase().includes('occupied')) status = 'Occupied';
+            else if (statusRaw.toLowerCase().includes('reserved')) status = 'Reserved';
+            else if (statusRaw.toLowerCase().includes('unavailable')) status = 'Unavailable';
+            else if (statusRaw.toLowerCase().includes('not usable')) status = 'Not Usable';
+
+            // 1. Handle Plot
+            let plotId;
+            if (plotMap.has(plotKey)) {
+                const existingPlot = plotMap.get(plotKey);
+                // Only update if status changed significantly or logic dictates
+                // For this import, we assume the file is the source of truth
+                if (existingPlot.status !== status) {
+                    await base44.entities.Plot.update(existingPlot.id, { status });
+                    plotsUpdated++;
                 }
-                plotId = existingPlots[0].id;
+                plotId = existingPlot.id;
             } else {
                 const newPlot = await base44.entities.Plot.create({
                     section: row.split('-')[0] || "Main",
                     row_number: row,
                     plot_number: grave,
-                    status: record.status || "Available",
-                    notes: "Imported from Legacy PDF"
+                    status: status,
+                    notes: "Imported via CSV"
                 });
+                plotMap.set(plotKey, newPlot); // Add to map for future ref
                 plotId = newPlot.id;
                 plotsCreated++;
             }
 
-            // 2. Create Deceased Record if Occupied and has name
-            if (record.status === 'Occupied' && record.last_name) {
-                // Check for duplicates
+            // 2. Handle Deceased (Only if Occupied and has name)
+            const lastName = getVal('Last Name');
+            const firstName = getVal('First Name');
+            
+            if (status === 'Occupied' && lastName) {
+                // Simple duplicate check: Last Name + Plot Location
+                // Note: Ideally we'd fetch all deceased too, but let's check one-by-one for safety or optimistically create
+                // To save time, we'll check existence.
                 const existingDeceased = await base44.entities.Deceased.filter({
-                    last_name: record.last_name,
-                    plot_location: plotLocation
+                    last_name: lastName,
+                    plot_location: plotKey
                 }, 1);
 
                 if (existingDeceased.length === 0) {
                     await base44.entities.Deceased.create({
-                        first_name: record.first_name || "Unknown",
-                        last_name: record.last_name,
-                        date_of_birth: record.birth_date, // LLM usually formats this well, but validation could be added
-                        date_of_death: record.death_date,
-                        plot_location: plotLocation,
-                        notes: record.notes,
-                        burial_type: "Casket" // Default
+                        first_name: firstName || "Unknown",
+                        last_name: lastName,
+                        family_name: getVal('Family Name'),
+                        date_of_birth: formatDate(getVal('Birth')),
+                        date_of_death: formatDate(getVal('Death')),
+                        plot_location: plotKey,
+                        notes: getVal('Notes'),
+                        burial_type: "Casket",
+                        veteran_status: (getVal('Notes') || "").toLowerCase().includes('vet')
                     });
                     deceasedCreated++;
                 }
@@ -107,9 +124,9 @@ export default Deno.serve(async (req) => {
 
         return Response.json({ 
             success: true, 
-            message: "Sample import successful",
-            plots_processed: records.length, 
+            message: "Full import completed",
             plots_created: plotsCreated, 
+            plots_updated: plotsUpdated,
             deceased_created: deceasedCreated 
         });
 
