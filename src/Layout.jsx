@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Menu, X, Search, Map, Info, Home, Lock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Toaster } from "sonner";
 
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -101,6 +102,7 @@ export default function Layout({ children }) {
         </div>
       </main>
 
+      <Toaster />
       {/* Footer */}
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800 mt-auto">
         <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">

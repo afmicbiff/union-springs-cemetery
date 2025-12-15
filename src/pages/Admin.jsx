@@ -169,11 +169,21 @@ export default function AdminDashboard() {
            </Button>
            <Button 
               onClick={async () => {
-                  toast.promise(base44.functions.invoke('importCemeteryData'), {
-                      loading: 'Importing data... this may take a minute...',
-                      success: (data) => `Imported ${data.data.plots_created} plots and ${data.data.deceased_created} records!`,
-                      error: 'Import failed'
-                  });
+                  console.log("Starting import...");
+                  try {
+                      const promise = base44.functions.invoke('importCemeteryData');
+                      toast.promise(promise, {
+                          loading: 'Importing data... this may take a minute...',
+                          success: (data) => `Imported ${data.data.plots_created} plots and ${data.data.deceased_created} records!`,
+                          error: (err) => {
+                              console.error("Import failed:", err);
+                              return 'Import failed';
+                          }
+                      });
+                      await promise;
+                  } catch (e) {
+                      console.error("Click handler error:", e);
+                  }
               }} 
               className="bg-stone-800 text-white hover:bg-stone-900"
            >
