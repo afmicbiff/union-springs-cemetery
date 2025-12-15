@@ -10,7 +10,7 @@ import { Check, Search, User } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-export default function TaskDialog({ isOpen, onClose, task, onSave, employees }) {
+export default function TaskDialog({ isOpen, onClose, task, onSave, employees = [] }) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
