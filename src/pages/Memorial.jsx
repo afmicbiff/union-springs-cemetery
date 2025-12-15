@@ -117,9 +117,6 @@ export default function MemorialPage() {
         <div className="min-h-screen bg-stone-50 font-serif">
             {/* Hero / Header */}
             <div className="bg-stone-900 text-stone-100 py-12 md:py-20 relative overflow-hidden">
-                <Link to={createPageUrl('Search')} className="absolute top-4 left-4 md:top-8 md:left-8 z-20 text-stone-300 hover:text-white flex items-center gap-2 transition-colors bg-black/20 hover:bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                    <ArrowLeft className="w-4 h-4" /> <span className="text-sm font-medium">Back to Search</span>
-                </Link>
                 <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
                     {deceased.image_url ? (
@@ -155,17 +152,22 @@ export default function MemorialPage() {
 
             <div className="max-w-4xl mx-auto px-4 py-12">
                 <Tabs defaultValue="obituary" className="space-y-8">
-                    <TabsList className="w-full justify-center bg-transparent border-b border-stone-200 rounded-none h-auto p-0 gap-8">
-                        <TabsTrigger value="obituary" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
-                            Obituary
-                        </TabsTrigger>
-                        <TabsTrigger value="gallery" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
-                            Gallery ({mediaList.length})
-                        </TabsTrigger>
-                        <TabsTrigger value="tributes" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
-                            Tributes ({condolences.length})
-                        </TabsTrigger>
-                    </TabsList>
+                    <div className="relative flex items-center justify-center border-b border-stone-200">
+                        <Link to={createPageUrl('Search')} className="absolute left-0 text-stone-500 hover:text-teal-700 transition-colors flex items-center gap-2">
+                            <ArrowLeft className="w-4 h-4" /> <span className="hidden md:inline">Back to Search</span>
+                        </Link>
+                        <TabsList className="bg-transparent border-none rounded-none h-auto p-0 gap-8">
+                            <TabsTrigger value="obituary" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                                Obituary
+                            </TabsTrigger>
+                            <TabsTrigger value="gallery" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                                Gallery ({mediaList.length})
+                            </TabsTrigger>
+                            <TabsTrigger value="tributes" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                                Tributes ({condolences.length})
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
                     {/* Obituary Tab */}
                     <TabsContent value="obituary" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
