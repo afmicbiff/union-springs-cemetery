@@ -5,6 +5,14 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         const taskData = await req.json();
 
+        // Clean up data
+        if (!taskData.assignee_id || taskData.assignee_id === "unassigned") {
+            delete taskData.assignee_id;
+        }
+        if (!taskData.due_date) {
+            delete taskData.due_date;
+        }
+
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
