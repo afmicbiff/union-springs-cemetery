@@ -116,8 +116,8 @@ export default function MemorialPage() {
     return (
         <div className="min-h-screen bg-stone-50 font-serif">
             {/* Hero / Header */}
-            <div className="bg-stone-900 text-stone-100 py-12 md:py-20 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
+            <div className="bg-stone-900 text-stone-100 min-h-[60vh] flex flex-col justify-center py-12 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
                     {deceased.image_url && (
                         <img 
