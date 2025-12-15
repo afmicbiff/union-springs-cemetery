@@ -133,25 +133,25 @@ export default function MemorialPage() {
     return (
         <div className="min-h-screen bg-stone-50 font-serif">
             {/* Hero / Header */}
-            <div className="bg-stone-900 text-stone-100 min-h-[60vh] flex flex-col justify-center py-12 relative overflow-hidden">
+            <div className="bg-stone-900 text-stone-100 min-h-[60vh] flex flex-col justify-end py-12 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
-                <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
+                <div className="max-w-[1240px] mx-auto px-4 w-full relative z-10 text-left">
                     {deceased.image_url && (
                         <img 
                             src={deceased.image_url} 
                             alt={`${deceased.first_name} ${deceased.last_name}`}
-                            className="h-auto max-h-64 md:max-h-96 w-auto max-w-full rounded-lg border-4 border-stone-100 shadow-xl mx-auto mb-6"
+                            className="h-auto max-h-64 md:max-h-96 w-auto max-w-full rounded-lg border-4 border-stone-100 shadow-xl mb-6"
                         />
                     )}
-                    
+
                     <h1 className="text-4xl md:text-6xl font-bold mb-2">{deceased.first_name} {deceased.last_name}</h1>
                     {(deceased.date_of_birth || deceased.date_of_death) && (
                         <p className="text-xl md:text-2xl text-white mb-6 font-bold">
                             {deceased.date_of_birth ? format(new Date(deceased.date_of_birth), 'MMMM d, yyyy') : 'Unknown'} – {deceased.date_of_death ? format(new Date(deceased.date_of_death), 'MMMM d, yyyy') : 'Unknown'}
                         </p>
                     )}
-                    
-                    <div className="flex justify-center gap-4">
+
+                    <div className="flex justify-start gap-4">
                         <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('facebook')}>
                             <Facebook className="w-4 h-4 mr-2" /> Share
                         </Button>
