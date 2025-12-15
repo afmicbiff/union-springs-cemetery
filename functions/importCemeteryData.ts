@@ -7,11 +7,10 @@ export default Deno.serve(async (req) => {
         // 1. Extract Data
         const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/310123335_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251.pdf";
         
-        // Use InvokeLLM for potentially better handling of PDF tables
-        const extractRes = await base44.integrations.Core.InvokeLLM({
-            prompt: "Extract the tabular data from the cemetery records file. Return a JSON object with a 'records' key containing an array of objects. Fields: Grave, Row, Status, Last Name, First Name, Birth, Death, Family Name, Notes. \n\nIMPORTANT: Return ALL rows found in the file.",
-            file_urls: [fileUrl],
-            response_json_schema: {
+        // Use ExtractDataFromUploadedFile with a root object schema
+        const extractRes = await base44.integrations.Core.ExtractDataFromUploadedFile({
+            file_url: fileUrl,
+            json_schema: {
                 "type": "object",
                 "properties": {
                     "records": {
@@ -35,11 +34,12 @@ export default Deno.serve(async (req) => {
             }
         });
 
-        if (!extractRes.records) {
+        if (extractRes.status === 'error' || !extractRes.output) {
+            console.error("Extraction error:", extractRes);
             return Response.json({ error: "Extraction failed", details: extractRes }, { status: 500 });
         }
 
-        const records = extractRes.records;
+        const records = extractRes.output.records || [];
         let plotsCreated = 0;
         let deceasedCreated = 0;
 
