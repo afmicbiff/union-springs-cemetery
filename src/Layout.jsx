@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
 import {
@@ -30,6 +30,7 @@ export default function Layout({ children }) {
 
   const navItems = [
     { label: 'Home', path: '/', icon: Home },
+    { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
     { label: 'Deceased Search', path: '/search', icon: Search },
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
