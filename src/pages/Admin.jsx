@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -184,6 +183,10 @@ export default function AdminDashboard() {
                       toast.success(`Imported ${data.plots_created} plots and ${data.deceased_created} records!`, { id: loadingToastId });
                   } catch (err) {
                       console.error("Full error object:", err);
+                      if (err.response) {
+                          console.error("Response data:", err.response.data);
+                          console.error("Response status:", err.response.status);
+                      }
                       toast.error(err.message || 'Import failed. Check console for details.', { id: loadingToastId });
                   }
               }} 
