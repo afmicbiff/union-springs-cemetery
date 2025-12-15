@@ -61,10 +61,15 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
         onSave(dataToSave);
     };
 
-    const filteredEmployees = employees.filter(emp => 
-        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(employeeSearch.toLowerCase()) ||
-        (emp.email && emp.email.toLowerCase().includes(employeeSearch.toLowerCase()))
-    );
+    const filteredEmployees = employees.filter(emp => {
+        const firstName = emp.first_name || '';
+        const lastName = emp.last_name || '';
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const search = employeeSearch.toLowerCase();
+        
+        return fullName.includes(search) || 
+               (emp.email && emp.email.toLowerCase().includes(search));
+    });
 
     const getAssigneeLabel = () => {
         if (formData.assignee_id === "unassigned" || !formData.assignee_id) return "Unassigned";
@@ -140,7 +145,7 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
 
                             {isAssigneeOpen && (
                                 <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg p-2">
-                                    <div className="flex items-center border-b px-2 pb-2 mb-2">
+                                    <div className="flex items-center border-b px-2 pb-2 mb-2" onClick={(e) => e.stopPropagation()}>
                                         <Search className="w-4 h-4 text-stone-400 mr-2" />
                                         <input
                                             className="w-full text-sm outline-none"

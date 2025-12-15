@@ -49,7 +49,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     // 2. Fetch Employees (for assignment mapping)
     const { data: employees } = useQuery({
         queryKey: ['employees-list-tasks'],
-        queryFn: () => base44.entities.Employee.list({ limit: 1000 }),
+        queryFn: () => base44.entities.Employee.list(null, 1000),
         initialData: []
     });
 
