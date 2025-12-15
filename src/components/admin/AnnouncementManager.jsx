@@ -20,7 +20,7 @@ export default function AnnouncementManager() {
 
     const { data: announcements, isLoading } = useQuery({
         queryKey: ['announcements'],
-        queryFn: () => base44.entities.Announcement.list({ limit: 100 }, '-date'),
+        queryFn: () => base44.entities.Announcement.list('-date', 100),
         initialData: []
     });
 

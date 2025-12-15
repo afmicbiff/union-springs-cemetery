@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 export default function EmployeesPage() {
     const { data: announcements } = useQuery({
         queryKey: ['announcements-public'],
-        queryFn: () => base44.entities.Announcement.list({ limit: 20 }, '-date'),
+        queryFn: () => base44.entities.Announcement.list('-date', 20),
         initialData: []
     });
 
