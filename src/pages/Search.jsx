@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Loader2, Calendar, MapPin, User, ChevronRight, ExternalLink } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -234,7 +234,9 @@ export default function SearchPage() {
                                 )}
                             </div>
                             <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
-                                {person.date_of_birth && format(new Date(person.date_of_birth), 'yyyy')} - {person.date_of_death && format(new Date(person.date_of_death), 'yyyy')}
+                                {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
+                                {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
+                                {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
                             </p>
                           </div>
                           <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
