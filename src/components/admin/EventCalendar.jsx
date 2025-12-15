@@ -18,6 +18,8 @@ export default function EventCalendar() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [viewEvent, setViewEvent] = useState(null);
+    const [editingEvent, setEditingEvent] = useState(null);
     const queryClient = useQueryClient();
 
     // Fetch Events
@@ -65,7 +67,21 @@ export default function EventCalendar() {
     const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const onDateClick = (day) => {
         setSelectedDate(day);
+        setEditingEvent(null);
         setIsDialogOpen(true);
+    };
+
+    const handleEventClick = (e, ev) => {
+        e.stopPropagation();
+        setViewEvent(ev);
+    };
+
+    const handleSaveEvent = (eventData) => {
+        if (editingEvent) {
+            updateEventMutation.mutate({ id: editingEvent.id, data: eventData });
+        } else {
+            createEventMutation.mutate(eventData);
+        }
     };
 
     // Calendar Grid Generation
@@ -81,7 +97,7 @@ export default function EventCalendar() {
                         <Button variant="outline" size="icon" onClick={nextMonth} className="h-8 w-8"><ChevronRight className="w-4 h-4" /></Button>
                     </div>
                 </div>
-                <Button onClick={() => setIsDialogOpen(true)} className="bg-teal-700 hover:bg-teal-800 text-white">
+                <Button onClick={() => { setSelectedDate(new Date()); setEditingEvent(null); setIsDialogOpen(true); }} className="bg-teal-700 hover:bg-teal-800 text-white">
                     <Plus className="w-4 h-4 mr-2" /> Add Event
                 </Button>
             </div>
@@ -182,15 +198,7 @@ export default function EventCalendar() {
                                         ${ev.type === 'invoice_due' ? 'bg-red-100 text-red-800' : ''}
                                         ${ev.type === 'other' ? 'bg-gray-100 text-gray-800' : ''}
                                     `}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        // Handle event click (maybe show details)
-                                        // For now, just a small alert or detail view could be added
-                                        // But I'll stick to a simple delete for now as per prompt "delete events"
-                                        if (confirm(`Delete event "${ev.title}"?`)) {
-                                            deleteEventMutation.mutate(ev.id);
-                                        }
-                                    }}
+                                    onClick={(e) => handleEventClick(e, ev)}
                                     title={ev.title}
                                 >
                                     {ev.type === 'invoice_due' && <DollarSign className="w-3 h-3 flex-shrink-0" />}
@@ -232,17 +240,105 @@ export default function EventCalendar() {
 
                 <EventDialog 
                     isOpen={isDialogOpen} 
-                    onClose={() => setIsDialogOpen(false)} 
+                    onClose={() => { setIsDialogOpen(false); setEditingEvent(null); }} 
                     selectedDate={selectedDate}
-                    createEvent={createEventMutation.mutate}
+                    onSave={handleSaveEvent}
                     employees={employees}
+                    eventToEdit={editingEvent}
+                />
+
+                <EventDetailsDialog 
+                    event={viewEvent}
+                    isOpen={!!viewEvent}
+                    onClose={() => setViewEvent(null)}
+                    employees={employees}
+                    onDelete={(id) => deleteEventMutation.mutate(id)}
+                    onEdit={(ev) => {
+                        setViewEvent(null);
+                        setEditingEvent(ev);
+                        setSelectedDate(parseISO(ev.start_time));
+                        setIsDialogOpen(true);
+                    }}
                 />
             </CardContent>
         </Card>
     );
 }
 
-function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) {
+function EventDetailsDialog({ event, isOpen, onClose, employees, onDelete, onEdit }) {
+    if (!event) return null;
+
+    const attendees = employees.filter(emp => event.attendee_ids?.includes(emp.id));
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-md">
+                <DialogHeader>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <DialogTitle className="text-xl">{event.title}</DialogTitle>
+                            <DialogDescription className="mt-1 flex items-center gap-2">
+                                <Badge variant="outline">{event.type}</Badge>
+                                <span>{format(parseISO(event.start_time), 'PPP p')}</span>
+                            </DialogDescription>
+                        </div>
+                    </div>
+                </DialogHeader>
+
+                <div className="space-y-4 py-2">
+                    {event.description && (
+                        <div>
+                            <Label className="text-xs text-stone-500 uppercase tracking-wider">Description</Label>
+                            <p className="text-stone-800 bg-stone-50 p-3 rounded-md mt-1 text-sm">{event.description}</p>
+                        </div>
+                    )}
+
+                    <div>
+                        <Label className="text-xs text-stone-500 uppercase tracking-wider">Recurrence</Label>
+                        <p className="text-stone-800 text-sm mt-1 capitalize flex items-center gap-2">
+                            <RefreshCw className="w-3 h-3" />
+                            {event.recurrence === 'none' ? 'One-time event' : event.recurrence}
+                            {event.recurrence_end_date && ` (Until ${format(parseISO(event.recurrence_end_date), 'PPP')})`}
+                            {event.recurrence_count && ` (For ${event.recurrence_count} times)`}
+                        </p>
+                    </div>
+
+                    {attendees.length > 0 && (
+                        <div>
+                            <Label className="text-xs text-stone-500 uppercase tracking-wider">Attendees</Label>
+                            <div className="mt-2 space-y-1">
+                                {attendees.map(emp => (
+                                    <div key={emp.id} className="flex items-center gap-2 text-sm text-stone-700">
+                                        <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-bold">
+                                            {emp.first_name[0]}{emp.last_name[0]}
+                                        </div>
+                                        {emp.first_name} {emp.last_name}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="destructive" onClick={() => {
+                        if (confirm("Are you sure you want to delete this event?")) {
+                            onDelete(event.id);
+                        }
+                    }}>
+                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={onClose}>Close</Button>
+                        <Button onClick={() => onEdit(event)} className="bg-teal-700 hover:bg-teal-800">Edit Event</Button>
+                    </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventToEdit }) {
     const [formData, setFormData] = useState({
         title: "",
         type: "other",
@@ -254,6 +350,35 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
         recurrence_count: "",
         attendee_ids: []
     });
+
+    React.useEffect(() => {
+        if (eventToEdit) {
+            const startDate = parseISO(eventToEdit.start_time);
+            setFormData({
+                title: eventToEdit.title,
+                type: eventToEdit.type,
+                time: format(startDate, 'HH:mm'),
+                description: eventToEdit.description || "",
+                recurrence: eventToEdit.recurrence || "none",
+                recurrence_end_type: eventToEdit.recurrence_end_date ? 'on_date' : (eventToEdit.recurrence_count ? 'after_occurrences' : 'never'),
+                recurrence_end_date: eventToEdit.recurrence_end_date ? format(parseISO(eventToEdit.recurrence_end_date), 'yyyy-MM-dd') : "",
+                recurrence_count: eventToEdit.recurrence_count || "",
+                attendee_ids: eventToEdit.attendee_ids || []
+            });
+        } else {
+            setFormData({
+                title: "",
+                type: "other",
+                time: "09:00",
+                description: "",
+                recurrence: "none",
+                recurrence_end_type: "never",
+                recurrence_end_date: "",
+                recurrence_count: "",
+                attendee_ids: []
+            });
+        }
+    }, [eventToEdit, isOpen]);
     const [employeeSearch, setEmployeeSearch] = useState("");
 
     const filteredEmployees = employees.filter(emp => 
@@ -276,7 +401,7 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
             description: formData.description,
             recurrence: formData.recurrence,
             attendee_ids: formData.attendee_ids,
-            reminders_sent: { "1h": false, "30m": false, "15m": false }
+            reminders_sent: eventToEdit ? eventToEdit.reminders_sent : { "1h": false, "30m": false, "15m": false }
         };
 
         if (formData.recurrence !== 'none') {
@@ -287,19 +412,7 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
             }
         }
 
-        createEvent(eventData);
-        
-        setFormData({ 
-            title: "", 
-            type: "other", 
-            time: "09:00", 
-            description: "", 
-            recurrence: "none",
-            recurrence_end_type: "never",
-            recurrence_end_date: "",
-            recurrence_count: "",
-            attendee_ids: []
-        }); 
+        onSave(eventData);
     };
 
     const toggleAttendee = (empId) => {
@@ -315,8 +428,8 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Add Event for {format(selectedDate, 'MMM d, yyyy')}</DialogTitle>
-                    <DialogDescription>Create a new calendar event.</DialogDescription>
+                    <DialogTitle>{eventToEdit ? 'Edit Event' : 'Add Event'} for {format(selectedDate, 'MMM d, yyyy')}</DialogTitle>
+                    <DialogDescription>{eventToEdit ? 'Modify event details.' : 'Create a new calendar event.'}</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
@@ -481,7 +594,7 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800">Save Event</Button>
+                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800">{eventToEdit ? 'Update' : 'Save'} Event</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
