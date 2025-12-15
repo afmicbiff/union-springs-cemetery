@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -170,19 +171,20 @@ export default function AdminDashboard() {
            <Button 
               onClick={async () => {
                   console.log("Starting import...");
+                  const loadingToastId = toast.loading('Importing data... this may take a minute...');
                   try {
-                      const promise = base44.functions.invoke('importCemeteryData');
-                      toast.promise(promise, {
-                          loading: 'Importing data... this may take a minute...',
-                          success: (data) => `Imported ${data.data.plots_created} plots and ${data.data.deceased_created} records!`,
-                          error: (err) => {
-                              console.error("Import failed:", err);
-                              return 'Import failed';
-                          }
-                      });
-                      await promise;
-                  } catch (e) {
-                      console.error("Click handler error:", e);
+                      console.log("Invoking importCemeteryData...");
+                      const { data, status } = await base44.functions.invoke('importCemeteryData', {}, { timeout: 60000 }); // Increase timeout to 60s
+                      console.log("Function response:", status, data);
+                      
+                      if (data && data.error) {
+                          throw new Error(data.error);
+                      }
+
+                      toast.success(`Imported ${data.plots_created} plots and ${data.deceased_created} records!`, { id: loadingToastId });
+                  } catch (err) {
+                      console.error("Full error object:", err);
+                      toast.error(err.message || 'Import failed. Check console for details.', { id: loadingToastId });
                   }
               }} 
               className="bg-stone-800 text-white hover:bg-stone-900"
