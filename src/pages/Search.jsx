@@ -105,6 +105,8 @@ export default function SearchPage() {
   const filteredResults = queryData.results || [];
   const pagination = queryData.pagination || { total: 0, totalPages: 0, page: 1 };
 
+  const hasActiveSearch = searchTerm || familyName || section !== 'all' || veteranStatus !== 'all' || birthYearMin || birthYearMax || deathYearMin || deathYearMax;
+
   let suggestion = null;
   // suggestion logic removed or needs update (client side suggestion requires full list or backend support)
   // For now we keep it simple as requested - server side filtering.
