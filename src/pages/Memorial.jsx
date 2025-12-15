@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Heart, Image as ImageIcon, MessageCircle, Share2, Upload, Facebook, Twitter, Link as LinkIcon, PlayCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { Heart, Image as ImageIcon, MessageCircle, Share2, Upload, Facebook, Twitter, Link as LinkIcon, PlayCircle, Loader2, ArrowLeft, UserCircle } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
 
@@ -161,9 +161,14 @@ export default function MemorialPage() {
                         <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10" onClick={() => handleShare('copy')}>
                             <LinkIcon className="w-4 h-4 mr-2" /> Copy Link
                         </Button>
-                    </div>
-                </div>
-            </div>
+                        <Link to={createPageUrl('Profile')}>
+                            <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10">
+                                <UserCircle className="w-4 h-4 mr-2" /> Profile
+                            </Button>
+                        </Link>
+                        </div>
+                        </div>
+                        </div>
 
             <div className="max-w-4xl mx-auto px-4 py-12">
                 <Tabs defaultValue="obituary" className="space-y-8">

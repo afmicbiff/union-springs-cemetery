@@ -27,7 +27,6 @@ export default function Layout({ children }) {
     { label: 'Deceased Search', path: '/search', icon: Search },
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
-    { label: 'Profile', path: '/profile', icon: UserCircle },
     { label: 'Admin', path: '/admin', icon: Lock },
   ];
 
