@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, parseISO } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, parseISO, getDay, getDate, getMonth } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar as CalendarIcon, Clock, DollarSign, Briefcase, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, Calendar as CalendarIcon, Clock, DollarSign, Briefcase, Users, RefreshCw } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 export default function EventCalendar() {
@@ -23,6 +24,13 @@ export default function EventCalendar() {
     const { data: events, isLoading } = useQuery({
         queryKey: ['events'],
         queryFn: () => base44.entities.Event.list({ limit: 500 }),
+        initialData: []
+    });
+
+    // Fetch Employees for Attendees
+    const { data: employees } = useQuery({
+        queryKey: ['employees-list'],
+        queryFn: () => base44.entities.Employee.list({ limit: 100 }),
         initialData: []
     });
 
@@ -103,7 +111,25 @@ export default function EventCalendar() {
                 formattedDate = format(day, "d");
                 const cloneDay = day;
                 
-                const dayEvents = events.filter(e => isSameDay(parseISO(e.start_time), day));
+                // Recurrence & Date Match Logic
+                const dayEvents = events.filter(e => {
+                    const eventStart = parseISO(e.start_time);
+                    
+                    // 1. Exact Date Match (One-time)
+                    if (isSameDay(eventStart, day)) return true;
+
+                    // 2. Recurrence Logic
+                    if (e.recurrence && e.recurrence !== 'none') {
+                        // Don't show recurring events before they started
+                        if (day < eventStart && !isSameDay(day, eventStart)) return false;
+
+                        if (e.recurrence === 'daily') return true;
+                        if (e.recurrence === 'weekly') return getDay(day) === getDay(eventStart);
+                        if (e.recurrence === 'monthly') return getDate(day) === getDate(eventStart);
+                        if (e.recurrence === 'yearly') return getMonth(day) === getMonth(eventStart) && getDate(day) === getDate(eventStart);
+                    }
+                    return false;
+                });
                 
                 days.push(
                     <div
@@ -143,6 +169,7 @@ export default function EventCalendar() {
                                     {ev.type === 'invoice_due' && <DollarSign className="w-3 h-3 flex-shrink-0" />}
                                     {ev.type === 'meeting' && <Users className="w-3 h-3 flex-shrink-0" />}
                                     {ev.type === 'vendor_service' && <Briefcase className="w-3 h-3 flex-shrink-0" />}
+                                    {ev.recurrence && ev.recurrence !== 'none' && <RefreshCw className="w-3 h-3 flex-shrink-0 text-stone-500" />}
                                     <span className="truncate">{ev.title}</span>
                                 </div>
                             ))}
@@ -181,24 +208,27 @@ export default function EventCalendar() {
                     onClose={() => setIsDialogOpen(false)} 
                     selectedDate={selectedDate}
                     createEvent={createEventMutation.mutate}
+                    employees={employees}
                 />
             </CardContent>
         </Card>
     );
 }
 
-function EventDialog({ isOpen, onClose, selectedDate, createEvent }) {
+function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) {
     const [formData, setFormData] = useState({
         title: "",
         type: "other",
         time: "09:00",
-        description: ""
+        description: "",
+        recurrence: "none",
+        attendee_ids: []
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        // Combine date and time
+        // Combine date and time correctly handling local time
         const startDateTime = new Date(selectedDate);
         const [hours, minutes] = formData.time.split(':');
         startDateTime.setHours(parseInt(hours), parseInt(minutes));
@@ -207,15 +237,34 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent }) {
             title: formData.title,
             type: formData.type,
             start_time: startDateTime.toISOString(),
-            description: formData.description
+            description: formData.description,
+            recurrence: formData.recurrence,
+            attendee_ids: formData.attendee_ids,
+            reminders_sent: { "1h": false, "30m": false, "15m": false } // Reset reminders
         });
         
-        setFormData({ title: "", type: "other", time: "09:00", description: "" }); // Reset
+        setFormData({ 
+            title: "", 
+            type: "other", 
+            time: "09:00", 
+            description: "", 
+            recurrence: "none",
+            attendee_ids: []
+        }); 
+    };
+
+    const toggleAttendee = (empId) => {
+        setFormData(prev => ({
+            ...prev,
+            attendee_ids: prev.attendee_ids.includes(empId) 
+                ? prev.attendee_ids.filter(id => id !== empId)
+                : [...prev.attendee_ids, empId]
+        }));
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
+            <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle>Add Event for {format(selectedDate, 'MMM d, yyyy')}</DialogTitle>
                     <DialogDescription>Create a new calendar event.</DialogDescription>
@@ -256,6 +305,50 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent }) {
                                 value={formData.time}
                                 onChange={(e) => setFormData({...formData, time: e.target.value})}
                             />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Recurrence</Label>
+                        <Select 
+                            value={formData.recurrence} 
+                            onValueChange={(val) => setFormData({...formData, recurrence: val})}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Recurrence" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">One-time Event</SelectItem>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Attendees (Company Employees)</Label>
+                        <div className="border rounded-md p-3 max-h-32 overflow-y-auto bg-stone-50 space-y-2">
+                            {employees.length === 0 ? (
+                                <p className="text-xs text-stone-500 italic">No employees found.</p>
+                            ) : (
+                                employees.map(emp => (
+                                    <div key={emp.id} className="flex items-center space-x-2">
+                                        <Checkbox 
+                                            id={`emp-${emp.id}`} 
+                                            checked={formData.attendee_ids.includes(emp.id)}
+                                            onCheckedChange={() => toggleAttendee(emp.id)}
+                                        />
+                                        <label 
+                                            htmlFor={`emp-${emp.id}`} 
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            {emp.first_name} {emp.last_name}
+                                        </label>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
 
