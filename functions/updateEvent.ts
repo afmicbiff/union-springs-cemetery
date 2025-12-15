@@ -4,14 +4,11 @@ import { format } from 'npm:date-fns@3.6.0';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const { id, data } = await req.json(); // data contains updated fields
+        const { id, data } = await req.json(); 
 
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-        // 1. Get existing event to compare or just to have data
-        const existingEvent = await base44.entities.Event.list({ id }, 1); // workaround if get(id) not available or filter
-        // Better to use filter:
         const events = await base44.entities.Event.filter({ id });
         const oldEvent = events[0];
 
@@ -19,29 +16,27 @@ Deno.serve(async (req) => {
              return Response.json({ error: "Event not found" }, { status: 404 });
         }
 
-        // 2. Update the Event
         const updatedEvent = await base44.entities.Event.update(id, data);
 
-        // 3. Create System Notification
-        await base44.entities.Notification.create({
-            message: `Event updated: "${updatedEvent.title}" (was "${oldEvent.title}")`,
-            type: 'info',
-            created_at: new Date().toISOString(),
-            is_read: false
-        });
-
-        // 4. Send Update Emails to Attendees
-        // Logic: Send to all current attendee_ids in the updated data
+        // Notify Attendees
         const currentAttendeeIds = updatedEvent.attendee_ids || [];
         
         if (currentAttendeeIds.length > 0) {
             const allEmployees = await base44.asServiceRole.entities.Employee.list({ limit: 1000 });
             const attendees = allEmployees.filter(emp => currentAttendeeIds.includes(emp.id));
-
             const formattedDate = format(new Date(updatedEvent.start_time), "PPPP 'at' p");
 
-            const emailPromises = attendees.map(attendee => {
-                if (!attendee.email) return Promise.resolve();
+            const promises = attendees.map(async (attendee) => {
+                 // In-App Notification
+                 await base44.entities.Notification.create({
+                    message: `Event updated: "${updatedEvent.title}"`,
+                    type: 'info',
+                    user_email: attendee.email,
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                });
+
+                if (!attendee.email) return;
 
                 return base44.integrations.Core.SendEmail({
                     to: attendee.email,
@@ -62,8 +57,16 @@ Union Springs Cemetery Admin`
                 });
             });
 
-            await Promise.all(emailPromises);
+            await Promise.all(promises);
         }
+
+        // System Log
+        await base44.entities.Notification.create({
+            message: `Event updated: "${updatedEvent.title}" by ${user.full_name}`,
+            type: 'info',
+            created_at: new Date().toISOString(),
+            is_read: false
+        });
 
         return Response.json(updatedEvent);
 

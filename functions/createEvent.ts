@@ -23,27 +23,26 @@ Deno.serve(async (req) => {
             reminders_sent: reminders_sent || {}
         });
 
-        // 2. Create System Notification
-        await base44.entities.Notification.create({
-            message: `New event created: "${title}" by ${user.full_name || 'Admin'}`,
-            type: 'info',
-            created_at: new Date().toISOString(),
-            is_read: false
-        });
-
-        // 3. Send Emails to Attendees
+        // 2. Fetch Attendees to Send Notifications
         if (attendee_ids && attendee_ids.length > 0) {
-            // Fetch all employees to find emails
-            // Optimization: In a real app with many users, we'd filter by IDs. 
-            // Here we list all (assuming < 1000 employees) and filter in memory for simplicity.
             const allEmployees = await base44.asServiceRole.entities.Employee.list({ limit: 1000 });
             const attendees = allEmployees.filter(emp => attendee_ids.includes(emp.id));
-
             const formattedDate = format(new Date(start_time), "PPPP 'at' p");
 
-            const emailPromises = attendees.map(attendee => {
-                if (!attendee.email) return Promise.resolve();
+            // Create Notifications & Send Emails
+            const promises = attendees.map(async (attendee) => {
+                // In-App Notification
+                await base44.entities.Notification.create({
+                    message: `You have been invited to: "${title}"`,
+                    type: 'task',
+                    user_email: attendee.email,
+                    created_at: new Date().toISOString(),
+                    is_read: false
+                });
 
+                if (!attendee.email) return;
+
+                // Email
                 return base44.integrations.Core.SendEmail({
                     to: attendee.email,
                     subject: `New Event Invitation: ${title}`,
@@ -63,8 +62,17 @@ Union Springs Cemetery Admin`
                 });
             });
 
-            await Promise.all(emailPromises);
+            await Promise.all(promises);
         }
+
+        // Notification for Creator (if not already included)
+        // or System Log
+        await base44.entities.Notification.create({
+            message: `Event created: "${title}" by ${user.full_name}`,
+            type: 'info',
+            created_at: new Date().toISOString(),
+            is_read: false
+        });
 
         return Response.json(newEvent);
 

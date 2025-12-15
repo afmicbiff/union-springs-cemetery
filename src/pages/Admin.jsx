@@ -30,6 +30,7 @@ import EmployeeList from "@/components/admin/EmployeeList";
 import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import VendorManager from "@/components/admin/VendorManager";
 import EventCalendar from "@/components/admin/EventCalendar";
+import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -215,6 +216,7 @@ export default function AdminDashboard() {
 
           {/* OVERVIEW TAB */}
           <TabsContent value="overview" className="space-y-6">
+            <UserSummaryWidget />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
                 <CardHeader className="pb-2">
