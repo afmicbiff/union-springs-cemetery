@@ -138,7 +138,15 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                                             placeholder="Search employees..."
                                             value={employeeSearch}
                                             onChange={(e) => setEmployeeSearch(e.target.value)}
-                                            onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
+                                            onKeyDown={(e) => { 
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (filteredEmployees.length > 0) {
+                                                        setFormData({...formData, assignee_id: filteredEmployees[0].id});
+                                                        setIsAssigneeOpen(false);
+                                                    }
+                                                }
+                                            }}
                                             autoFocus
                                         />
                                     </div>
