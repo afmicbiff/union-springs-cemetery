@@ -18,7 +18,8 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
         assignee_id: "unassigned",
         status: "To Do",
         priority: "Medium",
-        recurrence: "none"
+        recurrence: "none",
+        update_note: ""
     });
 
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -33,19 +34,21 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                 assignee_id: task.assignee_id || "unassigned",
                 status: task.status || "To Do",
                 priority: task.priority || "Medium",
-                recurrence: task.recurrence || "none"
-            });
-            } else {
-            setFormData({
+                recurrence: task.recurrence || "none",
+                update_note: ""
+                });
+                } else {
+                setFormData({
                 title: "",
                 description: "",
                 due_date: "",
                 assignee_id: "unassigned",
                 status: "To Do",
                 priority: "Medium",
-                recurrence: "none"
-            });
-            }
+                recurrence: "none",
+                update_note: ""
+                });
+                }
     }, [task, isOpen]);
 
     const handleSubmit = (e) => {
@@ -238,6 +241,20 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                             onChange={(e) => setFormData({...formData, description: e.target.value})} 
                         />
                     </div>
+
+                    {task && (
+                        <div className="space-y-2 bg-stone-50 p-3 rounded-md border border-stone-200">
+                            <Label htmlFor="update_note" className="text-teal-700">Add Update Note</Label>
+                            <Textarea 
+                                id="update_note" 
+                                rows={2}
+                                placeholder="Enter details about this update..."
+                                value={formData.update_note} 
+                                onChange={(e) => setFormData({...formData, update_note: e.target.value})} 
+                                className="bg-white"
+                            />
+                        </div>
+                    )}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>

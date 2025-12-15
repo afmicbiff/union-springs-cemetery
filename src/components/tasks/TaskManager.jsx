@@ -122,9 +122,30 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
     const handleSave = (taskData) => {
         if (editingTask) {
-            updateTaskMutation.mutate({ id: editingTask.id, data: taskData });
+            const dataToUpdate = { ...taskData };
+            
+            // Handle update note
+            if (dataToUpdate.update_note) {
+                const currentUpdates = editingTask.updates || [];
+                const empName = getAssigneeName(currentEmployeeId); // Best effort to get current user name if employee
+                
+                const newUpdate = {
+                    note: dataToUpdate.update_note,
+                    timestamp: new Date().toISOString(),
+                    updated_by: empName !== "Unassigned" ? empName : "Administrator" 
+                };
+                
+                dataToUpdate.updates = [newUpdate, ...currentUpdates];
+                delete dataToUpdate.update_note;
+            } else {
+                delete dataToUpdate.update_note;
+            }
+
+            updateTaskMutation.mutate({ id: editingTask.id, data: dataToUpdate });
         } else {
-            createTaskMutation.mutate(taskData);
+            // Remove update_note if it exists for create (though usually empty)
+            const { update_note, ...rest } = taskData;
+            createTaskMutation.mutate(rest);
         }
     };
 
@@ -371,8 +392,27 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                             )}
                                         </div>
                                         <p className="text-sm text-stone-600">{task.description}</p>
+
+                                        {task.updates && task.updates.length > 0 && (
+                                            <div className="mt-3 space-y-2 border-t pt-2 border-stone-100">
+                                                {task.updates.slice(0, 3).map((update, idx) => (
+                                                    <div key={idx} className="text-xs">
+                                                        <div className="flex justify-between text-stone-400 mb-0.5">
+                                                            <span className="font-medium text-teal-700">{update.updated_by}</span>
+                                                            <span>{format(new Date(update.timestamp), 'MMM d, h:mm a')}</span>
+                                                        </div>
+                                                        <p className="text-stone-600 pl-2 border-l-2 border-stone-200">{update.note}</p>
+                                                    </div>
+                                                ))}
+                                                {task.updates.length > 3 && (
+                                                    <p className="text-xs text-stone-400 italic text-center pt-1">
+                                                        +{task.updates.length - 3} more updates
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                         
-                                        <div className="flex items-center gap-4 pt-1 text-xs text-stone-400">
+                                        <div className="flex items-center gap-4 pt-2 text-xs text-stone-400">
                                             {task.due_date && (
                                                 <span className={`flex items-center gap-1 ${task.status !== 'Completed' && isPast(parseISO(task.due_date)) ? 'text-red-500 font-medium' : ''}`}>
                                                     <Clock className="w-3 h-3" />
