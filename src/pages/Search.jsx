@@ -36,33 +36,46 @@ const getLevenshteinDistance = (a, b) => {
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [deathYear, setDeathYear] = useState('');
+  // Filters
   const [familyName, setFamilyName] = useState('');
   const [section, setSection] = useState('all');
-  
-  // Debounce state to avoid too many API calls
+  const [veteranStatus, setVeteranStatus] = useState('all');
+  const [birthYearMin, setBirthYearMin] = useState('');
+  const [birthYearMax, setBirthYearMax] = useState('');
+  const [deathYearMin, setDeathYearMin] = useState('');
+  const [deathYearMax, setDeathYearMax] = useState('');
+
+  // Debounce state
   const [currentPage, setCurrentPage] = useState(1);
   const [debouncedParams, setDebouncedParams] = useState({
       term: '',
-      year: '',
       family: '',
-      section: 'all'
+      section: 'all',
+      veteran: 'all',
+      bMin: '',
+      bMax: '',
+      dMin: '',
+      dMax: ''
   });
 
-  // Effect to debounce inputs and reset page
+  // Effect to debounce inputs
   React.useEffect(() => {
       const timer = setTimeout(() => {
           setDebouncedParams({
               term: searchTerm,
-              year: deathYear,
               family: familyName,
-              section: section
+              section: section,
+              veteran: veteranStatus,
+              bMin: birthYearMin,
+              bMax: birthYearMax,
+              dMin: deathYearMin,
+              dMax: deathYearMax
           });
-          setCurrentPage(1); // Reset to page 1 on new search
+          setCurrentPage(1);
       }, 500);
 
       return () => clearTimeout(timer);
-  }, [searchTerm, deathYear, familyName, section]);
+  }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
 
   const { data: queryData, isLoading, error } = useQuery({
     queryKey: ['searchDeceased', debouncedParams, currentPage],
@@ -70,9 +83,13 @@ export default function SearchPage() {
         try {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedParams.term,
-                year: debouncedParams.year,
                 family_name: debouncedParams.family,
                 section: debouncedParams.section,
+                veteran_status: debouncedParams.veteran,
+                birth_year_min: debouncedParams.bMin,
+                birth_year_max: debouncedParams.bMax,
+                death_year_min: debouncedParams.dMin,
+                death_year_max: debouncedParams.dMax,
                 page: currentPage,
                 limit: 12
             });
@@ -174,15 +191,6 @@ export default function SearchPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-stone-600">Year of Passing</Label>
-                <Input 
-                  placeholder="e.g. 1995" 
-                  value={deathYear}
-                  onChange={(e) => setDeathYear(e.target.value)}
-                  className="bg-stone-50 border-stone-300"
-                />
-              </div>
-              <div className="space-y-2">
                 <Label className="text-stone-600">Family Name</Label>
                 <Input 
                   placeholder="e.g. Smith" 
@@ -190,6 +198,58 @@ export default function SearchPage() {
                   onChange={(e) => setFamilyName(e.target.value)}
                   className="bg-stone-50 border-stone-300"
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-stone-600">Veteran Status</Label>
+                <Select value={veteranStatus} onValueChange={setVeteranStatus}>
+                  <SelectTrigger className="bg-stone-50 border-stone-300">
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="true">Veteran</SelectItem>
+                    <SelectItem value="false">Non-Veteran</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date Ranges */}
+              <div className="space-y-2 col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                      <Label className="text-stone-600">Birth Year Range</Label>
+                      <div className="flex gap-2">
+                          <Input 
+                              placeholder="From" 
+                              value={birthYearMin}
+                              onChange={(e) => setBirthYearMin(e.target.value)}
+                              className="bg-stone-50 border-stone-300"
+                          />
+                          <Input 
+                              placeholder="To" 
+                              value={birthYearMax}
+                              onChange={(e) => setBirthYearMax(e.target.value)}
+                              className="bg-stone-50 border-stone-300"
+                          />
+                      </div>
+                  </div>
+                  <div className="space-y-2">
+                      <Label className="text-stone-600">Passing Year Range</Label>
+                      <div className="flex gap-2">
+                          <Input 
+                              placeholder="From" 
+                              value={deathYearMin}
+                              onChange={(e) => setDeathYearMin(e.target.value)}
+                              className="bg-stone-50 border-stone-300"
+                          />
+                          <Input 
+                              placeholder="To" 
+                              value={deathYearMax}
+                              onChange={(e) => setDeathYearMax(e.target.value)}
+                              className="bg-stone-50 border-stone-300"
+                          />
+                      </div>
+                  </div>
               </div>
             </div>
           )}
