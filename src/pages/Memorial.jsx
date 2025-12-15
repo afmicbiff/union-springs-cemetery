@@ -16,8 +16,13 @@ import { createPageUrl } from '@/utils';
 export default function MemorialPage() {
     const [searchParams] = useSearchParams();
     const id = searchParams.get('id');
+    const location = useLocation();
     const queryClient = useQueryClient();
     const [isUploading, setIsUploading] = useState(false);
+
+    const backSearchUrl = location.state?.search 
+        ? `${createPageUrl('Search')}${location.state.search}` 
+        : createPageUrl('Search');
 
     // Fetch Deceased Details
     const { data: deceased, isLoading } = useQuery({
