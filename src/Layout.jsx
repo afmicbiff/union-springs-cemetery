@@ -1,9 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
@@ -27,7 +33,16 @@ export default function Layout({ children }) {
     { label: 'Deceased Search', path: '/search', icon: Search },
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
-    { label: 'Admin', path: '/admin', icon: Lock },
+    { 
+      label: 'Admin', 
+      path: '/admin', 
+      icon: Lock,
+      isDropdown: true,
+      items: [
+        { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
+        { label: 'Employees', path: '/employee-resources', icon: Users }
+      ]
+    },
   ];
 
   return (
@@ -52,16 +67,38 @@ export default function Layout({ children }) {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
               {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={createPageUrl(item.path.replace('/', '')) || '/'}
-                  className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 ${
-                    location.pathname === item.path ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
-                  }`}
-                >
-                  <item.icon className="w-3.5 h-3.5" />
-                  {item.label}
-                </Link>
+                item.isDropdown ? (
+                  <DropdownMenu key={item.label}>
+                    <DropdownMenuTrigger className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 focus:outline-none ${
+                      location.pathname.startsWith('/admin') || location.pathname === '/employee-resources' ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
+                    }`}>
+                      <item.icon className="w-3.5 h-3.5" />
+                      {item.label}
+                      <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-stone-900 border-stone-700 text-stone-200">
+                      {item.items.map((subItem) => (
+                        <DropdownMenuItem key={subItem.label} asChild className="focus:bg-stone-800 focus:text-white cursor-pointer">
+                          <Link to={createPageUrl(subItem.path.replace('/', ''))}>
+                            <subItem.icon className="w-4 h-4 mr-2" />
+                            {subItem.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={createPageUrl(item.path.replace('/', '')) || '/'}
+                    className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 ${
+                      location.pathname === item.path ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
+                    }`}
+                  >
+                    <item.icon className="w-3.5 h-3.5" />
+                    {item.label}
+                  </Link>
+                )
               ))}
             </nav>
 
@@ -80,15 +117,37 @@ export default function Layout({ children }) {
           <div className="md:hidden bg-stone-900 border-t border-stone-800">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  to={createPageUrl(item.path.replace('/', '')) || '/'}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-4 rounded-md text-base font-medium text-stone-300 hover:text-white hover:bg-stone-800"
-                >
-                  <item.icon className="w-5 h-5 text-teal-500" />
-                  {item.label}
-                </Link>
+                item.isDropdown ? (
+                  <div key={item.label} className="space-y-1">
+                    <div className="flex items-center gap-3 px-3 py-4 text-base font-medium text-stone-300">
+                      <item.icon className="w-5 h-5 text-teal-500" />
+                      {item.label}
+                    </div>
+                    <div className="pl-11 space-y-1">
+                      {item.items.map((subItem) => (
+                        <Link
+                          key={subItem.label}
+                          to={createPageUrl(subItem.path.replace('/', ''))}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium text-stone-400 hover:text-white hover:bg-stone-800"
+                        >
+                          <subItem.icon className="w-4 h-4 text-stone-500" />
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={createPageUrl(item.path.replace('/', '')) || '/'}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-3 py-4 rounded-md text-base font-medium text-stone-300 hover:text-white hover:bg-stone-800"
+                  >
+                    <item.icon className="w-5 h-5 text-teal-500" />
+                    {item.label}
+                  </Link>
+                )
               ))}
             </div>
           </div>
