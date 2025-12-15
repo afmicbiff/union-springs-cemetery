@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
-import { differenceInMinutes, parseISO } from 'npm:date-fns@3.6.0';
+import { differenceInMinutes, differenceInHours, parseISO } from 'npm:date-fns@3.6.0';
 
 Deno.serve(async (req) => {
     try {
@@ -19,13 +19,30 @@ Deno.serve(async (req) => {
             const eventTime = parseISO(event.start_time);
             const minutesUntil = differenceInMinutes(eventTime, now);
 
-            if (minutesUntil < 0 || minutesUntil > 65) continue; // Optimization: only check near-term events
-
-            const reminders = event.reminders_sent || { "1h": false, "30m": false, "15m": false };
+            // Calculate differences
+            const hoursUntil = differenceInHours(eventTime, now);
+            const reminders = event.reminders_sent || {};
             let needsUpdate = false;
             let alertType = null;
 
-            // Check thresholds
+            // Check thresholds for Invoice Due (Longer term)
+            if (event.type === 'invoice_due') {
+                if (hoursUntil <= 168 && hoursUntil > 72 && !reminders["7d"]) { // 7 Days (168h)
+                    reminders["7d"] = true;
+                    alertType = "7 days";
+                    needsUpdate = true;
+                } else if (hoursUntil <= 72 && hoursUntil > 24 && !reminders["3d"]) { // 3 Days (72h)
+                    reminders["3d"] = true;
+                    alertType = "3 days";
+                    needsUpdate = true;
+                } else if (hoursUntil <= 24 && hoursUntil > 1 && !reminders["1d"]) { // 1 Day (24h)
+                    reminders["1d"] = true;
+                    alertType = "1 day";
+                    needsUpdate = true;
+                }
+            }
+
+            // Check thresholds for all events (Short term)
             if (minutesUntil <= 60 && minutesUntil > 30 && !reminders["1h"]) {
                 reminders["1h"] = true;
                 alertType = "1 hour";
