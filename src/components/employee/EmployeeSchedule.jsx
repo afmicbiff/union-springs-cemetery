@@ -14,6 +14,7 @@ export default function EmployeeSchedule() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const queryClient = useQueryClient();
 
     // Get Current User
     const { data: user } = useQuery({
@@ -40,7 +41,7 @@ export default function EmployeeSchedule() {
         initialData: []
     });
 
-    const createProfileMutation = useQueryClient().getMutationCache().build(useMutation({
+    const createProfileMutation = useMutation({
         mutationFn: async () => {
             const names = (user.full_name || "New Employee").split(' ');
             const first = names[0];
@@ -67,11 +68,11 @@ export default function EmployeeSchedule() {
             });
         },
         onSuccess: () => {
-            useQueryClient().invalidateQueries(['my-employee-profile']);
+            queryClient.invalidateQueries({ queryKey: ['my-employee-profile'] });
             toast.success("Profile created! You can now view your schedule.");
         },
         onError: (err) => toast.error("Failed to create profile: " + err.message)
-    }));
+    });
 
     // Filter events for this employee
     const myEvents = events.filter(e => e.attendee_ids?.includes(employee?.id));
@@ -193,36 +194,11 @@ export default function EmployeeSchedule() {
                     Create a profile to access your schedule and tasks.
                 </p>
                 <Button 
-                    onClick={() => {
-                        const names = (user.full_name || "New Employee").split(' ');
-                        const first = names[0];
-                        const last = names.slice(1).join(' ') || "User";
-                        
-                        base44.entities.Employee.create({
-                            first_name: first,
-                            last_name: last,
-                            email: user.email,
-                            employment_type: "Paid Employee",
-                            address_street: "Pending",
-                            address_state: "Pending",
-                            address_zip: "00000",
-                            phone_primary: "000-000-0000",
-                            date_of_birth: "1970-01-01",
-                            ssn: "000-00-0000",
-                            employee_number: "EMP-" + Math.floor(Math.random() * 10000),
-                            marital_status: "Single",
-                            emergency_contact_first_name: "Pending",
-                            emergency_contact_last_name: "Pending",
-                            emergency_contact_phone: "000-000-0000",
-                            emergency_contact_relationship: "Pending"
-                        }).then(() => {
-                             queryClient.invalidateQueries(['my-employee-profile']);
-                             toast.success("Profile created successfully");
-                        }).catch(err => toast.error("Error: " + err.message));
-                    }}
+                    onClick={() => createProfileMutation.mutate()}
                     className="bg-teal-700 hover:bg-teal-800"
+                    disabled={createProfileMutation.isPending}
                 >
-                    Create My Profile
+                    {createProfileMutation.isPending ? "Creating..." : "Create My Profile"}
                 </Button>
             </div>
         );
