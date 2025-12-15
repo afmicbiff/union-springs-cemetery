@@ -5,8 +5,10 @@ import { format, startOfWeek, addDays, startOfMonth, endOfMonth, endOfWeek, isSa
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Clock, MapPin, AlignLeft } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, MapPin, AlignLeft, UserPlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function EmployeeSchedule() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -37,6 +39,39 @@ export default function EmployeeSchedule() {
         enabled: !!employee?.id,
         initialData: []
     });
+
+    const createProfileMutation = useQueryClient().getMutationCache().build(useMutation({
+        mutationFn: async () => {
+            const names = (user.full_name || "New Employee").split(' ');
+            const first = names[0];
+            const last = names.slice(1).join(' ') || "User";
+            
+            await base44.entities.Employee.create({
+                first_name: first,
+                last_name: last,
+                email: user.email,
+                employment_type: "Paid Employee",
+                // Fill required placeholders
+                address_street: "Pending",
+                address_state: "Pending",
+                address_zip: "00000",
+                phone_primary: "000-000-0000",
+                date_of_birth: "1970-01-01",
+                ssn: "000-00-0000",
+                employee_number: "EMP-" + Math.floor(Math.random() * 10000),
+                marital_status: "Single",
+                emergency_contact_first_name: "Pending",
+                emergency_contact_last_name: "Pending",
+                emergency_contact_phone: "000-000-0000",
+                emergency_contact_relationship: "Pending"
+            });
+        },
+        onSuccess: () => {
+            useQueryClient().invalidateQueries(['my-employee-profile']);
+            toast.success("Profile created! You can now view your schedule.");
+        },
+        onError: (err) => toast.error("Failed to create profile: " + err.message)
+    }));
 
     // Filter events for this employee
     const myEvents = events.filter(e => e.attendee_ids?.includes(employee?.id));
@@ -145,7 +180,53 @@ export default function EmployeeSchedule() {
     };
 
     if (!user) return <div className="p-4 text-center">Please log in to view your schedule.</div>;
-    if (!employee) return <div className="p-4 text-center">No employee profile found for {user.email}.</div>;
+    
+    if (!employee) {
+        return (
+            <div className="p-12 text-center bg-stone-50 rounded-lg border border-stone-200 border-dashed">
+                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <UserPlus className="w-8 h-8 text-stone-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-stone-900 mb-2">Profile Missing</h3>
+                <p className="text-stone-500 max-w-md mx-auto mb-6">
+                    No employee record was found for <span className="font-medium text-stone-700">{user.email}</span>. 
+                    Create a profile to access your schedule and tasks.
+                </p>
+                <Button 
+                    onClick={() => {
+                        const names = (user.full_name || "New Employee").split(' ');
+                        const first = names[0];
+                        const last = names.slice(1).join(' ') || "User";
+                        
+                        base44.entities.Employee.create({
+                            first_name: first,
+                            last_name: last,
+                            email: user.email,
+                            employment_type: "Paid Employee",
+                            address_street: "Pending",
+                            address_state: "Pending",
+                            address_zip: "00000",
+                            phone_primary: "000-000-0000",
+                            date_of_birth: "1970-01-01",
+                            ssn: "000-00-0000",
+                            employee_number: "EMP-" + Math.floor(Math.random() * 10000),
+                            marital_status: "Single",
+                            emergency_contact_first_name: "Pending",
+                            emergency_contact_last_name: "Pending",
+                            emergency_contact_phone: "000-000-0000",
+                            emergency_contact_relationship: "Pending"
+                        }).then(() => {
+                             queryClient.invalidateQueries(['my-employee-profile']);
+                             toast.success("Profile created successfully");
+                        }).catch(err => toast.error("Error: " + err.message));
+                    }}
+                    className="bg-teal-700 hover:bg-teal-800"
+                >
+                    Create My Profile
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <Card className="h-full">
