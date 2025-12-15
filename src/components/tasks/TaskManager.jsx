@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { format, isPast, parseISO } from 'date-fns';
 import { toast } from "sonner";
 import {
@@ -22,6 +22,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     const [editingTask, setEditingTask] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
+    const [showArchived, setShowArchived] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -70,7 +71,15 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
         mutationFn: (id) => base44.entities.Task.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries(['tasks']);
-            toast.success("Task deleted");
+            toast.success("Task deleted permanently");
+        }
+    });
+
+    const archiveTaskMutation = useMutation({
+        mutationFn: ({ id, is_archived }) => base44.entities.Task.update(id, { is_archived }),
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries(['tasks']);
+            toast.success(variables.is_archived ? "Task archived" : "Task unarchived");
         }
     });
 
@@ -91,6 +100,13 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
     // Filter Logic
     const filteredTasks = tasks.filter(task => {
+        // Archive Filter
+        if (showArchived) {
+            if (!task.is_archived) return false;
+        } else {
+            if (task.is_archived) return false;
+        }
+
         // Permission Filter
         if (!isAdmin && currentEmployeeId && task.assignee_id !== currentEmployeeId) {
             return false;
@@ -138,9 +154,23 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                         {isAdmin ? 'Manage all tasks and assignments.' : 'Track your assigned work.'}
                     </CardDescription>
                 </div>
-                <Button onClick={() => { setEditingTask(null); setIsDialogOpen(true); }} className="bg-teal-700 hover:bg-teal-800">
-                    <Plus className="w-4 h-4 mr-2" /> New Task
-                </Button>
+                <div className="flex gap-2">
+                    {isAdmin && (
+                        <Button 
+                            variant={showArchived ? "secondary" : "outline"} 
+                            onClick={() => setShowArchived(!showArchived)}
+                            className={showArchived ? "bg-stone-200" : ""}
+                        >
+                            <Archive className="w-4 h-4 mr-2" />
+                            {showArchived ? "View Active Tasks" : "View Archive"}
+                        </Button>
+                    )}
+                    {!showArchived && (
+                        <Button onClick={() => { setEditingTask(null); setIsDialogOpen(true); }} className="bg-teal-700 hover:bg-teal-800">
+                            <Plus className="w-4 h-4 mr-2" /> New Task
+                        </Button>
+                    )}
+                </div>
             </CardHeader>
             <CardContent>
                 {/* Toolbar */}
@@ -219,14 +249,35 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => { setEditingTask(task); setIsDialogOpen(true); }}>
-                                            <Pencil className="w-4 h-4 mr-2" /> Edit
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="text-red-600" onClick={() => {
-                                            if(confirm("Delete this task?")) deleteTaskMutation.mutate(task.id);
-                                        }}>
-                                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                        </DropdownMenuItem>
+                                        {!task.is_archived && (
+                                            <DropdownMenuItem onClick={() => { setEditingTask(task); setIsDialogOpen(true); }}>
+                                                <Pencil className="w-4 h-4 mr-2" /> Edit
+                                            </DropdownMenuItem>
+                                        )}
+                                        
+                                        {isAdmin && !task.is_archived && (
+                                            <DropdownMenuItem onClick={() => {
+                                                if(confirm("Archive this task?")) archiveTaskMutation.mutate({ id: task.id, is_archived: true });
+                                            }}>
+                                                <Archive className="w-4 h-4 mr-2" /> Archive
+                                            </DropdownMenuItem>
+                                        )}
+
+                                        {isAdmin && task.is_archived && (
+                                            <DropdownMenuItem onClick={() => {
+                                                archiveTaskMutation.mutate({ id: task.id, is_archived: false });
+                                            }}>
+                                                <RotateCcw className="w-4 h-4 mr-2" /> Restore
+                                            </DropdownMenuItem>
+                                        )}
+
+                                        {isAdmin && (
+                                            <DropdownMenuItem className="text-red-600" onClick={() => {
+                                                if(confirm("Permanently delete this task? This cannot be undone.")) deleteTaskMutation.mutate(task.id);
+                                            }}>
+                                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                            </DropdownMenuItem>
+                                        )}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
