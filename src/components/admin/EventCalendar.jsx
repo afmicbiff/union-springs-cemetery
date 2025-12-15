@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, parseISO, getDay, getDate, getMonth, startOfDay, isValid } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, addWeeks, addYears, parseISO, getDay, getDate, getMonth, startOfDay, isValid } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -135,6 +135,20 @@ export default function EventCalendar() {
                         // Don't show recurring events before the start date
                         if (dayStart < eventStartDay) return false;
 
+                        // Check Recurrence End
+                        let endDate = null;
+                        if (e.recurrence_end_date) {
+                            endDate = startOfDay(parseISO(e.recurrence_end_date));
+                        } else if (e.recurrence_count) {
+                            const count = e.recurrence_count;
+                            if (e.recurrence === 'daily') endDate = addDays(eventStartDay, count - 1);
+                            if (e.recurrence === 'weekly') endDate = addWeeks(eventStartDay, count - 1);
+                            if (e.recurrence === 'monthly') endDate = addMonths(eventStartDay, count - 1);
+                            if (e.recurrence === 'yearly') endDate = addYears(eventStartDay, count - 1);
+                        }
+
+                        if (endDate && dayStart > endDate) return false;
+
                         if (e.recurrence === 'daily') return true;
                         if (e.recurrence === 'weekly') return getDay(day) === getDay(eventStart);
                         if (e.recurrence === 'monthly') return getDate(day) === getDate(eventStart);
@@ -235,6 +249,9 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
         time: "09:00",
         description: "",
         recurrence: "none",
+        recurrence_end_type: "never", // never, on_date, after_occurrences
+        recurrence_end_date: "",
+        recurrence_count: "",
         attendee_ids: []
     });
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -252,15 +269,25 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
         const [hours, minutes] = formData.time.split(':');
         startDateTime.setHours(parseInt(hours), parseInt(minutes));
         
-        createEvent({
+        const eventData = {
             title: formData.title,
             type: formData.type,
             start_time: startDateTime.toISOString(),
             description: formData.description,
             recurrence: formData.recurrence,
             attendee_ids: formData.attendee_ids,
-            reminders_sent: { "1h": false, "30m": false, "15m": false } // Reset reminders
-        });
+            reminders_sent: { "1h": false, "30m": false, "15m": false }
+        };
+
+        if (formData.recurrence !== 'none') {
+            if (formData.recurrence_end_type === 'on_date' && formData.recurrence_end_date) {
+                eventData.recurrence_end_date = new Date(formData.recurrence_end_date).toISOString();
+            } else if (formData.recurrence_end_type === 'after_occurrences' && formData.recurrence_count) {
+                eventData.recurrence_count = parseInt(formData.recurrence_count);
+            }
+        }
+
+        createEvent(eventData);
         
         setFormData({ 
             title: "", 
@@ -268,6 +295,9 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
             time: "09:00", 
             description: "", 
             recurrence: "none",
+            recurrence_end_type: "never",
+            recurrence_end_date: "",
+            recurrence_count: "",
             attendee_ids: []
         }); 
     };
@@ -345,6 +375,67 @@ function EventDialog({ isOpen, onClose, selectedDate, createEvent, employees }) 
                             </SelectContent>
                         </Select>
                     </div>
+
+                    {formData.recurrence !== 'none' && (
+                        <div className="space-y-4 border p-3 rounded-md bg-stone-50">
+                            <Label>Ends</Label>
+                            <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="radio" 
+                                        id="end-never" 
+                                        name="recurrence_end" 
+                                        checked={formData.recurrence_end_type === 'never'}
+                                        onChange={() => setFormData({...formData, recurrence_end_type: 'never'})}
+                                        className="text-teal-600 focus:ring-teal-500"
+                                    />
+                                    <Label htmlFor="end-never" className="font-normal">Never</Label>
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="radio" 
+                                        id="end-date" 
+                                        name="recurrence_end" 
+                                        checked={formData.recurrence_end_type === 'on_date'}
+                                        onChange={() => setFormData({...formData, recurrence_end_type: 'on_date'})}
+                                        className="text-teal-600 focus:ring-teal-500"
+                                    />
+                                    <Label htmlFor="end-date" className="font-normal">On Date</Label>
+                                    {formData.recurrence_end_type === 'on_date' && (
+                                        <Input 
+                                            type="date" 
+                                            value={formData.recurrence_end_date}
+                                            onChange={(e) => setFormData({...formData, recurrence_end_date: e.target.value})}
+                                            className="h-8 w-40 ml-2"
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="radio" 
+                                        id="end-count" 
+                                        name="recurrence_end" 
+                                        checked={formData.recurrence_end_type === 'after_occurrences'}
+                                        onChange={() => setFormData({...formData, recurrence_end_type: 'after_occurrences'})}
+                                        className="text-teal-600 focus:ring-teal-500"
+                                    />
+                                    <Label htmlFor="end-count" className="font-normal">After</Label>
+                                    {formData.recurrence_end_type === 'after_occurrences' && (
+                                        <Input 
+                                            type="number" 
+                                            min="1"
+                                            value={formData.recurrence_count}
+                                            onChange={(e) => setFormData({...formData, recurrence_count: e.target.value})}
+                                            className="h-8 w-20 ml-2"
+                                        />
+                                    )}
+                                    <span className="text-sm text-stone-600">occurrences</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label>Attendees (Company Employees)</Label>

@@ -4,7 +4,7 @@ import { format } from 'npm:date-fns@3.6.0';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const { title, type, start_time, end_time, description, recurrence, attendee_ids, reminders_sent } = await req.json();
+        const { title, type, start_time, end_time, description, recurrence, recurrence_end_date, recurrence_count, attendee_ids, reminders_sent } = await req.json();
 
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -17,6 +17,8 @@ Deno.serve(async (req) => {
             end_time,
             description,
             recurrence,
+            recurrence_end_date,
+            recurrence_count,
             attendee_ids: attendee_ids || [],
             reminders_sent: reminders_sent || {}
         });
