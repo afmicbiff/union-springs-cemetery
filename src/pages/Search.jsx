@@ -111,24 +111,7 @@ export default function SearchPage() {
   // suggestion logic removed or needs update (client side suggestion requires full list or backend support)
   // For now we keep it simple as requested - server side filtering.
 
-  // "Did you mean?" logic
-  if (filteredResults.length === 0 && searchTerm.length > 2) {
-    let closestMatch = null;
-    let minDistance = Infinity;
-    
-    deceasedList.forEach(person => {
-      const fullName = `${person.first_name} ${person.last_name}`;
-      const dist = getLevenshteinDistance(searchTerm.toLowerCase(), fullName.toLowerCase());
-      if (dist < minDistance && dist < 4) { // Threshold of 4
-        minDistance = dist;
-        closestMatch = fullName;
-      }
-    });
-
-    if (closestMatch) {
-      suggestion = closestMatch;
-    }
-  }
+  // "Did you mean?" logic removed due to missing full list client-side
 
   return (
     <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
