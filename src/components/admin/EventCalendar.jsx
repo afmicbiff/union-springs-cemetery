@@ -31,7 +31,7 @@ export default function EventCalendar() {
 
     // Fetch Employees for Attendees
     const { data: employees } = useQuery({
-        queryKey: ['employees-list'],
+        queryKey: ['employees-list-all'],
         queryFn: () => base44.entities.Employee.list({ limit: 1000 }),
         initialData: []
     });
@@ -411,47 +411,55 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
         const search = employeeSearch.toLowerCase().trim();
         const searchTerms = search.split(/\s+/);
 
-        // Simple Levenshtein distance for fuzzy matching
-        const getDist = (s, t) => {
-            if (!s || !t) return 99;
-            const d = []; 
-            for (let i = 0; i <= s.length; i++) d[i] = [i];
-            for (let j = 0; j <= t.length; j++) d[0][j] = j;
-            for (let i = 1; i <= s.length; i++) {
-                for (let j = 1; j <= t.length; j++) {
-                    const cost = s[i-1] === t[j-1] ? 0 : 1;
-                    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+cost);
+        // Levenshtein distance
+        const getDist = (a, b) => {
+            if (a.length === 0) return b.length;
+            if (b.length === 0) return a.length;
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
                 }
             }
-            return d[s.length][t.length];
+            return matrix[b.length][a.length];
         };
 
         return employees.filter(emp => {
             const first = (emp.first_name || "").toLowerCase();
             const last = (emp.last_name || "").toLowerCase();
             const email = (emp.email || "").toLowerCase();
-            const full = `${first} ${last}`;
+            const full = `${first} ${last}`.trim();
             
-            // 1. Exact match (inclusion)
+            // 1. Direct match
             if (full.includes(search) || email.includes(search)) return true;
-            
-            // 2. Term match (if multiple terms, check if all are present)
-            if (searchTerms.length > 1) {
-                const allTermsMatch = searchTerms.every(term => full.includes(term) || email.includes(term));
-                if (allTermsMatch) return true;
-            }
 
-            // 3. Fuzzy match (Levenshtein) for typos
-            // Check first name, last name, and email parts against search term (if single term)
-            // Only perform if search is reasonably long to avoid false positives on short strings
-            if (searchTerms.length === 1 && search.length > 2) {
-                const targets = [first, last, ...email.split(/[@.]/)];
-                // Allow edits proportional to length (e.g. 1 error for 3-4 chars, 2 for 5+)
-                const maxDist = search.length > 4 ? 2 : 1;
-                return targets.some(t => getDist(t, search) <= maxDist);
-            }
+            // 2. Fuzzy match parts
+            const targets = [first, last, full, ...email.split(/[@.]/)];
             
-            return false;
+            // Allow more leniency
+            const maxDist = search.length <= 3 ? 1 : (search.length <= 6 ? 2 : 3);
+
+            return targets.some(target => {
+                // If target is empty, skip
+                if (!target) return false;
+                // If target contains search term
+                if (target.includes(search)) return true;
+                // If search term is long enough, try fuzzy
+                if (search.length > 1) {
+                   return getDist(target, search) <= maxDist;
+                }
+                return false;
+            });
         });
     }, [employees, employeeSearch]);
 
