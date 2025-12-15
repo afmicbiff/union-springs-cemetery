@@ -8,6 +8,7 @@ import Visitor from './pages/Visitor';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
 import Memorial from './pages/Memorial';
+import Profile from './pages/Profile';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
     "Memorial": Memorial,
+    "Profile": Profile,
 }
 
 export const pagesConfig = {

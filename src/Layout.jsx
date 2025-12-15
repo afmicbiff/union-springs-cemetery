@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Toaster } from "sonner";
 
@@ -27,6 +27,7 @@ export default function Layout({ children }) {
     { label: 'Deceased Search', path: '/search', icon: Search },
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
+    { label: 'Profile', path: '/profile', icon: UserCircle },
     { label: 'Admin', path: '/admin', icon: Lock },
   ];
 

@@ -55,6 +55,18 @@ export default function MemorialPage() {
         initialData: []
     });
 
+    // Fetch Current User for Pre-filling
+    const { data: currentUser } = useQuery({
+        queryKey: ['currentUser'],
+        queryFn: async () => {
+            try {
+                return await base44.auth.me();
+            } catch {
+                return null;
+            }
+        }
+    });
+
     // Mutations
     const uploadMutation = useMutation({
         mutationFn: async (file) => {
@@ -273,16 +285,39 @@ export default function MemorialPage() {
                                                 e.preventDefault();
                                                 const formData = new FormData(e.target);
                                                 condolenceMutation.mutate(Object.fromEntries(formData));
-                                                e.target.reset();
+                                                if (!currentUser) {
+                                                    e.target.reset();
+                                                } else {
+                                                    // Reset only message if user is logged in
+                                                    e.target.elements.message.value = '';
+                                                }
                                             }}
                                             className="space-y-4"
                                         >
-                                            <Input name="author_name" placeholder="Your Name" required className="bg-white" />
-                                            <Input name="relation" placeholder="Relation (e.g. Friend)" className="bg-white" />
+                                            <Input 
+                                                name="author_name" 
+                                                placeholder="Your Name" 
+                                                required 
+                                                className="bg-white"
+                                                defaultValue={currentUser?.full_name || ''}
+                                                key={currentUser?.full_name ? 'user-name-loaded' : 'user-name-loading'}
+                                            />
+                                            <Input 
+                                                name="relation" 
+                                                placeholder="Relation (e.g. Friend)" 
+                                                className="bg-white"
+                                                defaultValue={currentUser?.default_relation || ''}
+                                                key={currentUser?.default_relation ? 'user-relation-loaded' : 'user-relation-loading'}
+                                            />
                                             <Textarea name="message" placeholder="Share a memory or condolence..." required className="bg-white min-h-[120px]" />
                                             <Button type="submit" disabled={condolenceMutation.isPending} className="w-full bg-teal-700 hover:bg-teal-800">
                                                 {condolenceMutation.isPending ? "Posting..." : "Post Tribute"}
                                             </Button>
+                                            {!currentUser && (
+                                                <p className="text-xs text-center text-stone-500">
+                                                    <Link to={createPageUrl('Profile')} className="underline hover:text-teal-700">Sign in</Link> to save your details for next time.
+                                                </p>
+                                            )}
                                         </form>
                                     </CardContent>
                                 </Card>
