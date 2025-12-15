@@ -10,8 +10,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from 'date-fns';
+import TaskManager from "@/components/tasks/TaskManager";
 
 export default function EmployeesPage() {
+    // Fetch Current User & Employee Profile for Task Filtering
+    const { data: user } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me().catch(() => null),
+    });
+
+    const { data: employeeProfile } = useQuery({
+        queryKey: ['my-employee-profile-page', user?.email],
+        queryFn: async () => {
+            if (!user?.email) return null;
+            const res = await base44.entities.Employee.list({ limit: 1000 });
+            return res.find(e => e.email === user.email);
+        },
+        enabled: !!user?.email
+    });
     const { data: announcements } = useQuery({
         queryKey: ['announcements-public'],
         queryFn: () => base44.entities.Announcement.list('-date', 20),
@@ -38,6 +54,7 @@ export default function EmployeesPage() {
                     <TabsList className="mb-4">
                         <TabsTrigger value="resources">Resources & News</TabsTrigger>
                         <TabsTrigger value="schedule">My Schedule</TabsTrigger>
+                        <TabsTrigger value="tasks">My Tasks</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="resources">
@@ -133,6 +150,13 @@ export default function EmployeesPage() {
                 
                 <TabsContent value="schedule">
                     <EmployeeSchedule />
+                </TabsContent>
+
+                <TabsContent value="tasks">
+                    <TaskManager 
+                        isAdmin={false} 
+                        currentEmployeeId={employeeProfile?.id} 
+                    />
                 </TabsContent>
                 </Tabs>
             </div>

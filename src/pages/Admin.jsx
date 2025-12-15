@@ -32,6 +32,7 @@ import VendorManager from "@/components/admin/VendorManager";
 import EventCalendar from "@/components/admin/EventCalendar";
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
+import TaskManager from "@/components/tasks/TaskManager";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -215,7 +216,8 @@ export default function AdminDashboard() {
               <TabsTrigger value="bylaws" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Bylaws</TabsTrigger>
               <TabsTrigger value="calendar" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Event Calendar</TabsTrigger>
               <TabsTrigger value="announcements" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Announcements</TabsTrigger>
-            </TabsList>
+              <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Tasks</TabsTrigger>
+              </TabsList>
           </div>
 
           {/* OVERVIEW TAB */}
@@ -476,6 +478,11 @@ export default function AdminDashboard() {
           {/* ANNOUNCEMENTS TAB */}
           <TabsContent value="announcements">
               <AnnouncementManager />
+          </TabsContent>
+
+          {/* TASKS TAB */}
+          <TabsContent value="tasks">
+              <TaskManager isAdmin={true} />
           </TabsContent>
         </Tabs>
       </div>
