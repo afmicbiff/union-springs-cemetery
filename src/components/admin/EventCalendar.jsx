@@ -32,7 +32,7 @@ export default function EventCalendar() {
     // Fetch Employees for Attendees
     const { data: employees } = useQuery({
         queryKey: ['employees-list'],
-        queryFn: () => base44.entities.Employee.list({ limit: 100 }),
+        queryFn: () => base44.entities.Employee.list({ limit: 1000 }),
         initialData: []
     });
 
