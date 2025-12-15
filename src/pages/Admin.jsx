@@ -22,6 +22,7 @@ import {
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { format } from 'date-fns';
+import { toast } from "sonner";
 import OnboardingForm from "@/components/admin/OnboardingForm";
 import OnboardingGuide from "@/components/admin/OnboardingGuide";
 
@@ -176,7 +177,7 @@ export default function AdminDashboard() {
               }} 
               className="bg-stone-800 text-white hover:bg-stone-900"
            >
-              <Download className="w-4 h-4 mr-2" /> Import Legacy Data
+              <Upload className="w-4 h-4 mr-2" /> Import Legacy Data
            </Button>
         </div>
         </div>
