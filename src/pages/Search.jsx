@@ -337,7 +337,10 @@ export default function SearchPage() {
                            </div>
 
                            <div className="mt-4 flex justify-end">
-                              <Link to={`${createPageUrl('Memorial')}?id=${person.id}`}>
+                              <Link 
+                                to={`${createPageUrl('Memorial')}?id=${person.id}`}
+                                state={{ search: location.search }}
+                              >
                                   <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
                                      View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
                                   </Button>
