@@ -39,6 +39,7 @@ export default function SearchPage() {
   const [section, setSection] = useState('all');
   
   // Debounce state to avoid too many API calls
+  const [currentPage, setCurrentPage] = useState(1);
   const [debouncedParams, setDebouncedParams] = useState({
       term: '',
       year: '',
@@ -46,7 +47,7 @@ export default function SearchPage() {
       section: 'all'
   });
 
-  // Effect to debounce inputs
+  // Effect to debounce inputs and reset page
   React.useEffect(() => {
       const timer = setTimeout(() => {
           setDebouncedParams({
@@ -55,31 +56,35 @@ export default function SearchPage() {
               family: familyName,
               section: section
           });
-      }, 500); // 500ms delay
+          setCurrentPage(1); // Reset to page 1 on new search
+      }, 500);
 
       return () => clearTimeout(timer);
   }, [searchTerm, deathYear, familyName, section]);
 
-  const { data: searchResults, isLoading, error } = useQuery({
-    queryKey: ['searchDeceased', debouncedParams],
+  const { data: queryData, isLoading, error } = useQuery({
+    queryKey: ['searchDeceased', debouncedParams, currentPage],
     queryFn: async () => {
         try {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedParams.term,
                 year: debouncedParams.year,
                 family_name: debouncedParams.family,
-                section: debouncedParams.section
+                section: debouncedParams.section,
+                page: currentPage,
+                limit: 12
             });
-            return response.data?.results || [];
+            return response.data || { results: [], pagination: { total: 0, totalPages: 0 } };
         } catch (err) {
             console.error("Failed to search deceased records:", err);
-            return [];
+            return { results: [], pagination: { total: 0, totalPages: 0 } };
         }
     },
-    initialData: [],
+    initialData: { results: [], pagination: { total: 0, totalPages: 0 } },
   });
 
-  const filteredResults = searchResults;
+  const filteredResults = queryData.results || [];
+  const pagination = queryData.pagination || { total: 0, totalPages: 0, page: 1 };
 
   let suggestion = null;
   // suggestion logic removed or needs update (client side suggestion requires full list or backend support)
@@ -191,7 +196,7 @@ export default function SearchPage() {
         {/* Results */}
         <div className="space-y-4">
           <div className="flex justify-between items-center text-sm text-stone-500 px-2">
-            <span>Found {filteredResults.length} results</span>
+            <span>Found {pagination.total} results</span>
             {error && <span className="text-red-500">Error loading data</span>}
           </div>
 
@@ -282,13 +287,38 @@ export default function SearchPage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-white rounded-sm border border-stone-200">
-              <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
-              <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
+             <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
+             <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
             </div>
-          )}
-        </div>
+            )}
 
-      </div>
-    </div>
-  );
-}
+            {/* Pagination Controls */}
+            {pagination.total > 0 && (
+            <div className="flex justify-center items-center gap-4 pt-4 border-t border-stone-200">
+               <Button 
+                   variant="outline" 
+                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                   disabled={currentPage === 1 || isLoading}
+                   className="w-24"
+               >
+                   Previous
+               </Button>
+               <span className="text-stone-600 font-medium">
+                   Page {currentPage} of {pagination.totalPages || 1}
+               </span>
+               <Button 
+                   variant="outline" 
+                   onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))}
+                   disabled={currentPage >= pagination.totalPages || isLoading}
+                   className="w-24"
+               >
+                   Next
+               </Button>
+            </div>
+            )}
+            </div>
+
+            </div>
+            </div>
+            );
+            }

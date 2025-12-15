@@ -3,11 +3,13 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const { query, year, family_name, section } = await req.json();
+        const { query, year, family_name, section, page = 1, limit = 12 } = await req.json();
+        
+        // Parse pagination params
+        const pageNum = Math.max(1, parseInt(page));
+        const limitNum = Math.max(1, parseInt(limit));
 
         // Fetch all records (cached by DB layer usually, or we assume fast enough for 5k records)
-        // In a real DB with regex support we'd push this down, but this ensures "LIKE" support 
-        // works exactly as requested regardless of underlying DB capabilities.
         const allDeceased = await base44.entities.Deceased.list('-created_date', 5000);
 
         const filtered = allDeceased.filter(person => {
@@ -40,7 +42,21 @@ export default Deno.serve(async (req) => {
             return true;
         });
 
-        return Response.json({ results: filtered });
+        // Pagination Logic
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / limitNum);
+        const startIndex = (pageNum - 1) * limitNum;
+        const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
+
+        return Response.json({ 
+            results: paginatedResults,
+            pagination: {
+                total,
+                page: pageNum,
+                limit: limitNum,
+                totalPages
+            }
+        });
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
     }
