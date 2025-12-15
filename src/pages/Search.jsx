@@ -35,6 +35,7 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [deathYear, setDeathYear] = useState('');
+  const [familyName, setFamilyName] = useState('');
   const [section, setSection] = useState('all');
   
   const { data: deceasedList, isLoading } = useQuery({
@@ -55,9 +56,11 @@ export default function SearchPage() {
     
     const matchesYear = !deathYear || (person.date_of_death && person.date_of_death.includes(deathYear));
     
+    const matchesFamily = !familyName || (person.family_name && person.family_name.toLowerCase().includes(familyName.toLowerCase()));
+
     const matchesSection = section === 'all' || (person.plot_location && person.plot_location.startsWith(section));
 
-    return matchesName && matchesYear && matchesSection;
+    return matchesName && matchesYear && matchesFamily && matchesSection;
   });
 
   // "Did you mean?" logic
@@ -150,6 +153,15 @@ export default function SearchPage() {
                   className="bg-stone-50 border-stone-300"
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="text-stone-600">Family Name</Label>
+                <Input 
+                  placeholder="e.g. Smith" 
+                  value={familyName}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  className="bg-stone-50 border-stone-300"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -196,6 +208,11 @@ export default function SearchPage() {
                                 <h3 className="text-2xl font-serif font-bold text-stone-900">
                                     {person.first_name} {person.last_name}
                                 </h3>
+                                {person.family_name && (
+                                    <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
+                                        {person.family_name} Family
+                                    </Badge>
+                                )}
                                 {person.veteran_status && (
                                     <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
                                 )}
@@ -214,6 +231,11 @@ export default function SearchPage() {
                            <MapPin className="w-4 h-4 mr-2 text-red-600" />
                            <span>Plot Location: {person.plot_location}</span>
                          </div>
+                         {person.notes && (
+                           <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
+                              Note: {person.notes}
+                           </p>
+                         )}
                          <p className="text-stone-600 text-sm line-clamp-2 italic">
                             "{person.obituary}"
                          </p>
