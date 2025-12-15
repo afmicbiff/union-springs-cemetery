@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -276,9 +278,11 @@ export default function SearchPage() {
                        </div>
 
                        <div className="mt-4 flex justify-end">
-                          <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
-                             View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
-                          </Button>
+                          <Link to={`${createPageUrl('Memorial')}?id=${person.id}`}>
+                              <Button variant="link" className="text-teal-700 hover:text-teal-900 p-0 h-auto font-serif">
+                                 View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
+                              </Button>
+                          </Link>
                        </div>
                      </CardContent>
                    </div>
