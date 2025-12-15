@@ -386,7 +386,11 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                                                     {task.recurrence}
                                                 </span>
                                             )}
-                                        </div>
+                                            <span className="text-stone-300 mx-1">•</span>
+                                            <span className="text-stone-400 italic" title="Last Updated">
+                                                Updated {format(parseISO(task.updated_date || task.created_date), 'MMM d, h:mm a')}
+                                            </span>
+                                            </div>
                                     </div>
                                 </div>
 
