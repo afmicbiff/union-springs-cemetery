@@ -4,7 +4,7 @@ import { format } from 'npm:date-fns@3.6.0';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const { title, type, start_time, end_time, description, recurrence, recurrence_end_date, recurrence_count, attendee_ids, reminders_sent } = await req.json();
+        const { title, type, start_time, end_time, description, recurrence, recurrence_end_date, recurrence_count, attendee_ids, external_attendees, reminders_sent } = await req.json();
 
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -20,10 +20,15 @@ Deno.serve(async (req) => {
             recurrence_end_date,
             recurrence_count,
             attendee_ids: attendee_ids || [],
+            external_attendees: external_attendees || [],
             reminders_sent: reminders_sent || {}
         });
 
-        // 2. Fetch Attendees to Send Notifications
+        const formattedDate = format(new Date(start_time), "PPPP 'at' p");
+        const host = req.headers.get("host"); // e.g. base44-app-id.deno.dev
+        const rsvpBaseUrl = `https://${host}/functions/handleEventRSVP`;
+
+        // 2. Send Notifications to Internal Attendees (Employees)
         if (attendee_ids && attendee_ids.length > 0) {
             const allEmployees = await base44.asServiceRole.entities.Employee.list({ limit: 1000 });
             const attendees = allEmployees.filter(emp => attendee_ids.includes(emp.id));
@@ -63,6 +68,38 @@ Union Springs Cemetery Admin`
             });
 
             await Promise.all(promises);
+        }
+
+        // 3. Send Emails to External Attendees
+        if (external_attendees && external_attendees.length > 0) {
+             const externalPromises = external_attendees.map(async (guest) => {
+                if (!guest.email) return;
+
+                const acceptLink = `${rsvpBaseUrl}?id=${newEvent.id}&email=${encodeURIComponent(guest.email)}&status=accepted`;
+                const declineLink = `${rsvpBaseUrl}?id=${newEvent.id}&email=${encodeURIComponent(guest.email)}&status=declined`;
+
+                return base44.integrations.Core.SendEmail({
+                    to: guest.email,
+                    subject: `Event Invitation: ${title}`,
+                    body: `Hello ${guest.name || 'Guest'},
+
+You have been invited to an event at Union Springs Cemetery.
+
+Event: ${title}
+Date: ${formattedDate}
+Type: ${type}
+${description ? `Description: ${description}` : ''}
+
+Please confirm your attendance:
+
+[ACCEPT](${acceptLink})
+[DECLINE](${declineLink})
+
+Best regards,
+Union Springs Cemetery Admin`
+                });
+            });
+            await Promise.all(externalPromises);
         }
 
         // Notification for Creator (if not already included)

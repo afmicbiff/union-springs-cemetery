@@ -379,7 +379,7 @@ function EventDetailsDialog({ event, isOpen, onClose, employees, onDelete, onEdi
 
                     {attendees.length > 0 && (
                         <div>
-                            <Label className="text-xs text-stone-500 uppercase tracking-wider">Attendees</Label>
+                            <Label className="text-xs text-stone-500 uppercase tracking-wider">Internal Attendees</Label>
                             <div className="mt-2 space-y-1">
                                 {attendees.map(emp => (
                                     <div key={emp.id} className="flex items-center gap-2 text-sm text-stone-700">
@@ -387,6 +387,33 @@ function EventDetailsDialog({ event, isOpen, onClose, employees, onDelete, onEdi
                                             {emp.first_name[0]}{emp.last_name[0]}
                                         </div>
                                         {emp.first_name} {emp.last_name}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {event.external_attendees && event.external_attendees.length > 0 && (
+                        <div className="mt-4">
+                            <Label className="text-xs text-stone-500 uppercase tracking-wider">External Guests</Label>
+                            <div className="mt-2 space-y-1">
+                                {event.external_attendees.map((guest, idx) => (
+                                    <div key={idx} className="flex items-center justify-between gap-2 text-sm text-stone-700 bg-stone-50 p-2 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">
+                                                {(guest.name || "G")[0].toUpperCase()}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{guest.name || "Guest"}</span>
+                                                <span className="text-xs text-stone-400">{guest.email}</span>
+                                            </div>
+                                        </div>
+                                        <Badge variant="outline" className={`capitalize ${
+                                            guest.status === 'accepted' ? 'bg-green-100 text-green-800 border-green-200' : 
+                                            guest.status === 'declined' ? 'bg-red-100 text-red-800 border-red-200' : 'text-stone-500'
+                                        }`}>
+                                            {guest.status || 'pending'}
+                                        </Badge>
                                     </div>
                                 ))}
                             </div>
@@ -523,6 +550,7 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
             description: formData.description,
             recurrence: formData.recurrence,
             attendee_ids: formData.attendee_ids,
+            external_attendees: formData.external_attendees,
             reminders_sent: eventToEdit ? eventToEdit.reminders_sent : { "1h": false, "30m": false, "15m": false }
         };
 
@@ -544,6 +572,28 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
                 ? prev.attendee_ids.filter(id => id !== empId)
                 : [...prev.attendee_ids, empId]
         }));
+    };
+
+    const addExternalAttendee = () => {
+        setFormData(prev => ({
+            ...prev,
+            external_attendees: [...prev.external_attendees, { name: "", email: "", status: "pending" }]
+        }));
+    };
+
+    const removeExternalAttendee = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            external_attendees: prev.external_attendees.filter((_, i) => i !== index)
+        }));
+    };
+
+    const updateExternalAttendee = (index, field, value) => {
+        setFormData(prev => {
+            const updated = [...prev.external_attendees];
+            updated[index] = { ...updated[index], [field]: value };
+            return { ...prev, external_attendees: updated };
+        });
     };
 
     return (
@@ -703,6 +753,52 @@ function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventTo
                                 ))
                             )}
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label>External Guests</Label>
+                            <Button type="button" variant="outline" size="sm" onClick={addExternalAttendee} className="h-7 text-xs">
+                                <Plus className="w-3 h-3 mr-1" /> Add Guest
+                            </Button>
+                        </div>
+                        {formData.external_attendees.length > 0 ? (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {formData.external_attendees.map((attendee, index) => (
+                                    <div key={index} className="flex gap-2 items-start bg-stone-50 p-2 rounded-md border">
+                                        <div className="flex-1 space-y-1">
+                                            <Input 
+                                                placeholder="Name" 
+                                                value={attendee.name} 
+                                                onChange={(e) => updateExternalAttendee(index, 'name', e.target.value)}
+                                                className="h-8 text-sm"
+                                            />
+                                            <Input 
+                                                placeholder="Email (for invite)" 
+                                                value={attendee.email} 
+                                                onChange={(e) => updateExternalAttendee(index, 'email', e.target.value)}
+                                                className="h-8 text-sm"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col items-center gap-1">
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeExternalAttendee(index)} className="h-8 w-8 text-red-500 hover:text-red-700">
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                            {attendee.status && (
+                                                <Badge variant="outline" className={`text-[10px] capitalize ${
+                                                    attendee.status === 'accepted' ? 'text-green-600 border-green-200' : 
+                                                    attendee.status === 'declined' ? 'text-red-600 border-red-200' : 'text-stone-400'
+                                                }`}>
+                                                    {attendee.status}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-xs text-stone-500 italic p-2 border border-dashed rounded-md text-center">No external guests added.</p>
+                        )}
                     </div>
 
                     <div className="space-y-2">
