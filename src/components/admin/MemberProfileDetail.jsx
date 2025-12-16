@@ -64,11 +64,6 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     <div>
                         <h2 className="text-2xl font-serif font-bold text-stone-900 flex items-center gap-2">
                             {fullName}
-                            {isDialog && (
-                                <Link to={`${createPageUrl('MemberProfile')}?id=${member.id}`} target="_blank" className="ml-2 text-stone-400 hover:text-teal-600" title="Open full profile in new tab">
-                                    <ExternalLink className="w-5 h-5" />
-                                </Link>
-                            )}
                         </h2>
                         <div className="flex items-center gap-2 text-stone-500 text-sm mt-1">
                             <MapPin className="w-4 h-4" />
@@ -98,6 +93,13 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    {isDialog && (
+                        <Button variant="outline" size="icon" asChild title="Open Full Profile in New Window">
+                            <Link to={`${createPageUrl('MemberProfile')}?id=${member.id}`} target="_blank">
+                                <ExternalLink className="w-4 h-4 text-stone-600" />
+                            </Link>
+                        </Button>
+                    )}
                     <Button onClick={() => onEdit(member)} className="bg-teal-700 hover:bg-teal-800">
                         <Edit className="w-4 h-4 mr-2" /> Edit Profile
                     </Button>
