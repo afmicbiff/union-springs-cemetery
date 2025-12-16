@@ -9,12 +9,11 @@ export default function ServicesSection() {
     <section className="py-16 md:py-24 bg-stone-50 border-t border-stone-200">
        <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center gap-12 lg:gap-20">
           <div className="md:w-1/2 w-full">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-teal-900 rounded-sm transform translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform duration-500 opacity-20"></div>
+              <div className="relative group perspective-1000">
                 <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg"
                   alt="Peaceful cemetery grounds"
-                  className="relative rounded-sm shadow-2xl w-full h-[300px] md:h-[400px] object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                  className="relative rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] w-full h-[300px] md:h-[400px] object-cover grayscale hover:grayscale-0 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-700 ease-in-out" 
                 />
               </div>
           </div>
