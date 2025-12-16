@@ -80,6 +80,7 @@ export default function AdminOverview() {
                     </div>
                 </CardContent>
             </Card>
+            </div>
         </div>
     );
 }
