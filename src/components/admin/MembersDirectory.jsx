@@ -44,18 +44,13 @@ export default function MembersDirectory() {
     const tableScrollRef = useRef(null);
     const queryClient = useQueryClient();
 
-    // Sync scrollbars
+    // Sync scrollbars - One-way binding from table to top is enough here since we handle top->table inline
+    // to avoid loop/jitter issues
     useEffect(() => {
         const top = topScrollRef.current;
         const table = tableScrollRef.current;
         
         if (!top || !table) return;
-
-        const handleTopScroll = () => {
-            if (table.scrollLeft !== top.scrollLeft) {
-                table.scrollLeft = top.scrollLeft;
-            }
-        };
 
         const handleTableScroll = () => {
             if (top.scrollLeft !== table.scrollLeft) {
@@ -63,13 +58,8 @@ export default function MembersDirectory() {
             }
         };
 
-        top.addEventListener('scroll', handleTopScroll);
         table.addEventListener('scroll', handleTableScroll);
-
-        return () => {
-            top.removeEventListener('scroll', handleTopScroll);
-            table.removeEventListener('scroll', handleTableScroll);
-        };
+        return () => table.removeEventListener('scroll', handleTableScroll);
     }, []);
 
     const { data: employees } = useQuery({
@@ -476,9 +466,13 @@ export default function MembersDirectory() {
                         <div 
                             ref={topScrollRef}
                             className="overflow-x-auto bg-stone-50 border-b border-stone-200"
-                            style={{ height: '12px' }} // Custom height for visibility
+                            onScroll={(e) => {
+                                if (tableScrollRef.current && tableScrollRef.current.scrollLeft !== e.target.scrollLeft) {
+                                    tableScrollRef.current.scrollLeft = e.target.scrollLeft;
+                                }
+                            }}
                         >
-                            <div className="h-full min-w-[1400px]"></div>
+                            <div className="h-4 min-w-[1400px]"></div>
                         </div>
 
                     <div ref={tableScrollRef} className="overflow-x-auto max-h-[600px]">
