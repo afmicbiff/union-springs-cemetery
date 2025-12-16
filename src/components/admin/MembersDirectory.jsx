@@ -545,15 +545,6 @@ export default function MembersDirectory() {
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-8 w-8 text-stone-400 hover:text-teal-600"
-                                                        title="Open Profile Page"
-                                                        onClick={() => window.open(`${createPageUrl('MemberProfile')}?id=${member.id}`, '_blank')}
-                                                    >
-                                                        <ExternalLink className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-8 w-8 text-stone-400 hover:text-teal-600"
                                                         onClick={() => { setEditingMember(member); setIsDialogOpen(true); }}
                                                     >
                                                         <Edit2 className="w-4 h-4" />
