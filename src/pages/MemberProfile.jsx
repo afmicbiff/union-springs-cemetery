@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ChevronLeft, Loader2, CheckSquare } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import MemberProfileDetail from '@/components/admin/MemberProfileDetail';
 import {
@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CheckSquare } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function MemberProfile() {
