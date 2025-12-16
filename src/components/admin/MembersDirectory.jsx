@@ -23,7 +23,7 @@ export default function MembersDirectory() {
 
     const { data: members } = useQuery({
         queryKey: ['members'],
-        queryFn: () => base44.entities.Member.list({ limit: 1000 }),
+        queryFn: () => base44.entities.Member.list('last_name', 1000),
         initialData: [],
     });
 
@@ -55,7 +55,7 @@ export default function MembersDirectory() {
         }
     });
 
-    const filteredMembers = members.filter(member => {
+    const filteredMembers = (members || []).filter(member => {
         const search = searchTerm.toLowerCase();
         return (
             (member.last_name || "").toLowerCase().includes(search) ||
