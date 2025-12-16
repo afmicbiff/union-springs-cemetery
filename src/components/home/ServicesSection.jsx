@@ -13,7 +13,7 @@ export default function ServicesSection() {
                 <img
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg"
                   alt="Peaceful cemetery grounds"
-                  className="relative rounded-sm shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] w-full h-[300px] md:h-[400px] object-cover grayscale hover:grayscale-0 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-700 ease-in-out" 
+                  className="relative rounded-sm shadow-[0_35px_60px_-15px_rgba(0,0,0,0.8)] w-full h-[300px] md:h-[400px] object-cover grayscale hover:grayscale-0 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-700 ease-in-out" 
                 />
               </div>
           </div>
