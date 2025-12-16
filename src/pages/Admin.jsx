@@ -60,6 +60,13 @@ export default function AdminDashboard() {
     refetchOnWindowFocus: true
   });
 
+  useQuery({
+      queryKey: ['check-member-reminders'],
+      queryFn: () => base44.functions.invoke('checkMemberReminders'),
+      refetchInterval: 120 * 1000, // Check every 2 minutes
+      refetchOnWindowFocus: false
+  });
+
   // On-Demand Data Export
   const exportData = async () => {
     const toastId = toast.loading("Preparing backup...");

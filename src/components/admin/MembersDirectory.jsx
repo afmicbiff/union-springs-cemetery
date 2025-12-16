@@ -4,7 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell } from 'lucide-react';
+import { format, isPast, parseISO, addDays } from 'date-fns';
 import {
     Dialog,
     DialogContent,
@@ -20,6 +21,7 @@ export default function MembersDirectory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [stateFilter, setStateFilter] = useState("all");
     const [donationFilter, setDonationFilter] = useState("all"); // 'all', 'donated', 'none'
+    const [followUpFilter, setFollowUpFilter] = useState("all"); // 'all', 'due', 'pending'
     const [sortConfig, setSortConfig] = useState({ key: 'last_name', direction: 'asc' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
@@ -86,7 +88,10 @@ export default function MembersDirectory() {
                 `"${m.email_primary || ''}"`,
                 `"${m.email_secondary || ''}"`,
                 `"${m.donation || ''}"`,
-                `"${m.comments || ''}"`
+                `"${m.comments || ''}"`,
+                `"${m.last_donation_date || ''}"`,
+                `"${m.last_contact_date || ''}"`,
+                `"${m.follow_up_date || ''}"`
             ].join(","))
         ].join("\n");
 
@@ -116,7 +121,14 @@ export default function MembersDirectory() {
                 ? !!member.donation 
                 : !member.donation;
 
-        return matchesSearch && matchesState && matchesDonation;
+        let matchesFollowUp = true;
+        if (followUpFilter === 'due') {
+            matchesFollowUp = member.follow_up_status === 'pending' && member.follow_up_date && (isPast(parseISO(member.follow_up_date)) || format(parseISO(member.follow_up_date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'));
+        } else if (followUpFilter === 'pending') {
+            matchesFollowUp = member.follow_up_status === 'pending';
+        }
+
+        return matchesSearch && matchesState && matchesDonation && matchesFollowUp;
     }).sort((a, b) => {
         const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
         const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
@@ -151,6 +163,11 @@ export default function MembersDirectory() {
             email_secondary: formData.get('email_secondary'),
             donation: formData.get('donation'),
             comments: formData.get('comments'),
+            last_donation_date: formData.get('last_donation_date'),
+            last_contact_date: formData.get('last_contact_date'),
+            follow_up_date: formData.get('follow_up_date'),
+            follow_up_status: formData.get('follow_up_status') || 'pending',
+            follow_up_notes: formData.get('follow_up_notes'),
         };
 
         if (editingMember) {
@@ -213,6 +230,16 @@ export default function MembersDirectory() {
                             <SelectItem value="none">Non-Donors</SelectItem>
                         </SelectContent>
                     </Select>
+                    <Select value={followUpFilter} onValueChange={setFollowUpFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Follow-Up" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="due">Due / Overdue</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="rounded-md border border-stone-200 overflow-hidden">
@@ -238,6 +265,7 @@ export default function MembersDirectory() {
                                     <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('donation')}>
                                         <div className="flex items-center gap-1">Donation <ArrowUpDown className="w-3 h-3" /></div>
                                     </th>
+                                    <th className="p-4 font-semibold">Follow-Up</th>
                                     <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -268,6 +296,14 @@ export default function MembersDirectory() {
                                             <td className="p-4 text-stone-600">{member.state}</td>
                                             <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
                                             <td className="p-4 text-stone-600">{member.donation}</td>
+                                            <td className="p-4">
+                                                {member.follow_up_date && member.follow_up_status === 'pending' && (
+                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                        <Calendar className="w-3 h-3" />
+                                                        {format(parseISO(member.follow_up_date), 'MMM d')}
+                                                    </div>
+                                                )}
+                                            </td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Button 
@@ -363,6 +399,46 @@ export default function MembersDirectory() {
                             <Label htmlFor="comments">Comments</Label>
                             <Input id="comments" name="comments" defaultValue={editingMember?.comments} placeholder="Additional notes..." />
                         </div>
+
+                        <div className="border-t border-stone-200 pt-4 mt-4">
+                            <h4 className="text-sm font-semibold text-stone-900 mb-3 flex items-center gap-2">
+                                <CheckSquare className="w-4 h-4 text-teal-600" /> Tracking & Follow-up
+                            </h4>
+                            <div className="grid grid-cols-2 gap-4 mb-3">
+                                <div className="space-y-2">
+                                    <Label htmlFor="last_donation_date" className="text-xs">Last Donation</Label>
+                                    <Input id="last_donation_date" name="last_donation_date" type="date" defaultValue={editingMember?.last_donation_date} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="last_contact_date" className="text-xs">Last Contact</Label>
+                                    <Input id="last_contact_date" name="last_contact_date" type="date" defaultValue={editingMember?.last_contact_date} />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mb-3">
+                                <div className="space-y-2">
+                                    <Label htmlFor="follow_up_date" className="text-xs font-medium text-amber-700">Next Follow-up Due</Label>
+                                    <Input id="follow_up_date" name="follow_up_date" type="date" defaultValue={editingMember?.follow_up_date} className="border-amber-200 focus:border-amber-400" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="follow_up_status" className="text-xs">Status</Label>
+                                    <Select name="follow_up_status" defaultValue={editingMember?.follow_up_status || "pending"}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="follow_up_notes" className="text-xs">Follow-up Notes</Label>
+                                <Input id="follow_up_notes" name="follow_up_notes" defaultValue={editingMember?.follow_up_notes} placeholder="Reason for follow-up..." />
+                            </div>
+                        </div>
+
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                             <Button type="submit" className="bg-teal-700 hover:bg-teal-800">Save Member</Button>
