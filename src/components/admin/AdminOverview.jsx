@@ -56,30 +56,30 @@ export default function AdminOverview() {
                 <Card className="col-span-1">
                     <CardHeader>
                         <CardTitle>Perpetual Care Report</CardTitle>
-                    <CardDescription>Maintenance status overview for grounds keeping.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        <div className="p-4 bg-stone-50 rounded-sm">
-                            <h4 className="font-bold text-stone-800 mb-2">Maintenance Required</h4>
-                            <p className="text-stone-600 text-sm">
-                                3 Plots flagged for leveling. <br/>
-                                2 Headstones require cleaning in Old Historic section.
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-white rounded-sm shadow-sm border border-stone-100">
-                                <span className="block text-sm text-stone-500">Lawn Maintenance</span>
-                                <span className="font-bold text-green-600 flex items-center gap-1"><CheckCircle className="w-4 h-4"/> Up to Date</span>
+                        <CardDescription>Maintenance status overview for grounds keeping.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-stone-50 rounded-sm">
+                                <h4 className="font-bold text-stone-800 mb-2">Maintenance Required</h4>
+                                <p className="text-stone-600 text-sm">
+                                    3 Plots flagged for leveling. <br/>
+                                    2 Headstones require cleaning in Old Historic section.
+                                </p>
                             </div>
-                            <div className="p-4 bg-white rounded-sm shadow-sm border border-stone-100">
-                                <span className="block text-sm text-stone-500">Site Inspections</span>
-                                <span className="font-bold text-amber-600 flex items-center gap-1"><AlertTriangle className="w-4 h-4"/> Due in 2 days</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 bg-white rounded-sm shadow-sm border border-stone-100">
+                                    <span className="block text-sm text-stone-500">Lawn Maintenance</span>
+                                    <span className="font-bold text-green-600 flex items-center gap-1"><CheckCircle className="w-4 h-4"/> Up to Date</span>
+                                </div>
+                                <div className="p-4 bg-white rounded-sm shadow-sm border border-stone-100">
+                                    <span className="block text-sm text-stone-500">Site Inspections</span>
+                                    <span className="font-bold text-amber-600 flex items-center gap-1"><AlertTriangle className="w-4 h-4"/> Due in 2 days</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
