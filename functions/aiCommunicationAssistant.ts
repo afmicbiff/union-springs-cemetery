@@ -52,6 +52,36 @@ Deno.serve(async (req) => {
             },
             required: ["subject", "body"]
         };
+    } else if (action === 'analyze_draft') {
+        const { draft } = data;
+        prompt = `Analyze the following email draft for tone, clarity, and personalization.
+        
+        Subject: ${draft.subject}
+        Body: ${draft.body}
+        
+        Provide:
+        1. A brief analysis of the current tone and clarity.
+        2. 3 specific suggestions for improvement.
+        3. An improved version of the email that incorporates these suggestions.
+        
+        Return a JSON object.`;
+        
+        jsonSchema = {
+            type: "object",
+            properties: {
+                analysis: { type: "string" },
+                suggestions: { type: "array", items: { type: "string" } },
+                improved_version: {
+                    type: "object",
+                    properties: {
+                        subject: { type: "string" },
+                        body: { type: "string" }
+                    },
+                    required: ["subject", "body"]
+                }
+            },
+            required: ["analysis", "suggestions", "improved_version"]
+        };
     } else if (action === 'suggest_followup') {
         const { content } = data;
          prompt = `Analyze the following email or note content and suggest a relevant follow-up task or log entry classification.

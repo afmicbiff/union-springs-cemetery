@@ -4,18 +4,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, RefreshCw, Wand2, Check } from 'lucide-react';
+import { Sparkles, RefreshCw, Wand2, Check, Microscope } from 'lucide-react';
 import { useMutation } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 export default function AIEmailAssistant({ onApply, currentSubject = "", currentBody = "", recipientContext = null }) {
-    const [mode, setMode] = useState("generate"); // generate | refine
+    const [mode, setMode] = useState("generate"); // generate | refine | analyze
     const [context, setContext] = useState("");
     const [tone, setTone] = useState("Professional");
     const [refineInstructions, setRefineInstructions] = useState("");
     const [generatedResult, setGeneratedResult] = useState(null);
+    const [analysisResult, setAnalysisResult] = useState(null);
 
     const aiMutation = useMutation({
         mutationFn: async (payload) => {
@@ -59,15 +60,36 @@ export default function AIEmailAssistant({ onApply, currentSubject = "", current
         });
     };
 
+    const handleAnalyze = () => {
+        if (!currentSubject && !currentBody) {
+            toast.error("No content to analyze.");
+            return;
+        }
+        aiMutation.mutate({
+            action: 'analyze_draft',
+            data: {
+                draft: { subject: currentSubject, body: currentBody }
+            }
+        }, {
+            onSuccess: (data) => {
+                setAnalysisResult(data);
+                setGeneratedResult(data.improved_version); // allow applying improved version directly
+            }
+        });
+    };
+
     return (
         <div className="space-y-4 p-1">
             <Tabs value={mode} onValueChange={setMode} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="generate">
-                        <Wand2 className="w-4 h-4 mr-2" /> Generate New
+                        <Wand2 className="w-4 h-4 mr-2" /> Generate
                     </TabsTrigger>
                     <TabsTrigger value="refine">
-                        <RefreshCw className="w-4 h-4 mr-2" /> Refine Existing
+                        <RefreshCw className="w-4 h-4 mr-2" /> Refine
+                    </TabsTrigger>
+                    <TabsTrigger value="analyze">
+                        <Microscope className="w-4 h-4 mr-2" /> Analyze
                     </TabsTrigger>
                 </TabsList>
                 
@@ -127,25 +149,60 @@ export default function AIEmailAssistant({ onApply, currentSubject = "", current
                         Refine Draft
                     </Button>
                 </TabsContent>
+
+                <TabsContent value="analyze" className="space-y-4 mt-4">
+                     <div className="bg-stone-50 p-3 rounded-md text-xs text-stone-500 border border-stone-200">
+                        <strong>Analyzing:</strong> {currentSubject ? `"${currentSubject}"` : "No Subject"}
+                    </div>
+                    <Button 
+                        onClick={handleAnalyze} 
+                        disabled={aiMutation.isPending} 
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                    >
+                        {aiMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Microscope className="w-4 h-4 mr-2" />}
+                        Analyze Draft
+                    </Button>
+
+                    {analysisResult && (
+                        <div className="space-y-3 bg-purple-50 p-3 rounded-md border border-purple-100 text-sm animate-in fade-in">
+                            <div>
+                                <h4 className="font-semibold text-purple-900 mb-1">Analysis</h4>
+                                <p className="text-purple-800 leading-relaxed">{analysisResult.analysis}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-purple-900 mb-1">Suggestions</h4>
+                                <ul className="list-disc pl-4 space-y-1 text-purple-800">
+                                    {analysisResult.suggestions.map((s, i) => (
+                                        <li key={i}>{s}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </TabsContent>
             </Tabs>
 
-            {generatedResult && (
+            {(generatedResult || (mode === 'analyze' && analysisResult?.improved_version)) && (
                 <div className="mt-6 pt-4 border-t border-stone-200 animate-in fade-in slide-in-from-bottom-2">
                     <div className="space-y-3">
+                         <h3 className="font-medium text-stone-900 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-teal-600" />
+                            {mode === 'analyze' ? 'Improved Version' : 'Generated Result'}
+                        </h3>
                         <div>
-                            <span className="text-xs font-semibold text-stone-500 uppercase">Generated Subject</span>
+                            <span className="text-xs font-semibold text-stone-500 uppercase">Subject</span>
                             <div className="p-2 bg-stone-50 rounded border border-stone-200 text-sm font-medium">
-                                {generatedResult.subject}
+                                {generatedResult?.subject || analysisResult?.improved_version?.subject}
                             </div>
                         </div>
                         <div>
-                            <span className="text-xs font-semibold text-stone-500 uppercase">Generated Body</span>
+                            <span className="text-xs font-semibold text-stone-500 uppercase">Body</span>
                             <div className="p-2 bg-stone-50 rounded border border-stone-200 text-sm whitespace-pre-wrap max-h-[200px] overflow-y-auto">
-                                {generatedResult.body}
+                                {generatedResult?.body || analysisResult?.improved_version?.body}
                             </div>
                         </div>
                         <Button 
-                            onClick={() => onApply(generatedResult)} 
+                            onClick={() => onApply(generatedResult || analysisResult?.improved_version)} 
                             className="w-full bg-green-600 hover:bg-green-700"
                         >
                             <Check className="w-4 h-4 mr-2" /> Apply to Editor

@@ -204,39 +204,6 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                             <h3 className="font-semibold text-stone-900 flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4 text-teal-600" /> Activity & Notes
                             </h3>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-stone-400 hover:text-teal-600" title="AI Suggestions">
-                                        <Sparkles className="w-4 h-4" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80" align="end">
-                                    <div className="space-y-2">
-                                        <h4 className="font-semibold text-xs uppercase text-stone-500">AI Suggestion</h4>
-                                        <p className="text-sm text-stone-600">Enter a note and click to analyze for follow-ups.</p>
-                                        <Button 
-                                            size="sm" 
-                                            className="w-full bg-teal-600" 
-                                            disabled={!noteContent}
-                                            onClick={async () => {
-                                                const res = await base44.functions.invoke('aiCommunicationAssistant', {
-                                                    action: 'suggest_followup',
-                                                    data: { content: noteContent }
-                                                });
-                                                if (res.data?.suggested_log_type) setNoteType(res.data.suggested_log_type);
-                                                if (res.data?.suggested_task) {
-                                                    toast.info(`Suggestion: Create task "${res.data.suggested_task.title}"`);
-                                                    // Here we could auto-create a task or open a dialog, but for now just notifying
-                                                } else {
-                                                    toast.success("No specific follow-up actions detected.");
-                                                }
-                                            }}
-                                        >
-                                            Analyze Note
-                                        </Button>
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
                         </div>
                         <div className="space-y-3">
                             <div className="flex gap-2">
@@ -258,7 +225,29 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                     onKeyDown={(e) => e.key === 'Enter' && noteContent && addLogMutation.mutate()}
                                 />
                             </div>
-                            <div className="flex justify-end">
+                            <div className="flex justify-between items-center">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-xs text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                                    disabled={!noteContent}
+                                    onClick={async () => {
+                                        const res = await base44.functions.invoke('aiCommunicationAssistant', {
+                                            action: 'suggest_followup',
+                                            data: { content: noteContent }
+                                        });
+                                        if (res.data?.suggested_log_type) setNoteType(res.data.suggested_log_type);
+                                        if (res.data?.suggested_task) {
+                                            toast.info(`Suggestion: Create task "${res.data.suggested_task.title}"`);
+                                            // Future: Open task creation dialog with pre-filled data
+                                        } else {
+                                            toast.success("Log type updated based on content.");
+                                        }
+                                    }}
+                                >
+                                    <Sparkles className="w-3 h-3 mr-1" /> AI Analyze
+                                </Button>
+
                                 <Button 
                                     size="sm" 
                                     disabled={!noteContent || addLogMutation.isPending}
