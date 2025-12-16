@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History } from 'lucide-react';
 import { format, isPast, parseISO, addDays } from 'date-fns';
 import {
     Dialog,
@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import MemberProfileDialog from './MemberProfileDialog';
 
 export default function MembersDirectory() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -24,6 +25,9 @@ export default function MembersDirectory() {
     const [followUpFilter, setFollowUpFilter] = useState("all"); // 'all', 'due', 'pending'
     const [sortConfig, setSortConfig] = useState({ key: 'last_name', direction: 'asc' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
     const [editingMember, setEditingMember] = useState(null);
     const queryClient = useQueryClient();
 
@@ -73,11 +77,22 @@ export default function MembersDirectory() {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: (id) => base44.entities.Member.delete(id),
+        mutationFn: async (id) => {
+            const res = await base44.functions.invoke('manageMember', { action: 'delete', id });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries(['members']);
+            queryClient.invalidateQueries(['member-activity']);
             toast.success("Member removed");
         }
+    });
+
+    const { data: activityLogs } = useQuery({
+        queryKey: ['member-activity'],
+        queryFn: () => base44.entities.MemberActivityLog.list('-timestamp', 50),
+        enabled: isActivityLogOpen
     });
 
     const uniqueStates = [...new Set((members || []).map(m => m.state).filter(Boolean))].sort();
@@ -206,6 +221,9 @@ export default function MembersDirectory() {
                     </CardDescription>
                 </div>
                 <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setIsActivityLogOpen(true)}>
+                        <History className="w-4 h-4 mr-2" /> Audit Log
+                    </Button>
                     <Button variant="outline" onClick={exportToCSV}>
                         <Download className="w-4 h-4 mr-2" /> Export CSV
                     </Button>
@@ -303,7 +321,11 @@ export default function MembersDirectory() {
                                     </tr>
                                 ) : (
                                     filteredMembers.map(member => (
-                                        <tr key={member.id} className="hover:bg-stone-50 transition-colors">
+                                        <tr 
+                                            key={member.id} 
+                                            className="hover:bg-teal-50/50 transition-colors cursor-pointer"
+                                            onClick={() => { setSelectedMember(member); setIsProfileOpen(true); }}
+                                        >
                                             <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
                                             <td className="p-4 text-stone-700">{member.first_name}</td>
                                             <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
@@ -329,7 +351,7 @@ export default function MembersDirectory() {
                                                 )}
                                             </td>
                                             <td className="p-4 text-right">
-                                                <div className="flex justify-end gap-2">
+                                                <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                     <Button 
                                                         variant="ghost" 
                                                         size="icon" 
@@ -468,6 +490,58 @@ export default function MembersDirectory() {
                             <Button type="submit" className="bg-teal-700 hover:bg-teal-800">Save Member</Button>
                         </DialogFooter>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Profile Dialog */}
+            <MemberProfileDialog 
+                member={selectedMember} 
+                isOpen={isProfileOpen} 
+                onClose={() => setIsProfileOpen(false)} 
+                onEdit={(member) => {
+                    setEditingMember(member);
+                    setIsDialogOpen(true);
+                    setIsProfileOpen(false);
+                }}
+            />
+
+            {/* Audit Log Dialog */}
+            <Dialog open={isActivityLogOpen} onOpenChange={setIsActivityLogOpen}>
+                <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <History className="w-5 h-5 text-teal-600" /> Member Directory Audit Log
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-y-auto mt-4 pr-2">
+                        {activityLogs?.length > 0 ? (
+                            <div className="space-y-4">
+                                {activityLogs.map((log) => (
+                                    <div key={log.id} className="flex gap-3 text-sm pb-3 border-b border-stone-100 last:border-0">
+                                        <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${
+                                            log.action === 'create' ? 'bg-green-500' : 
+                                            log.action === 'delete' ? 'bg-red-500' :
+                                            log.action === 'update' ? 'bg-blue-500' : 'bg-stone-400'
+                                        }`} />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between">
+                                                <span className="font-semibold text-stone-800 capitalize">{log.action}</span>
+                                                <span className="text-xs text-stone-400">{format(new Date(log.timestamp), 'MMM d, h:mm a')}</span>
+                                            </div>
+                                            <p className="text-stone-600 mt-0.5">
+                                                <span className="font-medium">{log.member_name}</span> - {log.details}
+                                            </p>
+                                            <div className="text-xs text-stone-400 mt-1 flex items-center gap-1">
+                                                by {log.performed_by}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center text-stone-500 py-10">No activity recorded yet.</div>
+                        )}
+                    </div>
                 </DialogContent>
             </Dialog>
         </Card>
