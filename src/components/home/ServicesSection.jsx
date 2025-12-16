@@ -23,7 +23,9 @@ export default function ServicesSection() {
               <div>
                 <h2 className="text-3xl md:text-4xl font-serif text-stone-900 mb-4">Services</h2>
                 <p className="text-stone-600 text-lg leading-relaxed">
-                    The staff at the Union Springs Cemetery maintains the grounds and upkeep of the property. The cemetery allows for:
+                    The staff at the Union Springs Cemetery maintains the grounds and upkeep of the property.
+                    <br /><br />
+                    The cemetery allows for:
                 </p>
               </div>
               
