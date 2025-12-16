@@ -21,9 +21,9 @@ export default function MembersDirectory() {
     const [editingMember, setEditingMember] = useState(null);
     const queryClient = useQueryClient();
 
-    const { data: members } = useQuery({
+    const { data: members, isLoading } = useQuery({
         queryKey: ['members'],
-        queryFn: () => base44.entities.Member.list('last_name', 1000),
+        queryFn: () => base44.entities.Member.list({ limit: 1000 }),
         initialData: [],
     });
 
@@ -125,7 +125,13 @@ export default function MembersDirectory() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-100 bg-white">
-                                {filteredMembers.length === 0 ? (
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="7" className="p-8 text-center text-stone-500 italic">
+                                            Loading members...
+                                        </td>
+                                    </tr>
+                                ) : filteredMembers.length === 0 ? (
                                     <tr>
                                         <td colSpan="7" className="p-8 text-center text-stone-500 italic">
                                             No members found.
