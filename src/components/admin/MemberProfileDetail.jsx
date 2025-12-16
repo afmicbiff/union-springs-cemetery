@@ -8,10 +8,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { 
     Phone, Mail, MapPin, DollarSign, Edit, MessageSquare, 
-    User, CheckSquare, X, ExternalLink, Sparkles, Send, Copy
+    User, CheckSquare, X, ExternalLink, Sparkles, Send, Copy,
+    UserCircle
 } from 'lucide-react';
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -23,6 +24,18 @@ import { Textarea } from "@/components/ui/textarea";
 export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
     const [noteContent, setNoteContent] = useState("");
+    
+    const { data: employees } = useQueryClient().getQueryData(['employees-list']) ? { data: useQueryClient().getQueryData(['employees-list']) } : useQuery({
+        queryKey: ['employees-profile-detail'],
+        queryFn: () => base44.entities.Employee.list(),
+        initialData: []
+    });
+
+    const getAssigneeName = (id) => {
+        if (!id || !employees) return null;
+        const emp = employees.find(e => e.id === id);
+        return emp ? `${emp.first_name} ${emp.last_name}` : null;
+    };
     const [isEmailDraftOpen, setIsEmailDraftOpen] = useState(false);
     const [draftEmail, setDraftEmail] = useState({ subject: "", body: "" });
     const queryClient = useQueryClient();
@@ -189,7 +202,14 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                         <div>
                                             <h4 className="font-medium text-amber-900">Follow-up Due: {format(new Date(member.follow_up_date), 'PPP')}</h4>
                                             <p className="text-sm text-amber-800 mt-1">{member.follow_up_notes || 'No specific notes'}</p>
-                                            <Badge className="mt-2 bg-amber-200 text-amber-900 hover:bg-amber-300 border-none">Pending</Badge>
+                                            <div className="flex gap-2 items-center mt-2">
+                                                <Badge className="bg-amber-200 text-amber-900 hover:bg-amber-300 border-none">Pending</Badge>
+                                                {getAssigneeName(member.follow_up_assignee_id) && (
+                                                    <span className="text-xs text-amber-800 flex items-center gap-1">
+                                                        <UserCircle className="w-3 h-3" /> Assigned to: {getAssigneeName(member.follow_up_assignee_id)}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

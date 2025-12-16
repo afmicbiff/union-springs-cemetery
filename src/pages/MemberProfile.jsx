@@ -25,6 +25,12 @@ export default function MemberProfile() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const queryClient = useQueryClient();
 
+    const { data: employees } = useQuery({
+        queryKey: ['employees-list'],
+        queryFn: () => base44.entities.Employee.list(),
+        initialData: []
+    });
+
     const { data: member, isLoading } = useQuery({
         queryKey: ['member', memberId],
         queryFn: async () => {
@@ -69,6 +75,7 @@ export default function MemberProfile() {
             follow_up_date: formData.get('follow_up_date'),
             follow_up_status: formData.get('follow_up_status') || 'pending',
             follow_up_notes: formData.get('follow_up_notes'),
+            follow_up_assignee_id: formData.get('follow_up_assignee_id'),
         };
         updateMutation.mutate({ id: member.id, data });
     };
@@ -195,7 +202,21 @@ export default function MemberProfile() {
                                 <Label htmlFor="follow_up_notes" className="text-xs">Follow-up Notes</Label>
                                 <Input id="follow_up_notes" name="follow_up_notes" defaultValue={member?.follow_up_notes} placeholder="Reason for follow-up..." />
                             </div>
-                        </div>
+                            </div>
+                            <div className="space-y-2">
+                            <Label htmlFor="follow_up_assignee_id" className="text-xs">Assign To</Label>
+                            <Select name="follow_up_assignee_id" defaultValue={member?.follow_up_assignee_id}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Employee" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                                    {employees.map(emp => (
+                                        <SelectItem key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            </div>
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>

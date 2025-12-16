@@ -7,7 +7,13 @@ Deno.serve(async (req) => {
         
         // Fetch all members (limit 1000)
         const members = await base44.entities.Member.list(null, 1000);
+        const employees = await base44.entities.Employee.list(null, 1000);
         
+        const employeeMap = {};
+        employees.forEach(e => {
+            employeeMap[e.id] = e;
+        });
+
         const notifications = [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -21,10 +27,20 @@ Deno.serve(async (req) => {
                 const followUpDate = parseISO(member.follow_up_date);
                 
                 if (followUpDate <= today || isPast(followUpDate)) {
+                    let user_email = null;
+                    let assignedText = "";
+
+                    if (member.follow_up_assignee_id && employeeMap[member.follow_up_assignee_id]) {
+                        const emp = employeeMap[member.follow_up_assignee_id];
+                        user_email = emp.email;
+                        assignedText = ` (Assigned to ${emp.first_name})`;
+                    }
+
                     notifications.push({
-                        message: `Follow-up due for ${member.first_name} ${member.last_name}: ${member.follow_up_notes || 'No notes'}`,
+                        message: `Follow-up due for ${member.first_name} ${member.last_name}${assignedText}: ${member.follow_up_notes || 'No notes'}`,
                         type: 'task',
                         is_read: false,
+                        user_email: user_email,
                         created_at: new Date().toISOString()
                     });
                 }

@@ -42,6 +42,12 @@ export default function MembersDirectory() {
     const [editingMember, setEditingMember] = useState(null);
     const queryClient = useQueryClient();
 
+    const { data: employees } = useQuery({
+        queryKey: ['employees-list'],
+        queryFn: () => base44.entities.Employee.list(),
+        initialData: []
+    });
+
     const { data: members, isLoading } = useQuery({
         queryKey: ['members'],
         queryFn: () => base44.entities.Member.list(null, 1000),
@@ -303,6 +309,7 @@ export default function MembersDirectory() {
             follow_up_date: formData.get('follow_up_date'),
             follow_up_status: formData.get('follow_up_status') || 'pending',
             follow_up_notes: formData.get('follow_up_notes'),
+            follow_up_assignee_id: formData.get('follow_up_assignee_id'),
         };
 
         if (editingMember) {
@@ -674,7 +681,21 @@ export default function MembersDirectory() {
                                 <Label htmlFor="follow_up_notes" className="text-xs">Follow-up Notes</Label>
                                 <Input id="follow_up_notes" name="follow_up_notes" defaultValue={editingMember?.follow_up_notes} placeholder="Reason for follow-up..." />
                             </div>
-                        </div>
+                            </div>
+                            <div className="space-y-2">
+                            <Label htmlFor="follow_up_assignee_id" className="text-xs">Assign To</Label>
+                            <Select name="follow_up_assignee_id" defaultValue={editingMember?.follow_up_assignee_id}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Employee" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                                    {employees.map(emp => (
+                                        <SelectItem key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            </div>
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>

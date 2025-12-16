@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
+import FollowUpWidget from "./FollowUpWidget";
 
 export default function AdminOverview() {
     const { data: plots } = useQuery({
@@ -49,9 +50,12 @@ export default function AdminOverview() {
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Perpetual Care Report</CardTitle>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <FollowUpWidget />
+                
+                <Card className="col-span-1">
+                    <CardHeader>
+                        <CardTitle>Perpetual Care Report</CardTitle>
                     <CardDescription>Maintenance status overview for grounds keeping.</CardDescription>
                 </CardHeader>
                 <CardContent>
