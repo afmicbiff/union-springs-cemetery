@@ -8,12 +8,18 @@ export default function ServicesPage() {
         <Breadcrumbs items={[{ label: 'Services' }]} />
         
         <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Our Services</h1>
+          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Services</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
-          <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed">
-            We offer a range of services to honor your loved ones and provide support during difficult times.
-            From traditional burials to modern memorials, every service is conducted with the utmost dignity.
-          </p>
+          <div className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed text-left">
+            <p>The staff at the Union Springs Cemetery maintains the grounds and upkeep of the property.</p>
+            <br />
+            <p>The cemetery allows for:</p>
+            <ul className="list-disc list-inside mt-4 ml-4 space-y-2 font-medium">
+                <li>Traditional Burial Plots</li>
+                <li>Cremation Niches</li>
+                <li>Family Estates</li>
+            </ul>
+          </div>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
