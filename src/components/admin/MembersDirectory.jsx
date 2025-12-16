@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter } from 'lucide-react';
 import { format, isPast, parseISO, addDays } from 'date-fns';
 import {
     Dialog,
@@ -17,13 +17,24 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import MemberProfileDialog from './MemberProfileDialog';
+import SegmentBuilder from './SegmentBuilder';
+import BulkActionDialog from './BulkActionDialog';
+import { differenceInDays, parseISO } from 'date-fns';
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function MembersDirectory() {
     const [searchTerm, setSearchTerm] = useState("");
     const [stateFilter, setStateFilter] = useState("all");
-    const [donationFilter, setDonationFilter] = useState("all"); // 'all', 'donated', 'none'
-    const [followUpFilter, setFollowUpFilter] = useState("all"); // 'all', 'due', 'pending'
+    const [donationFilter, setDonationFilter] = useState("all"); 
+    const [followUpFilter, setFollowUpFilter] = useState("all"); 
     const [sortConfig, setSortConfig] = useState({ key: 'last_name', direction: 'asc' });
+    
+    // Segment & Advanced Filters
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [segmentCriteria, setSegmentCriteria] = useState({ match: 'all', rules: [] });
+    const [selectedMemberIds, setSelectedMemberIds] = useState([]);
+    const [isBulkActionOpen, setIsBulkActionOpen] = useState(false);
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
@@ -35,6 +46,39 @@ export default function MembersDirectory() {
         queryKey: ['members'],
         queryFn: () => base44.entities.Member.list(null, 1000),
         initialData: [],
+    });
+
+    const { data: savedSegments } = useQuery({
+        queryKey: ['member-segments'],
+        queryFn: () => base44.entities.MemberSegment.list(),
+        initialData: []
+    });
+
+    const saveSegmentMutation = useMutation({
+        mutationFn: (name) => base44.entities.MemberSegment.create({ name, criteria: segmentCriteria, description: "Custom segment" }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['member-segments']);
+            toast.success("Segment saved");
+        }
+    });
+
+    const bulkActionMutation = useMutation({
+        mutationFn: async ({ actionType, config }) => {
+            const res = await base44.functions.invoke('processBulkMemberAction', {
+                memberIds: selectedMemberIds,
+                actionType,
+                config
+            });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            toast.success(`Processed: ${data.success} successful, ${data.failed} failed`);
+            setIsBulkActionOpen(false);
+            setSelectedMemberIds([]);
+            queryClient.invalidateQueries(['members']);
+        },
+        onError: (err) => toast.error("Bulk action failed: " + err.message)
     });
 
     const createMutation = useMutation({
@@ -137,7 +181,57 @@ export default function MembersDirectory() {
         link.click();
     };
 
+    // Advanced Filtering Logic
+    const evaluateRule = (member, rule) => {
+        let val = member[rule.field];
+        if (val === undefined || val === null) val = "";
+        
+        const target = rule.value;
+
+        if (rule.operator === 'contains') return String(val).toLowerCase().includes(String(target).toLowerCase());
+        if (rule.operator === 'equals') return String(val).toLowerCase() === String(target).toLowerCase();
+        if (rule.operator === 'starts_with') return String(val).toLowerCase().startsWith(String(target).toLowerCase());
+        if (rule.operator === 'not_equals') return String(val).toLowerCase() !== String(target).toLowerCase();
+
+        // Numeric
+        if (['gt', 'lt', 'gte', 'lte'].includes(rule.operator)) {
+            const numVal = parseFloat(String(val).replace(/[^0-9.-]+/g,""));
+            const numTarget = parseFloat(target);
+            if (isNaN(numVal) || isNaN(numTarget)) return false;
+            if (rule.operator === 'gt') return numVal > numTarget;
+            if (rule.operator === 'lt') return numVal < numTarget;
+            if (rule.operator === 'gte') return numVal >= numTarget;
+            if (rule.operator === 'lte') return numVal <= numTarget;
+        }
+
+        // Date Logic
+        if (['before', 'after', 'on', 'days_ago_gt', 'days_ago_lt', 'in_next_days'].includes(rule.operator)) {
+            if (!val) return false;
+            const dateVal = parseISO(val);
+            const today = new Date();
+            
+            if (rule.operator === 'days_ago_gt') {
+                return differenceInDays(today, dateVal) > parseInt(target);
+            }
+            if (rule.operator === 'days_ago_lt') {
+                return differenceInDays(today, dateVal) < parseInt(target);
+            }
+            if (rule.operator === 'in_next_days') {
+                const diff = differenceInDays(dateVal, today);
+                return diff >= 0 && diff <= parseInt(target);
+            }
+
+            const targetDate = parseISO(target);
+            if (rule.operator === 'before') return dateVal < targetDate;
+            if (rule.operator === 'after') return dateVal > targetDate;
+            if (rule.operator === 'on') return format(dateVal, 'yyyy-MM-dd') === target;
+        }
+
+        return false;
+    };
+
     const filteredMembers = (members || []).filter(member => {
+        // Basic Filters
         const search = searchTerm.toLowerCase();
         const matchesSearch = (
             (member.last_name || "").toLowerCase().includes(search) ||
@@ -162,7 +256,14 @@ export default function MembersDirectory() {
             matchesFollowUp = member.follow_up_status === 'pending';
         }
 
-        return matchesSearch && matchesState && matchesDonation && matchesFollowUp;
+        // Advanced Segment Filters
+        let matchesSegment = true;
+        if (showAdvancedFilters && segmentCriteria.rules.length > 0) {
+            const results = segmentCriteria.rules.map(rule => evaluateRule(member, rule));
+            matchesSegment = segmentCriteria.match === 'all' ? results.every(Boolean) : results.some(Boolean);
+        }
+
+        return matchesSearch && matchesState && matchesDonation && matchesFollowUp && matchesSegment;
     }).sort((a, b) => {
         const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
         const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
@@ -268,28 +369,76 @@ export default function MembersDirectory() {
                         </SelectContent>
                     </Select>
                     <Select value={followUpFilter} onValueChange={setFollowUpFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Follow-Up" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="due">Due / Overdue</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                        </SelectContent>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Follow-Up" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="due">Due / Overdue</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                    </SelectContent>
                     </Select>
-                </div>
 
-                <div className="rounded-md border border-stone-200 overflow-hidden">
+                    <Button 
+                    variant={showAdvancedFilters ? "secondary" : "outline"}
+                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    className={showAdvancedFilters ? "bg-stone-200 border-stone-300" : ""}
+                    >
+                    <Filter className="w-4 h-4 mr-2" /> Advanced
+                    </Button>
+                    </div>
+
+                    {showAdvancedFilters && (
+                    <div className="mb-6 animate-in fade-in slide-in-from-top-2">
+                    <SegmentBuilder 
+                        criteria={segmentCriteria} 
+                        onChange={setSegmentCriteria} 
+                        onSave={(name) => saveSegmentMutation.mutate(name)}
+                        savedSegments={savedSegments}
+                        onLoadSegment={(seg) => {
+                            if (seg && seg.criteria) setSegmentCriteria(seg.criteria);
+                        }}
+                    />
+                    </div>
+                    )}
+
+                    {selectedMemberIds.length > 0 && (
+                    <div className="mb-4 p-3 bg-teal-50 border border-teal-200 rounded-md flex justify-between items-center animate-in fade-in">
+                    <span className="text-teal-800 text-sm font-medium">{selectedMemberIds.length} members selected</span>
+                    <div className="flex gap-2">
+                         <Button size="sm" variant="ghost" onClick={() => setSelectedMemberIds([])} className="text-teal-700 hover:text-teal-800">
+                            Clear Selection
+                        </Button>
+                        <Button size="sm" className="bg-teal-700 hover:bg-teal-800" onClick={() => setIsBulkActionOpen(true)}>
+                            Bulk Actions ({selectedMemberIds.length})
+                        </Button>
+                    </div>
+                    </div>
+                    )}
+
+                    <div className="rounded-md border border-stone-200 overflow-hidden">
                     <div className="overflow-x-auto max-h-[600px]">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
-                                <tr>
-                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('last_name')}>
-                                        <div className="flex items-center gap-1">Last Name <ArrowUpDown className="w-3 h-3" /></div>
-                                    </th>
-                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('first_name')}>
-                                        <div className="flex items-center gap-1">First Name <ArrowUpDown className="w-3 h-3" /></div>
-                                    </th>
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
+                            <tr>
+                                <th className="p-4 w-[40px]">
+                                    <Checkbox 
+                                        checked={filteredMembers.length > 0 && selectedMemberIds.length === filteredMembers.length}
+                                        onCheckedChange={(checked) => {
+                                            if (checked) {
+                                                setSelectedMemberIds(filteredMembers.map(m => m.id));
+                                            } else {
+                                                setSelectedMemberIds([]);
+                                            }
+                                        }}
+                                    />
+                                </th>
+                                <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('last_name')}>
+                                    <div className="flex items-center gap-1">Last Name <ArrowUpDown className="w-3 h-3" /></div>
+                                </th>
+                                <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('first_name')}>
+                                    <div className="flex items-center gap-1">First Name <ArrowUpDown className="w-3 h-3" /></div>
+                                </th>
                                     <th className="p-4 font-semibold">Address</th>
                                     <th className="p-4 font-semibold">Contact</th>
                                     <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('city')}>
@@ -323,9 +472,21 @@ export default function MembersDirectory() {
                                     filteredMembers.map(member => (
                                         <tr 
                                             key={member.id} 
-                                            className="hover:bg-teal-50/50 transition-colors cursor-pointer"
+                                            className={`hover:bg-teal-50/50 transition-colors cursor-pointer ${selectedMemberIds.includes(member.id) ? 'bg-teal-50' : ''}`}
                                             onClick={() => { setSelectedMember(member); setIsProfileOpen(true); }}
                                         >
+                                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                                                <Checkbox 
+                                                    checked={selectedMemberIds.includes(member.id)}
+                                                    onCheckedChange={(checked) => {
+                                                        if (checked) {
+                                                            setSelectedMemberIds([...selectedMemberIds, member.id]);
+                                                        } else {
+                                                            setSelectedMemberIds(selectedMemberIds.filter(id => id !== member.id));
+                                                        }
+                                                    }}
+                                                />
+                                            </td>
                                             <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
                                             <td className="p-4 text-stone-700">{member.first_name}</td>
                                             <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
@@ -503,6 +664,13 @@ export default function MembersDirectory() {
                     setIsDialogOpen(true);
                     setIsProfileOpen(false);
                 }}
+            />
+
+            <BulkActionDialog 
+                isOpen={isBulkActionOpen}
+                onClose={() => setIsBulkActionOpen(false)}
+                selectedCount={selectedMemberIds.length}
+                onConfirm={(type, cfg) => bulkActionMutation.mutate({ actionType: type, config: cfg })}
             />
 
             {/* Audit Log Dialog */}

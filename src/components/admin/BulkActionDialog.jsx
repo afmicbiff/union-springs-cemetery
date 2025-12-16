@@ -1,0 +1,162 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+
+export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm }) {
+    const [actionType, setActionType] = useState("send_email");
+    const [config, setConfig] = useState({});
+
+    // Fetch employees for task assignment
+    const { data: employees } = useQuery({
+        queryKey: ['employees-bulk'],
+        queryFn: () => base44.entities.Employee.list(null, 100),
+        initialData: []
+    });
+
+    const handleConfirm = () => {
+        onConfirm(actionType, config);
+        onClose();
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                    <DialogTitle>Bulk Actions ({selectedCount} Selected)</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label>Select Action</Label>
+                        <RadioGroup value={actionType} onValueChange={setActionType} className="flex flex-col gap-2">
+                            <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                <RadioGroupItem value="send_email" id="email" />
+                                <Label htmlFor="email" className="cursor-pointer font-normal flex-1">Send Targeted Email</Label>
+                            </div>
+                            <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                <RadioGroupItem value="create_task" id="task" />
+                                <Label htmlFor="task" className="cursor-pointer font-normal flex-1">Assign Follow-up Task</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
+
+                    {actionType === 'send_email' && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <div className="space-y-1">
+                                <Label>Subject</Label>
+                                <Input 
+                                    placeholder="Email Subject" 
+                                    value={config.subject || ''} 
+                                    onChange={e => setConfig({...config, subject: e.target.value})}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Message Body</Label>
+                                <Textarea 
+                                    placeholder="Enter your message here. Use {{first_name}} for personalization." 
+                                    className="min-h-[120px]"
+                                    value={config.body || ''} 
+                                    onChange={e => setConfig({...config, body: e.target.value})}
+                                />
+                                <p className="text-xs text-stone-500">Supported variables: {'{{first_name}}'}, {'{{last_name}}'}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {actionType === 'create_task' && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <div className="space-y-1">
+                                <Label>Task Title</Label>
+                                <Input 
+                                    placeholder="e.g. Annual Check-in" 
+                                    value={config.title || ''} 
+                                    onChange={e => setConfig({...config, title: e.target.value})}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Description</Label>
+                                <Textarea 
+                                    placeholder="Task details..." 
+                                    value={config.description || ''} 
+                                    onChange={e => setConfig({...config, description: e.target.value})}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label>Due Date</Label>
+                                    <Input 
+                                        type="date"
+                                        value={config.due_date || ''} 
+                                        onChange={e => setConfig({...config, due_date: e.target.value})}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label>Priority</Label>
+                                    <Select 
+                                        value={config.priority} 
+                                        onValueChange={v => setConfig({...config, priority: v})}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="High">High</SelectItem>
+                                            <SelectItem value="Medium">Medium</SelectItem>
+                                            <SelectItem value="Low">Low</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Assign To</Label>
+                                <Select 
+                                    value={config.assignee_id} 
+                                    onValueChange={v => setConfig({...config, assignee_id: v})}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select Employee" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {employees.map(e => (
+                                            <SelectItem key={e.id} value={e.id}>{e.first_name} {e.last_name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex items-center space-x-2 pt-2">
+                                <Checkbox 
+                                    id="update_followup"
+                                    checked={config.update_member_followup || false}
+                                    onCheckedChange={(checked) => setConfig({...config, update_member_followup: checked})}
+                                />
+                                <Label htmlFor="update_followup" className="text-sm font-normal">Also update member's "Follow-up" status to Pending</Label>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button 
+                        className="bg-teal-700 hover:bg-teal-800"
+                        onClick={handleConfirm}
+                        disabled={
+                            (actionType === 'send_email' && (!config.subject || !config.body)) ||
+                            (actionType === 'create_task' && (!config.title))
+                        }
+                    >
+                        Execute Action
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
