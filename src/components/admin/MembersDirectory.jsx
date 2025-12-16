@@ -443,7 +443,7 @@ export default function MembersDirectory() {
 
                     <div className="rounded-md border border-stone-200 overflow-hidden">
                     <div className="overflow-x-auto max-h-[600px]">
-                    <table className="w-full text-sm text-left">
+                    <table className="w-full text-sm text-left min-w-[1400px]">
                         <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
                             <tr>
                                 <th className="p-4 w-[40px]">
