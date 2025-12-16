@@ -65,8 +65,8 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                         <h2 className="text-2xl font-serif font-bold text-stone-900 flex items-center gap-2">
                             {fullName}
                             {isDialog && (
-                                <Link to={createPageUrl(`MemberProfile?id=${member.id}`)} target="_blank" className="text-stone-400 hover:text-teal-600">
-                                    <ExternalLink className="w-4 h-4" />
+                                <Link to={`${createPageUrl('MemberProfile')}?id=${member.id}`} target="_blank" className="ml-2 text-stone-400 hover:text-teal-600" title="Open full profile in new tab">
+                                    <ExternalLink className="w-5 h-5" />
                                 </Link>
                             )}
                         </h2>
