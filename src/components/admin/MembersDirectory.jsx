@@ -384,7 +384,7 @@ export default function MembersDirectory() {
             </CardContent>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{editingMember ? 'Edit Member' : 'Add New Member'}</DialogTitle>
                     </DialogHeader>
