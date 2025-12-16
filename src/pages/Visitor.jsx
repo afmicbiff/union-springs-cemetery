@@ -32,7 +32,7 @@ export default function VisitorPage() {
       {/* Main Content - Quick Access Grid Style */}
       <section className="bg-stone-200 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-[128px] relative z-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Card 1: Hours & Location */}
             <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
@@ -45,32 +45,14 @@ export default function VisitorPage() {
                   <p className="font-semibold text-stone-700">Visiting Hours</p>
                   <p>Daily: Sunrise to Sunset</p>
                 </div>
-                <div>
-                  <p className="font-semibold text-stone-700">Office</p>
-                  <p>123 Granite Way, Union Springs</p>
-                  <p className="text-sm">Mon-Fri: 9am-5pm • Sat: 10am-2pm</p>
-                </div>
+
               </div>
               <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1 mt-auto">
                 Get Directions &rarr;
               </a>
             </div>
 
-            {/* Card 2: Guidelines */}
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
-              <div className="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center mb-6 group-hover:bg-stone-700 transition-colors duration-300">
-                <AlertCircle className="w-6 h-6 text-stone-700 group-hover:text-white" />
-              </div>
-              <h3 className="text-xl font-serif font-bold text-stone-800 mb-3">Visitor Guidelines</h3>
-              <ul className="text-stone-600 leading-relaxed mb-6 flex-grow space-y-2">
-                <li className="flex gap-2 items-start"><Car className="w-4 h-4 mt-1 text-stone-400"/> 15 mph speed limit</li>
-                <li className="flex gap-2 items-start"><Dog className="w-4 h-4 mt-1 text-stone-400"/> Pets must be leashed</li>
-                <li className="flex gap-2 items-start"><Flower2 className="w-4 h-4 mt-1 text-stone-400"/> Artificial flowers Nov-Mar</li>
-              </ul>
-              <span className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1 mt-auto cursor-pointer">
-                View Full Rules &rarr;
-              </span>
-            </div>
+
 
             {/* Card 3: Contact & Map */}
             <div className="bg-slate-50 p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col">
@@ -80,9 +62,11 @@ export default function VisitorPage() {
               <h3 className="text-xl font-serif font-bold text-stone-800 mb-3">Contact & Maps</h3>
               <div className="text-stone-600 leading-relaxed mb-6 flex-grow">
                 <p className="mb-4">Need assistance locating a loved one? Our board is here to help.</p>
-                <a href="tel:2222222222" className="flex items-center gap-2 text-lg font-semibold text-teal-700 hover:underline">
-                  <Phone className="w-4 h-4" /> 222-222-2222
-                </a>
+                <Link to={createPageUrl('Contact')}>
+                    <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-8 py-6 text-lg rounded-sm shadow-lg w-full sm:w-auto">
+                        <Phone className="w-5 h-5 mr-3" /> Contact an Advisor
+                    </Button>
+                </Link>
               </div>
               <div className="flex gap-4 mt-auto">
                 <Link to={createPageUrl('Plots')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
