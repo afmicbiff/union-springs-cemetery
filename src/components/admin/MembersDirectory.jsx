@@ -346,18 +346,7 @@ export default function MembersDirectory() {
                     </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                    <Button 
-                        variant="outline" 
-                        disabled={selectedMemberIds.length !== 1}
-                        onClick={() => {
-                            if (selectedMemberIds.length === 1) {
-                                window.open(`${createPageUrl('MemberProfile')}?id=${selectedMemberIds[0]}`, '_blank');
-                            }
-                        }}
-                        title={selectedMemberIds.length !== 1 ? "Select exactly one member to view profile page" : "Open Member Profile Page"}
-                    >
-                        <ExternalLink className="w-4 h-4 mr-2" /> Profile Page
-                    </Button>
+                    {/* Profile Page button removed */}
                     <Button variant="outline" onClick={() => setIsActivityLogOpen(true)}>
                         <History className="w-4 h-4 mr-2" /> Audit Log
                     </Button>
@@ -555,15 +544,7 @@ export default function MembersDirectory() {
                                             </td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-8 w-8 text-stone-400 hover:text-teal-600"
-                                                        title="Open Profile Page"
-                                                        onClick={() => window.open(`${createPageUrl('MemberProfile')}?id=${member.id}`, '_blank')}
-                                                    >
-                                                        <ExternalLink className="w-4 h-4" />
-                                                    </Button>
+                                                    {/* External Link button removed */}
                                                     <Button 
                                                         variant="ghost" 
                                                         size="icon" 

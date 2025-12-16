@@ -109,16 +109,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    {isDialog && (
-                        <Button 
-                            variant="outline" 
-                            size="icon" 
-                            title="Open Full Profile in New Window"
-                            onClick={() => window.open(`${createPageUrl('MemberProfile')}?id=${member.id}`, '_blank')}
-                        >
-                            <ExternalLink className="w-4 h-4 text-stone-600" />
-                        </Button>
-                    )}
+                    {/* External Link button removed */}
                     <Button onClick={() => onEdit(member)} className="bg-teal-700 hover:bg-teal-800">
                         <Edit className="w-4 h-4 mr-2" /> Edit Profile
                     </Button>
