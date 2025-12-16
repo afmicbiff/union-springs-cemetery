@@ -39,6 +39,7 @@ import AdminBylaws from "@/components/admin/AdminBylaws";
 import EventCalendar from "@/components/admin/EventCalendar";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import TaskManager from "@/components/tasks/TaskManager";
+import MembersDirectory from "@/components/admin/MembersDirectory";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -102,6 +103,7 @@ export default function AdminDashboard() {
       { id: "calendar", label: "Calendar", icon: Calendar, component: <EventCalendar /> },
       { id: "announcements", label: "News", icon: Megaphone, component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", icon: CheckSquare, component: <TaskManager isAdmin={true} /> },
+      { id: "members", label: "Members", icon: Users, component: <MembersDirectory /> },
   ];
 
   return (
