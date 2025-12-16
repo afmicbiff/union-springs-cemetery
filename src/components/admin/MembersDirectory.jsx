@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from '@/utils';
@@ -40,7 +40,37 @@ export default function MembersDirectory() {
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
     const [editingMember, setEditingMember] = useState(null);
+    const topScrollRef = useRef(null);
+    const tableScrollRef = useRef(null);
     const queryClient = useQueryClient();
+
+    // Sync scrollbars
+    useEffect(() => {
+        const top = topScrollRef.current;
+        const table = tableScrollRef.current;
+        
+        if (!top || !table) return;
+
+        const handleTopScroll = () => {
+            if (table.scrollLeft !== top.scrollLeft) {
+                table.scrollLeft = top.scrollLeft;
+            }
+        };
+
+        const handleTableScroll = () => {
+            if (top.scrollLeft !== table.scrollLeft) {
+                top.scrollLeft = table.scrollLeft;
+            }
+        };
+
+        top.addEventListener('scroll', handleTopScroll);
+        table.addEventListener('scroll', handleTableScroll);
+
+        return () => {
+            top.removeEventListener('scroll', handleTopScroll);
+            table.removeEventListener('scroll', handleTableScroll);
+        };
+    }, []);
 
     const { data: employees } = useQuery({
         queryKey: ['employees-list'],
@@ -442,7 +472,16 @@ export default function MembersDirectory() {
                     )}
 
                     <div className="rounded-md border border-stone-200 overflow-hidden">
-                    <div className="overflow-x-auto max-h-[600px]">
+                        {/* Top Scrollbar */}
+                        <div 
+                            ref={topScrollRef}
+                            className="overflow-x-auto bg-stone-50 border-b border-stone-200"
+                            style={{ height: '12px' }} // Custom height for visibility
+                        >
+                            <div className="h-full min-w-[1400px]"></div>
+                        </div>
+
+                    <div ref={tableScrollRef} className="overflow-x-auto max-h-[600px]">
                     <table className="w-full text-sm text-left min-w-[1400px]">
                         <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
                             <tr>
