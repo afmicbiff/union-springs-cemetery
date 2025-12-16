@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter, ExternalLink } from 'lucide-react';
 import { format, isPast, parseISO, addDays, differenceInDays } from 'date-fns';
 import {
     Dialog,
@@ -321,6 +321,18 @@ export default function MembersDirectory() {
                     </CardDescription>
                 </div>
                 <div className="flex gap-2">
+                    <Button 
+                        variant="outline" 
+                        disabled={selectedMemberIds.length !== 1}
+                        onClick={() => {
+                            if (selectedMemberIds.length === 1) {
+                                window.open(`${createPageUrl('MemberProfile')}?id=${selectedMemberIds[0]}`, '_blank');
+                            }
+                        }}
+                        title={selectedMemberIds.length !== 1 ? "Select exactly one member to view profile page" : "Open Member Profile Page"}
+                    >
+                        <ExternalLink className="w-4 h-4 mr-2" /> Profile Page
+                    </Button>
                     <Button variant="outline" onClick={() => setIsActivityLogOpen(true)}>
                         <History className="w-4 h-4 mr-2" /> Audit Log
                     </Button>
