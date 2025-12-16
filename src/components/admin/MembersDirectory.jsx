@@ -71,7 +71,7 @@ export default function MembersDirectory() {
     const exportToCSV = () => {
         if (!members || members.length === 0) return;
         
-        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Donation", "Comments"];
+        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments"];
         const csvContent = [
             headers.join(","),
             ...filteredMembers.map(m => [
@@ -81,6 +81,10 @@ export default function MembersDirectory() {
                 `"${m.city || ''}"`,
                 `"${m.state || ''}"`,
                 `"${m.zip || ''}"`,
+                `"${m.phone_primary || ''}"`,
+                `"${m.phone_secondary || ''}"`,
+                `"${m.email_primary || ''}"`,
+                `"${m.email_secondary || ''}"`,
                 `"${m.donation || ''}"`,
                 `"${m.comments || ''}"`
             ].join(","))
@@ -99,7 +103,9 @@ export default function MembersDirectory() {
         const matchesSearch = (
             (member.last_name || "").toLowerCase().includes(search) ||
             (member.first_name || "").toLowerCase().includes(search) ||
-            (member.city || "").toLowerCase().includes(search)
+            (member.city || "").toLowerCase().includes(search) ||
+            (member.email_primary || "").toLowerCase().includes(search) ||
+            (member.phone_primary || "").toLowerCase().includes(search)
         );
 
         const matchesState = stateFilter === 'all' || member.state === stateFilter;
@@ -139,6 +145,10 @@ export default function MembersDirectory() {
             city: formData.get('city'),
             state: formData.get('state'),
             zip: formData.get('zip'),
+            phone_primary: formData.get('phone_primary'),
+            phone_secondary: formData.get('phone_secondary'),
+            email_primary: formData.get('email_primary'),
+            email_secondary: formData.get('email_secondary'),
             donation: formData.get('donation'),
             comments: formData.get('comments'),
         };
@@ -217,6 +227,7 @@ export default function MembersDirectory() {
                                         <div className="flex items-center gap-1">First Name <ArrowUpDown className="w-3 h-3" /></div>
                                     </th>
                                     <th className="p-4 font-semibold">Address</th>
+                                    <th className="p-4 font-semibold">Contact</th>
                                     <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('city')}>
                                         <div className="flex items-center gap-1">City <ArrowUpDown className="w-3 h-3" /></div>
                                     </th>
@@ -249,6 +260,10 @@ export default function MembersDirectory() {
                                             <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
                                             <td className="p-4 text-stone-700">{member.first_name}</td>
                                             <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
+                                            <td className="p-4 text-stone-600 text-xs">
+                                                {member.phone_primary && <div className="flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> {member.phone_primary}</div>}
+                                                {member.email_primary && <div className="flex items-center gap-1"><Mail className="w-3 h-3" /> {member.email_primary}</div>}
+                                            </td>
                                             <td className="p-4 text-stone-600">{member.city}</td>
                                             <td className="p-4 text-stone-600">{member.state}</td>
                                             <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
@@ -305,6 +320,26 @@ export default function MembersDirectory() {
                         <div className="space-y-2">
                             <Label htmlFor="address">Address</Label>
                             <Input id="address" name="address" defaultValue={editingMember?.address} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="phone_primary">Primary Phone</Label>
+                                <Input id="phone_primary" name="phone_primary" defaultValue={editingMember?.phone_primary} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone_secondary">Secondary Phone</Label>
+                                <Input id="phone_secondary" name="phone_secondary" defaultValue={editingMember?.phone_secondary} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email_primary">Primary Email</Label>
+                                <Input id="email_primary" name="email_primary" type="email" defaultValue={editingMember?.email_primary} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email_secondary">Secondary Email</Label>
+                                <Input id="email_secondary" name="email_secondary" type="email" defaultValue={editingMember?.email_secondary} />
+                            </div>
                         </div>
                         <div className="grid grid-cols-6 gap-4">
                             <div className="col-span-3 space-y-2">
