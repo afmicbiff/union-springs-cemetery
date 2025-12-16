@@ -25,7 +25,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
     const [noteType, setNoteType] = useState("note");
     const [noteContent, setNoteContent] = useState("");
     
-    const { data: employees } = useQueryClient().getQueryData(['employees-list']) ? { data: useQueryClient().getQueryData(['employees-list']) } : useQuery({
+    const { data: employees } = useQuery({
         queryKey: ['employees-profile-detail'],
         queryFn: () => base44.entities.Employee.list(),
         initialData: []
