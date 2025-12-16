@@ -74,6 +74,8 @@ export default function MembersDirectory() {
             city: formData.get('city'),
             state: formData.get('state'),
             zip: formData.get('zip'),
+            donation: formData.get('donation'),
+            comments: formData.get('comments'),
         };
 
         if (editingMember) {
@@ -121,6 +123,7 @@ export default function MembersDirectory() {
                                     <th className="p-4 font-semibold">City</th>
                                     <th className="p-4 font-semibold">State</th>
                                     <th className="p-4 font-semibold">Zip</th>
+                                    <th className="p-4 font-semibold">Donation</th>
                                     <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -146,6 +149,7 @@ export default function MembersDirectory() {
                                             <td className="p-4 text-stone-600">{member.city}</td>
                                             <td className="p-4 text-stone-600">{member.state}</td>
                                             <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
+                                            <td className="p-4 text-stone-600">{member.donation}</td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2">
                                                     <Button 
@@ -212,6 +216,14 @@ export default function MembersDirectory() {
                                 <Label htmlFor="zip">Zip</Label>
                                 <Input id="zip" name="zip" defaultValue={editingMember?.zip} />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="donation">Donation</Label>
+                            <Input id="donation" name="donation" defaultValue={editingMember?.donation} placeholder="Amount or Type" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="comments">Comments</Label>
+                            <Input id="comments" name="comments" defaultValue={editingMember?.comments} placeholder="Additional notes..." />
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
