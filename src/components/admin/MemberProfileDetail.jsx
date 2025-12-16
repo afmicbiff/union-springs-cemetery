@@ -8,17 +8,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { 
     Phone, Mail, MapPin, DollarSign, Edit, MessageSquare, 
-    User, CheckSquare, X, ExternalLink
+    User, CheckSquare, X, ExternalLink, Sparkles, Send, Copy
 } from 'lucide-react';
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import AIEmailAssistant from './AIEmailAssistant';
+import { Textarea } from "@/components/ui/textarea";
 
 export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
     const [noteContent, setNoteContent] = useState("");
+    const [isEmailDraftOpen, setIsEmailDraftOpen] = useState(false);
+    const [draftEmail, setDraftEmail] = useState({ subject: "", body: "" });
     const queryClient = useQueryClient();
 
     const addLogMutation = useMutation({
@@ -77,11 +83,16 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                 </Button>
                             )}
                             {member.email_primary && (
-                                <Button size="sm" variant="outline" className="h-8 gap-2" asChild>
-                                    <a href={`mailto:${member.email_primary}`}>
-                                        <Mail className="w-3.5 h-3.5" /> Email
-                                    </a>
-                                </Button>
+                                <>
+                                    <Button size="sm" variant="outline" className="h-8 gap-2" asChild>
+                                        <a href={`mailto:${member.email_primary}`}>
+                                            <Mail className="w-3.5 h-3.5" /> Email
+                                        </a>
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="h-8 gap-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100" onClick={() => setIsEmailDraftOpen(true)}>
+                                        <Sparkles className="w-3.5 h-3.5" /> Draft with AI
+                                    </Button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -189,9 +200,44 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                 {/* Right Column: Activity Log */}
                 <div className="w-full md:w-[400px] bg-stone-50/50 flex flex-col border-l border-stone-200 shrink-0 h-1/2 md:h-auto">
                     <div className="p-4 border-b border-stone-200 bg-white">
-                        <h3 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-                            <MessageSquare className="w-4 h-4 text-teal-600" /> Activity & Notes
-                        </h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-semibold text-stone-900 flex items-center gap-2">
+                                <MessageSquare className="w-4 h-4 text-teal-600" /> Activity & Notes
+                            </h3>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-stone-400 hover:text-teal-600" title="AI Suggestions">
+                                        <Sparkles className="w-4 h-4" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80" align="end">
+                                    <div className="space-y-2">
+                                        <h4 className="font-semibold text-xs uppercase text-stone-500">AI Suggestion</h4>
+                                        <p className="text-sm text-stone-600">Enter a note and click to analyze for follow-ups.</p>
+                                        <Button 
+                                            size="sm" 
+                                            className="w-full bg-teal-600" 
+                                            disabled={!noteContent}
+                                            onClick={async () => {
+                                                const res = await base44.functions.invoke('aiCommunicationAssistant', {
+                                                    action: 'suggest_followup',
+                                                    data: { content: noteContent }
+                                                });
+                                                if (res.data?.suggested_log_type) setNoteType(res.data.suggested_log_type);
+                                                if (res.data?.suggested_task) {
+                                                    toast.info(`Suggestion: Create task "${res.data.suggested_task.title}"`);
+                                                    // Here we could auto-create a task or open a dialog, but for now just notifying
+                                                } else {
+                                                    toast.success("No specific follow-up actions detected.");
+                                                }
+                                            }}
+                                        >
+                                            Analyze Note
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                         <div className="space-y-3">
                             <div className="flex gap-2">
                                 <Select value={noteType} onValueChange={setNoteType}>
@@ -264,6 +310,76 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     </ScrollArea>
                 </div>
             </div>
+
+            {/* Email Draft Dialog */}
+            <Dialog open={isEmailDraftOpen} onOpenChange={setIsEmailDraftOpen}>
+                <DialogContent className="sm:max-w-[800px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-teal-600" /> Draft Email to {member.first_name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-stone-500 uppercase tracking-wider">AI Assistant</h4>
+                            <AIEmailAssistant 
+                                currentSubject={draftEmail.subject}
+                                currentBody={draftEmail.body}
+                                recipientContext={{ 
+                                    first_name: member.first_name, 
+                                    last_name: member.last_name, 
+                                    donation: member.donation,
+                                    city: member.city
+                                }}
+                                onApply={(result) => setDraftEmail({ subject: result.subject, body: result.body })}
+                            />
+                        </div>
+                        <div className="space-y-4 border-l pl-6 border-stone-100">
+                            <h4 className="text-sm font-medium text-stone-500 uppercase tracking-wider">Preview & Action</h4>
+                            <div className="space-y-3">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium text-stone-600">Subject</label>
+                                    <Input 
+                                        value={draftEmail.subject} 
+                                        onChange={(e) => setDraftEmail({...draftEmail, subject: e.target.value})}
+                                        placeholder="Email subject..."
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium text-stone-600">Body</label>
+                                    <Textarea 
+                                        value={draftEmail.body} 
+                                        onChange={(e) => setDraftEmail({...draftEmail, body: e.target.value})}
+                                        placeholder="Email content..."
+                                        rows={12}
+                                    />
+                                </div>
+                                <div className="flex gap-2 pt-2">
+                                    <Button 
+                                        variant="outline" 
+                                        className="flex-1"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${draftEmail.subject}\n\n${draftEmail.body}`);
+                                            toast.success("Copied to clipboard");
+                                        }}
+                                    >
+                                        <Copy className="w-4 h-4 mr-2" /> Copy
+                                    </Button>
+                                    <Button 
+                                        className="flex-1 bg-teal-700 hover:bg-teal-800"
+                                        onClick={() => {
+                                            window.open(`mailto:${member.email_primary}?subject=${encodeURIComponent(draftEmail.subject)}&body=${encodeURIComponent(draftEmail.body)}`);
+                                        }}
+                                        disabled={!member.email_primary}
+                                    >
+                                        <Send className="w-4 h-4 mr-2" /> Open Mail App
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
