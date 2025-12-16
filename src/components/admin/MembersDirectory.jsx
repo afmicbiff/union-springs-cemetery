@@ -23,7 +23,7 @@ export default function MembersDirectory() {
 
     const { data: members, isLoading } = useQuery({
         queryKey: ['members'],
-        queryFn: () => base44.entities.Member.list({ limit: 1000 }),
+        queryFn: () => base44.entities.Member.list(null, 1000),
         initialData: [],
     });
 
