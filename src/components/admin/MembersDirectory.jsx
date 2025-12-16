@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter } from 'lucide-react';
-import { format, isPast, parseISO, addDays } from 'date-fns';
+import { format, isPast, parseISO, addDays, differenceInDays } from 'date-fns';
 import {
     Dialog,
     DialogContent,
@@ -19,7 +19,6 @@ import { toast } from "sonner";
 import MemberProfileDialog from './MemberProfileDialog';
 import SegmentBuilder from './SegmentBuilder';
 import BulkActionDialog from './BulkActionDialog';
-import { differenceInDays, parseISO } from 'date-fns';
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function MembersDirectory() {
