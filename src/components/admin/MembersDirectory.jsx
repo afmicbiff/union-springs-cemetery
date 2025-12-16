@@ -34,23 +34,42 @@ export default function MembersDirectory() {
     });
 
     const createMutation = useMutation({
-        mutationFn: (data) => base44.entities.Member.create(data),
-        onSuccess: () => {
+        mutationFn: async (data) => {
+            const res = await base44.functions.invoke('manageMember', { action: 'create', data });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
+        onSuccess: (data) => {
             queryClient.invalidateQueries(['members']);
             setIsDialogOpen(false);
             setEditingMember(null);
             toast.success("Member added successfully");
-        }
+            if (data._workflows_triggered?.includes('welcome')) {
+                toast.success("Welcome email sent");
+            }
+            if (data._workflows_triggered?.includes('donation_thank_you')) {
+                toast.success("Donation thank-you email sent");
+            }
+        },
+        onError: (err) => toast.error("Failed to create member: " + err.message)
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }) => base44.entities.Member.update(id, data),
-        onSuccess: () => {
+        mutationFn: async ({ id, data }) => {
+            const res = await base44.functions.invoke('manageMember', { action: 'update', id, data });
+            if (res.data.error) throw new Error(res.data.error);
+            return res.data;
+        },
+        onSuccess: (data) => {
             queryClient.invalidateQueries(['members']);
             setIsDialogOpen(false);
             setEditingMember(null);
             toast.success("Member updated successfully");
-        }
+            if (data._workflows_triggered?.includes('donation_thank_you')) {
+                toast.success("Donation thank-you email sent");
+            }
+        },
+        onError: (err) => toast.error("Failed to update member: " + err.message)
     });
 
     const deleteMutation = useMutation({
@@ -298,9 +317,14 @@ export default function MembersDirectory() {
                                             <td className="p-4 text-stone-600">{member.donation}</td>
                                             <td className="p-4">
                                                 {member.follow_up_date && member.follow_up_status === 'pending' && (
-                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit mb-1 ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
                                                         <Calendar className="w-3 h-3" />
                                                         {format(parseISO(member.follow_up_date), 'MMM d')}
+                                                    </div>
+                                                )}
+                                                {member.last_contact_date && isPast(addDays(parseISO(member.last_contact_date), 180)) && (
+                                                    <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit bg-purple-100 text-purple-700" title="No contact in 6+ months">
+                                                        <Bell className="w-3 h-3" /> Re-engage
                                                     </div>
                                                 )}
                                             </td>

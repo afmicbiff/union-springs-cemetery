@@ -5,33 +5,39 @@ Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
         
-        // 1. Fetch Members with pending follow-ups that are due or overdue
-        // Note: Filtering logic might need to be done in memory if complex date comparison isn't supported directly in list/filter yet
-        // fetching all for now as list size is manageable (1000 limit)
+        // Fetch all members (limit 1000)
         const members = await base44.entities.Member.list(null, 1000);
         
         const notifications = [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        
+        // 6 months threshold for re-engagement
+        const reEngagementThreshold = subDays(today, 180);
 
         for (const member of members) {
+            // 1. Follow-up Reminders
             if (member.follow_up_status === 'pending' && member.follow_up_date) {
                 const followUpDate = parseISO(member.follow_up_date);
                 
-                // If date is today or in the past
                 if (followUpDate <= today || isPast(followUpDate)) {
-                    // Check if we already notified recently to avoid spam (optional, skipping complexity for now)
-                    // Just create the notification
-                    
-                    const message = `Follow-up due for ${member.first_name} ${member.last_name}: ${member.follow_up_notes || 'No notes'}`;
-                    
-                    // Check if duplicate notification exists for today to avoid spamming on every poll
-                    // We'll fetch recent notifications
-                    // For efficiency, maybe we just generate it. Ideally we'd check DB.
-                    
                     notifications.push({
-                        message,
-                        type: 'task', // distinct type
+                        message: `Follow-up due for ${member.first_name} ${member.last_name}: ${member.follow_up_notes || 'No notes'}`,
+                        type: 'task',
+                        is_read: false,
+                        created_at: new Date().toISOString()
+                    });
+                }
+            }
+
+            // 2. Re-engagement Workflow
+            // If they haven't been contacted in > 180 days
+            if (member.last_contact_date) {
+                const lastContact = parseISO(member.last_contact_date);
+                if (lastContact < reEngagementThreshold) {
+                    notifications.push({
+                        message: `Re-engagement needed: ${member.first_name} ${member.last_name} hasn't been contacted since ${format(lastContact, 'MMM d, yyyy')}.`,
+                        type: 'alert',
                         is_read: false,
                         created_at: new Date().toISOString()
                     });
@@ -39,15 +45,16 @@ Deno.serve(async (req) => {
             }
         }
 
-        // 2. Fetch recent notifications to prevent duplicates
+        // Fetch recent notifications to prevent spamming duplicates
+        // We look at the last 50 notifications
         const recentNotes = await base44.entities.Notification.list('-created_at', 50);
         
         let createdCount = 0;
         for (const note of notifications) {
+            // Check if a similar notification was created in the last 24 hours
             const isDuplicate = recentNotes.some(n => 
                 n.message === note.message && 
-                !n.is_read && // if read, we can remind again? no, let's just check message content
-                new Date(n.created_at) > subDays(new Date(), 1) // only check last 24h
+                new Date(n.created_at) > subDays(new Date(), 1)
             );
 
             if (!isDuplicate) {
