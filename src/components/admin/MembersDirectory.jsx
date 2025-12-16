@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -13,10 +13,14 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export default function MembersDirectory() {
     const [searchTerm, setSearchTerm] = useState("");
+    const [stateFilter, setStateFilter] = useState("all");
+    const [donationFilter, setDonationFilter] = useState("all"); // 'all', 'donated', 'none'
+    const [sortConfig, setSortConfig] = useState({ key: 'last_name', direction: 'asc' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const queryClient = useQueryClient();
@@ -55,14 +59,75 @@ export default function MembersDirectory() {
         }
     });
 
+    const uniqueStates = [...new Set((members || []).map(m => m.state).filter(Boolean))].sort();
+
+    const handleSort = (key) => {
+        setSortConfig(current => ({
+            key,
+            direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+        }));
+    };
+
+    const exportToCSV = () => {
+        if (!members || members.length === 0) return;
+        
+        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Donation", "Comments"];
+        const csvContent = [
+            headers.join(","),
+            ...filteredMembers.map(m => [
+                `"${m.last_name || ''}"`,
+                `"${m.first_name || ''}"`,
+                `"${m.address || ''}"`,
+                `"${m.city || ''}"`,
+                `"${m.state || ''}"`,
+                `"${m.zip || ''}"`,
+                `"${m.donation || ''}"`,
+                `"${m.comments || ''}"`
+            ].join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "members_directory.csv";
+        link.click();
+    };
+
     const filteredMembers = (members || []).filter(member => {
         const search = searchTerm.toLowerCase();
-        return (
+        const matchesSearch = (
             (member.last_name || "").toLowerCase().includes(search) ||
             (member.first_name || "").toLowerCase().includes(search) ||
             (member.city || "").toLowerCase().includes(search)
         );
-    }).sort((a, b) => (a.last_name || "").localeCompare(b.last_name || ""));
+
+        const matchesState = stateFilter === 'all' || member.state === stateFilter;
+        
+        const matchesDonation = donationFilter === 'all' 
+            ? true 
+            : donationFilter === 'donated' 
+                ? !!member.donation 
+                : !member.donation;
+
+        return matchesSearch && matchesState && matchesDonation;
+    }).sort((a, b) => {
+        const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
+        const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
+        
+        if (sortConfig.key === 'donation') {
+             // Try to sort donation numerically if possible
+             const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
+             const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
+             if (!isNaN(aNum) && !isNaN(bNum)) {
+                 return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+             }
+        }
+
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     const handleSave = (e) => {
         e.preventDefault();
@@ -94,22 +159,50 @@ export default function MembersDirectory() {
                         Manage contact information for cemetery members and donors.
                     </CardDescription>
                 </div>
-                <Button 
-                    onClick={() => { setEditingMember(null); setIsDialogOpen(true); }}
-                    className="bg-teal-700 hover:bg-teal-800"
-                >
-                    <Plus className="w-4 h-4 mr-2" /> Add Member
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={exportToCSV}>
+                        <Download className="w-4 h-4 mr-2" /> Export CSV
+                    </Button>
+                    <Button 
+                        onClick={() => { setEditingMember(null); setIsDialogOpen(true); }}
+                        className="bg-teal-700 hover:bg-teal-800"
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> Add Member
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
-                <div className="relative mb-6">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
-                    <Input
-                        placeholder="Search by name or city..."
-                        className="pl-9 bg-stone-50"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
+                        <Input
+                            placeholder="Search by name or city..."
+                            className="pl-9 bg-stone-50"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <Select value={stateFilter} onValueChange={setStateFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All States</SelectItem>
+                            {uniqueStates.map(state => (
+                                <SelectItem key={state} value={state}>{state}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={donationFilter} onValueChange={setDonationFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Donation Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Members</SelectItem>
+                            <SelectItem value="donated">Donors Only</SelectItem>
+                            <SelectItem value="none">Non-Donors</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="rounded-md border border-stone-200 overflow-hidden">
@@ -117,13 +210,23 @@ export default function MembersDirectory() {
                         <table className="w-full text-sm text-left">
                             <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
                                 <tr>
-                                    <th className="p-4 font-semibold">Last Name</th>
-                                    <th className="p-4 font-semibold">First Name</th>
+                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('last_name')}>
+                                        <div className="flex items-center gap-1">Last Name <ArrowUpDown className="w-3 h-3" /></div>
+                                    </th>
+                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('first_name')}>
+                                        <div className="flex items-center gap-1">First Name <ArrowUpDown className="w-3 h-3" /></div>
+                                    </th>
                                     <th className="p-4 font-semibold">Address</th>
-                                    <th className="p-4 font-semibold">City</th>
-                                    <th className="p-4 font-semibold">State</th>
+                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('city')}>
+                                        <div className="flex items-center gap-1">City <ArrowUpDown className="w-3 h-3" /></div>
+                                    </th>
+                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('state')}>
+                                        <div className="flex items-center gap-1">State <ArrowUpDown className="w-3 h-3" /></div>
+                                    </th>
                                     <th className="p-4 font-semibold">Zip</th>
-                                    <th className="p-4 font-semibold">Donation</th>
+                                    <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('donation')}>
+                                        <div className="flex items-center gap-1">Donation <ArrowUpDown className="w-3 h-3" /></div>
+                                    </th>
                                     <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
