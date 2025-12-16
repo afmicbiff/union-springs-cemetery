@@ -27,7 +27,10 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
     
     const { data: employees } = useQuery({
         queryKey: ['employees-profile-detail'],
-        queryFn: () => base44.entities.Employee.list(),
+        queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) return [];
+            return base44.entities.Employee.list();
+        },
         initialData: []
     });
 

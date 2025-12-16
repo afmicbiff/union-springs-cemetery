@@ -44,7 +44,10 @@ export default function MembersDirectory() {
 
     const { data: employees } = useQuery({
         queryKey: ['employees-list'],
-        queryFn: () => base44.entities.Employee.list(),
+        queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) return [];
+            return base44.entities.Employee.list();
+        },
         initialData: []
     });
 
@@ -67,7 +70,10 @@ export default function MembersDirectory() {
 
     const { data: savedSegments } = useQuery({
         queryKey: ['member-segments'],
-        queryFn: () => base44.entities.MemberSegment.list(),
+        queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) return [];
+            return base44.entities.MemberSegment.list();
+        },
         initialData: []
     });
 

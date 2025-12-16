@@ -27,7 +27,10 @@ export default function MemberProfile() {
 
     const { data: employees } = useQuery({
         queryKey: ['employees-list'],
-        queryFn: () => base44.entities.Employee.list(),
+        queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) return [];
+            return base44.entities.Employee.list();
+        },
         initialData: []
     });
 
