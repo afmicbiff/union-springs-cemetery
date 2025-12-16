@@ -31,13 +31,22 @@ export default function MemberProfile() {
         initialData: []
     });
 
-    const { data: member, isLoading } = useQuery({
+    const { data: member, isLoading, isError, error } = useQuery({
         queryKey: ['member', memberId],
         queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) {
+                base44.auth.redirectToLogin();
+                throw new Error("User not authenticated.");
+            }
             const res = await base44.entities.Member.filter({ id: memberId });
             return res[0];
         },
-        enabled: !!memberId
+        enabled: !!memberId,
+        onError: (err) => {
+            if (err.message !== "User not authenticated.") {
+                toast.error("Failed to load member profile: " + err.message);
+            }
+        },
     });
 
     const updateMutation = useMutation({
@@ -80,6 +89,7 @@ export default function MemberProfile() {
         updateMutation.mutate({ id: member.id, data });
     };
 
+    if (isError) return <div className="p-10 text-center text-red-500">Error loading member: {error?.message}</div>;
     if (isLoading) return <div className="flex items-center justify-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-teal-700" /></div>;
     if (!member) return <div className="p-10 text-center">Member not found</div>;
 

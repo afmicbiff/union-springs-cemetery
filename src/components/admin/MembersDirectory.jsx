@@ -48,10 +48,21 @@ export default function MembersDirectory() {
         initialData: []
     });
 
-    const { data: members, isLoading } = useQuery({
+    const { data: members, isLoading, isError, error } = useQuery({
         queryKey: ['members'],
-        queryFn: () => base44.entities.Member.list(null, 1000),
+        queryFn: async () => {
+            if (!(await base44.auth.isAuthenticated())) {
+                base44.auth.redirectToLogin();
+                throw new Error("User not authenticated.");
+            }
+            return base44.entities.Member.list(undefined, 1000);
+        },
         initialData: [],
+        onError: (err) => {
+            if (err.message !== "User not authenticated.") {
+                toast.error("Failed to load members: " + err.message);
+            }
+        },
     });
 
     const { data: savedSegments } = useQuery({
@@ -475,15 +486,21 @@ export default function MembersDirectory() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-100 bg-white">
-                                {isLoading ? (
+                                {isError ? (
                                     <tr>
-                                        <td colSpan="7" className="p-8 text-center text-stone-500 italic">
+                                        <td colSpan="11" className="p-8 text-center text-red-500">
+                                            Error loading members. Please ensure you are logged in.
+                                        </td>
+                                    </tr>
+                                ) : isLoading ? (
+                                    <tr>
+                                        <td colSpan="11" className="p-8 text-center text-stone-500 italic">
                                             Loading members...
                                         </td>
                                     </tr>
                                 ) : filteredMembers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" className="p-8 text-center text-stone-500 italic">
+                                        <td colSpan="11" className="p-8 text-center text-stone-500 italic">
                                             No members found.
                                         </td>
                                     </tr>
