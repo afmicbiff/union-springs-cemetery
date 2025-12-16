@@ -21,9 +21,9 @@ export default function ServicesSection() {
           
           <div className="md:w-1/2 w-full space-y-8 text-center md:text-left">
               <div>
-                <h2 className="text-3xl md:text-4xl font-serif text-stone-900 mb-4">Pre-Planning Services</h2>
+                <h2 className="text-3xl md:text-4xl font-serif text-stone-900 mb-4">Services</h2>
                 <p className="text-stone-600 text-lg leading-relaxed">
-                    Planning ahead provides peace of mind for you and your family. Our counselors are here to guide you through plot selection and arrangement options with care and respect.
+                    The staff at the cemetery maintains the grounds at the Union springs Cemetery. The cemetery allows the user to have:
                 </p>
               </div>
               
@@ -51,7 +51,7 @@ export default function ServicesSection() {
               <div className="pt-2">
                 <Link to={createPageUrl('Contact')}>
                     <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-8 py-6 text-lg rounded-sm shadow-lg w-full sm:w-auto">
-                        <Phone className="w-5 h-5 mr-3" /> Contact an Advisor
+                        <Phone className="w-5 h-5 mr-3" /> Contact the Administrator of the Grounds
                     </Button>
                 </Link>
               </div>
