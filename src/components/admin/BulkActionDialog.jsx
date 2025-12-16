@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { Sparkles } from 'lucide-react';
+import AIEmailAssistant from './AIEmailAssistant';
 
 export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm }) {
     const [actionType, setActionType] = useState("send_email");
@@ -59,7 +62,24 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                                 />
                             </div>
                             <div className="space-y-1">
-                                <Label>Message Body</Label>
+                                <div className="flex justify-between items-center">
+                                    <Label>Message Body</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button size="sm" variant="outline" className="h-6 text-[10px] gap-1 text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100 px-2">
+                                                <Sparkles className="w-3 h-3" /> AI Assistant
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[400px]" align="end">
+                                            <AIEmailAssistant 
+                                                currentSubject={config.subject}
+                                                currentBody={config.body}
+                                                recipientContext={{ count: selectedCount, type: 'bulk' }}
+                                                onApply={(result) => setConfig({ ...config, subject: result.subject, body: result.body })}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
                                 <Textarea 
                                     placeholder="Enter your message here. Use {{first_name}} for personalization." 
                                     className="min-h-[120px]"
