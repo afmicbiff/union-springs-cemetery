@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Search, MapPin, Flower2 } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 
 const QuickAccessCard = ({ icon: Icon, title, description, linkText, linkUrl, colorClass, hoverColorClass }) => (
   <div className="bg-white p-8 rounded-sm shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col items-center text-center h-full border-b-4 border-transparent hover:border-teal-600">
@@ -39,14 +39,7 @@ export default function QuickAccessGrid() {
           hoverColorClass="text-teal-700"
         />
 
-        <QuickAccessCard
-          icon={Flower2}
-          title="Send Flowers"
-          description="Partnering with local florists to ensure fresh, beautiful arrangements are delivered directly to the site."
-          linkText="View Florists"
-          colorClass="bg-amber-50"
-          hoverColorClass="text-amber-700"
-        />
+
 
         <QuickAccessCard
           icon={MapPin}
