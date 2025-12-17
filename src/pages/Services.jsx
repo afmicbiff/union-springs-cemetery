@@ -26,6 +26,14 @@ export default function ServicesPage() {
                 <li>The President, Vice-President, or Caretaker shall have sole authority for reserving or marking grave sites. Any sites marked by an individual other than the authorized persons will not be recognized.</li>
                 <li>All grave sites will remain the property of the Union Springs Cemetery Association with no right of transfer to any person. A reserved plot cannot be transferred to another individual by the person who reserved it, if they no longer wish to keep the plot, they should notify a member of the Executive Board so the plot can be marked for use by another person. Maintenance Fees – A minimum donation of $400 secures a plot. Members must reaffirm intent to use the plot every five years, the Association will attempt to verify contact for one year. If no contact is successful the plot will revert to the Association.</li>
             </ol>
+
+            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Urns</h3>
+            <p className="text-left text-stone-600 font-medium mb-4">Maximum of three urns per plot.</p>
+            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
+                <li>Place the first urn 12 inches from the headstone base or marker, centered on the plot. The second urn should be placed 12 inches from the first urn in the row. The third and final urn will be positioned 12 inches from the second urn in the row.</li>
+                <li>Dimensional limits: No more than 200 cubic inches, 9 inches tall, and 7 inches in diameter.</li>
+                <li>Placement shall be regulated and mapped by the Association.</li>
+            </ol>
             <br />
             <p>The cemetery allows for:</p>
             <ul className="list-disc list-inside mt-4 ml-4 space-y-2 font-medium">
