@@ -7,9 +7,9 @@ export default function InfoSection() {
   return (
     <section className="py-16 md:py-24 px-4 md:px-8 bg-white">
       <div className="max-w-4xl mx-auto text-center space-y-8">
-        <h2 className="text-3xl md:text-5xl font-serif text-stone-900 tracking-tight">A Tradition of Dignity</h2>
+        <h2 className="text-3xl md:text-5xl font-serif text-stone-900 tracking-tight drop-shadow-md">A Tradition of Dignity</h2>
         <div className="w-24 h-1 bg-red-700 mx-auto rounded-full"></div>
-        <p className="text-lg md:text-xl text-stone-600 leading-relaxed font-light">
+        <p className="text-lg md:text-xl text-stone-600 leading-relaxed font-light drop-shadow-sm">
           Established in 1892, Union Springs Cemetery has served our community for generations. 
           Nestled among ancient oaks and granite formations, our grounds offer a serene environment 
           for reflection and remembrance. We are dedicated to preserving the memory of those who 
