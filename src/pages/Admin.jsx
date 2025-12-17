@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -162,6 +164,12 @@ export default function AdminDashboard() {
                         </div>
                     </PopoverContent>
                 </Popover>
+
+                <Link to={createPageUrl('Bylaws')}>
+                    <Button variant="outline" size="sm" className="hidden md:flex border-stone-300 text-stone-700 hover:bg-stone-50">
+                        <FileText className="w-4 h-4 mr-2" /> View Bylaws
+                    </Button>
+                </Link>
 
                 <Button onClick={exportData} variant="outline" size="sm" className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50">
                     <Database className="w-4 h-4 mr-2" /> Backup
