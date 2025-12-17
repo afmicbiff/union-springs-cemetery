@@ -10,6 +10,7 @@ import EmployeeProfile from './pages/EmployeeProfile';
 import Memorial from './pages/Memorial';
 import Profile from './pages/Profile';
 import Employees from './pages/Employees';
+import Bylaws from './pages/Bylaws';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +27,7 @@ export const PAGES = {
     "Memorial": Memorial,
     "Profile": Profile,
     "Employees": Employees,
+    "Bylaws": Bylaws,
 }
 
 export const pagesConfig = {
