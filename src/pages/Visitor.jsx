@@ -23,7 +23,7 @@ export default function VisitorPage() {
             <h1 className="text-4xl md:text-5xl font-serif text-stone-100">Plan Your Visit</h1>
             <div className="w-24 h-1 bg-red-700 mx-auto"></div>
             <p className="text-stone-200 max-w-2xl mx-auto text-lg leading-relaxed font-light">
-              We welcome you to Union Springs Cemetery. Whether you are visiting a loved one or exploring our historic grounds, we ask that you respect the sanctity of this place.
+              We welcome you to Union Springs Cemetery. Whether you are visiting a loved one or exploring our historic grounds, we ask that you respect the sanctity of the cemetery.
             </p>
           </div>
         </div>
