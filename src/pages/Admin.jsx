@@ -41,6 +41,7 @@ import EventCalendar from "@/components/admin/EventCalendar";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import TaskManager from "@/components/tasks/TaskManager";
 import MembersDirectory from "@/components/admin/MembersDirectory";
+import AdminSearch from "@/components/admin/AdminSearch";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
