@@ -198,6 +198,10 @@ export default function AdminDashboard() {
                     </PopoverContent>
                 </Popover>
 
+                <Button onClick={() => setActiveTab('onboarding')} variant="outline" size="sm" className="hidden md:flex border-stone-300 text-stone-700 hover:bg-stone-50">
+                    <UserPlus className="w-4 h-4 mr-2" /> Onboarding
+                </Button>
+
                 <Link to={createPageUrl('Bylaws')}>
                     <Button variant="outline" size="sm" className="hidden md:flex border-stone-300 text-stone-700 hover:bg-stone-50">
                         <FileText className="w-4 h-4 mr-2" /> View Bylaws
