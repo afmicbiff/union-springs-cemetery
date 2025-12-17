@@ -43,8 +43,8 @@ export default function Layout({ children }) {
       items: [
         { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
         { label: 'Bylaws', path: '/Bylaws', icon: Scale },
-        { label: 'Employees', path: '/Employees', icon: Users },
-        { label: 'Onboarding', path: '/admin', icon: UserPlus }
+        { label: 'Employee Directory', path: '/Employees', icon: Users },
+        { label: 'New Employee Onboarding', path: '/admin', icon: UserPlus }
       ]
     },
   ];
@@ -84,7 +84,7 @@ export default function Layout({ children }) {
                       {item.items.map((subItem) => (
                         <DropdownMenuItem key={subItem.label} asChild className="focus:bg-stone-800 focus:text-white cursor-pointer">
                           <Link to={createPageUrl(subItem.path.replace('/', ''))}>
-                            <subItem.icon className={`${subItem.label === 'Employees' ? 'w-5 h-5' : 'w-4 h-4'} mr-2`} />
+                            <subItem.icon className={`${subItem.label === 'Employee Directory' ? 'w-5 h-5' : 'w-4 h-4'} mr-2`} />
                             {subItem.label}
                           </Link>
                         </DropdownMenuItem>
