@@ -43,8 +43,7 @@ export default function Layout({ children }) {
       items: [
         { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
         { label: 'Bylaws', path: '/Bylaws', icon: Scale },
-        { label: 'Employees', path: '/Employees', icon: Users },
-        { label: 'Onboarding', path: '/admin', icon: UserPlus }
+        { label: 'Employees', path: '/Employees', icon: Users }
       ]
     },
   ];
