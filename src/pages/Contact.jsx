@@ -97,8 +97,8 @@ export default function ContactPage() {
                                     <div>
                                         <h3 className="font-serif font-bold text-lg text-stone-800">Office Location</h3>
                                         <p className="text-stone-600">
-                                            123 Granite Way<br />
-                                            Union Springs, USA
+                                            1311 Fire Tower Road<br />
+                                            Shongaloo, Webster Parish, Louisiana, 71072
                                         </p>
                                     </div>
                                 </CardContent>
