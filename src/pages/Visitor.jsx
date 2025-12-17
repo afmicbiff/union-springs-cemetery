@@ -64,7 +64,7 @@ export default function VisitorPage() {
                 <p className="mb-4">Need assistance locating a loved one? Our board is here to help.</p>
                 <Link to={createPageUrl('Contact')}>
                     <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-8 py-6 text-lg rounded-sm shadow-lg w-full sm:w-auto">
-                        <Phone className="w-5 h-5 mr-3" /> Contact an Advisor
+                        <Phone className="w-5 h-5 mr-3" /> Contact the Administrator of the Grounds
                     </Button>
                 </Link>
               </div>
