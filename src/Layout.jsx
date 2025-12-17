@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
 import {
   DropdownMenu,
@@ -178,11 +179,66 @@ export default function Layout({ children }) {
             <p className="mt-2">Phone: (555) 123-4567</p>
             <p>Email: office@unionsprings.com</p>
           </div>
-          <div>
-            <h3 className="text-stone-100 font-serif text-lg mb-4">Hours</h3>
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-stone-100 font-serif text-lg">Hours</h3>
+              <a 
+                href="https://www.facebook.com/LTHPreservation/posts/union-springs-school-church-cemetery-near-shongaloo-webster-parish/4371242156248213/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-stone-400 hover:text-[#1877F2] transition-colors"
+                title="Follow us on Facebook"
+              >
+                <Facebook className="w-5 h-5" />
+              </a>
+            </div>
             <p>Gates: Sunrise to Sunset</p>
             <p>Office: Mon-Fri 9am - 5pm</p>
             <p>Sat: 10am - 2pm</p>
+            
+            <div className="mt-6">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-transparent border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800 hover:border-stone-600 w-full justify-start">
+                    <Map className="w-4 h-4 mr-2" /> Site Map
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-stone-50 max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle className="font-serif text-2xl text-stone-900 border-b border-stone-200 pb-2">Site Map</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 py-4">
+                      {navItems.map((item) => (
+                        <div key={item.label}>
+                          {item.isDropdown ? (
+                            <div className="space-y-2">
+                              <div className="font-semibold text-teal-800 flex items-center gap-2">
+                                <item.icon className="w-4 h-4" /> {item.label}
+                              </div>
+                              <div className="pl-6 flex flex-col gap-1.5 border-l-2 border-stone-200 ml-2">
+                                {item.items.map(subItem => (
+                                  <Link key={subItem.path} to={createPageUrl(subItem.path.replace('/', ''))} className="text-stone-600 text-sm hover:text-teal-700 hover:underline">
+                                    {subItem.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <Link to={createPageUrl(item.path.replace('/', '')) || '/'} className="font-semibold text-stone-800 hover:text-teal-700 flex items-center gap-2 hover:underline py-1">
+                              <item.icon className="w-4 h-4 text-teal-600" /> {item.label}
+                            </Link>
+                          )}
+                        </div>
+                      ))}
+                      <div className="col-span-1 sm:col-span-2 pt-4 mt-2 border-t border-stone-200">
+                        <Link to={createPageUrl('Contact')} className="font-semibold text-stone-800 hover:text-teal-700 flex items-center gap-2 hover:underline">
+                          <Info className="w-4 h-4 text-teal-600" /> Contact Us
+                        </Link>
+                      </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </footer>
