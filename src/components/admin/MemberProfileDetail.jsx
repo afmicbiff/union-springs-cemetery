@@ -113,7 +113,11 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     <Button onClick={() => onEdit(member)} className="bg-teal-700 hover:bg-teal-800">
                         <Edit className="w-4 h-4 mr-2" /> Edit Profile
                     </Button>
-
+                    {onClose && (
+                        <Button variant="ghost" size="icon" onClick={onClose}>
+                            <X className="w-5 h-5" />
+                        </Button>
+                    )}
                 </div>
             </div>
 
