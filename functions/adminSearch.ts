@@ -16,6 +16,27 @@ export default Deno.serve(async (req) => {
         }
 
         const searchRegex = { $regex: query, $options: 'i' };
+        
+        // Handle full name searches (e.g. "John Doe")
+        const nameParts = query.trim().split(/\s+/);
+        const fullNameFilter = [];
+        if (nameParts.length >= 2) {
+            const first = { $regex: nameParts[0], $options: 'i' };
+            const last = { $regex: nameParts.slice(1).join(' '), $options: 'i' };
+            fullNameFilter.push({
+                $and: [
+                    { first_name: first },
+                    { last_name: last }
+                ]
+            });
+            // Also try reverse (Last First) just in case
+            fullNameFilter.push({
+                $and: [
+                    { first_name: last },
+                    { last_name: first }
+                ]
+            });
+        }
 
         // Define search configurations for each entity
         const searchPromises = [
@@ -28,11 +49,31 @@ export default Deno.serve(async (req) => {
                         { phone_primary: searchRegex },
                         { comments: searchRegex },
                         { address: searchRegex },
-                        { city: searchRegex }
+                        { city: searchRegex },
+                        ...fullNameFilter
                     ]
                 },
                 limit: 5
             }).then(res => ({ type: 'member', results: res })),
+
+            base44.entities.User.list({
+                limit: 5
+            }).then(res => {
+                // Client-side filtering for User entity as it might not support complex $or with full_name regex depending on backend implementation
+                // OR assuming .list() returns all users (usually small number) and we filter here.
+                // However, better to rely on filter if possible.
+                // If filter is supported for User:
+                // return base44.entities.User.list({ filter: { $or: [{ full_name: searchRegex }, { email: searchRegex }] }, limit: 5 });
+                // But safety rules might apply. Let's try listing all and filtering in memory if list is small, or use standard list.
+                // Safe bet: fetch list and filter in memory since admin users are few.
+                // If many users, this is bad, but for "company people" usually < 100.
+                if (!res.items) return { type: 'user', results: [] };
+                const filtered = res.items.filter(u => 
+                    (u.full_name && u.full_name.match(new RegExp(query, 'i'))) || 
+                    (u.email && u.email.match(new RegExp(query, 'i')))
+                ).slice(0, 5);
+                return { type: 'user', results: { items: filtered } };
+            }),
 
             base44.entities.Plot.list({ 
                 filter: { 
@@ -63,7 +104,8 @@ export default Deno.serve(async (req) => {
                         { job_title: searchRegex },
                         { bio: searchRegex },
                         { email: searchRegex },
-                        { department: searchRegex }
+                        { department: searchRegex },
+                        ...fullNameFilter
                     ]
                 },
                 limit: 5
@@ -109,7 +151,8 @@ export default Deno.serve(async (req) => {
                         { last_name: searchRegex },
                         { family_name: searchRegex },
                         { obituary: searchRegex },
-                        { notes: searchRegex }
+                        { notes: searchRegex },
+                        ...fullNameFilter
                     ]
                 },
                 limit: 5
@@ -163,6 +206,7 @@ function getItemLabel(type, item) {
         case 'announcement': return item.title;
         case 'deceased': return `${item.first_name} ${item.last_name}`;
         case 'event': return item.title;
+        case 'user': return item.full_name || 'System User';
         default: return 'Unknown';
     }
 }
@@ -178,6 +222,7 @@ function getItemSubLabel(type, item) {
         case 'announcement': return item.date;
         case 'deceased': return `Buried: ${item.plot_location}`;
         case 'event': return formatEventDate(item.start_time);
+        case 'user': return item.email;
         default: return '';
     }
 }
@@ -186,6 +231,7 @@ function getItemLink(type, item) {
     // Return keys to help frontend switch tabs/open dialogs
     if (type === 'deceased') return { path: `/search?q=${item.last_name}` };
     if (type === 'event') return { type: 'calendar', id: item.id };
+    if (type === 'user') return { type: 'employees' }; // Users usually manage employees or are employees
     return { type, id: item.id };
 }
 

@@ -144,6 +144,7 @@ export default function AdminSearch({ onNavigate }) {
             case 'navigation': return Compass;
             case 'deceased': return Ghost;
             case 'event': return Calendar;
+            case 'user': return User;
             default: return Search;
         }
     };
