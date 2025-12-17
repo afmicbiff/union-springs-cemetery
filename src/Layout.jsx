@@ -35,7 +35,6 @@ export default function Layout({ children }) {
     { label: 'Deceased Search', path: '/search', icon: Search },
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
-    { label: 'Bylaws', path: '/Bylaws', icon: Scale },
     { 
       label: 'Admin', 
       path: '/admin', 
@@ -43,6 +42,7 @@ export default function Layout({ children }) {
       isDropdown: true,
       items: [
         { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
+        { label: 'Bylaws', path: '/Bylaws', icon: Scale },
         { label: 'Employees', path: '/Employees', icon: Users }
       ]
     },
