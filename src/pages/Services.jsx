@@ -43,7 +43,7 @@ export default function ServicesPage() {
                 <li>Placement shall be regulated and mapped by the Association.</li>
             </ol>
             <br />
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">The cemetery allows for:</h3>
+            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Union Springs Cemetery allows for:</h3>
             <ul className="list-disc list-inside ml-4 space-y-2 font-medium">
                 <li>Traditional Burial Plots</li>
                 <li>Cremation Niches</li>
