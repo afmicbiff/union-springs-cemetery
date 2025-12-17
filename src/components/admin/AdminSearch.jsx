@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare, Compass, Calendar, Ghost } from 'lucide-react';
+import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare, Compass, Calendar, Ghost, Heart, Receipt, Users } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -145,6 +145,10 @@ export default function AdminSearch({ onNavigate }) {
             case 'deceased': return Ghost;
             case 'event': return Calendar;
             case 'user': return User;
+            case 'notification': return Bell;
+            case 'segment': return Users;
+            case 'condolence': return Heart;
+            case 'invoice': return Receipt;
             default: return Search;
         }
     };

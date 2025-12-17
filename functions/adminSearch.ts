@@ -166,7 +166,43 @@ export default Deno.serve(async (req) => {
                     ]
                 },
                 limit: 5
-            }).then(res => ({ type: 'event', results: res }))
+            }).then(res => ({ type: 'event', results: res })),
+
+            base44.entities.Notification.list({
+                filter: { message: searchRegex },
+                limit: 5
+            }).then(res => ({ type: 'notification', results: res })),
+
+            base44.entities.MemberSegment.list({
+                filter: {
+                    $or: [
+                        { name: searchRegex },
+                        { description: searchRegex }
+                    ]
+                },
+                limit: 5
+            }).then(res => ({ type: 'segment', results: res })),
+
+            base44.entities.Condolence.list({
+                filter: {
+                    $or: [
+                        { author_name: searchRegex },
+                        { message: searchRegex },
+                        { relation: searchRegex }
+                    ]
+                },
+                limit: 5
+            }).then(res => ({ type: 'condolence', results: res })),
+
+            base44.entities.VendorInvoice.list({
+                filter: {
+                    $or: [
+                        { invoice_number: searchRegex },
+                        { notes: searchRegex }
+                    ]
+                },
+                limit: 5
+            }).then(res => ({ type: 'invoice', results: res }))
         ];
 
         // Use allSettled to prevent one failure from blocking all results
@@ -207,6 +243,10 @@ function getItemLabel(type, item) {
         case 'deceased': return `${item.first_name} ${item.last_name}`;
         case 'event': return item.title;
         case 'user': return item.full_name || 'System User';
+        case 'notification': return 'Notification';
+        case 'segment': return item.name;
+        case 'condolence': return `Condolence from ${item.author_name}`;
+        case 'invoice': return `Invoice #${item.invoice_number}`;
         default: return 'Unknown';
     }
 }
@@ -223,6 +263,10 @@ function getItemSubLabel(type, item) {
         case 'deceased': return `Buried: ${item.plot_location}`;
         case 'event': return formatEventDate(item.start_time);
         case 'user': return item.email;
+        case 'notification': return item.message;
+        case 'segment': return item.description;
+        case 'condolence': return item.message?.substring(0, 30);
+        case 'invoice': return `Amount: $${item.amount_owed} - ${item.status}`;
         default: return '';
     }
 }
@@ -231,7 +275,11 @@ function getItemLink(type, item) {
     // Return keys to help frontend switch tabs/open dialogs
     if (type === 'deceased') return { path: `/search?q=${item.last_name}` };
     if (type === 'event') return { type: 'calendar', id: item.id };
-    if (type === 'user') return { type: 'employees' }; // Users usually manage employees or are employees
+    if (type === 'user') return { type: 'employees' }; 
+    if (type === 'notification') return { type: 'overview' }; // Notifications are on overview
+    if (type === 'segment') return { type: 'members' }; // Segments are in members
+    if (type === 'condolence') return { path: `/Memorial?id=${item.deceased_id}` };
+    if (type === 'invoice') return { type: 'vendors', id: item.vendor_id };
     return { type, id: item.id };
 }
 
