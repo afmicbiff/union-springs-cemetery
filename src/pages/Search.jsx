@@ -496,9 +496,18 @@ export default function SearchPage() {
                    )}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-white rounded-sm border border-stone-200">
+                <div className="text-center py-12 bg-white rounded-sm border border-stone-200 space-y-4">
                  <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
-                 <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600 mt-2">Clear filters</Button>
+                 <Button variant="link" onClick={() => setSearchTerm('')} className="text-teal-600">Clear filters</Button>
+                 
+                 <div className="pt-4 border-t border-stone-100 max-w-md mx-auto mt-4">
+                    <p className="text-stone-600 mb-3">Click on the Find A Grave button for additional searches for your loved ones.</p>
+                    <a href="https://www.findagrave.com/" target="_blank" rel="noreferrer">
+                        <Button variant="outline" className="border-stone-400 text-stone-600 hover:bg-stone-100 hover:text-stone-900">
+                           Find a Grave <ExternalLink className="w-4 h-4 ml-2" />
+                        </Button>
+                    </a>
+                 </div>
                 </div>
               )}
             </>
