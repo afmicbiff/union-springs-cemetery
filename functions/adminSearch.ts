@@ -18,7 +18,7 @@ export default Deno.serve(async (req) => {
         const searchRegex = { $regex: query, $options: 'i' };
 
         // Define search configurations for each entity
-        const searches = [
+        const searchPromises = [
             base44.entities.Member.list({ 
                 filter: { 
                     $or: [
@@ -72,7 +72,8 @@ export default Deno.serve(async (req) => {
                     $or: [
                         { company_name: searchRegex },
                         { contact_name: searchRegex },
-                        { notes: searchRegex }
+                        { address_city: searchRegex },
+                        { email: searchRegex }
                     ]
                 },
                 limit: 5
@@ -99,8 +100,13 @@ export default Deno.serve(async (req) => {
             }).then(res => ({ type: 'announcement', results: res }))
         ];
 
-        const results = await Promise.all(searches);
+        // Use allSettled to prevent one failure from blocking all results
+        const resultsSettled = await Promise.allSettled(searchPromises);
         
+        const results = resultsSettled
+            .filter(r => r.status === 'fulfilled')
+            .map(r => r.value);
+
         // Flatten and format results
         const flatResults = results.flatMap(group => 
             (group.results.items || group.results).map(item => ({
@@ -139,7 +145,7 @@ function getItemSubLabel(type, item) {
         case 'plot': return item.status;
         case 'reservation': return item.plot_id;
         case 'employee': return item.job_title;
-        case 'vendor': return item.contact_name || item.notes?.substring(0, 30);
+        case 'vendor': return item.contact_name || item.email;
         case 'task': return item.status;
         case 'announcement': return item.date;
         default: return '';

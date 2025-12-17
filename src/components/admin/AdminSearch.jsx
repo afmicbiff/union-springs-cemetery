@@ -92,8 +92,16 @@ export default function AdminSearch({ onNavigate }) {
             if (query.length < 2) return [];
             
             // 1. Search DB
-            const response = await base44.functions.invoke('adminSearch', { query });
-            let dbResults = response.data.results || [];
+            let dbResults = [];
+            try {
+                const response = await base44.functions.invoke('adminSearch', { query });
+                if (response?.data?.results) {
+                    dbResults = response.data.results;
+                }
+            } catch (err) {
+                console.error("Admin search DB error:", err);
+                // Continue with nav results even if DB fails
+            }
 
             // 2. Search Navigation (Client-side)
             const navResults = adminSections.filter(section => 
