@@ -175,8 +175,8 @@ export default function Layout({ children }) {
           </div>
           <div>
             <h3 className="text-stone-100 font-serif text-lg mb-4">Contact</h3>
-            <p>123 Granite Way</p>
-            <p>Union Springs, USA</p>
+            <p>1311 Fire Tower Road</p>
+            <p>Shongaloo, Webster Parish, Louisiana, 71072</p>
             <p className="mt-2">Phone: (555) 123-4567</p>
             <p>Email: office@unionsprings.com</p>
           </div>
