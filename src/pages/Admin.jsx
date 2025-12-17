@@ -37,7 +37,6 @@ import OnboardingGuide from "@/components/admin/OnboardingGuide";
 import EmployeeList from "@/components/admin/EmployeeList";
 import VendorManager from "@/components/admin/VendorManager";
 import AdminSecurity from "@/components/admin/AdminSecurity";
-import AdminBylaws from "@/components/admin/AdminBylaws";
 import EventCalendar from "@/components/admin/EventCalendar";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import TaskManager from "@/components/tasks/TaskManager";
@@ -108,7 +107,6 @@ export default function AdminDashboard() {
       { id: "employees", label: "Employees", icon: Users, component: <EmployeeList /> },
       { id: "vendors", label: "Vendors", icon: Truck, component: <VendorManager /> },
       { id: "security", label: "Security", icon: Shield, component: <AdminSecurity /> },
-      { id: "bylaws", label: "Bylaws", icon: FileText, component: <AdminBylaws /> },
       { id: "calendar", label: "Calendar", icon: Calendar, component: <EventCalendar /> },
       { id: "announcements", label: "News", icon: Megaphone, component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", icon: CheckSquare, component: <TaskManager isAdmin={true} /> },
