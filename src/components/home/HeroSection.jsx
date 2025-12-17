@@ -66,7 +66,7 @@ export default function HeroSection() {
         <div className="flex-1 text-center md:text-left space-y-6">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-stone-50 tracking-wide leading-tight drop-shadow-lg">
             Peaceful Resting <br /> 
-            <span className="text-teal-500 italic">In Union Springs</span>
+            <span className="text-teal-500 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">In Union Springs</span>
           </h1>
           
           <p className="text-base sm:text-lg text-stone-200 font-light max-w-2xl mx-auto md:mx-0 leading-relaxed drop-shadow-md">
