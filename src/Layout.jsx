@@ -171,7 +171,7 @@ export default function Layout({ children }) {
           <div>
             <h3 className="text-teal-500 font-serif text-lg mb-4 uppercase tracking-widest">Union Springs</h3>
             <p className="mb-4">Ideally located in a granite setting, providing a peaceful final resting place with dignity and respect.</p>
-            <p>&copy; {new Date().getFullYear()} Union Springs Cemetery</p>
+            <p>&copy; {new Date().getFullYear()} Union Springs Cemetery Association</p>
           </div>
           <div>
             <h3 className="text-stone-100 font-serif text-lg mb-4">Contact</h3>
