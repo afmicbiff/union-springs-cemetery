@@ -25,7 +25,10 @@ export default Deno.serve(async (req) => {
                         { first_name: searchRegex }, 
                         { last_name: searchRegex },
                         { email_primary: searchRegex },
-                        { phone_primary: searchRegex }
+                        { phone_primary: searchRegex },
+                        { comments: searchRegex },
+                        { address: searchRegex },
+                        { city: searchRegex }
                     ]
                 },
                 limit: 5
@@ -57,7 +60,8 @@ export default Deno.serve(async (req) => {
                     $or: [
                         { first_name: searchRegex },
                         { last_name: searchRegex },
-                        { job_title: searchRegex }
+                        { job_title: searchRegex },
+                        { bio: searchRegex }
                     ]
                 },
                 limit: 5
@@ -67,7 +71,8 @@ export default Deno.serve(async (req) => {
                 filter: { 
                     $or: [
                         { company_name: searchRegex },
-                        { contact_name: searchRegex }
+                        { contact_name: searchRegex },
+                        { notes: searchRegex }
                     ]
                 },
                 limit: 5
@@ -130,11 +135,11 @@ function getItemLabel(type, item) {
 
 function getItemSubLabel(type, item) {
     switch(type) {
-        case 'member': return item.email_primary || item.phone_primary;
+        case 'member': return item.email_primary || item.phone_primary || item.comments?.substring(0, 30);
         case 'plot': return item.status;
         case 'reservation': return item.plot_id;
         case 'employee': return item.job_title;
-        case 'vendor': return item.contact_name;
+        case 'vendor': return item.contact_name || item.notes?.substring(0, 30);
         case 'task': return item.status;
         case 'announcement': return item.date;
         default: return '';

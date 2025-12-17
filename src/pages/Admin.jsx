@@ -56,7 +56,20 @@ export default function AdminDashboard() {
           employee: 'employees',
           vendor: 'vendors',
           task: 'tasks',
-          announcement: 'announcements'
+          announcement: 'announcements',
+          // Navigation types map directly or via aliases
+          overview: 'overview',
+          onboarding: 'onboarding',
+          security: 'security',
+          bylaws: 'bylaws',
+          calendar: 'calendar',
+          reservations: 'reservations',
+          plots: 'plots',
+          employees: 'employees',
+          vendors: 'vendors',
+          tasks: 'tasks',
+          announcements: 'announcements',
+          members: 'members'
       };
 
       if (tabMap[link.type]) {

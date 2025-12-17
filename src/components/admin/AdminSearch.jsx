@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare } from 'lucide-react';
+import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare, Compass } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
@@ -70,12 +70,38 @@ export default function AdminSearch({ onNavigate }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [wrapperRef]);
 
+    // Navigation items to search client-side
+    const adminSections = [
+        { label: "Overview", type: "navigation", link: { type: "overview" }, subLabel: "Dashboard & Stats" },
+        { label: "Sales & Reservations", type: "navigation", link: { type: "reservations" }, subLabel: "Manage plot sales" },
+        { label: "Plots Management", type: "navigation", link: { type: "plots" }, subLabel: "Map & Plot Inventory" },
+        { label: "Onboarding", type: "navigation", link: { type: "onboarding" }, subLabel: "Employee Onboarding" },
+        { label: "Employees", type: "navigation", link: { type: "employees" }, subLabel: "Staff directory" },
+        { label: "Vendors", type: "navigation", link: { type: "vendors" }, subLabel: "External partners" },
+        { label: "Security", type: "navigation", link: { type: "security" }, subLabel: "Access control" },
+        { label: "Bylaws", type: "navigation", link: { type: "bylaws" }, subLabel: "Rules & Regulations" },
+        { label: "Calendar", type: "navigation", link: { type: "calendar" }, subLabel: "Events & Scheduling" },
+        { label: "News & Announcements", type: "navigation", link: { type: "announcements" }, subLabel: "Public notices" },
+        { label: "Tasks", type: "navigation", link: { type: "tasks" }, subLabel: "To-do list" },
+        { label: "Members", type: "navigation", link: { type: "members" }, subLabel: "Community directory" },
+    ];
+
     const { data: results, isLoading } = useQuery({
         queryKey: ['admin-search', query],
         queryFn: async () => {
             if (query.length < 2) return [];
+            
+            // 1. Search DB
             const response = await base44.functions.invoke('adminSearch', { query });
-            return response.data.results || [];
+            let dbResults = response.data.results || [];
+
+            // 2. Search Navigation (Client-side)
+            const navResults = adminSections.filter(section => 
+                section.label.toLowerCase().includes(query.toLowerCase()) || 
+                section.subLabel.toLowerCase().includes(query.toLowerCase())
+            );
+
+            return [...navResults, ...dbResults];
         },
         enabled: query.length >= 2,
         staleTime: 1000 * 60, // 1 minute
@@ -99,6 +125,7 @@ export default function AdminSearch({ onNavigate }) {
             case 'vendor': return Truck;
             case 'announcement': return Bell;
             case 'task': return CheckSquare;
+            case 'navigation': return Compass;
             default: return Search;
         }
     };
