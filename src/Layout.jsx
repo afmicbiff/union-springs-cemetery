@@ -193,8 +193,7 @@ export default function Layout({ children }) {
               </a>
             </div>
             <p>Gates: Sunrise to Sunset</p>
-            <p>Office: Mon-Fri 9am - 5pm</p>
-            <p>Sat: 10am - 2pm</p>
+            <p>Office: Contact the administrator by email or phone</p>
             
             <div className="mt-6">
               <Dialog>
