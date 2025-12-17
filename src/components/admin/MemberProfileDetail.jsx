@@ -109,11 +109,6 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    {/* External Link button removed */}
-                    <Button onClick={() => onEdit(member)} className="bg-teal-700 hover:bg-teal-800">
-                        <Edit className="w-4 h-4 mr-2" /> Edit Profile
-                    </Button>
-
                 </div>
             </div>
 
@@ -219,6 +214,9 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                             <h3 className="font-semibold text-stone-900 flex items-center gap-2">
                                 <MessageSquare className="w-4 h-4 text-teal-600" /> Activity & Notes
                             </h3>
+                            <Button onClick={() => onEdit(member)} size="sm" className="bg-teal-700 hover:bg-teal-800 h-8">
+                                <Edit className="w-3.5 h-3.5 mr-2" /> Edit Profile
+                            </Button>
                         </div>
                         <div className="space-y-3">
                             <div className="flex gap-2">
