@@ -46,6 +46,25 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
 
+  const handleSearchNavigate = (link) => {
+      // Map search result types to tabs
+      const tabMap = {
+          member: 'members',
+          plot: 'plots',
+          reservation: 'reservations',
+          employee: 'employees',
+          vendor: 'vendors',
+          task: 'tasks',
+          announcement: 'announcements'
+      };
+
+      if (tabMap[link.type]) {
+          setActiveTab(tabMap[link.type]);
+          // You could pass the ID via state or context to the tab component to open specific item
+          // For now we just switch tabs
+      }
+  };
+
   // Notifications for Header
   const { data: notifications } = useQuery({
     queryKey: ['notifications'],
@@ -124,7 +143,9 @@ export default function AdminDashboard() {
                 <p className="text-stone-600 text-sm md:text-base">Administrative Overview & Management</p>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 self-end md:self-auto">
+            <div className="flex items-center gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end">
+                <AdminSearch onNavigate={handleSearchNavigate} />
+                
                 {/* Notifications */}
                 <Popover>
                     <PopoverTrigger asChild>
