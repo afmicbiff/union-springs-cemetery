@@ -66,7 +66,9 @@ export default function PlotsPage() {
      const hasVeteran = occupants.some(d => d.veteran_status);
      const isMultiStatus = plot.current_occupancy > 0 && plot.status === 'reserved'; // Example of multi-status complexity
 
-     if (plot.status === 'unavailable') return "bg-gray-800 border-gray-900 text-gray-400";
+     if (plot.status === 'unavailable' || plot.status === 'Unavailable') return "bg-gray-800 border-gray-900 text-gray-400";
+     if (plot.status === 'Not Usable' || plot.status === 'not usable') return "bg-gray-200 border-gray-300 text-gray-800";
+     if (plot.status === 'Unknown' || plot.status === 'unknown') return "bg-gray-400 border-gray-500 text-white";
      if (hasVeteran) return "bg-blue-100 border-blue-300 text-blue-900"; // Veteran Specific Color
      if (isMultiStatus) return "bg-purple-100 border-purple-300 text-purple-900";
      
@@ -158,6 +160,8 @@ export default function PlotsPage() {
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-red-100 border border-red-300"></div><span className="text-sm">Occupied</span></div>
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-blue-100 border border-blue-300"></div><span className="text-sm">Veteran</span></div>
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-800 border border-gray-900"></div><span className="text-sm text-stone-500">Unavailable</span></div>
+                    <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-200 border border-gray-300"></div><span className="text-sm">Not Usable</span></div>
+                    <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-400 border border-gray-500"></div><span className="text-sm">Unknown</span></div>
                 </CardContent>
             </Card>
           </div>
