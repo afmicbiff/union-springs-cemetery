@@ -464,9 +464,11 @@ export default function SearchPage() {
                                                 Note: {person.notes}
                                              </p>
                                            )}
-                                           <p className="text-stone-600 text-sm line-clamp-2 italic">
-                                              "{person.obituary}"
-                                           </p>
+                                           {person.obituary && (
+                                             <p className="text-stone-600 text-sm line-clamp-2 italic">
+                                                {person.obituary}
+                                             </p>
+                                           )}
                                          </div>
 
                                          <div className="mt-4 flex justify-end">
