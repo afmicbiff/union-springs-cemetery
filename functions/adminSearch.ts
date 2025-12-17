@@ -61,7 +61,9 @@ export default Deno.serve(async (req) => {
                         { first_name: searchRegex },
                         { last_name: searchRegex },
                         { job_title: searchRegex },
-                        { bio: searchRegex }
+                        { bio: searchRegex },
+                        { email: searchRegex },
+                        { department: searchRegex }
                     ]
                 },
                 limit: 5
@@ -73,7 +75,8 @@ export default Deno.serve(async (req) => {
                         { company_name: searchRegex },
                         { contact_name: searchRegex },
                         { address_city: searchRegex },
-                        { email: searchRegex }
+                        { email: searchRegex },
+                        { phone: searchRegex }
                     ]
                 },
                 limit: 5
@@ -97,7 +100,30 @@ export default Deno.serve(async (req) => {
                     ]
                 },
                 limit: 5
-            }).then(res => ({ type: 'announcement', results: res }))
+            }).then(res => ({ type: 'announcement', results: res })),
+
+            base44.entities.Deceased.list({ 
+                filter: { 
+                    $or: [
+                        { first_name: searchRegex },
+                        { last_name: searchRegex },
+                        { family_name: searchRegex },
+                        { obituary: searchRegex },
+                        { notes: searchRegex }
+                    ]
+                },
+                limit: 5
+            }).then(res => ({ type: 'deceased', results: res })),
+
+            base44.entities.Event.list({ 
+                filter: { 
+                    $or: [
+                        { title: searchRegex },
+                        { description: searchRegex }
+                    ]
+                },
+                limit: 5
+            }).then(res => ({ type: 'event', results: res }))
         ];
 
         // Use allSettled to prevent one failure from blocking all results
@@ -135,6 +161,8 @@ function getItemLabel(type, item) {
         case 'vendor': return item.company_name;
         case 'task': return item.title;
         case 'announcement': return item.title;
+        case 'deceased': return `${item.first_name} ${item.last_name}`;
+        case 'event': return item.title;
         default: return 'Unknown';
     }
 }
@@ -148,11 +176,20 @@ function getItemSubLabel(type, item) {
         case 'vendor': return item.contact_name || item.email;
         case 'task': return item.status;
         case 'announcement': return item.date;
+        case 'deceased': return `Buried: ${item.plot_location}`;
+        case 'event': return formatEventDate(item.start_time);
         default: return '';
     }
 }
 
 function getItemLink(type, item) {
     // Return keys to help frontend switch tabs/open dialogs
+    if (type === 'deceased') return { path: `/search?q=${item.last_name}` };
+    if (type === 'event') return { type: 'calendar', id: item.id };
     return { type, id: item.id };
+}
+
+function formatEventDate(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString();
 }

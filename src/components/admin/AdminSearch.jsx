@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare, Compass } from 'lucide-react';
+import { Search, History, X, Loader2, ChevronRight, User, Map, FileText, Briefcase, Truck, Bell, CheckSquare, Compass, Calendar, Ghost } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from 'react-router-dom';
 
 // Helper for highlighting text
 const HighlightedText = ({ text, highlight, className }) => {
@@ -26,6 +27,7 @@ const HighlightedText = ({ text, highlight, className }) => {
 };
 
 export default function AdminSearch({ onNavigate }) {
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [recentSearches, setRecentSearches] = useState([]);
@@ -119,6 +121,12 @@ export default function AdminSearch({ onNavigate }) {
         addToRecent(query);
         setIsOpen(false);
         setQuery("");
+        
+        if (item.link?.path) {
+            navigate(item.link.path);
+            return;
+        }
+
         if (onNavigate) {
             onNavigate(item.link);
         }
@@ -134,6 +142,8 @@ export default function AdminSearch({ onNavigate }) {
             case 'announcement': return Bell;
             case 'task': return CheckSquare;
             case 'navigation': return Compass;
+            case 'deceased': return Ghost;
+            case 'event': return Calendar;
             default: return Search;
         }
     };
