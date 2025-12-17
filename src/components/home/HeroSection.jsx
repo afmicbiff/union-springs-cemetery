@@ -49,6 +49,17 @@ export default function HeroSection() {
                />
              </div>
            </div>
+
+           {/* Fourth Image - Bottom Right Overlay */}
+           <div className="absolute transform rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:rotate-0 hover:translate-x-0 hover:translate-y-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer hidden md:block">
+             <div className="bg-white p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.8)] rounded-sm max-w-[280px] md:max-w-[340px]">
+               <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
+                  alt="Union Springs Church" 
+                  className="w-full h-auto opacity-95 filter sepia-[.15]"
+               />
+             </div>
+           </div>
         </div>
 
         {/* Right Side Content */}
