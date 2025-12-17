@@ -11,8 +11,8 @@ export default function ServicesPage() {
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Services</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
           <div className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed text-left">
-            <p>The staff at the Union Springs Cemetery will:</p>
-            <ol className="list-decimal list-inside mt-4 ml-4 space-y-2 text-left">
+            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-6 mb-4">The staff at the Union Springs Cemetery will:</h3>
+            <ol className="list-decimal list-inside ml-4 space-y-2 text-left">
                 <li>Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.</li>
                 <li>Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.</li>
                 <li>Raise and manage financial resources for the ongoing upkeep of the cemetery.</li>
@@ -41,7 +41,7 @@ export default function ServicesPage() {
                 <li>Placement shall be regulated and mapped by the Association.</li>
             </ol>
             <br />
-            <p>The cemetery allows for:</p>
+            <p className="font-bold text-stone-800 mt-4">The cemetery allows for:</p>
             <ul className="list-disc list-inside mt-4 ml-4 space-y-2 font-medium">
                 <li>Traditional Burial Plots</li>
                 <li>Cremation Niches</li>
