@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, Scale } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, Scale, UserPlus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -43,7 +43,8 @@ export default function Layout({ children }) {
       items: [
         { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
         { label: 'Bylaws', path: '/Bylaws', icon: Scale },
-        { label: 'Employees', path: '/Employees', icon: Users }
+        { label: 'Employees', path: '/Employees', icon: Users },
+        { label: 'Onboarding', path: '/admin', icon: UserPlus }
       ]
     },
   ];
@@ -83,7 +84,7 @@ export default function Layout({ children }) {
                       {item.items.map((subItem) => (
                         <DropdownMenuItem key={subItem.label} asChild className="focus:bg-stone-800 focus:text-white cursor-pointer">
                           <Link to={createPageUrl(subItem.path.replace('/', ''))}>
-                            <subItem.icon className="w-4 h-4 mr-2" />
+                            <subItem.icon className={`${subItem.label === 'Employees' ? 'w-5 h-5' : 'w-4 h-4'} mr-2`} />
                             {subItem.label}
                           </Link>
                         </DropdownMenuItem>
