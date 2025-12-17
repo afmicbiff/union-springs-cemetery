@@ -6,7 +6,7 @@ import { Search, MapPin } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-4 z-30 py-12 md:py-0">
+    <section className="relative min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-4 overflow-hidden py-12 md:py-0">
       {/* Background Image with optimized loading and overlay */}
       <div 
         className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat mix-blend-overlay"
@@ -51,7 +51,7 @@ export default function HeroSection() {
            </div>
 
            {/* Fourth Image - Bottom Right Overlay */}
-           <div className="absolute transform rotate-[25deg] translate-x-12 translate-y-[26rem] z-30 hover:rotate-0 hover:translate-x-0 hover:translate-y-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer hidden md:block">
+           <div className="absolute transform rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:rotate-0 hover:translate-x-0 hover:translate-y-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer hidden md:block">
              <div className="bg-white p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.8)] rounded-sm max-w-[280px] md:max-w-[340px]">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
