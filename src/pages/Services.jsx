@@ -11,8 +11,9 @@ export default function ServicesPage() {
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Services</h1>
           <div className="w-24 h-1 bg-red-700 mx-auto"></div>
           <div className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed text-left">
+            <br />
             <h3 className="text-2xl font-serif font-bold text-stone-800 mt-6 mb-4">The staff at the Union Springs Cemetery will:</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-2 text-left">
+            <ol className="list-decimal list-inside ml-4 space-y-2 text-left marker:font-bold">
                 <li>Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.</li>
                 <li>Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.</li>
                 <li>Raise and manage financial resources for the ongoing upkeep of the cemetery.</li>
@@ -20,13 +21,13 @@ export default function ServicesPage() {
             </ol>
 
             <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Perpetual Funds</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
+            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
                 <li>Any funds received and designated for perpetual care shall be preserved in an insured financial institution domiciled in Webster Parish, Louisiana. These funds shall be considered Perpetual Care Fund assets with the primary purpose of generating interest.</li>
                 <li>Interest earned from these accounts shall be deposited into the Association’s general fund and expended as directed by the Executive Board in accordance with the Association’s objectives.</li>
             </ol>
 
             <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Burial Plots</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
+            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
                 <li>Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.</li>
                 <li>The size of all burial plots are five feet wide and ten feet in length. The Association shall strive to maintain a dignified and orderly manner when marking plots.</li>
                 <li>The President, Vice-President, or Caretaker shall have sole authority for reserving or marking grave sites. Any sites marked by an individual other than the authorized persons will not be recognized.</li>
@@ -36,7 +37,7 @@ export default function ServicesPage() {
 
             <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Urns</h3>
             <p className="text-left text-stone-600 font-medium mb-4">Maximum of three urns per plot.</p>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
+            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
                 <li>Place the first urn 12 inches from the headstone base or marker, centered on the plot. The second urn should be placed 12 inches from the first urn in the row. The third and final urn will be positioned 12 inches from the second urn in the row.</li>
                 <li>Dimensional limits: No more than 200 cubic inches, 9 inches tall, and 7 inches in diameter.</li>
                 <li>Placement shall be regulated and mapped by the Association.</li>
