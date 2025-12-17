@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Search, MapPin } from 'lucide-react';
 
 const QuickAccessCard = ({ icon: Icon, title, description, linkText, linkUrl, colorClass, hoverColorClass }) => (
-  <div className="bg-white p-8 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.25)] hover:shadow-[0_-20px_45px_rgba(0,0,0,0.3)] hover:-translate-y-1 transition-all duration-300 group flex flex-col items-center text-center h-full border-b-4 border-transparent hover:border-teal-600">
+  <div className="bg-white p-8 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.5)] hover:shadow-[0_-20px_45px_rgba(0,0,0,0.6)] hover:-translate-y-1 transition-all duration-300 group flex flex-col items-center text-center h-full border-b-4 border-transparent hover:border-teal-600">
     <div className={`w-14 h-14 ${colorClass} rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
       <Icon className={`w-7 h-7 ${hoverColorClass}`} />
     </div>
