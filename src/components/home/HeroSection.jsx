@@ -38,6 +38,17 @@ export default function HeroSection() {
                />
              </div>
            </div>
+
+           {/* Third Image - Center Stack */}
+           <div className="absolute transform -rotate-3 translate-y-6 scale-95 z-0 hover:rotate-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer">
+             <div className="bg-white p-3 pb-12 md:pb-16 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm max-w-[280px] md:max-w-[340px]">
+               <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png" 
+                  alt="Union Springs History" 
+                  className="w-full h-auto opacity-95 filter sepia-[.15]"
+               />
+             </div>
+           </div>
         </div>
 
         {/* Right Side Content */}
