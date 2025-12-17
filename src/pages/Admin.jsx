@@ -130,14 +130,14 @@ export default function AdminDashboard() {
       { id: "overview", label: "Overview", icon: LayoutDashboard, component: <AdminOverview /> },
       { id: "reservations", label: "Sales", icon: DollarSign, component: <AdminReservations /> },
       { id: "plots", label: "Plots", icon: Map, component: <AdminPlots /> },
-      { id: "onboarding", label: "New Employee Onboarding", icon: UserPlus, component: (
+      { id: "onboarding", label: "Onboarding", icon: UserPlus, component: (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-1 space-y-6"><OnboardingForm /></div>
               <div className="xl:col-span-1 space-y-6"><OnboardingProgress /></div>
               <div className="xl:col-span-1"><OnboardingGuide /></div>
           </div>
       )},
-      { id: "employees", label: "Employee Directory", icon: Users, component: <EmployeeList /> },
+      { id: "employees", label: "Employees", icon: Users, component: <EmployeeList /> },
       { id: "vendors", label: "Vendors", icon: Truck, component: <VendorManager /> },
       { id: "security", label: "Security", icon: Shield, component: <AdminSecurity /> },
       { id: "calendar", label: "Calendar", icon: Calendar, component: <EventCalendar /> },
