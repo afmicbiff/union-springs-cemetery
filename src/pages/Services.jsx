@@ -19,6 +19,12 @@ export default function ServicesPage() {
                 <li>Foster a fraternal and cooperative spirit among members of the Association.</li>
             </ol>
 
+            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Perpetual Funds</h3>
+            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
+                <li>Any funds received and designated for perpetual care shall be preserved in an insured financial institution domiciled in Webster Parish, Louisiana. These funds shall be considered Perpetual Care Fund assets with the primary purpose of generating interest.</li>
+                <li>Interest earned from these accounts shall be deposited into the Association’s general fund and expended as directed by the Executive Board in accordance with the Association’s objectives.</li>
+            </ol>
+
             <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Burial Plots</h3>
             <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600">
                 <li>Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.</li>
