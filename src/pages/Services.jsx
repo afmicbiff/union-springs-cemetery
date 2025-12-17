@@ -41,8 +41,8 @@ export default function ServicesPage() {
                 <li>Placement shall be regulated and mapped by the Association.</li>
             </ol>
             <br />
-            <p className="font-bold text-stone-800 mt-4">The cemetery allows for:</p>
-            <ul className="list-disc list-inside mt-4 ml-4 space-y-2 font-medium">
+            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">The cemetery allows for:</h3>
+            <ul className="list-disc list-inside ml-4 space-y-2 font-medium">
                 <li>Traditional Burial Plots</li>
                 <li>Cremation Niches</li>
                 <li>Family Estates</li>
