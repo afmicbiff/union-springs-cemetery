@@ -59,7 +59,7 @@ export default function VisitorPage() {
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-red-700 transition-colors duration-300">
                 <Phone className="w-6 h-6 text-red-700 group-hover:text-white" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-stone-800 mb-3">Contact & Maps</h3>
+              <h3 className="text-xl font-serif font-bold text-stone-800 mb-3">Contact</h3>
               <div className="text-stone-600 leading-relaxed mb-6 flex-grow">
                 <p className="mb-4">Need assistance locating a loved one? Our board is here to help.</p>
                 <Link to={createPageUrl('Contact')}>
@@ -70,7 +70,7 @@ export default function VisitorPage() {
               </div>
               <div className="flex gap-4 mt-auto">
                 <Link to={createPageUrl('Plots')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
-                  View Map
+                  Plots & Maps
                 </Link>
                 <span className="text-stone-300">|</span>
                 <Link to={createPageUrl('Search')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
