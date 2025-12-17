@@ -16,12 +16,14 @@ export default function HeroSection() {
       
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 px-4 animate-fade-in-up">
         {/* Left Side Image */}
-        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl">
-           <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
-              alt="Union Springs Cemetery Gate" 
-              className="w-full h-auto rounded-lg shadow-2xl border-2 border-stone-700/50 opacity-90 hover:opacity-100 transition-opacity duration-500"
-           />
+        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl transform -rotate-2 hover:rotate-0 transition-transform duration-500">
+           <div className="bg-white p-3 pb-16 shadow-2xl rounded-sm">
+             <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
+                alt="Union Springs Cemetery Gate" 
+                className="w-full h-auto opacity-95 filter sepia-[.15]"
+             />
+           </div>
         </div>
 
         {/* Right Side Content */}
