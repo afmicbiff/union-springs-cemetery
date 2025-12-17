@@ -244,7 +244,7 @@ export default function AdminDashboard() {
                                 min-w-[80px] md:min-w-0
                             "
                         >
-                            <tab.icon className="w-4 h-4" />
+                            <tab.icon className={tab.id === 'employees' ? 'w-5 h-5' : 'w-4 h-4'} />
                             <span className="whitespace-nowrap">{tab.label}</span>
                         </TabsTrigger>
                     ))}
