@@ -84,7 +84,7 @@ export default function Layout({ children }) {
                       {item.items.map((subItem) => (
                         <DropdownMenuItem key={subItem.label} asChild className="focus:bg-stone-800 focus:text-white cursor-pointer">
                           <Link to={createPageUrl(subItem.path.replace('/', ''))}>
-                            <subItem.icon className={`${subItem.label === 'Employees' ? 'w-5 h-5' : 'w-4 h-4'} mr-2`} />
+                            <subItem.icon className="w-4 h-4 mr-2" />
                             {subItem.label}
                           </Link>
                         </DropdownMenuItem>
