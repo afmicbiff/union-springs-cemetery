@@ -435,7 +435,8 @@ export default function EmployeeProfile() {
                                         <div className="mt-4">
                                              <DocumentList 
                                                  documents={employee.documents} 
-                                                 onDelete={handleDeleteDoc} 
+                                                 onDelete={handleDeleteDoc}
+                                                 onUpdate={handleUploadComplete}
                                              />
                                         </div>
                                     </CardContent>

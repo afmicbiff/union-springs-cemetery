@@ -82,6 +82,13 @@ export default function AdminDashboard() {
   });
 
   useQuery({
+    queryKey: ['check-doc-expirations'],
+    queryFn: () => base44.functions.invoke('checkDocumentExpirations'),
+    refetchInterval: 300 * 1000, // Check every 5 minutes
+    refetchOnWindowFocus: false
+  });
+
+  useQuery({
       queryKey: ['check-member-reminders'],
       queryFn: () => base44.functions.invoke('checkMemberReminders'),
       refetchInterval: 120 * 1000, // Check every 2 minutes
