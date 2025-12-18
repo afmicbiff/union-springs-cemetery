@@ -237,7 +237,7 @@ export const historyTimelineData = [
 ];
 
 export const footnotes = {
-    1: "“Pioneer Settler of Northwest Lousiana Buried on Deer Stand in North Webster”, Bossier Banner, 30 May 1957, P.1, Col. F.",
+    1: "“Pioneer Settler of Northwest Louisiana Buried on Deer Stand in North Webster”, Bossier Banner, 30 May 1957, P.1, Col. F.",
     2: "Ardis Cawthon, et.al. History of Webster Parish Schools, 1935.",
     3: "Land Records Webster Parish, Book 7, page 370.",
     4: "North Louisiana Association Minutes, September 3, 1895, Baptist Archives, Alexandria, Louisiana.",
