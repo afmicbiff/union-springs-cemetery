@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,35 +58,13 @@ export default function HistoryMap({ events, onEventSelect, dateRange }) {
                                 click: () => onEventSelect && onEventSelect(event.id),
                             }}
                         >
-                            <Popup className="font-sans">
-                                <div className="p-1 max-w-[200px]">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200 text-[10px] px-1.5 h-5">
-                                            {event.year}
-                                        </Badge>
-                                    </div>
-                                    <h3 className="font-bold text-sm text-stone-900 leading-tight mb-1">
-                                        {event.title}
-                                    </h3>
-                                    <div className="flex items-center gap-1 text-xs text-stone-500 mb-2">
-                                        <MapPin className="w-3 h-3" />
-                                        {event.location.label}
-                                    </div>
-                                    <p className="text-xs text-stone-600 line-clamp-3">
-                                        {event.text.replace(/NOTE \d+/g, '')}
-                                    </p>
-                                    {onEventSelect && (
-                                        <Button 
-                                            size="sm" 
-                                            variant="link" 
-                                            className="px-0 h-auto text-xs text-teal-600 mt-2"
-                                            onClick={() => onEventSelect(event.id)}
-                                        >
-                                            View Details
-                                        </Button>
-                                    )}
+                            <Tooltip direction="top" offset={[0, -20]} opacity={1} className="font-sans rounded-md shadow-md border-none px-3 py-2">
+                                <div className="text-center">
+                                    <span className="block font-bold text-sm text-teal-900">{event.title}</span>
+                                    <span className="block text-xs text-stone-500 font-serif">{event.year}</span>
+                                    <span className="block text-[10px] text-stone-400 mt-1 uppercase tracking-wide">Click to view on timeline</span>
                                 </div>
-                            </Popup>
+                            </Tooltip>
                         </Marker>
                     ))}
                 </MapContainer>

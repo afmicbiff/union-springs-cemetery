@@ -32,6 +32,19 @@ export default function HistoryPage() {
         setSelectedId(prev => prev === id ? null : id);
     }, []);
 
+    // Scroll to selected item when selection changes and we are in timeline view
+    React.useEffect(() => {
+        if (selectedId && viewMode === 'timeline') {
+            // Small timeout to allow render/expansion to complete or start
+            setTimeout(() => {
+                const element = document.getElementById(`timeline-node-${selectedId}`);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                }
+            }, 300);
+        }
+    }, [selectedId, viewMode]);
+
     return (
         <div className="min-h-screen bg-stone-200 flex flex-col overflow-hidden">
             {/* Header Area */}
@@ -130,6 +143,7 @@ export default function HistoryPage() {
                                             return (
                                                 <HistoryItem 
                                                     key={item.id}
+                                                    id={`timeline-node-${item.id}`}
                                                     item={item}
                                                     isSelected={selectedId === item.id}
                                                     isMatch={searchQuery && matchesSearch}
