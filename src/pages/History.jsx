@@ -423,11 +423,11 @@ export default function HistoryPage() {
                                             {/* Card Body */}
                                             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                                 {isSelected ? (
-                                                    <div className="prose prose-stone prose-sm max-w-none">
+                                                    <div className="prose prose-stone prose-sm max-w-none whitespace-normal">
                                                         <TextWithFootnotes text={item.text} highlight={searchQuery} />
                                                     </div>
                                                 ) : (
-                                                    <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed">
+                                                    <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed whitespace-normal">
                                                         <HighlightedText text={item.text.replace(/NOTE \d+/g, '')} highlight={searchQuery} />
                                                     </p>
                                                 )}
@@ -485,7 +485,7 @@ export default function HistoryPage() {
 
                                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                     {selectedId === 'members' ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 whitespace-normal">
                                             {membershipLists.map((list, i) => (
                                                 <div key={i} className="space-y-2">
                                                     <h4 className="font-bold text-teal-800 text-sm border-b border-teal-100 pb-1">{list.era}</h4>
@@ -494,7 +494,7 @@ export default function HistoryPage() {
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-2 whitespace-normal">
                                             <p className="text-stone-600 text-sm">Historical membership records from 1895 through the 1990s.</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <Users className="w-4 h-4 text-stone-400" />
