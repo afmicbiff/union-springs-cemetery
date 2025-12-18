@@ -256,24 +256,27 @@ const TextWithFootnotes = ({ text, highlight }) => {
                     return (
                         <Popover key={index}>
                             <PopoverTrigger asChild>
-                                <button className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1">
+                                <button className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1 cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                                     {noteId}
                                 </button>
                             </PopoverTrigger>
                             <PopoverContent 
-                                side="top" 
-                                align="center" 
+                                side="right" 
+                                align="start" 
                                 sideOffset={5}
-                                className="w-80 bg-white border-stone-200 shadow-xl p-3 z-50"
+                                className="w-72 bg-white border border-stone-200 shadow-lg p-3 z-50 rounded-lg"
                             >
-                                <div className="relative">
-                                    <div className="pr-6 text-sm text-stone-600 italic">
-                                        <span className="font-bold text-teal-700 not-italic mr-2">Note {noteId}:</span>
+                                <div className="relative pt-1">
+                                    <div className="pr-6 text-sm text-stone-600 leading-snug">
+                                        <span className="font-bold text-teal-700 mr-1">Note {noteId}:</span>
                                         {noteContent}
                                     </div>
                                     <PopoverTrigger asChild>
-                                        <button className="absolute -top-1 -right-1 text-stone-400 hover:text-stone-600">
-                                            <X className="w-4 h-4" />
+                                        <button 
+                                            className="absolute -top-2 -right-2 p-1 text-stone-400 hover:text-red-500 hover:bg-stone-50 rounded-full transition-colors"
+                                            aria-label="Close note"
+                                        >
+                                            <X className="w-3.5 h-3.5" />
                                         </button>
                                     </PopoverTrigger>
                                 </div>
