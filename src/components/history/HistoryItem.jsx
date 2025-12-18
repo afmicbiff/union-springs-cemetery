@@ -63,6 +63,13 @@ const TextWithFootnotes = ({ text, highlight, footnotes }) => {
 
 const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onToggle, footnotes, id }) => {
     const hasFootnotes = /NOTE\s*\d+/.test(item.text);
+    
+    // Extract footnote IDs for the footer list
+    const footnoteIds = React.useMemo(() => {
+        const matches = item.text.match(/NOTE\s*(\d+)/g);
+        if (!matches) return [];
+        return [...new Set(matches.map(m => parseInt(m.match(/\d+/)[0])))].sort((a, b) => a - b);
+    }, [item.text]);
 
     const getWeatherIcon = (iconName) => {
         switch(iconName) {
@@ -196,9 +203,28 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
                             />
                         </div>
                     )}
-                </div>
-                
-                {!isSelected && (
+
+                    {/* Footnotes Section (Expanded View) */}
+                    {isSelected && footnoteIds.length > 0 && (
+                        <div className="mt-8 pt-6 border-t border-stone-200">
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2 mb-3">
+                                <BookOpen className="w-4 h-4" /> Sources & Notes
+                            </h4>
+                            <ul className="space-y-3">
+                                {footnoteIds.map(id => (
+                                    <li key={id} className="text-sm text-stone-600 flex gap-3 items-start group/note">
+                                        <span className="flex-none inline-flex items-center justify-center w-5 h-5 rounded-full bg-teal-100 text-teal-800 text-[10px] font-bold mt-0.5 ring-1 ring-teal-200 group-hover/note:bg-teal-200 transition-colors">
+                                            {id}
+                                        </span>
+                                        <span className="leading-relaxed">{footnotes[id]}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    </div>
+
+                    {!isSelected && (
                     <div className="mt-4 pt-4 border-t border-stone-100 text-xs text-stone-400 font-medium flex items-center gap-1">
                         <Info className="w-3 h-3" /> Click to read more
                     </div>
