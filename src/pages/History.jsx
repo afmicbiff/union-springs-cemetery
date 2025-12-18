@@ -8,8 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ArrowLeft, Search, X, History as HistoryIcon, ChevronRight, ChevronLeft, Calendar, User, Users, Info } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen } from "lucide-react";
 // ScrollArea removed to use native scrolling for better reliability
 import { cn } from "@/lib/utils";
 
@@ -43,6 +45,11 @@ const getFootnotesContent = (text, footnotesMap) => {
         const id = parseInt(match.match(/\d+/)[0]);
         return footnotesMap[id] || "";
     }).join(" ");
+};
+
+const parseYear = (yearStr) => {
+    const match = yearStr.match(/(\d{4})/);
+    return match ? parseInt(match[1]) : 0;
 };
 
 // Full text content with timeline metadata
@@ -318,14 +325,15 @@ const TextWithFootnotes = ({ text, highlight }) => {
 
 export default function HistoryPage() {
     const [searchQuery, setSearchQuery] = useState("");
-    const [yearFilter, setYearFilter] = useState("all");
     const [selectedId, setSelectedId] = useState(null);
     const scrollRef = useRef(null);
 
-    const uniqueYears = React.useMemo(() => {
-        const years = new Set(historyTimelineData.map(item => item.year));
-        return Array.from(years).sort();
+    const { minYear, maxYear } = React.useMemo(() => {
+        const years = historyTimelineData.map(item => parseYear(item.year)).filter(y => y > 0);
+        return { minYear: Math.min(...years), maxYear: Math.max(...years) };
     }, []);
+
+    const [dateRange, setDateRange] = useState([minYear, maxYear]);
 
     const handleNodeClick = (id) => {
         setSelectedId(selectedId === id ? null : id);
@@ -372,18 +380,21 @@ export default function HistoryPage() {
                         </div>
                     </div>
                     
-                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <Select value={yearFilter} onValueChange={setYearFilter}>
-                            <SelectTrigger className="w-full sm:w-[140px] bg-white border-stone-300">
-                                <SelectValue placeholder="Filter Year" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Years</SelectItem>
-                                {uniqueYears.map(year => (
-                                    <SelectItem key={year} value={year}>{year}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="flex flex-col sm:flex-row gap-6 w-full md:w-auto items-center">
+                        <div className="flex flex-col gap-1 w-full sm:w-48">
+                            <span className="text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                                Period: {dateRange[0]} - {dateRange[1]}
+                            </span>
+                            <Slider
+                                defaultValue={[minYear, maxYear]}
+                                min={minYear}
+                                max={maxYear}
+                                step={1}
+                                value={dateRange}
+                                onValueChange={setDateRange}
+                                className="w-full"
+                            />
+                        </div>
 
                         <div className="relative w-full md:w-80">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 w-4 h-4" />
@@ -421,24 +432,27 @@ export default function HistoryPage() {
                         </div>
 
                         {/* History Nodes */}
-                        <AnimatePresence>
-                            {historyTimelineData.map((item, index) => {
-                                const isSelected = selectedId === item.id;
-                                
-                                // Enhanced Search Logic
-                                const noteContent = getFootnotesContent(item.text, footnotes);
-                                const searchableContent = `${item.title} ${item.text} ${noteContent}`;
-                                
-                                const matchesSearch = !searchQuery || isFuzzyMatch(searchableContent, searchQuery);
-                                const matchesYear = yearFilter === "all" || item.year === yearFilter;
-                                
-                                const isMatch = searchQuery && matchesSearch;
-                                const isVisible = matchesSearch && matchesYear;
+                        <TooltipProvider>
+                            <AnimatePresence>
+                                {historyTimelineData.map((item, index) => {
+                                    const isSelected = selectedId === item.id;
+                                    const itemYear = parseYear(item.year);
+                                    
+                                    // Enhanced Search Logic
+                                    const noteContent = getFootnotesContent(item.text, footnotes);
+                                    const hasFootnotes = /NOTE\s*\d+/.test(item.text);
+                                    const searchableContent = `${item.title} ${item.text} ${noteContent}`;
+                                    
+                                    const matchesSearch = !searchQuery || isFuzzyMatch(searchableContent, searchQuery);
+                                    const matchesYear = itemYear >= dateRange[0] && itemYear <= dateRange[1];
+                                    
+                                    const isMatch = searchQuery && matchesSearch;
+                                    const isVisible = matchesSearch && matchesYear;
 
-                                if (!isVisible && yearFilter !== "all") return null; // Hide non-matching years completely
+                                    if (!isVisible) return null;
 
-                                return (
-                                    <motion.div
+                                    return (
+                                        <motion.div
                                         key={item.id}
                                         layout
                                         initial={{ opacity: 0, scale: 0.8 }}
@@ -466,10 +480,18 @@ export default function HistoryPage() {
                                                     {item.year}
                                                 </Badge>
                                                 <div className="w-0.5 h-6 bg-stone-300" />
-                                                <div className={cn(
-                                                    "w-4 h-4 rounded-full border-4 shadow-sm transition-colors",
-                                                    isMatch ? "bg-yellow-400 border-yellow-200" : "bg-stone-100 border-stone-400 group-hover:border-teal-500"
-                                                )} />
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <div className={cn(
+                                                            "w-4 h-4 rounded-full border-4 shadow-sm transition-colors cursor-help",
+                                                            isMatch ? "bg-yellow-400 border-yellow-200" : "bg-stone-100 border-stone-400 group-hover:border-teal-500"
+                                                        )} />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p className="font-serif font-bold">{item.title}</p>
+                                                        <p className="text-xs text-stone-500">{item.year}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             </div>
                                         )}
 
@@ -484,6 +506,12 @@ export default function HistoryPage() {
                                                     <h3 className={cn("font-serif font-bold text-stone-900 leading-tight whitespace-normal", isSelected ? "text-2xl" : "text-lg line-clamp-2")}>
                                                         <HighlightedText text={item.title} highlight={searchQuery} />
                                                     </h3>
+                                                    {hasFootnotes && !isSelected && (
+                                                        <div className="flex items-center gap-1 mt-1 text-teal-600 text-xs">
+                                                            <BookOpen className="w-3 h-3" />
+                                                            <span className="font-medium">Has Footnotes</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 {isSelected ? (
                                                      <button 
@@ -533,10 +561,11 @@ export default function HistoryPage() {
                                                 </div>
                                             )}
                                         </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </AnimatePresence>
+                                            </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </TooltipProvider>
 
                         {/* Membership Lists Node */}
                          <motion.div
