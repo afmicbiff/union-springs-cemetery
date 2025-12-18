@@ -31,27 +31,33 @@ export default function EmployeeList({ view = 'active' }) {
         queryKey: ['employees', debouncedTerm, view],
         queryFn: async () => {
             const filters = {};
+            
+            // Define status predicate - include missing status as active for legacy records
+            let statusPredicate = null;
             if (view === 'active') {
-                filters['status'] = 'active';
+                statusPredicate = { $or: [{ status: 'active' }, { status: { $exists: false } }, { status: null }] };
             } else if (view === 'archived') {
-                filters['status'] = 'inactive';
+                statusPredicate = { status: 'inactive' };
             }
 
             if (debouncedTerm) {
-                const searchFilter = [
+                const searchPredicate = { $or: [
                     { first_name: { $regex: debouncedTerm, $options: 'i' } },
                     { last_name: { $regex: debouncedTerm, $options: 'i' } },
                     { email: { $regex: debouncedTerm, $options: 'i' } }
-                ];
+                ]};
                 
-                if (filters['status']) {
+                if (statusPredicate) {
                     filters['$and'] = [
-                        { status: filters['status'] },
-                        { $or: searchFilter }
+                        statusPredicate,
+                        searchPredicate
                     ];
-                    delete filters['status'];
                 } else {
-                    filters['$or'] = searchFilter;
+                    Object.assign(filters, searchPredicate);
+                }
+            } else {
+                if (statusPredicate) {
+                    Object.assign(filters, statusPredicate);
                 }
             }
             return await base44.entities.Employee.list(filters);
