@@ -36,13 +36,13 @@ export default function Layout({ children }) {
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
     { 
-      label: 'Board Members / Employees', 
+      label: 'Admin Dashboard', 
       path: '/admin', 
       icon: Lock,
       isDropdown: true,
       items: [
-        { label: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
-        { label: 'Employees', path: '/Employees', icon: Users }
+        { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
+        { label: 'Board Members & Employees', path: '/Employees', icon: Users }
       ]
     },
   ];
