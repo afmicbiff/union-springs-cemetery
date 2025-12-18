@@ -59,7 +59,15 @@ export const historyTimelineData = [
         year: "1835",
         title: "Government Survey",
         text: `When William Dearing surveyed the area for the government in 1835, he plotted the path of the storm and called it Hurricane. John T. Campbell, Minden lawyer, said this land was advertised back East as "already done cleared land" and everyone wanted to buy land in the Hurricane. This map, the Governmental Map of Webster Public Lands June 30, 1830, can be seen in the Clerk’s office in Minden, Louisiana.`,
-        location: { lat: 32.6150, lng: -93.2850, label: "Webster Parish Clerk's Office (Minden)" }
+        location: { lat: 32.6150, lng: -93.2850, label: "Webster Parish Clerk's Office (Minden)" },
+        media: [
+            {
+                type: "image",
+                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Map_of_the_United_States_and_part_of_Louisiana._LOC_2002621137.tif/lossy-page1-1024px-Map_of_the_United_States_and_part_of_Louisiana._LOC_2002621137.tif.jpg",
+                caption: "1830s Map of the United States and Louisiana.",
+                source: "Library of Congress"
+            }
+        ]
     },
     {
         id: "spiritual",
@@ -155,6 +163,14 @@ export const historyTimelineData = [
         title: "The Wild Well",
         text: `Drilling those first wells created much excitement. Three crews, composed of five men each, worked around the clock. Tom Wiley cut the timbers for the wood derrick. On April 7, 1921, two hundred or more people were present to watch the well "come in" as their anticipation heightened, the pipe in the hole "cut loose." The well was wild! Gas began gushing from every hole down the hill in the Dorcheat bottoms. The blowing of the gas could be heard as far away as Cotton Valley. For several miles, craters formed through crayfish holes and any other crevices in the earth's surface. Thousands of people came to see the well and the fury of its fires. Oil men came to observe the spectacle. People walked, rode mules and horses, and traveled in wagons, buggies, and cars; they wanted to view this once-in-a-lifetime happening. The churchyard became a parking lot for the spectators. Nig Crouch ran a store at Union Springs, selling sandwiches and chili to the people. Leon Roseberry set up a stand to sell cokes.`,
         location: { lat: 32.9380, lng: -93.2930, label: "Wild Well Site" },
+        media: [
+            {
+                type: "image",
+                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Spindletop_Lucas_Gusher.jpg/467px-Spindletop_Lucas_Gusher.jpg",
+                caption: "The famous Lucas Gusher at Spindletop (1901) - similar to the 'wild well' blowouts seen in early Louisiana oil fields.",
+                source: "Wikimedia Commons"
+            }
+        ],
         overlay: {
             type: "circle",
             center: [32.9380, -93.2930],
