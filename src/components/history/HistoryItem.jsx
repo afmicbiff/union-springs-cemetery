@@ -24,11 +24,11 @@ const HighlightedText = ({ text, highlight }) => {
 };
 
 const TextWithFootnotes = ({ text, highlight, footnotes }) => {
-    const parts = text.split(/(NOTE\s*\d+)/g);
+    const parts = text.split(/(NOTE\s*\[?\d+\]?)/g);
     return (
         <span className="leading-relaxed text-stone-700">
             {parts.map((part, index) => {
-                const noteMatch = part.match(/NOTE\s*(\d+)/);
+                const noteMatch = part.match(/NOTE\s*\[?(\d+)\]?/);
                 if (noteMatch) {
                     const noteId = parseInt(noteMatch[1]);
                     const noteContent = footnotes[noteId];
@@ -62,11 +62,11 @@ const TextWithFootnotes = ({ text, highlight, footnotes }) => {
 };
 
 const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onToggle, footnotes, id }) => {
-    const hasFootnotes = /NOTE\s*\d+/.test(item.text);
-    
+    const hasFootnotes = /NOTE\s*\[?\d+\]?/.test(item.text);
+
     // Extract footnote IDs for the footer list
     const footnoteIds = React.useMemo(() => {
-        const matches = item.text.match(/NOTE\s*(\d+)/g);
+        const matches = item.text.match(/NOTE\s*\[?\d+\]?/g);
         if (!matches) return [];
         return [...new Set(matches.map(m => parseInt(m.match(/\d+/)[0])))].sort((a, b) => a - b);
     }, [item.text]);
@@ -185,7 +185,7 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
                         </div>
                     ) : (
                         <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed whitespace-normal">
-                            <HighlightedText text={item.text.replace(/NOTE \d+/g, '')} highlight={searchQuery} />
+                            <HighlightedText text={item.text.replace(/NOTE\s*\[?\d+\]?/g, '')} highlight={searchQuery} />
                         </p>
                     )}
                     
