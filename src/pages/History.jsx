@@ -8,9 +8,42 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ArrowLeft, Search, X, History as HistoryIcon, ChevronRight, ChevronLeft, Calendar, User, Users, Info } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 // ScrollArea removed to use native scrolling for better reliability
 import { cn } from "@/lib/utils";
+
+// Levenshtein distance for fuzzy matching
+const levenshtein = (a, b) => {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+};
+
+const getFootnotesContent = (text, footnotesMap) => {
+    const noteMatches = text.match(/NOTE\s*(\d+)/g);
+    if (!noteMatches) return "";
+    return noteMatches.map(match => {
+        const id = parseInt(match.match(/\d+/)[0]);
+        return footnotesMap[id] || "";
+    }).join(" ");
+};
 
 // Full text content with timeline metadata
 const historyTimelineData = [
@@ -285,12 +318,41 @@ const TextWithFootnotes = ({ text, highlight }) => {
 
 export default function HistoryPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [yearFilter, setYearFilter] = useState("all");
     const [selectedId, setSelectedId] = useState(null);
     const scrollRef = useRef(null);
 
+    const uniqueYears = React.useMemo(() => {
+        const years = new Set(historyTimelineData.map(item => item.year));
+        return Array.from(years).sort();
+    }, []);
+
     const handleNodeClick = (id) => {
         setSelectedId(selectedId === id ? null : id);
-        // Optional: Scroll to center logic could go here
+    };
+
+    const isFuzzyMatch = (text, query) => {
+        if (!query) return false;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        
+        // Exact substring match
+        if (lowerText.includes(lowerQuery)) return true;
+        
+        // Split query into words and check if all words match (fuzzy or exact)
+        const queryWords = lowerQuery.split(/\s+/);
+        return queryWords.every(word => {
+            // Check for substring
+            if (lowerText.includes(word)) return true;
+            
+            // Check for fuzzy match on words in text
+            const textWords = lowerText.split(/\s+/);
+            return textWords.some(textWord => {
+                if (Math.abs(textWord.length - word.length) > 2) return false;
+                const distance = levenshtein(textWord, word);
+                return distance <= 2; // Allow up to 2 typos
+            });
+        });
     };
 
     return (
@@ -310,22 +372,36 @@ export default function HistoryPage() {
                         </div>
                     </div>
                     
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 w-4 h-4" />
-                        <Input 
-                            placeholder="Search events..." 
-                            className="pl-9 bg-white border-stone-300 focus-visible:ring-teal-600"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        {searchQuery && (
-                            <button 
-                                onClick={() => setSearchQuery("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        )}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <Select value={yearFilter} onValueChange={setYearFilter}>
+                            <SelectTrigger className="w-full sm:w-[140px] bg-white border-stone-300">
+                                <SelectValue placeholder="Filter Year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Years</SelectItem>
+                                {uniqueYears.map(year => (
+                                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        <div className="relative w-full md:w-80">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 w-4 h-4" />
+                            <Input 
+                                placeholder="Search events & notes..." 
+                                className="pl-9 bg-white border-stone-300 focus-visible:ring-teal-600"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            {searchQuery && (
+                                <button 
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -348,11 +424,18 @@ export default function HistoryPage() {
                         <AnimatePresence>
                             {historyTimelineData.map((item, index) => {
                                 const isSelected = selectedId === item.id;
-                                const isMatch = searchQuery && (
-                                    item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                    item.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    item.year.includes(searchQuery)
-                                );
+                                
+                                // Enhanced Search Logic
+                                const noteContent = getFootnotesContent(item.text, footnotes);
+                                const searchableContent = `${item.title} ${item.text} ${noteContent}`;
+                                
+                                const matchesSearch = !searchQuery || isFuzzyMatch(searchableContent, searchQuery);
+                                const matchesYear = yearFilter === "all" || item.year === yearFilter;
+                                
+                                const isMatch = searchQuery && matchesSearch;
+                                const isVisible = matchesSearch && matchesYear;
+
+                                if (!isVisible && yearFilter !== "all") return null; // Hide non-matching years completely
 
                                 return (
                                     <motion.div
@@ -426,6 +509,21 @@ export default function HistoryPage() {
                                                     <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed whitespace-normal">
                                                         <HighlightedText text={item.text.replace(/NOTE \d+/g, '')} highlight={searchQuery} />
                                                     </p>
+                                                )}
+
+                                                {/* Show matching footnote context if found */}
+                                                {isMatch && !isSelected && (
+                                                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-100 rounded text-xs text-stone-600">
+                                                        <span className="font-bold text-yellow-700 block mb-1">Found in match:</span>
+                                                        <HighlightedText 
+                                                            text={
+                                                                isFuzzyMatch(item.title, searchQuery) ? item.title :
+                                                                isFuzzyMatch(item.text, searchQuery) ? "Content text" :
+                                                                "Footnote details"
+                                                            } 
+                                                            highlight={searchQuery} 
+                                                        />
+                                                    </div>
                                                 )}
                                             </div>
                                             
