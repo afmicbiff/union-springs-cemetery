@@ -65,6 +65,28 @@ export default function AdminDashboard() {
     checkAuth();
   }, []);
 
+  // Notifications for Header
+  const { data: notifications } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => base44.entities.Notification.list({ limit: 10 }),
+    initialData: [],
+  });
+
+  // Background polling for reminders
+  useQuery({
+    queryKey: ['check-reminders'],
+    queryFn: () => base44.functions.invoke('checkEventReminders'),
+    refetchInterval: 60 * 1000, 
+    refetchOnWindowFocus: true
+  });
+
+  useQuery({
+      queryKey: ['check-member-reminders'],
+      queryFn: () => base44.functions.invoke('checkMemberReminders'),
+      refetchInterval: 120 * 1000, // Check every 2 minutes
+      refetchOnWindowFocus: false
+  });
+
   if (!isAuthorized) {
       return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
   }
@@ -100,28 +122,6 @@ export default function AdminDashboard() {
           // For now we just switch tabs
       }
   };
-
-  // Notifications for Header
-  const { data: notifications } = useQuery({
-    queryKey: ['notifications'],
-    queryFn: () => base44.entities.Notification.list({ limit: 10 }),
-    initialData: [],
-  });
-
-  // Background polling for reminders
-  useQuery({
-    queryKey: ['check-reminders'],
-    queryFn: () => base44.functions.invoke('checkEventReminders'),
-    refetchInterval: 60 * 1000, 
-    refetchOnWindowFocus: true
-  });
-
-  useQuery({
-      queryKey: ['check-member-reminders'],
-      queryFn: () => base44.functions.invoke('checkMemberReminders'),
-      refetchInterval: 120 * 1000, // Check every 2 minutes
-      refetchOnWindowFocus: false
-  });
 
   // On-Demand Data Export
   const exportData = async () => {

@@ -25,8 +25,6 @@ export default function EmployeesPage() {
         }
     }, [user, isAuthLoading]);
 
-    if (isAuthLoading || !user) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
-
     const { data: employeeProfile } = useQuery({
         queryKey: ['my-employee-profile-page', user?.email],
         queryFn: async () => {
@@ -36,6 +34,7 @@ export default function EmployeesPage() {
         },
         enabled: !!user?.email
     });
+    
     const { data: announcements } = useQuery({
         queryKey: ['announcements-public'],
         queryFn: () => base44.entities.Announcement.list('-date', 20),
@@ -43,6 +42,8 @@ export default function EmployeesPage() {
     });
 
     const activeAnnouncements = announcements.filter(a => a.is_active !== false);
+
+    if (isAuthLoading || !user) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
 
     return (
         <div className="min-h-screen bg-stone-50 py-12 px-4 sm:px-6 lg:px-8 font-serif">
