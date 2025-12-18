@@ -443,9 +443,19 @@ export default function HistoryPage() {
                         {/* Membership Lists Node */}
                          <motion.div
                             layout
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ 
+                                opacity: 1, 
+                                scale: 1,
+                                flexBasis: selectedId === 'members' ? "40rem" : "16rem",
+                                minWidth: selectedId === 'members' ? "40rem" : "16rem"
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             className={cn(
-                                "relative flex flex-col transition-all duration-300 ease-in-out cursor-pointer group rounded-xl border shadow-sm hover:shadow-md bg-stone-100/80 border-stone-200 h-64 hover:bg-white hover:border-teal-300 min-w-[16rem]",
-                                selectedId === 'members' && "bg-white border-teal-500 z-20 h-[70vh] md:h-[60vh] min-w-[50rem] flex-basis-[50rem]"
+                                "relative flex flex-col transition-all duration-300 ease-in-out cursor-pointer group rounded-xl border shadow-sm hover:shadow-md bg-stone-100/80 border-stone-200 h-64 hover:bg-white hover:border-teal-300",
+                                selectedId === 'members' 
+                                    ? "bg-white border-teal-500 z-20 h-[70vh] md:h-[60vh] overflow-hidden" 
+                                    : ""
                             )}
                             onClick={() => handleNodeClick('members')}
                         >
@@ -481,7 +491,7 @@ export default function HistoryPage() {
 
                                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                                     {selectedId === 'members' ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 whitespace-normal">
+                                        <div className="flex flex-col gap-6 whitespace-normal">
                                             {membershipLists.map((list, i) => (
                                                 <div key={i} className="space-y-2">
                                                     <h4 className="font-bold text-teal-800 text-sm border-b border-teal-100 pb-1">{list.era}</h4>
