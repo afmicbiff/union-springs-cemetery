@@ -264,10 +264,12 @@ const TextWithFootnotes = ({ text, highlight }) => {
                                 </button>
                             </PopoverTrigger>
                             <PopoverContent 
-                                side="right" 
-                                align="start" 
+                                side="top" 
+                                align="center" 
                                 sideOffset={5}
-                                className="w-72 bg-white border border-stone-200 shadow-lg p-3 z-50 rounded-lg"
+                                collisionPadding={10}
+                                onOpenAutoFocus={(e) => e.preventDefault()}
+                                className="w-80 bg-white border border-stone-200 shadow-xl p-3 z-50 rounded-lg"
                             >
                                 <div className="relative pt-1">
                                     <div className="pr-6 text-sm text-stone-600 leading-snug">
