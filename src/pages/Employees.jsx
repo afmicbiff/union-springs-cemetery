@@ -39,9 +39,7 @@ export default function EmployeesPage() {
     React.useEffect(() => {
         if (employeeProfile && employeeProfile.status === 'inactive') {
             // Log out user or redirect to a blocked page
-            // Since we can't programmatically logout via SDK easily here without refresh, 
-            // we will redirect to home and let the home page handle or show an error.
-            // But better to just show an access denied screen here.
+            // Logic handled in render
         }
     }, [employeeProfile]);
     

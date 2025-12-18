@@ -119,8 +119,6 @@ export default function AdminDashboard() {
 
       if (tabMap[link.type]) {
           setActiveTab(tabMap[link.type]);
-          // You could pass the ID via state or context to the tab component to open specific item
-          // For now we just switch tabs
       }
   };
 
