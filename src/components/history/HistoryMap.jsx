@@ -33,16 +33,16 @@ export default function HistoryMap({ events, onEventSelect, dateRange }) {
         });
     }, [events, dateRange]);
 
-    const center = [32.9365, -93.2921]; // Default center (Union Springs)
+    const center = [32.8200, -93.2000]; // Centered to show Minden, Homer, and Union Springs area
 
     return (
         <Card className="h-[600px] w-full border-none shadow-none bg-transparent">
             <CardContent className="p-0 h-full rounded-xl overflow-hidden border border-stone-300 relative">
                 <MapContainer 
                     center={center} 
-                    zoom={13} 
+                    zoom={10} 
                     style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={false}
+                    scrollWheelZoom={true}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
