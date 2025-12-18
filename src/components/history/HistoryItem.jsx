@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud } from 'lucide-react';
@@ -33,26 +33,26 @@ const TextWithFootnotes = ({ text, highlight, footnotes }) => {
                     const noteId = parseInt(noteMatch[1]);
                     const noteContent = footnotes[noteId];
                     return (
-                        <Dialog key={index}>
-                            <DialogTrigger asChild>
+                        <Popover key={index}>
+                            <PopoverTrigger asChild>
                                 <button 
                                     onClick={(e) => e.stopPropagation()}
                                     className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1 cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     {noteId}
                                 </button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-md bg-white">
-                                <div className="flex flex-col gap-4">
-                                    <DialogTitle className="text-lg font-serif font-bold text-teal-800 border-b border-teal-100 pb-2">
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 bg-white p-4 shadow-lg border-stone-200">
+                                <div className="flex flex-col gap-2">
+                                    <h4 className="text-sm font-serif font-bold text-teal-800 border-b border-teal-100 pb-1">
                                         Footnote {noteId}
-                                    </DialogTitle>
-                                    <p className="text-stone-600 leading-relaxed text-sm">
+                                    </h4>
+                                    <p className="text-stone-600 leading-relaxed text-xs">
                                         {noteContent}
                                     </p>
                                 </div>
-                            </DialogContent>
-                        </Dialog>
+                            </PopoverContent>
+                        </Popover>
                     );
                 }
                 return <HighlightedText key={index} text={part} highlight={highlight} />;
