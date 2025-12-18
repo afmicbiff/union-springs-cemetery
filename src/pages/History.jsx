@@ -398,7 +398,7 @@ export default function HistoryPage() {
                                                     <span className={cn("text-xs font-bold uppercase tracking-wider mb-1 block", isSelected ? "text-teal-600" : "text-stone-500")}>
                                                         {item.year}
                                                     </span>
-                                                    <h3 className={cn("font-serif font-bold text-stone-900 leading-tight", isSelected ? "text-2xl" : "text-lg")}>
+                                                    <h3 className={cn("font-serif font-bold text-stone-900 leading-tight whitespace-normal", isSelected ? "text-2xl" : "text-lg line-clamp-2")}>
                                                         <HighlightedText text={item.title} highlight={searchQuery} />
                                                     </h3>
                                                 </div>
@@ -465,7 +465,7 @@ export default function HistoryPage() {
                                         <span className="text-xs font-bold uppercase tracking-wider mb-1 block text-stone-500">
                                             Records
                                         </span>
-                                        <h3 className={cn("font-serif font-bold text-stone-900 leading-tight", selectedId === 'members' ? "text-2xl" : "text-lg")}>
+                                        <h3 className={cn("font-serif font-bold text-stone-900 leading-tight whitespace-normal", selectedId === 'members' ? "text-2xl" : "text-lg line-clamp-2")}>
                                             Membership Rolls
                                         </h3>
                                     </div>
