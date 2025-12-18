@@ -43,6 +43,9 @@ export default function HistoryMap({ events, onEventSelect, dateRange }) {
                     zoom={10} 
                     style={{ height: '100%', width: '100%' }}
                     scrollWheelZoom={true}
+                    doubleClickZoom={true}
+                    zoomControl={true}
+                    dragging={true}
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
