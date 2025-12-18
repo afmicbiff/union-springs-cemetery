@@ -21,7 +21,8 @@ import {
     FileText,
     Calendar,
     Megaphone,
-    CheckSquare
+    CheckSquare,
+    Archive
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
@@ -159,7 +160,8 @@ export default function AdminDashboard() {
               <div className="xl:col-span-1"><OnboardingGuide /></div>
           </div>
       )},
-      { id: "employees", label: "Employees", icon: Users, component: <EmployeeList /> },
+      { id: "employees", label: "Employees", icon: Users, component: <EmployeeList view="active" /> },
+      { id: "archives", label: "Archives", icon: Archive, component: <EmployeeList view="archived" /> },
       { id: "vendors", label: "Vendors", icon: Truck, component: <VendorManager /> },
       { id: "security", label: "Security", icon: Shield, component: <AdminSecurity /> },
       { id: "calendar", label: "Calendar", icon: Calendar, component: <EventCalendar /> },

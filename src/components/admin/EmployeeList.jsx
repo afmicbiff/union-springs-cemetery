@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import BulkActionDialog from "@/components/admin/BulkActionDialog";
 import { toast } from "sonner";
 
-export default function EmployeeList() {
+export default function EmployeeList({ view = 'active' }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedTerm, setDebouncedTerm] = useState("");
     const [selectedEmployees, setSelectedEmployees] = useState([]);
@@ -69,6 +69,8 @@ export default function EmployeeList() {
                     data = { employment_type: config.employment_type };
                 } else if (actionType === 'deactivate') {
                     data = { status: 'inactive' };
+                } else if (actionType === 'reactivate') {
+                    data = { status: 'active' };
                 }
                 if (Object.keys(data).length > 0) {
                     return base44.entities.Employee.update(id, data);
@@ -255,7 +257,7 @@ export default function EmployeeList() {
                 onClose={() => setIsBulkDialogOpen(false)}
                 selectedCount={selectedEmployees.length}
                 onConfirm={handleBulkAction}
-                type="employee"
+                type={view === 'archived' ? 'archived_employee' : 'employee'}
             />
         </Card>
     );

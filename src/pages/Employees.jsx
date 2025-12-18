@@ -34,6 +34,16 @@ export default function EmployeesPage() {
         },
         enabled: !!user?.email
     });
+
+    // Check if employee is inactive and redirect
+    React.useEffect(() => {
+        if (employeeProfile && employeeProfile.status === 'inactive') {
+            // Log out user or redirect to a blocked page
+            // Since we can't programmatically logout via SDK easily here without refresh, 
+            // we will redirect to home and let the home page handle or show an error.
+            // But better to just show an access denied screen here.
+        }
+    }, [employeeProfile]);
     
     const { data: announcements } = useQuery({
         queryKey: ['announcements-public'],
@@ -44,6 +54,19 @@ export default function EmployeesPage() {
     const activeAnnouncements = announcements.filter(a => a.is_active !== false);
 
     if (isAuthLoading || !user) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
+
+    if (employeeProfile && employeeProfile.status === 'inactive') {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50 p-4">
+                <Shield className="w-16 h-16 text-red-500 mb-4" />
+                <h1 className="text-2xl font-bold text-stone-900 mb-2">Access Suspended</h1>
+                <p className="text-stone-600 text-center max-w-md">
+                    Your employee account is currently inactive. Please contact the administrator for assistance.
+                </p>
+                <a href="/" className="mt-6 text-teal-700 hover:underline">Return Home</a>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-stone-50 py-12 px-4 sm:px-6 lg:px-8 font-serif">

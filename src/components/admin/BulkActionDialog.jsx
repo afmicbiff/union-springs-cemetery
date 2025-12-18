@@ -14,8 +14,21 @@ import { Sparkles } from 'lucide-react';
 import AIEmailAssistant from './AIEmailAssistant';
 
 export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm, type = 'member' }) {
-    const [actionType, setActionType] = useState(type === 'employee' ? "change_role" : "send_email");
+    const [actionType, setActionType] = useState(
+        type === 'employee' ? "change_role" : 
+        type === 'archived_employee' ? "reactivate" :
+        "send_email"
+    );
     const [config, setConfig] = useState({});
+
+    // Reset action type when type prop changes
+    React.useEffect(() => {
+        setActionType(
+            type === 'employee' ? "change_role" : 
+            type === 'archived_employee' ? "reactivate" :
+            "send_email"
+        );
+    }, [type]);
 
     // Fetch employees for task assignment
     const { data: employees } = useQuery({
@@ -61,6 +74,14 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                                     <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
                                         <RadioGroupItem value="deactivate" id="deactivate" />
                                         <Label htmlFor="deactivate" className="cursor-pointer font-normal flex-1">Deactivate Employees</Label>
+                                    </div>
+                                </>
+                            )}
+                            {type === 'archived_employee' && (
+                                <>
+                                    <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                        <RadioGroupItem value="reactivate" id="reactivate" />
+                                        <Label htmlFor="reactivate" className="cursor-pointer font-normal flex-1">Reactivate Employees</Label>
                                     </div>
                                 </>
                             )}
@@ -200,7 +221,15 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                     {actionType === 'deactivate' && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                             <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-                                Warning: This will mark {selectedCount} employees as inactive. They may lose access to the system.
+                                Warning: This will mark {selectedCount} employees as inactive. They will be moved to the archive and may lose access to the system.
+                            </p>
+                        </div>
+                    )}
+
+                    {actionType === 'reactivate' && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <p className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+                                This will reactivate {selectedCount} employees. They will be restored to the active employee list.
                             </p>
                         </div>
                     )}
