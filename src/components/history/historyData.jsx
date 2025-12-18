@@ -3,73 +3,85 @@ export const historyTimelineData = [
         id: "intro",
         year: "1816",
         title: "Early Settlement",
-        text: `As early as 1816, Jesse Sikes came to the Leton area in northwest Louisiana, and then settled on Dorcheat Bayou, where he built an Indian trading post and established a ferry. At this time, Webster Parish was still part of Natchitoches Parish. White settlers began arriving for the purpose of homesteading the area, now known as Union Springs. The ferry to cross the bayou was called Sikes' Ferry. NOTE 1`
+        text: `As early as 1816, Jesse Sikes came to the Leton area in northwest Louisiana, and then settled on Dorcheat Bayou, where he built an Indian trading post and established a ferry. At this time, Webster Parish was still part of Natchitoches Parish. White settlers began arriving for the purpose of homesteading the area, now known as Union Springs. The ferry to cross the bayou was called Sikes' Ferry. NOTE 1`,
+        location: { lat: 32.9565, lng: -93.3121, label: "Sikes' Ferry (Dorcheat Bayou)" }
     },
     {
         id: "storm",
         year: "1830",
         title: "The Great Storm",
-        text: `About 1830, there was a storm in this area. Many of the old timers called it a "harricane", but from all indications, it must have been a tornado. It cleared a path in excess of one-half mile all the way from the present Union Springs area up into Columbia County, Arkansas. The area just to the west of New Shongaloo is still called "The Harricane". A woman was killed here when her log cabin fell in on her. In 1961, Aurie Duke Morgan said there were still signs of the storm in their woods.`
+        text: `About 1830, there was a storm in this area. Many of the old timers called it a "harricane", but from all indications, it must have been a tornado. It cleared a path in excess of one-half mile all the way from the present Union Springs area up into Columbia County, Arkansas. The area just to the west of New Shongaloo is still called "The Harricane". A woman was killed here when her log cabin fell in on her. In 1961, Aurie Duke Morgan said there were still signs of the storm in their woods.`,
+        location: { lat: 32.9450, lng: -93.3050, label: "Path of 'The Harricane'" }
     },
     {
         id: "survey",
         year: "1835",
         title: "Government Survey",
-        text: `When William Dearing surveyed the area for the government in 1835, he plotted the path of the storm and called it Hurricane. John T. Campbell, Minden lawyer, said this land was advertised back East as "already done cleared land" and everyone wanted to buy land in the Hurricane. This map, the Governmental Map of Webster Public Lands June 30, 1830, can be seen in the Clerk’s office in Minden, Louisiana.`
+        text: `When William Dearing surveyed the area for the government in 1835, he plotted the path of the storm and called it Hurricane. John T. Campbell, Minden lawyer, said this land was advertised back East as "already done cleared land" and everyone wanted to buy land in the Hurricane. This map, the Governmental Map of Webster Public Lands June 30, 1830, can be seen in the Clerk’s office in Minden, Louisiana.`,
+        location: { lat: 32.6150, lng: -93.2850, label: "Webster Parish Clerk's Office (Minden)" }
     },
     {
         id: "spiritual",
         year: "1840s",
         title: "Spiritual Beginnings",
-        text: `As more people inhabited the land, their need for spiritual guidance led to religious services being conducted in private homes, as well as meetings under the arbor structures. One favorite meeting site was the spot on which the Union Springs Church now stands. On the sides of the hill flowed numerous natural springs of water. Four springs were especially good. Their cool, clear waters flowed in all directions--northward, westward, southward, and eastward--before making their way into Dorcheat Bayou. Since there was a union of four springs on the hillside, and since Methodists, Baptists, Missionary Baptists, and Pentecostals were represented in the congregation, the name of the church was appropriately selected: Union Springs. Some say an encampment of Union soldiers here during reconstruction gave the area its name.`
+        text: `As more people inhabited the land, their need for spiritual guidance led to religious services being conducted in private homes, as well as meetings under the arbor structures. One favorite meeting site was the spot on which the Union Springs Church now stands. On the sides of the hill flowed numerous natural springs of water. Four springs were especially good. Their cool, clear waters flowed in all directions--northward, westward, southward, and eastward--before making their way into Dorcheat Bayou. Since there was a union of four springs on the hillside, and since Methodists, Baptists, Missionary Baptists, and Pentecostals were represented in the congregation, the name of the church was appropriately selected: Union Springs. Some say an encampment of Union soldiers here during reconstruction gave the area its name.`,
+        location: { lat: 32.9365, lng: -93.2921, label: "Union Springs Church Site" }
     },
     {
         id: "school",
         year: "1850",
         title: "First School",
-        text: `By 1850, the area had become a part of Claiborne Parish; and a private school was built at Union Springs. The log structure consisted of one room, which was heated by a large mud fireplace as the school term lasted two or three months during the winter. The students paid their tuitions with chickens, eggs, butter, potatoes, and other farm products. Each family was responsible for its children's transportation. NOTE 2`
+        text: `By 1850, the area had become a part of Claiborne Parish; and a private school was built at Union Springs. The log structure consisted of one room, which was heated by a large mud fireplace as the school term lasted two or three months during the winter. The students paid their tuitions with chickens, eggs, butter, potatoes, and other farm products. Each family was responsible for its children's transportation. NOTE 2`,
+        location: { lat: 32.9370, lng: -93.2925, label: "Original Log Schoolhouse" }
     },
     {
         id: "early_period",
         year: "1890",
         title: "Church Origins",
-        text: `According to the deceased parents of the present generation of members, the Union Springs Church was established in 1890. The church may have been organized that year; not applying for membership in the Baptist Association until the year 1895. Unfortunately, no records for this earlier period can be found; nor is any ancestor living to verify the facts. Records at the Baptist Association Building in Alexandria, Louisiana, indicate that the Union Springs Baptist Church was constituted in 1895. No correspondence was received from the Union Springs Church to the Association during the period dating from 1895 to 1933. During this time the building was used as a church, a school, and a community assembly place. Any denomination was granted the privilege of conducting services in the church building. Whenever these religious services were held everyone-regardless of his religious convictions--came to worship. It is reported that there were great evangelistic meetings in those early days, with great preaching, vigorous singing, feet washing, and speaking in other tongues. Often these meetings lasted until early in the morning hours. NOTE 5`
+        text: `According to the deceased parents of the present generation of members, the Union Springs Church was established in 1890. The church may have been organized that year; not applying for membership in the Baptist Association until the year 1895. Unfortunately, no records for this earlier period can be found; nor is any ancestor living to verify the facts. Records at the Baptist Association Building in Alexandria, Louisiana, indicate that the Union Springs Baptist Church was constituted in 1895. No correspondence was received from the Union Springs Church to the Association during the period dating from 1895 to 1933. During this time the building was used as a church, a school, and a community assembly place. Any denomination was granted the privilege of conducting services in the church building. Whenever these religious services were held everyone-regardless of his religious convictions--came to worship. It is reported that there were great evangelistic meetings in those early days, with great preaching, vigorous singing, feet washing, and speaking in other tongues. Often these meetings lasted until early in the morning hours. NOTE 5`,
+        location: { lat: 32.9365, lng: -93.2921, label: "Union Springs Baptist Church" }
     },
     {
         id: "church_services",
         year: "1894",
         title: "Land Deed",
-        text: `Church services were conducted only one Sunday a month, and the school building was used. No records of Union Springs Church have been found as to its constitution. One land record shows that on July 20, 1894, John F. Phillips Sr. sold two acres of land to the trustees of Union Springs School. These trustees-- James Richard Martin; his son, H. L. Martin; William Thomas Gleason; William W. Kaylor; W. D. Crouch; George W. Holiday; Jessie O. Wise: and Ally W. Sinclair--paid five dollars for the plot of land located in Section 13, Township 22, Range 10 West, for use as a nondenominational church. NOTE 3`
+        text: `Church services were conducted only one Sunday a month, and the school building was used. No records of Union Springs Church have been found as to its constitution. One land record shows that on July 20, 1894, John F. Phillips Sr. sold two acres of land to the trustees of Union Springs School. These trustees-- James Richard Martin; his son, H. L. Martin; William Thomas Gleason; William W. Kaylor; W. D. Crouch; George W. Holiday; Jessie O. Wise: and Ally W. Sinclair--paid five dollars for the plot of land located in Section 13, Township 22, Range 10 West, for use as a nondenominational church. NOTE 3`,
+        location: { lat: 32.9368, lng: -93.2918, label: "Land Deed Location (Section 13)" }
     },
     {
         id: "association",
         year: "1895",
         title: "Baptist Association",
-        text: `In 1895, Union Springs Baptist Church wrote a petitionary letter to the North Louisiana Baptist Association. Upon its reading the church was received as a member of the Association and the messengers were given the handshake of fellowship. The association was held at the New Friendship Baptist Church on September 3, 1895, in Claiborne Parish, Louisiana. The pastor of Union Springs was J.E. Williamson, the clerk was J. F. Phillips Jr.; the church was valued at one hundred fifty dollars, which included the value of the organ. Other statistics included the church's donation of one dollar for associational purposes. The total membership thirteen worshipers: four men and nine women. One member was added by baptism, and one was lost by letter. At this time, there was a post office at Dorcheat Louisiana. NOTE 4`
+        text: `In 1895, Union Springs Baptist Church wrote a petitionary letter to the North Louisiana Baptist Association. Upon its reading the church was received as a member of the Association and the messengers were given the handshake of fellowship. The association was held at the New Friendship Baptist Church on September 3, 1895, in Claiborne Parish, Louisiana. The pastor of Union Springs was J.E. Williamson, the clerk was J. F. Phillips Jr.; the church was valued at one hundred fifty dollars, which included the value of the organ. Other statistics included the church's donation of one dollar for associational purposes. The total membership thirteen worshipers: four men and nine women. One member was added by baptism, and one was lost by letter. At this time, there was a post office at Dorcheat Louisiana. NOTE 4`,
+        location: { lat: 32.8500, lng: -93.0500, label: "New Friendship Baptist Church" }
     },
     {
         id: "coyle",
         year: "1899",
         title: "A Winter Tale",
-        text: `E. M. "Eli" Coyle (1860-1928), who married Mary Sarepta Lennard, lived on the road to Cox's Ford north of Union Springs. A sad, but interesting, story is told about their daughter Eva Mae. She died on February 17, 1899; her body was to be buried in Old Sarepta Cemetery. A severe winter storm had frozen solid Dorcheat Bayou. The ferry was inoperative; therefore, John Slack, Minnie Dollar's husband and Nina Hardaway's father, assisted Claiborne Lindsey, Ida Sikes' brother, to push the coffin across the ice so the body could be buried as planned. NOTE 6 Her funeral was held on the day that she was to be married to Jasper Boucher. NOTE 7`
+        text: `E. M. "Eli" Coyle (1860-1928), who married Mary Sarepta Lennard, lived on the road to Cox's Ford north of Union Springs. A sad, but interesting, story is told about their daughter Eva Mae. She died on February 17, 1899; her body was to be buried in Old Sarepta Cemetery. A severe winter storm had frozen solid Dorcheat Bayou. The ferry was inoperative; therefore, John Slack, Minnie Dollar's husband and Nina Hardaway's father, assisted Claiborne Lindsey, Ida Sikes' brother, to push the coffin across the ice so the body could be buried as planned. NOTE 6 Her funeral was held on the day that she was to be married to Jasper Boucher. NOTE 7`,
+        location: { lat: 32.8950, lng: -93.4500, label: "Old Sarepta Cemetery" }
     },
     {
         id: "new_building",
         year: "1900",
         title: "New Building & Railroad",
-        text: `About 1900, Porter Wadley Lumber Company, which was located in Cotton Valley, built a railroad track from its mill into the Union Springs-Sikes' Ferry area. A logging camp was established a mile and a half east of the ferry. It was at this time that the old building, used as a church and school, was removed so a new one could be constructed. The frame building consisted of one room, which measured 30 feet by 36 feet. It was made from heart pine, 1 x 12 rough lumber planks, which were nailed uprights. Hand-split cypress shingles covered the roof; beaded lumber was used for the ceiling. Typical of the early churches, there were two front doors, and one rear door located to the speaker's left. On his right stood the organ. The three windows on each side were originally shuttered, but were later encased with glass panes. Three sections for the worshipers placed the men on the preacher's right, the ladies on his left, and the young people in the center. At that time, the attendance at church services was usually about thirty persons; cards were given out in Sunday School. NOTE 8`
+        text: `About 1900, Porter Wadley Lumber Company, which was located in Cotton Valley, built a railroad track from its mill into the Union Springs-Sikes' Ferry area. A logging camp was established a mile and a half east of the ferry. It was at this time that the old building, used as a church and school, was removed so a new one could be constructed. The frame building consisted of one room, which measured 30 feet by 36 feet. It was made from heart pine, 1 x 12 rough lumber planks, which were nailed uprights. Hand-split cypress shingles covered the roof; beaded lumber was used for the ceiling. Typical of the early churches, there were two front doors, and one rear door located to the speaker's left. On his right stood the organ. The three windows on each side were originally shuttered, but were later encased with glass panes. Three sections for the worshipers placed the men on the preacher's right, the ladies on his left, and the young people in the center. At that time, the attendance at church services was usually about thirty persons; cards were given out in Sunday School. NOTE 8`,
+        location: { lat: 32.9600, lng: -93.3000, label: "Logging Camp East of Ferry" }
     },
     {
         id: "sam_rogers",
         year: "1900",
         title: "Sam Rogers",
-        text: `The cemetery at Union Springs had a unique beginning. Sam Rogers, who worked at the sawmill, had no family. When he became very ill with a fever, he requested that he be buried under the old sycamore tree that stood east of the church. In 1900, Sam died. To honor his last wish, Sam's friends buried him under the tree; however, no marker was ever placed at his resting place. There were three others buried at Union Springs in 1900: H. W. Bishop, Jessie D. Wise, and Mrs. Mary Courtney.`
+        text: `The cemetery at Union Springs had a unique beginning. Sam Rogers, who worked at the sawmill, had no family. When he became very ill with a fever, he requested that he be buried under the old sycamore tree that stood east of the church. In 1900, Sam died. To honor his last wish, Sam's friends buried him under the tree; however, no marker was ever placed at his resting place. There were three others buried at Union Springs in 1900: H. W. Bishop, Jessie D. Wise, and Mrs. Mary Courtney.`,
+        location: { lat: 32.9365, lng: -93.2920, label: "The Old Sycamore (First Grave)" }
     },
     {
         id: "school_1910",
         year: "1910",
         title: "School Expansion",
-        text: `In 1910, a new school was built across the road, two-tenths of a mile north of the Union Springs Church. Whereas school sessions had lasted only two or three months a year in the original log building, the sessions now were extended to seven months a year. NOTE 9`
+        text: `In 1910, a new school was built across the road, two-tenths of a mile north of the Union Springs Church. Whereas school sessions had lasted only two or three months a year in the original log building, the sessions now were extended to seven months a year. NOTE 9`,
+        location: { lat: 32.9390, lng: -93.2921, label: "1910 Schoolhouse Site" }
     },
     {
         id: "services_details",
@@ -87,19 +99,22 @@ export const historyTimelineData = [
         id: "oil_discovery",
         year: "1921",
         title: "Oil Discovery",
-        text: `The Louisiana Oil Refining Company, on March 3, 1921, made the first oil discovery in Webster Parish. The well was the Gleason #1, drilled on land owned by W. T. Gleason. The well was located only a few yards north of the Union Springs Church: Section 13, Township 22 North, and Range 10 West. Using this first well, the company drilled the second well in April. NOTE 12`
+        text: `The Louisiana Oil Refining Company, on March 3, 1921, made the first oil discovery in Webster Parish. The well was the Gleason #1, drilled on land owned by W. T. Gleason. The well was located only a few yards north of the Union Springs Church: Section 13, Township 22 North, and Range 10 West. Using this first well, the company drilled the second well in April. NOTE 12`,
+        location: { lat: 32.9375, lng: -93.2921, label: "Gleason #1 Well" }
     },
     {
         id: "wild_well",
         year: "Apr 1921",
         title: "The Wild Well",
-        text: `Drilling those first wells created much excitement. Three crews, composed of five men each, worked around the clock. Tom Wiley cut the timbers for the wood derrick. On April 7, 1921, two hundred or more people were present to watch the well "come in" as their anticipation heightened, the pipe in the hole "cut loose." The well was wild! Gas began gushing from every hole down the hill in the Dorcheat bottoms. The blowing of the gas could be heard as far away as Cotton Valley. For several miles, craters formed through crayfish holes and any other crevices in the earth's surface. Thousands of people came to see the well and the fury of its fires. Oil men came to observe the spectacle. People walked, rode mules and horses, and traveled in wagons, buggies, and cars; they wanted to view this once-in-a-lifetime happening. The churchyard became a parking lot for the spectators. Nig Crouch ran a store at Union Springs, selling sandwiches and chili to the people. Leon Roseberry set up a stand to sell cokes.`
+        text: `Drilling those first wells created much excitement. Three crews, composed of five men each, worked around the clock. Tom Wiley cut the timbers for the wood derrick. On April 7, 1921, two hundred or more people were present to watch the well "come in" as their anticipation heightened, the pipe in the hole "cut loose." The well was wild! Gas began gushing from every hole down the hill in the Dorcheat bottoms. The blowing of the gas could be heard as far away as Cotton Valley. For several miles, craters formed through crayfish holes and any other crevices in the earth's surface. Thousands of people came to see the well and the fury of its fires. Oil men came to observe the spectacle. People walked, rode mules and horses, and traveled in wagons, buggies, and cars; they wanted to view this once-in-a-lifetime happening. The churchyard became a parking lot for the spectators. Nig Crouch ran a store at Union Springs, selling sandwiches and chili to the people. Leon Roseberry set up a stand to sell cokes.`,
+        location: { lat: 32.9380, lng: -93.2930, label: "Wild Well Site" }
     },
     {
         id: "crater",
         year: "1921-23",
         title: "The Crater",
-        text: `The oil workers attempted to drill a relief well between Gleason #1 and Gleason #2. To put mud and cement into the well should have reduced the gas pressure. Nothing worked; therefore, they finally abandoned the well. A month later, the oil company brought in a work-over rig. Suddenly the bottom of the pit sank to the depth of a hundred feet--only moments before, John Slack had been standing on a board lying across the slush pit. As the well fell inward; the derrick fell to the side. Before the derrick could sink into the gaping void, the men rushed to save the engine, boiler, and crown block. Miraculously, no one was injured or killed. As the sides caved in, the hole became wider and wider. The wild well continued to be an attraction. Oil and gas sprayed into the air from the well. It was told that Tobe Newsom, riding his mule, galloped by H. L. Martin and yelled, "Hell has opened up down there." A year later, the well caught fire and burned steadily for two years or more. The fire finally died out when the drilling of "Bub" Martin's oil well relieved the pressure on the Crater. NOTE 13`
+        text: `The oil workers attempted to drill a relief well between Gleason #1 and Gleason #2. To put mud and cement into the well should have reduced the gas pressure. Nothing worked; therefore, they finally abandoned the well. A month later, the oil company brought in a work-over rig. Suddenly the bottom of the pit sank to the depth of a hundred feet--only moments before, John Slack had been standing on a board lying across the slush pit. As the well fell inward; the derrick fell to the side. Before the derrick could sink into the gaping void, the men rushed to save the engine, boiler, and crown block. Miraculously, no one was injured or killed. As the sides caved in, the hole became wider and wider. The wild well continued to be an attraction. Oil and gas sprayed into the air from the well. It was told that Tobe Newsom, riding his mule, galloped by H. L. Martin and yelled, "Hell has opened up down there." A year later, the well caught fire and burned steadily for two years or more. The fire finally died out when the drilling of "Bub" Martin's oil well relieved the pressure on the Crater. NOTE 13`,
+        location: { lat: 32.9380, lng: -93.2930, label: "The Crater" }
     },
     {
         id: "aftermath",
