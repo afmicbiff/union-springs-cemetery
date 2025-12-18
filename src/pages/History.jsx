@@ -217,7 +217,13 @@ const TextWithFootnotes = ({ text, highlight }) => {
                                     {noteId}
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-80 bg-white border-stone-200 shadow-xl p-3">
+                            <PopoverContent 
+                                side="top" 
+                                align="center" 
+                                sideOffset={5}
+                                avoidCollisions={false}
+                                className="w-80 bg-white border-stone-200 shadow-xl p-3"
+                            >
                                 <div className="relative">
                                     <div className="pr-6 text-sm text-stone-600 italic">
                                         <span className="font-bold text-teal-700 not-italic mr-2">Note {noteId}:</span>
