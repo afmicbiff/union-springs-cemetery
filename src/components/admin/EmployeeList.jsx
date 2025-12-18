@@ -31,7 +31,7 @@ export default function EmployeeList({ view = 'active' }) {
         queryKey: ['employees', debouncedTerm, view],
         queryFn: async () => {
             // Fetch all employees and filter client-side to ensure robust handling of legacy data (missing status)
-            const allEmployees = await base44.entities.Employee.list({ limit: 1000 });
+            const allEmployees = await base44.entities.Employee.list(null, 1000);
             
             return allEmployees.filter(emp => {
                 // Default missing status to 'active'
