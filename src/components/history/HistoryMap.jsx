@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, Polygon, Circle, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,22 +53,47 @@ export default function HistoryMap({ events, onEventSelect, dateRange }) {
                     />
                     
                     {mappableEvents.map((event) => (
-                        <Marker 
-                            key={event.id} 
-                            position={[event.location.lat, event.location.lng]}
-                            icon={customIcon}
-                            eventHandlers={{
-                                click: () => onEventSelect && onEventSelect(event.id),
-                            }}
-                        >
-                            <Tooltip direction="top" offset={[0, -20]} opacity={1} className="font-sans rounded-md shadow-md border-none px-3 py-2">
-                                <div className="text-center">
-                                    <span className="block font-bold text-sm text-teal-900">{event.title}</span>
-                                    <span className="block text-xs text-stone-500 font-serif">{event.year}</span>
-                                    <span className="block text-[10px] text-stone-400 mt-1 uppercase tracking-wide">Click to view on timeline</span>
-                                </div>
-                            </Tooltip>
-                        </Marker>
+                        <React.Fragment key={event.id}>
+                            <Marker 
+                                position={[event.location.lat, event.location.lng]}
+                                icon={customIcon}
+                                eventHandlers={{
+                                    click: () => onEventSelect && onEventSelect(event.id),
+                                }}
+                            >
+                                <Tooltip direction="top" offset={[0, -20]} opacity={1} className="font-sans rounded-md shadow-md border-none px-3 py-2">
+                                    <div className="text-center">
+                                        <span className="block font-bold text-sm text-teal-900">{event.title}</span>
+                                        <span className="block text-xs text-stone-500 font-serif">{event.year}</span>
+                                        {event.weather && (
+                                            <div className="flex items-center justify-center gap-1 mt-1 text-xs text-amber-600 font-medium bg-amber-50 px-1 py-0.5 rounded">
+                                                <span>{event.weather.condition}</span>
+                                            </div>
+                                        )}
+                                        <span className="block text-[10px] text-stone-400 mt-1 uppercase tracking-wide">Click to view on timeline</span>
+                                    </div>
+                                </Tooltip>
+                            </Marker>
+                            
+                            {/* Historical Overlays */}
+                            {event.overlay && event.overlay.type === 'polygon' && (
+                                <Polygon 
+                                    positions={event.overlay.positions}
+                                    pathOptions={{ color: event.overlay.color, fillColor: event.overlay.color, fillOpacity: 0.2, weight: 2, dashArray: '5, 5' }}
+                                >
+                                    <Popup>{event.overlay.label}</Popup>
+                                </Polygon>
+                            )}
+                            {event.overlay && event.overlay.type === 'circle' && (
+                                <Circle 
+                                    center={event.overlay.center}
+                                    radius={event.overlay.radius}
+                                    pathOptions={{ color: event.overlay.color, fillColor: event.overlay.color, fillOpacity: 0.2, weight: 2 }}
+                                >
+                                    <Popup>{event.overlay.label}</Popup>
+                                </Circle>
+                            )}
+                        </React.Fragment>
                     ))}
                 </MapContainer>
                 

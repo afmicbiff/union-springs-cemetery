@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
-import { X, ChevronRight, Info, BookOpen } from 'lucide-react';
+import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { isFuzzyMatch } from './utils';
 
@@ -61,11 +61,23 @@ const TextWithFootnotes = ({ text, highlight, footnotes }) => {
     );
 };
 
-const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onToggle, footnotes }) => {
+const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onToggle, footnotes, id }) => {
     const hasFootnotes = /NOTE\s*\d+/.test(item.text);
+
+    const getWeatherIcon = (iconName) => {
+        switch(iconName) {
+            case 'cloud-lightning': return CloudLightning;
+            case 'snowflake': return CloudSnow;
+            case 'sun': return Sun;
+            default: return Cloud;
+        }
+    };
+
+    const WeatherIcon = item.weather ? getWeatherIcon(item.weather.icon) : null;
 
     return (
         <motion.div
+            id={id}
             layout
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ 
@@ -88,8 +100,9 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
             {/* Connector Line Point */}
             {!isSelected && (
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
-                    <Badge variant="outline" className="bg-stone-100 border-stone-300 text-stone-600 font-serif">
+                    <Badge variant="outline" className="bg-stone-100 border-stone-300 text-stone-600 font-serif flex items-center gap-1">
                         {item.year}
+                        {item.weather && <WeatherIcon className="w-3 h-3 text-stone-400" />}
                     </Badge>
                     <div className="w-0.5 h-6 bg-stone-300" />
                     <Tooltip>
@@ -141,6 +154,22 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
 
                 {/* Card Body */}
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                    {isSelected && item.weather && (
+                        <div className="mb-4 p-3 bg-stone-50 rounded-lg border border-stone-100 flex items-start gap-3">
+                            <div className="p-2 bg-white rounded-full shadow-sm">
+                                <WeatherIcon className="w-5 h-5 text-stone-600" />
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-0.5">Historical Conditions</h4>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="font-serif font-bold text-stone-800">{item.weather.condition}</span>
+                                    {item.weather.temp && <span className="text-xs text-stone-500 font-mono">{item.weather.temp}</span>}
+                                </div>
+                                <p className="text-xs text-stone-600 mt-1 italic">{item.weather.description}</p>
+                            </div>
+                        </div>
+                    )}
+
                     {isSelected ? (
                         <div className="prose prose-stone prose-sm max-w-none whitespace-normal">
                             <TextWithFootnotes text={item.text} highlight={searchQuery} footnotes={footnotes} />

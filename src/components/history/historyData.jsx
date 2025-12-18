@@ -4,14 +4,39 @@ export const historyTimelineData = [
         year: "1816",
         title: "Early Settlement",
         text: `As early as 1816, Jesse Sikes came to the Leton area in northwest Louisiana, and then settled on Dorcheat Bayou, where he built an Indian trading post and established a ferry. At this time, Webster Parish was still part of Natchitoches Parish. White settlers began arriving for the purpose of homesteading the area, now known as Union Springs. The ferry to cross the bayou was called Sikes' Ferry. NOTE 1`,
-        location: { lat: 32.9565, lng: -93.3121, label: "Sikes' Ferry (Dorcheat Bayou)" }
+        location: { lat: 32.9565, lng: -93.3121, label: "Sikes' Ferry (Dorcheat Bayou)" },
+        overlay: {
+            type: "circle",
+            center: [32.9565, -93.3121],
+            radius: 800,
+            color: "#A0522D",
+            label: "Early Settlement Area"
+        }
     },
     {
         id: "storm",
         year: "1830",
         title: "The Great Storm",
         text: `About 1830, there was a storm in this area. Many of the old timers called it a "harricane", but from all indications, it must have been a tornado. It cleared a path in excess of one-half mile all the way from the present Union Springs area up into Columbia County, Arkansas. The area just to the west of New Shongaloo is still called "The Harricane". A woman was killed here when her log cabin fell in on her. In 1961, Aurie Duke Morgan said there were still signs of the storm in their woods.`,
-        location: { lat: 32.9450, lng: -93.3050, label: "Path of 'The Harricane'" }
+        location: { lat: 32.9450, lng: -93.3050, label: "Path of 'The Harricane'" },
+        weather: {
+            condition: "Tornado/Hurricane",
+            temp: "N/A",
+            description: "Severe storm system clearing a 0.5 mile wide path.",
+            icon: "cloud-lightning"
+        },
+        overlay: {
+            type: "polygon",
+            positions: [
+                [32.9300, -93.2900],
+                [32.9600, -93.3200],
+                [33.0500, -93.3500], // Towards Columbia County, AR
+                [33.0600, -93.3300],
+                [32.9400, -93.2800]
+            ],
+            color: "#DC2626",
+            label: "Storm Path"
+        }
     },
     {
         id: "survey",
@@ -60,7 +85,13 @@ export const historyTimelineData = [
         year: "1899",
         title: "A Winter Tale",
         text: `E. M. "Eli" Coyle (1860-1928), who married Mary Sarepta Lennard, lived on the road to Cox's Ford north of Union Springs. A sad, but interesting, story is told about their daughter Eva Mae. She died on February 17, 1899; her body was to be buried in Old Sarepta Cemetery. A severe winter storm had frozen solid Dorcheat Bayou. The ferry was inoperative; therefore, John Slack, Minnie Dollar's husband and Nina Hardaway's father, assisted Claiborne Lindsey, Ida Sikes' brother, to push the coffin across the ice so the body could be buried as planned. NOTE 6 Her funeral was held on the day that she was to be married to Jasper Boucher. NOTE 7`,
-        location: { lat: 32.8950, lng: -93.4500, label: "Old Sarepta Cemetery" }
+        location: { lat: 32.8950, lng: -93.4500, label: "Old Sarepta Cemetery" },
+        weather: {
+            condition: "Deep Freeze",
+            temp: "< 32°F",
+            description: "Bayou Dorcheat frozen solid, allowing passage on ice.",
+            icon: "snowflake"
+        }
     },
     {
         id: "new_building",
@@ -107,7 +138,14 @@ export const historyTimelineData = [
         year: "Apr 1921",
         title: "The Wild Well",
         text: `Drilling those first wells created much excitement. Three crews, composed of five men each, worked around the clock. Tom Wiley cut the timbers for the wood derrick. On April 7, 1921, two hundred or more people were present to watch the well "come in" as their anticipation heightened, the pipe in the hole "cut loose." The well was wild! Gas began gushing from every hole down the hill in the Dorcheat bottoms. The blowing of the gas could be heard as far away as Cotton Valley. For several miles, craters formed through crayfish holes and any other crevices in the earth's surface. Thousands of people came to see the well and the fury of its fires. Oil men came to observe the spectacle. People walked, rode mules and horses, and traveled in wagons, buggies, and cars; they wanted to view this once-in-a-lifetime happening. The churchyard became a parking lot for the spectators. Nig Crouch ran a store at Union Springs, selling sandwiches and chili to the people. Leon Roseberry set up a stand to sell cokes.`,
-        location: { lat: 32.9380, lng: -93.2930, label: "Wild Well Site" }
+        location: { lat: 32.9380, lng: -93.2930, label: "Wild Well Site" },
+        overlay: {
+            type: "circle",
+            center: [32.9380, -93.2930],
+            radius: 300,
+            color: "#F59E0B",
+            label: "Gas Blowout Zone"
+        }
     },
     {
         id: "crater",
