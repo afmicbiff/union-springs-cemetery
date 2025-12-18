@@ -30,37 +30,32 @@ export default function EmployeeList({ view = 'active' }) {
     const { data: employees, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['employees', debouncedTerm, view],
         queryFn: async () => {
-            const filters = {};
+            // Fetch all employees and filter client-side to ensure robust handling of legacy data (missing status)
+            const allEmployees = await base44.entities.Employee.list({ limit: 1000 });
             
-            // Define status predicate - include missing status as active for legacy records
-            let statusPredicate = null;
-            if (view === 'active') {
-                statusPredicate = { $or: [{ status: 'active' }, { status: { $exists: false } }, { status: null }] };
-            } else if (view === 'archived') {
-                statusPredicate = { status: 'inactive' };
-            }
-
-            if (debouncedTerm) {
-                const searchPredicate = { $or: [
-                    { first_name: { $regex: debouncedTerm, $options: 'i' } },
-                    { last_name: { $regex: debouncedTerm, $options: 'i' } },
-                    { email: { $regex: debouncedTerm, $options: 'i' } }
-                ]};
+            return allEmployees.filter(emp => {
+                // Default missing status to 'active'
+                const status = emp.status || 'active';
                 
-                if (statusPredicate) {
-                    filters['$and'] = [
-                        statusPredicate,
-                        searchPredicate
-                    ];
-                } else {
-                    Object.assign(filters, searchPredicate);
+                // Filter by View Mode
+                const matchesView = (view === 'active' && status === 'active') || 
+                                  (view === 'archived' && status === 'inactive');
+                
+                if (!matchesView) return false;
+
+                // Filter by Search Term
+                if (debouncedTerm) {
+                    const term = debouncedTerm.toLowerCase();
+                    return (
+                        (emp.first_name || '').toLowerCase().includes(term) ||
+                        (emp.last_name || '').toLowerCase().includes(term) ||
+                        (emp.email || '').toLowerCase().includes(term) ||
+                        (emp.employee_number || '').toLowerCase().includes(term)
+                    );
                 }
-            } else {
-                if (statusPredicate) {
-                    Object.assign(filters, statusPredicate);
-                }
-            }
-            return await base44.entities.Employee.list(filters);
+
+                return true;
+            });
         },
         initialData: [],
     });
