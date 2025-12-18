@@ -3,7 +3,7 @@ export const historyTimelineData = [
         id: "intro",
         year: "1816",
         title: "Early Settlement",
-        text: `As early as 1816, Jesse Sikes came to the Leton area in northwest Louisiana, and then settled on Dorcheat Bayou, where he built an Indian trading post and established a ferry. At this time, Webster Parish was still part of Natchitoches Parish. White settlers began arriving for the purpose of homesteading the area, now known as Union Springs. The ferry to cross the bayou was called Sikes' Ferry. NOTE 1`,
+        text: `As early as 1816, Jesse Sikes came to the Leton area in northwest Louisiana, and then settled on Dorcheat Bayou, where he built an Indian trading post and established a ferry. At this time, Webster Parish was still part of Natchitoches Parish. White settlers began arriving for the purpose of homesteading the area, now known as Union Springs. The ferry to cross the bayou was called Sikes' Ferry. NOTE [1]`,
         location: { lat: 32.9565, lng: -93.3121, label: "Sikes' Ferry (Dorcheat Bayou)" },
         overlay: {
             type: "circle",
@@ -80,7 +80,7 @@ export const historyTimelineData = [
         id: "school",
         year: "1850",
         title: "First School",
-        text: `By 1850, the area had become a part of Claiborne Parish; and a private school was built at Union Springs. The log structure consisted of one room, which was heated by a large mud fireplace as the school term lasted two or three months during the winter. The students paid their tuitions with chickens, eggs, butter, potatoes, and other farm products. Each family was responsible for its children's transportation. NOTE 2`,
+        text: `By 1850, the area had become a part of Claiborne Parish; and a private school was built at Union Springs. The log structure consisted of one room, which was heated by a large mud fireplace as the school term lasted two or three months during the winter. The students paid their tuitions with chickens, eggs, butter, potatoes, and other farm products. Each family was responsible for its children's transportation. NOTE [2]`,
         location: { lat: 32.9370, lng: -93.2925, label: "Original Log Schoolhouse" }
     },
     {
@@ -94,14 +94,14 @@ export const historyTimelineData = [
         id: "church_services",
         year: "1894",
         title: "Land Deed",
-        text: `Church services were conducted only one Sunday a month, and the school building was used. No records of Union Springs Church have been found as to its constitution. One land record shows that on July 20, 1894, John F. Phillips Sr. sold two acres of land to the trustees of Union Springs School. These trustees-- James Richard Martin; his son, H. L. Martin; William Thomas Gleason; William W. Kaylor; W. D. Crouch; George W. Holiday; Jessie O. Wise: and Ally W. Sinclair--paid five dollars for the plot of land located in Section 13, Township 22, Range 10 West, for use as a nondenominational church. NOTE 3`,
+        text: `Church services were conducted only one Sunday a month, and the school building was used. No records of Union Springs Church have been found as to its constitution. One land record shows that on July 20, 1894, John F. Phillips Sr. sold two acres of land to the trustees of Union Springs School. These trustees-- James Richard Martin; his son, H. L. Martin; William Thomas Gleason; William W. Kaylor; W. D. Crouch; George W. Holiday; Jessie O. Wise: and Ally W. Sinclair--paid five dollars for the plot of land located in Section 13, Township 22, Range 10 West, for use as a nondenominational church. NOTE [3]`,
         location: { lat: 32.9368, lng: -93.2918, label: "Land Deed Location (Section 13)" }
     },
     {
         id: "association",
         year: "1895",
         title: "Baptist Association",
-        text: `In 1895, Union Springs Baptist Church wrote a petitionary letter to the North Louisiana Baptist Association. Upon its reading the church was received as a member of the Association and the messengers were given the handshake of fellowship. The association was held at the New Friendship Baptist Church on September 3, 1895, in Claiborne Parish, Louisiana. The pastor of Union Springs was J.E. Williamson, the clerk was J. F. Phillips Jr.; the church was valued at one hundred fifty dollars, which included the value of the organ. Other statistics included the church's donation of one dollar for associational purposes. The total membership thirteen worshipers: four men and nine women. One member was added by baptism, and one was lost by letter. At this time, there was a post office at Dorcheat Louisiana. NOTE 4`,
+        text: `In 1895, Union Springs Baptist Church wrote a petitionary letter to the North Louisiana Baptist Association. Upon its reading the church was received as a member of the Association and the messengers were given the handshake of fellowship. The association was held at the New Friendship Baptist Church on September 3, 1895, in Claiborne Parish, Louisiana. The pastor of Union Springs was J.E. Williamson, the clerk was J. F. Phillips Jr.; the church was valued at one hundred fifty dollars, which included the value of the organ. Other statistics included the church's donation of one dollar for associational purposes. The total membership thirteen worshipers: four men and nine women. One member was added by baptism, and one was lost by letter. At this time, there was a post office at Dorcheat Louisiana. NOTE [4]`,
         location: { lat: 32.8500, lng: -93.0500, label: "New Friendship Baptist Church" }
     },
     {
