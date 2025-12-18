@@ -26,6 +26,7 @@ import {
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
 import { toast } from "sonner";
+import { Loader2 } from 'lucide-react';
 
 // Components
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -46,6 +47,27 @@ import AdminSearch from "@/components/admin/AdminSearch";
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      const user = await base44.auth.me().catch(() => null);
+      if (!user) {
+        base44.auth.redirectToLogin(window.location.pathname);
+        return;
+      }
+      if (user.role !== 'admin') {
+        window.location.href = '/';
+        return;
+      }
+      setIsAuthorized(true);
+    };
+    checkAuth();
+  }, []);
+
+  if (!isAuthorized) {
+      return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
+  }
 
   const handleSearchNavigate = (link) => {
       // Map search result types to tabs

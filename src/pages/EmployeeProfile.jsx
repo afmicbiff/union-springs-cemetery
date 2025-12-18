@@ -29,6 +29,21 @@ export default function EmployeeProfile() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isSendingReminder, setIsSendingReminder] = useState(false);
 
+    const { data: currentUser, isLoading: isAuthLoading } = useQuery({
+        queryKey: ['me'],
+        queryFn: () => base44.auth.me().catch(() => null),
+    });
+
+    React.useEffect(() => {
+        if (!isAuthLoading) {
+            if (!currentUser) {
+                base44.auth.redirectToLogin(window.location.pathname);
+            } else if (currentUser.role !== 'admin') {
+                window.location.href = '/';
+            }
+        }
+    }, [currentUser, isAuthLoading]);
+
     const { data: employee, isLoading, error } = useQuery({
         queryKey: ['employee', id],
         queryFn: async () => {
@@ -123,6 +138,8 @@ export default function EmployeeProfile() {
             setIsSendingReminder(false);
         }
     };
+
+    if (isAuthLoading || !currentUser || currentUser.role !== 'admin') return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
 
     if (isLoading) return <div className="flex justify-center items-center min-h-screen"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
     if (error || !employee) return <div className="p-8 text-center text-red-500">Employee not found or error loading profile.</div>;

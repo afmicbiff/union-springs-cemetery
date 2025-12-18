@@ -36,7 +36,7 @@ export default function Layout({ children }) {
     { label: 'Plots & Map', path: '/plots', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
     { 
-      label: 'Admin', 
+      label: 'Board Members / Employees', 
       path: '/admin', 
       icon: Lock,
       isDropdown: true,

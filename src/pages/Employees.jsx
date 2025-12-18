@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Bell, Shield, BookOpen } from "lucide-react";
+import { FileText, Bell, Shield, BookOpen, Loader2 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 import EmployeeSchedule from "@/components/employee/EmployeeSchedule";
@@ -14,10 +14,18 @@ import TaskManager from "@/components/tasks/TaskManager";
 
 export default function EmployeesPage() {
     // Fetch Current User & Employee Profile for Task Filtering
-    const { data: user } = useQuery({
+    const { data: user, isLoading: isAuthLoading } = useQuery({
         queryKey: ['me'],
         queryFn: () => base44.auth.me().catch(() => null),
     });
+
+    React.useEffect(() => {
+        if (!isAuthLoading && !user) {
+            base44.auth.redirectToLogin(window.location.pathname);
+        }
+    }, [user, isAuthLoading]);
+
+    if (isAuthLoading || !user) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
 
     const { data: employeeProfile } = useQuery({
         queryKey: ['my-employee-profile-page', user?.email],
