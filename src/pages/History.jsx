@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ArrowLeft, Search, X, History as HistoryIcon, ChevronRight, ChevronLeft, Calendar, User, Users } from 'lucide-react';
+import { ArrowLeft, Search, X, History as HistoryIcon, ChevronRight, ChevronLeft, Calendar, User, Users, Info } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
