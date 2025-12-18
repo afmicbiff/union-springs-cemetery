@@ -256,7 +256,10 @@ const TextWithFootnotes = ({ text, highlight }) => {
                     return (
                         <Popover key={index}>
                             <PopoverTrigger asChild>
-                                <button className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1 cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                                <button 
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1 cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
                                     {noteId}
                                 </button>
                             </PopoverTrigger>
