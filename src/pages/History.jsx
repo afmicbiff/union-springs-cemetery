@@ -359,7 +359,41 @@ export default function HistoryPage() {
                                 <h4 className="font-bold text-stone-900 mb-2">1930</h4>
                                 <p>Lillian Bingle, Mr. M. L. Bishop, May Bishop, Savina Way Castor, Mrs. John Cole, May Bell Dollar, Tavy Dollar, Zella Finlay, Effie Lee Harris, N. J. Harris, Mrs. N. J. Harris, Robert Harris, Rosie Harris, Wayman Harris, Agnes King, Bessie King, Elmo King, Fred C. King, Goldie King, Hettie King, J. D. King, Virgil King, Mary Langston, Lucy Parker Lewis, Berta McCuin, Nina Martin, Justin Moore, Vernon Moore, Alice Nealy, Cal Nealy Mrs. H. J. Nealy, J. A. Nealy, Mrs. L. M. Nealy, Rosie Sinclair, Myrtle Slack, Morgan Strange, Chester Strickland, Hunter Teutsch, and Kirk Wise.</p>
                             </div>
-                            {/* Additional lists can be added here if needed, but keeping it concise for now as per length */}
+                            
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1940s</h4>
+                                <p>Myte Bearden, Marzelle Crouch, Odie Crouch, Pauline Dollar, Annie Franklin, Marilyn Hollinsworth, Ruthie Humphrey, Dorothy May Johnson, Ebbie Johnson, Elsie Johnson, Listerine Johnson, Norene Johnson, Louise King, Annie Franklin Lindsey, Claiborne Lindsey, Ever Lindsey, Filda Lindsey, J. F. Lindsey, Pearl Lindsey, Roy Lindsey, Ernestine Long, Willie Long, Christine Martin, Perry Merritt, Vernice Merrit, Charleen Nealy, Earlene Nealy, Erma Fay Nealy, Beatrice O'Neal, Emma Lee Peterson, Love Ratcliff, Della Mac Strange, Gene Teutsch, Roy Teutsch, W. J. Teutsch, Blanch Wise, Inez Wise, and Patsy Wise.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1950s</h4>
+                                <p>B. B. Adkins, Mrs. B. B. Adkins, Davis Adkins, Johnny Ray Adkins, C. J. Barmore, Mrs. C.J. Barmore, Randy Barmore, Sherry Branton, Shirley Branton, Mr. & Mrs. L. B. Canterberry, Jewel Cox, Mr. & Mrs. A. T. Crawford, Betty Joe Franklin, Dianne Gordon, Rev. and Mrs. Roy Gordon, Tommy Gordon, Tulla Ann Lindsey, W. D. Lindsey, Frank Little, Roy McCuin, Patsy Peterson, Betty Rattliff, Huey Ratcliff, Trebie Reeves, Harem Robinson, Charles Slack, Roger Slack, Tommy Slack, Sam Smith, Flora Strange, Nobie Strange, Arthur Earl Teutsch, Felton Teutsch, Gladys Teutsch, Mittie Teutsch, Mr. Veatch, Johnny Veatch, Sue Veatch, and Mrs. T. F. Veatch.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1960s</h4>
+                                <p>Lillian Branton, Donald Campbell, Randal Campbell, Albert Cox, William T. Davis, Rev. Robert C. Hughes, Rev. & Mrs. W. L. Kelly, Rev. Henry McLaren, Sue Merritt, Tommy Merritt, Larry Miller Jr., Bro. Lestie Mills, Tullie Moore, Sally Murphy, Della Nealy, Dianne Ratcliff, Becky Slack, Lona Strickland, Sandra J. Teutsch, Nellie Wiley, J. V. Wiley, and Carolyn Wise.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1970s</h4>
+                                <p>Rev. E. N. Burns, Mr. & Mrs. T. V. Colvin, Mr. & Mrs. Robert J. Hughes, Jon Ellis Miller, Terry Joe Miller, Huey Ratcliff Jr., Bro. Ronnie Whitlock, and Retha G. Whitlock.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1980s</h4>
+                                <p>Rev. Albert Babbin, Mrs. Donna Babbin, Tanya Babin, Tara Babin, Don Campbell, Virginia Campbell, Tammy Blackmon Davis, Charlotte Driver, Mr. & Mrs. W. L. Gryder, Nina Hardaway, Laura Morgan, Mrs. W. J. Taylor, BarbaraH. Tyson, and Don E. Tyson.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">1990s</h4>
+                                <p>Cartie Campbell, Katie Campbell, Eunice T. Ratcliff Fields, R. L. Fields, Frankie Strickland Foster, Minnie Nealy Gryder, James H. Kelly, Peggy Lyn Kelly, Dalton Nealy, Lucille Neal, Gladys Parker, Marie Teutsch Simmons, Mrs. Hoyt Slack, Cecile Teutsch, Janet Kay Sanders Teutsch, Melvin Teutsch, Rudolph Teutsch, R. D. Teutsch, and Mike Sanders.</p>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-stone-900 mb-2">Undated Records</h4>
+                                <p>Daut Branton, Arthur Branton, Green Coleman, Clemmie Coursey, J.B. Cox, Blanchie Davis, R. H. Davis, A. C. Dick, Mrs. Garrett, Lillian Hardaway, Velma G. Hough, Brad Howell, Orie B. Howell, Velma Johnson, Gid Jones, Lillie Martin, Mattie Martin, Minervie Martin, Pearl Martin, Minnie Martin, T. J. Martin, Trebie Martin, Armer Mashaw, Velma Knott Moore, Edgar Morris, Jean Murphy, J. B. Murrel, Hettie B. Nealy, H. J. Nealy, Lon M. Nealy, W. A. Phillips, S. W. Rogers, Gladys Shaddin, Willie Shaddin, Dave Sinclair, Dochie Lee Slack, John Slack, Lillie Estelle Slack, Lula Slack, Minnie Dollar Slack, W. Nelson Slack, Clara Smith, Lee Strange, Elizer Teutsch, Lucy Teutsch, Martha Teutsch, Ollie Teutsch, Ella Warren, J. D. Wise, Mary Wise, Ora Wise, Rosie Ella Wise, and W. E. Wise.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
