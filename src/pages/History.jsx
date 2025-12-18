@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ArrowLeft, Search, X, History as HistoryIcon, ChevronRight, ChevronLeft, Calendar, User, Users, Info } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -254,39 +255,26 @@ const TextWithFootnotes = ({ text, highlight }) => {
                     const noteId = parseInt(noteMatch[1]);
                     const noteContent = footnotes[noteId];
                     return (
-                        <Popover key={index}>
-                            <PopoverTrigger asChild>
+                        <Dialog key={index}>
+                            <DialogTrigger asChild>
                                 <button 
                                     onClick={(e) => e.stopPropagation()}
                                     className="inline-flex items-center justify-center mx-1 h-5 w-5 rounded-full bg-teal-100 text-teal-700 text-[10px] font-bold hover:bg-teal-200 transition-colors align-top mt-1 cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
                                     {noteId}
                                 </button>
-                            </PopoverTrigger>
-                            <PopoverContent 
-                                side="top" 
-                                align="center" 
-                                sideOffset={5}
-                                collisionPadding={10}
-                                onOpenAutoFocus={(e) => e.preventDefault()}
-                                className="w-80 bg-white border border-stone-200 shadow-xl p-3 z-50 rounded-lg"
-                            >
-                                <div className="relative pt-1">
-                                    <div className="pr-6 text-sm text-stone-600 leading-snug">
-                                        <span className="font-bold text-teal-700 mr-1">Note {noteId}:</span>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md bg-white">
+                                <div className="flex flex-col gap-4">
+                                    <DialogTitle className="text-lg font-serif font-bold text-teal-800 border-b border-teal-100 pb-2">
+                                        Footnote {noteId}
+                                    </DialogTitle>
+                                    <p className="text-stone-600 leading-relaxed text-sm">
                                         {noteContent}
-                                    </div>
-                                    <PopoverTrigger asChild>
-                                        <button 
-                                            className="absolute -top-2 -right-2 p-1 text-stone-400 hover:text-red-500 hover:bg-stone-50 rounded-full transition-colors"
-                                            aria-label="Close note"
-                                        >
-                                            <X className="w-3.5 h-3.5" />
-                                        </button>
-                                    </PopoverTrigger>
+                                    </p>
                                 </div>
-                            </PopoverContent>
-                        </Popover>
+                            </DialogContent>
+                        </Dialog>
                     );
                 }
                 return <HighlightedText key={index} text={part} highlight={highlight} />;
