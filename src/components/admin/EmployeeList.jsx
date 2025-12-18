@@ -28,15 +28,33 @@ export default function EmployeeList({ view = 'active' }) {
     }, [searchTerm]);
 
     const { data: employees, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['employees', debouncedTerm],
+        queryKey: ['employees', debouncedTerm, view],
         queryFn: async () => {
-            if (!debouncedTerm) {
-                return base44.entities.Employee.list('-created_date', 1000);
-            } else {
-                const { data } = await base44.functions.invoke('searchEmployees', { searchTerm: debouncedTerm });
-                if (data.error) throw new Error(data.error);
-                return data.employees || [];
+            const filters = {};
+            if (view === 'active') {
+                filters['status'] = 'active';
+            } else if (view === 'archived') {
+                filters['status'] = 'inactive';
             }
+
+            if (debouncedTerm) {
+                const searchFilter = [
+                    { first_name: { $regex: debouncedTerm, $options: 'i' } },
+                    { last_name: { $regex: debouncedTerm, $options: 'i' } },
+                    { email: { $regex: debouncedTerm, $options: 'i' } }
+                ];
+                
+                if (filters['status']) {
+                    filters['$and'] = [
+                        { status: filters['status'] },
+                        { $or: searchFilter }
+                    ];
+                    delete filters['status'];
+                } else {
+                    filters['$or'] = searchFilter;
+                }
+            }
+            return await base44.entities.Employee.list(filters);
         },
         initialData: [],
     });
