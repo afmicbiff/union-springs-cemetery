@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
-import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud } from 'lucide-react';
+import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { isFuzzyMatch } from './utils';
 
@@ -166,6 +166,42 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
                                     {item.weather.temp && <span className="text-xs text-stone-500 font-mono">{item.weather.temp}</span>}
                                 </div>
                                 <p className="text-xs text-stone-600 mt-1 italic">{item.weather.description}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Media Gallery */}
+                    {isSelected && item.media && item.media.length > 0 && (
+                        <div className="mb-6 space-y-3">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
+                                <ImageIcon className="w-3 h-3" /> Historical Media
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {item.media.map((media, idx) => (
+                                    <div key={idx} className="group relative rounded-lg overflow-hidden border border-stone-200 bg-stone-100 shadow-sm transition-shadow hover:shadow-md">
+                                        <div className="aspect-video w-full overflow-hidden bg-stone-200">
+                                            <img 
+                                                src={media.url} 
+                                                alt={media.caption} 
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <div className="p-3">
+                                            <p className="text-xs text-stone-700 font-medium leading-snug mb-1">
+                                                {media.caption}
+                                            </p>
+                                            {media.source && (
+                                                <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-200/50">
+                                                    <span className="text-[10px] text-stone-400 uppercase tracking-wide">Source</span>
+                                                    <span className="text-[10px] text-teal-600 font-medium truncate max-w-[120px]" title={media.source}>
+                                                        {media.source}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

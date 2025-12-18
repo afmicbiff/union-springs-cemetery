@@ -11,7 +11,15 @@ export const historyTimelineData = [
             radius: 800,
             color: "#A0522D",
             label: "Early Settlement Area"
-        }
+        },
+        media: [
+            {
+                type: "image",
+                url: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Louisiana_steamboat_by_Henry_Summer_Watson.jpg",
+                caption: "Illustration of a 19th-century steamboat on a Louisiana bayou, similar to those that would have navigated Dorcheat.",
+                source: "Wikimedia Commons"
+            }
+        ]
     },
     {
         id: "storm",
@@ -36,7 +44,15 @@ export const historyTimelineData = [
             ],
             color: "#DC2626",
             label: "Storm Path"
-        }
+        },
+        media: [
+            {
+                type: "image",
+                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/1896_Tornado_Damage.jpg/640px-1896_Tornado_Damage.jpg",
+                caption: "Historical example of tornado damage from the 19th century (Illustrative).",
+                source: "Library of Congress / Wikimedia Commons"
+            }
+        ]
     },
     {
         id: "survey",
