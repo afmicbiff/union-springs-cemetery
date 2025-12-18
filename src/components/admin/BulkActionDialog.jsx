@@ -13,8 +13,8 @@ import { base44 } from "@/api/base44Client";
 import { Sparkles } from 'lucide-react';
 import AIEmailAssistant from './AIEmailAssistant';
 
-export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm }) {
-    const [actionType, setActionType] = useState("send_email");
+export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm, type = 'member' }) {
+    const [actionType, setActionType] = useState(type === 'employee' ? "change_role" : "send_email");
     const [config, setConfig] = useState({});
 
     // Fetch employees for task assignment
@@ -40,14 +40,30 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                     <div className="space-y-2">
                         <Label>Select Action</Label>
                         <RadioGroup value={actionType} onValueChange={setActionType} className="flex flex-col gap-2">
-                            <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
-                                <RadioGroupItem value="send_email" id="email" />
-                                <Label htmlFor="email" className="cursor-pointer font-normal flex-1">Send Targeted Email</Label>
-                            </div>
-                            <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
-                                <RadioGroupItem value="create_task" id="task" />
-                                <Label htmlFor="task" className="cursor-pointer font-normal flex-1">Assign Follow-up Task</Label>
-                            </div>
+                            {type === 'member' && (
+                                <>
+                                    <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                        <RadioGroupItem value="send_email" id="email" />
+                                        <Label htmlFor="email" className="cursor-pointer font-normal flex-1">Send Targeted Email</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                        <RadioGroupItem value="create_task" id="task" />
+                                        <Label htmlFor="task" className="cursor-pointer font-normal flex-1">Assign Follow-up Task</Label>
+                                    </div>
+                                </>
+                            )}
+                            {type === 'employee' && (
+                                <>
+                                    <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                        <RadioGroupItem value="change_role" id="role" />
+                                        <Label htmlFor="role" className="cursor-pointer font-normal flex-1">Change Role / Employment Type</Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2 border p-3 rounded-md hover:bg-stone-50 cursor-pointer">
+                                        <RadioGroupItem value="deactivate" id="deactivate" />
+                                        <Label htmlFor="deactivate" className="cursor-pointer font-normal flex-1">Deactivate Employees</Label>
+                                    </div>
+                                </>
+                            )}
                         </RadioGroup>
                     </div>
 
@@ -161,6 +177,33 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                             </div>
                         </div>
                     )}
+
+                    {actionType === 'change_role' && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <Label>New Employment Type</Label>
+                            <Select 
+                                value={config.employment_type} 
+                                onValueChange={v => setConfig({...config, employment_type: v})}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Administrator">Administrator</SelectItem>
+                                    <SelectItem value="Paid Employee">Paid Employee</SelectItem>
+                                    <SelectItem value="Volunteer">Volunteer</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
+                    {actionType === 'deactivate' && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <p className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                                Warning: This will mark {selectedCount} employees as inactive. They may lose access to the system.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>
@@ -170,7 +213,8 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                         onClick={handleConfirm}
                         disabled={
                             (actionType === 'send_email' && (!config.subject || !config.body)) ||
-                            (actionType === 'create_task' && (!config.title))
+                            (actionType === 'create_task' && (!config.title)) ||
+                            (actionType === 'change_role' && !config.employment_type)
                         }
                     >
                         Execute Action
