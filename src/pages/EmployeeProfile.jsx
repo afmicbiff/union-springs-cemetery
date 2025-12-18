@@ -185,9 +185,15 @@ export default function EmployeeProfile() {
                                 <Badge variant="secondary" className="bg-teal-100 text-teal-800 hover:bg-teal-200">
                                     {employee.employment_type}
                                 </Badge>
-                                <Badge className="bg-teal-700 text-white hover:bg-teal-800 border-none">
-                                    Active
-                                </Badge>
+                                {employee.status === 'inactive' ? (
+                                    <Badge variant="outline" className="bg-stone-100 text-stone-500 border-stone-200">
+                                        Inactive
+                                    </Badge>
+                                ) : (
+                                    <Badge className="bg-teal-700 text-white hover:bg-teal-800 border-none">
+                                        Active
+                                    </Badge>
+                                )}
                             </div>
 
                             <div className="w-full border-t pt-4 text-left space-y-3">
