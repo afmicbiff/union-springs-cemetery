@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Search, MapPin } from 'lucide-react';
 
 export default function HeroSection() {
+  const [activeImage, setActiveImage] = useState(null);
+
+  const handleImageClick = (index) => {
+    setActiveImage(activeImage === index ? null : index);
+  };
+
   return (
     <section className="relative min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-4 overflow-hidden py-12 md:py-0">
       {/* Background Image with optimized loading and overlay */}
@@ -18,7 +24,14 @@ export default function HeroSection() {
         {/* Left Side Image */}
         <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[350px] md:h-[450px] flex items-center justify-center">
            {/* First Image - Tilted Left */}
-           <div className="absolute transform -rotate-6 -translate-x-8 hover:rotate-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer z-10">
+           <div 
+             onClick={() => handleImageClick(1)}
+             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
+               activeImage === 1 
+                 ? 'rotate-0 scale-110 z-50' 
+                 : '-rotate-6 -translate-x-8 z-10 hover:scale-105 hover:z-50'
+             }`}
+           >
              <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
@@ -29,7 +42,14 @@ export default function HeroSection() {
            </div>
            
            {/* Second Image - Tilted Right */}
-           <div className="absolute transform rotate-6 translate-x-8 translate-y-4 hover:rotate-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer z-20">
+           <div 
+             onClick={() => handleImageClick(2)}
+             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
+               activeImage === 2 
+                 ? 'rotate-0 scale-110 z-50' 
+                 : 'rotate-6 translate-x-8 translate-y-4 z-20 hover:scale-105 hover:z-50'
+             }`}
+           >
              <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png" 
@@ -40,7 +60,14 @@ export default function HeroSection() {
            </div>
 
            {/* Third Image - Top Position */}
-           <div className="absolute transform -rotate-12 -translate-y-24 -translate-x-6 z-0 hover:rotate-0 hover:translate-y-0 hover:translate-x-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer">
+           <div 
+             onClick={() => handleImageClick(3)}
+             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
+               activeImage === 3 
+                 ? 'rotate-0 translate-y-0 translate-x-0 scale-110 z-50' 
+                 : '-rotate-12 -translate-y-24 -translate-x-6 z-0 hover:scale-105 hover:z-50'
+             }`}
+           >
              <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png" 
@@ -51,7 +78,14 @@ export default function HeroSection() {
            </div>
 
            {/* Fourth Image - Bottom Right Overlay */}
-           <div className="absolute transform rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:rotate-0 hover:translate-x-0 hover:translate-y-0 hover:scale-110 hover:z-50 transition-all duration-500 ease-in-out cursor-pointer hidden md:block">
+           <div 
+             onClick={() => handleImageClick(4)}
+             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer hidden md:block ${
+               activeImage === 4 
+                 ? 'rotate-0 translate-x-0 translate-y-0 scale-110 z-50' 
+                 : 'rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:scale-105 hover:z-50'
+             }`}
+           >
              <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
