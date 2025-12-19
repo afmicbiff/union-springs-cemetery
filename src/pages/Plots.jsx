@@ -16,16 +16,16 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 11,C-1,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Section 1
 12,C-1,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Section 1
 13,C-1,Available,,,,,,,,Section 1
-14,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-15,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-18,D-1,Occupied,Roach,Magee,,,,,,,Section 1
-19,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-20,D-1,Occupied,Mills,Ronald Edward,,,,,,,Section 1
-21,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-22,D-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Section 1
-23,D-1,Occupied,Rives,Treable,,,,,,,Section 1
+14,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
+15,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
+16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
+17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
+18,D-1,Occupied,Roach,Magee,,,,,,,Row D
+19,D-1,Occupied,Dollar,Pauline,,,,,,,Row D
+20,D-1,Occupied,Mills,Ronald Edward,,,,,,,Row D
+21,D-1,Occupied,Dollar,Pauline,,,,,,,Row D
+22,D-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Row D
+23,D-1,Occupied,Rives,Treable,,,,,,,Row D
 `;
 
 // --- CONFIGURATION ---
@@ -42,8 +42,8 @@ const STATUS_COLORS = {
 
 // Distinct colors for different Sections
 const SECTION_PALETTES = [
-  'bg-red-100 border-red-300 text-red-900',         // Section 1
-  'bg-indigo-100 border-indigo-300 text-indigo-900', // Section 2
+  'bg-blue-100 border-blue-300 text-blue-900',         // Section 1 / Row D
+  'bg-blue-100 border-blue-300 text-blue-900',         // Section 2
   'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
   'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
   'bg-cyan-100 border-cyan-300 text-cyan-900',      // Section 5
@@ -376,6 +376,7 @@ export default function PlotsPage() {
                         return (
                             <div key={sectionKey} className="relative">
                                 {/* Section Label */}
+                                {sectionKey !== 'Row D' && (
                                 <div className="flex items-end mb-3 ml-1">
                                     <h2 className={`text-2xl font-bold ${textColor.replace('text', 'text-opacity-80 text')}`}>
                                         Section {sectionKey}
@@ -385,6 +386,7 @@ export default function PlotsPage() {
                                         {sections[sectionKey].length} Plots
                                     </span>
                                 </div>
+                                )}
                                 
                                 {/* SECTION CONTAINER: flex-wrap-reverse starts items from bottom-left */}
                                 <div className={`
