@@ -15,17 +15,17 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 10,C-1,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Section 1
 11,C-1,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Section 1
 12,C-1,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Section 1
-13,D-1,Available,,,,,,,,Section 1
-14,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-15,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
-18,D-1,Occupied,Roach,Magee,,,,,,,Section 1
-19,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-20,D-1,Occupied,Mills,Ronald Edward,,,,,,,Section 1
-21,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-22,D-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Section 1
-23,D-1,Occupied,Rives,Treable,,,,,,,Section 1
+13,Section 1,Available,,,,,,,,Section 1
+14,Section 1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+15,Section 1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+16,Section 1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+17,Section 1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+18,Section 1,Occupied,Roach,Magee,,,,,,,Section 1
+19,Section 1,Occupied,Dollar,Pauline,,,,,,,Section 1
+20,Section 1,Occupied,Mills,Ronald Edward,,,,,,,Section 1
+21,Section 1,Occupied,Dollar,Pauline,,,,,,,Section 1
+22,Section 1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Section 1
+23,Section 1,Occupied,Rives,Treable,,,,,,,Section 1
 `;
 
 // --- CONFIGURATION ---
