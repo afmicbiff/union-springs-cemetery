@@ -721,11 +721,23 @@ export default function PlotsPage() {
             </div>
 
             {isAdmin && (
-            <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
-                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
-                <span className="font-medium text-sm">Import CSV</span>
-                <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
-            </label>
+            <>
+                <Button 
+                    variant="outline" 
+                    onClick={handleSeedData} 
+                    disabled={createPlotsMutation.isPending}
+                    className="mr-2 hidden md:flex"
+                    title="Update database with built-in sample data"
+                >
+                    {createPlotsMutation.isPending && !document.querySelector('input[type="file"]:active') ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Database className="mr-2 h-4 w-4" />}
+                    Load Sample Data
+                </Button>
+                <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
+                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
+                    <span className="font-medium text-sm">Import CSV</span>
+                    <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
+                </label>
+            </>
             )}
           </div>
         </div>
