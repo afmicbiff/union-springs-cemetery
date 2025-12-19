@@ -81,7 +81,15 @@ export const historyTimelineData = [
         year: "1850",
         title: "First School",
         text: `By 1850, the area had become a part of Claiborne Parish; and a private school was built at Union Springs. The log structure consisted of one room, which was heated by a large mud fireplace as the school term lasted two or three months during the winter. The students paid their tuitions with chickens, eggs, butter, potatoes, and other farm products. Each family was responsible for its children's transportation. NOTE [2]`,
-        location: { lat: 32.9370, lng: -93.2925, label: "Original Log Schoolhouse" }
+        location: { lat: 32.9370, lng: -93.2925, label: "Original Log Schoolhouse" },
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/5dc582f27_IMG_6928.jpg",
+                caption: "Union Springs School, Shongaloo, Louisiana - ca. 1895",
+                source: "Courtesy of Tommie O'Bier"
+            }
+        ]
     },
     {
         id: "early_period",
