@@ -51,7 +51,8 @@ const PlotTableRow = ({
     handleInlineSave, 
     handleInlineCancel, 
     handleInlineEditStart, 
-    handleEditClick 
+    handleEditClick,
+    isAdmin
 }) => {
     const isEditing = editingId === row._id;
     return (
@@ -109,6 +110,7 @@ const PlotTableRow = ({
                         </Button>
                     </div>
                 ) : (
+                    isAdmin && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -124,6 +126,7 @@ const PlotTableRow = ({
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    )
                 )}
             </td>
         </tr>
@@ -321,6 +324,13 @@ export default function PlotsPage() {
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
 
   // DATA FETCHING
+  const { data: user } = useQuery({
+      queryKey: ['currentUser'],
+      queryFn: () => base44.auth.me().catch(() => null),
+  });
+  
+  const isAdmin = user?.role === 'admin';
+
   const { data: plotEntities, isLoading } = useQuery({
       queryKey: ['plots'],
       queryFn: () => base44.entities.Plot.list(null, 2000), // Fetch up to 2000 plots
@@ -682,11 +692,13 @@ export default function PlotsPage() {
                 </button>
             </div>
 
+            {isAdmin && (
             <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
                 {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                 <span className="font-medium text-sm">Import CSV</span>
                 <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
             </label>
+            )}
           </div>
         </div>
       </header>
@@ -769,7 +781,7 @@ export default function PlotsPage() {
                                                     data={plot} 
                                                     baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                                     onHover={handleHover}
-                                                    onEdit={handleEditClick}
+                                                    onEdit={isAdmin ? handleEditClick : undefined}
                                                 />
                                             ))}
                                         </div>
@@ -784,10 +796,12 @@ export default function PlotsPage() {
                             <Database size={48} className="mb-4 opacity-50" />
                             <p className="text-lg font-medium">No plots found in database</p>
                             <p className="text-sm mb-4">Import a CSV or initialize with sample data</p>
+                            {isAdmin && (
                             <Button variant="outline" onClick={handleSeedData} disabled={createPlotsMutation.isPending}>
                                 {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : null}
                                 Load Sample Data
                             </Button>
+                            )}
                         </div>
                     )}
                     {isLoading && (
@@ -863,6 +877,7 @@ export default function PlotsPage() {
                                       handleInlineCancel={handleInlineCancel}
                                       handleInlineEditStart={handleInlineEditStart}
                                       handleEditClick={handleEditClick}
+                                      isAdmin={isAdmin}
                                   />
                               ))
                           ) : (
@@ -886,6 +901,7 @@ export default function PlotsPage() {
                                               handleInlineCancel={handleInlineCancel}
                                               handleInlineEditStart={handleInlineEditStart}
                                               handleEditClick={handleEditClick}
+                                              isAdmin={isAdmin}
                                           />
                                       ))}
                                   </React.Fragment>
