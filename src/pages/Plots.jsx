@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2 } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -220,7 +220,7 @@ const Tooltip = ({ data, position, visible }) => {
 };
 
 // Individual Burial Plot Component
-const GravePlot = ({ data, baseColorClass, onHover }) => {
+const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Handle specific "Veteran" checks in notes if strictly labeled "Occupied"
@@ -242,6 +242,10 @@ const GravePlot = ({ data, baseColorClass, onHover }) => {
 
   return (
     <div
+      onClick={(e) => {
+        e.stopPropagation();
+        onEdit && onEdit(data);
+      }}
       onMouseEnter={(e) => {
         setIsHovered(true);
         onHover(e, data);
@@ -293,6 +297,7 @@ export default function PlotsPage() {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
+  const [collapsedSections, setCollapsedSections] = useState({});
   
   // Filtering State
   const [filters, setFilters] = useState({
@@ -634,6 +639,13 @@ export default function PlotsPage() {
       updatePlotMutation.mutate({ id: updatedPlot._id, data: entityData });
   };
 
+  const toggleSection = (sectionKey) => {
+    setCollapsedSections(prev => ({
+        ...prev,
+        [sectionKey]: !prev[sectionKey]
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       
@@ -723,37 +735,46 @@ export default function PlotsPage() {
                         const palette = SECTION_PALETTES[index % SECTION_PALETTES.length];
                         const [bgColor, borderColor, textColor] = palette.split(' ');
                         
+                        const isCollapsed = collapsedSections[sectionKey];
+                        
                         return (
                             <div key={sectionKey} className="relative">
                                 {/* Section Label */}
-                                {sectionKey !== 'Row D' && (
-                                <div className="flex items-end mb-3 ml-1">
+                                <div 
+                                    className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
+                                    onClick={() => toggleSection(sectionKey)}
+                                >
+                                    <div className={`mr-2 mb-1 p-1 rounded-full transition-colors ${isCollapsed ? 'bg-gray-200 text-gray-600' : `bg-white text-${textColor.split('-')[1]}-600 shadow-sm`}`}>
+                                        {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                                    </div>
                                     <h2 className={`text-2xl font-bold ${textColor.replace('text', 'text-opacity-80 text')}`}>
-                                        Section {sectionKey}
+                                        {sectionKey === 'Unassigned' ? 'Unassigned Plots' : `Section ${sectionKey.replace('Section', '').trim()}`}
                                     </h2>
-                                    <div className="ml-4 h-px flex-grow bg-gray-200 mb-2"></div>
-                                    <span className="mb-1 text-xs font-mono text-gray-400">
+                                    <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
+                                    <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
                                         {sections[sectionKey].length} Plots
                                     </span>
                                 </div>
-                                )}
                                 
                                 {/* SECTION CONTAINER: flex-wrap-reverse starts items from bottom-left */}
-                                <div className={`
-                                    rounded-xl border-2 border-dashed p-6 transition-colors duration-500
-                                    ${borderColor} ${bgColor} bg-opacity-30
-                                `}>
-                                    <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                        {sections[sectionKey].map((plot) => (
-                                            <GravePlot 
-                                                key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                data={plot} 
-                                                baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                onHover={handleHover}
-                                            />
-                                        ))}
+                                {!isCollapsed && (
+                                    <div className={`
+                                        rounded-xl border-2 border-dashed p-6 transition-colors duration-500
+                                        ${borderColor} ${bgColor} bg-opacity-30
+                                    `}>
+                                        <div className="flex flex-col-reverse gap-2 content-center items-center">
+                                            {sections[sectionKey].map((plot) => (
+                                                <GravePlot 
+                                                    key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                    data={plot} 
+                                                    baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                    onHover={handleHover}
+                                                    onEdit={handleEditClick}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         );
                     })}
