@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
+import PlotFilters from "@/components/plots/PlotFilters";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -201,11 +202,106 @@ export default function PlotsPage() {
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
   
+  // Filtering State
+  const [filters, setFilters] = useState({
+      search: '',
+      status: 'All',
+      birthYearStart: '',
+      birthYearEnd: '',
+      deathYearStart: '',
+      deathYearEnd: ''
+  });
+
   // Editing State
   const [editingId, setEditingId] = useState(null);
   const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
+
+  // Filtered Data Computation
+  const filteredData = useMemo(() => {
+      return parsedData.filter(item => {
+          // 1. Search Filter
+          if (filters.search) {
+              const term = filters.search.toLowerCase();
+              const searchable = [
+                  item.Grave, 
+                  item.Row, 
+                  item['First Name'], 
+                  item['Last Name'], 
+                  item.Notes,
+                  item.Section
+              ].join(' ').toLowerCase();
+              if (!searchable.includes(term)) return false;
+          }
+
+          // 2. Status Filter
+          if (filters.status !== 'All' && item.Status !== filters.status) {
+              // Special case for Veteran which might be in notes or derived
+              const isVeteran = item.Status === 'Veteran' || (item.Notes && item.Notes.toLowerCase().includes('vet') && item.Status === 'Occupied');
+              if (filters.status === 'Veteran' && !isVeteran) return false;
+              if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
+          }
+
+          // 3. Date Filters
+          const getYear = (dateStr) => {
+              if (!dateStr) return null;
+              const date = new Date(dateStr);
+              return isNaN(date.getFullYear()) ? null : date.getFullYear();
+          };
+
+          if (filters.birthYearStart || filters.birthYearEnd) {
+              const birthYear = getYear(item.Birth);
+              if (!birthYear) return false;
+              if (filters.birthYearStart && birthYear < parseInt(filters.birthYearStart)) return false;
+              if (filters.birthYearEnd && birthYear > parseInt(filters.birthYearEnd)) return false;
+          }
+
+          if (filters.deathYearStart || filters.deathYearEnd) {
+              const deathYear = getYear(item.Death);
+              if (!deathYear) return false;
+              if (filters.deathYearStart && deathYear < parseInt(filters.deathYearStart)) return false;
+              if (filters.deathYearEnd && deathYear > parseInt(filters.deathYearEnd)) return false;
+          }
+
+          return true;
+      });
+  }, [parsedData, filters]);
+
+  // Update Sections based on Filtered Data
+  useEffect(() => {
+      processSections(filteredData);
+  }, [filteredData]);
+
+  const processSections = (data) => {
+    const grouped = {};
+    
+    data.forEach(item => {
+        let sectionKey = item.Section || '';
+        
+        if (!sectionKey) {
+            const rowID = item.Row || '';
+            const rowMatch = rowID.match(/^[A-Za-z]+/);
+            sectionKey = rowMatch ? `Row ${rowMatch[0]}` : 'Unassigned';
+        } else {
+            sectionKey = sectionKey.replace(/Section\s*/i, '').trim();
+        }
+        
+        if (!grouped[sectionKey]) grouped[sectionKey] = [];
+        grouped[sectionKey].push(item);
+    });
+
+    // Sort items within sections by Grave number
+    Object.keys(grouped).forEach(key => {
+        grouped[key].sort((a, b) => {
+            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+    });
+
+    setSections(grouped);
+  };
 
   // Load mock data on mount
   useEffect(() => {
@@ -253,33 +349,7 @@ export default function PlotsPage() {
 
   const processData = (data) => {
     setParsedData(data);
-    const grouped = {};
-    
-    data.forEach(item => {
-        let sectionKey = item.Section || '';
-        
-        if (!sectionKey) {
-            const rowID = item.Row || '';
-            const rowMatch = rowID.match(/^[A-Za-z]+/);
-            sectionKey = rowMatch ? `Row ${rowMatch[0]}` : 'Unassigned';
-        } else {
-            sectionKey = sectionKey.replace(/Section\s*/i, '').trim();
-        }
-        
-        if (!grouped[sectionKey]) grouped[sectionKey] = [];
-        grouped[sectionKey].push(item);
-    });
-
-    // Sort items within sections by Grave number
-    Object.keys(grouped).forEach(key => {
-        grouped[key].sort((a, b) => {
-            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-            return numA - numB;
-        });
-    });
-
-    setSections(grouped);
+    // processSections is now handled by useEffect on filteredData
   };
 
   const handleFileUpload = (e) => {
@@ -336,7 +406,7 @@ export default function PlotsPage() {
   const handleUpdatePlot = (updatedPlot) => {
     const newData = parsedData.map(p => p._id === updatedPlot._id ? updatedPlot : p);
     setParsedData(newData);
-    processData(newData);
+    // processData is just setting state now, effect will handle grouping
   };
 
   return (
@@ -390,6 +460,13 @@ export default function PlotsPage() {
             <p>{errorMessage}</p>
         </div>
       )}
+
+      {/* Filter Bar */}
+      <PlotFilters 
+          filters={filters} 
+          onFilterChange={setFilters} 
+          statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
+      />
 
       {/* Main Area */}
       {activeTab === 'map' ? (
@@ -479,7 +556,7 @@ export default function PlotsPage() {
                           </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                          {parsedData.map((row) => {
+                          {filteredData.map((row) => {
                               const isEditing = editingId === row._id;
                               return (
                                   <tr key={row._id} className="hover:bg-gray-50">
