@@ -170,6 +170,26 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
 
                 {/* Card Body */}
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                    {/* Thumbnail Image - 2x2 inch approx */}
+                    {item.media && item.media.length > 0 && (
+                        <div className="float-right ml-4 mb-2 relative z-10">
+                            <div 
+                                className="w-[50mm] h-[50mm] bg-stone-200 rounded-md overflow-hidden border-2 border-stone-300 shadow-sm cursor-pointer hover:border-teal-500 hover:shadow-md transition-all relative group/img"
+                                onClick={(e) => handleImageClick(e, item.media[0])}
+                                title="Click to enlarge"
+                            >
+                                <img 
+                                    src={item.media[0].url} 
+                                    alt={item.media[0].caption || "Historical image"} 
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover/img:opacity-100">
+                                    <Maximize2 className="w-6 h-6 text-white drop-shadow-md" />
+                                </div>
+                            </div>
+                            <div className="text-[10px] text-stone-400 text-center mt-1 font-mono">Click to expand</div>
+                        </div>
+                    )}
                     {isSelected && item.weather && (
                         <div className="mb-4 p-3 bg-stone-50 rounded-lg border border-stone-100 flex items-start gap-3">
                             <div className="p-2 bg-white rounded-full shadow-sm">
