@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, Calendar, AlertCircle } from 'lucide-react';
+import { Search, Filter, Calendar } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,7 +16,6 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
         onFilterChange({
             search: '',
             status: 'All',
-            needsReview: false,
             birthYearStart: '',
             birthYearEnd: '',
             deathYearStart: '',
@@ -55,19 +54,6 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
                             ))}
                         </SelectContent>
                     </Select>
-                </div>
-
-                {/* Needs Review Filter */}
-                <div className="flex items-center space-x-2">
-                      <Button 
-                          variant={filters.needsReview ? "destructive" : "outline"}
-                          size="sm"
-                          onClick={() => handleChange('needsReview', !filters.needsReview)}
-                          className={filters.needsReview ? "bg-red-100 text-red-700 border-red-200 hover:bg-red-200" : "text-gray-600 border-dashed"}
-                      >
-                          <AlertCircle className={`w-4 h-4 mr-2 ${filters.needsReview ? "fill-current" : ""}`} />
-                          Needs Review
-                      </Button>
                 </div>
 
                 {/* Date Filters Popover */}

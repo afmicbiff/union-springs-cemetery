@@ -275,14 +275,8 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
         {data.Row}
       </span>
 
-      {/* 3. Status Circle (or Warning Icon) */}
-      {data.needs_review ? (
-          <div className="text-red-500 animate-pulse">
-            <AlertCircle size={10} fill="currentColor" className="bg-white rounded-full" />
-          </div>
-      ) : (
-          <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
-      )}
+      {/* 3. Status Circle */}
+      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
     </div>
   );
 };
@@ -313,7 +307,6 @@ export default function PlotsPage() {
   const [filters, setFilters] = useState({
       search: '',
       status: 'All',
-      needsReview: false,
       birthYearStart: '',
       birthYearEnd: '',
       deathYearStart: '',
@@ -430,12 +423,7 @@ export default function PlotsPage() {
               if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
           }
 
-          // 3. Needs Review Filter
-          if (filters.needsReview && !item.needs_review) {
-              return false;
-          }
-
-          // 4. Date Filters
+          // 3. Date Filters
           const getYear = (dateStr) => {
               if (!dateStr) return null;
               const date = new Date(dateStr);
@@ -721,23 +709,11 @@ export default function PlotsPage() {
             </div>
 
             {isAdmin && (
-            <>
-                <Button 
-                    variant="outline" 
-                    onClick={handleSeedData} 
-                    disabled={createPlotsMutation.isPending}
-                    className="mr-2 hidden md:flex"
-                    title="Update database with built-in sample data"
-                >
-                    {createPlotsMutation.isPending && !document.querySelector('input[type="file"]:active') ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Database className="mr-2 h-4 w-4" />}
-                    Load Sample Data
-                </Button>
-                <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
-                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
-                    <span className="font-medium text-sm">Import CSV</span>
-                    <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
-                </label>
-            </>
+            <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
+                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
+                <span className="font-medium text-sm">Import CSV</span>
+                <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
+            </label>
             )}
           </div>
         </div>

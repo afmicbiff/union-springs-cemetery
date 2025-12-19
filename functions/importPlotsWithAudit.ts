@@ -119,34 +119,6 @@ Deno.serve(async (req) => {
                 }
                 newData.death_date = cleanDeath;
 
-                // --- DATA CONSISTENCY CHECK ---
-                let needsReview = false;
-                const reviewReasons = [];
-
-                // Check 1: Ambiguous Dates (if raw date exists but clean date is null, it's already logged in corrections, but lets flag it)
-                if ((rawBirth && !cleanBirth) || (rawDeath && !cleanDeath)) {
-                    needsReview = true;
-                    reviewReasons.push("Contains invalid date formats");
-                }
-
-                // Check 2: Occupied but missing name
-                if (cleanStatus === 'Occupied' && !newData.first_name && !newData.last_name) {
-                    needsReview = true;
-                    reviewReasons.push("Status is Occupied but no occupant name provided");
-                }
-
-                // Check 3: Keywords in notes
-                if (newData.notes && /check|verify|\?|ambiguous|unsure/i.test(newData.notes)) {
-                    needsReview = true;
-                    reviewReasons.push("Notes contain uncertainty keywords");
-                }
-
-                if (needsReview) {
-                    newData.needs_review = true;
-                    newData.review_notes = reviewReasons.join('; ');
-                }
-                // -----------------------------
-
                 // 3. Match Existing
                 const key = `${section.toLowerCase()}|${rowNum.toLowerCase()}|${String(plotNum).toLowerCase()}`;
                 const existing = plotMap.get(key);
@@ -208,32 +180,6 @@ Deno.serve(async (req) => {
                 console.error("Row Error", err);
                 report.errors.push(`Error processing row ${raw.plot_number || 'unknown'}: ${err.message}`);
             }
-        }
-
-        // Check if any plots need review and send notification
-        try {
-            const flaggedPlots = report.created + report.updated; // Simplified check, ideally filter checks
-            // We can't easily count "needs_review" from report summary without tracking it, but let's send a generic summary if changes happened
-            
-            // Better: Let's count flagged plots during the loop (add to report)
-            // But since I can't modify the loop easily in this patch, let's just alert on ANY errors or corrections
-            if (report.corrections.length > 0 || report.errors.length > 0) {
-                 // Send Notification to Admins
-                 const admins = await base44.entities.User.list(); // Assuming user list is small or we filter manually if SDK doesn't support role filter
-                 // Actually SDK doesn't support filtering User entity by custom attributes easily in all versions, 
-                 // but 'role' is built-in.
-                 // NOTE: User entity has special security, but admin running this function (as admin) can list.
-                 
-                 // However, let's just create an in-app notification for now which is safer and supported
-                 await base44.entities.Notification.create({
-                     message: `CSV Import completed with ${report.corrections.length} auto-corrections and ${report.errors.length} errors. Please review the plot data.`,
-                     type: 'alert',
-                     is_read: false,
-                     user_email: null // System-wide for admins
-                 });
-            }
-        } catch (notifyErr) {
-            console.error("Failed to send notification", notifyErr);
         }
 
         return Response.json(report);

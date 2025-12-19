@@ -28,41 +28,6 @@ Deno.serve(async (req) => {
             console.error("Error fetching old plot", e);
         }
 
-        // --- DATA CONSISTENCY CHECK ---
-        const consistencyData = { ...oldPlot, ...data }; // Merge to check full state
-        let needsReview = false;
-        const reviewReasons = [];
-
-        // Check 1: Occupied but missing name
-        if (consistencyData.status === 'Occupied' && !consistencyData.first_name && !consistencyData.last_name) {
-            needsReview = true;
-            reviewReasons.push("Status is Occupied but no occupant name provided");
-        }
-
-        // Check 2: Keywords in notes
-        if (consistencyData.notes && /check|verify|\?|ambiguous|unsure/i.test(consistencyData.notes)) {
-            needsReview = true;
-            reviewReasons.push("Notes contain uncertainty keywords");
-        }
-        
-        // Apply review flag if needed (only if explicitly set or found issues)
-        // If data contains explicit needs_review: false, we trust the admin cleared it.
-        // If data doesn't contain needs_review, we check logic.
-        if (data.needs_review === undefined && needsReview) {
-            data.needs_review = true;
-            data.review_notes = reviewReasons.join('; ');
-            
-            // Send Notification
-            try {
-                await base44.entities.Notification.create({
-                     message: `Plot ${consistencyData.plot_number} flagged for review: ${data.review_notes}`,
-                     type: 'task',
-                     is_read: false
-                 });
-            } catch (e) { console.error("Notify failed", e); }
-        }
-        // -----------------------------
-
         // Update Plot
         const updatedPlot = await base44.entities.Plot.update(id, data);
 
