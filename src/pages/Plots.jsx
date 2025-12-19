@@ -286,7 +286,7 @@ const LegendItem = ({ label, colorClass }) => {
 // --- MAIN APP COMPONENT ---
 
 export default function PlotsPage() {
-  const [parsedData, setParsedData] = useState([]);
+  const queryClient = useQueryClient();
   const [sections, setSections] = useState({});
   const [hoverData, setHoverData] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -305,15 +305,67 @@ export default function PlotsPage() {
   });
 
   // Table View State
-  const [groupBy, setGroupBy] = useState('none'); // 'none', 'Section', 'Row', 'Status'
-  const [sortBy, setSortBy] = useState('Grave'); // 'Grave', 'Last Name', 'First Name', 'Death'
-  const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
+  const [groupBy, setGroupBy] = useState('none');
+  const [sortBy, setSortBy] = useState('Grave');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   // Editing State
   const [editingId, setEditingId] = useState(null);
   const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
+
+  // DATA FETCHING
+  const { data: plotEntities, isLoading } = useQuery({
+      queryKey: ['plots'],
+      queryFn: () => base44.entities.Plot.list(null, 2000), // Fetch up to 2000 plots
+      initialData: []
+  });
+
+  // MUTATIONS
+  const updatePlotMutation = useMutation({
+      mutationFn: async ({ id, data }) => {
+          return await base44.entities.Plot.update(id, data);
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['plots'] });
+          toast.success("Plot updated successfully");
+      },
+      onError: (err) => {
+          toast.error(`Update failed: ${err.message}`);
+      }
+  });
+
+  const createPlotsMutation = useMutation({
+      mutationFn: async (plots) => {
+          return await base44.entities.Plot.bulkCreate(plots);
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['plots'] });
+          toast.success("Imported plots successfully");
+      },
+      onError: (err) => {
+          toast.error(`Import failed: ${err.message}`);
+      }
+  });
+
+  // MAP ENTITIES TO UI FORMAT
+  const parsedData = useMemo(() => {
+      return plotEntities.map(p => ({
+          _id: p.id,
+          Section: p.section,
+          Row: p.row_number,
+          Grave: p.plot_number,
+          Status: p.status,
+          'First Name': p.first_name,
+          'Last Name': p.last_name,
+          'Family Name': p.family_name,
+          Birth: p.birth_date,
+          Death: p.death_date,
+          Notes: p.notes,
+          ...p // keep original fields too
+      }));
+  }, [plotEntities]);
 
   // Filtered Data Computation
   const filteredData = useMemo(() => {
@@ -446,11 +498,11 @@ export default function PlotsPage() {
     setSections(grouped);
   };
 
-  // Load mock data on mount
-  useEffect(() => {
-    const data = parseCSV(INITIAL_CSV);
-    if (data.length > 0) processData(data);
-  }, []);
+  // Load mock data on mount - REPLACED BY REACT QUERY
+  // useEffect(() => {
+  //   const data = parseCSV(INITIAL_CSV);
+  //   if (data.length > 0) processData(data);
+  // }, []);
 
   // CSV Parser
   const parseCSV = (text) => {
@@ -484,15 +536,27 @@ export default function PlotsPage() {
         }
         values.push(current.trim().replace(/^"|"$/g, ''));
         
-        const entry = { _id: `plot-${idx}-${Date.now()}` }; // Generate ID for editing
+        const entry = {};
         headers.forEach((h, index) => { entry[h] = values[index] || ''; });
-        return entry;
-    }).filter(row => row.Grave);
+        
+        // Map CSV keys to Entity keys
+        return {
+            section: entry['Section'],
+            row_number: entry['Row'],
+            plot_number: entry['Grave'],
+            status: entry['Status'],
+            first_name: entry['First Name'],
+            last_name: entry['Last Name'],
+            family_name: entry['Family Name'],
+            birth_date: entry['Birth'],
+            death_date: entry['Death'],
+            notes: entry['Notes']
+        };
+    }).filter(row => row.plot_number);
   };
 
   const processData = (data) => {
-    setParsedData(data);
-    // processSections is now handled by useEffect on filteredData
+    // setParsedData(data); // Removed, handled by Query
   };
 
   const handleFileUpload = (e) => {
@@ -502,10 +566,17 @@ export default function PlotsPage() {
     reader.onload = (evt) => {
         const data = parseCSV(evt.target.result);
         if(data && data.length > 0) {
-            processData(data);
+            createPlotsMutation.mutate(data);
         }
     };
     reader.readAsText(file);
+  };
+
+  const handleSeedData = () => {
+    const data = parseCSV(INITIAL_CSV);
+    if(data && data.length > 0) {
+        createPlotsMutation.mutate(data);
+    }
   };
 
   const handleHover = (e, data) => {
@@ -547,9 +618,20 @@ export default function PlotsPage() {
   };
 
   const handleUpdatePlot = (updatedPlot) => {
-    const newData = parsedData.map(p => p._id === updatedPlot._id ? updatedPlot : p);
-    setParsedData(newData);
-    // processData is just setting state now, effect will handle grouping
+      // Convert UI keys back to Entity keys for update
+      const entityData = {
+          section: updatedPlot.Section,
+          row_number: updatedPlot.Row,
+          plot_number: updatedPlot.Grave,
+          status: updatedPlot.Status,
+          first_name: updatedPlot['First Name'],
+          last_name: updatedPlot['Last Name'],
+          family_name: updatedPlot['Family Name'],
+          birth_date: updatedPlot.Birth,
+          death_date: updatedPlot.Death,
+          notes: updatedPlot.Notes
+      };
+      updatePlotMutation.mutate({ id: updatedPlot._id, data: entityData });
   };
 
   return (
