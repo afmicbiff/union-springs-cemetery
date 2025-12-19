@@ -105,10 +105,10 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
                 "relative flex flex-col transition-all duration-300 ease-in-out cursor-pointer group",
-                "rounded-xl border shadow-sm hover:shadow-md",
+                "rounded-xl border shadow-md hover:shadow-xl hover:-translate-y-2",
                 isSelected 
                     ? "bg-white border-teal-500 z-20 h-[70vh] md:h-[60vh] overflow-hidden" 
-                    : "bg-white/80 border-stone-200 h-64 hover:bg-white hover:border-teal-300",
+                    : "bg-white/80 border-stone-200 h-64 hover:bg-white",
                 isMatch && !isSelected && "ring-2 ring-yellow-400 ring-offset-2"
             )}
             onClick={() => onToggle(item.id)}
