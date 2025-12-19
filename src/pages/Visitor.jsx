@@ -45,9 +45,12 @@ export default function VisitorPage() {
                   <p className="font-semibold text-stone-700">Visiting Hours</p>
                   <p>Daily: Sunrise to Sunset</p>
                 </div>
-
+                <div>
+                  <p className="font-semibold text-stone-700">Location</p>
+                  <p>1311 Fire Tower Road<br />Shongaloo, Webster Parish, LA 71072</p>
+                </div>
               </div>
-              <a href="https://maps.google.com" target="_blank" rel="noreferrer" className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1 mt-auto">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=1311+Fire+Tower+Road,+Shongaloo,+LA,+71072" target="_blank" rel="noreferrer" className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800 flex items-center gap-1 mt-auto">
                 Get Directions &rarr;
               </a>
             </div>
