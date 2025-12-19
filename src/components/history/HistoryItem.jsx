@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
-import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud } from 'lucide-react';
+import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud, Maximize2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { isFuzzyMatch } from './utils';
 import DraggableImageModal from './DraggableImageModal';
@@ -259,6 +259,13 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
                     </div>
                 )}
             </div>
+
+            <DraggableImageModal 
+                isOpen={showImageModal} 
+                onClose={() => setShowImageModal(false)}
+                imageUrl={activeMedia?.url}
+                caption={activeMedia?.caption}
+            />
         </motion.div>
     );
 });
