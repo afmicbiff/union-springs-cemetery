@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
+import ImportReportDialog from "@/components/plots/ImportReportDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -322,6 +323,10 @@ export default function PlotsPage() {
   const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
+  
+  // Import Report State
+  const [importReport, setImportReport] = useState(null);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   // DATA FETCHING
   const { data: user } = useQuery({
@@ -359,11 +364,16 @@ export default function PlotsPage() {
 
   const createPlotsMutation = useMutation({
       mutationFn: async (plots) => {
-          return await base44.entities.Plot.bulkCreate(plots);
+          // Call the advanced import function
+          const response = await base44.functions.invoke('importPlotsWithAudit', { plots });
+          if (response.data && response.data.error) throw new Error(response.data.error);
+          return response.data;
       },
-      onSuccess: () => {
+      onSuccess: (data) => {
           queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success("Imported plots successfully");
+          toast.success(`Import complete: ${data.created} created, ${data.updated} updated`);
+          setImportReport(data);
+          setIsReportOpen(true);
       },
       onError: (err) => {
           toast.error(`Import failed: ${err.message}`);
@@ -928,6 +938,12 @@ export default function PlotsPage() {
         onClose={() => setIsEditModalOpen(false)}
         plot={selectedPlotForModal}
         onSave={handleUpdatePlot}
+      />
+
+      <ImportReportDialog 
+        isOpen={isReportOpen} 
+        onClose={() => setIsReportOpen(false)} 
+        report={importReport} 
       />
     </div>
   );
