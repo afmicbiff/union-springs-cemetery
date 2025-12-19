@@ -3,22 +3,190 @@ import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle } from 'luc
 
 // --- MOCK DATA ---
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
-1,A-1,Available,,,,,,,,Section 1
-2,A-1,Occupied,Boutwell,Paul Marshall,5/25/1901,9/3/1982,Boutwell,,Find a Grave,Section 1
-3,A-1,Occupied,Boutwell,Clara Martin,11/15/1907,1/31/1995,Boutwell,,Find a Grave,Section 1
-4,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-5,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-8,B-1,Occupied,Slack,Zachary Neal,11/11/1984,4/9/1999,Slack,,Find a Grave,Section 1
-9,C-1,Reserved,Slack,Tom L.,7/6/1941,,Slack,,,Section 1
-10,C-1,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Section 1
-1078,S-7,Available,,,,,,,,Section 5
-1079,T-7,Available,,,,,,,,Section 5
-1082,T-7,Reserved,Martin,Ricky Sr,,,,,,Section 5
-1083,U-7,Reserved,Martin,Ricky Sr Wife,,,,,,Section 5
-1084,U-7,Reserved,Sheets,"Teddy, Brandi, Jerryn",,,A&B,,,Section 5
-1085,R-8,Occupied,Wilson,"Washington Marvin ""Shorty""",8/21/1920,9/25/2018,Wilson,,Find a Grave,Section 5
-1086,R-8,Occupied,Wilson,Verdi Mae Crouch,8/16/1924,2/27/2000,Wilson,,Find a Grave,Section 5
-1090,R-8,Occupied,Ratliff,James Howard,1937,3/29/2020,Ratliff,Vet/USAF/A1C/Vietnam,,Section 5
+1,A,Available,,,,,,,,Section 1
+2,A,Occupied,Boutwell,Paul,,,,,,,Section 1
+3,A,Occupied,Boutwell,Clara,,,,,,,Section 1
+4,B,Occupied,Slack,Hoyt,,,,,,,Section 1
+5,B,Occupied,Slack,Hoyt,,,,,,,Section 1
+6,B,Occupied,Slack,Hoyt,,,,,,,Section 1
+7,B,Occupied,Slack,Roger Neal,,,,,,,Section 1
+8,B,Occupied,Slack,Zachary Neal,,,,,,,Section 1
+9,C,Occupied,Slack,Tom Lary,,,,,,,Section 1
+10,C,Occupied,Slack,Pamela Diane,,,,,,,Section 1
+11,C,Occupied,Slack,Hoyt,,,,,,,Section 1
+12,C,Occupied,Slack,Charles Lynn,,,,,,,Section 1
+13,D,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+14,D,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+15,D,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+16,D,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+17,D,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+18,D,Occupied,Roach,Magee,,,,,,,Section 1
+19,E,Occupied,Dollar,Pauline,,,,,,,Section 1
+20,E,Occupied,Mills,Ronald Edward,,,,,,,Section 1
+21,E,Occupied,Dollar,Pauline,,,,,,,Section 1
+22,E,Occupied,Rives,Francis C,,,,,,,Section 1
+23,E,Occupied,Rives,Treable,,,,,,,Section 1
+24,A,Available,Giddings,Tommy Gene,,,,,,,Section 1
+25,A,Occupied,Tilley,Billy Wayne,,,,,,,Section 1
+26,A,Occupied,Tilley,Clara Boutwell,,,,,,,Section 1
+27,B,Occupied,Godley,Charles Fred,,,,,,,Section 1
+28,B,Occupied,Mason,Bobby,,,,,,,Section 1
+29,B,Occupied,,,,,,,,,Section 1
+30,B,Occupied,Mason,Bobby,,,,,,,Section 1
+31,B,Occupied,Mason,Bobby,,,,,,,Section 1
+32,C,Occupied,Mason,Bobby,,,,,,,Section 1
+33,C,Occupied,Mason,Bobby,,,,,,,Section 1
+34,C,Occupied,Mason,Bobby,,,,,,,Section 1
+35,C,Occupied,Lee,Charles,,,,,,,Section 1
+36,D,Occupied,Craig,Charles,,,,,,,Section 1
+37,D,Occupied,Slack,Hoyt,,,,,,,Section 1
+38,D,Occupied,Slack,Hoyt,,,,,,,Section 1
+39,D,Occupied,Slack,Hoyt,,,,,,,Section 1
+40,D,Occupied,Magee,Mike,,,,,,,Section 1
+41,D,Occupied,Magee,Livinus McCuen,,,,,,,Section 1
+42,E,Occupied,Magee,Charles,,,,,,,Section 1
+43,E,Occupied,Moore,Tullie,,,,,,,Section 1
+44,E,Occupied,Moore,Tullie,,,,,,,Section 1
+45,E,Occupied,Moore,Tullie,,,,,,,Section 1
+46,E,Occupied,Moore,Rober Elmer,,,,,,,Section 1
+47,A,Occupied,Mason,Bobby,,,,,,,Section 1
+48,A,Occupied,Mason,Bobby,,,,,,,Section 1
+49,A,Occupied,Mason,Bobby,,,,,,,Section 1
+50,B,Occupied,Mason,Bobby,,,,,,,Section 1
+51,B,Occupied,Mason,Bobby,,,,,,,Section 1
+52,B,Occupied,Mason,Bobby,,,,,,,Section 1
+53,B,Occupied,Mason,Bobby,,,,,,,Section 1
+54,B,Occupied,Mason,Bobby,,,,,,,Section 1
+55,C,Occupied,Mason,Bobby,,,,,,,Section 1
+56,C,Occupied,Mason,Heather,,,,,,,Section 1
+57,C,Occupied,Mason,Bobby Gene,,,,,,,Section 1
+58,C,Occupied,Strange,Wanda Faye,,,,,,,Section 1
+59,D,Available,,,,,,,,Section 1
+60,D,Available,,,,,,,Section 1
+61,D,Occupied,Strange,Jerry,,,,,,,Section 1
+62,D,Occupied,Dillon,Debbie,,,,,,,Section 1
+63,D,Occupied,Baker,Trudy,,,,,,,Section 1
+64,D,Occupied,Baker,Trudy,,,,,,,Section 1
+65,E,Occupied,Baker,Trudy,,,,,,,Section 1
+66,E,Occupied,Baker,Trudy,,,,,,,Section 1
+67,E,Occupied,Baker,Trudy,,,,,,,Section 1
+68,E,Occupied,Baker,Trudy,,,,,,,Section 1
+69,E,Occupied,Baker,Trudy,,,,,,,Section 1
+70,A,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+71,A,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+72,A,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+73,B,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+74,B,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+75,B,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+76,B,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+77,B,Occupied,Roberts,Virginia Farrington,,,,,,,Section 1
+78,C,Available,,,,,,,,Section 1
+79,C,Available,,,,,,,,Section 1
+80,C,Available,,,,,,,,Section 1
+81,C,Available,,,,,,,,Section 1
+82,C,Available,,,,,,,,Section 1
+83,D,Available,,,,,,,,Section 1
+84,D,Occupied,McCuen,Carlton,,,,,,,Section 1
+85,D,Occupied,McCuen,Jo Ann,,,,,,,Section 1
+86,D,Occupied,Simmons,Marie,,,,,,,Section 1
+87,D,Occupied,Simmons,Marie,,,,,,,Section 1
+88,E,Occupied,Simmons,Marie,,,,,,,Section 1
+89,E,Occupied,Simmons,Marie,,,,,,,Section 1
+90,E,Occupied,Simmons,George H. Jr.,,,,,,,Section 1
+91,E,Occupied,Simmons,Marie Teutsch,,,,,,,Section 1
+92,E,Occupied,Simmons,Terry Lynn,,,,,,,Section 1
+93,A,Occupied,Roberts,Virginia,,,,,,,Section 1
+94,A,Occupied,Roberts,Virginia,,,,,,,Section 1
+95,A,Occupied,Roberts,Virginia,,,,,,,Section 1
+96,B,Occupied,Roberts,Virginia,,,,,,,Section 1
+97,B,Occupied,Roberts,Virginia,,,,,,,Section 1
+98,B,Occupied,Roberts,Virginia,,,,,,,Section 1
+99,B,Occupied,Roberts,Virginia,,,,,,,Section 1
+100,B,Occupied,Roberts,Virginia,,,,,,,Section 1
+101,C,Available,,,,,,,,Section 1
+102,C,Available,,,,,,,,Section 1
+103,C,Available,,,,,,,,Section 1
+104,C,Available,,,,,,,,Section 1
+105,C,Available,,,,,,,,Section 1
+106,D,Available,,,,,,,,Section 1
+107,D,Available,,,,,,,,Section 1
+108,D,Available,,,,,,,,Section 1
+109,D,Occupied,Simmons,Marie,,,,,,,Section 1
+110,D,Occupied,Simmons,Marie,,,,,,,Section 1
+111,E,Occupied,Simmons,Marie,,,,,,,Section 1
+112,E,Occupied,Simmons,Marie,,,,,,,Section 1
+113,E,Occupied,Simmons,Marie,,,,,,,Section 1
+114,E,Occupied,Simmons,Marie,,,,,,,Section 1
+115,E,Occupied,Simmons,Marie,,,,,,,Section 1
+116,A,Available,,,,,,,,Section 1
+117,A,Available,,,,,,,,Section 1
+118,A,Available,,,,,,,,Section 1
+119,B,Available,,,,,,,,Section 1
+120,B,Available,,,,,,,,Section 1
+121,B,Available,,,,,,,,Section 1
+122,B,Occupied,Carroway,Nicole David,,,,,,,Section 1
+123,B,Occupied,Carroway,,,,,,,,Section 1
+124,C,Occupied,Carroway,,,,,,,,Section 1
+125,C,Occupied,Carroway,,,,,,,,Section 1
+126,C,Occupied,Carroway,,,,,,,,Section 1
+127,C,Available,,,,,,,,Section 1
+128,C,Available,,,,,,,,Section 1
+129,D,Available,,,,,,,,Section 1
+130,D,Available,,,,,,,,Section 1
+131,D,Available,,,,,,,,Section 1
+132,D,Occupied,Simmons,Marie,,,,,,,Section 1
+133,D,Occupied,Simmons,Marie,,,,,,,Section 1
+134,E,Occupied,Simmons,Marie,,,,,,,Section 1
+135,E,Occupied,Simmons,Marie,,,,,,,Section 1
+136,E,Occupied,Simmons,Marie,,,,,,,Section 1
+137,E,Occupied,Simmons,Marie,,,,,,,Section 1
+138,E,Occupied,Simmons,Marie,,,,,,,Section 1
+139,A,Occupied,Bauldree,,,,,,,,Section 1
+140,A,Occupied,Bauldree,,,,,,,,Section 1
+141,A,Occupied,Bauldree,Emma L.,,,,,,,Section 1
+142,B,Occupied,Bauldree,,,,,,,,Section 1
+143,B,Occupied,Bauldree,,,,,,,,Section 1
+144,B,Occupied,Bauldree,,,,,,,,Section 1
+145,B,Available,,,,,,,,Section 1
+146,B,Occupied,Pierce,,,,,,,,Section 1
+147,C,Occupied,Pierce,,,,,,,,Section 1
+148,C,Occupied,Pierce,,,,,,,,Section 1
+149,C,Occupied,Matlock,,,,,,,,Section 1
+150,C,Occupied,Matlock,,,,,,,,Section 1
+151,C,Occupied,Matlock,,,,,,,,Section 1
+152,D,Occupied,Matlock,,,,,,,,Section 1
+153,D,Occupied,Matlock,,,,,,,,Section 1
+154,D,Occupied,Matlock,,,,,,,,Section 1
+155,D,Occupied,Matlock,Clyde L.,,,,,,,Section 1
+156,D,Occupied,Matlock,Lydia Beth,,,,,,,Section 1
+157,E,Occupied,Pierce,James D.,,,,,,,Section 1
+158,E,Occupied,Pierce,,,,,,,,Section 1
+159,E,Occupied,Pierce,,,,,,,,Section 1
+160,E,Occupied,Pierce,,,,,,,,Section 1
+161,E,Occupied,Pierce,,,,,,,,Section 1
+162,A,Occupied,Miller,,,,,,,,Section 1
+163,A,Occupied,Miller,Leonard F.,,,,,,,Section 1
+164,A,Occupied,Miller,Nevella J.,,,,,,,Section 1
+165,B,Occupied,Miller,,,,,,,,Section 1
+166,B,Occupied,Miller,,,,,,,,Section 1
+167,B,Occupied,Adkins,Lyndell W.,,,,,,,Section 1
+168,B,Occupied,Johnson,Roy Woodard,,,,,,,Section 1
+169,B,Occupied,Johnson,Ollie Mae Palmer,,,,,,,Section 1
+170,C,Occupied,Johnson,Roy W. Jr.,,,,,,,Section 1
+171,C,Occupied,Johnson,,,,,,,,Section 1
+172,C,Occupied,Johnson,Eldon,,,,,,,Section 1
+173,C,Occupied,Johnson,,,,,,,,Section 1
+174,C,Occupied,Johnson,,,,,,,,Section 1
+175,D,Occupied,Johnson,,,,,,,,Section 1
+176,D,Occupied,Johnson,,,,,,,,Section 1
+177,D,Occupied,Johnson,,,,,,,,Section 1
+178,D,Occupied,Johnson,,,,,,,,Section 1
+179,D,Occupied,Johnson,,,,,,,,Section 1
+180,E,Occupied,Johnson,,,,,,,,Section 1
+181,E,Occupied,Johnson,,,,,,,,Section 1
+182,E,Occupied,Johnson,,,,,,,,Section 1
+183,E,Occupied,Johnson,,,,,,,,Section 1
+184,E,Occupied,Adkins,Niler C.,,,,,,,Section 1
 `;
 
 // --- CONFIGURATION ---
