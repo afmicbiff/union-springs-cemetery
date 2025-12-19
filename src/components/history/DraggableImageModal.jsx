@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'framer-motion';
-import { X, Download, Maximize2 } from 'lucide-react';
+import { X, Download, Maximize2, ZoomIn } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { jsPDF } from "jspdf";
 
@@ -17,6 +17,12 @@ export default function DraggableImageModal({ isOpen, onClose, imageUrl, caption
 function DraggableModalContent({ onClose, imageUrl, caption }) {
     const [zIndex, setZIndex] = useState(100);
     const [size, setSize] = useState({ width: 600, height: 500 });
+    const dragControls = useDragControls();
+    
+    // Magnifier State
+    const [isMagnifying, setIsMagnifying] = useState(false);
+    const [magnifierState, setMagnifierState] = useState({ show: false, x: 0, y: 0, width: 0, height: 0 });
+    const imageRef = useRef(null);
     const containerRef = useRef(null);
 
     const handleDownloadPDF = () => {
@@ -40,9 +46,32 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
         setZIndex(prev => prev + 1);
     };
 
+    const handleMouseMove = (e) => {
+        if (!isMagnifying || !imageRef.current) return;
+        
+        const { left, top, width, height } = imageRef.current.getBoundingClientRect();
+        const x = e.clientX - left;
+        const y = e.clientY - top;
+
+        if (x < 0 || y < 0 || x > width || y > height) {
+            setMagnifierState(prev => ({ ...prev, show: false }));
+            return;
+        }
+
+        setMagnifierState({
+            show: true,
+            x,
+            y,
+            width,
+            height
+        });
+    };
+
     return (
         <motion.div
             drag
+            dragListener={false}
+            dragControls={dragControls}
             dragMomentum={false}
             initial={{ opacity: 0, scale: 0.9, x: window.innerWidth / 2 - 300, y: window.innerHeight / 2 - 250 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -60,10 +89,19 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
         >
             {/* Header / Drag Handle */}
             <div className="bg-stone-100 p-2 border-b border-stone-200 flex justify-between items-center cursor-move select-none"
-                 onPointerDown={(e) => handleFocus()}
+                 onPointerDown={(e) => { handleFocus(); dragControls.start(e); }}
             >
                 <span className="text-xs font-bold text-stone-500 uppercase tracking-wider px-2">Image Viewer</span>
                 <div className="flex gap-1">
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className={`h-6 w-6 ${isMagnifying ? 'bg-teal-100 text-teal-700' : ''}`}
+                        onClick={() => setIsMagnifying(!isMagnifying)} 
+                        title="Toggle Magnifying Glass"
+                    >
+                        <ZoomIn className="w-3 h-3" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleDownloadPDF} title="Download PDF">
                         <Download className="w-3 h-3" />
                     </Button>
@@ -74,13 +112,43 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
             </div>
 
             {/* Content */}
-            <div className="flex-1 bg-stone-900 flex items-center justify-center overflow-hidden relative group">
+            <div className="flex-1 bg-stone-900 flex items-center justify-center overflow-hidden relative group"
+                 onMouseMove={handleMouseMove}
+                 onMouseLeave={() => setMagnifierState(prev => ({ ...prev, show: false }))}
+            >
                 <img 
+                    ref={imageRef}
                     src={imageUrl} 
                     alt={caption} 
-                    className="max-w-full max-h-full object-contain pointer-events-none" 
+                    className={`max-w-full max-h-full object-contain ${isMagnifying ? 'cursor-none' : ''}`}
+                    onDragStart={(e) => e.preventDefault()}
                 />
                 
+                {isMagnifying && magnifierState.show && (
+                    <div 
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            // Transform to position relative to image container, simpler than calculating absolute positions
+                            transform: `translate(${magnifierState.x + (imageRef.current?.offsetLeft || 0) - 75}px, ${magnifierState.y + (imageRef.current?.offsetTop || 0) - 75}px)`,
+                            width: '150px',
+                            height: '150px',
+                            borderRadius: '50%',
+                            border: '2px solid white',
+                            boxShadow: '0 0 15px rgba(0,0,0,0.5)',
+                            pointerEvents: 'none',
+                            backgroundImage: `url(${imageUrl})`,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundColor: '#000',
+                            // Zoom level 2.5x
+                            backgroundSize: `${magnifierState.width * 2.5}px ${magnifierState.height * 2.5}px`,
+                            backgroundPosition: `-${magnifierState.x * 2.5 - 75}px -${magnifierState.y * 2.5 - 75}px`,
+                            zIndex: 50
+                        }}
+                    />
+                )}
+
                 {/* Resize Handles - Simple 4 corners implementation */}
                 <ResizeHandle onResize={(w, h) => setSize({ width: Math.max(300, w), height: Math.max(200, h) })} size={size} position="br" />
             </div>
