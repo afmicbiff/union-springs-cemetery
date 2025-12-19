@@ -21,11 +21,6 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
 17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
 18,D-1,Occupied,Roach,Magee,,,,,,,Section 1
-19,E-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-20,E-1,Occupied,Mills,Ronald Edward,,,,,,,Section 1
-21,E-1,Occupied,Dollar,Pauline,,,,,,,Section 1
-22,E-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Section 1
-23,E-1,Occupied,Rives,Treable,,,,,,,Section 1
 `;
 
 // --- CONFIGURATION ---
