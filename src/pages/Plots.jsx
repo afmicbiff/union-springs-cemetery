@@ -160,7 +160,6 @@ export default function PlotsPage() {
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-red-100 border border-red-300"></div><span className="text-sm">Occupied</span></div>
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-blue-100 border border-blue-300"></div><span className="text-sm">Veteran</span></div>
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-800 border border-gray-900"></div><span className="text-sm text-stone-500">Unavailable</span></div>
-                    <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-200 border border-gray-300"></div><span className="text-sm">Not Usable</span></div>
                     <div className="flex items-center gap-3"><div className="w-4 h-4 rounded-sm bg-gray-400 border border-gray-500"></div><span className="text-sm">Unknown</span></div>
                 </CardContent>
             </Card>
