@@ -64,6 +64,14 @@ const TextWithFootnotes = ({ text, highlight, footnotes }) => {
 
 const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onToggle, footnotes, id }) => {
     const hasFootnotes = /NOTE\s*\[?\d+\]?/.test(item.text);
+    const [showImageModal, setShowImageModal] = React.useState(false);
+    const [activeMedia, setActiveMedia] = React.useState(null);
+
+    const handleImageClick = (e, media) => {
+        e.stopPropagation();
+        setActiveMedia(media);
+        setShowImageModal(true);
+    };
 
     // Extract footnote IDs for the footer list
     const footnoteIds = React.useMemo(() => {
