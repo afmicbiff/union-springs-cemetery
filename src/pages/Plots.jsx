@@ -15,6 +15,7 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 10,C-1,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Section 1
 11,C-1,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Section 1
 12,C-1,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Section 1
+13,D-1,Available,,,,,,,,Section 1
 `;
 
 // --- CONFIGURATION ---
@@ -380,7 +381,7 @@ export default function PlotsPage() {
                                     rounded-xl border-2 border-dashed p-6 transition-colors duration-500
                                     ${borderColor} ${bgColor} bg-opacity-30
                                 `}>
-                                    <div className="flex flex-wrap-reverse gap-2 content-start">
+                                    <div className="flex flex-col-reverse gap-2 content-center items-center">
                                         {sections[sectionKey].map((plot) => (
                                             <GravePlot 
                                                 key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
