@@ -42,7 +42,7 @@ const STATUS_COLORS = {
 
 // Distinct colors for different Sections
 const SECTION_PALETTES = [
-  'bg-teal-100 border-teal-300 text-teal-900',      // Section 1
+  'bg-red-100 border-red-300 text-red-900',         // Section 1
   'bg-indigo-100 border-indigo-300 text-indigo-900', // Section 2
   'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
   'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
