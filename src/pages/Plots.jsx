@@ -3,29 +3,29 @@ import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle } from 'luc
 
 // --- MOCK DATA ---
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
-1,1,Available,,,,,,,,Main
-2,1,Occupied,Boutwell,Paul Marshall,5/25/1901,9/3/1982,Boutwell,,Find a Grave,Main
-3,1,Occupied,Boutwell,Clara Martin,11/15/1907,1/31/1995,Boutwell,,Find a Grave,Main
-4,2,Reserved,,,,,"Slack, Hoyt",,,Main
-5,2,Reserved,,,,,"Slack, Hoyt",,,Main
-6,2,Reserved,,,,,"Slack, Hoyt",,,Main
-7,2,Reserved,,,,,"Slack, Hoyt",,,Main
-8,2,Occupied,Slack,Zachary Neal,11/11/1984,4/9/1999,Slack,,Find a Grave,Main
-9,3,Reserved,Slack,Tom L.,7/6/1941,,Slack,,,Main
-10,3,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Main
-11,3,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Main
-12,3,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Main
-13,3,Available,,,,,,,,Main
-14,4,Occupied,Roach,Pauline Dollar,,,,,,,Main
-15,4,Occupied,Roach,Pauline Dollar,,,,,,,Main
-16,4,Occupied,Roach,Pauline Dollar,,,,,,,Main
-17,4,Occupied,Roach,Pauline Dollar,,,,,,,Main
-18,4,Occupied,Roach,Magee,,,,,,,Main
-19,4,Occupied,Dollar,Pauline,,,,,,,Main
-20,4,Occupied,Mills,Ronald Edward,,,,,,,Main
-21,4,Occupied,Dollar,Pauline,,,,,,,Main
-22,4,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Main
-23,4,Occupied,Rives,Treable,,,,,,,Main
+1,A-1,Available,,,,,,,,Section 1
+2,A-1,Occupied,Boutwell,Paul Marshall,5/25/1901,9/3/1982,Boutwell,,Find a Grave,Section 1
+3,A-1,Occupied,Boutwell,Clara Martin,11/15/1907,1/31/1995,Boutwell,,Find a Grave,Section 1
+4,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
+5,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
+6,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
+7,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
+8,B-1,Occupied,Slack,Zachary Neal,11/11/1984,4/9/1999,Slack,,Find a Grave,Section 1
+9,C-1,Reserved,Slack,Tom L.,7/6/1941,,Slack,,,Section 1
+10,C-1,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Section 1
+11,C-1,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Section 1
+12,C-1,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Section 1
+13,C-1,Available,,,,,,,,Section 1
+14,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+15,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Section 1
+18,D-1,Occupied,Roach,Magee,,,,,,,Section 1
+19,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
+20,D-1,Occupied,Mills,Ronald Edward,,,,,,,Section 1
+21,D-1,Occupied,Dollar,Pauline,,,,,,,Section 1
+22,D-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Section 1
+23,D-1,Occupied,Rives,Treable,,,,,,,Section 1
 `;
 
 // --- CONFIGURATION ---
