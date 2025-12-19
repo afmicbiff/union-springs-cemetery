@@ -38,6 +38,95 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 23,D-1,Occupied,Rives,Treable,,,,,,,Row D
 `;
 
+// Helper Component for Table Row to reduce duplication
+const PlotTableRow = ({ 
+    row, 
+    editingId, 
+    inlineEditData, 
+    STATUS_COLORS, 
+    handleInlineChange, 
+    handleInlineSave, 
+    handleInlineCancel, 
+    handleInlineEditStart, 
+    handleEditClick 
+}) => {
+    const isEditing = editingId === row._id;
+    return (
+        <tr className="hover:bg-gray-50 transition-colors">
+            <td className="px-4 py-4 font-bold text-gray-700">
+                {isEditing ? <Input value={inlineEditData.Section || ''} onChange={e => handleInlineChange('Section', e.target.value)} className="h-8 w-24" /> : row.Section}
+            </td>
+            <td className="px-4 py-4 font-mono text-gray-900">
+                {isEditing ? <Input value={inlineEditData.Grave || ''} onChange={e => handleInlineChange('Grave', e.target.value)} className="h-8 w-16" /> : row.Grave}
+            </td>
+            <td className="px-4 py-4 text-gray-500">
+                {isEditing ? <Input value={inlineEditData.Row || ''} onChange={e => handleInlineChange('Row', e.target.value)} className="h-8 w-16" /> : row.Row}
+            </td>
+            <td className="px-4 py-4">
+                {isEditing ? (
+                    <select 
+                        value={inlineEditData.Status} 
+                        onChange={e => handleInlineChange('Status', e.target.value)}
+                        className="h-8 text-sm border rounded px-2"
+                    >
+                        {Object.keys(STATUS_COLORS).filter(k => k !== 'Default').map(s => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
+                    </select>
+                ) : (
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[row.Status]?.split(' ').filter(c=>c.startsWith('bg') || c.startsWith('text')).join(' ')} bg-opacity-10`}>
+                        {row.Status}
+                    </span>
+                )}
+            </td>
+            <td className="px-4 py-4 font-medium text-gray-900">
+                {isEditing ? <Input value={inlineEditData['Last Name'] || ''} onChange={e => handleInlineChange('Last Name', e.target.value)} className="h-8 w-32" /> : row['Last Name']}
+            </td>
+            <td className="px-4 py-4 text-gray-500">
+                {isEditing ? <Input value={inlineEditData['First Name'] || ''} onChange={e => handleInlineChange('First Name', e.target.value)} className="h-8 w-32" /> : row['First Name']}
+            </td>
+            <td className="px-4 py-4 text-gray-500 text-xs">
+                {isEditing ? (
+                    <div className="flex flex-col gap-1">
+                        <Input value={inlineEditData.Birth || ''} onChange={e => handleInlineChange('Birth', e.target.value)} placeholder="Birth" className="h-7 w-24 text-xs" />
+                        <Input value={inlineEditData.Death || ''} onChange={e => handleInlineChange('Death', e.target.value)} placeholder="Death" className="h-7 w-24 text-xs" />
+                    </div>
+                ) : (
+                    row.Birth && row.Death ? `${row.Birth} - ${row.Death}` : '-'
+                )}
+            </td>
+            <td className="px-4 py-4">
+                {isEditing ? (
+                    <div className="flex gap-2">
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleInlineSave}>
+                            <Save className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleInlineCancel}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ) : (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleInlineEditStart(row)}>
+                                <Pencil className="mr-2 h-4 w-4" /> Quick Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditClick(row)}>
+                                <FileText className="mr-2 h-4 w-4" /> Full Details
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </td>
+        </tr>
+    );
+};
+
 // --- CONFIGURATION ---
 
 const STATUS_COLORS = {
@@ -212,6 +301,11 @@ export default function PlotsPage() {
       deathYearEnd: ''
   });
 
+  // Table View State
+  const [groupBy, setGroupBy] = useState('none'); // 'none', 'Section', 'Row', 'Status'
+  const [sortBy, setSortBy] = useState('Grave'); // 'Grave', 'Last Name', 'First Name', 'Death'
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc', 'desc'
+
   // Editing State
   const [editingId, setEditingId] = useState(null);
   const [inlineEditData, setInlineEditData] = useState({});
@@ -267,6 +361,52 @@ export default function PlotsPage() {
           return true;
       });
   }, [parsedData, filters]);
+
+  // Grouped and Sorted Data for Table View
+  const processedTableData = useMemo(() => {
+    // 1. Sort Data
+    const sorted = [...filteredData].sort((a, b) => {
+        let valA = a[sortBy];
+        let valB = b[sortBy];
+
+        // Handle Dates
+        if (sortBy === 'Death') {
+             valA = a.Death ? new Date(a.Death).getTime() : 0;
+             valB = b.Death ? new Date(b.Death).getTime() : 0;
+        } 
+        // Handle Grave Numbers (Numeric Sort)
+        else if (sortBy === 'Grave') {
+            const numA = parseInt(String(valA).replace(/\D/g, '')) || 0;
+            const numB = parseInt(String(valB).replace(/\D/g, '')) || 0;
+            if (numA !== numB) return numA - numB;
+            return String(valA).localeCompare(String(valB));
+        }
+        
+        // Default String Sort
+        if (valA < valB) return -1;
+        if (valA > valB) return 1;
+        return 0;
+    });
+
+    if (sortOrder === 'desc') sorted.reverse();
+
+    // 2. Group Data (if applicable)
+    if (groupBy !== 'none') {
+        const groups = {};
+        sorted.forEach(item => {
+            const groupKey = item[groupBy] || 'Unassigned';
+            if (!groups[groupKey]) groups[groupKey] = [];
+            groups[groupKey].push(item);
+        });
+        // Return array of group objects for easier rendering
+        return Object.keys(groups).sort().map(key => ({
+            group: key,
+            items: groups[key]
+        }));
+    }
+
+    return sorted;
+  }, [filteredData, groupBy, sortBy, sortOrder]);
 
   // Update Sections based on Filtered Data
   useEffect(() => {
@@ -546,6 +686,43 @@ export default function PlotsPage() {
       ) : (
           /* Data Table View */
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
+              <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-gray-500 uppercase">Group By:</span>
+                      <div className="flex bg-white rounded-md shadow-sm border border-gray-200 p-0.5">
+                          {['none', 'Section', 'Row', 'Status'].map(g => (
+                              <button
+                                  key={g}
+                                  onClick={() => setGroupBy(g)}
+                                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${groupBy === g ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                              >
+                                  {g === 'none' ? 'None' : g}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 border-l border-gray-300 pl-4">
+                      <span className="text-xs font-semibold text-gray-500 uppercase">Sort By:</span>
+                      <select 
+                          value={sortBy} 
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="text-xs h-7 border-gray-200 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      >
+                          <option value="Grave">Grave #</option>
+                          <option value="Last Name">Last Name</option>
+                          <option value="First Name">First Name</option>
+                          <option value="Death">Death Date</option>
+                      </select>
+                      <button 
+                          onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                          className="text-xs bg-white border border-gray-200 rounded px-2 py-1 shadow-sm hover:bg-gray-50 text-gray-600 font-medium w-16"
+                      >
+                          {sortOrder === 'asc' ? 'Asc' : 'Desc'}
+                      </button>
+                  </div>
+              </div>
+
               <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
                   <table className="min-w-full divide-y divide-gray-200 text-sm">
                       <thead className="bg-gray-50">
@@ -556,83 +733,48 @@ export default function PlotsPage() {
                           </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                          {filteredData.map((row) => {
-                              const isEditing = editingId === row._id;
-                              return (
-                                  <tr key={row._id} className="hover:bg-gray-50">
-                                      <td className="px-4 py-4 font-bold text-gray-700">
-                                          {isEditing ? <Input value={inlineEditData.Section || ''} onChange={e => handleInlineChange('Section', e.target.value)} className="h-8 w-24" /> : row.Section}
-                                      </td>
-                                      <td className="px-4 py-4 font-mono text-gray-900">
-                                          {isEditing ? <Input value={inlineEditData.Grave || ''} onChange={e => handleInlineChange('Grave', e.target.value)} className="h-8 w-16" /> : row.Grave}
-                                      </td>
-                                      <td className="px-4 py-4 text-gray-500">
-                                          {isEditing ? <Input value={inlineEditData.Row || ''} onChange={e => handleInlineChange('Row', e.target.value)} className="h-8 w-16" /> : row.Row}
-                                      </td>
-                                      <td className="px-4 py-4">
-                                          {isEditing ? (
-                                              <select 
-                                                  value={inlineEditData.Status} 
-                                                  onChange={e => handleInlineChange('Status', e.target.value)}
-                                                  className="h-8 text-sm border rounded px-2"
-                                              >
-                                                  {Object.keys(STATUS_COLORS).filter(k => k !== 'Default').map(s => (
-                                                      <option key={s} value={s}>{s}</option>
-                                                  ))}
-                                              </select>
-                                          ) : (
-                                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[row.Status]?.split(' ').filter(c=>c.startsWith('bg') || c.startsWith('text')).join(' ')} bg-opacity-10`}>
-                                                  {row.Status}
-                                              </span>
-                                          )}
-                                      </td>
-                                      <td className="px-4 py-4 font-medium text-gray-900">
-                                          {isEditing ? <Input value={inlineEditData['Last Name'] || ''} onChange={e => handleInlineChange('Last Name', e.target.value)} className="h-8 w-32" /> : row['Last Name']}
-                                      </td>
-                                      <td className="px-4 py-4 text-gray-500">
-                                          {isEditing ? <Input value={inlineEditData['First Name'] || ''} onChange={e => handleInlineChange('First Name', e.target.value)} className="h-8 w-32" /> : row['First Name']}
-                                      </td>
-                                      <td className="px-4 py-4 text-gray-500 text-xs">
-                                          {isEditing ? (
-                                              <div className="flex flex-col gap-1">
-                                                  <Input value={inlineEditData.Birth || ''} onChange={e => handleInlineChange('Birth', e.target.value)} placeholder="Birth" className="h-7 w-24 text-xs" />
-                                                  <Input value={inlineEditData.Death || ''} onChange={e => handleInlineChange('Death', e.target.value)} placeholder="Death" className="h-7 w-24 text-xs" />
-                                              </div>
-                                          ) : (
-                                              row.Birth && row.Death ? `${row.Birth} - ${row.Death}` : '-'
-                                          )}
-                                      </td>
-                                      <td className="px-4 py-4">
-                                          {isEditing ? (
-                                              <div className="flex gap-2">
-                                                  <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleInlineSave}>
-                                                      <Save className="h-4 w-4" />
-                                                  </Button>
-                                                  <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleInlineCancel}>
-                                                      <X className="h-4 w-4" />
-                                                  </Button>
-                                              </div>
-                                          ) : (
-                                              <DropdownMenu>
-                                                  <DropdownMenuTrigger asChild>
-                                                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                          <MoreHorizontal className="h-4 w-4" />
-                                                      </Button>
-                                                  </DropdownMenuTrigger>
-                                                  <DropdownMenuContent align="end">
-                                                      <DropdownMenuItem onClick={() => handleInlineEditStart(row)}>
-                                                          <Pencil className="mr-2 h-4 w-4" /> Quick Edit
-                                                      </DropdownMenuItem>
-                                                      <DropdownMenuItem onClick={() => handleEditClick(row)}>
-                                                          <FileText className="mr-2 h-4 w-4" /> Full Details
-                                                      </DropdownMenuItem>
-                                                  </DropdownMenuContent>
-                                              </DropdownMenu>
-                                          )}
-                                      </td>
-                                  </tr>
-                              );
-                          })}
+                          {groupBy === 'none' ? (
+                              // Flat List Render
+                              processedTableData.map((row) => (
+                                  <PlotTableRow 
+                                      key={row._id} 
+                                      row={row} 
+                                      editingId={editingId} 
+                                      inlineEditData={inlineEditData}
+                                      STATUS_COLORS={STATUS_COLORS}
+                                      handleInlineChange={handleInlineChange}
+                                      handleInlineSave={handleInlineSave}
+                                      handleInlineCancel={handleInlineCancel}
+                                      handleInlineEditStart={handleInlineEditStart}
+                                      handleEditClick={handleEditClick}
+                                  />
+                              ))
+                          ) : (
+                              // Grouped Render
+                              processedTableData.map((group) => (
+                                  <React.Fragment key={group.group}>
+                                      <tr className="bg-gray-100">
+                                          <td colSpan={8} className="px-6 py-2 text-sm font-bold text-gray-700 uppercase tracking-wide border-t border-b border-gray-300">
+                                              {groupBy}: {group.group} <span className="text-gray-400 font-normal ml-2">({group.items.length})</span>
+                                          </td>
+                                      </tr>
+                                      {group.items.map((row) => (
+                                          <PlotTableRow 
+                                              key={row._id} 
+                                              row={row} 
+                                              editingId={editingId} 
+                                              inlineEditData={inlineEditData}
+                                              STATUS_COLORS={STATUS_COLORS}
+                                              handleInlineChange={handleInlineChange}
+                                              handleInlineSave={handleInlineSave}
+                                              handleInlineCancel={handleInlineCancel}
+                                              handleInlineEditStart={handleInlineEditStart}
+                                              handleEditClick={handleEditClick}
+                                          />
+                                      ))}
+                                  </React.Fragment>
+                              ))
+                          )}
                       </tbody>
                   </table>
               </div>
