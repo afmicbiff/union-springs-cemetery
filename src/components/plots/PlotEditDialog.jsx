@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { History, Clock, User } from 'lucide-react';
+import moment from 'moment';
 
 const STATUS_OPTIONS = [
   'Available',
@@ -28,6 +34,13 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // Fetch Audit Logs
+  const { data: auditLogs, isLoading: isLoadingLogs } = useQuery({
+      queryKey: ['plotAuditLogs', plot?.id],
+      queryFn: () => base44.entities.PlotAuditLog.filter({ plot_id: plot.id }, '-timestamp'),
+      enabled: !!plot?.id && isOpen
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
@@ -43,7 +56,14 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
           <DialogTitle>Edit Plot Details</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+        <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details">Details</TabsTrigger>
+                <TabsTrigger value="history">Audit History</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="details">
+                <form onSubmit={handleSubmit} className="grid gap-6 py-4">
           {/* Location Details */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Location & Status</h3>
@@ -156,11 +176,61 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
             />
           </div>
 
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">Save Changes</Button>
-          </DialogFooter>
-        </form>
+                  <DialogFooter className="gap-2">
+                    <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">Save Changes</Button>
+                  </DialogFooter>
+                </form>
+            </TabsContent>
+
+            <TabsContent value="history">
+                <div className="py-4">
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <History className="w-4 h-4" /> Change Log
+                    </h3>
+                    <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+                        {isLoadingLogs ? (
+                            <p className="text-center text-gray-500 py-4">Loading history...</p>
+                        ) : auditLogs?.length > 0 ? (
+                            <div className="space-y-6">
+                                {auditLogs.map((log) => (
+                                    <div key={log.id} className="relative pl-6 border-l-2 border-gray-200">
+                                        <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-gray-200 border-2 border-white"></div>
+                                        <div className="mb-1 flex items-center justify-between">
+                                            <span className="text-sm font-semibold text-gray-900">{log.change_summary}</span>
+                                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                {moment(log.timestamp).format('MMM D, YYYY h:mm A')}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                                            <User className="w-3 h-3" /> {log.changed_by}
+                                        </div>
+                                        {log.details && Object.keys(log.details).length > 0 && (
+                                            <div className="bg-gray-50 p-2 rounded text-xs font-mono space-y-1">
+                                                {Object.entries(log.details).map(([key, diff]) => (
+                                                    <div key={key} className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                                                        <span className="text-red-600 truncate text-right">{String(diff.from || 'empty')}</span>
+                                                        <span className="text-gray-400">→</span>
+                                                        <span className="text-green-600 truncate">{String(diff.to || 'empty')}</span>
+                                                        <span className="col-span-3 text-gray-400 text-[10px] uppercase tracking-wide border-b border-gray-100 pb-1 mb-1">{key}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center text-gray-500 py-8">
+                                <History className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                <p>No audit history found for this plot.</p>
+                            </div>
+                        )}
+                    </ScrollArea>
+                </div>
+            </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

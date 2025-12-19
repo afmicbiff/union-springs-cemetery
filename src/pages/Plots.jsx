@@ -340,7 +340,13 @@ export default function PlotsPage() {
   // MUTATIONS
   const updatePlotMutation = useMutation({
       mutationFn: async ({ id, data }) => {
-          return await base44.entities.Plot.update(id, data);
+          // Use backend function for audit logging
+          const response = await base44.functions.invoke('updatePlot', { id, data });
+          // Check for error in response data as invoke returns Axios response
+          if (response.data && response.data.error) {
+              throw new Error(response.data.error);
+          }
+          return response.data;
       },
       onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ['plots'] });
