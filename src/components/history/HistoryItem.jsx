@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { X, ChevronRight, Info, BookOpen, CloudLightning, CloudSnow, Sun, Cloud } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { isFuzzyMatch } from './utils';
+import DraggableImageModal from './DraggableImageModal';
 
 const HighlightedText = ({ text, highlight }) => {
     if (!highlight || !text) return text;
