@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal } from 'lucide-react';
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -10,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // --- MOCK DATA ---
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
@@ -586,9 +589,9 @@ export default function PlotsPage() {
             </div>
 
             <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
-                <Upload size={16} className="mr-2" />
+                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                 <span className="font-medium text-sm">Import CSV</span>
-                <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
+                <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
             </label>
           </div>
         </div>
@@ -673,11 +676,21 @@ export default function PlotsPage() {
                         );
                     })}
 
-                    {Object.keys(sections).length === 0 && !errorMessage && (
+                    {Object.keys(sections).length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
-                            <AlertCircle size={48} className="mb-4 opacity-50" />
-                            <p className="text-lg font-medium">No burial data loaded</p>
-                            <p className="text-sm">Upload a CSV file to generate the map</p>
+                            <Database size={48} className="mb-4 opacity-50" />
+                            <p className="text-lg font-medium">No plots found in database</p>
+                            <p className="text-sm mb-4">Import a CSV or initialize with sample data</p>
+                            <Button variant="outline" onClick={handleSeedData} disabled={createPlotsMutation.isPending}>
+                                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : null}
+                                Load Sample Data
+                            </Button>
+                        </div>
+                    )}
+                    {isLoading && (
+                        <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                            <Loader2 size={48} className="mb-4 animate-spin text-blue-500" />
+                            <p className="text-lg font-medium">Loading Plots...</p>
                         </div>
                     )}
                 </div>
