@@ -275,8 +275,14 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
         {data.Row}
       </span>
 
-      {/* 3. Status Circle */}
-      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
+      {/* 3. Status Circle (or Warning Icon) */}
+      {data.needs_review ? (
+          <div className="text-red-500 animate-pulse">
+            <AlertCircle size={10} fill="currentColor" className="bg-white rounded-full" />
+          </div>
+      ) : (
+          <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
+      )}
     </div>
   );
 };
@@ -307,6 +313,7 @@ export default function PlotsPage() {
   const [filters, setFilters] = useState({
       search: '',
       status: 'All',
+      needsReview: false,
       birthYearStart: '',
       birthYearEnd: '',
       deathYearStart: '',
@@ -423,7 +430,12 @@ export default function PlotsPage() {
               if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
           }
 
-          // 3. Date Filters
+          // 3. Needs Review Filter
+          if (filters.needsReview && !item.needs_review) {
+              return false;
+          }
+
+          // 4. Date Filters
           const getYear = (dateStr) => {
               if (!dateStr) return null;
               const date = new Date(dateStr);

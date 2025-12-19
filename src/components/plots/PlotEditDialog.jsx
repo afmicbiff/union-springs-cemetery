@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { History, Clock, User } from 'lucide-react';
+import { History, Clock, User, AlertTriangle, CheckCircle } from 'lucide-react';
 import moment from 'moment';
+import { Checkbox } from "@/components/ui/checkbox";
 
 const STATUS_OPTIONS = [
   'Available',
@@ -64,6 +65,31 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
 
             <TabsContent value="details">
                 <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+                  {/* Needs Review Alert */}
+                  {formData.needs_review && (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-start gap-3">
+                          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                              <h4 className="text-sm font-bold text-red-800">Flagged for Review</h4>
+                              <p className="text-sm text-red-700 mt-1">{formData.review_notes}</p>
+                              <div className="flex items-center gap-2 mt-3">
+                                  <Checkbox 
+                                      id="clear_review" 
+                                      checked={!formData.needs_review} // Logic inverse for UI "Mark as Reviewed"
+                                      onCheckedChange={(checked) => {
+                                          if(checked) {
+                                              handleChange('needs_review', false);
+                                              handleChange('review_notes', null);
+                                          }
+                                      }}
+                                  />
+                                  <Label htmlFor="clear_review" className="text-red-900 font-medium cursor-pointer">
+                                      Mark as Reviewed / Resolve Issue
+                                  </Label>
+                              </div>
+                          </div>
+                      </div>
+                  )}
           {/* Location Details */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Location & Status</h3>
