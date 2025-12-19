@@ -49,11 +49,11 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
     const handleMouseMove = (e) => {
         if (!isMagnifying || !imageRef.current) return;
         
-        const { left, top, width, height } = imageRef.current.getBoundingClientRect();
-        const x = e.clientX - left;
-        const y = e.clientY - top;
+        const imgRect = imageRef.current.getBoundingClientRect();
+        const x = e.clientX - imgRect.left;
+        const y = e.clientY - imgRect.top;
 
-        if (x < 0 || y < 0 || x > width || y > height) {
+        if (x < 0 || y < 0 || x > imgRect.width || y > imgRect.height) {
             setMagnifierState(prev => ({ ...prev, show: false }));
             return;
         }
@@ -62,8 +62,10 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
             show: true,
             x,
             y,
-            width,
-            height
+            width: imgRect.width,
+            height: imgRect.height,
+            imgOffsetLeft: imageRef.current.offsetLeft,
+            imgOffsetTop: imageRef.current.offsetTop
         });
     };
 
@@ -130,21 +132,22 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
                             position: 'absolute',
                             left: 0,
                             top: 0,
-                            // Transform to position relative to image container, simpler than calculating absolute positions
-                            transform: `translate(${magnifierState.x + (imageRef.current?.offsetLeft || 0) - 75}px, ${magnifierState.y + (imageRef.current?.offsetTop || 0) - 75}px)`,
-                            width: '150px',
-                            height: '150px',
+                            // Center the 200px loupe on the cursor
+                            // Position = (cursor X relative to image) + (image offset left) - (half loupe width)
+                            transform: `translate(${magnifierState.x + magnifierState.imgOffsetLeft - 100}px, ${magnifierState.y + magnifierState.imgOffsetTop - 100}px)`,
+                            width: '200px',
+                            height: '200px',
                             borderRadius: '50%',
-                            border: '2px solid white',
-                            boxShadow: '0 0 15px rgba(0,0,0,0.5)',
+                            border: '3px solid #14b8a6', // teal-500
+                            boxShadow: '0 0 20px rgba(0,0,0,0.4)',
                             pointerEvents: 'none',
-                            backgroundImage: `url(${imageUrl})`,
+                            backgroundImage: `url("${imageUrl}")`,
                             backgroundRepeat: 'no-repeat',
                             backgroundColor: '#000',
-                            // Zoom level 2.5x
-                            backgroundSize: `${magnifierState.width * 2.5}px ${magnifierState.height * 2.5}px`,
-                            backgroundPosition: `-${magnifierState.x * 2.5 - 75}px -${magnifierState.y * 2.5 - 75}px`,
-                            zIndex: 50
+                            // Zoom level 3x
+                            backgroundSize: `${magnifierState.width * 3}px ${magnifierState.height * 3}px`,
+                            backgroundPosition: `-${magnifierState.x * 3 - 100}px -${magnifierState.y * 3 - 100}px`,
+                            zIndex: 999
                         }}
                     />
                 )}
