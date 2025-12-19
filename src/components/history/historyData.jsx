@@ -15,9 +15,9 @@ export const historyTimelineData = [
         media: [
             {
                 type: "image",
-                url: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Louisiana_steamboat_by_Henry_Summer_Watson.jpg",
-                caption: "Illustration of a 19th-century steamboat on a Louisiana bayou, similar to those that would have navigated Dorcheat.",
-                source: "Wikimedia Commons"
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/329e2d3db_IMG-6924.jpg",
+                caption: "Sikes' Ferry, 1887",
+                source: "Courtesy of Tommie O'Bier"
             }
         ]
     },
@@ -48,9 +48,9 @@ export const historyTimelineData = [
         media: [
             {
                 type: "image",
-                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/1896_Tornado_Damage.jpg/640px-1896_Tornado_Damage.jpg",
-                caption: "Historical example of tornado damage from the 19th century (Illustrative).",
-                source: "Library of Congress / Wikimedia Commons"
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/cd48135f2_IMG-6920.jpg",
+                caption: "Path of the 'Hurricane' (ca. 1830) as surveyed by William Dearing",
+                source: "Courtesy of Tommie O'Bier"
             }
         ]
     },
@@ -59,15 +59,7 @@ export const historyTimelineData = [
         year: "1835",
         title: "Government Survey",
         text: `When William Dearing surveyed the area for the government in 1835, he plotted the path of the storm and called it Hurricane. John T. Campbell, Minden lawyer, said this land was advertised back East as "already done cleared land" and everyone wanted to buy land in the Hurricane. This map, the Governmental Map of Webster Public Lands June 30, 1830, can be seen in the Clerk’s office in Minden, Louisiana.`,
-        location: { lat: 32.6150, lng: -93.2850, label: "Webster Parish Clerk's Office (Minden)" },
-        media: [
-            {
-                type: "image",
-                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Map_of_the_United_States_and_part_of_Louisiana._LOC_2002621137.tif/lossy-page1-1024px-Map_of_the_United_States_and_part_of_Louisiana._LOC_2002621137.tif.jpg",
-                caption: "1830s Map of the United States and Louisiana.",
-                source: "Library of Congress"
-            }
-        ]
+        location: { lat: 32.6150, lng: -93.2850, label: "Webster Parish Clerk's Office (Minden)" }
     },
     {
         id: "spiritual",
@@ -144,13 +136,29 @@ export const historyTimelineData = [
         year: "1910",
         title: "School Expansion",
         text: `In 1910, a new school was built across the road, two-tenths of a mile north of the Union Springs Church. Whereas school sessions had lasted only two or three months a year in the original log building, the sessions now were extended to seven months a year. NOTE 9`,
-        location: { lat: 32.9390, lng: -93.2921, label: "1910 Schoolhouse Site" }
+        location: { lat: 32.9390, lng: -93.2921, label: "1910 Schoolhouse Site" },
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/30847748b_IMG-6921.jpg",
+                caption: "Union Springs School Class Photo",
+                source: "Courtesy of Barry W. Slack"
+            }
+        ]
     },
     {
         id: "services_details",
         year: "1910s",
         title: "Church Life",
-        text: `During church services, pallets were placed in the corner for the convenience of mothers with babies. If the babies became restless and cried, they were taken outside by Jess Cox or John "Bus" Perkins, who took turns calming the babies. The known pastors, Brother Strickland and Brother Nealy, preached once a month. Brother Strickland lived at Timothy and drove to Union Springs in a buggy or rode a horse whenever he preached. He usually stayed overnight in the community with the John Perkins family or other families of the congregation. The deacons were: Nelson Slack, who married Dochia Martin; Walter Jacob Teutsch, who married Martha Leona Nealy; and Henry James Nealy Sr., who married Delilie Elizabeth Dick. NOTE 10`
+        text: `During church services, pallets were placed in the corner for the convenience of mothers with babies. If the babies became restless and cried, they were taken outside by Jess Cox or John "Bus" Perkins, who took turns calming the babies. The known pastors, Brother Strickland and Brother Nealy, preached once a month. Brother Strickland lived at Timothy and drove to Union Springs in a buggy or rode a horse whenever he preached. He usually stayed overnight in the community with the John Perkins family or other families of the congregation. The deacons were: Nelson Slack, who married Dochia Martin; Walter Jacob Teutsch, who married Martha Leona Nealy; and Henry James Nealy Sr., who married Delilie Elizabeth Dick. NOTE 10`,
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/f2a11f1df_IMG-6923.jpg",
+                caption: "Graveyard working and dinner on the ground at Old Shongaloo, ca. 1949",
+                source: "Courtesy of Tommie O'Bier"
+            }
+        ]
     },
     {
         id: "music_1920",
@@ -163,7 +171,15 @@ export const historyTimelineData = [
         year: "1921",
         title: "Oil Discovery",
         text: `The Louisiana Oil Refining Company, on March 3, 1921, made the first oil discovery in Webster Parish. The well was the Gleason #1, drilled on land owned by W. T. Gleason. The well was located only a few yards north of the Union Springs Church: Section 13, Township 22 North, and Range 10 West. Using this first well, the company drilled the second well in April. NOTE 12`,
-        location: { lat: 32.9375, lng: -93.2921, label: "Gleason #1 Well" }
+        location: { lat: 32.9375, lng: -93.2921, label: "Gleason #1 Well" },
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/58410705a_IMG-6927.jpg",
+                caption: "Gleason Well - 1921. First oil well drilled in Webster Parish.",
+                source: "Courtesy of Tommie O'Bier"
+            }
+        ]
     },
     {
         id: "wild_well",
@@ -174,9 +190,9 @@ export const historyTimelineData = [
         media: [
             {
                 type: "image",
-                url: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Spindletop_Lucas_Gusher.jpg/467px-Spindletop_Lucas_Gusher.jpg",
-                caption: "The famous Lucas Gusher at Spindletop (1901) - similar to the 'wild well' blowouts seen in early Louisiana oil fields.",
-                source: "Wikimedia Commons"
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/ad7dce04d_IMG-6925.jpg",
+                caption: "Gleason Well - 1921",
+                source: "Courtesy of Tommie O'Bier"
             }
         ],
         overlay: {
@@ -192,7 +208,15 @@ export const historyTimelineData = [
         year: "1921-23",
         title: "The Crater",
         text: `The oil workers attempted to drill a relief well between Gleason #1 and Gleason #2. To put mud and cement into the well should have reduced the gas pressure. Nothing worked; therefore, they finally abandoned the well. A month later, the oil company brought in a work-over rig. Suddenly the bottom of the pit sank to the depth of a hundred feet--only moments before, John Slack had been standing on a board lying across the slush pit. As the well fell inward; the derrick fell to the side. Before the derrick could sink into the gaping void, the men rushed to save the engine, boiler, and crown block. Miraculously, no one was injured or killed. As the sides caved in, the hole became wider and wider. The wild well continued to be an attraction. Oil and gas sprayed into the air from the well. It was told that Tobe Newsom, riding his mule, galloped by H. L. Martin and yelled, "Hell has opened up down there." A year later, the well caught fire and burned steadily for two years or more. The fire finally died out when the drilling of "Bub" Martin's oil well relieved the pressure on the Crater. NOTE 13`,
-        location: { lat: 32.9380, lng: -93.2930, label: "The Crater" }
+        location: { lat: 32.9380, lng: -93.2930, label: "The Crater" },
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/3b59c4846_IMG-6926.jpg",
+                caption: "Gleason Well cratered, forming a hole 200' wide x 200' deep.",
+                source: "Courtesy of Geology of Webster Parish, Louisiana, p. 94."
+            }
+        ]
     },
     {
         id: "aftermath",
@@ -222,7 +246,15 @@ export const historyTimelineData = [
         id: "gleason_donation",
         year: "1940",
         title: "Gleason Donation",
-        text: `On January 5, 1940, W. T. Gleason, husband of Annie C. Gleason, in a cash deed to Union Springs Missionary Baptist Church, donated a plot of land (150 feet by 150 feet), west of the road, across from the non-denominational church, to hold forever for church purposes only. At the time, W. T. Gleason was the only surviving member of the Board of Trustees of the Union Springs school and non-denominational church. He also made a cash donation of twenty-five dollars. Not wanting to be in debt, they bought additional materials needed as money was available; the men did the carpentry work themselves.`
+        text: `On January 5, 1940, W. T. Gleason, husband of Annie C. Gleason, in a cash deed to Union Springs Missionary Baptist Church, donated a plot of land (150 feet by 150 feet), west of the road, across from the non-denominational church, to hold forever for church purposes only. At the time, W. T. Gleason was the only surviving member of the Board of Trustees of the Union Springs school and non-denominational church. He also made a cash donation of twenty-five dollars. Not wanting to be in debt, they bought additional materials needed as money was available; the men did the carpentry work themselves.`,
+        media: [
+            {
+                type: "image",
+                url: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/8876a89d0_IMG-6922.jpg",
+                caption: "Graveyard working, Old Shongaloo Cemetery, ca. 1910",
+                source: "Courtesy of Tommie O'Bier"
+            }
+        ]
     },
     {
         id: "improvements",
