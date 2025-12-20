@@ -46,6 +46,7 @@ import TaskManager from "@/components/tasks/TaskManager";
 import MembersDirectory from "@/components/admin/MembersDirectory";
 import AdminSearch from "@/components/admin/AdminSearch";
 import AdminBylaws from "@/components/admin/AdminBylaws";
+import DataImportDialog from "@/components/admin/DataImportDialog";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -235,24 +236,7 @@ export default function AdminDashboard() {
                     <Database className="w-4 h-4 mr-2" /> Backup
                 </Button>
                 
-                <Button 
-                    size="sm"
-                    onClick={async () => {
-                        const loadingToastId = toast.loading('Importing data...');
-                        try {
-                            const { data } = await base44.functions.invoke('importCemeteryData', {}, { timeout: 60000 });
-                            if (data?.error) throw new Error(data.error);
-                            toast.success(`Imported ${data.plots_created} plots`, { id: loadingToastId });
-                            queryClient.invalidateQueries({ queryKey: ['plots-admin-list'] });
-                            queryClient.invalidateQueries({ queryKey: ['plots-admin'] });
-                        } catch (err) {
-                            toast.error(err.message || 'Import failed', { id: loadingToastId });
-                        }
-                    }} 
-                    className="bg-stone-800 text-white hover:bg-stone-900"
-                >
-                    <Upload className="w-4 h-4 md:mr-2" /> <span className="hidden md:inline">Import Legacy</span>
-                </Button>
+                <DataImportDialog />
             </div>
         </div>
 
