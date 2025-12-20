@@ -32,8 +32,8 @@ export default function DeceasedManager() {
         queryFn: async () => {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedSearch,
-                limit: 5000 // Fetch all records
-                });
+                limit: 10000 // Fetch all records
+            });
             return response.data;
         },
         placeholderData: keepPreviousData
