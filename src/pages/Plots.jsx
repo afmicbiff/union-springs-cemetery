@@ -855,7 +855,6 @@ export default function PlotsPage() {
                                         {sectionKey === '1' ? (
                                             <div className="flex gap-4 justify-center">
                                                 {(() => {
-                                                    // Define the 8 columns by ranges (Plots 1-184)
                                                     const ranges = [
                                                         { start: 1, end: 23 },
                                                         { start: 24, end: 46 },
@@ -863,18 +862,16 @@ export default function PlotsPage() {
                                                         { start: 70, end: 92 },
                                                         { start: 93, end: 115 },
                                                         { start: 116, end: 138 },
-                                                        { start: 139, end: 161 }, // Plots 140-161 stacked on top of 139
+                                                        { start: 139, end: 161 },
                                                         { start: 162, end: 186 }
                                                     ];
 
                                                     return ranges.map((range, idx) => {
-                                                        // Filter plots that belong to this column range
                                                         const colPlots = sections[sectionKey].filter(p => {
                                                             const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
                                                             return num >= range.start && num <= range.end;
                                                         });
 
-                                                        // Sort descending so the smallest number (e.g. 1) is at the bottom of the flex column
                                                         colPlots.sort((a, b) => {
                                                             const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
                                                             const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
@@ -896,6 +893,31 @@ export default function PlotsPage() {
                                                         );
                                                     });
                                                 })()}
+                                            </div>
+                                        ) : sectionKey === '2' ? (
+                                            <div className="flex justify-center overflow-x-auto">
+                                                 {/* Section 2: 10 columns x 23 rows grid. Data sorted Ascending by default. 
+                                                     We chunk into columns of 23, then reverse each column to have Highest ID at top (Descending visually). 
+                                                 */}
+                                                 <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))' }}>
+                                                    {(() => {
+                                                        const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+                                                        // Data is ascending. Chunk it to get columns (Left->Right).
+                                                        const columns = chunk(sections[sectionKey], 23);
+                                                        // Flatten after reversing each column to make them Top->Bottom (High->Low)
+                                                        const renderData = columns.flatMap(col => [...col].reverse());
+
+                                                        return renderData.map((plot) => (
+                                                            <GravePlot 
+                                                                key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                                data={plot} 
+                                                                baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                                onHover={handleHover}
+                                                                onEdit={isAdmin ? handleEditClick : undefined}
+                                                            />
+                                                        ));
+                                                    })()}
+                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="flex flex-col-reverse gap-2 content-center items-center">
