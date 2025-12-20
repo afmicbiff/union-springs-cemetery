@@ -104,8 +104,14 @@ export default Deno.serve(async (req) => {
                     created_at: new Date().toISOString()
                 });
             } else {
-                // Notify Admins (could be a specific list, for now just log/passive)
-                // In a real app, we might email the generic admin email if configured
+                // Notify Admins
+                await base44.asServiceRole.entities.Notification.create({
+                    message: `New message from ${user.email}: ${subject}`,
+                    type: 'info',
+                    user_email: null, // Null indicates system-wide / admin notification
+                    is_read: false,
+                    created_at: new Date().toISOString()
+                });
             }
 
             return Response.json({ success: true, message: newMessage });

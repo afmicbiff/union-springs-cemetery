@@ -257,13 +257,14 @@ export default function AdminDashboard() {
                         <TabsTrigger 
                             key={tab.id} 
                             value={tab.id} 
-                            className="
+                            className={`
                                 px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
                                 data-[state=active]:bg-teal-700 data-[state=active]:text-white
                                 hover:text-green-700 hover:bg-green-50
                                 flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
                                 min-w-[80px] md:min-w-0
-                            "
+                                ${tab.id === 'communication' ? 'ml-4 md:ml-0 md:col-span-2 px-6' : ''}
+                            `}
                         >
                             <span className="whitespace-nowrap">{tab.label}</span>
                         </TabsTrigger>
