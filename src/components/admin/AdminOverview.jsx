@@ -7,48 +7,12 @@ import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 import FollowUpWidget from "./FollowUpWidget";
 
 export default function AdminOverview() {
-    const { data: plots } = useQuery({
-        queryKey: ['plots-admin'],
-        queryFn: () => base44.entities.Plot.list({ limit: 1000 }), // Increased limit for accurate stats
-        initialData: [],
-    });
+
 
     return (
         <div className="space-y-6">
             <UserSummaryWidget />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Total Plots</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-stone-900">{plots.length}</div>
-                        <p className="text-xs text-stone-500 mt-1">Across all sections</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Available</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-teal-600">
-                            {plots.filter(p => p.status === 'Available').length}
-                        </div>
-                        <p className="text-xs text-stone-500 mt-1">Ready for reservation</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Occupied/Reserved</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-stone-700">
-                            {plots.filter(p => p.status !== 'Available').length}
-                        </div>
-                        <p className="text-xs text-stone-500 mt-1">Total interments & holds</p>
-                    </CardContent>
-                </Card>
-            </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <FollowUpWidget />
