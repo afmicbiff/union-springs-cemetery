@@ -68,7 +68,7 @@ export default function DeceasedManager() {
                         Manage deceased individuals, obituaries, and burial details.
                         <div className="flex gap-2 mt-2">
                             <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50" title={searchResults?.stats?.raw_total ? `Raw Database Records: ${searchResults.stats.raw_total}` : ''}>
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Individuals
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Deceased
                             </Badge>
                             <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_obituaries || 0)} Obituaries
@@ -104,6 +104,13 @@ export default function DeceasedManager() {
                         />
                     </div>
                     <div className="flex gap-2">
+                        <Button 
+                            variant="outline"
+                            onClick={() => setSearch('')}
+                            className="text-stone-600 border-stone-200 hover:bg-stone-50"
+                        >
+                            Show All Records
+                        </Button>
                         <Button 
                             variant="outline" 
                             className="text-red-600 border-red-200 hover:bg-red-50"
