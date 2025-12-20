@@ -71,7 +71,7 @@ export default function DeceasedManager() {
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Deceased
                             </Badge>
                             <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_obituaries || 0)} Obituaries
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.raw_total || 0)} All Records
                             </Badge>
                             <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50">
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} Reserved Plots
