@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import Fuse from 'npm:fuse.js@^7.0.0';
 
 export default Deno.serve(async (req) => {
     try {
@@ -124,36 +125,19 @@ export default Deno.serve(async (req) => {
             return null;
         };
 
-        const filtered = baseRecords.filter(record => {
+        // 1. First apply strict filters (non-fuzzy) to reduce dataset
+        let filtered = baseRecords.filter(record => {
             // Section
             if (section && section !== 'all') {
                 if (!record.plot_location || !record.plot_location.startsWith(section)) return false;
             }
 
-            // Family Name
+            // Family Name (kept as strict filter for specific field search)
             if (family_name) {
                 if (!record.family_name || !record.family_name.toLowerCase().includes(family_name.toLowerCase())) return false;
             }
 
-            // Query
-            if (query) {
-                const term = query.toLowerCase();
-                const firstName = record.first_name || '';
-                const lastName = record.last_name || '';
-                const fullName = `${firstName} ${lastName}`.toLowerCase();
-                const location = record.plot_location || '';
-                
-                const matches = 
-                    fullName.includes(term) || 
-                    lastName.toLowerCase().includes(term) ||
-                    location.toLowerCase().includes(term) ||
-                    (record.status && record.status.toLowerCase().includes(term));
-                
-                if (!matches) return false;
-            }
-
-            // Veteran Status (Explicit filter param, overrides status_filter='Veteran' if both present?)
-            // Usually 'veteran_status' param comes from the advanced filter dropdown.
+            // Veteran Status
             if (veteran_status && veteran_status !== 'all') {
                 const isVet = !!record.veteran_status;
                 if (veteran_status === 'true' && !isVet) return false;
@@ -166,7 +150,7 @@ export default Deno.serve(async (req) => {
                 if (birth_year_min && birthYear < parseInt(birth_year_min)) return false;
                 if (birth_year_max && birthYear > parseInt(birth_year_max)) return false;
             }
-            
+
             const deathYear = getYear(record.date_of_death);
             if (deathYear) {
                 if (death_year_min && deathYear < parseInt(death_year_min)) return false;
@@ -176,7 +160,35 @@ export default Deno.serve(async (req) => {
             return true;
         });
 
-        // Pagination
+        // 2. Apply Fuzzy Search if query exists
+        if (query) {
+            const fuse = new Fuse(filtered, {
+                keys: [
+                    { name: 'first_name', weight: 0.3 },
+                    { name: 'last_name', weight: 0.4 },
+                    { name: 'family_name', weight: 0.2 },
+                    { name: 'plot_location', weight: 0.3 },
+                    { name: 'obituary', weight: 0.1 },
+                    { name: 'notes', weight: 0.1 }
+                ],
+                threshold: 0.4, // Match algorithm sensitivity (0.0 = perfect match, 1.0 = match anything)
+                distance: 100,
+                includeScore: true
+            });
+
+            const fuzzyResults = fuse.search(query);
+            // Fuse returns { item, score, ... }. map back to item
+            filtered = fuzzyResults.map(result => result.item);
+        }
+
+        // Veteran Status logic was moved up to pre-filtering
+        /* 
+            // Veteran Status (Explicit filter param, overrides status_filter='Veteran' if both present?)
+
+            // Usually 'veteran_status' param comes from the advanced filter dropdown.
+            */
+
+              // Pagination
         const total = filtered.length;
         const totalPages = Math.ceil(total / limitNum);
         const startIndex = (pageNum - 1) * limitNum;

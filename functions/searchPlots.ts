@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import Fuse from 'npm:fuse.js@^7.0.0';
 
 export default Deno.serve(async (req) => {
     try {
@@ -27,21 +28,8 @@ export default Deno.serve(async (req) => {
             return isNaN(date.getFullYear()) ? null : date.getFullYear();
         };
 
-        const filtered = allPlots.filter(plot => {
-            // 1. General Search Query
-            if (query) {
-                const term = query.toLowerCase();
-                const searchable = [
-                    plot.plot_number || '', 
-                    plot.row_number || '', 
-                    plot.first_name || '', 
-                    plot.last_name || '', 
-                    plot.notes || '',
-                    plot.section || ''
-                ].join(' ').toLowerCase();
-                if (!searchable.includes(term)) return false;
-            }
-
+        // 1. Apply Filters (except query)
+        let filtered = allPlots.filter(plot => {
             // 2. Status Filter
             if (status && status !== 'All') {
                 const isVeteran = plot.status === 'Veteran' || (plot.notes && plot.notes.toLowerCase().includes('vet') && plot.status === 'Occupied');
