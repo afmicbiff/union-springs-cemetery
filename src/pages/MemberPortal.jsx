@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MemberDashboard from "@/components/member/MemberDashboard";
 import MemberProfile from "@/components/member/MemberProfile";
 import MemberMessages from "@/components/member/MemberMessages";
+import MemberDocuments from "@/components/member/MemberDocuments";
+import { FileText } from 'lucide-react';
 
 export default function MemberPortal() {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -59,6 +61,9 @@ export default function MemberPortal() {
                     <TabsTrigger value="messages" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <MessageSquare className="w-4 h-4 mr-2 md:inline hidden" /> Messages
                     </TabsTrigger>
+                    <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
+                        <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="dashboard" className="focus-visible:outline-none">
@@ -71,6 +76,10 @@ export default function MemberPortal() {
 
                 <TabsContent value="messages" className="focus-visible:outline-none">
                     <MemberMessages user={user} />
+                </TabsContent>
+
+                <TabsContent value="documents" className="focus-visible:outline-none">
+                    <MemberDocuments user={user} />
                 </TabsContent>
             </Tabs>
         </div>

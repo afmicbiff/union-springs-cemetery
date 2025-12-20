@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
                     created_at: new Date().toISOString()
                 }));
 
-                // 3. Send Emails to Attendees
+                // 3. Send Emails to Attendees (Employees)
                 if (event.attendee_ids && event.attendee_ids.length > 0) {
                     const attendees = employees.filter(emp => event.attendee_ids.includes(emp.id));
                     
@@ -96,6 +96,19 @@ Deno.serve(async (req) => {
                                 body: `Hello ${attendee.first_name},\n\nThis is a reminder that the event "${event.title}" is scheduled to begin in ${alertType} (${event.start_time}).\n\n- Union Springs Admin`
                             }));
                         }
+                    }
+                }
+
+                // 4. Send Emails to External Attendees (Members/Guests)
+                if (event.external_attendees && event.external_attendees.length > 0) {
+                    for (const guest of event.external_attendees) {
+                         if (guest.email && guest.status !== 'declined') {
+                            emails.push(base44.integrations.Core.SendEmail({
+                                to: guest.email,
+                                subject: `Event Reminder: ${event.title}`,
+                                body: `Hello ${guest.name},\n\nThis is a friendly reminder that the event "${event.title}" is scheduled for ${new Date(event.start_time).toLocaleString()}.\n\nWe look forward to seeing you.\n\nUnion Springs Cemetery\n(555) 123-4567`
+                            }));
+                         }
                     }
                 }
             }
