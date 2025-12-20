@@ -61,7 +61,17 @@ export default function DeceasedManager() {
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                 <div className="space-y-1.5">
                     <CardTitle>Deceased Records</CardTitle>
-                    <CardDescription>Manage deceased individuals, obituaries, and burial details.</CardDescription>
+                    <CardDescription>
+                        Manage deceased individuals, obituaries, and burial details.
+                        <div className="flex gap-2 mt-2">
+                            <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50">
+                                {searchResults?.stats?.total_records || 0} Total Records
+                            </Badge>
+                            <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
+                                {searchResults?.stats?.total_obituaries || 0} Obituaries
+                            </Badge>
+                        </div>
+                    </CardDescription>
                 </div>
                 <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
                     <Plus className="w-4 h-4 mr-2" /> Add Record

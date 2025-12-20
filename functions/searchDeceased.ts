@@ -89,6 +89,10 @@ export default Deno.serve(async (req) => {
         const startIndex = (pageNum - 1) * limitNum;
         const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
 
+        // Calculate stats
+        const totalRecords = allDeceased.length;
+        const totalObituaries = allDeceased.filter(d => d.obituary && d.obituary.trim().length > 0).length;
+
         return Response.json({ 
             results: paginatedResults,
             pagination: {
@@ -96,6 +100,10 @@ export default Deno.serve(async (req) => {
                 page: pageNum,
                 limit: limitNum,
                 totalPages
+            },
+            stats: {
+                total_records: totalRecords,
+                total_obituaries: totalObituaries
             }
         });
     } catch (error) {
