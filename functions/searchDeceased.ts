@@ -22,7 +22,11 @@ export default Deno.serve(async (req) => {
 
         // Fetch all records - using service role to ensure we get full count including any potential visibility issues
         // Although admin should see all, this guarantees the stats are for the DB
-        const allDeceased = await base44.asServiceRole.entities.Deceased.list('-created_date', 5000);
+        const [allDeceased, allPlots] = await Promise.all([
+            base44.asServiceRole.entities.Deceased.list('-created_date', 5000),
+            base44.asServiceRole.entities.Plot.list(null, 5000)
+        ]);
+        const reservedPlotsCount = allPlots.filter(p => p.status === 'Reserved').length;
 
         const getYear = (dateStr) => {
             if (!dateStr) return null;
