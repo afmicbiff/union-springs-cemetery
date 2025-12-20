@@ -90,9 +90,22 @@ export default Deno.serve(async (req) => {
         const startIndex = (pageNum - 1) * limitNum;
         const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
 
-        // Calculate stats
-        const totalRecords = allDeceased.length;
-        const totalObituaries = allDeceased.filter(d => d.obituary && d.obituary.trim().length > 0).length;
+        // Calculate stats with deduplication to handle potential double-imports
+        // We consider a record unique based on First Name + Last Name + Birth Date + Death Date
+        const uniqueKeys = new Set();
+        const uniqueObituaries = new Set();
+        
+        allDeceased.forEach(d => {
+            const key = `${d.first_name || ''}|${d.last_name || ''}|${d.date_of_birth || ''}|${d.date_of_death || ''}`.toLowerCase();
+            uniqueKeys.add(key);
+            
+            if (d.obituary && d.obituary.trim().length > 0) {
+                uniqueObituaries.add(key);
+            }
+        });
+
+        const totalUniqueRecords = uniqueKeys.size;
+        const totalUniqueObituaries = uniqueObituaries.size;
 
         return Response.json({ 
             results: paginatedResults,
@@ -103,8 +116,9 @@ export default Deno.serve(async (req) => {
                 totalPages
             },
             stats: {
-                total_records: totalRecords,
-                total_obituaries: totalObituaries
+                total_records: totalUniqueRecords, // Display unique individuals
+                total_obituaries: totalUniqueObituaries,
+                raw_total: allDeceased.length // Keep raw count for debugging
             }
         });
     } catch (error) {

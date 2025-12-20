@@ -64,8 +64,8 @@ export default function DeceasedManager() {
                     <CardDescription>
                         Manage deceased individuals, obituaries, and burial details.
                         <div className="flex gap-2 mt-2">
-                            <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50">
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Total Records
+                            <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50" title={searchResults?.stats?.raw_total ? `Raw Database Records: ${searchResults.stats.raw_total}` : ''}>
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Individuals
                             </Badge>
                             <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_obituaries || 0)} Obituaries
