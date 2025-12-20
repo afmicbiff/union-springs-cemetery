@@ -814,12 +814,12 @@ export default function PlotsPage() {
             {/* Map Canvas */}
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
-                    {/* LAYOUT UPDATE: Sections sorted Descending (5 -> 1) */}
+                    {/* Sections 1-5 Sorted Ascending */}
                     {Object.keys(sections).sort((a, b) => {
                         const numA = parseInt(a);
                         const numB = parseInt(b);
-                        if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order
-                        return b.localeCompare(a); // DESCENDING order for text
+                        if (!isNaN(numA) && !isNaN(numB)) return numA - numB; // ASCENDING order (1 -> 5)
+                        return a.localeCompare(b);
                     }).map((sectionKey, index) => {
                         const palette = SECTION_PALETTES[index % SECTION_PALETTES.length];
                         const [bgColor, borderColor, textColor] = palette.split(' ');
