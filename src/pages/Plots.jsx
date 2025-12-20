@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -370,6 +370,20 @@ export default function PlotsPage() {
       }
   });
 
+  const cleanupMutation = useMutation({
+      mutationFn: async () => {
+          const res = await base44.functions.invoke('cleanupSection1Duplicates', {});
+          return res.data;
+      },
+      onSuccess: (data) => {
+          queryClient.invalidateQueries({ queryKey: ['plots'] });
+          toast.success(data.message || "Cleanup complete");
+      },
+      onError: (err) => {
+          toast.error(`Cleanup failed: ${err.message}`);
+      }
+  });
+
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
       return plotEntities.map(p => ({
@@ -699,11 +713,27 @@ export default function PlotsPage() {
             </div>
 
             {isAdmin && (
-            <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
-                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
-                <span className="font-medium text-sm">Import CSV</span>
-                <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
-            </label>
+            <div className="flex gap-2">
+                <Button 
+                    variant="outline" 
+                    className="text-red-600 border-red-200 hover:bg-red-50"
+                    onClick={() => {
+                        if(confirm("Are you sure you want to run the duplicate cleanup? This will delete duplicate plots in Section 1, keeping the ones with the most data.")) {
+                            cleanupMutation.mutate();
+                        }
+                    }}
+                    disabled={cleanupMutation.isPending}
+                >
+                    {cleanupMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Trash2 className="mr-2 h-4 w-4" />}
+                    Cleanup Duplicates
+                </Button>
+
+                <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
+                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
+                    <span className="font-medium text-sm">Import CSV</span>
+                    <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
+                </label>
+            </div>
             )}
           </div>
         </div>
