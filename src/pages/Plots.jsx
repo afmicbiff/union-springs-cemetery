@@ -782,29 +782,48 @@ export default function PlotsPage() {
                                         overflow-x-auto
                                     `}>
                                         {sectionKey === '1' ? (
-                                            <div 
-                                              className="grid gap-2 content-start justify-center"
-                                              style={{ 
-                                                  gridTemplateRows: 'repeat(23, min-content)',
-                                                  gridAutoFlow: 'column'
-                                              }}
-                                            >
+                                            <div className="flex gap-4 justify-center">
                                                 {(() => {
-                                                    const items = [...sections[sectionKey]];
-                                                    const chunkSize = 23;
-                                                    const reordered = [];
-                                                    for (let i = 0; i < items.length; i += chunkSize) {
-                                                        reordered.push(...items.slice(i, i + chunkSize).reverse());
-                                                    }
-                                                    return reordered.map((plot) => (
-                                                        <GravePlot 
-                                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                            data={plot} 
-                                                            baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                            onHover={handleHover}
-                                                            onEdit={isAdmin ? handleEditClick : undefined}
-                                                        />
-                                                    ));
+                                                    // Define the 8 columns by ranges
+                                                    const ranges = [
+                                                        { start: 1, end: 23 },
+                                                        { start: 24, end: 46 },
+                                                        { start: 47, end: 69 },
+                                                        { start: 70, end: 92 },
+                                                        { start: 93, end: 115 },
+                                                        { start: 116, end: 138 },
+                                                        { start: 139, end: 161 },
+                                                        { start: 162, end: 184 }
+                                                    ];
+
+                                                    return ranges.map((range, idx) => {
+                                                        // Filter plots that belong to this column range
+                                                        const colPlots = sections[sectionKey].filter(p => {
+                                                            const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                            return num >= range.start && num <= range.end;
+                                                        });
+
+                                                        // Sort descending so the smallest number (e.g. 1) is at the bottom of the flex column
+                                                        colPlots.sort((a, b) => {
+                                                            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
+                                                            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
+                                                            return numB - numA;
+                                                        });
+
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-2 justify-end">
+                                                                {colPlots.map((plot) => (
+                                                                    <GravePlot 
+                                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                                        data={plot} 
+                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                                        onHover={handleHover}
+                                                                        onEdit={isAdmin ? handleEditClick : undefined}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    });
                                                 })()}
                                             </div>
                                         ) : (
