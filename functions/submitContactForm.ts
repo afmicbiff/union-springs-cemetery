@@ -19,6 +19,7 @@ Deno.serve(async (req) => {
         // Using a placeholder admin email - in production this would be the actual office email
         const adminEmail = "office@unionsprings.com"; 
         
+        // Send Email
         await base44.integrations.Core.SendEmail({
             to: adminEmail,
             subject: `New Contact Inquiry: ${subject || 'General Inquiry'}`,
@@ -37,6 +38,15 @@ ${message}
 
 Please reply to the user at ${email}.
             `
+        });
+
+        // Create In-App Notification for Admin
+        await base44.asServiceRole.entities.Notification.create({
+            message: `New Contact Inquiry from ${name}: ${subject || 'No Subject'}`,
+            type: "info",
+            is_read: false,
+            user_email: null, // System-wide / Admin
+            created_at: new Date().toISOString()
         });
 
         // 2. Send acknowledgement to User

@@ -74,8 +74,9 @@ export default function AdminDashboard() {
   // Notifications for Header
   const { data: notifications } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => base44.entities.Notification.list({ limit: 10 }),
+    queryFn: () => base44.entities.Notification.list('-created_at', 20),
     initialData: [],
+    refetchInterval: 30000,
   });
 
   // Background polling for reminders
