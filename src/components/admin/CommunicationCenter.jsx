@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb, Megaphone, X } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
 
@@ -36,6 +36,9 @@ export default function CommunicationCenter() {
                         <TabsTrigger value="campaigns" className="flex items-center gap-2">
                             <Sparkles className="w-4 h-4" /> AI Campaigns
                         </TabsTrigger>
+                        <TabsTrigger value="home-alert" className="flex items-center gap-2">
+                            <Megaphone className="w-4 h-4" /> Home Page
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="inbox">
@@ -48,6 +51,10 @@ export default function CommunicationCenter() {
 
                     <TabsContent value="campaigns">
                         <CampaignSuggestions />
+                    </TabsContent>
+
+                    <TabsContent value="home-alert">
+                        <HomeNotificationManager />
                     </TabsContent>
                 </Tabs>
             </CardContent>
@@ -104,6 +111,106 @@ function CampaignSuggestions() {
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+
+function HomeNotificationManager() {
+    const [message, setMessage] = React.useState('');
+    const queryClient = useQueryClient();
+
+    const { data: activeNotifications, isLoading } = useQuery({
+        queryKey: ['home-notifications'],
+        queryFn: () => base44.entities.HomeNotification.list('-created_at', 5),
+    });
+
+    const createMutation = useMutation({
+        mutationFn: (msg) => base44.entities.HomeNotification.create({ 
+            message: msg, 
+            is_active: true,
+            created_at: new Date().toISOString()
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['home-notifications']);
+            setMessage('');
+            toast.success("Notification posted to home page");
+        }
+    });
+
+    const toggleMutation = useMutation({
+        mutationFn: ({ id, is_active }) => base44.entities.HomeNotification.update(id, { is_active }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['home-notifications']);
+            toast.success("Notification updated");
+        }
+    });
+
+    const activeNotification = activeNotifications?.find(n => n.is_active);
+
+    return (
+        <div className="space-y-6">
+            <Card className="bg-stone-50">
+                <CardHeader>
+                    <CardTitle className="text-base">Publish Home Page Notification</CardTitle>
+                    <CardDescription>
+                        This message will appear at the top of the home page for all visitors until dismissed or deactivated.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Notification Message</label>
+                        <textarea 
+                            className="w-full min-h-[100px] p-3 rounded-md border border-stone-300 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                            placeholder="e.g. The cemetery office will be closed on July 4th..."
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                        />
+                    </div>
+                    <Button 
+                        onClick={() => createMutation.mutate(message)}
+                        disabled={!message.trim() || createMutation.isPending}
+                        className="bg-teal-700 hover:bg-teal-800"
+                    >
+                        {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Megaphone className="w-4 h-4 mr-2" />}
+                        Post to Home Page
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <div className="space-y-4">
+                <h3 className="font-medium text-stone-900">Recent Notifications</h3>
+                {isLoading ? (
+                    <div className="p-4 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>
+                ) : activeNotifications?.length === 0 ? (
+                    <p className="text-stone-500 italic">No notifications found.</p>
+                ) : (
+                    activeNotifications?.map(note => (
+                        <Card key={note.id} className="bg-white">
+                            <CardContent className="p-4 flex justify-between items-start gap-4">
+                                <div>
+                                    <p className="text-stone-800 font-medium">{note.message}</p>
+                                    <p className="text-xs text-stone-400 mt-1">Posted: {new Date(note.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <span className={`text-xs px-2 py-1 rounded-full ${note.is_active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500'}`}>
+                                        {note.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                    {note.is_active && (
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            onClick={() => toggleMutation.mutate({ id: note.id, is_active: false })}
+                                            className="text-red-600 border-red-200 hover:bg-red-50 h-8"
+                                        >
+                                            Deactivate
+                                        </Button>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
         </div>
     );
 }
