@@ -380,9 +380,11 @@ export default function PlotsPage() {
           toast.success(data.message || "Cleanup complete");
       },
       onError: (err) => {
-          toast.error(`Cleanup failed: ${err.message}`);
+          // Try to extract backend error message if available
+          const msg = err.response?.data?.error || err.message;
+          toast.error(`Cleanup failed: ${msg}`);
       }
-  });
+      });
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
