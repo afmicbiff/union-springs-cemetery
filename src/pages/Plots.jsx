@@ -789,15 +789,23 @@ export default function PlotsPage() {
                                                   gridAutoFlow: 'column'
                                               }}
                                             >
-                                                {sections[sectionKey].map((plot) => (
-                                                    <GravePlot 
-                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                        data={plot} 
-                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                        onHover={handleHover}
-                                                        onEdit={isAdmin ? handleEditClick : undefined}
-                                                    />
-                                                ))}
+                                                {(() => {
+                                                    const items = [...sections[sectionKey]];
+                                                    const chunkSize = 23;
+                                                    const reordered = [];
+                                                    for (let i = 0; i < items.length; i += chunkSize) {
+                                                        reordered.push(...items.slice(i, i + chunkSize).reverse());
+                                                    }
+                                                    return reordered.map((plot) => (
+                                                        <GravePlot 
+                                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                            data={plot} 
+                                                            baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                            onHover={handleHover}
+                                                            onEdit={isAdmin ? handleEditClick : undefined}
+                                                        />
+                                                    ));
+                                                })()}
                                             </div>
                                         ) : (
                                             <div className="flex flex-col-reverse gap-2 content-center items-center">
