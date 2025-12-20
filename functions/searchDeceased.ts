@@ -101,6 +101,7 @@ export default Deno.serve(async (req) => {
         // We consider a record unique based on First Name + Last Name + Birth Date + Death Date
         const uniqueKeys = new Set();
         const uniqueObituaries = new Set();
+        const uniqueVeterans = new Set();
         
         allDeceased.forEach(d => {
             const key = `${d.first_name || ''}|${d.last_name || ''}|${d.date_of_birth || ''}|${d.date_of_death || ''}`.toLowerCase();
@@ -109,10 +110,15 @@ export default Deno.serve(async (req) => {
             if (d.obituary && d.obituary.trim().length > 0) {
                 uniqueObituaries.add(key);
             }
+
+            if (!!d.veteran_status) {
+                uniqueVeterans.add(key);
+            }
         });
 
         const totalUniqueRecords = uniqueKeys.size;
         const totalUniqueObituaries = uniqueObituaries.size;
+        const totalUniqueVeterans = uniqueVeterans.size;
 
         return Response.json({ 
             results: paginatedResults,
@@ -125,6 +131,7 @@ export default Deno.serve(async (req) => {
             stats: {
                 total_records: totalUniqueRecords, // Display unique individuals
                 total_obituaries: totalUniqueObituaries,
+                total_veterans: totalUniqueVeterans,
                 total_reserved: reservedPlotsCount,
                 total_available: availablePlotsCount,
                 total_not_usable: notUsablePlotsCount,

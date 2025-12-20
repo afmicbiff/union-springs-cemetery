@@ -85,6 +85,9 @@ export default function DeceasedManager() {
                             <Badge variant="outline" className="text-purple-700 border-purple-200 bg-purple-50">
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_unknown || 0)} Unknown
                             </Badge>
+                            <Badge variant="outline" className="text-blue-700 border-blue-200 bg-blue-50">
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} Veterans
+                            </Badge>
                         </div>
                     </CardDescription>
                 </div>
