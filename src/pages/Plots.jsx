@@ -824,8 +824,8 @@ export default function PlotsPage() {
                                                         { start: 70, end: 92 },
                                                         { start: 93, end: 115 },
                                                         { start: 116, end: 138 },
-                                                        { start: 139, end: 163 }, // Plots 140-163 stacked on top of 139
-                                                        { start: 164, end: 186 }
+                                                        { start: 139, end: 161 }, // Plots 140-161 stacked on top of 139
+                                                        { start: 162, end: 186 }
                                                     ];
 
                                                     return ranges.map((range, idx) => {
