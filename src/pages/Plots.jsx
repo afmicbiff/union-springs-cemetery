@@ -784,7 +784,7 @@ export default function PlotsPage() {
                                         {sectionKey === '1' ? (
                                             <div className="flex gap-4 justify-center">
                                                 {(() => {
-                                                    // Define the 8 columns by ranges
+                                                    // Define the 8 columns by ranges (Plots 1-184)
                                                     const ranges = [
                                                         { start: 1, end: 23 },
                                                         { start: 24, end: 46 },
@@ -792,7 +792,7 @@ export default function PlotsPage() {
                                                         { start: 70, end: 92 },
                                                         { start: 93, end: 115 },
                                                         { start: 116, end: 138 },
-                                                        { start: 139, end: 161 },
+                                                        { start: 139, end: 161 }, // Plots 140-161 stacked on top of 139
                                                         { start: 162, end: 184 }
                                                     ];
 
