@@ -525,21 +525,28 @@ export default function PlotsPage() {
   }, [filteredData]);
 
   const processSections = (data) => {
-    const grouped = {};
-    
+    // Initialize strictly with Sections 1-5
+    const grouped = {
+        '1': [],
+        '2': [],
+        '3': [],
+        '4': [],
+        '5': []
+    };
+
     data.forEach(item => {
         let sectionKey = item.Section || '';
-        
-        if (!sectionKey) {
-            const rowID = item.Row || '';
-            const rowMatch = rowID.match(/^[A-Za-z]+/);
-            sectionKey = rowMatch ? `Row ${rowMatch[0]}` : 'Unassigned';
-        } else {
-            sectionKey = sectionKey.replace(/Section\s*/i, '').trim();
+
+        // Normalize section key (e.g. "Section 1" -> "1")
+        if (sectionKey) {
+             sectionKey = sectionKey.replace(/Section\s*/i, '').trim();
         }
-        
-        if (!grouped[sectionKey]) grouped[sectionKey] = [];
-        grouped[sectionKey].push(item);
+
+        // Only add if it maps to valid sections 1-5
+        if (grouped[sectionKey]) {
+            grouped[sectionKey].push(item);
+        }
+        // Data not matching 1-5 (like 'Row D') is effectively filtered out/deleted from view
     });
 
     // Sort items within sections by Grave number
