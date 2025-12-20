@@ -33,6 +33,7 @@ import { Loader2 } from 'lucide-react';
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminReservations from "@/components/admin/AdminReservations";
 import AdminPlots from "@/components/admin/AdminPlots";
+import DeceasedManager from "@/components/admin/DeceasedManager";
 import OnboardingForm from "@/components/admin/OnboardingForm";
 import OnboardingProgress from "@/components/admin/OnboardingProgress";
 import OnboardingGuide from "@/components/admin/OnboardingGuide";
@@ -156,6 +157,7 @@ export default function AdminDashboard() {
 
   const tabs = [
       { id: "overview", label: "Overview", icon: LayoutDashboard, component: <AdminOverview /> },
+      { id: "deceased", label: "Deceased", icon: Users, component: <DeceasedManager /> },
       { id: "reservations", label: "Sales", icon: DollarSign, component: <AdminReservations /> },
       { id: "plots", label: "Plots", icon: Map, component: <AdminPlots /> },
       { id: "onboarding", label: "Onboarding", icon: UserPlus, component: (
