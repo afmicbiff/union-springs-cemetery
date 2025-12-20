@@ -811,7 +811,7 @@ export default function PlotsPage() {
                                                         });
 
                                                         return (
-                                                            <div key={idx} className="flex flex-col gap-2 justify-end">
+                                                            <div key={idx} className="flex flex-col gap-1 justify-end">
                                                                 {colPlots.map((plot) => (
                                                                     <GravePlot 
                                                                         key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
