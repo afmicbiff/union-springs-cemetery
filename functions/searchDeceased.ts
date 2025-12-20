@@ -20,8 +20,9 @@ export default Deno.serve(async (req) => {
         const pageNum = Math.max(1, parseInt(page));
         const limitNum = Math.max(1, parseInt(limit));
 
-        // Fetch all records
-        const allDeceased = await base44.entities.Deceased.list('-created_date', 5000);
+        // Fetch all records - using service role to ensure we get full count including any potential visibility issues
+        // Although admin should see all, this guarantees the stats are for the DB
+        const allDeceased = await base44.asServiceRole.entities.Deceased.list('-created_date', 5000);
 
         const getYear = (dateStr) => {
             if (!dateStr) return null;

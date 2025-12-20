@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,7 @@ export default function DeceasedManager() {
             });
             return response.data;
         },
-        keepPreviousData: true
+        placeholderData: keepPreviousData
     });
 
     const filteredList = (searchResults?.results || []).sort((a, b) => {
@@ -65,10 +65,10 @@ export default function DeceasedManager() {
                         Manage deceased individuals, obituaries, and burial details.
                         <div className="flex gap-2 mt-2">
                             <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50">
-                                {searchResults?.stats?.total_records || 0} Total Records
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Total Records
                             </Badge>
                             <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
-                                {searchResults?.stats?.total_obituaries || 0} Obituaries
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_obituaries || 0)} Obituaries
                             </Badge>
                         </div>
                     </CardDescription>
