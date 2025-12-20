@@ -774,23 +774,44 @@ export default function PlotsPage() {
                                     </span>
                                 </div>
                                 
-                                {/* SECTION CONTAINER: flex-wrap-reverse starts items from bottom-left */}
+                                {/* SECTION CONTAINER */}
                                 {!isCollapsed && (
                                     <div className={`
                                         rounded-xl border-2 border-dashed p-6 transition-colors duration-500
                                         ${borderColor} ${bgColor} bg-opacity-30
+                                        overflow-x-auto
                                     `}>
-                                        <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                            {sections[sectionKey].map((plot) => (
-                                                <GravePlot 
-                                                    key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                    data={plot} 
-                                                    baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                    onHover={handleHover}
-                                                    onEdit={isAdmin ? handleEditClick : undefined}
-                                                />
-                                            ))}
-                                        </div>
+                                        {sectionKey === '1' ? (
+                                            <div 
+                                              className="grid gap-2 content-start justify-center"
+                                              style={{ 
+                                                  gridTemplateRows: 'repeat(23, min-content)',
+                                                  gridAutoFlow: 'column'
+                                              }}
+                                            >
+                                                {sections[sectionKey].map((plot) => (
+                                                    <GravePlot 
+                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                        data={plot} 
+                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                        onHover={handleHover}
+                                                        onEdit={isAdmin ? handleEditClick : undefined}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col-reverse gap-2 content-center items-center">
+                                                {sections[sectionKey].map((plot) => (
+                                                    <GravePlot 
+                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                        data={plot} 
+                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                        onHover={handleHover}
+                                                        onEdit={isAdmin ? handleEditClick : undefined}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
