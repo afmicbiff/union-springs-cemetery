@@ -161,11 +161,6 @@ export default function MemorialPage() {
                         <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('copy')}>
                             <LinkIcon className="w-4 h-4 mr-2" /> Copy Link
                         </Button>
-                        <Link to={createPageUrl('Profile')}>
-                            <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white">
-                                <UserCircle className="w-4 h-4 mr-2" /> Profile
-                            </Button>
-                        </Link>
                     </div>
                         </div>
                         </div>
@@ -323,11 +318,6 @@ export default function MemorialPage() {
                                             <Button type="submit" disabled={condolenceMutation.isPending} className="w-full bg-teal-700 hover:bg-teal-800">
                                                 {condolenceMutation.isPending ? "Posting..." : "Post Tribute"}
                                             </Button>
-                                            {!currentUser && (
-                                                <p className="text-xs text-center text-stone-500">
-                                                    <Link to={createPageUrl('Profile')} className="underline hover:text-teal-700">Sign in</Link> to save your details for next time.
-                                                </p>
-                                            )}
                                         </form>
                                     </CardContent>
                                 </Card>
