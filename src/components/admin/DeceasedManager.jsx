@@ -76,6 +76,9 @@ export default function DeceasedManager() {
                             <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50">
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} Reserved Plots
                             </Badge>
+                            <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} Available Plots
+                            </Badge>
                         </div>
                     </CardDescription>
                 </div>

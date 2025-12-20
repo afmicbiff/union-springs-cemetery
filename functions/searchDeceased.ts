@@ -27,6 +27,7 @@ export default Deno.serve(async (req) => {
             base44.asServiceRole.entities.Plot.list(null, 5000)
         ]);
         const reservedPlotsCount = allPlots.filter(p => p.status === 'Reserved').length;
+        const availablePlotsCount = allPlots.filter(p => p.status === 'Available').length;
 
         const getYear = (dateStr) => {
             if (!dateStr) return null;
@@ -123,6 +124,7 @@ export default Deno.serve(async (req) => {
                 total_records: totalUniqueRecords, // Display unique individuals
                 total_obituaries: totalUniqueObituaries,
                 total_reserved: reservedPlotsCount,
+                total_available: availablePlotsCount,
                 raw_total: allDeceased.length // Keep raw count for debugging
             }
         });
