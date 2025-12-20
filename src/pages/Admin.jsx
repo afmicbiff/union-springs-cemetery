@@ -48,6 +48,7 @@ import AdminSearch from "@/components/admin/AdminSearch";
 import AdminBylaws from "@/components/admin/AdminBylaws";
 import DataImportDialog from "@/components/admin/DataImportDialog";
 import BackupManager from "@/components/admin/BackupManager";
+import CommunicationCenter from "@/components/admin/CommunicationCenter";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -180,6 +181,7 @@ export default function AdminDashboard() {
       { id: "members", label: "Members", component: <MembersDirectory /> },
       { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
       { id: "backups", label: "Backups", component: <BackupManager /> },
+      { id: "communication", label: "Communications", component: <CommunicationCenter /> },
   ];
 
   return (
