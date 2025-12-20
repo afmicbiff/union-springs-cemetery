@@ -100,52 +100,9 @@ export default Deno.serve(async (req) => {
             if (plotMap.has(plotKey)) {
                 const existingPlot = plotMap.get(plotKey);
                 plotId = existingPlot.id;
-                // Check if update needed (Status or Missing Info)
-                const updates = {};
-                let hasUpdates = false;
-
-                // 1. Status Update (Logic: Trust import, or only if current is Available?)
-                // User said: "fill out the plots if the data is missing"
-                // Let's update status if it differs, but prioritize "Occupied" over "Available" if conflict?
-                // For now, let's assume if CSV says Occupied, we update.
+                // Check if update needed
                 if (existingPlot.status !== status) {
-                    // Safety: Don't overwrite an existing Occupied/Reserved status with 'Available' from CSV unless sure.
-                    // But if CSV says Occupied, definitely update.
-                    if (status !== 'Available' || (existingPlot.status === 'Available' || !existingPlot.status)) {
-                        updates.status = status;
-                        hasUpdates = true;
-                    }
-                }
-
-                // 2. Missing Data Check
-                // Map CSV fields to Entity fields
-                const csvFirst = getVal('First Name');
-                const csvLast = getVal('Last Name');
-                const csvFamily = getVal('Family Name');
-                const csvBirth = formatDate(getVal('Birth'));
-                const csvDeath = formatDate(getVal('Death'));
-                const csvNotes = getVal('Notes');
-
-                const fieldMap = {
-                    'first_name': csvFirst,
-                    'last_name': csvLast,
-                    'family_name': csvFamily,
-                    'birth_date': csvBirth,
-                    'death_date': csvDeath,
-                    'notes': csvNotes
-                };
-
-                for (const [field, newVal] of Object.entries(fieldMap)) {
-                    const currentVal = existingPlot[field];
-                    // If current is empty/null and new value exists, update
-                    if ((!currentVal || currentVal === '') && (newVal && newVal !== '')) {
-                        updates[field] = newVal;
-                        hasUpdates = true;
-                    }
-                }
-
-                if (hasUpdates) {
-                    plotsToUpdate.push({ id: existingPlot.id, ...updates });
+                    plotsToUpdate.push({ id: existingPlot.id, status });
                 }
             } else {
                 // Prepare for creation
@@ -220,10 +177,8 @@ export default Deno.serve(async (req) => {
         }
 
         // B. Update Existing Plots (Concurrent limit)
-        const updatePlot = async (p) => {
-            const { id, ...data } = p;
-            return base44.entities.Plot.update(id, data);
-        };
+        // Use a concurrency limiter helper
+        const updatePlot = async (p) => base44.entities.Plot.update(p.id, { status: p.status });
         // Process in chunks of 20
         for (let i = 0; i < plotsToUpdate.length; i += 20) {
             const chunk = plotsToUpdate.slice(i, i + 20);

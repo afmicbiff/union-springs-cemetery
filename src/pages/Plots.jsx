@@ -723,30 +723,6 @@ export default function PlotsPage() {
             <div className="flex gap-2">
                 <Button 
                     variant="outline" 
-                    className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                    onClick={async () => {
-                        if(confirm("Run full data import/update from server file? This will update existing plots with missing data.")) {
-                            toast.info("Starting import...");
-                            try {
-                                const res = await base44.functions.invoke('importCemeteryData');
-                                if(res.data.success) {
-                                    toast.success(res.data.message);
-                                    queryClient.invalidateQueries({ queryKey: ['plots'] });
-                                } else {
-                                    toast.error("Import failed: " + res.data.message);
-                                }
-                            } catch(e) {
-                                toast.error("Import error: " + e.message);
-                            }
-                        }
-                    }}
-                >
-                    <Database className="mr-2 h-4 w-4" />
-                    Update Data
-                </Button>
-
-                <Button 
-                    variant="outline" 
                     className="text-red-600 border-red-200 hover:bg-red-50"
                     onClick={() => {
                         if(confirm("Are you sure you want to run the duplicate cleanup? This will delete duplicate plots in Section 1, keeping the ones with the most data.")) {
