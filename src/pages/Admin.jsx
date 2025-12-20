@@ -45,6 +45,7 @@ import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import TaskManager from "@/components/tasks/TaskManager";
 import MembersDirectory from "@/components/admin/MembersDirectory";
 import AdminSearch from "@/components/admin/AdminSearch";
+import AdminBylaws from "@/components/admin/AdminBylaws";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -156,25 +157,26 @@ export default function AdminDashboard() {
   };
 
   const tabs = [
-      { id: "overview", label: "Overview", icon: LayoutDashboard, component: <AdminOverview /> },
-      { id: "deceased", label: "Deceased", icon: Users, component: <DeceasedManager /> },
-      { id: "reservations", label: "Sales", icon: DollarSign, component: <AdminReservations /> },
-      { id: "plots", label: "Plots", icon: Map, component: <AdminPlots /> },
-      { id: "onboarding", label: "Onboarding", icon: UserPlus, component: (
+      { id: "overview", label: "Overview", component: <AdminOverview /> },
+      { id: "deceased", label: "Deceased", component: <DeceasedManager /> },
+      { id: "reservations", label: "Sales", component: <AdminReservations /> },
+      { id: "plots", label: "Plots", component: <AdminPlots /> },
+      { id: "onboarding", label: "Onboarding", component: (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-1 space-y-6"><OnboardingForm /></div>
               <div className="xl:col-span-1 space-y-6"><OnboardingProgress /></div>
               <div className="xl:col-span-1"><OnboardingGuide /></div>
           </div>
       )},
-      { id: "employees", label: "Employees", icon: Users, component: <EmployeeList view="active" /> },
-      { id: "archives", label: "Archives", icon: Archive, component: <EmployeeList view="archived" /> },
-      { id: "vendors", label: "Vendors", icon: Truck, component: <VendorManager /> },
-      { id: "security", label: "Security", icon: Shield, component: <AdminSecurity /> },
-      { id: "calendar", label: "Calendar", icon: Calendar, component: <EventCalendar /> },
-      { id: "announcements", label: "News", icon: Megaphone, component: <AnnouncementManager /> },
-      { id: "tasks", label: "Tasks", icon: CheckSquare, component: <TaskManager isAdmin={true} /> },
-      { id: "members", label: "Members", icon: Users, component: <MembersDirectory /> },
+      { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
+      { id: "archives", label: "Archives", component: <EmployeeList view="archived" /> },
+      { id: "vendors", label: "Vendors", component: <VendorManager /> },
+      { id: "security", label: "Security", component: <AdminSecurity /> },
+      { id: "calendar", label: "Calendar", component: <EventCalendar /> },
+      { id: "announcements", label: "News", component: <AnnouncementManager /> },
+      { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
+      { id: "members", label: "Members", component: <MembersDirectory /> },
+      { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
   ];
 
   return (
@@ -229,16 +231,6 @@ export default function AdminDashboard() {
                     </PopoverContent>
                 </Popover>
 
-                <Button onClick={() => setActiveTab('onboarding')} variant="outline" size="sm" className="hidden md:flex border-stone-300 text-stone-700 hover:bg-stone-50">
-                    <UserPlus className="w-4 h-4 mr-2" /> Onboarding
-                </Button>
-
-                <Link to={createPageUrl('Bylaws')}>
-                    <Button variant="outline" size="sm" className="hidden md:flex border-stone-300 text-stone-700 hover:bg-stone-50">
-                        <FileText className="w-4 h-4 mr-2" /> View Bylaws
-                    </Button>
-                </Link>
-
                 <Button onClick={exportData} variant="outline" size="sm" className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50">
                     <Database className="w-4 h-4 mr-2" /> Backup
                 </Button>
@@ -267,7 +259,7 @@ export default function AdminDashboard() {
         {/* Navigation & Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 inline-flex h-auto w-max md:w-full md:grid md:grid-cols-6 lg:grid-cols-11 gap-1">
+                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 inline-flex h-auto w-max md:w-full md:grid md:grid-cols-6 lg:grid-cols-12 gap-1">
                     {tabs.map(tab => (
                         <TabsTrigger 
                             key={tab.id} 
@@ -275,11 +267,11 @@ export default function AdminDashboard() {
                             className="
                                 px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
                                 data-[state=active]:bg-teal-700 data-[state=active]:text-white
+                                hover:text-green-700 hover:bg-green-50
                                 flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
                                 min-w-[80px] md:min-w-0
                             "
                         >
-                            <tab.icon className={['onboarding', 'employees', 'members'].includes(tab.id) ? "w-5 h-5" : "w-4 h-4"} />
                             <span className="whitespace-nowrap">{tab.label}</span>
                         </TabsTrigger>
                     ))}
