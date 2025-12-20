@@ -359,11 +359,16 @@ export default function PlotsPage() {
 
   const createPlotsMutation = useMutation({
       mutationFn: async (plots) => {
-          return await base44.entities.Plot.bulkCreate(plots);
+          // Use backend function for smart import (upsert/merge)
+          const response = await base44.functions.invoke('importPlots', { plots });
+          if (response.data && response.data.error) {
+              throw new Error(response.data.error);
+          }
+          return response.data;
       },
-      onSuccess: () => {
+      onSuccess: (data) => {
           queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success("Imported plots successfully");
+          toast.success(data.message || "Imported plots successfully");
       },
       onError: (err) => {
           toast.error(`Import failed: ${err.message}`);
