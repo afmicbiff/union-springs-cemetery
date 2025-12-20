@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Download, Database, Plus, FileJson, Clock, HardDrive } from 'lucide-react';
+import { Loader2, Download, Database, Plus, FileJson, Clock, HardDrive, Upload, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import PaginationControls from "@/components/ui/PaginationControls";
@@ -56,6 +56,49 @@ export default function BackupManager() {
         }
     };
 
+    const restoreBackup = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!confirm("WARNING: You are about to restore data from a backup.\n\nThis is intended for recovery when data is missing. Importing data that already exists may result in errors or duplication.\n\nAre you sure you want to proceed?")) {
+            event.target.value = null;
+            return;
+        }
+
+        const toastId = toast.loading("Reading backup file...");
+        
+        try {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const jsonContent = JSON.parse(e.target.result);
+                    toast.loading("Restoring data... This may take a minute.", { id: toastId });
+                    
+                    const { data } = await base44.functions.invoke('restoreSystem', { backupData: jsonContent });
+                    
+                    if (data.error) throw new Error(data.error);
+                    
+                    toast.success("Restore completed successfully!", { id: toastId });
+                    
+                    if (data.details?.errors?.length > 0) {
+                        console.warn("Restore warnings:", data.details.errors);
+                        toast.warning(`Restore finished with ${data.details.errors.length} warnings. Check console.`, { duration: 5000 });
+                    }
+                    
+                    // Refresh current view
+                    queryClient.invalidateQueries();
+                } catch (err) {
+                    console.error(err);
+                    toast.error("Restore failed: " + err.message, { id: toastId });
+                }
+            };
+            reader.readAsText(file);
+        } catch (err) {
+            toast.error("File reading failed", { id: toastId });
+        }
+        event.target.value = null;
+    };
+
     const formatBytes = (bytes) => {
         if (!bytes) return '0 B';
         const k = 1024;
@@ -74,18 +117,36 @@ export default function BackupManager() {
                         Backups are stored securely and can be downloaded anytime.
                     </CardDescription>
                 </div>
-                <Button 
-                    onClick={() => createBackupMutation.mutate()} 
-                    disabled={createBackupMutation.isPending}
-                    className="bg-teal-700 hover:bg-teal-800 text-white"
-                >
-                    {createBackupMutation.isPending ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                        <Plus className="w-4 h-4 mr-2" />
-                    )}
-                    Create New Backup
-                </Button>
+                <div className="flex gap-2">
+                    <div className="relative">
+                        <input
+                            type="file"
+                            accept=".json"
+                            onChange={restoreBackup}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            title="Restore from JSON Backup"
+                        />
+                        <Button 
+                            variant="outline"
+                            className="border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                        >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Restore Data
+                        </Button>
+                    </div>
+                    <Button 
+                        onClick={() => createBackupMutation.mutate()} 
+                        disabled={createBackupMutation.isPending}
+                        className="bg-teal-700 hover:bg-teal-800 text-white"
+                    >
+                        {createBackupMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                        )}
+                        Create New Backup
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="rounded-md border overflow-hidden">

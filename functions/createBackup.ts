@@ -9,24 +9,45 @@ export default Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 1. Fetch all critical data
-        // We'll fetch in parallel. For large datasets, pagination might be needed, 
-        // but for now we'll fetch a reasonable large limit.
+        // 1. Fetch all system data (Limit 10000 per entity for now)
         const limit = 10000;
-        const [plots, reservations, notifications, deceased, members, tasks] = await Promise.all([
+        
+        const [
+            plots, 
+            reservations, 
+            notifications, 
+            deceased, 
+            members, 
+            tasks,
+            employees,
+            vendors,
+            vendorInvoices,
+            events,
+            announcements,
+            memorialMedia,
+            condolences
+        ] = await Promise.all([
             base44.asServiceRole.entities.Plot.list(null, limit),
             base44.asServiceRole.entities.Reservation.list(null, limit),
             base44.asServiceRole.entities.Notification.list(null, limit),
             base44.asServiceRole.entities.Deceased.list(null, limit),
             base44.asServiceRole.entities.Member.list(null, limit),
-            base44.asServiceRole.entities.Task.list(null, limit)
+            base44.asServiceRole.entities.Task.list(null, limit),
+            base44.asServiceRole.entities.Employee.list(null, limit),
+            base44.asServiceRole.entities.Vendor.list(null, limit),
+            base44.asServiceRole.entities.VendorInvoice.list(null, limit),
+            base44.asServiceRole.entities.Event.list(null, limit),
+            base44.asServiceRole.entities.Announcement.list(null, limit),
+            base44.asServiceRole.entities.MemorialMedia.list(null, limit),
+            base44.asServiceRole.entities.Condolence.list(null, limit)
         ]);
 
         const backupData = {
             metadata: {
                 timestamp: new Date().toISOString(),
                 created_by: user.email,
-                version: "1.0"
+                version: "1.1",
+                description: "Full System Backup"
             },
             data: {
                 plots,
@@ -34,18 +55,22 @@ export default Deno.serve(async (req) => {
                 notifications,
                 deceased,
                 members,
-                tasks
+                tasks,
+                employees,
+                vendors,
+                vendorInvoices,
+                events,
+                announcements,
+                memorialMedia,
+                condolences
             }
         };
 
         const jsonString = JSON.stringify(backupData, null, 2);
-        const filename = `backup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        const filename = `backup_full_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
         
-        // 2. Create a File object
         const file = new File([jsonString], filename, { type: 'application/json' });
 
-        // 3. Upload to Private Storage
-        // Note: The integration expects 'file' parameter.
         const uploadRes = await base44.asServiceRole.integrations.Core.UploadPrivateFile({
             file: file
         });
@@ -54,21 +79,22 @@ export default Deno.serve(async (req) => {
             throw new Error("Failed to upload backup file");
         }
 
-        // 4. Create Backup Record
+        const stats = {
+            plots: plots.length,
+            deceased: deceased.length,
+            reservations: reservations.length,
+            members: members.length,
+            employees: employees.length,
+            other: notifications.length + tasks.length + vendors.length + events.length
+        };
+
         const backupRecord = await base44.asServiceRole.entities.Backup.create({
             filename: filename,
             file_uri: uploadRes.file_uri,
             file_size: jsonString.length,
             created_by_email: user.email,
             status: "completed",
-            stats: {
-                plots: plots.length,
-                reservations: reservations.length,
-                notifications: notifications.length,
-                deceased: deceased.length,
-                members: members.length,
-                tasks: tasks.length
-            }
+            stats: stats
         });
 
         return Response.json(backupRecord);
