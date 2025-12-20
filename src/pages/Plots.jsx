@@ -749,6 +749,19 @@ export default function PlotsPage() {
                     Cleanup Duplicates
                 </Button>
 
+                <Button 
+                    variant="outline"
+                    onClick={() => {
+                        if(confirm("Import legacy records into PlotsAndMaps?")) {
+                            seedLegacyDataMutation.mutate();
+                        }
+                    }}
+                    disabled={seedLegacyDataMutation.isPending}
+                >
+                    {seedLegacyDataMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Database className="mr-2 h-4 w-4" />}
+                    Import 184 Records
+                </Button>
+
                 <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
                     {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                     <span className="font-medium text-sm">Import CSV</span>
