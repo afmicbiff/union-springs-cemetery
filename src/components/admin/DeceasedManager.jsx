@@ -23,11 +23,21 @@ export default function DeceasedManager() {
 
     const filteredList = deceasedList.filter(d => {
         const term = search.toLowerCase();
+        const first = d.first_name || '';
+        const last = d.last_name || '';
+        const location = d.plot_location || '';
+        
         return (
-            d.first_name?.toLowerCase().includes(term) ||
-            d.last_name?.toLowerCase().includes(term) ||
-            d.plot_location?.toLowerCase().includes(term)
+            first.toLowerCase().includes(term) ||
+            last.toLowerCase().includes(term) ||
+            location.toLowerCase().includes(term)
         );
+    }).sort((a, b) => {
+        const nameA = (a.last_name || '').toLowerCase();
+        const nameB = (b.last_name || '').toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
     });
 
     const handleEdit = (record) => {
