@@ -304,8 +304,6 @@ export default function MemorialPage() {
                                                 placeholder="Your Name" 
                                                 required 
                                                 className="bg-white"
-                                                defaultValue={currentUser?.full_name || ''}
-                                                key={currentUser?.full_name ? 'user-name-loaded' : 'user-name-loading'}
                                             />
                                             <Input 
                                                 name="relation" 
