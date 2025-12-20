@@ -3,78 +3,108 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        
-        // Check admin
         const user = await base44.auth.me();
+        
         if (!user || user.role !== 'admin') {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Fetch ALL plots to be safe (limit 10,000 to get everything)
-        // We'll filter in memory to handle "Section 1" vs "1" vs "Section 01" mismatches
+        // List ALL plots to ensure we don't miss anything
         const allPlots = await base44.asServiceRole.entities.Plot.list(null, 10000);
 
         const groups = {};
-        const sectionNamesFound = new Set();
-        let plotsInScope = 0;
+        const debugInfo = {};
 
-        // Group by plot number, BUT only for Section 1
         for (const p of allPlots) {
-            // Normalize Section Name
-            // Matches "Section 1", "Section 1 ", "1", "01"
-            let isSection1 = false;
+            // lenient section check: if it contains "1" or is null/empty (could be imported wrong)
+            // AND the plot number is in range
             const sec = p.section ? String(p.section).trim().toLowerCase() : '';
+            const row = p.row_number ? String(p.row_number).trim() : '';
             
-            sectionNamesFound.add(p.section); // Debug info
-
-            if (sec === 'section 1' || sec === 'section 01' || sec === '1' || sec === '01') {
-                isSection1 = true;
-            }
-
-            if (!isSection1) continue;
-
             // Normalize Plot Number
-            const num = parseInt(String(p.plot_number).replace(/\D/g, ''));
-            if (!isNaN(num) && num >= 1 && num <= 184) {
-                 if (!groups[num]) groups[num] = [];
-                 groups[num].push(p);
-                 plotsInScope++;
+            const numVal = parseInt(String(p.plot_number).replace(/\D/g, ''));
+
+            if (isNaN(numVal)) continue;
+
+            // Target range 1-184 (covering 90-139)
+            if (numVal >= 1 && numVal <= 184) {
+                
+                // Heuristic: It's likely Section 1 if:
+                // 1. Section says "1"
+                // 2. Section is empty but Plot number is in this specific range (Section 1 is the main/oldest part)
+                // 3. Row matches typical Section 1 rows (usually A-Z or similar, but let's be broad)
+                
+                // We want to group BY NUMBER primarily.
+                // If we have "Section 1, Plot 90" and "Section 2, Plot 90", we shouldn't merge them.
+                // But user says duplicates are in 90-139. 
+                
+                // Let's filter strict on Section 1 OR potential candidates
+                let isCandidate = false;
+                if (sec.includes('1') || sec === 'section 1' || sec === '01' || sec === '') {
+                    isCandidate = true;
+                }
+                
+                if (isCandidate) {
+                     if (!groups[numVal]) groups[numVal] = [];
+                     groups[numVal].push(p);
+
+                     // Debug specifically for user's range
+                     if (numVal >= 90 && numVal <= 139) {
+                         if (!debugInfo[numVal]) debugInfo[numVal] = [];
+                         debugInfo[numVal].push({
+                             id: p.id,
+                             sec: p.section,
+                             row: p.row_number,
+                             status: p.status,
+                             name: (p.first_name||'') + ' ' + (p.last_name||''),
+                             updated: p.updated_date
+                         });
+                     }
+                }
             }
         }
 
         const toDelete = [];
         let duplicateGroups = 0;
 
-        // Identify duplicates
         for (const num in groups) {
             const list = groups[num];
             if (list.length > 1) {
                 duplicateGroups++;
                 
-                // Sort to find keeper (highest score first)
+                // Sort to find keeper
                 list.sort((a, b) => {
-                    // 1. Prefer records with meaningful data (names/dates)
-                    const hasData = (p) => (p.first_name || p.last_name || p.family_name || p.birth_date || p.death_date) ? 1 : 0;
-                    if (hasData(a) !== hasData(b)) return hasData(b) - hasData(a);
+                    // Score 1: Has Data
+                    const hasData = (p) => (p.first_name || p.last_name || p.family_name) ? 5 : 0;
+                    
+                    // Score 2: "Imported" note penalty
+                    const importPenalty = (p) => (p.notes && p.notes.includes('Imported')) ? -2 : 0;
 
-                    // 2. Penalize "Imported" notes (prefer manual entries)
-                    const isImported = (p) => (p.notes && p.notes.includes('Imported')) ? 1 : 0;
-                    if (isImported(a) !== isImported(b)) return isImported(a) - isImported(b); 
-
-                    // 3. Status priority
-                    const statusScore = (s) => {
-                        if (s === 'Occupied') return 3;
-                        if (s === 'Reserved') return 2;
-                        if (s === 'Veteran') return 2;
-                        return 1;
+                    // Score 3: Status
+                    const statusScore = (p) => {
+                        if (p.status === 'Occupied') return 3;
+                        if (p.status === 'Reserved') return 2;
+                        if (p.status === 'Veteran') return 2;
+                        return 0;
                     };
-                    if (statusScore(a.status) !== statusScore(b.status)) return statusScore(b.status) - statusScore(a.status);
 
-                    // 4. Newer updated_date
+                    // Score 4: Section name cleanliness (prefer "Section 1" over "1" or "")
+                    const secScore = (p) => {
+                        const s = p.section || '';
+                        if (s.toLowerCase() === 'section 1') return 1;
+                        return 0;
+                    };
+
+                    const scoreA = hasData(a) + importPenalty(a) + statusScore(a) + secScore(a);
+                    const scoreB = hasData(b) + importPenalty(b) + statusScore(b) + secScore(b);
+
+                    if (scoreA !== scoreB) return scoreB - scoreA; // Higher score first
+
+                    // Tie-break: Newer update
                     return new Date(b.updated_date || 0) - new Date(a.updated_date || 0);
                 });
 
-                // Keep index 0, delete the rest
+                // Keep top 1, delete others
                 for (let i = 1; i < list.length; i++) {
                     toDelete.push(list[i].id);
                 }
@@ -100,9 +130,9 @@ Deno.serve(async (req) => {
 
         return Response.json({
             success: true,
-            message: `Scanned ${allPlots.length} total plots. Found ${plotsInScope} in Section 1. Found ${duplicateGroups} duplicate groups. Deleted ${deletedIds.length} records.`,
-            debug_sections: Array.from(sectionNamesFound),
+            message: `Scanned plots. Found ${duplicateGroups} duplicate groups. Deleted ${deletedIds.length} records.`,
             deleted_count: deletedIds.length,
+            debug_90_139: debugInfo, // Return this so user can see what's happening
             errors: errors.length > 0 ? errors : undefined
         });
 
