@@ -45,6 +45,7 @@ export default function Layout({ children }) {
         { label: 'Board Members & Employees', path: '/Employees', icon: Users }
       ]
     },
+    { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
   ];
 
   return (
