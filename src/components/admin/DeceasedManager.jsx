@@ -174,10 +174,18 @@ export default function DeceasedManager() {
                                             </td>
                                             <td className="p-4 text-stone-600">
                                                 <div className="text-xs">
-                                                    B: {record.date_of_birth ? format(new Date(record.date_of_birth), 'MMM d, yyyy') : '-'}
+                                                    B: {(() => {
+                                                        if (!record.date_of_birth) return '-';
+                                                        const d = new Date(record.date_of_birth);
+                                                        return isNaN(d.getTime()) ? record.date_of_birth : format(d, 'MMM d, yyyy');
+                                                    })()}
                                                 </div>
                                                 <div className="text-xs">
-                                                    D: {record.date_of_death ? format(new Date(record.date_of_death), 'MMM d, yyyy') : '-'}
+                                                    D: {(() => {
+                                                        if (!record.date_of_death) return '-';
+                                                        const d = new Date(record.date_of_death);
+                                                        return isNaN(d.getTime()) ? record.date_of_death : format(d, 'MMM d, yyyy');
+                                                    })()}
                                                 </div>
                                             </td>
                                             <td className="p-4">{record.plot_location || '-'}</td>
