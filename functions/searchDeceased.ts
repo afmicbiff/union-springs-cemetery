@@ -118,6 +118,7 @@ export default Deno.serve(async (req) => {
             stats: {
                 total_records: totalUniqueRecords, // Display unique individuals
                 total_obituaries: totalUniqueObituaries,
+                total_reserved: reservedPlotsCount,
                 raw_total: allDeceased.length // Keep raw count for debugging
             }
         });
