@@ -12,113 +12,175 @@ export default Deno.serve(async (req) => {
             death_year_min,
             death_year_max,
             veteran_status,
+            status_filter, // New filter: 'Deceased', 'Reserved', 'Available', 'Not Usable', 'Unknown', 'Veteran', 'All'
             page = 1, 
-            limit = 12 
+            limit = 50 
         } = await req.json();
         
-        // Parse pagination params
         const pageNum = Math.max(1, parseInt(page));
         const limitNum = Math.max(1, parseInt(limit));
 
-        // Fetch all records - using service role to ensure we get full count including any potential visibility issues
-        // Although admin should see all, this guarantees the stats are for the DB
+        // Fetch all records
         const [allDeceased, allPlots] = await Promise.all([
             base44.asServiceRole.entities.Deceased.list('-created_date', 10000),
             base44.asServiceRole.entities.Plot.list(null, 10000)
         ]);
-        const reservedPlotsCount = allPlots.filter(p => p.status === 'Reserved').length;
-        const availablePlotsCount = allPlots.filter(p => p.status === 'Available').length;
-        const notUsablePlotsCount = allPlots.filter(p => p.status === 'Not Usable' || p.status === 'Unavailable').length;
-        const unknownPlotsCount = allPlots.filter(p => p.status === 'Unknown').length;
 
+        // Helper to format plot location
+        const formatPlotLoc = (p) => {
+            const parts = [];
+            if(p.section) parts.push(p.section);
+            if(p.row_number) parts.push(p.row_number);
+            if(p.plot_number) parts.push(p.plot_number);
+            return parts.join('-');
+        };
+
+        // Map Plots to Unified Record Schema
+        const mapPlotToRecord = (p) => ({
+            id: p.id,
+            entity_type: 'plot',
+            first_name: p.first_name, // Might be empty for Available
+            last_name: p.last_name,
+            family_name: p.family_name,
+            date_of_birth: p.birth_date,
+            date_of_death: p.death_date,
+            plot_location: formatPlotLoc(p),
+            status: p.status, // Available, Reserved, etc.
+            veteran_status: p.status === 'Veteran' || (p.notes && p.notes.toLowerCase().includes('vet')),
+            notes: p.notes,
+            // Fields that exist on Deceased but maybe not Plot
+            burial_type: null,
+            obituary: null
+        });
+
+        // Map Deceased to Unified Record Schema
+        const mapDeceasedToRecord = (d) => ({
+            ...d,
+            entity_type: 'deceased',
+            status: 'Occupied' // Implicit
+        });
+
+        // Determine Base Set based on Status Filter
+        let baseRecords = [];
+        
+        // Stats Calculation
+        const reservedPlots = allPlots.filter(p => p.status === 'Reserved');
+        const availablePlots = allPlots.filter(p => p.status === 'Available');
+        const notUsablePlots = allPlots.filter(p => ['Not Usable', 'Unavailable'].includes(p.status));
+        const unknownPlots = allPlots.filter(p => p.status === 'Unknown');
+        const veteranPlots = allPlots.filter(p => p.status === 'Veteran'); // Plots explicitly marked Veteran
+        const deceasedVeterans = allDeceased.filter(d => d.veteran_status);
+
+        // Deduplication for stats (same as before)
+        const uniqueKeys = new Set();
+        const uniqueObituaries = new Set();
+        const uniqueVeterans = new Set();
+        allDeceased.forEach(d => {
+            const key = `${d.first_name || ''}|${d.last_name || ''}|${d.date_of_birth || ''}|${d.date_of_death || ''}`.toLowerCase();
+            uniqueKeys.add(key);
+            if (d.obituary && d.obituary.trim().length > 0) uniqueObituaries.add(key);
+            if (!!d.veteran_status) uniqueVeterans.add(key);
+        });
+
+        // Total Veterans = Deceased Veterans (unique) + Veteran Plots (assuming not dupes, or just sum counts?)
+        // For simplicity/safety, we'll just use the Deceased Veteran count + Veteran Plot count.
+        const totalVeteransCount = uniqueVeterans.size + veteranPlots.length;
+
+        // Select Records
+        if (!status_filter || status_filter === 'Deceased') {
+            baseRecords = allDeceased.map(mapDeceasedToRecord);
+        } else if (status_filter === 'Reserved') {
+            baseRecords = reservedPlots.map(mapPlotToRecord);
+        } else if (status_filter === 'Available') {
+            baseRecords = availablePlots.map(mapPlotToRecord);
+        } else if (status_filter === 'Not Usable') {
+            baseRecords = notUsablePlots.map(mapPlotToRecord);
+        } else if (status_filter === 'Unknown') {
+            baseRecords = unknownPlots.map(mapPlotToRecord);
+        } else if (status_filter === 'Veteran') {
+            const vDeceased = deceasedVeterans.map(mapDeceasedToRecord);
+            const vPlots = veteranPlots.map(mapPlotToRecord);
+            baseRecords = [...vDeceased, ...vPlots];
+        } else if (status_filter === 'All') {
+            // Deceased + Reserved + Available + Not Usable + Unknown (Plots)
+            // Exclude 'Occupied' plots to avoid duplication with Deceased records
+            const nonOccupiedPlots = allPlots.filter(p => 
+                ['Reserved', 'Available', 'Not Usable', 'Unavailable', 'Unknown'].includes(p.status)
+            );
+            baseRecords = [
+                ...allDeceased.map(mapDeceasedToRecord),
+                ...nonOccupiedPlots.map(mapPlotToRecord)
+            ];
+        } else {
+            // Fallback
+            baseRecords = allDeceased.map(mapDeceasedToRecord);
+        }
+
+        // Apply Common Filters (Query, Date, Section, etc.)
         const getYear = (dateStr) => {
             if (!dateStr) return null;
-            // Handle YYYY-MM-DD or simple YYYY
             const parts = dateStr.split('-');
             if (parts.length > 0) return parseInt(parts[0]);
             return null;
         };
 
-        const filtered = allDeceased.filter(person => {
-            // 1. Section Filter (Prefix match)
+        const filtered = baseRecords.filter(record => {
+            // Section
             if (section && section !== 'all') {
-                if (!person.plot_location || !person.plot_location.startsWith(section)) return false;
+                if (!record.plot_location || !record.plot_location.startsWith(section)) return false;
             }
 
-            // 2. Family Name Filter (Partial/Like)
+            // Family Name
             if (family_name) {
-                if (!person.family_name || !person.family_name.toLowerCase().includes(family_name.toLowerCase())) return false;
+                if (!record.family_name || !record.family_name.toLowerCase().includes(family_name.toLowerCase())) return false;
             }
 
-            // 3. General Search Query (Name/Last Name)
+            // Query
             if (query) {
                 const term = query.toLowerCase();
-                const firstName = person.first_name || '';
-                const lastName = person.last_name || '';
+                const firstName = record.first_name || '';
+                const lastName = record.last_name || '';
                 const fullName = `${firstName} ${lastName}`.toLowerCase();
+                const location = record.plot_location || '';
                 
-                const matches = fullName.includes(term) || lastName.toLowerCase().includes(term);
+                const matches = 
+                    fullName.includes(term) || 
+                    lastName.toLowerCase().includes(term) ||
+                    location.toLowerCase().includes(term) ||
+                    (record.status && record.status.toLowerCase().includes(term));
+                
                 if (!matches) return false;
             }
 
-            // 4. Veteran Status
+            // Veteran Status (Explicit filter param, overrides status_filter='Veteran' if both present?)
+            // Usually 'veteran_status' param comes from the advanced filter dropdown.
             if (veteran_status && veteran_status !== 'all') {
-                const isVet = !!person.veteran_status;
+                const isVet = !!record.veteran_status;
                 if (veteran_status === 'true' && !isVet) return false;
                 if (veteran_status === 'false' && isVet) return false;
             }
 
-            // 5. Birth Year Range
-            const birthYear = getYear(person.date_of_birth);
+            // Dates
+            const birthYear = getYear(record.date_of_birth);
             if (birthYear) {
                 if (birth_year_min && birthYear < parseInt(birth_year_min)) return false;
                 if (birth_year_max && birthYear > parseInt(birth_year_max)) return false;
-            } else if (birth_year_min || birth_year_max) {
-                // If filtering by birth year but person has no birth date, exclude them? 
-                // Usually yes in strict search.
-                return false;
             }
-
-            // 6. Death Year Range
-            const deathYear = getYear(person.date_of_death);
+            
+            const deathYear = getYear(record.date_of_death);
             if (deathYear) {
                 if (death_year_min && deathYear < parseInt(death_year_min)) return false;
                 if (death_year_max && deathYear > parseInt(death_year_max)) return false;
-            } else if (death_year_min || death_year_max) {
-                return false;
             }
 
             return true;
         });
 
-        // Pagination Logic
+        // Pagination
         const total = filtered.length;
         const totalPages = Math.ceil(total / limitNum);
         const startIndex = (pageNum - 1) * limitNum;
         const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
-
-        // Calculate stats with deduplication to handle potential double-imports
-        // We consider a record unique based on First Name + Last Name + Birth Date + Death Date
-        const uniqueKeys = new Set();
-        const uniqueObituaries = new Set();
-        const uniqueVeterans = new Set();
-        
-        allDeceased.forEach(d => {
-            const key = `${d.first_name || ''}|${d.last_name || ''}|${d.date_of_birth || ''}|${d.date_of_death || ''}`.toLowerCase();
-            uniqueKeys.add(key);
-            
-            if (d.obituary && d.obituary.trim().length > 0) {
-                uniqueObituaries.add(key);
-            }
-
-            if (!!d.veteran_status) {
-                uniqueVeterans.add(key);
-            }
-        });
-
-        const totalUniqueRecords = uniqueKeys.size;
-        const totalUniqueObituaries = uniqueObituaries.size;
-        const totalUniqueVeterans = uniqueVeterans.size;
 
         return Response.json({ 
             results: paginatedResults,
@@ -129,14 +191,14 @@ export default Deno.serve(async (req) => {
                 totalPages
             },
             stats: {
-                total_records: totalUniqueRecords, // Display unique individuals
-                total_obituaries: totalUniqueObituaries,
-                total_veterans: totalUniqueVeterans,
-                total_reserved: reservedPlotsCount,
-                total_available: availablePlotsCount,
-                total_not_usable: notUsablePlotsCount,
-                total_unknown: unknownPlotsCount,
-                raw_total: allDeceased.length // Keep raw count for debugging
+                total_records: uniqueKeys.size, // Deceased count
+                total_obituaries: uniqueObituaries.size,
+                total_veterans: totalVeteransCount,
+                total_reserved: reservedPlots.length,
+                total_available: availablePlots.length,
+                total_not_usable: notUsablePlots.length,
+                total_unknown: unknownPlots.length,
+                raw_total: allDeceased.length
             }
         });
     } catch (error) {

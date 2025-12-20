@@ -14,6 +14,7 @@ import DeceasedEditDialog from './DeceasedEditDialog';
 export default function DeceasedManager() {
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [statusFilter, setStatusFilter] = useState('Deceased');
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedDeceased, setSelectedDeceased] = useState(null);
     const [mode, setMode] = useState('create');
@@ -32,10 +33,11 @@ export default function DeceasedManager() {
     }, [search]);
 
     const { data: searchResults, isLoading } = useQuery({
-        queryKey: ['deceased-admin-search', debouncedSearch, page],
+        queryKey: ['deceased-admin-search', debouncedSearch, statusFilter, page],
         queryFn: async () => {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedSearch,
+                status_filter: statusFilter,
                 page,
                 limit
             });
@@ -71,11 +73,19 @@ export default function DeceasedManager() {
                     <CardTitle>Deceased Records</CardTitle>
                     <CardDescription>
                         Manage deceased individuals, obituaries, and burial details.
-                        <div className="flex gap-2 mt-2">
-                            <Badge variant="outline" className="text-teal-700 border-teal-200 bg-teal-50" title={searchResults?.stats?.raw_total ? `Raw Database Records: ${searchResults.stats.raw_total}` : ''}>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                            <Badge 
+                                variant={statusFilter === 'Deceased' ? "default" : "outline"} 
+                                className={`cursor-pointer transition-all ${statusFilter === 'Deceased' ? 'bg-teal-700 hover:bg-teal-800' : 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100'}`}
+                                onClick={() => { setStatusFilter('Deceased'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Deceased
                             </Badge>
-                            <Badge variant="outline" className="text-stone-600 border-stone-200 bg-stone-50">
+                            <Badge 
+                                variant={statusFilter === 'All' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'All' ? 'bg-stone-700 hover:bg-stone-800' : 'text-stone-600 border-stone-200 bg-stone-50 hover:bg-stone-100'}`}
+                                onClick={() => { setStatusFilter('All'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (
                                     (searchResults?.stats?.total_records || 0) +
                                     (searchResults?.stats?.total_reserved || 0) +
@@ -84,19 +94,39 @@ export default function DeceasedManager() {
                                     (searchResults?.stats?.total_unknown || 0)
                                 )} All Records
                             </Badge>
-                            <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50">
+                            <Badge 
+                                variant={statusFilter === 'Reserved' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'Reserved' ? 'bg-amber-700 hover:bg-amber-800' : 'text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100'}`}
+                                onClick={() => { setStatusFilter('Reserved'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} Reserved Plots
                             </Badge>
-                            <Badge variant="outline" className="text-emerald-700 border-emerald-200 bg-emerald-50">
+                            <Badge 
+                                variant={statusFilter === 'Available' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'Available' ? 'bg-emerald-700 hover:bg-emerald-800' : 'text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100'}`}
+                                onClick={() => { setStatusFilter('Available'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} Available Plots
                             </Badge>
-                            <Badge variant="outline" className="text-gray-700 border-gray-200 bg-gray-50">
+                            <Badge 
+                                variant={statusFilter === 'Not Usable' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'Not Usable' ? 'bg-gray-700 hover:bg-gray-800' : 'text-gray-700 border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
+                                onClick={() => { setStatusFilter('Not Usable'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_not_usable || 0)} Not Usable
                             </Badge>
-                            <Badge variant="outline" className="text-purple-700 border-purple-200 bg-purple-50">
+                            <Badge 
+                                variant={statusFilter === 'Unknown' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'Unknown' ? 'bg-purple-700 hover:bg-purple-800' : 'text-purple-700 border-purple-200 bg-purple-50 hover:bg-purple-100'}`}
+                                onClick={() => { setStatusFilter('Unknown'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_unknown || 0)} Unknown
                             </Badge>
-                            <Badge variant="outline" className="text-blue-700 border-blue-200 bg-blue-50">
+                            <Badge 
+                                variant={statusFilter === 'Veteran' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all ${statusFilter === 'Veteran' ? 'bg-blue-700 hover:bg-blue-800' : 'text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100'}`}
+                                onClick={() => { setStatusFilter('Veteran'); setPage(1); }}
+                            >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} Veterans
                             </Badge>
                         </div>
@@ -117,7 +147,7 @@ export default function DeceasedManager() {
                     <div className="flex gap-2">
                         <Button 
                             variant="outline"
-                            onClick={() => setSearch('')}
+                            onClick={() => { setSearch(''); setStatusFilter('All'); setPage(1); }}
                             className="text-stone-600 border-stone-200 hover:bg-stone-50"
                         >
                             Show All Records
@@ -174,7 +204,11 @@ export default function DeceasedManager() {
                                     filteredList.map(record => (
                                         <tr key={record.id} className="hover:bg-stone-50">
                                             <td className="p-4 font-medium">
-                                                <div>{record.first_name} {record.last_name}</div>
+                                                {record.entity_type === 'plot' && !record.first_name ? (
+                                                    <span className="italic text-stone-400">Empty Plot</span>
+                                                ) : (
+                                                    <div>{record.first_name} {record.last_name}</div>
+                                                )}
                                                 {record.family_name && <div className="text-xs text-stone-500">née {record.family_name}</div>}
                                             </td>
                                             <td className="p-4 text-stone-600">
@@ -195,14 +229,30 @@ export default function DeceasedManager() {
                                             </td>
                                             <td className="p-4">{record.plot_location || '-'}</td>
                                             <td className="p-4">
-                                                <Badge variant="outline" className="text-xs font-normal">
-                                                    {record.burial_type}
-                                                </Badge>
+                                                {record.entity_type === 'plot' ? (
+                                                    <Badge variant="outline" className="text-xs font-normal bg-stone-50">
+                                                        Plot
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge variant="outline" className="text-xs font-normal">
+                                                        {record.burial_type || 'Deceased'}
+                                                    </Badge>
+                                                )}
                                             </td>
                                             <td className="p-4">
                                                 {record.veteran_status && (
-                                                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 gap-1">
+                                                    <Badge className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 gap-1 mr-1">
                                                         <Flag className="w-3 h-3" /> Veteran
+                                                    </Badge>
+                                                )}
+                                                {record.entity_type === 'plot' && record.status && (
+                                                    <Badge variant="outline" className={`
+                                                        ${record.status === 'Available' ? 'text-emerald-700 border-emerald-200 bg-emerald-50' : ''}
+                                                        ${record.status === 'Reserved' ? 'text-amber-700 border-amber-200 bg-amber-50' : ''}
+                                                        ${record.status === 'Not Usable' ? 'text-gray-700 border-gray-200 bg-gray-50' : ''}
+                                                        ${record.status === 'Unknown' ? 'text-purple-700 border-purple-200 bg-purple-50' : ''}
+                                                    `}>
+                                                        {record.status}
                                                     </Badge>
                                                 )}
                                                 {record.obituary && (
