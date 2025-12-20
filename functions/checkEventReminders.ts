@@ -43,6 +43,17 @@ Deno.serve(async (req) => {
             }
 
             // Check thresholds for all events (Short term)
+            
+            // "Day of" notification (e.g. within 24 hours but at least 1 hour away, ensuring we notify once for "Today")
+            // We'll use a 12-hour window lookahead to signify "Today/Upcoming" if not yet notified.
+            // Or simpler: if it's the same day.
+            const isSameDay = eventTime.toDateString() === now.toDateString();
+            if (isSameDay && !reminders["day_of"] && minutesUntil > 60) {
+                 reminders["day_of"] = true;
+                 alertType = "today";
+                 needsUpdate = true;
+            }
+
             if (minutesUntil <= 60 && minutesUntil > 30 && !reminders["1h"]) {
                 reminders["1h"] = true;
                 alertType = "1 hour";
@@ -62,8 +73,12 @@ Deno.serve(async (req) => {
                 updates.push(base44.asServiceRole.entities.Event.update(event.id, { reminders_sent: reminders }));
 
                 // 2. Create Admin Notification
+                const msg = alertType === 'today' 
+                    ? `Meeting "${event.title}" is scheduled for today at ${eventTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}.`
+                    : `Meeting "${event.title}" starts in ${alertType}.`;
+
                 notifications.push(base44.asServiceRole.entities.Notification.create({
-                    message: `Meeting "${event.title}" starts in ${alertType}.`,
+                    message: msg,
                     type: "alert",
                     is_read: false,
                     created_at: new Date().toISOString()
