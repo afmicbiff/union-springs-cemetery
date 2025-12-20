@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/base44Client";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Pencil, Flag, Loader2 } from 'lucide-react';
+import { Search, Plus, Pencil, Flag, Loader2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from "sonner";
 import DeceasedEditDialog from './DeceasedEditDialog';
 
 export default function DeceasedManager() {
@@ -15,6 +16,8 @@ export default function DeceasedManager() {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedDeceased, setSelectedDeceased] = useState(null);
     const [mode, setMode] = useState('create');
+    const [isCleaning, setIsCleaning] = useState(false);
+    const queryClient = useQueryClient();
 
     // Debounce search input
     useEffect(() => {
@@ -73,10 +76,36 @@ export default function DeceasedManager() {
                         </div>
                     </CardDescription>
                 </div>
-                <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
-                    <Plus className="w-4 h-4 mr-2" /> Add Record
-                </Button>
-            </CardHeader>
+                <div className="flex gap-2">
+                    <Button 
+                        variant="outline" 
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        onClick={async () => {
+                            if (confirm("Are you sure you want to delete duplicate deceased records? This will keep the most complete record for each person and delete duplicates. This action cannot be undone.")) {
+                                setIsCleaning(true);
+                                try {
+                                    const res = await base44.functions.invoke('cleanupDeceasedDuplicates');
+                                    if (res.data.error) throw new Error(res.data.error);
+                                    toast.success(res.data.message);
+                                    queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
+                                } catch (err) {
+                                    console.error(err);
+                                    toast.error("Cleanup failed: " + err.message);
+                                } finally {
+                                    setIsCleaning(false);
+                                }
+                            }
+                        }}
+                        disabled={isCleaning}
+                    >
+                        {isCleaning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                        Cleanup Duplicates
+                    </Button>
+                    <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
+                        <Plus className="w-4 h-4 mr-2" /> Add Record
+                    </Button>
+                </div>
+                </CardHeader>
             <CardContent>
                 <div className="flex items-center mb-6">
                     <div className="relative w-full max-w-sm">
