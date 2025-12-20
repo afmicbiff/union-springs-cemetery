@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
         const allPlots = await base44.asServiceRole.entities.Plot.list(null, 10000);
 
         const groups = {};
-        const rangeStart = 93;
-        const rangeEnd = 139;
+        const rangeStart = 162;
+        const rangeEnd = 166;
         
         // Debug counters
         let inRangeCount = 0;
