@@ -22,6 +22,7 @@ import AIEmailAssistant from './AIEmailAssistant';
 import { Textarea } from "@/components/ui/textarea";
 import { FileText, Eye, ArrowRight, Trash2 } from 'lucide-react';
 import MoveDocumentDialog from './MoveDocumentDialog';
+import MemberInvoicesAdmin from './MemberInvoicesAdmin';
 
 export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
@@ -255,6 +256,11 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                 </div>
                             )}
                         </section>
+
+                        <Separator />
+                        
+                        {/* Invoices Section */}
+                        <MemberInvoicesAdmin member={member} />
                     </div>
                 </ScrollArea>
 

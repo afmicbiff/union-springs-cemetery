@@ -7,7 +7,8 @@ import MemberDashboard from "@/components/member/MemberDashboard";
 import MemberProfile from "@/components/member/MemberProfile";
 import MemberMessages from "@/components/member/MemberMessages";
 import MemberDocuments from "@/components/member/MemberDocuments";
-import { FileText } from 'lucide-react';
+import MemberInvoices from "@/components/member/MemberInvoices";
+import { FileText, Receipt } from 'lucide-react';
 
 export default function MemberPortal() {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -64,6 +65,9 @@ export default function MemberPortal() {
                     <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
                     </TabsTrigger>
+                    <TabsTrigger value="invoices" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
+                        <Receipt className="w-4 h-4 mr-2 md:inline hidden" /> Invoices
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="dashboard" className="focus-visible:outline-none">
@@ -80,6 +84,10 @@ export default function MemberPortal() {
 
                 <TabsContent value="documents" className="focus-visible:outline-none">
                     <MemberDocuments user={user} />
+                </TabsContent>
+
+                <TabsContent value="invoices" className="focus-visible:outline-none">
+                    <MemberInvoices user={user} />
                 </TabsContent>
             </Tabs>
         </div>
