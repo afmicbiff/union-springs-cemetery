@@ -10,11 +10,14 @@ import { format } from 'date-fns';
 import { toast } from "sonner";
 import PaginationControls from "@/components/ui/PaginationControls";
 import DeceasedEditDialog from './DeceasedEditDialog';
+import AdvancedDateFilter from "@/components/common/AdvancedDateFilter";
+import SavedSearchManager from "@/components/common/SavedSearchManager";
 
 export default function DeceasedManager() {
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('Deceased');
+    const [dateFilters, setDateFilters] = useState({});
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedDeceased, setSelectedDeceased] = useState(null);
     const [mode, setMode] = useState('create');
@@ -33,11 +36,12 @@ export default function DeceasedManager() {
     }, [search]);
 
     const { data: searchResults, isLoading } = useQuery({
-        queryKey: ['deceased-admin-search', debouncedSearch, statusFilter, page],
+        queryKey: ['deceased-admin-search', debouncedSearch, statusFilter, dateFilters, page],
         queryFn: async () => {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedSearch,
                 status_filter: statusFilter,
+                ...dateFilters,
                 page,
                 limit
             });
@@ -45,6 +49,26 @@ export default function DeceasedManager() {
         },
         placeholderData: keepPreviousData
     });
+
+    const handleApplySavedSearch = (filters) => {
+        if (filters.query) setSearch(filters.query);
+        if (filters.status_filter) setStatusFilter(filters.status_filter);
+        if (filters.birth_year_min || filters.birth_year_max || filters.death_year_min || filters.death_year_max) {
+            setDateFilters({
+                birth_year_min: filters.birth_year_min,
+                birth_year_max: filters.birth_year_max,
+                death_year_min: filters.death_year_min,
+                death_year_max: filters.death_year_max
+            });
+        }
+        setPage(1);
+    };
+
+    const currentFiltersForSave = {
+        query: search,
+        status_filter: statusFilter,
+        ...dateFilters
+    };
 
     const filteredList = (searchResults?.results || []).sort((a, b) => {
         const nameA = (a.last_name || '').toLowerCase();
@@ -144,13 +168,22 @@ export default function DeceasedManager() {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center flex-wrap">
+                        <AdvancedDateFilter 
+                            filters={dateFilters} 
+                            onChange={(newFilters) => { setDateFilters(newFilters); setPage(1); }} 
+                        />
+                        <SavedSearchManager 
+                            type="deceased"
+                            currentFilters={currentFiltersForSave}
+                            onApplySearch={handleApplySavedSearch}
+                        />
                         <Button 
                             variant="outline"
-                            onClick={() => { setSearch(''); setStatusFilter('All'); setPage(1); }}
+                            onClick={() => { setSearch(''); setStatusFilter('All'); setDateFilters({}); setPage(1); }}
                             className="text-stone-600 border-stone-200 hover:bg-stone-50"
                         >
-                            Show All Records
+                            Reset
                         </Button>
                         <Button 
                             variant="outline" 

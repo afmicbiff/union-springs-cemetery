@@ -60,6 +60,25 @@ export default Deno.serve(async (req) => {
             return true;
         });
 
+        // 2. Apply Fuzzy Search if query exists
+        if (query) {
+            const fuse = new Fuse(filtered, {
+                keys: [
+                    { name: 'plot_number', weight: 0.3 },
+                    { name: 'row_number', weight: 0.2 },
+                    { name: 'section', weight: 0.2 },
+                    { name: 'first_name', weight: 0.3 },
+                    { name: 'last_name', weight: 0.4 },
+                    { name: 'notes', weight: 0.1 }
+                ],
+                threshold: 0.4,
+                distance: 100
+            });
+
+            const fuzzyResults = fuse.search(query);
+            filtered = fuzzyResults.map(result => result.item);
+        }
+
         // Pagination Logic
         const total = filtered.length;
         const totalPages = Math.ceil(total / limitNum);
