@@ -1,38 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, Pencil, Flag } from 'lucide-react';
+import { Search, Plus, Pencil, Flag, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import DeceasedEditDialog from './DeceasedEditDialog';
 
 export default function DeceasedManager() {
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedDeceased, setSelectedDeceased] = useState(null);
     const [mode, setMode] = useState('create');
 
-    const { data: deceasedList, isLoading } = useQuery({
-        queryKey: ['deceased-admin-list'],
-        queryFn: () => base44.entities.Deceased.list({ limit: 500 }),
-        initialData: [],
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const { data: searchResults, isLoading } = useQuery({
+        queryKey: ['deceased-admin-search', debouncedSearch],
+        queryFn: async () => {
+            const response = await base44.functions.invoke('searchDeceased', {
+                query: debouncedSearch,
+                limit: 100 // Fetch up to 100 matching records
+            });
+            return response.data;
+        },
+        keepPreviousData: true
     });
 
-    const filteredList = deceasedList.filter(d => {
-        const term = search.toLowerCase();
-        const first = d.first_name || '';
-        const last = d.last_name || '';
-        const location = d.plot_location || '';
-        
-        return (
-            first.toLowerCase().includes(term) ||
-            last.toLowerCase().includes(term) ||
-            location.toLowerCase().includes(term)
-        );
-    }).sort((a, b) => {
+    const filteredList = (searchResults?.results || []).sort((a, b) => {
         const nameA = (a.last_name || '').toLowerCase();
         const nameB = (b.last_name || '').toLowerCase();
         if (nameA < nameB) return -1;
@@ -91,7 +95,7 @@ export default function DeceasedManager() {
                             </thead>
                             <tbody className="divide-y">
                                 {isLoading ? (
-                                    <tr><td colSpan="6" className="p-8 text-center text-stone-500">Loading records...</td></tr>
+                                    <tr><td colSpan="6" className="p-8 text-center text-stone-500"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />Searching records...</td></tr>
                                 ) : filteredList.length === 0 ? (
                                     <tr><td colSpan="6" className="p-8 text-center text-stone-500">No records found.</td></tr>
                                 ) : (
