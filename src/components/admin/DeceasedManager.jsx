@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Pencil, Flag, Loader2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from "sonner";
+import PaginationControls from "@/components/ui/PaginationControls";
 import DeceasedEditDialog from './DeceasedEditDialog';
 
 export default function DeceasedManager() {
@@ -17,22 +18,26 @@ export default function DeceasedManager() {
     const [selectedDeceased, setSelectedDeceased] = useState(null);
     const [mode, setMode] = useState('create');
     const [isCleaning, setIsCleaning] = useState(false);
+    const [page, setPage] = useState(1);
+    const limit = 50;
     const queryClient = useQueryClient();
 
     // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedSearch(search);
+            setPage(1); // Reset to page 1 on search change
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
 
     const { data: searchResults, isLoading } = useQuery({
-        queryKey: ['deceased-admin-search', debouncedSearch],
+        queryKey: ['deceased-admin-search', debouncedSearch, page],
         queryFn: async () => {
             const response = await base44.functions.invoke('searchDeceased', {
                 query: debouncedSearch,
-                limit: 10000 // Fetch all records
+                page,
+                limit
             });
             return response.data;
         },
@@ -216,9 +221,18 @@ export default function DeceasedManager() {
                                 )}
                             </tbody>
                         </table>
-                    </div>
-                </div>
-            </CardContent>
+                        </div>
+                        </div>
+                        {searchResults?.pagination && (
+                        <PaginationControls
+                        currentPage={searchResults.pagination.page}
+                        totalPages={searchResults.pagination.totalPages}
+                        totalRecords={searchResults.pagination.total}
+                        limit={limit}
+                        onPageChange={setPage}
+                        />
+                        )}
+                        </CardContent>
 
             <DeceasedEditDialog 
                 isOpen={isEditOpen} 
