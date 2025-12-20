@@ -29,6 +29,7 @@ export default Deno.serve(async (req) => {
         const reservedPlotsCount = allPlots.filter(p => p.status === 'Reserved').length;
         const availablePlotsCount = allPlots.filter(p => p.status === 'Available').length;
         const notUsablePlotsCount = allPlots.filter(p => p.status === 'Not Usable' || p.status === 'Unavailable').length;
+        const unknownPlotsCount = allPlots.filter(p => p.status === 'Unknown').length;
 
         const getYear = (dateStr) => {
             if (!dateStr) return null;
@@ -127,6 +128,7 @@ export default Deno.serve(async (req) => {
                 total_reserved: reservedPlotsCount,
                 total_available: availablePlotsCount,
                 total_not_usable: notUsablePlotsCount,
+                total_unknown: unknownPlotsCount,
                 raw_total: allDeceased.length // Keep raw count for debugging
             }
         });
