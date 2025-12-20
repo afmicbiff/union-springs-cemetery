@@ -9,63 +9,46 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // List ALL plots to ensure we don't miss anything
+        // List ALL plots
         const allPlots = await base44.asServiceRole.entities.Plot.list(null, 10000);
 
         const groups = {};
-        const debugInfo = {};
+        const rangeStart = 93;
+        const rangeEnd = 139;
+        
+        // Debug counters
+        let inRangeCount = 0;
+        let candidateCount = 0;
 
         for (const p of allPlots) {
-            // lenient section check: if it contains "1" or is null/empty (could be imported wrong)
-            // AND the plot number is in range
-            const sec = p.section ? String(p.section).trim().toLowerCase() : '';
-            const row = p.row_number ? String(p.row_number).trim() : '';
-            
             // Normalize Plot Number
             const numVal = parseInt(String(p.plot_number).replace(/\D/g, ''));
-
             if (isNaN(numVal)) continue;
 
-            // Target range 1-184 (covering 90-139)
-            if (numVal >= 1 && numVal <= 184) {
+            // Target range 93-139
+            if (numVal >= rangeStart && numVal <= rangeEnd) {
+                inRangeCount++;
                 
-                // Heuristic: It's likely Section 1 if:
-                // 1. Section says "1"
-                // 2. Section is empty but Plot number is in this specific range (Section 1 is the main/oldest part)
-                // 3. Row matches typical Section 1 rows (usually A-Z or similar, but let's be broad)
+                // Section check
+                const sec = p.section ? String(p.section).trim().toLowerCase() : '';
                 
-                // We want to group BY NUMBER primarily.
-                // If we have "Section 1, Plot 90" and "Section 2, Plot 90", we shouldn't merge them.
-                // But user says duplicates are in 90-139. 
-                
-                // Let's filter strict on Section 1 OR potential candidates
-                let isCandidate = false;
-                if (sec.includes('1') || sec === 'section 1' || sec === '01' || sec === '') {
-                    isCandidate = true;
+                // Exclude explicit other sections
+                if (sec.includes('section 2') || sec.includes('section 3') || 
+                    sec.includes('section 4') || sec.includes('section 5') ||
+                    sec.includes('row')) {
+                    continue;
                 }
-                
-                if (isCandidate) {
-                     if (!groups[numVal]) groups[numVal] = [];
-                     groups[numVal].push(p);
 
-                     // Debug specifically for user's range
-                     if (numVal >= 90 && numVal <= 139) {
-                         if (!debugInfo[numVal]) debugInfo[numVal] = [];
-                         debugInfo[numVal].push({
-                             id: p.id,
-                             sec: p.section,
-                             row: p.row_number,
-                             status: p.status,
-                             name: (p.first_name||'') + ' ' + (p.last_name||''),
-                             updated: p.updated_date
-                         });
-                     }
-                }
+                // Treat as candidate for Section 1 duplicate group
+                if (!groups[numVal]) groups[numVal] = [];
+                groups[numVal].push(p);
+                candidateCount++;
             }
         }
 
         const toDelete = [];
         let duplicateGroups = 0;
+        const debugGroups = {};
 
         for (const num in groups) {
             const list = groups[num];
@@ -74,39 +57,59 @@ Deno.serve(async (req) => {
                 
                 // Sort to find keeper
                 list.sort((a, b) => {
-                    // Score 1: Has Data
-                    const hasData = (p) => (p.first_name || p.last_name || p.family_name) ? 5 : 0;
-                    
-                    // Score 2: "Imported" note penalty
-                    const importPenalty = (p) => (p.notes && p.notes.includes('Imported')) ? -2 : 0;
+                    // 1. Data richness (names/dates)
+                    const dataScore = (p) => {
+                        let s = 0;
+                        if (p.first_name) s++;
+                        if (p.last_name) s++;
+                        if (p.family_name) s++;
+                        if (p.birth_date) s++;
+                        if (p.death_date) s++;
+                        return s;
+                    };
+                    const dsA = dataScore(a);
+                    const dsB = dataScore(b);
+                    if (dsA !== dsB) return dsB - dsA; // More data first
 
-                    // Score 3: Status
+                    // 2. Status priority
                     const statusScore = (p) => {
                         if (p.status === 'Occupied') return 3;
                         if (p.status === 'Reserved') return 2;
                         if (p.status === 'Veteran') return 2;
                         return 0;
                     };
+                    const ssA = statusScore(a);
+                    const ssB = statusScore(b);
+                    if (ssA !== ssB) return ssB - ssA;
 
-                    // Score 4: Section name cleanliness (prefer "Section 1" over "1" or "")
+                    // 3. "Imported" note penalty
+                    const importPenalty = (p) => (p.notes && p.notes.includes('Imported')) ? 1 : 0;
+                    if (importPenalty(a) !== importPenalty(b)) return importPenalty(a) - importPenalty(b); // 0 (clean) before 1 (imported)
+
+                    // 4. Section cleanliness ("Section 1" > "1" > "")
                     const secScore = (p) => {
                         const s = p.section || '';
-                        if (s.toLowerCase() === 'section 1') return 1;
+                        if (s.toLowerCase() === 'section 1') return 2;
+                        if (s === '1' || s === '01') return 1;
                         return 0;
                     };
+                    if (secScore(a) !== secScore(b)) return secScore(b) - secScore(a);
 
-                    const scoreA = hasData(a) + importPenalty(a) + statusScore(a) + secScore(a);
-                    const scoreB = hasData(b) + importPenalty(b) + statusScore(b) + secScore(b);
-
-                    if (scoreA !== scoreB) return scoreB - scoreA; // Higher score first
-
-                    // Tie-break: Newer update
+                    // 5. Update date (Newer is better)
                     return new Date(b.updated_date || 0) - new Date(a.updated_date || 0);
                 });
 
-                // Keep top 1, delete others
-                for (let i = 1; i < list.length; i++) {
-                    toDelete.push(list[i].id);
+                // Keep index 0, delete the rest
+                const keeper = list[0];
+                const losers = list.slice(1);
+                
+                debugGroups[num] = {
+                    kept: { id: keeper.id, sec: keeper.section, name: keeper.first_name, notes: keeper.notes },
+                    deleted: losers.map(l => ({ id: l.id, sec: l.section, name: l.first_name, notes: l.notes }))
+                };
+
+                for (const l of losers) {
+                    toDelete.push(l.id);
                 }
             }
         }
@@ -116,23 +119,31 @@ Deno.serve(async (req) => {
         const deletedIds = [];
         const errors = [];
 
-        for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
-            const batch = toDelete.slice(i, i + BATCH_SIZE);
-            await Promise.all(batch.map(async (id) => {
-                try {
-                    await base44.asServiceRole.entities.Plot.delete(id);
-                    deletedIds.push(id);
-                } catch (err) {
-                    errors.push({ id, error: err.message });
-                }
-            }));
+        if (toDelete.length > 0) {
+            for (let i = 0; i < toDelete.length; i += BATCH_SIZE) {
+                const batch = toDelete.slice(i, i + BATCH_SIZE);
+                await Promise.all(batch.map(async (id) => {
+                    try {
+                        await base44.asServiceRole.entities.Plot.delete(id);
+                        deletedIds.push(id);
+                    } catch (err) {
+                        errors.push({ id, error: err.message });
+                    }
+                }));
+            }
         }
 
         return Response.json({
             success: true,
-            message: `Scanned plots. Found ${duplicateGroups} duplicate groups. Deleted ${deletedIds.length} records.`,
-            deleted_count: deletedIds.length,
-            debug_90_139: debugInfo, // Return this so user can see what's happening
+            message: `Range ${rangeStart}-${rangeEnd}: Found ${duplicateGroups} duplicate groups. Deleted ${deletedIds.length} records.`,
+            stats: {
+                total_plots_scanned: allPlots.length,
+                in_range_count: inRangeCount,
+                candidates_for_dedup: candidateCount,
+                groups_with_duplicates: duplicateGroups,
+                deleted_count: deletedIds.length
+            },
+            details: debugGroups,
             errors: errors.length > 0 ? errors : undefined
         });
 
