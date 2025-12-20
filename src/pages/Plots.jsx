@@ -389,7 +389,21 @@ export default function PlotsPage() {
           const msg = err.response?.data?.error || err.message;
           toast.error(`Cleanup failed: ${msg}`);
       }
-      });
+  });
+
+  const seedLegacyDataMutation = useMutation({
+      mutationFn: async () => {
+          const res = await base44.functions.invoke('seedPlotsAndMaps', {});
+          if (res.data && res.data.error) throw new Error(res.data.error);
+          return res.data;
+      },
+      onSuccess: (data) => {
+          toast.success(data.message || "Import complete");
+      },
+      onError: (err) => {
+          toast.error(`Import failed: ${err.message}`);
+      }
+  });
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
