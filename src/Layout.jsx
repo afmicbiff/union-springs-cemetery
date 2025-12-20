@@ -42,10 +42,10 @@ export default function Layout({ children }) {
       isDropdown: true,
       items: [
         { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
-        { label: 'Board Members & Employees', path: '/Employees', icon: Users }
+        { label: 'Board Members & Employees', path: '/Employees', icon: Users },
+        { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle }
       ]
     },
-    { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
   ];
 
   return (

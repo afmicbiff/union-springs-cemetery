@@ -112,6 +112,40 @@ Deno.serve(async (req) => {
                  suggested_log_type: { type: "string", enum: ["note", "call", "email", "meeting"] }
              }
          };
+    } else if (action === 'suggest_campaigns') {
+        // Suggest campaigns based on date/season or generic patterns
+        // In a real app, we'd feed in aggregate member data
+        const date = new Date().toLocaleDateString();
+        prompt = `Suggest 3 communication campaigns for a cemetery membership based on the current date (${date}).
+        
+        Focus on engagement, remembrance, or maintenance updates.
+        
+        Return a JSON object with a list of campaigns. Each campaign should have:
+        - title
+        - description
+        - target_audience
+        - suggested_subject
+        `;
+        
+        jsonSchema = {
+            type: "object",
+            properties: {
+                campaigns: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            title: { type: "string" },
+                            description: { type: "string" },
+                            target_audience: { type: "string" },
+                            suggested_subject: { type: "string" }
+                        },
+                        required: ["title", "description", "target_audience"]
+                    }
+                }
+            },
+            required: ["campaigns"]
+        };
     } else {
         return Response.json({ error: "Invalid action" }, { status: 400 });
     }

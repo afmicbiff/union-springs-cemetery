@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
 
@@ -33,6 +33,9 @@ export default function CommunicationCenter() {
                         <TabsTrigger value="compose" className="flex items-center gap-2">
                             <Send className="w-4 h-4" /> Mass Notification
                         </TabsTrigger>
+                        <TabsTrigger value="campaigns" className="flex items-center gap-2">
+                            <Sparkles className="w-4 h-4" /> AI Campaigns
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="inbox">
@@ -42,9 +45,66 @@ export default function CommunicationCenter() {
                     <TabsContent value="compose">
                         <MassNotificationForm onSuccess={() => setActiveTab('inbox')} />
                     </TabsContent>
+
+                    <TabsContent value="campaigns">
+                        <CampaignSuggestions />
+                    </TabsContent>
                 </Tabs>
             </CardContent>
         </Card>
+    );
+}
+
+function CampaignSuggestions() {
+    const { data, isLoading, refetch } = useQuery({
+        queryKey: ['ai-campaigns'],
+        queryFn: async () => {
+            const res = await base44.functions.invoke('aiCommunicationAssistant', { action: 'suggest_campaigns', data: {} });
+            return res.data;
+        },
+        staleTime: 1000 * 60 * 60 // 1 hour
+    });
+
+    const campaigns = data?.campaigns || [];
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h3 className="text-lg font-medium">AI Campaign Suggestions</h3>
+                    <p className="text-sm text-stone-500">Engage members with timely, relevant communications.</p>
+                </div>
+                <Button variant="outline" onClick={() => refetch()} disabled={isLoading}>
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                </Button>
+            </div>
+
+            {isLoading ? (
+                <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+            ) : (
+                <div className="grid gap-4">
+                    {campaigns.map((campaign, idx) => (
+                        <Card key={idx} className="bg-stone-50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-amber-500" />
+                                    {campaign.title}
+                                </CardTitle>
+                                <CardDescription>{campaign.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-sm space-y-2">
+                                    <div><span className="font-semibold">Target:</span> {campaign.target_audience}</div>
+                                    <div><span className="font-semibold">Subject Idea:</span> {campaign.suggested_subject}</div>
+                                    <Button size="sm" variant="secondary" className="mt-2 w-full sm:w-auto">Draft this Campaign</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
