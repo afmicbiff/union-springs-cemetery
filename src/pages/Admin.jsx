@@ -47,6 +47,7 @@ import MembersDirectory from "@/components/admin/MembersDirectory";
 import AdminSearch from "@/components/admin/AdminSearch";
 import AdminBylaws from "@/components/admin/AdminBylaws";
 import DataImportDialog from "@/components/admin/DataImportDialog";
+import BackupManager from "@/components/admin/BackupManager";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -178,6 +179,7 @@ export default function AdminDashboard() {
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
       { id: "members", label: "Members", component: <MembersDirectory /> },
       { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
+      { id: "backups", label: "Backups", component: <BackupManager /> },
   ];
 
   return (
@@ -232,8 +234,13 @@ export default function AdminDashboard() {
                     </PopoverContent>
                 </Popover>
 
-                <Button onClick={exportData} variant="outline" size="sm" className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50">
-                    <Database className="w-4 h-4 mr-2" /> Backup
+                <Button 
+                    onClick={() => setActiveTab('backups')} 
+                    variant="outline" 
+                    size="sm" 
+                    className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50"
+                >
+                    <Database className="w-4 h-4 mr-2" /> Backups
                 </Button>
                 
                 <DataImportDialog />
