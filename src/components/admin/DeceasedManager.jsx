@@ -85,38 +85,9 @@ export default function DeceasedManager() {
                         </div>
                     </CardDescription>
                 </div>
-                <div className="flex gap-2">
-                    <Button 
-                        variant="outline" 
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                        onClick={async () => {
-                            if (confirm("Are you sure you want to delete duplicate deceased records? This will keep the most complete record for each person and delete duplicates. This action cannot be undone.")) {
-                                setIsCleaning(true);
-                                try {
-                                    const res = await base44.functions.invoke('cleanupDeceasedDuplicates');
-                                    if (res.data.error) throw new Error(res.data.error);
-                                    toast.success(res.data.message);
-                                    queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
-                                } catch (err) {
-                                    console.error(err);
-                                    toast.error("Cleanup failed: " + err.message);
-                                } finally {
-                                    setIsCleaning(false);
-                                }
-                            }
-                        }}
-                        disabled={isCleaning}
-                    >
-                        {isCleaning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                        Cleanup Duplicates
-                    </Button>
-                    <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
-                        <Plus className="w-4 h-4 mr-2" /> Add Record
-                    </Button>
-                </div>
                 </CardHeader>
             <CardContent>
-                <div className="flex items-center mb-6">
+                <div className="flex items-center justify-between mb-6">
                     <div className="relative w-full max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
                         <Input
@@ -125,6 +96,35 @@ export default function DeceasedManager() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="outline" 
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={async () => {
+                                if (confirm("Are you sure you want to delete duplicate deceased records? This will keep the most complete record for each person and delete duplicates. This action cannot be undone.")) {
+                                    setIsCleaning(true);
+                                    try {
+                                        const res = await base44.functions.invoke('cleanupDeceasedDuplicates');
+                                        if (res.data.error) throw new Error(res.data.error);
+                                        toast.success(res.data.message);
+                                        queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.error("Cleanup failed: " + err.message);
+                                    } finally {
+                                        setIsCleaning(false);
+                                    }
+                                }
+                            }}
+                            disabled={isCleaning}
+                        >
+                            {isCleaning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                            Cleanup Duplicates
+                        </Button>
+                        <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
+                            <Plus className="w-4 h-4 mr-2" /> Add Record
+                        </Button>
                     </div>
                 </div>
 
