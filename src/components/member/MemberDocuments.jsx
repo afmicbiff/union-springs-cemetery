@@ -56,6 +56,15 @@ export default function MemberDocuments({ user }) {
             const updatedDocs = [...documents, newDoc];
             await base44.entities.Member.update(memberRecord.id, { documents: updatedDocs });
 
+            // C. Create Notification for Admin
+            await base44.entities.Notification.create({
+                message: `New document uploaded by ${memberRecord.first_name} ${memberRecord.last_name}: ${file.name} (${docType})`,
+                type: "info",
+                is_read: false,
+                user_email: null, // System-wide / Admin
+                created_at: new Date().toISOString()
+            });
+
             queryClient.invalidateQueries(['member-profile']);
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input

@@ -20,9 +20,28 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import AIEmailAssistant from './AIEmailAssistant';
 import { Textarea } from "@/components/ui/textarea";
+import { FileText, Eye, ArrowRight, Trash2 } from 'lucide-react';
+import MoveDocumentDialog from './MoveDocumentDialog';
 
 export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
+    const [moveDoc, setMoveDoc] = useState(null);
+
+    const handleViewDoc = async (doc) => {
+        const toastId = toast.loading("Opening document...");
+        try {
+            const res = await base44.integrations.Core.CreateFileSignedUrl({ 
+                file_uri: doc.file_uri,
+                expires_in: 60 
+            });
+            if (res.signed_url) {
+                window.open(res.signed_url, '_blank');
+                toast.dismiss(toastId);
+            }
+        } catch (err) {
+            toast.error("Error: " + err.message, { id: toastId });
+        }
+    };
     const [noteContent, setNoteContent] = useState("");
     
     const { data: employees } = useQuery({
@@ -204,6 +223,38 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                 </div>
                             )}
                         </section>
+
+                        <Separator />
+
+                        {/* Documents Section */}
+                        <section>
+                            <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-3">Documents</h3>
+                            {!member.documents || member.documents.length === 0 ? (
+                                <p className="text-sm text-stone-400 italic">No documents uploaded.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {member.documents.map((doc, idx) => (
+                                        <div key={doc.id || idx} className="flex items-center justify-between p-2 bg-stone-50 border rounded-md text-sm">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <FileText className="w-4 h-4 text-stone-500 shrink-0" />
+                                                <div className="truncate">
+                                                    <span className="font-medium text-stone-800">{doc.name}</span>
+                                                    <span className="text-stone-500 text-xs ml-2">({doc.type})</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => handleViewDoc(doc)} title="View">
+                                                    <Eye className="w-3.5 h-3.5" />
+                                                </Button>
+                                                <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => setMoveDoc(doc)} title="Move to Record">
+                                                    <ArrowRight className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
                     </div>
                 </ScrollArea>
 
@@ -312,6 +363,17 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                     </ScrollArea>
                 </div>
             </div>
+
+            <MoveDocumentDialog 
+                isOpen={!!moveDoc} 
+                onClose={() => setMoveDoc(null)} 
+                document={moveDoc} 
+                member={member}
+                onMoveSuccess={() => {
+                    queryClient.invalidateQueries(['members']);
+                    queryClient.invalidateQueries(['member', member.id]);
+                }}
+            />
 
             {/* Email Draft Dialog */}
             <Dialog open={isEmailDraftOpen} onOpenChange={setIsEmailDraftOpen}>
