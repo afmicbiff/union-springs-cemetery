@@ -31,35 +31,20 @@ export default Deno.serve(async (req) => {
         Return JSON format.
         `;
 
-        const response = await base44.integrations.Core.InvokeLLM({
-            prompt: prompt,
-            response_json_schema: {
-                type: "object",
-                properties: {
-                    filters: {
-                        type: "object",
-                        properties: {
-                            q: { type: "string" },
-                            family: { type: "string" },
-                            section: { type: "string" },
-                            veteran: { type: "string" },
-                            bMin: { type: "string" },
-                            bMax: { type: "string" },
-                            dMin: { type: "string" },
-                            dMax: { type: "string" }
-                        }
-                    },
-                    explanation: { type: "string" },
-                    related_suggestions: { 
-                        type: "array", 
-                        items: { type: "string" } 
-                    }
-                },
-                required: ["filters", "explanation", "related_suggestions"]
-            }
-        });
+        // Use schema-less call to avoid provider 'thinking' requirement; parse manually
+        const raw = await base44.integrations.Core.InvokeLLM({ prompt });
+        let output = raw;
+        try {
+            output = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        } catch (_) {
+            output = {
+                filters: { q: query, section: "all", veteran: "all" },
+                explanation: "Parsed with fallback.",
+                related_suggestions: ["Add a date range", "Filter by family name", "Search for veterans only"]
+            };
+        }
 
-        return Response.json(response);
+        return Response.json(output);
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
     }
