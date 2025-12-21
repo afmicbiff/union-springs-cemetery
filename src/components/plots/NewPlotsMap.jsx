@@ -23,10 +23,12 @@ export default function NewPlotsMap({ batchId }) {
   const grouped = React.useMemo(() => {
     const g = {};
     (rowsQuery.data || []).forEach((r) => {
-      const rowStr = String(r.row_number || '').trim();
-      const cleanedRow = rowStr.replace(/^(ROW|SECTION)\s*/i, '');
-      const letterMatch = cleanedRow.match(/^[A-Za-z]/);
-      const sectionKey = (r.section || "Unassigned").replace(/Section\s*/i, "").trim() || "Unassigned";
+      const rowStrRaw = String(r.row_number || '').toUpperCase();
+      const cleanedRow = rowStrRaw.replace(/^(ROW|SECTION)\s*:?\s*/i, '').trim();
+      let letterMatch = cleanedRow.match(/[A-Z]/);
+      const plotStr = String(r.plot_number || '').toUpperCase();
+      if (!letterMatch && plotStr) letterMatch = plotStr.match(/[A-Z]/);
+      const sectionKey = (r.section || 'Unassigned').replace(/Section\s*/i, '').trim() || 'Unassigned';
       const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
       if (!g[key]) g[key] = [];
       g[key].push(r);
@@ -108,14 +110,14 @@ export default function NewPlotsMap({ batchId }) {
                 const digits = String(row.plot_number || '').replace(/\D/g, '');
                 return digits ? parseInt(digits, 10) : NaN;
               };
-              const rowStr = (r) => String(r.row_number || '').toUpperCase();
+              const rowNorm = (r) => String(r.row_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
               const a1 = aRows.filter((r) => {
                 const n = numFromPlot(r);
-                return (n >= 101 && n <= 132) || rowStr(r).includes('A-1') || rowStr(r).startsWith('A1');
+                return (n >= 101 && n <= 132) || rowNorm(r).startsWith('A1');
               });
               const a2 = aRows.filter((r) => {
                 const n = numFromPlot(r);
-                return (n >= 201 && n <= 232) || rowStr(r).includes('A-2') || rowStr(r).startsWith('A2');
+                return (n >= 201 && n <= 232) || rowNorm(r).startsWith('A2');
               });
 
               // Fallback: if nothing matched our A-1/A-2 criteria, render default A section
