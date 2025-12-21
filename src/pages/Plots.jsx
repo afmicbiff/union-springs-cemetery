@@ -1095,7 +1095,8 @@ export default function PlotsPage() {
                                                             spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }],
                                                             blanksEnd: 19
                                                         },
-                                                        // Col 9: 789-795, NO blanks, 720-737, blank after 720
+                                                        // Col 9: 789-795, 720-737, blank after 720. 
+                                                        // Ensure NO other blanks under 789 (which is at bottom visually).
                                                         { 
                                                             ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }],
                                                             spacers: [
