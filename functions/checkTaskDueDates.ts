@@ -42,6 +42,8 @@ export default Deno.serve(async (req) => {
                     type: "task",
                     is_read: false,
                     user_email: null, // Admin/System wide
+                    related_entity_id: task.id,
+                    related_entity_type: "task",
                     created_at: now.toISOString()
                 }));
 
