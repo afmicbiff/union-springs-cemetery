@@ -781,58 +781,13 @@ export default function PlotsPage() {
 
             {isAdmin && (
             <div className="flex gap-2">
-                <Button 
-                    variant="outline" 
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => {
-                        if(confirm("Are you sure you want to run the duplicate cleanup? This will delete duplicate plots in Section 1, keeping the ones with the most data.")) {
-                            cleanupMutation.mutate();
-                        }
-                    }}
-                    disabled={cleanupMutation.isPending}
-                >
-                    {cleanupMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Trash2 className="mr-2 h-4 w-4" />}
-                    Cleanup Duplicates
-                </Button>
 
-                <Button 
-                    variant="outline"
-                    onClick={() => {
-                        if(confirm("Import legacy records into PlotsAndMaps?")) {
-                            seedLegacyDataMutation.mutate();
-                        }
-                    }}
-                    disabled={seedLegacyDataMutation.isPending}
-                >
-                    {seedLegacyDataMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Database className="mr-2 h-4 w-4" />}
-                    Import 184 Records
-                </Button>
 
-                <Button 
-                    variant="outline"
-                    onClick={() => {
-                        if(confirm("Update Section 3 Grid? This will add missing plots including extended ranges.")) {
-                            seedSection3Mutation.mutate();
-                        }
-                    }}
-                    disabled={seedSection3Mutation.isPending}
-                >
-                    {seedSection3Mutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Layers className="mr-2 h-4 w-4" />}
-                    Seed Section 3
-                </Button>
 
-                <Button 
-                    variant="outline"
-                    onClick={() => {
-                        if(confirm("Seed Section 4 Grid?")) {
-                            seedSection4Mutation.mutate();
-                        }
-                    }}
-                    disabled={seedSection4Mutation.isPending}
-                >
-                    {seedSection4Mutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Layers className="mr-2 h-4 w-4" />}
-                    Seed Section 4
-                </Button>
+
+
+
+
 
 
 
