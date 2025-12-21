@@ -17,6 +17,11 @@ export default function NewPlotsAndMap() {
     const count = res.data?.deleted_count ?? 0;
     alert(`Deleted ${count} A-1 plot(s).`);
   };
+  const handlePopulateA1 = async () => {
+    if (!window.confirm('Fill A-1 (101–132) from NewPlot data?')) return;
+    const res = await base44.functions.invoke('populateA1Plots', {});
+    alert(res.data?.message || 'Done');
+  };
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm">
