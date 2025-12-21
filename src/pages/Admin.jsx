@@ -85,8 +85,21 @@ export default function AdminDashboard() {
       if (!note.related_entity_id) return;
       try {
           // 1. Get current task to preserve history
-          const task = await base44.entities.Task.get(note.related_entity_id);
-          if (!task) throw new Error("Task not found");
+          let task;
+          try {
+              task = await base44.entities.Task.get(note.related_entity_id);
+          } catch (e) {
+              // Task might be deleted
+              task = null;
+          }
+          
+          if (!task) {
+               // Mark notification as read to prevent getting stuck
+               await base44.entities.Notification.update(note.id, { is_read: true });
+               queryClient.invalidateQueries(['notifications']);
+               toast.error("Task not found (it may have been deleted). Notification cleared.");
+               return;
+          }
 
           const newUpdate = {
               note: status === 'Completed' ? 'Task marked completed via notification' : 'Task reviewed via notification',
