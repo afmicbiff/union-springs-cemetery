@@ -232,7 +232,7 @@ export default function NewPlotsMap({ batchId }) {
                           });
                           const rows = [
                             [132,124,116,108],
-                            [121,123,115,107],
+                            [131,123,115,107],
                             [130,122,114,106],
                             [129,121,113,105],
                             [128,120,112,104],
@@ -256,10 +256,21 @@ export default function NewPlotsMap({ batchId }) {
                             <div className="space-y-3">
                               <div className="grid grid-cols-4 gap-2">
                                 {rows.map((row, ri) => (
-                                  <React.Fragment key={ri}>
+                                  <React.Fragment key={`a1-row-${ri}`}>
                                     {row.map((n, ci) => {
                                       const r = byNum[n];
-                                      if (!r) return null;
+                                      if (!r) {
+                                        return (
+                                          <div key={`placeholder-${n}`} className="border border-gray-200 rounded-md p-2 bg-gray-50 opacity-60">
+                                            <div className="flex items-center justify-between">
+                                              <div className="text-[11px] font-mono text-gray-400 font-semibold">{n}</div>
+                                              <span className="w-3 h-3 rounded-full bg-gray-300"></span>
+                                            </div>
+                                            <div className="mt-1 text-[11px] text-gray-400 truncate">Row: A-{n}</div>
+                                            <div className="mt-0.5 text-[11px] text-gray-400 truncate">&nbsp;</div>
+                                          </div>
+                                        );
+                                      }
                                       const key = r.id;
                                       const st = r.status && STATUS_COLORS[r.status] ? r.status : 'Default';
                                       const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
