@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsImport from "../components/plots/NewPlotsImport";
-import NewPlotsView from "../components/plots/NewPlotsView";
+import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
 
 
 export default function NewPlotsAndMap() {
@@ -39,7 +39,7 @@ export default function NewPlotsAndMap() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
-          <NewPlotsView />
+          <NewPlotsBrowser />
         </div>
       </main>
     </div>
