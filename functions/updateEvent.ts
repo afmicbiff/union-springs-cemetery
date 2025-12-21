@@ -9,14 +9,15 @@ Deno.serve(async (req) => {
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-        const events = await base44.entities.Event.filter({ id });
+        // Use service role to ensure admins can update events regardless of creator
+        const events = await base44.asServiceRole.entities.Event.filter({ id });
         const oldEvent = events[0];
 
         if (!oldEvent) {
              return Response.json({ error: "Event not found" }, { status: 404 });
         }
 
-        const updatedEvent = await base44.entities.Event.update(id, data);
+        const updatedEvent = await base44.asServiceRole.entities.Event.update(id, data);
 
         // Notify Attendees
         const currentAttendeeIds = updatedEvent.attendee_ids || [];

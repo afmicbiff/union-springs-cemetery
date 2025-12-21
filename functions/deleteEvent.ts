@@ -9,14 +9,15 @@ Deno.serve(async (req) => {
         const user = await base44.auth.me();
         if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-        const events = await base44.entities.Event.filter({ id });
+        // Use service role to ensure admins can delete events regardless of creator
+        const events = await base44.asServiceRole.entities.Event.filter({ id });
         const eventToDelete = events[0];
 
         if (!eventToDelete) {
              return Response.json({ error: "Event not found" }, { status: 404 });
         }
 
-        await base44.entities.Event.delete(id);
+        await base44.asServiceRole.entities.Event.delete(id);
 
         const attendeeIds = eventToDelete.attendee_ids || [];
         if (attendeeIds.length > 0) {
