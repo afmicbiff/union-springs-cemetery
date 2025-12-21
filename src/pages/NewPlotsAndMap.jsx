@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
+import NewPlotsGrid from "../components/plots/NewPlotsGrid";
 
 
 export default function NewPlotsAndMap() {

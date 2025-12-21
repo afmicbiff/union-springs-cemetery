@@ -1,37 +1,37 @@
-import Home from './pages/Home';
-import Search from './pages/Search';
-import Plots from './pages/Plots';
-import Services from './pages/Services';
 import Admin from './pages/Admin';
-import History from './pages/History';
-import Visitor from './pages/Visitor';
+import Bylaws from './pages/Bylaws';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
-import Memorial from './pages/Memorial';
-import Profile from './pages/Profile';
 import Employees from './pages/Employees';
-import Bylaws from './pages/Bylaws';
+import History from './pages/History';
+import Home from './pages/Home';
 import MemberPortal from './pages/MemberPortal';
+import Memorial from './pages/Memorial';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
+import Plots from './pages/Plots';
+import Profile from './pages/Profile';
+import Search from './pages/Search';
+import Services from './pages/Services';
+import Visitor from './pages/Visitor';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Home": Home,
-    "Search": Search,
-    "Plots": Plots,
-    "Services": Services,
     "Admin": Admin,
-    "History": History,
-    "Visitor": Visitor,
+    "Bylaws": Bylaws,
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
-    "Memorial": Memorial,
-    "Profile": Profile,
     "Employees": Employees,
-    "Bylaws": Bylaws,
+    "History": History,
+    "Home": Home,
     "MemberPortal": MemberPortal,
+    "Memorial": Memorial,
     "NewPlotsAndMap": NewPlotsAndMap,
+    "Plots": Plots,
+    "Profile": Profile,
+    "Search": Search,
+    "Services": Services,
+    "Visitor": Visitor,
 }
 
 export const pagesConfig = {
