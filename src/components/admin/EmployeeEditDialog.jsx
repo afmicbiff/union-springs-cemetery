@@ -65,7 +65,23 @@ export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
     const maritalStatus = watch("marital_status");
 
     const updateMutation = useMutation({
-        mutationFn: (data) => base44.entities.Employee.update(employee.id, data),
+        mutationFn: async (data) => {
+            await base44.entities.Employee.update(employee.id, data);
+            
+            // Audit Log
+            try {
+                const user = await base44.auth.me();
+                await base44.entities.AuditLog.create({
+                    action: 'update',
+                    entity_type: 'Employee',
+                    entity_id: employee.id,
+                    details: `Employee ${employee.first_name} ${employee.last_name} updated.`,
+                    metadata: data,
+                    performed_by: user.email,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) { console.error("Audit log failed", e); }
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['employees'] });
             queryClient.invalidateQueries({ queryKey: ['employee', employee.id] });

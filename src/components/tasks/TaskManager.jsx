@@ -98,7 +98,21 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     });
 
     const deleteTaskMutation = useMutation({
-        mutationFn: (id) => base44.entities.Task.delete(id),
+        mutationFn: async (id) => {
+            await base44.entities.Task.delete(id);
+            // Audit Log
+            try {
+                const user = await base44.auth.me();
+                await base44.entities.AuditLog.create({
+                    action: 'delete',
+                    entity_type: 'Task',
+                    entity_id: id,
+                    details: 'Task deleted permanently.',
+                    performed_by: user.email,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) { console.error(e); }
+        },
         onSuccess: () => {
             queryClient.invalidateQueries(['tasks']);
             toast.success("Task deleted permanently");
@@ -106,10 +120,24 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     });
 
     const archiveTaskMutation = useMutation({
-        mutationFn: ({ id, is_archived }) => base44.entities.Task.update(id, { is_archived }),
+        mutationFn: async ({ id, is_archived }) => {
+            await base44.entities.Task.update(id, { is_archived });
+            // Audit Log
+            try {
+                const user = await base44.auth.me();
+                await base44.entities.AuditLog.create({
+                    action: is_archived ? 'archive' : 'unarchive',
+                    entity_type: 'Task',
+                    entity_id: id,
+                    details: is_archived ? 'Task archived.' : 'Task unarchived.',
+                    performed_by: user.email,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) { console.error(e); }
+        },
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries(['tasks']);
-            toast.success(variables.is_archived ? "Task archived" : "Task unarchived");
+            toast.success(variables && variables.is_archived ? "Task archived" : "Task unarchived");
         }
     });
 
