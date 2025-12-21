@@ -61,6 +61,12 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
         onSave(dataToSave);
     };
 
+    const handleCompleteAndArchive = () => {
+        const dataToSave = { ...formData, status: "Completed", is_archived: true };
+        if (dataToSave.assignee_id === "unassigned") dataToSave.assignee_id = null;
+        onSave(dataToSave);
+    };
+
     const filteredEmployees = employees.filter(emp => {
         const firstName = emp.first_name || '';
         const lastName = emp.last_name || '';
@@ -303,6 +309,14 @@ export default function TaskDialog({ isOpen, onClose, task, onSave, employees = 
                                 onChange={(e) => setFormData({...formData, update_note: e.target.value})} 
                                 className="bg-white"
                             />
+                            <Button 
+                                type="button" 
+                                variant="secondary" 
+                                className="w-full mt-2 bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
+                                onClick={handleCompleteAndArchive}
+                            >
+                                <Check className="w-4 h-4 mr-2" /> Complete & Archive Task
+                            </Button>
                         </div>
                     )}
 
