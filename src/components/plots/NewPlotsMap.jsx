@@ -76,9 +76,14 @@ export default function NewPlotsMap({ batchId }) {
   }
 
   const sectionKeys = Object.keys(grouped).sort((a, b) => {
+    // Always show 'A' first, then numeric sections ascending, then others alphabetically
+    if (a === 'A') return -1;
+    if (b === 'A') return 1;
     const na = parseInt(a);
     const nb = parseInt(b);
     if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    if (!isNaN(na)) return -1; // numeric before non-numeric
+    if (!isNaN(nb)) return 1;
     return a.localeCompare(b);
   });
 
