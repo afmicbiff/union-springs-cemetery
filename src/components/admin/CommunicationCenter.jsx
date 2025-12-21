@@ -9,7 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb, Megaphone, X } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb, Megaphone, X, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { format } from 'date-fns';
 
@@ -326,12 +332,34 @@ function InboxView() {
     const queryClient = useQueryClient();
     const [selectedThread, setSelectedThread] = useState(null);
     const [replyText, setReplyText] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState('inbox'); // 'inbox' or 'archived'
 
     const { data, isLoading } = useQuery({
         queryKey: ['admin-conversations'],
         queryFn: async () => {
             const res = await base44.functions.invoke('communication', { action: 'getConversations' });
             return res.data;
+        }
+    });
+
+    const manageThreadMutation = useMutation({
+        mutationFn: async ({ threadId, operation, value }) => {
+            return await base44.functions.invoke('communication', {
+                action: 'manageThread',
+                thread_id: threadId,
+                operation,
+                value
+            });
+        },
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries(['admin-conversations']);
+            if (variables.operation === 'delete' || (variables.operation === 'archive' && viewMode === 'inbox')) {
+                if (selectedThread?.id === variables.threadId) {
+                    setSelectedThread(null);
+                }
+            }
+            toast.success("Conversation updated");
         }
     });
 
@@ -348,15 +376,12 @@ function InboxView() {
         onSuccess: () => {
             setReplyText('');
             queryClient.invalidateQueries(['admin-conversations']);
-            // Optimistically update UI logic if needed, but re-fetch is safer for messages
             toast.success("Reply sent");
         }
     });
 
     const handleReply = () => {
         if (!replyText.trim()) return;
-        // Determine recipient (the participant that isn't ADMIN/Me)
-        // Since this is Admin view, recipient is the participant email
         const recipient = selectedThread.participants[0]; 
         replyMutation.mutate({
             threadId: selectedThread.id,
@@ -367,85 +392,223 @@ function InboxView() {
 
     if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
 
-    const threads = data?.threads || [];
+    const allThreads = data?.threads || [];
+    
+    // Filter Threads
+    const filteredThreads = allThreads.filter(thread => {
+        // 1. View Mode
+        if (viewMode === 'inbox' && thread.is_archived) return false;
+        if (viewMode === 'archived' && !thread.is_archived) return false;
+
+        // 2. Search
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const matchesSubject = (thread.subject || '').toLowerCase().includes(term);
+            const matchesParticipant = thread.participants.some(p => p.toLowerCase().includes(term));
+            const matchesBody = thread.messages.some(m => (m.body || '').toLowerCase().includes(term));
+            return matchesSubject || matchesParticipant || matchesBody;
+        }
+        return true;
+    });
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px]">
-            {/* Thread List */}
-            <div className="border rounded-md md:col-span-1 overflow-y-auto bg-stone-50">
-                {threads.length === 0 ? (
-                    <div className="p-4 text-center text-stone-500">No messages yet.</div>
-                ) : (
-                    threads.map(thread => (
-                        <div 
-                            key={thread.id}
-                            className={`p-4 border-b cursor-pointer hover:bg-stone-100 transition-colors ${selectedThread?.id === thread.id ? 'bg-white border-l-4 border-l-teal-600 shadow-sm' : ''}`}
-                            onClick={() => setSelectedThread(thread)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[650px]">
+            {/* Thread List Column */}
+            <div className="md:col-span-1 flex flex-col h-full bg-stone-50 border rounded-md overflow-hidden">
+                {/* Search & Filters */}
+                <div className="p-3 border-b bg-white space-y-3">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-400" />
+                        <Input 
+                            placeholder="Search messages..." 
+                            className="pl-9 bg-stone-50"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant={viewMode === 'inbox' ? 'secondary' : 'ghost'} 
+                            size="sm" 
+                            className="flex-1 text-xs"
+                            onClick={() => setViewMode('inbox')}
                         >
-                            <div className="flex justify-between mb-1">
-                                <span className="font-semibold text-sm truncate">{thread.participants[0] || 'Unknown'}</span>
-                                <span className="text-xs text-stone-400">{format(new Date(thread.last_message), 'MMM d')}</span>
-                            </div>
-                            <div className="text-sm font-medium truncate text-stone-800">{thread.subject}</div>
-                            <div className="text-xs text-stone-500 truncate">{thread.messages[thread.messages.length-1]?.body}</div>
+                            <Mail className="w-3 h-3 mr-1.5" /> Inbox
+                        </Button>
+                        <Button 
+                            variant={viewMode === 'archived' ? 'secondary' : 'ghost'} 
+                            size="sm" 
+                            className="flex-1 text-xs"
+                            onClick={() => setViewMode('archived')}
+                        >
+                            <Archive className="w-3 h-3 mr-1.5" /> Archived
+                        </Button>
+                    </div>
+                </div>
+
+                {/* List */}
+                <div className="flex-1 overflow-y-auto">
+                    {filteredThreads.length === 0 ? (
+                        <div className="p-8 text-center text-stone-500 text-sm">
+                            <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                            <p>No {viewMode} messages.</p>
                         </div>
-                    ))
-                )}
+                    ) : (
+                        filteredThreads.map(thread => (
+                            <div 
+                                key={thread.id}
+                                className={`p-4 border-b cursor-pointer transition-colors group relative
+                                    ${selectedThread?.id === thread.id ? 'bg-white border-l-4 border-l-teal-600 shadow-sm' : 'hover:bg-stone-100'}
+                                    ${thread.unread_count > 0 ? 'bg-blue-50/50' : ''}
+                                `}
+                                onClick={() => setSelectedThread(thread)}
+                            >
+                                <div className="flex justify-between mb-1 items-start">
+                                    <div className="flex items-center gap-1.5 overflow-hidden">
+                                        {thread.is_starred && <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />}
+                                        <span className={`text-sm truncate ${thread.unread_count > 0 ? 'font-bold text-stone-900' : 'font-semibold text-stone-700'}`}>
+                                            {thread.participants[0] || 'Unknown'}
+                                        </span>
+                                    </div>
+                                    <span className="text-xs text-stone-400 shrink-0 ml-2">{format(new Date(thread.last_message), 'MMM d')}</span>
+                                </div>
+                                <div className={`text-sm truncate mb-0.5 ${thread.unread_count > 0 ? 'font-medium text-stone-900' : 'text-stone-600'}`}>
+                                    {thread.subject}
+                                </div>
+                                <div className="text-xs text-stone-500 truncate pr-4">
+                                    {thread.messages[thread.messages.length-1]?.body}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
 
-            {/* Message Detail */}
-            <div className="border rounded-md md:col-span-2 flex flex-col bg-white">
+            {/* Message Detail Column */}
+            <div className="md:col-span-2 flex flex-col h-full bg-white border rounded-md overflow-hidden shadow-sm">
                 {selectedThread ? (
                     <>
-                        <div className="p-4 border-b bg-stone-50">
-                            <h3 className="font-semibold text-lg">{selectedThread.subject}</h3>
-                            <div className="flex items-center gap-2 text-sm text-stone-500">
-                                <User className="w-4 h-4" />
-                                {selectedThread.participants.join(', ')}
+                        {/* Header */}
+                        <div className="p-4 border-b bg-stone-50 flex justify-between items-start">
+                            <div className="overflow-hidden mr-4">
+                                <h3 className="font-semibold text-lg truncate flex items-center gap-2">
+                                    {selectedThread.is_starred && <Star className="w-4 h-4 fill-amber-400 text-amber-400" />}
+                                    {selectedThread.subject}
+                                </h3>
+                                <div className="flex items-center gap-2 text-sm text-stone-500 mt-1">
+                                    <User className="w-4 h-4" />
+                                    {selectedThread.participants.join(', ')}
+                                </div>
                             </div>
+                            
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-stone-900">
+                                        <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => manageThreadMutation.mutate({ 
+                                        threadId: selectedThread.id, 
+                                        operation: 'star', 
+                                        value: !selectedThread.is_starred 
+                                    })}>
+                                        <Star className={`w-4 h-4 mr-2 ${selectedThread.is_starred ? 'fill-amber-400 text-amber-400' : ''}`} /> 
+                                        {selectedThread.is_starred ? 'Unstar' : 'Star'}
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuItem onClick={() => manageThreadMutation.mutate({ 
+                                        threadId: selectedThread.id, 
+                                        operation: 'read', 
+                                        value: selectedThread.unread_count > 0 // if unread > 0, we want to mark read (true). Wait. if unread>0, it IS unread. so we want to mark read? 
+                                        // Logic: if unread, mark read. If read, mark unread.
+                                        // unread_count > 0 means it has unread messages. So we want to mark READ (is_read=true).
+                                        // If unread_count == 0, we want to mark UNREAD (is_read=false).
+                                    })}>
+                                        {selectedThread.unread_count > 0 ? (
+                                            <><MailOpen className="w-4 h-4 mr-2" /> Mark as Read</>
+                                        ) : (
+                                            <><MailIcon className="w-4 h-4 mr-2" /> Mark as Unread</>
+                                        )}
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuItem onClick={() => manageThreadMutation.mutate({ 
+                                        threadId: selectedThread.id, 
+                                        operation: 'archive', 
+                                        value: !selectedThread.is_archived 
+                                    })}>
+                                        <Archive className="w-4 h-4 mr-2" /> 
+                                        {selectedThread.is_archived ? 'Move to Inbox' : 'Archive'}
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => {
+                                        if(confirm('Delete this conversation permanently?')) {
+                                            manageThreadMutation.mutate({ threadId: selectedThread.id, operation: 'delete' });
+                                        }
+                                    }}>
+                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                         
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {/* Messages */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50/30">
                             {selectedThread.messages.map(msg => {
-                                const isAdmin = !selectedThread.participants.includes(msg.sender_email); // If sender is NOT in participants list (which filters out ADMIN), assume it's admin
-                                // Wait, the logic above for participants filtered out 'ADMIN'. 
-                                // So if sender_email is NOT in that list, it must be the admin user.
+                                const isAdmin = !selectedThread.participants.includes(msg.sender_email);
                                 return (
                                     <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-[80%] rounded-lg p-3 ${isAdmin ? 'bg-teal-100 text-teal-900' : 'bg-stone-100 text-stone-900'}`}>
-                                            <div className="text-xs opacity-70 mb-1 flex justify-between gap-4">
-                                                <span>{isAdmin ? 'Admin' : msg.sender_email}</span>
+                                        <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+                                            isAdmin 
+                                            ? 'bg-teal-700 text-white rounded-br-none' 
+                                            : 'bg-white text-stone-800 border border-stone-100 rounded-bl-none'
+                                        }`}>
+                                            <div className={`text-[10px] mb-1 flex justify-between gap-4 ${isAdmin ? 'text-teal-200' : 'text-stone-400'}`}>
+                                                <span>{isAdmin ? 'You' : msg.sender_email}</span>
                                                 <span>{format(new Date(msg.created_date), 'p')}</span>
                                             </div>
-                                            <div className="whitespace-pre-wrap text-sm">{msg.body}</div>
+                                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{msg.body}</div>
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
 
-                        <div className="p-4 border-t bg-stone-50">
-                            <div className="flex gap-2">
+                        {/* Reply Box */}
+                        <div className="p-4 border-t bg-white">
+                            <div className="flex gap-3 items-end">
                                 <Textarea 
                                     placeholder="Type your reply..." 
-                                    className="min-h-[80px] bg-white"
+                                    className="min-h-[80px] bg-stone-50 resize-none focus:bg-white transition-colors"
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleReply();
+                                        }
+                                    }}
                                 />
                                 <Button 
-                                    className="h-auto bg-teal-700 hover:bg-teal-800"
+                                    className="h-[80px] w-14 bg-teal-700 hover:bg-teal-800 flex flex-col gap-1"
                                     onClick={handleReply}
-                                    disabled={replyMutation.isPending}
+                                    disabled={replyMutation.isPending || !replyText.trim()}
+                                    title="Send Reply (Ctrl+Enter)"
                                 >
-                                    <Send className="w-4 h-4" />
+                                    {replyMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                                    <span className="text-[10px]">Send</span>
                                 </Button>
+                            </div>
+                            <div className="text-[10px] text-stone-400 mt-2 text-right">
+                                Press Enter to send, Shift+Enter for new line
                             </div>
                         </div>
                     </>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-stone-400">
-                        <MessageSquare className="w-12 h-12 mb-2" />
-                        <p>Select a conversation to view</p>
+                    <div className="flex flex-col items-center justify-center h-full text-stone-300">
+                        <MessageSquare className="w-16 h-16 mb-4 opacity-50" />
+                        <p className="font-medium text-lg text-stone-400">Select a conversation</p>
+                        <p className="text-sm">Choose a thread from the list to view details</p>
                     </div>
                 )}
             </div>

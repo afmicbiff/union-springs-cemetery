@@ -156,11 +156,21 @@ export default Deno.serve(async (req) => {
             });
 
             // Format for UI
-            const threadList = Object.values(threads).map(t => ({
-                ...t,
-                participants: Array.from(t.participants).filter(p => p !== 'ADMIN'),
-                messages: t.messages.sort((a,b) => new Date(a.created_date) - new Date(b.created_date))
-            })).sort((a,b) => new Date(b.last_message) - new Date(a.last_message));
+            const threadList = Object.values(threads).map(t => {
+                const msgs = t.messages.sort((a,b) => new Date(a.created_date) - new Date(b.created_date));
+                // Aggregate flags
+                const isStarred = msgs.some(m => m.is_starred);
+                const isArchived = msgs.every(m => m.is_archived); // Only archived if ALL are archived (simplest logic)
+                // Actually, if we archive a thread, we update all. If a new message comes in, it defaults to false, unarchiving it. This is good behavior.
+                
+                return {
+                    ...t,
+                    is_starred: isStarred,
+                    is_archived: isArchived,
+                    participants: Array.from(t.participants).filter(p => p !== 'ADMIN'),
+                    messages: msgs
+                };
+            }).sort((a,b) => new Date(b.last_message) - new Date(a.last_message));
 
             return Response.json({ threads: threadList });
         }
@@ -173,6 +183,31 @@ export default Deno.serve(async (req) => {
                  await base44.asServiceRole.entities.Message.update(id, { is_read: true });
              }
              return Response.json({ success: true });
+        }
+
+        // --- ACTION: MANAGE THREAD (Archive, Star, Read, Delete) ---
+        if (action === 'manageThread') {
+            const { thread_id, operation, value } = payload; 
+            // operation: 'archive', 'star', 'read', 'delete'
+            
+            // 1. Find messages in thread
+            const messages = await base44.asServiceRole.entities.Message.filter({ thread_id }, null, 100);
+            
+            if (operation === 'delete') {
+                for (const msg of messages) {
+                    await base44.asServiceRole.entities.Message.delete(msg.id);
+                }
+            } else {
+                let updateData = {};
+                if (operation === 'archive') updateData = { is_archived: value };
+                if (operation === 'star') updateData = { is_starred: value };
+                if (operation === 'read') updateData = { is_read: value };
+
+                for (const msg of messages) {
+                    await base44.asServiceRole.entities.Message.update(msg.id, updateData);
+                }
+            }
+            return Response.json({ success: true });
         }
 
         return Response.json({ error: 'Invalid action' }, { status: 400 });
