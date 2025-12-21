@@ -59,6 +59,16 @@ Union Springs Cemetery Admin`
             is_read: false
         });
 
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'delete',
+            entity_type: 'Event',
+            entity_id: id,
+            details: `Event "${eventToDelete.title}" deleted.`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         return Response.json({ success: true });
 
     } catch (error) {

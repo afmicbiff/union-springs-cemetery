@@ -16,6 +16,16 @@ Deno.serve(async (req) => {
 
         // Attempt deletion
         const result = await base44.entities.Employee.delete(id);
+
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'delete',
+            entity_type: 'Employee',
+            entity_id: id,
+            details: 'Employee deleted (force delete).',
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
         
         return Response.json({ success: true, result });
     } catch (error) {

@@ -98,6 +98,21 @@ export default function EmployeeList({ view = 'active' }) {
             });
 
             await Promise.all(updates);
+            
+            // Audit Log
+            try {
+                const user = await base44.auth.me();
+                await base44.entities.AuditLog.create({
+                    action: 'bulk_update',
+                    entity_type: 'Employee',
+                    details: `Bulk action "${actionType}" performed on ${selectedEmployees.length} employees.`,
+                    performed_by: user.email,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Failed to log audit", e);
+            }
+
             toast.success(`Successfully updated ${selectedEmployees.length} employees`, { id: toastId });
             setSelectedEmployees([]);
             refetch();

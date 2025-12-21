@@ -28,6 +28,16 @@ Deno.serve(async (req) => {
                 timestamp: new Date().toISOString(),
                 details: details || ""
             });
+
+            // Audit Log
+            await base44.entities.AuditLog.create({
+                action: act,
+                entity_type: 'Member',
+                entity_id: memId,
+                details: `${act} member: ${memName}. ${details || ""}`,
+                performed_by: user.email,
+                timestamp: new Date().toISOString()
+            });
         };
 
         if (action === 'delete' && id) {
