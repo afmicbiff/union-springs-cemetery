@@ -91,7 +91,7 @@ export default function AdminDashboard() {
   // Notifications for Header
   const { data: notifications } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => base44.entities.Notification.list('-created_at', 20),
+    queryFn: () => base44.entities.Notification.filter({ is_read: false }, '-created_at', 20),
     initialData: [],
     refetchInterval: 30000,
   });
@@ -99,42 +99,44 @@ export default function AdminDashboard() {
   const updateTaskStatus = async (note, status) => {
       if (!note.related_entity_id) return;
       try {
-          // 1. Get current task to preserve history
-          let task;
-          try {
-              task = await base44.entities.Task.get(note.related_entity_id);
-          } catch (e) {
-              // Task might be deleted
-              task = null;
+          // Call backend function to handle recurrence and audit logs
+          if (status === 'Completed') {
+              const res = await base44.functions.invoke('updateTaskStatus', { 
+                  id: note.related_entity_id, 
+                  status: 'Completed' 
+              });
+              if (res.data.error) throw new Error(res.data.error);
+          } else {
+               // Just mark as updated/viewed manually if not completing
+               // Or potentially just navigate to it. 
+               // For "Update" button which usually implies acknowledging:
+               // We'll keeps existing logic but just add a note if needed, 
+               // but mostly we just want to clear the notification.
+               // If the user meant "Update" as in "I'm working on it", we might set to In Progress?
+               // The previous logic didn't change status unless 'Completed'.
+               // It just added a note. We'll stick to that for non-complete actions or just mark read.
           }
-          
-          if (!task) {
-               // Mark notification as read to prevent getting stuck
-               await base44.entities.Notification.update(note.id, { is_read: true });
-               queryClient.invalidateQueries(['notifications']);
-               toast.error("Task not found (it may have been deleted). Notification cleared.");
-               return;
-          }
 
-          const newUpdate = {
-              note: status === 'Completed' ? 'Task marked completed via notification' : 'Task reviewed via notification',
-              timestamp: new Date().toISOString(),
-              updated_by: 'Admin'
-          };
-
-          // 2. Update Task
-          await base44.entities.Task.update(task.id, {
-              status: status === 'Completed' ? 'Completed' : task.status,
-              updates: [...(task.updates || []), newUpdate]
-          });
-
-          // 3. Mark Notification Read
+          // Mark Notification Read
           await base44.entities.Notification.update(note.id, { is_read: true });
+          
           queryClient.invalidateQueries(['notifications']);
           queryClient.invalidateQueries(['tasks']);
-          toast.success(status === 'Completed' ? "Task Completed" : "Task Updated");
+          
+          if (status === 'Completed') {
+              toast.success("Task Completed");
+          } else {
+              toast.success("Notification updated");
+          }
       } catch (err) {
-          toast.error("Action failed: " + err.message);
+          // If task not found (404), clear notification
+          if (err.message && (err.message.includes("not found") || err.message.includes("404"))) {
+               await base44.entities.Notification.update(note.id, { is_read: true });
+               queryClient.invalidateQueries(['notifications']);
+               toast.error("Task not found. Notification cleared.");
+          } else {
+               toast.error("Action failed: " + err.message);
+          }
       }
   };
 
