@@ -155,7 +155,7 @@ export default function NewPlotsMap({ batchId }) {
                   <div className="flex flex-col md:flex-row justify-between gap-6 w-full">
                     {/* Left: A-2 */}
                     {a2.length > 0 && (
-                      <div>
+                      <div className="md:order-1">
                         <div className="text-sm font-semibold text-gray-700 mb-2">Section A-2</div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                           {a2.map((r) => {
