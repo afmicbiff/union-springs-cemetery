@@ -152,7 +152,7 @@ export default function NewPlotsMap({ batchId }) {
                     <h3 className="text-xl font-semibold text-gray-900">Section A</h3>
                     <span className="text-xs text-gray-500">{aRows.length} plots</span>
                   </div>
-                  <div className="flex flex-col md:flex-row md:justify-between gap-6">
+                  <div className="flex flex-col md:flex-row justify-between gap-6 w-full">
                     {/* Left: A-2 */}
                     {a2.length > 0 && (
                       <div>
