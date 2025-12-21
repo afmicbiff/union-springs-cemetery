@@ -1,31 +1,52 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 
 function canonicalA1NumberFromNewPlot(row) {
+  // 1) Prefer explicit row labels like "A-1xx" or "A1xx"
+  const rowUpRaw = String(row.row_number || '').toUpperCase();
+  const rowUp = rowUpRaw.replace(/[^A-Z0-9]/g, ''); // A-101 -> A101
+  let mr = rowUp.match(/A1(\d{2})/);
+  if (mr) {
+    const d = parseInt(mr[1], 10);
+    if (d >= 1 && d <= 32) return 100 + d; // 01..32 -> 101..132
+  }
+
+  // 2) Analyze plot_number text
   const pnRaw = String(row.plot_number || '').toUpperCase();
   const pn = pnRaw.replace(/\s+/g, '');
-  // If label starts with A1, try to derive canonical 101-132
+
+  // Patterns like A1-07, A107, A1 7
   if (pn.startsWith('A1')) {
     const after = pn.slice(2);
     const m = after.match(/(\d{1,3})/);
     if (m) {
       const d = parseInt(m[1], 10);
-      if (d >= 100 && d <= 999) return d; // A110, A111 etc
-      if (d >= 1 && d <= 32) return 100 + d; // A1-07 => 107
+      if (d >= 100 && d <= 999) return d; // A110 -> 110
+      if (d >= 1 && d <= 32) return 100 + d; // A1-07 -> 107
     }
   }
-  // Try a 3-digit group first (e.g., 101)
+
+  // 3) Handle numeric encodings (e.g., 1103 meaning 103, 1180 meaning 118)
+  // If 4 digits and starts with 11, map 11xy -> 1xy (1103 -> 103)
+  const four = pn.match(/^(\d{4})$/);
+  if (four) {
+    const val = parseInt(four[1], 10);
+    if (val >= 1101 && val <= 1132) return 100 + (val % 100); // 1103 -> 103
+    if (val >= 1180 && val <= 1199) return 100 + (val % 100); // 1180 -> 180 -> 118
+    if (val >= 1250 && val <= 1299) return 100 + (val % 100); // 1257 -> 157 -> 125
+    if (val >= 1260 && val <= 1299) return 100 + (val % 100); // 1260 -> 160 -> 120
+  }
+
+  // 4) Fallback to first 3-digit group (e.g., 101)
   const m3 = pn.match(/(\d{3})/);
   if (m3) return parseInt(m3[1], 10);
-  // Then try 1-2 digits and map to 100+
+
+  // 5) Then try 1-2 digits and map to 100+
   const m2 = pn.match(/(\d{1,2})/);
   if (m2) {
     const d2 = parseInt(m2[1], 10);
     if (d2 >= 1 && d2 <= 32) return 100 + d2;
   }
-  // Fallback to row number like A1xx
-  const rn = String(row.row_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  const mr = rn.match(/A1(\d{1,2})/);
-  if (mr) return 100 + parseInt(mr[1], 10);
+
   return NaN;
 }
 
