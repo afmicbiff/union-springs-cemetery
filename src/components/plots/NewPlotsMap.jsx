@@ -180,25 +180,50 @@ export default function NewPlotsMap({ batchId }) {
                     {a1.length > 0 && (
                       <div className="md:ml-auto md:order-2 md:self-start w-fit">
                         <div className="text-sm font-semibold text-gray-700 mb-2 text-right md:text-left">Section A-1</div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 transform rotate-90 origin-top-left">
-                          {a1.map((r) => {
-                            const key = r.id;
-                            const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
-                            const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
-                            const occupant = [r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || "";
-                            const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || "-"} • ${r.status || "Unknown"}${occupant ? " • " + occupant : ""}`;
-                            return (
-                              <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
-                                <div className="flex items-center justify-between">
-                                  <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                  <span className={`w-3 h-3 rounded-full ${bg}`}></span>
-                                </div>
-                                <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
-                                <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        {(() => {
+                          const byNum = {};
+                          a1.forEach((r) => {
+                            const n = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || NaN;
+                            if (!isNaN(n)) byNum[n] = r;
+                          });
+                          const rows = [
+                            [132,124,116,108],
+                            [131,123,115,107],
+                            [130,122,114,106],
+                            [129,121,113,105],
+                            [128,120,112,104],
+                            [127,119,111,103],
+                            [126,118,110,102],
+                            [125,117,109,101],
+                          ];
+                          return (
+                            <div className="grid grid-cols-4 gap-2">
+                              {rows.map((row, ri) => (
+                                <React.Fragment key={ri}>
+                                  {row.map((n, ci) => {
+                                    const r = byNum[n];
+                                    if (!r) return null;
+                                    const key = r.id;
+                                    const st = r.status && STATUS_COLORS[r.status] ? r.status : 'Default';
+                                    const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                                    const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
+                                    const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
+                                    return (
+                                      <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                                        <div className="flex items-center justify-between">
+                                          <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                                          <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                        </div>
+                                        <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || '-'}</div>
+                                        <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
+                                      </div>
+                                    );
+                                  })}
+                                </React.Fragment>
+                              ))}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
