@@ -113,11 +113,11 @@ export default function NewPlotsMap({ batchId }) {
               const rowNorm = (r) => String(r.row_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
               const a1 = aRows.filter((r) => {
                 const n = numFromPlot(r);
-                return (n >= 101 && n <= 132) || rowNorm(r).startsWith('A1');
+                return (n >= 101 && n <= 132) || rowNorm(r).includes('A1');
               });
               const a2 = aRows.filter((r) => {
                 const n = numFromPlot(r);
-                return (n >= 201 && n <= 232) || rowNorm(r).startsWith('A2');
+                return (n >= 201 && n <= 232) || rowNorm(r).includes('A2');
               });
 
               // Fallback: if nothing matched our A-1/A-2 criteria, render default A section
