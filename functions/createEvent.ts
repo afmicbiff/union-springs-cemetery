@@ -108,7 +108,10 @@ Union Springs Cemetery Admin`
             message: `Event created: "${title}" by ${user.full_name}`,
             type: 'info',
             created_at: new Date().toISOString(),
-            is_read: false
+            is_read: false,
+            related_entity_id: newEvent.id,
+            related_entity_type: 'event',
+            link: '/admin?tab=calendar'
         });
 
         return Response.json(newEvent);

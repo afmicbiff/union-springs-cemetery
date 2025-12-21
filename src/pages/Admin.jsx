@@ -151,8 +151,10 @@ export default function AdminDashboard() {
            setActiveTab('communication');
        } else if (note.related_entity_type === 'task') {
            setActiveTab('tasks');
-       } else if (note.related_entity_type === 'event') {
+       } else if (note.related_entity_type === 'event' || (note.message && note.message.toLowerCase().includes('event'))) {
            setActiveTab('calendar');
+       } else if (note.related_entity_type === 'member' || note.related_entity_type === 'document') {
+           setActiveTab('members');
        }
   };
 
@@ -320,61 +322,83 @@ export default function AdminDashboard() {
                                                 <p className="text-sm text-stone-800 leading-snug">{note.message}</p>
                                                 <p className="text-[10px] text-stone-400 mt-1">
                                                     {format(new Date(note.created_at), 'MMM d, HH:mm')}
-                                                    {note.related_entity_type && (
-                                                        <span className="ml-2">
-                                                            • From {
-                                                                note.related_entity_type === 'task' ? 'Tasks' :
-                                                                note.related_entity_type === 'message' ? 'Communications' :
-                                                                note.related_entity_type === 'event' ? 'Calendar' :
-                                                                note.related_entity_type === 'member' ? 'Member Directory' :
-                                                                note.related_entity_type === 'document' ? 'Member Directory' :
-                                                                'Admin'
-                                                            }
-                                                        </span>
-                                                    )}
+                                                    <span className="ml-2">
+                                                        • From {
+                                                            note.related_entity_type === 'task' ? 'Tasks' :
+                                                            note.related_entity_type === 'message' ? 'Communications' :
+                                                            note.related_entity_type === 'event' ? 'Calendar' :
+                                                            (note.related_entity_type === 'member' || note.related_entity_type === 'document') ? 'Member Directory' :
+                                                            (note.message.toLowerCase().includes('event') ? 'Calendar' : 'Admin')
+                                                        }
+                                                    </span>
                                                 </p>
                                             </div>
                                         </div>
 
-                                        {/* Action Buttons for Tasks & Events */}
-                                        {(note.related_entity_type === 'task') && (
-                                            <div className="flex gap-2 mt-2 ml-7">
+                                        {/* Unified Action Buttons */}
+                                        <div className="flex gap-2 mt-2 ml-7">
+                                            {note.related_entity_type === 'task' ? (
+                                                <>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
+                                                        onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Completed'); }}
+                                                    >
+                                                        <Check className="w-3 h-3 mr-1" /> Complete Task
+                                                    </Button>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                                                        onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Updated'); }}
+                                                    >
+                                                        <Eye className="w-3 h-3 mr-1" /> Updated
+                                                    </Button>
+                                                </>
+                                            ) : (note.related_entity_type === 'event' || note.message.toLowerCase().includes('event')) ? (
                                                 <Button 
                                                     size="sm" 
                                                     variant="outline" 
                                                     className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
-                                                    onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Completed'); }}
+                                                    onClick={async (e) => { 
+                                                        e.stopPropagation(); 
+                                                        await base44.entities.Notification.update(note.id, { is_read: true });
+                                                        queryClient.invalidateQueries(['notifications']);
+                                                        setActiveTab('calendar');
+                                                    }}
                                                 >
-                                                    <Check className="w-3 h-3 mr-1" /> Complete Task
+                                                    <Calendar className="w-3 h-3 mr-1" /> Go to Calendar
                                                 </Button>
+                                            ) : note.related_entity_type === 'message' ? (
                                                 <Button 
                                                     size="sm" 
                                                     variant="outline" 
-                                                    className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
-                                                    onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Updated'); }}
+                                                    className="h-6 text-[10px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
+                                                    onClick={async (e) => { 
+                                                        e.stopPropagation(); 
+                                                        await base44.entities.Notification.update(note.id, { is_read: true });
+                                                        queryClient.invalidateQueries(['notifications']);
+                                                        setActiveTab('communication');
+                                                    }}
                                                 >
-                                                    <Eye className="w-3 h-3 mr-1" /> Updated
+                                                    <Megaphone className="w-3 h-3 mr-1" /> View Message
                                                 </Button>
-                                            </div>
-                                        )}
-                                        {/* Action Buttons for Events */}
-                                        {(note.related_entity_type === 'event') && (
-                                             <div className="flex gap-2 mt-2 ml-7">
-                                                 <Button 
-                                                     size="sm" 
-                                                     variant="outline" 
-                                                     className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
-                                                     onClick={async (e) => { 
-                                                         e.stopPropagation(); 
-                                                         await base44.entities.Notification.update(note.id, { is_read: true });
-                                                         queryClient.invalidateQueries(['notifications']);
-                                                         setActiveTab('calendar');
-                                                     }}
-                                                 >
-                                                     <Calendar className="w-3 h-3 mr-1" /> Go to Calendar
-                                                 </Button>
-                                             </div>
-                                        )}
+                                            ) : (
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline" 
+                                                    className="h-6 text-[10px] px-2 text-stone-600 bg-stone-50 border-stone-200 hover:bg-stone-100"
+                                                    onClick={async (e) => { 
+                                                        e.stopPropagation(); 
+                                                        await base44.entities.Notification.update(note.id, { is_read: true });
+                                                        queryClient.invalidateQueries(['notifications']);
+                                                    }}
+                                                >
+                                                    <Check className="w-3 h-3 mr-1" /> Dismiss
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))
                             )}
