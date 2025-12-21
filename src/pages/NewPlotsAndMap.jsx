@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsGrid from "../components/plots/NewPlotsGrid";
+import NewPlotsImport from "../components/plots/NewPlotsImport";
 
 
 export default function NewPlotsAndMap() {
@@ -26,9 +27,12 @@ export default function NewPlotsAndMap() {
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">New Plots for Reservation</h1>
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
-            <Link to={createPageUrl('Plots')}>
-              <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <NewPlotsImport />
+              <Link to={createPageUrl('Plots')}>
+                <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
