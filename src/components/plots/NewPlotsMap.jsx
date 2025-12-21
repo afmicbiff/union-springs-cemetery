@@ -60,16 +60,21 @@ export default function NewPlotsMap({ batchId }) {
   const sectionKeys = Object.keys(grouped).sort((a, b) => {
     const aLetter = /^[A-Za-z]$/.test(a);
     const bLetter = /^[A-Za-z]$/.test(b);
-    if (aLetter && bLetter) return a.localeCompare(b);
+    // Reverse alphabetical for letter sections (e.g., J..A)
+    if (aLetter && bLetter) return b.localeCompare(a);
+    // Keep letters before others
     if (aLetter) return -1;
     if (bLetter) return 1;
+    // Numeric sections ascending
     const na = parseInt(a);
     const nb = parseInt(b);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb; // numeric sections ascending
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
     if (!isNaN(na)) return -1; // numeric before non-numeric/other
     if (!isNaN(nb)) return 1;
+    // Put Unassigned last
     if (a === 'Unassigned') return 1;
     if (b === 'Unassigned') return -1;
+    // Fallback alpha
     return a.localeCompare(b);
   });
 
