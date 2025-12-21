@@ -52,6 +52,7 @@ import AdminBylaws from "@/components/admin/AdminBylaws";
 import DataImportDialog from "@/components/admin/DataImportDialog";
 import BackupManager from "@/components/admin/BackupManager";
 import CommunicationCenter from "@/components/admin/CommunicationCenter";
+import AuditLogViewer from "@/components/admin/AuditLogViewer";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -283,6 +284,7 @@ export default function AdminDashboard() {
       { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
       { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },
+      { id: "logs", label: "System Logs", component: <AuditLogViewer /> },
   ];
 
   return (
