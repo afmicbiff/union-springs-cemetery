@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -54,8 +54,22 @@ import CommunicationCenter from "@/components/admin/CommunicationCenter";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [initialParams, setInitialParams] = useState({});
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) {
+        setActiveTab(tab);
+    }
+    const memberId = params.get('memberId');
+    if (memberId) {
+        setInitialParams(prev => ({ ...prev, memberId }));
+    }
+  }, [location.search]);
 
   React.useEffect(() => {
     const checkAuth = async () => {
@@ -247,7 +261,7 @@ export default function AdminDashboard() {
       { id: "calendar", label: "Calendar", component: <EventCalendar /> },
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
-      { id: "members", label: "Members", component: <MembersDirectory /> },
+      { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
       { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
       { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },

@@ -22,7 +22,7 @@ import SegmentBuilder from './SegmentBuilder';
 import BulkActionDialog from './BulkActionDialog';
 import { Checkbox } from "@/components/ui/checkbox";
 
-export default function MembersDirectory() {
+export default function MembersDirectory({ openMemberId }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [stateFilter, setStateFilter] = useState("all");
     const [donationFilter, setDonationFilter] = useState("all"); 
@@ -87,6 +87,16 @@ export default function MembersDirectory() {
             }
         },
     });
+
+    useEffect(() => {
+        if (openMemberId && members.length > 0 && !selectedMember) {
+            const memberToOpen = members.find(m => m.id === openMemberId);
+            if (memberToOpen) {
+                setSelectedMember(memberToOpen);
+                setIsProfileOpen(true);
+            }
+        }
+    }, [openMemberId, members]);
 
     const { data: savedSegments } = useQuery({
         queryKey: ['member-segments'],
