@@ -24,7 +24,8 @@ export default function NewPlotsMap({ batchId }) {
     const g = {};
     (rowsQuery.data || []).forEach((r) => {
       const rowStr = String(r.row_number || '').trim();
-      const letterMatch = rowStr.match(/^[A-Za-z]/);
+      const cleanedRow = rowStr.replace(/^(ROW|SECTION)\s*/i, '');
+      const letterMatch = cleanedRow.match(/^[A-Za-z]/);
       const sectionKey = (r.section || "Unassigned").replace(/Section\s*/i, "").trim() || "Unassigned";
       const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
       if (!g[key]) g[key] = [];
@@ -188,7 +189,7 @@ export default function NewPlotsMap({ batchId }) {
                           });
                           const rows = [
                             [132,124,116,108],
-                            [131,123,115,107],
+                            [121,123,115,107],
                             [130,122,114,106],
                             [129,121,113,105],
                             [128,120,112,104],
