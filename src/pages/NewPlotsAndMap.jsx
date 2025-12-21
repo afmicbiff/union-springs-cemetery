@@ -4,7 +4,6 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsGrid from "../components/plots/NewPlotsGrid";
 import NewPlotsImport from "../components/plots/NewPlotsImport";
-import NewPlotsImport from "../components/plots/NewPlotsImport";
 
 
 export default function NewPlotsAndMap() {
