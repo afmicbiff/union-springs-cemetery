@@ -18,19 +18,20 @@ Deno.serve(async (req) => {
         }
 
         const employees = await base44.asServiceRole.entities.Employee.list({ limit: 1000, status: 'active' });
-        
+        const members = await base44.asServiceRole.entities.Member.list({ limit: 1000 });
+
         const notifications = [];
         const today = new Date();
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(today.getDate() + 30);
         
-        for (const emp of employees) {
-            if (!emp.documents) continue;
+        const checkDocuments = (person, type) => {
+            if (!person.documents) return;
             
-            // Group by group_id to find latest versions
+            // Group by group_id to find latest versions (mainly for employees, members usually list all)
             const latestDocs = {};
-            emp.documents.forEach(doc => {
-                const groupId = doc.group_id || doc.id || doc.name; // Fallback
+            person.documents.forEach(doc => {
+                const groupId = doc.group_id || doc.id || doc.name; 
                 if (!latestDocs[groupId] || (doc.version || 1) > (latestDocs[groupId].version || 1)) {
                     latestDocs[groupId] = doc;
                 }
@@ -44,24 +45,33 @@ Deno.serve(async (req) => {
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                 
                 if (diffDays <= 30 && diffDays >= 0) {
-                     // Check if notification already exists to avoid spam?
-                     // For simplicity, we'll create an alert. In prod, we'd check `last_reminder_sent` or similar.
-                     // Or simply rely on the UI to show these.
-                     // The user asked to "receive alerts".
-                     
                      notifications.push({
-                         message: `Document Expiring: ${doc.name} for ${emp.first_name} ${emp.last_name} expires in ${diffDays} days (${doc.expiration_date}).`,
+                         message: `${type} Document Expiring: "${doc.name}" for ${person.first_name} ${person.last_name} expires in ${diffDays} days (${doc.expiration_date}).`,
                          type: "alert",
-                         user_email: null // System wide notification for admins
+                         user_email: null, // System wide notification for admins
+                         related_entity_id: person.id,
+                         related_entity_type: type.toLowerCase(),
+                         link: `/admin?tab=${type === 'Member' ? 'members' : 'employees'}&${type === 'Member' ? 'memberId' : 'employeeId'}=${person.id}`
                      });
                 } else if (diffDays < 0) {
                      notifications.push({
-                         message: `Document EXPIRED: ${doc.name} for ${emp.first_name} ${emp.last_name} expired on ${doc.expiration_date}.`,
+                         message: `${type} Document EXPIRED: "${doc.name}" for ${person.first_name} ${person.last_name} expired on ${doc.expiration_date}.`,
                          type: "alert",
-                         user_email: null
+                         user_email: null,
+                         related_entity_id: person.id,
+                         related_entity_type: type.toLowerCase(),
+                         link: `/admin?tab=${type === 'Member' ? 'members' : 'employees'}&${type === 'Member' ? 'memberId' : 'employeeId'}=${person.id}`
                      });
                 }
             }
+        };
+
+        for (const emp of employees) {
+            checkDocuments(emp, 'Employee');
+        }
+
+        for (const member of members) {
+            checkDocuments(member, 'Member');
         }
         
         if (notifications.length > 0) {

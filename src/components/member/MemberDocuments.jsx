@@ -14,6 +14,7 @@ export default function MemberDocuments({ user }) {
     const queryClient = useQueryClient();
     const [uploading, setUploading] = useState(false);
     const [docType, setDocType] = useState('Identification');
+    const [expirationDate, setExpirationDate] = useState('');
 
     // 1. Fetch Member Record to get documents list
     const { data: memberRecord } = useQuery({
@@ -50,6 +51,7 @@ export default function MemberDocuments({ user }) {
                 name: file.name,
                 file_uri: uploadRes.file_uri,
                 type: docType,
+                expiration_date: expirationDate || null,
                 uploaded_at: new Date().toISOString()
             };
 
@@ -71,6 +73,7 @@ export default function MemberDocuments({ user }) {
             queryClient.invalidateQueries(['member-profile']);
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input
+            setExpirationDate('');
         } catch (err) {
             console.error(err);
             toast.error("Upload Error: " + err.message);
@@ -141,7 +144,17 @@ export default function MemberDocuments({ user }) {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="w-full sm:w-2/3 space-y-1.5">
+                        <div className="w-full sm:w-1/3 space-y-1.5">
+                            <Label htmlFor="expiration-date" className="text-xs">Expiration Date (Optional)</Label>
+                            <Input 
+                                id="expiration-date" 
+                                type="date" 
+                                className="bg-white h-9"
+                                value={expirationDate}
+                                onChange={(e) => setExpirationDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="w-full sm:w-1/3 space-y-1.5">
                             <Label htmlFor="file-upload" className="text-xs">Select File</Label>
                             <div className="flex gap-2">
                                 <Input 
@@ -174,10 +187,15 @@ export default function MemberDocuments({ user }) {
                                         </div>
                                         <div className="min-w-0">
                                             <div className="font-medium text-sm truncate">{doc.name}</div>
-                                            <div className="text-xs text-stone-500 flex gap-2">
+                                            <div className="text-xs text-stone-500 flex gap-2 flex-wrap">
                                                 <span>{doc.type}</span>
                                                 <span>•</span>
-                                                <span>{doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : 'Unknown Date'}</span>
+                                                <span>Uploaded: {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : 'Unknown'}</span>
+                                                {doc.expiration_date && (
+                                                    <span className={`ml-2 px-1.5 py-0.5 rounded ${new Date(doc.expiration_date) < new Date() ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-600'}`}>
+                                                        Exp: {format(new Date(doc.expiration_date), 'MMM d, yyyy')}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

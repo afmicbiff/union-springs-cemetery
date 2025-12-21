@@ -238,9 +238,17 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                         <div key={doc.id || idx} className="flex items-center justify-between p-2 bg-stone-50 border rounded-md text-sm">
                                             <div className="flex items-center gap-2 overflow-hidden">
                                                 <FileText className="w-4 h-4 text-stone-500 shrink-0" />
-                                                <div className="truncate">
-                                                    <span className="font-medium text-stone-800">{doc.name}</span>
-                                                    <span className="text-stone-500 text-xs ml-2">({doc.type})</span>
+                                                <div className="truncate flex flex-col">
+                                                    <div>
+                                                        <span className="font-medium text-stone-800">{doc.name}</span>
+                                                        <span className="text-stone-500 text-xs ml-2">({doc.type})</span>
+                                                    </div>
+                                                    {doc.expiration_date && (
+                                                        <div className={`text-xs mt-0.5 ${new Date(doc.expiration_date) < new Date() ? 'text-red-600 font-medium' : 'text-stone-400'}`}>
+                                                            Exp: {format(new Date(doc.expiration_date), 'MMM d, yyyy')}
+                                                            {new Date(doc.expiration_date) < new Date() && " (Expired)"}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0">
