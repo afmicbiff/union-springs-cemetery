@@ -100,31 +100,94 @@ export default function NewPlotsMap({ batchId }) {
         {sectionKeys.length === 0 ? (
           <div className="text-sm text-gray-500">No rows for this batch.</div>
         ) : (
-          sectionKeys.map((section) => (
-            <div key={section}>
-              <div className="flex items-end gap-3 mb-3">
-                <h3 className="text-xl font-semibold text-gray-900">Section {section}</h3>
-                <span className="text-xs text-gray-500">{grouped[section].length} plots</span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                {grouped[section].map((r) => {
-                  const key = r.id;
-                  const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
-                  const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
-                  return (
-                    <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
-                      <div className="flex items-center justify-between">
-                        <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                        <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+          sectionKeys.map((section) => {
+            if (section === 'A') {
+              const aRows = grouped[section] || [];
+              const numFromPlot = (row) => {
+                const m = String(row.plot_number || '').toUpperCase().match(/A?(\d+)/);
+                return m ? parseInt(m[1], 10) : NaN;
+              };
+              const a1 = aRows.filter((r) => { const n = numFromPlot(r); return n >= 101 && n <= 132; });
+              const a2 = aRows.filter((r) => { const n = numFromPlot(r); return n >= 201 && n <= 232; });
+              return (
+                <div key={section}>
+                  <div className="flex items-end gap-3 mb-3">
+                    <h3 className="text-xl font-semibold text-gray-900">Section A</h3>
+                    <span className="text-xs text-gray-500">{aRows.length} plots</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left: A-2 */}
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-2">Section A-2</div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                        {a2.map((r) => {
+                          const key = r.id;
+                          const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
+                          const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                          return (
+                            <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                              <div className="flex items-center justify-between">
+                                <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                                <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                              </div>
+                              <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
+                              <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
-                      <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
                     </div>
-                  );
-                })}
+                    {/* Right: A-1 */}
+                    <div>
+                      <div className="text-sm font-semibold text-gray-700 mb-2 text-right md:text-left">Section A-1</div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                        {a1.map((r) => {
+                          const key = r.id;
+                          const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
+                          const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                          return (
+                            <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                              <div className="flex items-center justify-between">
+                                <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                                <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                              </div>
+                              <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
+                              <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div key={section}>
+                <div className="flex items-end gap-3 mb-3">
+                  <h3 className="text-xl font-semibold text-gray-900">Section {section}</h3>
+                  <span className="text-xs text-gray-500">{grouped[section].length} plots</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                  {grouped[section].map((r) => {
+                    const key = r.id;
+                    const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
+                    const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                    return (
+                      <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                        <div className="flex items-center justify-between">
+                          <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                          <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
+                        <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
