@@ -405,6 +405,21 @@ export default function PlotsPage() {
       }
   });
 
+  const seedSection3Mutation = useMutation({
+      mutationFn: async () => {
+          const res = await base44.functions.invoke('seedSection3', {});
+          if (res.data && res.data.error) throw new Error(res.data.error);
+          return res.data;
+      },
+      onSuccess: (data) => {
+          queryClient.invalidateQueries({ queryKey: ['plots'] });
+          toast.success(`Section 3: ${data.created} created, ${data.skipped} skipped.`);
+      },
+      onError: (err) => {
+          toast.error(`Section 3 Seed failed: ${err.message}`);
+      }
+  });
+
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
       return plotEntities.map(p => ({
@@ -769,6 +784,19 @@ export default function PlotsPage() {
                     Import 184 Records
                 </Button>
 
+                <Button 
+                    variant="outline"
+                    onClick={() => {
+                        if(confirm("Seed Section 3 Grid (Columns 1-9)? This will add missing plots.")) {
+                            seedSection3Mutation.mutate();
+                        }
+                    }}
+                    disabled={seedSection3Mutation.isPending}
+                >
+                    {seedSection3Mutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Layers className="mr-2 h-4 w-4" />}
+                    Seed Section 3
+                </Button>
+
                 <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
                     {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                     <span className="font-medium text-sm">Import CSV</span>
@@ -896,15 +924,10 @@ export default function PlotsPage() {
                                             </div>
                                         ) : sectionKey === '2' ? (
                                             <div className="flex justify-center overflow-x-auto">
-                                                 {/* Section 2: 10 columns x 23 rows grid. Data sorted Ascending by default. 
-                                                     We chunk into columns of 23, then reverse each column to have Highest ID at top (Descending visually). 
-                                                 */}
                                                  <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))' }}>
                                                     {(() => {
                                                         const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                                                        // Data is ascending. Chunk it to get columns (Left->Right).
                                                         const columns = chunk(sections[sectionKey], 23);
-                                                        // Flatten after reversing each column to make them Top->Bottom (High->Low)
                                                         const renderData = columns.flatMap(col => [...col].reverse());
 
                                                         return renderData.map((plot) => (
@@ -918,6 +941,59 @@ export default function PlotsPage() {
                                                         ));
                                                     })()}
                                                  </div>
+                                            </div>
+                                        ) : sectionKey === '3' ? (
+                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                                                {(() => {
+                                                    // Grid Definition: 9 Columns x 25 High
+                                                    // Bottom Horizontal (justify-end handles bottom alignment)
+                                                    const ranges = [
+                                                        { start: 251, end: 268 },
+                                                        { start: 326, end: 346 },
+                                                        { start: 406, end: 430 },
+                                                        { start: 489, end: 512 },
+                                                        { start: 605, end: 629 },
+                                                        { start: 688, end: 711 },
+                                                        { start: 765, end: 788 },
+                                                        { start: 821, end: 843 },
+                                                        { start: 898, end: 922 }
+                                                    ];
+
+                                                    return ranges.map((range, idx) => {
+                                                        const colPlots = sections[sectionKey].filter(p => {
+                                                            const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                            return num >= range.start && num <= range.end;
+                                                        });
+
+                                                        // Sort High to Low (Top to Bottom) or Low to High (Bottom to Top)?
+                                                        // User said "9 on the bottom horizontal"
+                                                        // Usually cemetery plots are numbered sequentially.
+                                                        // If 251 is bottom, 268 is top.
+                                                        // Let's assume standard stack: Low # at Bottom, High # at Top.
+                                                        // So we render flex-col-reverse (Bottom is first in DOM, or flex-col justify-end).
+                                                        // <div className="flex flex-col gap-1 justify-end"> with standard sort (High -> Low in array) puts High at top.
+                                                        
+                                                        colPlots.sort((a, b) => {
+                                                            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
+                                                            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
+                                                            return numB - numA; // High numbers first (Top of visual stack)
+                                                        });
+
+                                                        return (
+                                                            <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
+                                                                {colPlots.map((plot) => (
+                                                                    <GravePlot 
+                                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                                        data={plot} 
+                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                                        onHover={handleHover}
+                                                                        onEdit={isAdmin ? handleEditClick : undefined}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    });
+                                                })()}
                                             </div>
                                         ) : (
                                             <div className="flex flex-col-reverse gap-2 content-center items-center">
