@@ -3,7 +3,6 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Map as MapIcon, FileText } from "lucide-react";
-import BatchesList from "./BatchesList";
 import NewPlotsDataTable from "./NewPlotsDataTable";
 import NewPlotsMap from "./NewPlotsMap";
 
@@ -24,7 +23,7 @@ export default function NewPlotsBrowser() {
   }, [batchesQuery.data, selectedBatchId]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="space-y-3">
       {/* Batches list */}
       <div className="lg:col-span-4">
         <BatchesList
@@ -37,7 +36,7 @@ export default function NewPlotsBrowser() {
       </div>
 
       {/* Content */}
-      <div className="lg:col-span-8">
+      <div>
         <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg mb-3">
           <button
             onClick={() => setActiveTab("map")}
