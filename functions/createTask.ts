@@ -52,6 +52,8 @@ Union Springs Cemetery Management`
                     message: `New Task Assigned: "${task.title}"`,
                     type: 'task',
                     user_email: assignee.email,
+                    related_entity_id: task.id,
+                    related_entity_type: "task",
                     created_at: new Date().toISOString(),
                     is_read: false
                 });
