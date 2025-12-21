@@ -15,6 +15,15 @@ export default Deno.serve(async (req) => {
             return Response.json({ error: 'Invalid payload: plots array required' }, { status: 400 });
         }
 
+        // Create import batch record
+        const batch = await base44.asServiceRole.entities.ImportBatch.create({
+            status: 'processing',
+            user_email: user.email,
+            source: 'manual_upload',
+            total_rows: plots.length,
+            started_at: new Date().toISOString()
+        });
+
         // Fetch all existing plots to check against
         const allPlots = await base44.asServiceRole.entities.Plot.list(null, 5000);
         const plotMap = new Map();
@@ -32,6 +41,7 @@ export default Deno.serve(async (req) => {
 
         const toCreate = [];
         const toUpdate = [];
+        const batchNewRows = [];
 
         for (const inputPlot of plots) {
             const key = getKey(inputPlot);
@@ -39,6 +49,8 @@ export default Deno.serve(async (req) => {
 
             if (!existing) {
                 toCreate.push(inputPlot);
+                // Log imported row
+                batchNewRows.push({ batch_id: batch.id, ...inputPlot, action_taken: 'created', raw_row: inputPlot });
             } else {
                 // Check if we need to fill in missing data
                 const updates = {};
@@ -72,6 +84,9 @@ export default Deno.serve(async (req) => {
 
                 if (hasUpdates) {
                     toUpdate.push({ id: existing.id, ...updates });
+                    batchNewRows.push({ batch_id: batch.id, ...inputPlot, matched_plot_id: existing.id, action_taken: 'updated', raw_row: inputPlot });
+                } else {
+                    batchNewRows.push({ batch_id: batch.id, ...inputPlot, matched_plot_id: existing.id, action_taken: 'skipped', raw_row: inputPlot });
                 }
             }
         }
@@ -98,6 +113,27 @@ export default Deno.serve(async (req) => {
             ));
             updatedCount += chunk.length;
         }
+
+        // Compute skipped count
+        const skippedCount = plots.length - (createList.length + toUpdate.length);
+
+        // Save imported rows for review
+        if (batchNewRows.length) {
+            const NP_CHUNK = 100;
+            for (let i = 0; i < batchNewRows.length; i += NP_CHUNK) {
+                const chunk = batchNewRows.slice(i, i + NP_CHUNK);
+                await base44.asServiceRole.entities.NewPlot.bulkCreate(chunk);
+            }
+        }
+
+        // Update import batch summary
+        await base44.asServiceRole.entities.ImportBatch.update(batch.id, {
+            status: 'completed',
+            created_rows: createdCount,
+            updated_rows: updatedCount,
+            skipped_rows: skippedCount,
+            completed_at: new Date().toISOString()
+        });
 
         // Audit Log (non-blocking)
         try {
