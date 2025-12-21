@@ -17,6 +17,21 @@ Deno.serve(async (req) => {
              return Response.json({ error: "Event not found" }, { status: 404 });
         }
 
+        // Delete associated notifications
+        try {
+            const relatedNotifications = await base44.asServiceRole.entities.Notification.filter({
+                related_entity_id: id,
+                related_entity_type: 'event'
+            });
+            
+            // Delete in chunks if needed, or loop
+            await Promise.all(relatedNotifications.map(n => 
+                base44.asServiceRole.entities.Notification.delete(n.id)
+            ));
+        } catch (e) {
+            console.error("Failed to cleanup notifications:", e);
+        }
+
         await base44.asServiceRole.entities.Event.delete(id);
 
         const attendeeIds = eventToDelete.attendee_ids || [];

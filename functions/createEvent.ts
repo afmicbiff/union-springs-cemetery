@@ -51,6 +51,8 @@ Deno.serve(async (req) => {
                     message: `You have been invited to: "${title}"`,
                     type: 'task',
                     user_email: attendee.email,
+                    related_entity_id: newEvent.id,
+                    related_entity_type: 'event',
                     created_at: new Date().toISOString(),
                     is_read: false
                 });
