@@ -219,9 +219,16 @@ export default function NewPlotsMap({ batchId }) {
                         <div className="text-sm font-semibold text-gray-700 mb-2">Section A-1</div>
                         {(() => {
                           const byNum = {};
+                          const dupes = {};
                           a1.forEach((r) => {
                             const cn = canonicalA1Number(r);
-                            if (!isNaN(cn)) byNum[cn] = r;
+                            if (!isNaN(cn) && cn >= 101 && cn <= 132) {
+                              if (byNum[cn]) {
+                                dupes[cn] = dupes[cn] ? [...dupes[cn], r] : [r];
+                              } else {
+                                byNum[cn] = r;
+                              }
+                            }
                           });
                           const rows = [
                             [132,124,116,108],
@@ -233,31 +240,90 @@ export default function NewPlotsMap({ batchId }) {
                             [126,118,110,102],
                             [125,117,109,101],
                           ];
+
+                          // Compute diagnostics
+                          const missing = [];
+                          for (let n = 101; n <= 132; n++) {
+                            if (!byNum[n]) missing.push(n);
+                          }
+                          const unplaced = a1.filter((r) => {
+                            const cn = canonicalA1Number(r);
+                            return isNaN(cn) || cn < 101 || cn > 132;
+                          });
+                          const othersInA = aRows.filter((r) => !a1.includes(r) && !a2.includes(r));
+
                           return (
-                            <div className="grid grid-cols-4 gap-2">
-                              {rows.map((row, ri) => (
-                                <React.Fragment key={ri}>
-                                  {row.map((n, ci) => {
-                                    const r = byNum[n];
-                                    if (!r) return null;
-                                    const key = r.id;
-                                    const st = r.status && STATUS_COLORS[r.status] ? r.status : 'Default';
-                                    const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
-                                    const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
-                                    const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
-                                    return (
-                                      <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
-                                        <div className="flex items-center justify-between">
-                                          <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                          <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                            <div className="space-y-3">
+                              <div className="grid grid-cols-4 gap-2">
+                                {rows.map((row, ri) => (
+                                  <React.Fragment key={ri}>
+                                    {row.map((n, ci) => {
+                                      const r = byNum[n];
+                                      if (!r) return null;
+                                      const key = r.id;
+                                      const st = r.status && STATUS_COLORS[r.status] ? r.status : 'Default';
+                                      const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                                      const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
+                                      const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
+                                      return (
+                                        <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                                          <div className="flex items-center justify-between">
+                                            <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                                            <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                          </div>
+                                          <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || '-'}</div>
+                                          <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
                                         </div>
-                                        <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || '-'}</div>
-                                        <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
+                                      );
+                                    })}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+
+                              {(missing.length > 0 || unplaced.length > 0 || Object.keys(dupes).length > 0 || othersInA.length > 0) && (
+                                <div className="mt-2 space-y-2">
+                                  {missing.length > 0 && (
+                                    <div className="text-xs text-gray-700">
+                                      Missing canonical A-1 numbers:
+                                      <span className="ml-1 font-mono">{missing.join(', ')}</span>
+                                    </div>
+                                  )}
+                                  {Object.keys(dupes).length > 0 && (
+                                    <div className="text-xs text-gray-700">
+                                      Duplicate entries for numbers:
+                                      {Object.entries(dupes).map(([n, arr]) => (
+                                        <span key={n} className="inline-block ml-2 bg-amber-50 border border-amber-200 text-amber-800 rounded px-1.5 py-0.5 mr-1 mb-1">
+                                          {n}: {arr.map(d => d.plot_number).join(' / ')}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {unplaced.length > 0 && (
+                                    <div className="text-xs text-gray-700">
+                                      A-1 labeled but not placed:
+                                      <div className="mt-1 flex flex-wrap gap-1">
+                                        {unplaced.map((r) => (
+                                          <span key={r.id} className="inline-block bg-blue-50 border border-blue-200 text-blue-800 rounded px-1.5 py-0.5">
+                                            {String(r.plot_number || '').trim() || '(no plot#)'}{r.row_number ? ` • Row ${r.row_number}` : ''}
+                                          </span>
+                                        ))}
                                       </div>
-                                    );
-                                  })}
-                                </React.Fragment>
-                              ))}
+                                    </div>
+                                  )}
+                                  {othersInA.length > 0 && (
+                                    <div className="text-xs text-gray-700">
+                                      Also in Section A (not A-1/A-2):
+                                      <div className="mt-1 flex flex-wrap gap-1">
+                                        {othersInA.map((r) => (
+                                          <span key={r.id} className="inline-block bg-slate-50 border border-slate-200 text-slate-700 rounded px-1.5 py-0.5">
+                                            {String(r.plot_number || '').trim() || '(no plot#)'}{r.row_number ? ` • Row ${r.row_number}` : ''}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           );
                         })()}
