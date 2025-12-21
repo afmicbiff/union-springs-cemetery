@@ -749,14 +749,17 @@ export default function PlotsPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-             <div className="bg-blue-600 p-2 rounded-lg text-white">
-                <MapIcon size={24} />
-             </div>
-             <div>
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Union Springs Cemetery</h1>
-                <p className="text-sm text-gray-500">Interactive Burial Plot Viewer</p>
-             </div>
+          <div className="flex items-center gap-3">
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
+              alt="Union Springs Logo" 
+              className="h-14 w-auto rounded-full"
+            />
+            <div className="flex flex-col">
+              <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
+              <span className="text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
+              <span className="text-sm text-gray-500 mt-1">Interactive Burial Plot Viewer</span>
+            </div>
           </div>
           
           <div className="flex items-center space-x-3">
@@ -791,7 +794,7 @@ export default function PlotsPage() {
 
 
 
-                <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
+                <label className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition shadow-sm active:transform active:scale-95">
                     {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                     <span className="font-medium text-sm">Import CSV</span>
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
