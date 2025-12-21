@@ -8,14 +8,14 @@ export default Deno.serve(async (req) => {
         // Each object represents a column with start and end plot numbers
         const columns = [
             { start: 251, end: 268, col: 1 },
-            { start: 326, end: 346, col: 2 },
+            { start: 326, end: 348, col: 2 }, // Extended to 348
             { start: 406, end: 430, col: 3 },
             { start: 489, end: 512, col: 4 },
-            { start: 605, end: 629, col: 5 },
+            { start: 605, end: 633, col: 5 }, // Extended to 633
             { start: 688, end: 711, col: 6 },
             { start: 765, end: 788, col: 7 },
             { start: 821, end: 843, col: 8 },
-            { start: 898, end: 922, col: 9 }
+            { start: 898, end: 930, col: 9 }  // Extended to 930
         ];
 
         let createdCount = 0;
