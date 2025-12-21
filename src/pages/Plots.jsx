@@ -1373,6 +1373,7 @@ export default function PlotsPage() {
                                                 })()}
                                             </div>
                                         ) : (
+                                            <div className="flex flex-col-reverse gap-2 content-center items-center">
                                                 {sections[sectionKey].map((plot) => (
                                                     <GravePlot 
                                                         key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
