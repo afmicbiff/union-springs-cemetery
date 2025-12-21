@@ -27,7 +27,33 @@ export default function NewPlotsMap({ batchId }) {
       g[key] = g[key] || [];
       g[key].push(r);
     });
+
+    // Separate all rows whose row_number starts with 'A' into a dedicated section 'A'
+    const isA = (row) => String(row.row_number || '').trim().toUpperCase().startsWith('A');
+    const aRows = [];
     Object.keys(g).forEach((k) => {
+      const remaining = [];
+      g[k].forEach((r) => {
+        if (isA(r)) aRows.push(r); else remaining.push(r);
+      });
+      g[k] = remaining;
+    });
+    if (aRows.length) {
+      aRows.sort((a, b) => {
+        const na = parseInt(String(a.plot_number).replace(/\D/g, "")) || 0;
+        const nb = parseInt(String(b.plot_number).replace(/\D/g, "")) || 0;
+        if (na !== nb) return na - nb;
+        return String(a.plot_number).localeCompare(String(b.plot_number));
+      });
+      g['A'] = aRows;
+    }
+
+    // Sort plots within each remaining section and drop empty groups
+    Object.keys(g).forEach((k) => {
+      if (!g[k] || g[k].length === 0) {
+        delete g[k];
+        return;
+      }
       g[k].sort((a, b) => {
         const na = parseInt(String(a.plot_number).replace(/\D/g, "")) || 0;
         const nb = parseInt(String(b.plot_number).replace(/\D/g, "")) || 0;
@@ -35,6 +61,7 @@ export default function NewPlotsMap({ batchId }) {
         return String(a.plot_number).localeCompare(String(b.plot_number));
       });
     });
+
     return g;
   }, [rowsQuery.data]);
 
