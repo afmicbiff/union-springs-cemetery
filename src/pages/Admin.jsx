@@ -318,7 +318,21 @@ export default function AdminDashboard() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm text-stone-800 leading-snug">{note.message}</p>
-                                                <p className="text-[10px] text-stone-400 mt-1">{format(new Date(note.created_at), 'MMM d, HH:mm')}</p>
+                                                <p className="text-[10px] text-stone-400 mt-1">
+                                                    {format(new Date(note.created_at), 'MMM d, HH:mm')}
+                                                    {note.related_entity_type && (
+                                                        <span className="ml-2">
+                                                            • From {
+                                                                note.related_entity_type === 'task' ? 'Tasks' :
+                                                                note.related_entity_type === 'message' ? 'Communications' :
+                                                                note.related_entity_type === 'event' ? 'Calendar' :
+                                                                note.related_entity_type === 'member' ? 'Member Directory' :
+                                                                note.related_entity_type === 'document' ? 'Member Directory' :
+                                                                'Admin'
+                                                            }
+                                                        </span>
+                                                    )}
+                                                </p>
                                             </div>
                                         </div>
 
