@@ -241,6 +241,17 @@ export default function AdminDashboard() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        // Audit Log
+        const user = await base44.auth.me();
+        await base44.entities.AuditLog.create({
+            action: 'export',
+            entity_type: 'System',
+            details: 'Full system backup exported.',
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         toast.success("Backup downloaded successfully", { id: toastId });
     } catch (error) {
         toast.error("Backup failed: " + error.message, { id: toastId });
@@ -394,6 +405,18 @@ export default function AdminDashboard() {
                                                         e.stopPropagation(); 
                                                         try {
                                                             await base44.entities.Notification.delete(note.id);
+                                                            
+                                                            // Audit Log
+                                                            const user = await base44.auth.me();
+                                                            await base44.entities.AuditLog.create({
+                                                                action: 'dismiss',
+                                                                entity_type: 'Notification',
+                                                                entity_id: note.id,
+                                                                details: `Notification dismissed: "${note.message}"`,
+                                                                performed_by: user.email,
+                                                                timestamp: new Date().toISOString()
+                                                            });
+
                                                             queryClient.invalidateQueries(['notifications']);
                                                             toast.success("Notification dismissed");
                                                         } catch (err) {

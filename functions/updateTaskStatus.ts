@@ -19,6 +19,16 @@ Deno.serve(async (req) => {
         // Update the current task status
         const updatedTask = await base44.entities.Task.update(id, { status });
 
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'update',
+            entity_type: 'Task',
+            entity_id: id,
+            details: `Task "${task.title}" status updated to ${status}.`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         // Handle Recurrence if completing
         if (status === 'Completed' && task.recurrence && task.recurrence !== 'none') {
             // Calculate next due date

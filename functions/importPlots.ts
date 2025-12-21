@@ -98,6 +98,15 @@ export default Deno.serve(async (req) => {
             updatedCount += chunk.length;
         }
 
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'import',
+            entity_type: 'Plot',
+            details: `Imported plots. Created: ${createdCount}, Updated: ${updatedCount}.`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         return Response.json({ 
             success: true, 
             message: `Import processed. Created ${createdCount} new plots. Updated ${updatedCount} existing plots with missing data.` 

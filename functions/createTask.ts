@@ -19,6 +19,16 @@ Deno.serve(async (req) => {
         // Create Task
         const task = await base44.entities.Task.create(taskData);
 
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'create',
+            entity_type: 'Task',
+            entity_id: task.id,
+            details: `Task "${task.title}" created.`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         // Send Email if assigned
         if (task.assignee_id) {
             // Fetch assignee details (using service role to ensure access to email)

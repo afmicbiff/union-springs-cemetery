@@ -24,6 +24,16 @@ Deno.serve(async (req) => {
             reminders_sent: reminders_sent || {}
         });
 
+        // Audit Log
+        await base44.entities.AuditLog.create({
+            action: 'create',
+            entity_type: 'Event',
+            entity_id: newEvent.id,
+            details: `Event "${title}" created.`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+        });
+
         const formattedDate = format(new Date(start_time), "PPPP 'at' p");
         const host = req.headers.get("host"); // e.g. base44-app-id.deno.dev
         const rsvpBaseUrl = `https://${host}/functions/handleEventRSVP`;
