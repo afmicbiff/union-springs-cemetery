@@ -23,32 +23,14 @@ export default function NewPlotsMap({ batchId }) {
   const grouped = React.useMemo(() => {
     const g = {};
     (rowsQuery.data || []).forEach((r) => {
-      const key = (r.section || "Unassigned").replace(/Section\s*/i, "").trim() || "Unassigned";
-      g[key] = g[key] || [];
+      const rowStr = String(r.row_number || '').trim();
+      const letterMatch = rowStr.match(/^[A-Za-z]/);
+      const sectionKey = (r.section || "Unassigned").replace(/Section\s*/i, "").trim() || "Unassigned";
+      const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
+      if (!g[key]) g[key] = [];
       g[key].push(r);
     });
 
-    // Separate all rows whose row_number starts with 'A' into a dedicated section 'A'
-    const isA = (row) => String(row.row_number || '').trim().toUpperCase().startsWith('A');
-    const aRows = [];
-    Object.keys(g).forEach((k) => {
-      const remaining = [];
-      g[k].forEach((r) => {
-        if (isA(r)) aRows.push(r); else remaining.push(r);
-      });
-      g[k] = remaining;
-    });
-    if (aRows.length) {
-      aRows.sort((a, b) => {
-        const na = parseInt(String(a.plot_number).replace(/\D/g, "")) || 0;
-        const nb = parseInt(String(b.plot_number).replace(/\D/g, "")) || 0;
-        if (na !== nb) return na - nb;
-        return String(a.plot_number).localeCompare(String(b.plot_number));
-      });
-      g['A'] = aRows;
-    }
-
-    // Sort plots within each remaining section and drop empty groups
     Object.keys(g).forEach((k) => {
       if (!g[k] || g[k].length === 0) {
         delete g[k];
@@ -76,14 +58,18 @@ export default function NewPlotsMap({ batchId }) {
   }
 
   const sectionKeys = Object.keys(grouped).sort((a, b) => {
-    // Always show 'A' first, then numeric sections ascending, then others alphabetically
-    if (a === 'A') return -1;
-    if (b === 'A') return 1;
+    const aLetter = /^[A-Za-z]$/.test(a);
+    const bLetter = /^[A-Za-z]$/.test(b);
+    if (aLetter && bLetter) return a.localeCompare(b);
+    if (aLetter) return -1;
+    if (bLetter) return 1;
     const na = parseInt(a);
     const nb = parseInt(b);
-    if (!isNaN(na) && !isNaN(nb)) return na - nb;
-    if (!isNaN(na)) return -1; // numeric before non-numeric
+    if (!isNaN(na) && !isNaN(nb)) return na - nb; // numeric sections ascending
+    if (!isNaN(na)) return -1; // numeric before non-numeric/other
     if (!isNaN(nb)) return 1;
+    if (a === 'Unassigned') return 1;
+    if (b === 'Unassigned') return -1;
     return a.localeCompare(b);
   });
 
