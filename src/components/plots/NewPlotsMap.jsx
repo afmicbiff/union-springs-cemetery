@@ -111,16 +111,37 @@ export default function NewPlotsMap({ batchId }) {
                 return digits ? parseInt(digits, 10) : NaN;
               };
               const rowNorm = (r) => String(r.row_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+              const canonicalA1Number = (row) => {
+                const pnRaw = String(row.plot_number || '').toUpperCase();
+                const pn = pnRaw.replace(/\s+/g, '');
+                // If label starts with A1, try to derive canonical 101-132
+                if (pn.startsWith('A1')) {
+                  const after = pn.slice(2);
+                  const m = after.match(/(\d{1,3})/);
+                  if (m) {
+                    const d = parseInt(m[1], 10);
+                    if (d >= 100 && d <= 999) return d; // A110, A111 etc
+                    if (d >= 1 && d <= 32) return 100 + d; // A1-07 => 107
+                  }
+                }
+                // Try a 3-digit group first (e.g., 101)
+                const m3 = pn.match(/(\d{3})/);
+                if (m3) return parseInt(m3[1], 10);
+                // Then try 1-2 digits and map to 100+
+                const m2 = pn.match(/(\d{1,2})/);
+                if (m2) {
+                  const d2 = parseInt(m2[1], 10);
+                  if (d2 >= 1 && d2 <= 32) return 100 + d2;
+                }
+                // Fallback to row number like A1xx
+                const rn = String(row.row_number || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                const mr = rn.match(/A1(\d{1,2})/);
+                if (mr) return 100 + parseInt(mr[1], 10);
+                return NaN;
+              };
               const a1 = aRows.filter((r) => {
-                const n = numFromPlot(r);
-                const pn = String(r.plot_number || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
-                return (
-                  (n >= 1 && n <= 32) ||
-                  (n >= 101 && n <= 132) ||
-                  (n >= 1101 && n <= 1132) ||
-                  rowNorm(r).includes('A1') ||
-                  pn.startsWith('A1')
-                );
+                const cn = canonicalA1Number(r);
+                return (!isNaN(cn) && cn >= 101 && cn <= 132) || rowNorm(r).includes('A1');
               });
               const a2 = aRows.filter((r) => {
                 const n = numFromPlot(r);
@@ -199,17 +220,8 @@ export default function NewPlotsMap({ batchId }) {
                         {(() => {
                           const byNum = {};
                           a1.forEach((r) => {
-                            const n = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || NaN;
-                            if (!isNaN(n)) {
-                              byNum[n] = r;
-                              const short = n >= 1000 ? (n % 1000) : n;
-                              if (!byNum[short]) byNum[short] = r;
-                              // If data uses 1–32 for A-1, also map to 101–132
-                              if (n >= 1 && n <= 32) {
-                                const plus100 = 100 + n;
-                                if (!byNum[plus100]) byNum[plus100] = r;
-                              }
-                            }
+                            const cn = canonicalA1Number(r);
+                            if (!isNaN(cn)) byNum[cn] = r;
                           });
                           const rows = [
                             [132,124,116,108],
