@@ -221,12 +221,23 @@ function HomeNotificationManager() {
     );
 }
 
+import AIEmailAssistant from './AIEmailAssistant';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
 function MassNotificationForm({ onSuccess }) {
     const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
     const [targetGroup, setTargetGroup] = useState('all_members');
     const [sendEmail, setSendEmail] = useState(true);
     const [sendInApp, setSendInApp] = useState(true);
+    const [isAIOpen, setIsAIOpen] = useState(false);
+
+    const handleApplyAI = (content) => {
+        if (content.subject) setSubject(content.subject);
+        if (content.body) setMessage(content.body);
+        setIsAIOpen(false);
+        toast.success("AI content applied");
+    };
 
     const sendMutation = useMutation({
         mutationFn: async (data) => {
@@ -294,6 +305,33 @@ function MassNotificationForm({ onSuccess }) {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* AI Assistant Trigger */}
+                <div className="flex justify-end">
+                    <Sheet open={isAIOpen} onOpenChange={setIsAIOpen}>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" size="sm" className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100">
+                                <Sparkles className="w-4 h-4 mr-2" /> AI Assistant
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="sm:max-w-md overflow-y-auto">
+                            <SheetHeader className="mb-4">
+                                <SheetTitle className="flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5 text-indigo-600" /> AI Writing Assistant
+                                </SheetTitle>
+                                <SheetDescription>
+                                    Generate drafts, refine content, or analyze your message tone.
+                                </SheetDescription>
+                            </SheetHeader>
+                            <AIEmailAssistant 
+                                onApply={handleApplyAI} 
+                                currentSubject={subject} 
+                                currentBody={message}
+                                recipientContext={{ targetGroup }} 
+                            />
+                        </SheetContent>
+                    </Sheet>
                 </div>
 
                 <div className="space-y-2">
