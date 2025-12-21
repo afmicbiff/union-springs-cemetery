@@ -81,8 +81,9 @@ export default Deno.serve(async (req) => {
         // 1. Create
         const CHUNK_SIZE = 50;
         let createdCount = 0;
-        for (let i = 0; i < toCreate.length; i += CHUNK_SIZE) {
-            const chunk = toCreate.slice(i, i + CHUNK_SIZE);
+        const createList = toCreate.filter(p => p && p.plot_number);
+        for (let i = 0; i < createList.length; i += CHUNK_SIZE) {
+            const chunk = createList.slice(i, i + CHUNK_SIZE);
             await base44.asServiceRole.entities.Plot.bulkCreate(chunk);
             createdCount += chunk.length;
         }
@@ -98,14 +99,18 @@ export default Deno.serve(async (req) => {
             updatedCount += chunk.length;
         }
 
-        // Audit Log
-        await base44.entities.AuditLog.create({
-            action: 'import',
-            entity_type: 'Plot',
-            details: `Imported plots. Created: ${createdCount}, Updated: ${updatedCount}.`,
-            performed_by: user.email,
-            timestamp: new Date().toISOString()
-        });
+        // Audit Log (non-blocking)
+        try {
+            await base44.asServiceRole.entities.AuditLog.create({
+                action: 'import',
+                entity_type: 'Plot',
+                details: `Imported plots. Created: ${createdCount}, Updated: ${updatedCount}.`,
+                performed_by: user.email,
+                timestamp: new Date().toISOString()
+            });
+        } catch (_) {
+            // ignore audit failures
+        }
 
         return Response.json({ 
             success: true, 
@@ -113,6 +118,7 @@ export default Deno.serve(async (req) => {
         });
 
     } catch (error) {
-        return Response.json({ error: error.message }, { status: 500 });
+        const msg = error?.message || String(error);
+        return Response.json({ error: msg }, { status: 500 });
     }
-});
+    });
