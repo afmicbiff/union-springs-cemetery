@@ -22,6 +22,12 @@ export default function NewPlotsAndMap() {
     const res = await base44.functions.invoke('populateA1Plots', {});
     alert(res.data?.message || 'Done');
   };
+  const handleDeleteA1Unplaced = async () => {
+    if (!window.confirm('Delete A-1 labeled but not placed NewPlot rows (e.g., 1334–1341)? This cannot be undone.')) return;
+    const res = await base44.functions.invoke('deleteA1UnplacedNewPlots', {});
+    const count = res.data?.deleted_count ?? 0;
+    alert(res.data?.message || `Deleted ${count} unplaced A-1 row(s).`);
+  };
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm">
@@ -48,6 +54,9 @@ export default function NewPlotsAndMap() {
                 <>
                   <Button variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50" onClick={handlePopulateA1}>
                     Fill A-1 Missing
+                  </Button>
+                  <Button variant="outline" className="border-amber-600 text-amber-700 hover:bg-amber-50" onClick={handleDeleteA1Unplaced}>
+                    Delete A-1 Unplaced
                   </Button>
                   <Button variant="outline" className="border-red-600 text-red-700 hover:bg-red-50" onClick={handleDeleteA1}>
                     Delete A-1 Plots
