@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Employees from './pages/Employees';
 import Bylaws from './pages/Bylaws';
 import MemberPortal from './pages/MemberPortal';
+import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "Employees": Employees,
     "Bylaws": Bylaws,
     "MemberPortal": MemberPortal,
+    "NewPlotsAndMap": NewPlotsAndMap,
 }
 
 export const pagesConfig = {

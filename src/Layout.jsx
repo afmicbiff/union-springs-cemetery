@@ -33,7 +33,16 @@ export default function Layout({ children }) {
     { label: 'Home', path: '/', icon: Home },
     { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
     { label: 'Deceased Search', path: '/search', icon: Search },
-    { label: 'Plots & Map', path: '/plots', icon: Map },
+    { 
+      label: 'Plots & Map', 
+      path: '/plots', 
+      icon: Map,
+      isDropdown: true,
+      items: [
+        { label: 'Plots & Map', path: '/plots', icon: Map },
+        { label: 'New Plots for Reservation', path: '/NewPlotsAndMap', icon: Map }
+      ]
+    },
     { label: 'Services', path: '/services', icon: Info },
     { 
       label: 'Admin Dashboard', 
