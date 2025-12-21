@@ -427,6 +427,21 @@ export default function PlotsPage() {
       }
   });
 
+  const seedSection4Mutation = useMutation({
+      mutationFn: async () => {
+          const res = await base44.functions.invoke('seedSection4', {});
+          if (res.data && res.data.error) throw new Error(res.data.error);
+          return res.data;
+      },
+      onSuccess: (data) => {
+          queryClient.invalidateQueries({ queryKey: ['plots'] });
+          toast.success(`Section 4: ${data.created} created, ${data.skipped} skipped.`);
+      },
+      onError: (err) => {
+          toast.error(`Section 4 Seed failed: ${err.message}`);
+      }
+  });
+
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
       return plotEntities.map(p => ({
@@ -547,14 +562,14 @@ export default function PlotsPage() {
   }, [filteredData]);
 
   const processSections = (data) => {
-    // Initialize strictly with Sections 1-5
-    const grouped = {
-        '1': [],
-        '2': [],
-        '3': [],
-        '4': [],
-        '5': []
-    };
+  // Initialize strictly with Sections 1-5
+  const grouped = {
+      '1': [],
+      '2': [],
+      '3': [],
+      '4': [],
+      '5': []
+  };
 
     data.forEach(item => {
         let sectionKey = item.Section || '';
@@ -804,6 +819,19 @@ export default function PlotsPage() {
                     Seed Section 3
                 </Button>
 
+                <Button 
+                    variant="outline"
+                    onClick={() => {
+                        if(confirm("Seed Section 4 Grid?")) {
+                            seedSection4Mutation.mutate();
+                        }
+                    }}
+                    disabled={seedSection4Mutation.isPending}
+                >
+                    {seedSection4Mutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : <Layers className="mr-2 h-4 w-4" />}
+                    Seed Section 4
+                </Button>
+
                 <label className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition shadow-sm active:transform active:scale-95">
                     {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                     <span className="font-medium text-sm">Import CSV</span>
@@ -1012,6 +1040,177 @@ export default function PlotsPage() {
                                                                 {plotsWithSpacers.map((plot, pIdx) => (
                                                                     <GravePlot 
                                                                         key={plot._id || `plot-${pIdx}`} 
+                                                                        data={plot} 
+                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                                        onHover={handleHover}
+                                                                        onEdit={isAdmin ? handleEditClick : undefined}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        );
+                                                    });
+                                                })()}
+                                            </div>
+                                        ) : sectionKey === '4' ? (
+                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                                                {(() => {
+                                                    // Grid Definition: 11 Columns x 30 High
+                                                    // Layout order per column: Bottom -> Top
+                                                    const columnsConfig = [
+                                                        // Col 1: 14 Blanks, then 208-223
+                                                        { 
+                                                            ranges: [{ start: 208, end: 223 }], 
+                                                            blanksStart: 14 
+                                                        },
+                                                        // Col 2: 269-298
+                                                        { 
+                                                            ranges: [{ start: 269, end: 298 }] 
+                                                        },
+                                                        // Col 3: 349-378
+                                                        { 
+                                                            ranges: [{ start: 349, end: 378 }] 
+                                                        },
+                                                        // Col 4: 431-461, Spacer beside 431 (assuming before/start)
+                                                        { 
+                                                            ranges: [{ start: 431, end: 461 }], 
+                                                            spacers: [{ target: 431, position: 'before' }] 
+                                                        },
+                                                        // Col 5: 513-542
+                                                        { 
+                                                            ranges: [{ start: 513, end: 542 }] 
+                                                        },
+                                                        // Col 6: 546-576, blank after 562
+                                                        { 
+                                                            ranges: [{ start: 546, end: 576 }],
+                                                            spacers: [{ target: 562, position: 'after' }]
+                                                        },
+                                                        // Col 7: 630-658, blank after 641
+                                                        { 
+                                                            ranges: [{ start: 630, end: 658 }],
+                                                            spacers: [{ target: 641, position: 'after' }]
+                                                        },
+                                                        // Col 8: 712-719, plot above 713 (after), 19 blanks after 719
+                                                        { 
+                                                            ranges: [{ start: 712, end: 719 }],
+                                                            spacers: [{ target: 713, position: 'after' }],
+                                                            blanksEnd: 19
+                                                        },
+                                                        // Col 9: 789-795, 6 blanks, 720-737, blank after 720
+                                                        // Special sequence: 789...795 -> Blanks -> 720...737
+                                                        { 
+                                                            ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }],
+                                                            spacers: [
+                                                                { target: 720, position: 'after' },
+                                                                // 6 blanks between ranges. 
+                                                                // We can treat them as spacers injected after the last of first range (795)
+                                                                // or use blanksMiddle capability if we code it.
+                                                                // Let's use custom injection for this complexity.
+                                                            ],
+                                                            customLayout: true 
+                                                        },
+                                                        // Col 10: Blank, 844-870, blank after 854, 861
+                                                        { 
+                                                            ranges: [{ start: 844, end: 870 }],
+                                                            blanksStart: 1,
+                                                            spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }]
+                                                        },
+                                                        // Col 11: 923-945, blank after 935, 7 blanks end
+                                                        { 
+                                                            ranges: [{ start: 923, end: 945 }],
+                                                            spacers: [{ target: 935, position: 'after' }],
+                                                            blanksEnd: 7
+                                                        }
+                                                    ];
+
+                                                    return columnsConfig.map((col, idx) => {
+                                                        // 1. Collect Plots
+                                                        let plots = [];
+                                                        col.ranges.forEach(r => {
+                                                            const rangePlots = sections[sectionKey].filter(p => {
+                                                                const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                                return num >= r.start && num <= r.end;
+                                                            });
+                                                            // Sort each range individually (High to Low or Low to High?)
+                                                            // Standard: 208-223 -> 208 bottom, 223 top. (Ascending in visual stack bottom-up)
+                                                            // So standard sort is Ascending (Low to High).
+                                                            rangePlots.sort((a, b) => {
+                                                                const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
+                                                                const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
+                                                                return numA - numB; 
+                                                            });
+                                                            plots = [...plots, ...rangePlots];
+                                                        });
+
+                                                        // Handle Custom Layout for Col 9 (Mixed Order)
+                                                        if (col.customLayout && idx === 8) { // Col 9
+                                                            // Range 1: 789-795 (7 plots)
+                                                            const r1 = sections[sectionKey].filter(p => {
+                                                                const num = parseInt(p.Grave); return num >= 789 && num <= 795;
+                                                            }).sort((a,b) => parseInt(a.Grave) - parseInt(b.Grave));
+                                                            
+                                                            // Range 2: 720-737 (18 plots)
+                                                            const r2 = sections[sectionKey].filter(p => {
+                                                                const num = parseInt(p.Grave); return num >= 720 && num <= 737;
+                                                            }).sort((a,b) => parseInt(a.Grave) - parseInt(b.Grave));
+
+                                                            // Sequence: r1 -> 6 Blanks -> r2
+                                                            // With Spacer after 720 (in r2)
+                                                            
+                                                            // Construct r2 with spacer
+                                                            const r2WithSpacer = [];
+                                                            r2.forEach(p => {
+                                                                r2WithSpacer.push(p);
+                                                                if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' });
+                                                            });
+
+                                                            const middleBlanks = Array(6).fill({ isSpacer: true, _id: 'mid-blank' });
+                                                            
+                                                            plots = [...r1, ...middleBlanks, ...r2WithSpacer];
+                                                            
+                                                            // Override standard processing
+                                                        } else {
+                                                            // Standard Spacer Injection
+                                                            if (col.spacers) {
+                                                                const withSpacers = [];
+                                                                plots.forEach(p => {
+                                                                    const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                                    
+                                                                    // Before
+                                                                    if (col.spacers.some(s => s.target === num && s.position === 'before')) {
+                                                                        withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
+                                                                    }
+                                                                    
+                                                                    withSpacers.push(p);
+
+                                                                    // After
+                                                                    if (col.spacers.some(s => s.target === num && s.position === 'after')) {
+                                                                        withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
+                                                                    }
+                                                                });
+                                                                plots = withSpacers;
+                                                            }
+                                                        }
+
+                                                        // Add Start/End Blanks
+                                                        if (col.blanksStart) {
+                                                            const startBlanks = Array(col.blanksStart).fill({ isSpacer: true });
+                                                            plots = [...startBlanks, ...plots];
+                                                        }
+                                                        if (col.blanksEnd) {
+                                                            const endBlanks = Array(col.blanksEnd).fill({ isSpacer: true });
+                                                            plots = [...plots, ...endBlanks];
+                                                        }
+
+                                                        // Render Stack (Bottom to Top -> flex-col-reverse)
+                                                        // Wait, if plots array is ordered [BottomItem, ..., TopItem]
+                                                        // flex-col-reverse renders last item at top, first at bottom.
+                                                        // So plots array should be [Bottom, ..., Top].
+                                                        
+                                                        return (
+                                                            <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
+                                                                {plots.map((plot, pIdx) => (
+                                                                    <GravePlot 
+                                                                        key={plot._id || `plot-${idx}-${pIdx}`} 
                                                                         data={plot} 
                                                                         baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                                                         onHover={handleHover}
