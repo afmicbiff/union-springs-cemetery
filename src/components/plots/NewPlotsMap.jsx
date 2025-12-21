@@ -114,12 +114,22 @@ export default function NewPlotsMap({ batchId }) {
               const a1 = aRows.filter((r) => {
                 const n = numFromPlot(r);
                 const pn = String(r.plot_number || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
-                return (n >= 101 && n <= 132) || rowNorm(r).includes('A1') || pn.startsWith('A1');
+                return (
+                  (n >= 101 && n <= 132) ||
+                  (n >= 1101 && n <= 1132) ||
+                  rowNorm(r).includes('A1') ||
+                  pn.startsWith('A1')
+                );
               });
               const a2 = aRows.filter((r) => {
                 const n = numFromPlot(r);
                 const pn = String(r.plot_number || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
-                return (n >= 201 && n <= 232) || rowNorm(r).includes('A2') || pn.startsWith('A2');
+                return (
+                  (n >= 201 && n <= 232) ||
+                  (n >= 1201 && n <= 1232) ||
+                  rowNorm(r).includes('A2') ||
+                  pn.startsWith('A2')
+                );
               });
 
               // Fallback: if nothing matched our A-1/A-2 criteria, render default A section
@@ -189,7 +199,11 @@ export default function NewPlotsMap({ batchId }) {
                           const byNum = {};
                           a1.forEach((r) => {
                             const n = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || NaN;
-                            if (!isNaN(n)) byNum[n] = r;
+                            if (!isNaN(n)) {
+                              byNum[n] = r;
+                              const short = n >= 1000 ? (n % 1000) : n;
+                              if (!byNum[short]) byNum[short] = r;
+                            }
                           });
                           const rows = [
                             [132,124,116,108],
