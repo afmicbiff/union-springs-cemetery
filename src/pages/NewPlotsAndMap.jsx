@@ -34,11 +34,7 @@ export default function NewPlotsAndMap() {
       </header>
 
       <main className="max-w-7xl mx-auto p-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-gray-600">
-          <p>
-            This page is reserved for showcasing new plots available for reservation. Let me know how you want this laid out (grid, filters, map overlay), and I’ll build it accordingly.
-          </p>
-        </div>
+        <NewPlotsGrid />
       </main>
     </div>
   );
