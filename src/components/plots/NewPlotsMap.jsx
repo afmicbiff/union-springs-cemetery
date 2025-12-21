@@ -115,6 +115,7 @@ export default function NewPlotsMap({ batchId }) {
                 const n = numFromPlot(r);
                 const pn = String(r.plot_number || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
                 return (
+                  (n >= 1 && n <= 32) ||
                   (n >= 101 && n <= 132) ||
                   (n >= 1101 && n <= 1132) ||
                   rowNorm(r).includes('A1') ||
@@ -203,6 +204,11 @@ export default function NewPlotsMap({ batchId }) {
                               byNum[n] = r;
                               const short = n >= 1000 ? (n % 1000) : n;
                               if (!byNum[short]) byNum[short] = r;
+                              // If data uses 1–32 for A-1, also map to 101–132
+                              if (n >= 1 && n <= 32) {
+                                const plus100 = 100 + n;
+                                if (!byNum[plus100]) byNum[plus100] = r;
+                              }
                             }
                           });
                           const rows = [
