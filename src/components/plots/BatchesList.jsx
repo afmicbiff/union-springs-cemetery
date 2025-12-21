@@ -1,12 +1,27 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Database } from "lucide-react";
+import { base44 } from "@/api/base44Client";
+import { RefreshCcw, Database, Trash2 } from "lucide-react";
 
 function formatDate(d) {
   try { return d ? new Date(d).toLocaleString() : ""; } catch { return String(d || ""); }
 }
 
 export default function BatchesList({ batches, isLoading, onRefresh, selectedBatchId, onSelectBatch }) {
+  const [deletingId, setDeletingId] = React.useState(null);
+  const handleDelete = async (b) => {
+    const ok = window.confirm('Delete this import batch and its rows? This cannot be undone.');
+    if (!ok) return;
+    try {
+      setDeletingId(b.id);
+      await base44.functions.invoke('deleteImportBatch', { batch_id: b.id });
+      if (selectedBatchId === b.id && onSelectBatch) onSelectBatch(null);
+      onRefresh && onRefresh();
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
@@ -40,6 +55,17 @@ export default function BatchesList({ batches, isLoading, onRefresh, selectedBat
                 <div className="text-[11px] text-gray-500">Created: {b.created_rows ?? 0}</div>
                 <div className="text-[11px] text-gray-500">Updated: {b.updated_rows ?? 0}</div>
                 <div className="text-[11px] text-gray-500">Skipped: {b.skipped_rows ?? 0}</div>
+                <div className="mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={(e) => { e.stopPropagation(); handleDelete(b); }}
+                    disabled={deletingId === b.id}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" /> {deletingId === b.id ? 'Deleting…' : 'Delete'}
+                  </Button>
+                </div>
               </div>
             </div>
           </button>
