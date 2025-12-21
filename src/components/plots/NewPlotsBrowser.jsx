@@ -24,17 +24,6 @@ export default function NewPlotsBrowser() {
 
   return (
     <div className="space-y-3">
-      {/* Batches list */}
-      <div className="lg:col-span-4">
-        <BatchesList
-          batches={batchesQuery.data}
-          isLoading={batchesQuery.isLoading}
-          onRefresh={() => batchesQuery.refetch()}
-          selectedBatchId={selectedBatchId}
-          onSelectBatch={setSelectedBatchId}
-        />
-      </div>
-
       {/* Content */}
       <div>
         <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg mb-3">
