@@ -15,10 +15,10 @@ function isA1Plot(plot) {
   const startsWithA1 = pnUp.startsWith('A1');
   const rowHasA1 = rowUp.includes('A-1') || rowUp.includes('A1');
 
-  // Also treat simple 1..32 as A-1 in some datasets (map to 101..132)
+  // If data uses 1..32, only consider it A-1 when labels indicate A1
   const in1to32 = !isNaN(digits) && digits >= 1 && digits <= 32;
 
-  return in101to132 || in1101to1132 || startsWithA1 || rowHasA1 || in1to32;
+  return in101to132 || in1101to1132 || startsWithA1 || rowHasA1 || (in1to32 && (startsWithA1 || rowHasA1));
 }
 
 Deno.serve(async (req) => {
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch plots (use a generous cap; adjust if needed)
-    const plots = await base44.asServiceRole.entities.Plot.list(null, 10000);
+    const plots = await base44.asServiceRole.entities.Plot.list(null, 20000);
 
     const toDelete = plots.filter(isA1Plot);
 
