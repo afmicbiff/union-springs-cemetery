@@ -1070,14 +1070,14 @@ export default function PlotsPage() {
                                                         { 
                                                             ranges: [{ start: 349, end: 378 }] 
                                                         },
-                                                        // Col 4: 431-461, Spacer beside 431 (assuming before/start)
+                                                        // Col 4: 431-461, Removed spacer under 431
                                                         { 
-                                                            ranges: [{ start: 431, end: 461 }], 
-                                                            spacers: [{ target: 431, position: 'before' }] 
+                                                            ranges: [{ start: 431, end: 461 }] 
                                                         },
-                                                        // Col 5: 513-542
+                                                        // Col 5: 513-542, Add spacer under 513
                                                         { 
-                                                            ranges: [{ start: 513, end: 542 }] 
+                                                            ranges: [{ start: 513, end: 542 }],
+                                                            spacers: [{ target: 513, position: 'before' }]
                                                         },
                                                         // Col 6: 546-576, blank after 562
                                                         { 
@@ -1089,22 +1089,17 @@ export default function PlotsPage() {
                                                             ranges: [{ start: 630, end: 658 }],
                                                             spacers: [{ target: 641, position: 'after' }]
                                                         },
-                                                        // Col 8: 712-719, plot above 713 (after), 19 blanks after 719
+                                                        // Col 8: 712-719, plot under 712, plot above 713 (after), 19 blanks after 719
                                                         { 
                                                             ranges: [{ start: 712, end: 719 }],
-                                                            spacers: [{ target: 713, position: 'after' }],
+                                                            spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }],
                                                             blanksEnd: 19
                                                         },
-                                                        // Col 9: 789-795, 6 blanks, 720-737, blank after 720
-                                                        // Special sequence: 789...795 -> Blanks -> 720...737
+                                                        // Col 9: 789-795, NO blanks, 720-737, blank after 720
                                                         { 
                                                             ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }],
                                                             spacers: [
-                                                                { target: 720, position: 'after' },
-                                                                // 6 blanks between ranges. 
-                                                                // We can treat them as spacers injected after the last of first range (795)
-                                                                // or use blanksMiddle capability if we code it.
-                                                                // Let's use custom injection for this complexity.
+                                                                { target: 720, position: 'after' }
                                                             ],
                                                             customLayout: true 
                                                         },
@@ -1163,9 +1158,8 @@ export default function PlotsPage() {
                                                                 if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' });
                                                             });
 
-                                                            const middleBlanks = Array(6).fill({ isSpacer: true, _id: 'mid-blank' });
-                                                            
-                                                            plots = [...r1, ...middleBlanks, ...r2WithSpacer];
+                                                            // Removed middleBlanks as requested
+                                                            plots = [...r1, ...r2WithSpacer];
                                                             
                                                             // Override standard processing
                                                         } else {
