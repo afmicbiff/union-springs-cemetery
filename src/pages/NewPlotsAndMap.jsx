@@ -11,7 +11,7 @@ export default function NewPlotsAndMap() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a2b5f0cd5_image.png" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
               alt="Union Springs Logo" 
               className="h-14 w-auto rounded-full"
             />
@@ -26,7 +26,7 @@ export default function NewPlotsAndMap() {
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
             <Link to={createPageUrl('Plots')}>
-              <Button variant="outline" className="hover:bg-gray-100">Back to Plots & Map</Button>
+              <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
             </Link>
           </div>
         </div>
