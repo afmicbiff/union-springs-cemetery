@@ -39,9 +39,13 @@ export default Deno.serve(async (req) => {
                     continue;
                 }
 
+                let row = 'Grid';
+                if (num === 942) row = 'N-9';
+                if (num >= 943 && num <= 945) row = 'O-9';
+
                 await base44.asServiceRole.entities.Plot.create({
                     section: '4',
-                    row_number: 'Grid', // Generic row for grid layout
+                    row_number: row,
                     plot_number: num.toString(),
                     status: 'Available',
                     notes: `Seeded for Section 4 Grid`
