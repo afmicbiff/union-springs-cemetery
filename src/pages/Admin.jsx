@@ -391,11 +391,17 @@ export default function AdminDashboard() {
                                                     className="h-6 text-[10px] px-2 text-stone-600 bg-stone-50 border-stone-200 hover:bg-stone-100"
                                                     onClick={async (e) => { 
                                                         e.stopPropagation(); 
-                                                        await base44.entities.Notification.update(note.id, { is_read: true });
-                                                        queryClient.invalidateQueries(['notifications']);
+                                                        try {
+                                                            await base44.entities.Notification.delete(note.id);
+                                                            queryClient.invalidateQueries(['notifications']);
+                                                            toast.success("Notification dismissed");
+                                                        } catch (err) {
+                                                            console.error("Failed to dismiss:", err);
+                                                            toast.error("Failed to dismiss notification");
+                                                        }
                                                     }}
                                                 >
-                                                    <Check className="w-3 h-3 mr-1" /> Dismiss
+                                                    <X className="w-3 h-3 mr-1" /> Dismiss
                                                 </Button>
                                             )}
                                         </div>
