@@ -39,6 +39,11 @@ export default function NewPlotsAndMap() {
             </div>
             <div className="flex items-center gap-2">
               <NewPlotsImport />
+              {isAdmin && (
+                <Button variant="outline" className="border-red-600 text-red-700 hover:bg-red-50" onClick={handleDeleteA1}>
+                  Delete A-1 Plots
+                </Button>
+              )}
               <Link to={createPageUrl('Plots')}>
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
               </Link>
