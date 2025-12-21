@@ -4,9 +4,19 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsImport from "../components/plots/NewPlotsImport";
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 
 
 export default function NewPlotsAndMap() {
+  const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
+  const isAdmin = user?.role === 'admin';
+  const handleDeleteA1 = async () => {
+    if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
+    const res = await base44.functions.invoke('deleteA1Plots', {});
+    const count = res.data?.deleted_count ?? 0;
+    alert(`Deleted ${count} A-1 plot(s).`);
+  };
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm">
