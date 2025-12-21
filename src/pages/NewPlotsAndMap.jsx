@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import NewPlotsGrid from "../components/plots/NewPlotsGrid";
 import NewPlotsImport from "../components/plots/NewPlotsImport";
 
 
@@ -37,9 +36,7 @@ export default function NewPlotsAndMap() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-6">
-        <NewPlotsGrid />
-      </main>
+      <main className="max-w-7xl mx-auto p-6"></main>
     </div>
   );
 }
