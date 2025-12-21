@@ -59,9 +59,12 @@ export default function MemberDocuments({ user }) {
             // C. Create Notification for Admin
             await base44.entities.Notification.create({
                 message: `New document uploaded by ${memberRecord.first_name} ${memberRecord.last_name}: ${file.name} (${docType})`,
-                type: "info",
+                type: "document",
                 is_read: false,
-                user_email: null, // System-wide / Admin
+                user_email: null,
+                related_entity_id: memberRecord.id,
+                related_entity_type: "member",
+                link: `/admin?tab=members&memberId=${memberRecord.id}`, // Custom link logic
                 created_at: new Date().toISOString()
             });
 

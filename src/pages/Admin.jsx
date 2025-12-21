@@ -22,7 +22,9 @@ import {
     Calendar,
     Megaphone,
     CheckSquare,
-    Archive
+    Archive,
+    Check,
+    Eye
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
@@ -78,6 +80,52 @@ export default function AdminDashboard() {
     initialData: [],
     refetchInterval: 30000,
   });
+
+  const updateTaskStatus = async (note, status) => {
+      if (!note.related_entity_id) return;
+      try {
+          // 1. Get current task to preserve history
+          const task = await base44.entities.Task.get(note.related_entity_id);
+          if (!task) throw new Error("Task not found");
+
+          const newUpdate = {
+              note: status === 'Completed' ? 'Task marked completed via notification' : 'Task reviewed via notification',
+              timestamp: new Date().toISOString(),
+              updated_by: 'Admin'
+          };
+
+          // 2. Update Task
+          await base44.entities.Task.update(task.id, {
+              status: status === 'Completed' ? 'Completed' : task.status,
+              updates: [...(task.updates || []), newUpdate]
+          });
+
+          // 3. Mark Notification Read
+          await base44.entities.Notification.update(note.id, { is_read: true });
+          queryClient.invalidateQueries(['notifications']);
+          queryClient.invalidateQueries(['tasks']);
+          toast.success(status === 'Completed' ? "Task Completed" : "Task Updated");
+      } catch (err) {
+          toast.error("Action failed: " + err.message);
+      }
+  };
+
+  const handleNotificationClick = async (note) => {
+       // Mark as read
+       if (!note.is_read) {
+           await base44.entities.Notification.update(note.id, { is_read: true });
+           queryClient.invalidateQueries(['notifications']);
+       }
+
+       // Navigate if link exists
+       if (note.link) {
+           window.location.href = note.link; // Or use router navigation if internal
+       } else if (note.related_entity_type === 'message') {
+           setActiveTab('communication');
+       } else if (note.related_entity_type === 'task') {
+           setActiveTab('tasks');
+       }
+  };
 
   // Background polling for reminders
   useQuery({
@@ -224,19 +272,48 @@ export default function AdminDashboard() {
                         <div className="p-3 border-b bg-stone-50">
                             <h4 className="font-semibold text-stone-900 text-sm">Notifications</h4>
                         </div>
-                        <div className="max-h-[300px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-y-auto">
                             {notifications.length === 0 ? (
                                 <p className="p-4 text-center text-sm text-stone-500">No new notifications</p>
                             ) : (
                                 notifications.map((note) => (
                                     <div key={note.id} className={`p-3 border-b last:border-0 hover:bg-stone-50 ${!note.is_read ? 'bg-red-50/30' : ''}`}>
-                                        <div className="flex gap-3">
-                                            <AlertTriangle className={`w-4 h-4 mt-0.5 shrink-0 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />
-                                            <div>
+                                        <div 
+                                          className="flex gap-3 cursor-pointer"
+                                          onClick={() => handleNotificationClick(note)}
+                                        >
+                                            <div className="mt-0.5 shrink-0">
+                                                {note.related_entity_type === 'task' ? <CheckSquare className="w-4 h-4 text-blue-500" /> :
+                                                 note.related_entity_type === 'message' ? <Megaphone className="w-4 h-4 text-teal-500" /> :
+                                                 <AlertTriangle className={`w-4 h-4 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />}
+                                            </div>
+                                            <div className="flex-1">
                                                 <p className="text-sm text-stone-800 leading-snug">{note.message}</p>
                                                 <p className="text-[10px] text-stone-400 mt-1">{format(new Date(note.created_at), 'MMM d, HH:mm')}</p>
                                             </div>
                                         </div>
+
+                                        {/* Action Buttons for Tasks */}
+                                        {note.related_entity_type === 'task' && (
+                                            <div className="flex gap-2 mt-2 ml-7">
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline" 
+                                                    className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
+                                                    onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Completed'); }}
+                                                >
+                                                    <Check className="w-3 h-3 mr-1" /> Complete Task
+                                                </Button>
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline" 
+                                                    className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                                                    onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Updated'); }}
+                                                >
+                                                    <Eye className="w-3 h-3 mr-1" /> Updated
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             )}
