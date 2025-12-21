@@ -146,11 +146,13 @@ export default function AdminDashboard() {
 
        // Navigate if link exists
        if (note.link) {
-           window.location.href = note.link; // Or use router navigation if internal
+           window.location.href = note.link; 
        } else if (note.related_entity_type === 'message') {
            setActiveTab('communication');
        } else if (note.related_entity_type === 'task') {
            setActiveTab('tasks');
+       } else if (note.related_entity_type === 'event') {
+           setActiveTab('calendar');
        }
   };
 
@@ -320,8 +322,8 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
 
-                                        {/* Action Buttons for Tasks */}
-                                        {note.related_entity_type === 'task' && (
+                                        {/* Action Buttons for Tasks & Events */}
+                                        {(note.related_entity_type === 'task') && (
                                             <div className="flex gap-2 mt-2 ml-7">
                                                 <Button 
                                                     size="sm" 
@@ -340,6 +342,24 @@ export default function AdminDashboard() {
                                                     <Eye className="w-3 h-3 mr-1" /> Updated
                                                 </Button>
                                             </div>
+                                        )}
+                                        {/* Action Buttons for Events */}
+                                        {(note.related_entity_type === 'event') && (
+                                             <div className="flex gap-2 mt-2 ml-7">
+                                                 <Button 
+                                                     size="sm" 
+                                                     variant="outline" 
+                                                     className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
+                                                     onClick={async (e) => { 
+                                                         e.stopPropagation(); 
+                                                         await base44.entities.Notification.update(note.id, { is_read: true });
+                                                         queryClient.invalidateQueries(['notifications']);
+                                                         setActiveTab('calendar');
+                                                     }}
+                                                 >
+                                                     <Calendar className="w-3 h-3 mr-1" /> Go to Calendar
+                                                 </Button>
+                                             </div>
                                         )}
                                     </div>
                                 ))

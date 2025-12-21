@@ -41,6 +41,9 @@ Deno.serve(async (req) => {
                         type: 'task',
                         is_read: false,
                         user_email: user_email,
+                        related_entity_id: member.id,
+                        related_entity_type: "member",
+                        link: `/admin?tab=members&memberId=${member.id}`,
                         created_at: new Date().toISOString()
                     });
                 }
@@ -55,6 +58,9 @@ Deno.serve(async (req) => {
                         message: `Re-engagement needed: ${member.first_name} ${member.last_name} hasn't been contacted since ${format(lastContact, 'MMM d, yyyy')}.`,
                         type: 'alert',
                         is_read: false,
+                        related_entity_id: member.id,
+                        related_entity_type: "member",
+                        link: `/admin?tab=members&memberId=${member.id}`,
                         created_at: new Date().toISOString()
                     });
                 }

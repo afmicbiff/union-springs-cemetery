@@ -81,6 +81,9 @@ Deno.serve(async (req) => {
                     message: msg,
                     type: "alert",
                     is_read: false,
+                    related_entity_id: event.id,
+                    related_entity_type: "event",
+                    link: '/admin?tab=calendar',
                     created_at: new Date().toISOString()
                 }));
 
