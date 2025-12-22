@@ -79,9 +79,12 @@ export default function AdminOverview() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Upcoming Schedule</CardTitle>
-                  <CardDescription>Next events from the calendar.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Upcoming Schedule</CardTitle>
+                    <CardDescription>Next events from the calendar.</CardDescription>
+                  </div>
+                  <Calendar className="w-4 h-4 text-stone-400" />
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[260px] pr-4">
@@ -110,9 +113,12 @@ export default function AdminOverview() {
               </Card>
 
               <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Tasks</CardTitle>
-                  <CardDescription>Your current work queue.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Tasks</CardTitle>
+                    <CardDescription>Your current work queue.</CardDescription>
+                  </div>
+                  <CheckSquare className="w-4 h-4 text-stone-400" />
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[260px] pr-4">
@@ -144,9 +150,12 @@ export default function AdminOverview() {
               </Card>
 
               <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Notifications</CardTitle>
-                  <CardDescription>Latest system activity.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Notifications</CardTitle>
+                    <CardDescription>Latest system activity.</CardDescription>
+                  </div>
+                  <Bell className="w-4 h-4 text-stone-400" />
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[260px] pr-4">
