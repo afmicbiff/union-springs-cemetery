@@ -241,7 +241,7 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
   const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
-  const isSelected = !!targetPlotNum && plotNum === targetPlotNum && (!!targetSectionRaw ? sectionNorm === targetSectionRaw : true);
+  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum && (!!targetSectionRaw ? sectionNorm === targetSectionRaw : true);
 
   // Handle specific "Veteran" checks in notes if strictly labeled "Occupied"
   let displayStatus = data.Status;
