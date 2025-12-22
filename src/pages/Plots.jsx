@@ -850,7 +850,7 @@ export default function PlotsPage() {
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
                         <Info size={14} className="mr-1" /> Status Legend
                     </span>
-                    <LegendItem label="Open" colorClass={STATUS_COLORS.Available} />
+                    <LegendItem label="Available" colorClass={STATUS_COLORS.Available} />
                     <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} />
                     <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} />
                     <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} />
