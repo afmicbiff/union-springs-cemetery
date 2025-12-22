@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, ArrowLeft, Image as ImageIcon, Save, Pencil, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import NewReservationDialog from "../components/plots/NewReservationDialog";
 
 export default function NewPlotDetails() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -15,6 +16,7 @@ export default function NewPlotDetails() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = React.useState(false);
   const [form, setForm] = React.useState({});
+  const [reservationOpen, setReservationOpen] = React.useState(false);
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me().catch(() => null) });
   const isAdmin = user?.role === 'admin';
 
@@ -40,6 +42,7 @@ export default function NewPlotDetails() {
         birth_date: row.birth_date || "",
         death_date: row.death_date || "",
         notes: row.notes || "",
+        reservation_expiry_date: row.reservation_expiry_date || "",
       });
     }
   }, [row]);
@@ -52,6 +55,35 @@ export default function NewPlotDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newplot", id] });
       setIsEditing(false);
+    },
+  });
+
+  const { data: reservations, isLoading: reservationsLoading, refetch: refetchReservations } = useQuery({
+    queryKey: ["newplot-reservations", id],
+    enabled: !!id,
+    queryFn: async () => base44.entities.NewPlotReservation.filter({ new_plot_id: id }, "-created_date", 100),
+    initialData: [],
+  });
+
+  const confirmReservation = useMutation({
+    mutationFn: async (reservation) => {
+      const today = new Date().toISOString().split('T')[0];
+      await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Confirmed', confirmed_date: today });
+      await base44.entities.NewPlot.update(id, { status: 'Reserved' });
+    },
+    onSuccess: () => {
+      refetchReservations();
+      queryClient.invalidateQueries({ queryKey: ["newplot", id] });
+    },
+  });
+
+  const rejectReservation = useMutation({
+    mutationFn: async (reservation) => {
+      const today = new Date().toISOString().split('T')[0];
+      await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Rejected', rejected_date: today });
+    },
+    onSuccess: () => {
+      refetchReservations();
     },
   });
 
@@ -98,9 +130,14 @@ export default function NewPlotDetails() {
             <h1 className="text-xl font-semibold text-gray-900 ml-3">Plot Details</h1>
           </div>
           <div className="flex gap-2">
+            {isAdmin && !isEditing && (
+              <Button className="bg-teal-700 hover:bg-teal-800 text-white" onClick={() => setReservationOpen(true)}>
+                Start Reservation
+              </Button>
+            )}
             {isAdmin && (
               !isEditing ? (
-                <Button variant="outline" onClick={() => isAdmin && setIsEditing(true)} className="gap-2">
+                <Button variant="outline" onClick={() => setIsEditing(true)} className="gap-2">
                   <Pencil className="w-4 h-4" /> Edit
                 </Button>
               ) : (
@@ -173,6 +210,10 @@ export default function NewPlotDetails() {
                   <label className="text-xs text-gray-500">Notes</label>
                   <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
+                <div className="md:col-span-1">
+                  <label className="text-xs text-gray-500">Reservation Expiry</label>
+                  <Input value={form.reservation_expiry_date} onChange={(e) => setForm({ ...form, reservation_expiry_date: e.target.value })} placeholder="YYYY-MM-DD" />
+                </div>
               </>
             ) : (
               <>
@@ -185,6 +226,7 @@ export default function NewPlotDetails() {
                 <InfoRow label="Family / Owner" value={row.family_name} />
                 <InfoRow label="Birth Date" value={row.birth_date} />
                 <InfoRow label="Death Date" value={row.death_date} />
+                <InfoRow label="Reservation Expiry" value={row.reservation_expiry_date} />
                 <div className="md:col-span-4">
                   <div className="text-xs uppercase tracking-wide text-gray-500">Notes</div>
                   <div className="text-gray-900 whitespace-pre-wrap">{row.notes || "-"}</div>
@@ -195,6 +237,46 @@ export default function NewPlotDetails() {
         </section>
 
         {isAdmin && (
+          {isAdmin && (
+          <section className="bg-white rounded-lg border p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-800">Reservations</h2>
+            </div>
+            {reservationsLoading ? (
+              <div className="text-sm text-gray-500">Loading reservations…</div>
+            ) : (
+              <div className="space-y-2">
+                {reservations?.length === 0 ? (
+                  <div className="text-sm text-gray-500">No reservation requests yet.</div>
+                ) : (
+                  reservations.map((resv) => (
+                    <div key={resv.id} className="flex items-center justify-between border rounded-md p-3">
+                      <div className="space-y-0.5">
+                        <div className="text-sm font-medium text-gray-900">{resv.requester_name} <span className="text-gray-400">({resv.requester_email || 'n/a'})</span></div>
+                        <div className="text-xs text-gray-600">Status: <span className={`px-1.5 py-0.5 rounded-full border ${resv.status === 'Pending' ? 'bg-amber-50 border-amber-200 text-amber-700' : resv.status === 'Confirmed' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>{resv.status}</span></div>
+                        {resv.donation_amount ? <div className="text-xs text-gray-600">Donation: ${resv.donation_amount}</div> : null}
+                        {resv.notes ? <div className="text-xs text-gray-600">Notes: {resv.notes}</div> : null}
+                      </div>
+                      {resv.status === 'Pending' && (
+                        <div className="flex gap-2">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => confirmReservation.mutate(resv)} disabled={confirmReservation.isPending}>
+                            {confirmReservation.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}
+                            Confirm
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={() => rejectReservation.mutate(resv)} disabled={rejectReservation.isPending}>
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </section>
+          )}
+
+          {isAdmin && (
           <section className="bg-white rounded-lg border p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-800">Associated Media</h2>
@@ -218,6 +300,13 @@ export default function NewPlotDetails() {
             </div>
           </section>
         )}
+
+        <NewReservationDialog 
+          open={reservationOpen} 
+          onOpenChange={setReservationOpen} 
+          plot={row} 
+          onCreated={() => { refetchReservations(); }}
+        />
       </main>
     </div>
   );
