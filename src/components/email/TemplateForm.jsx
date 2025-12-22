@@ -63,7 +63,7 @@ export default function TemplateForm({ open, onOpenChange, initial, onSave }) {
           <div>
             <label className="text-xs text-gray-500">Body</label>
             <Textarea rows={10} value={form.body} onChange={(e)=>setForm({...form, body: e.target.value})} required />
-            <div className="text-xs text-gray-500 mt-1">Use placeholders with {{variable}} syntax, e.g. {{requester_name}}.</div>
+            <div className="text-xs text-gray-500 mt-1">Use placeholders with {'{'}{'{'}variable{'}'}{'}'} syntax, e.g. {'{'}{'{'}requester_name{'}'}{'}'}.</div>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={()=>onOpenChange(false)}>Cancel</Button>
