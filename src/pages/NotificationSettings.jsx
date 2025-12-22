@@ -1,12 +1,14 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Shield } from "lucide-react";
+import { Loader2, Shield, ArrowLeft } from "lucide-react";
 
 const DEFAULTS = {
   email_recipients: [],
@@ -102,10 +104,17 @@ export default function NotificationSettings() {
       <header className="bg-white border-b px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <h1 className="text-xl font-semibold text-stone-900">Notification Settings</h1>
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="bg-teal-700 hover:bg-teal-800 text-white">
-            {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-            Save Changes
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to={createPageUrl('Admin')}>
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="w-4 h-4" /> Back to Admin
+              </Button>
+            </Link>
+            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="bg-teal-700 hover:bg-teal-800 text-white">
+              {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </div>
         </div>
       </header>
 

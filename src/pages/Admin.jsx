@@ -529,7 +529,7 @@ export default function AdminDashboard() {
                     </Link>
                     <Link to={createPageUrl('SendEmail')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
                       <Mail className="w-4 h-4" /> Email Tool
-                    </Link>>
+                    </Link>
                 </TabsList>
             </div>
 

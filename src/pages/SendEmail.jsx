@@ -1,9 +1,11 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Mail, Send } from "lucide-react";
+import { Loader2, Mail, Send, ArrowLeft } from "lucide-react";
 import TemplateApply from "../components/email/TemplateApply";
 import TemplatesManager from "../components/email/TemplatesManager";
 
@@ -66,9 +68,16 @@ export default function SendEmail() {
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b px-6 py-5">
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
-          <Mail className="w-5 h-5 text-teal-700" />
-          <h1 className="text-xl font-semibold text-gray-900">Send Email</h1>
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Mail className="w-5 h-5 text-teal-700" />
+            <h1 className="text-xl font-semibold text-gray-900">Send Email</h1>
+          </div>
+          <Link to={createPageUrl('Admin')}>
+            <Button variant="outline" className="gap-2">
+              <ArrowLeft className="w-4 h-4" /> Back to Admin
+            </Button>
+          </Link>
         </div>
       </header>
 
