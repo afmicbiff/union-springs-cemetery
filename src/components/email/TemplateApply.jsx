@@ -17,7 +17,11 @@ function extractVars(text) {
 }
 
 function renderTemplate(tpl, vars) {
-  return (tpl || "").replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => (vars?.[k] ?? ""));
+  let s = tpl || "";
+  // Handle simple conditional blocks: {{var?}}...{{/var?}}
+  s = s.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\?\s*\}\}([\s\S]*?)\{\{\/\s*\1\?\s*\}\}/g, (_, k, inner) => (vars && vars[k] ? inner : ""));
+  // Replace simple placeholders {{var}}
+  return s.replace(/\{\{\s*([a-zA-Z0-9_\.]+)\s*\}\}/g, (_, k) => (vars?.[k] ?? ""));
 }
 
 export default function TemplateApply({ onApply }) {

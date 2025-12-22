@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Mail, Send } from "lucide-react";
+import TemplateApply from "../components/email/TemplateApply";
+import TemplatesManager from "../components/email/TemplatesManager";
 
 export default function SendEmail() {
   const [form, setForm] = React.useState({ to: "", subject: "", body: "", from_name: "" });
@@ -28,19 +30,20 @@ export default function SendEmail() {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setResult(null);
-    if (!form.to || !form.subject || !form.body) {
-      setResult({ ok: false, message: "Please fill To, Subject, and Body." });
-      return;
-    }
-    setSending(true);
-    try {
-      const res = await base44.functions.invoke('sendEmail', {
-        to: form.to,
-        subject: form.subject,
-        body: form.body,
-      });
+            e.preventDefault();
+            setResult(null);
+            if (!form.to || !form.subject || !form.body) {
+              setResult({ ok: false, message: "Please fill To, Subject, and Body." });
+              return;
+            }
+            setSending(true);
+            try {
+              const res = await base44.functions.invoke('sendEmail', {
+                to: form.to,
+                subject: form.subject,
+                body: form.body,
+                from_name: form.from_name || undefined,
+              });
       if (res.data?.success === false || res.data?.error) {
         setResult({ ok: false, message: res.data?.error || 'Failed to send email.' });
       } else {
@@ -70,6 +73,7 @@ export default function SendEmail() {
       </header>
 
       <main className="max-w-3xl mx-auto p-6">
+              <TemplateApply onApply={(subject, body) => setForm({ ...form, subject, body })} />
         <div className="bg-white border rounded-lg p-5 shadow-sm">
           <p className="text-sm text-gray-600 mb-4">
             Use Base44’s built-in email service to send messages to any external address.
@@ -130,6 +134,7 @@ export default function SendEmail() {
             )}
           </form>
         </div>
+      <TemplatesManager />
       </main>
     </div>
   );

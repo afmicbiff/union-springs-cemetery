@@ -13,11 +13,11 @@ import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import NotificationSettings from './pages/NotificationSettings';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
+import ResendAck from './pages/ResendAck';
 import Search from './pages/Search';
+import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import ResendAck from './pages/ResendAck';
-import SendEmail from './pages/SendEmail';
 import __Layout from './Layout.jsx';
 
 
@@ -37,11 +37,11 @@ export const PAGES = {
     "NotificationSettings": NotificationSettings,
     "Plots": Plots,
     "Profile": Profile,
+    "ResendAck": ResendAck,
     "Search": Search,
+    "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "ResendAck": ResendAck,
-    "SendEmail": SendEmail,
 }
 
 export const pagesConfig = {
