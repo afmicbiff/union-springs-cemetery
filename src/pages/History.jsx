@@ -115,8 +115,8 @@ export default function HistoryPage() {
                          {/* Background Line */}
                         <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-stone-300 -translate-y-1/2 z-0" />
 
-                        <div className="w-full h-full overflow-x-auto overflow-y-hidden whitespace-nowrap z-10 relative custom-scrollbar" ref={scrollRef}>
-                            <div className="flex items-center h-full px-10 md:px-20 gap-8 min-w-max py-12">
+                        <div className="w-full h-full md:overflow-x-auto md:overflow-y-hidden overflow-y-auto overflow-x-hidden md:whitespace-nowrap whitespace-normal z-10 relative custom-scrollbar" ref={scrollRef}>
+                            <div className="flex flex-col md:flex-row md:items-center h-full px-4 md:px-20 gap-4 md:gap-8 md:min-w-max min-w-0 py-6 md:py-12">
                                 
                                 {/* Start Node */}
                                 <div className="relative flex flex-col items-center justify-center">
