@@ -148,7 +148,7 @@ export default function AdminPlots() {
                                                 ${plot.status === 'Reserved' ? 'bg-teal-100 text-teal-800' : ''}
                                                 ${plot.status === 'Occupied' ? 'bg-red-100 text-red-800' : ''}
                                                 ${plot.status === 'Unavailable' ? 'bg-gray-100 text-gray-800' : ''}
-                                                ${plot.status === 'Pending Reservation' ? 'bg-amber-100 text-amber-800' : ''}
+                                                
                                             `}>
                                                 {plot.status}
                                             </Badge>

@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import clsx from "clsx";
 
 const STATUS_COLORS = {
   Available: "bg-green-500",
@@ -54,7 +54,7 @@ export default function AdminPlotMap({ plots = [], onSelect }) {
                     key={p.id}
                     title={title}
                     onClick={() => onSelect && onSelect(p)}
-                    className={cn(
+                    className={clsx(
                       "text-left border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                     )}
@@ -63,7 +63,7 @@ export default function AdminPlotMap({ plots = [], onSelect }) {
                       <div className="text-[11px] font-mono text-gray-800 font-semibold truncate">
                         {p.plot_number}
                       </div>
-                      <span className={cn("w-3 h-3 rounded-full", dot)}></span>
+                      <span className={clsx("w-3 h-3 rounded-full", dot)}></span>
                     </div>
                     <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {p.row_number || '-'}</div>
                     <div className="mt-0.5 text-[11px] text-gray-600 truncate">
