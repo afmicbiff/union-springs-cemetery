@@ -1,4 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from "@/components/ui/button";
+import { Phone } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function ServicesPage() {
@@ -50,6 +54,15 @@ export default function ServicesPage() {
                 <li>Family Estates</li>
             </ul>
           </div>
+        </div>
+
+        <div className="w-full flex justify-center my-6">
+          <Link to={createPageUrl('Contact')}>
+            <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-4 py-4 text-base md:text-lg rounded-sm shadow-lg whitespace-normal break-words leading-snug text-center flex items-center justify-center gap-2">
+              <Phone className="w-5 h-5" />
+              <span className="block">Contact the Administrator of the Grounds</span>
+            </Button>
+          </Link>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
