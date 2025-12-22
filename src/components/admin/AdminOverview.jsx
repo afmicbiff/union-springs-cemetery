@@ -27,14 +27,7 @@ export default function AdminOverview() {
         .filter(e => e.start_time && isAfter(parseISO(e.start_time), new Date()))
         .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-    const tasksSorted = [...tasks].sort((a, b) => {
-        const ad = a.due_date ? new Date(a.due_date) : null;
-        const bd = b.due_date ? new Date(b.due_date) : null;
-        if (ad && bd) return ad - bd;
-        if (ad) return -1;
-        if (bd) return 1;
-        return (a.created_date || 0) > (b.created_date || 0) ? -1 : 1;
-    });
+
 
     return (
         <div className="space-y-6">
