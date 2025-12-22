@@ -9,6 +9,8 @@ import { createPageUrl } from "@/utils";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
+    request_for: "self",
+    family_member_name: "",
     requester_name: "",
     requester_email: "",
     donation_amount: "",
@@ -19,10 +21,17 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    if (form.request_for === 'family_member' && !String(form.family_member_name || '').trim()) {
+      alert("Please enter the family member's name.");
+      setSubmitting(false);
+      return;
+    }
     try {
       const today = new Date().toISOString().split('T')[0];
       const newReservation = await base44.entities.NewPlotReservation.create({
         new_plot_id: plot.id,
+        request_for: form.request_for,
+        family_member_name: form.request_for === 'family_member' ? form.family_member_name : '',
         requester_name: form.requester_name,
         requester_email: form.requester_email,
         donation_amount: form.donation_amount ? Number(form.donation_amount) : 0,
@@ -46,7 +55,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
       });
 
       onCreated && onCreated();
-      setForm({ requester_name: "", requester_email: "", donation_amount: "", notes: "" });
+      setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", donation_amount: "", notes: "" });
       window.alert("Your reservation request has been submitted for review.");
       onOpenChange(false);
     } finally {
@@ -64,11 +73,28 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-xs text-gray-500">Requester Name</label>
+            <label className="text-xs text-gray-500">Who is this for?</label>
+            <select
+              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+              value={form.request_for}
+              onChange={(e)=>setForm({...form, request_for: e.target.value})}
+            >
+              <option value="self">Myself</option>
+              <option value="family_member">Another family member</option>
+            </select>
+          </div>
+          {form.request_for === 'family_member' && (
+            <div>
+              <label className="text-xs text-gray-500">Family Member Name</label>
+              <Input value={form.family_member_name} onChange={(e)=>setForm({...form, family_member_name: e.target.value})} required />
+            </div>
+          )}
+          <div>
+            <label className="text-xs text-gray-500">Your Name</label>
             <Input value={form.requester_name} onChange={(e)=>setForm({...form, requester_name: e.target.value})} required />
           </div>
           <div>
-            <label className="text-xs text-gray-500">Requester Email</label>
+            <label className="text-xs text-gray-500">Your Email</label>
             <Input type="email" value={form.requester_email} onChange={(e)=>setForm({...form, requester_email: e.target.value})} />
           </div>
           <div>
