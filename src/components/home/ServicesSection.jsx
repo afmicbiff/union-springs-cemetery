@@ -51,8 +51,8 @@ export default function ServicesSection() {
 
               <div className="pt-2">
                 <Link to={createPageUrl('Contact')}>
-                    <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-8 py-6 text-lg rounded-sm shadow-lg w-full sm:w-auto">
-                        <Phone className="w-5 h-5 mr-3" /> Contact the Administrator of the Grounds
+                    <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-sm sm:text-base md:text-lg rounded-sm shadow-lg w-full sm:w-auto whitespace-normal leading-snug text-center">
+                        <Phone className="w-4 h-4 md:w-5 md:h-5 mr-2 md:mr-3" /> Contact the Administrator of the Grounds
                     </Button>
                 </Link>
               </div>
