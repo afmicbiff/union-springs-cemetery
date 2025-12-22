@@ -157,6 +157,96 @@ function getStarterTemplates() {
       body: "Hello {{member_name}},\n\nThis is a friendly reminder that invoice {{invoice_number}} (amount ${{amount}}) is due on {{due_date}}.\nYou can reply to this email if you need assistance.\n\nThank you,\nUnion Springs Cemetery",
       placeholders: ["member_name","invoice_number","amount","due_date"],
       is_active: true
+    },
+    {
+      name: "Reservation Hold Expiring",
+      key: "reservation_hold_expiring",
+      category: "reservation",
+      description: "Warns a requester that a temporary hold is expiring",
+      subject: "Reminder: Your reservation hold for plot {{plot_number}} expires on {{expiry_date}}",
+      body: "Hello {{requester_name}},\n\nYour temporary hold for plot {{plot_number}} (Section {{section}}) will expire on {{expiry_date}}.\nIf you need more time or have questions, please reply to this email.\n\nUnion Springs Cemetery",
+      placeholders: ["requester_name","plot_number","section","expiry_date"],
+      is_active: true
+    },
+    {
+      name: "Forward Inquiry to Admin",
+      key: "inquiry_forward_admin",
+      category: "inquiry",
+      description: "Sends a copy of an inquiry to administrators",
+      subject: "New website inquiry from {{name}}",
+      body: "New inquiry received.\n\nFrom: {{name}} <{{email}}>\nSubject: {{subject}}\n\nMessage:\n{{message}}",
+      placeholders: ["name","email","subject","message"],
+      is_active: true
+    },
+    {
+      name: "Invoice Created",
+      key: "invoice_created",
+      category: "invoice",
+      description: "Notifies a member a new invoice was issued",
+      subject: "Invoice {{invoice_number}} issued (Due {{due_date}})",
+      body: "Hello {{member_name}},\n\nAn invoice has been issued: {{invoice_number}} for ${{amount}}.\nDue date: {{due_date}}.\n\nIf you have any questions, reply to this email.\n\nThank you,\nUnion Springs Cemetery",
+      placeholders: ["member_name","invoice_number","amount","due_date"],
+      is_active: true
+    },
+    {
+      name: "Invoice Overdue",
+      key: "invoice_overdue",
+      category: "invoice",
+      description: "Notifies when an invoice is overdue",
+      subject: "Overdue notice: Invoice {{invoice_number}}",
+      body: "Hello {{member_name}},\n\nOur records indicate that invoice {{invoice_number}} (amount ${{amount}}) is now overdue.\nPlease let us know if you need any assistance.\n\nThank you,\nUnion Springs Cemetery",
+      placeholders: ["member_name","invoice_number","amount"],
+      is_active: true
+    },
+    {
+      name: "Event Invitation",
+      key: "event_invite",
+      category: "general",
+      description: "Invite members to an event",
+      subject: "You're invited: {{event_title}} on {{event_date}}",
+      body: "Hello {{name}},\n\nWe'd love to see you at {{event_title}} on {{event_date}} at {{event_location}}.\n{{description?}}Details: {{description}}{{/description?}}\n\nPlease reply if you have questions.\n\nUnion Springs Cemetery",
+      placeholders: ["name","event_title","event_date","event_location","description"],
+      is_active: true
+    },
+    {
+      name: "Event Reminder",
+      key: "event_reminder",
+      category: "general",
+      description: "Reminder for upcoming events",
+      subject: "Reminder: {{event_title}} on {{event_date}}",
+      body: "Hello {{name}},\n\nJust a reminder about {{event_title}} on {{event_date}} at {{event_location}}.\nWe look forward to seeing you.\n\nUnion Springs Cemetery",
+      placeholders: ["name","event_title","event_date","event_location"],
+      is_active: true
+    },
+    {
+      name: "Employee Onboarding Reminder",
+      key: "employee_onboarding_reminder",
+      category: "general",
+      description: "Reminds employees to complete onboarding docs",
+      subject: "Action needed: Complete onboarding documents",
+      body: "Hello {{employee_name}},\n\nThis is a reminder to complete your onboarding documents by {{due_date}}.\nIf you need assistance, reply to this email.\n\nThank you,\nUnion Springs Cemetery",
+      placeholders: ["employee_name","due_date"],
+      is_active: true
+    },
+    {
+      name: "Document Expiration Notice",
+      key: "document_expiration_notice",
+      category: "general",
+      description: "Notifies about upcoming document expiration",
+      subject: "Document expiring: {{document_name}} on {{expiration_date}}",
+      body: "Hello {{name}},\n\nThe document '{{document_name}}' is set to expire on {{expiration_date}}.\nPlease update it at your earliest convenience.\n\nThank you,\nUnion Springs Cemetery",
+      placeholders: ["name","document_name","expiration_date"],
+      is_active: true
+    },
+    {
+      name: "Task Due Soon",
+      key: "task_due_soon",
+      category: "general",
+      description: "Notifies an assignee a task is due soon",
+      subject: "Task due soon: {{task_title}} (due {{due_date}})",
+      body: "Hello {{assignee_name}},\n\nThe task '{{task_title}}' is due on {{due_date}}.\n{{notes?}}Notes: {{notes}}{{/notes?}}\n\nThank you,\nUnion Springs Cemetery",
+      placeholders: ["assignee_name","task_title","due_date","notes"],
+      is_active: true
     }
   ];
 }
