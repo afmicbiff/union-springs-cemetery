@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Check, Edit, Trash2, AlertTriangle, Loader2, Calendar as CalIcon } from "lucide-react";
+import { Plus, Check, Edit, Trash2, AlertTriangle, Loader2, Calendar as CalIcon, Download } from "lucide-react";
 import LawnCareForm from "./lawncare/LawnCareForm";
+import LawnCareStats from "./lawncare/LawnCareStats";
+import LawnCareHistoryChart from "./lawncare/LawnCareHistoryChart";
 
 function formatDate(d) {
   if (!d) return "";
@@ -74,6 +76,54 @@ export default function LawnCare() {
     updateMutation.mutate({ id: row.id, data });
   };
 
+  const handleExportCsv = () => {
+    const headers = [
+      "area",
+      "frequency",
+      "start_date",
+      "end_date",
+      "last_completed_date",
+      "next_due_date",
+      "status",
+      "assigned_employee_id",
+      "assigned_employee_name"
+    ];
+
+    const getEmpName = (id) => {
+      const e = (employees || []).find((x) => x.id === id);
+      return e ? `${e.first_name || ""} ${e.last_name || ""}`.trim() : "";
+    };
+
+    const escape = (val) => {
+      if (val === null || val === undefined) return "";
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}` + `"`;
+    };
+
+    const rows = (schedules || []).map((s) => [
+      s.area || "",
+      s.frequency || "",
+      s.start_date || "",
+      s.end_date || "",
+      s.last_completed_date || "",
+      s.next_due_date || "",
+      s.status || "",
+      s.assigned_employee_id || "",
+      getEmpName(s.assigned_employee_id)
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.map(escape).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `lawncare_export_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const filtered = (schedules || []).filter((s) => {
     const matchesStatus = statusFilter === "all" || s.status === statusFilter;
     const matchesSearch = !search || (s.area || "").toLowerCase().includes(search.toLowerCase());
@@ -94,9 +144,12 @@ export default function LawnCare() {
         <div className="flex items-center gap-2">
           <Badge variant="destructive">{overdueCount} Overdue</Badge>
           <Badge variant="outline">{dueSoonCount} Due in 7 days</Badge>
+          <Button variant="outline" onClick={handleExportCsv} className="gap-2"><Download className="w-4 h-4"/> Export CSV</Button>
           <Button onClick={() => { setEditing(null); setOpen(true); }} className="bg-teal-700 hover:bg-teal-800 text-white gap-2"><Plus className="w-4 h-4"/> New Schedule</Button>
         </div>
       </div>
+
+      <LawnCareStats schedules={schedules} />
 
       <Card>
         <CardHeader>
@@ -180,6 +233,8 @@ export default function LawnCare() {
           </div>
         </CardContent>
       </Card>
+
+      <LawnCareHistoryChart schedules={schedules} />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[600px]">
