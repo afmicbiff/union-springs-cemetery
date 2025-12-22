@@ -17,6 +17,7 @@ import Search from './pages/Search';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
 import ResendAck from './pages/ResendAck';
+import SendEmail from './pages/SendEmail';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "Services": Services,
     "Visitor": Visitor,
     "ResendAck": ResendAck,
+    "SendEmail": SendEmail,
 }
 
 export const pagesConfig = {

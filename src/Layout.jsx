@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -53,9 +53,10 @@ export default function Layout({ children }) {
         { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
         { label: 'Board Members & Employees', path: '/Employees', icon: Users },
         { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
-        { label: 'Notification Settings', path: '/NotificationSettings', icon: Settings }
-      ]
-    },
+        { label: 'Notification Settings', path: '/NotificationSettings', icon: Settings },
+        { label: 'Email Tool', path: '/SendEmail', icon: Mail }
+        ]
+        },
   ];
 
   return (
