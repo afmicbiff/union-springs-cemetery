@@ -311,13 +311,15 @@ export default function PlotsPage() {
   
   // Filtering State
   const [filters, setFilters] = useState({
-      search: '',
-      status: 'All',
-      birthYearStart: '',
-      birthYearEnd: '',
-      deathYearStart: '',
-      deathYearEnd: ''
-  });
+          search: '',
+          status: 'All',
+          birthYearStart: '',
+          birthYearEnd: '',
+          deathYearStart: '',
+          deathYearEnd: '',
+          owner: '',
+          plot: ''
+      });
 
   // Table View State
   const [groupBy, setGroupBy] = useState('none');
@@ -465,7 +467,7 @@ export default function PlotsPage() {
   // Filtered Data Computation
   const filteredData = useMemo(() => {
       return parsedData.filter(item => {
-          // 1. Search Filter
+          // 1. General Search
           if (filters.search) {
               const term = filters.search.toLowerCase();
               const searchable = [
@@ -473,21 +475,41 @@ export default function PlotsPage() {
                   item.Row, 
                   item['First Name'], 
                   item['Last Name'], 
+                  item['Family Name'],
                   item.Notes,
                   item.Section
               ].join(' ').toLowerCase();
               if (!searchable.includes(term)) return false;
           }
 
-          // 2. Status Filter
+          // 2. Owner Name (Family)
+          if (filters.owner) {
+              const owner = String(item['Family Name'] || '').toLowerCase();
+              if (!owner.includes(filters.owner.toLowerCase())) return false;
+          }
+
+          // 3. Plot Number
+          if (filters.plot) {
+              const plotStr = String(item.Grave || '').toLowerCase();
+              const wanted = filters.plot.toLowerCase();
+              // match either substring or numeric equality if user typed only digits
+              const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
+              const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
+              if (numWanted != null) {
+                  if (numItem !== numWanted) return false;
+              } else if (!plotStr.includes(wanted)) {
+                  return false;
+              }
+          }
+
+          // 4. Status Filter
           if (filters.status !== 'All' && item.Status !== filters.status) {
-              // Special case for Veteran which might be in notes or derived
               const isVeteran = item.Status === 'Veteran' || (item.Notes && item.Notes.toLowerCase().includes('vet') && item.Status === 'Occupied');
               if (filters.status === 'Veteran' && !isVeteran) return false;
               if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
           }
 
-          // 3. Date Filters
+          // 5. Date Filters (Year)
           const getYear = (dateStr) => {
               if (!dateStr) return null;
               const date = new Date(dateStr);

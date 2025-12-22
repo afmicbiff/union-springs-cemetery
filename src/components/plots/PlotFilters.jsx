@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import SavedSearchManager from "@/components/common/SavedSearchManager";
 
 export default function PlotFilters({ filters, onFilterChange, statusOptions }) {
     
@@ -19,7 +20,9 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
             birthYearStart: '',
             birthYearEnd: '',
             deathYearStart: '',
-            deathYearEnd: ''
+            deathYearEnd: '',
+            owner: '',
+            plot: ''
         });
     };
 
@@ -35,6 +38,26 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
                         className="pl-9"
                         value={filters.search}
                         onChange={(e) => handleChange('search', e.target.value)}
+                    />
+                </div>
+
+                {/* Owner / Family Name */}
+                <div className="relative w-full md:w-1/4">
+                    <Input
+                        placeholder="Owner / Family Name"
+                        value={filters.owner || ''}
+                        onChange={(e) => handleChange('owner', e.target.value)}
+                        className=""
+                    />
+                </div>
+
+                {/* Plot Number */}
+                <div className="relative w-full md:w-40">
+                    <Input
+                        placeholder="Plot #"
+                        value={filters.plot || ''}
+                        onChange={(e) => handleChange('plot', e.target.value)}
+                        className=""
                     />
                 </div>
 
@@ -123,8 +146,15 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
                     </PopoverContent>
                 </Popover>
 
+                {/* Saved Searches */}
+                <SavedSearchManager 
+                    type="plot" 
+                    currentFilters={filters}
+                    onApplySearch={(saved) => onFilterChange({ ...filters, ...saved })}
+                />
+
                 {/* Clear Filters */}
-                {(filters.search || filters.status !== 'All' || filters.birthYearStart || filters.deathYearStart) && (
+                {(filters.search || filters.status !== 'All' || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
                     <Button variant="ghost" onClick={handleClear} className="text-sm text-gray-500 hover:text-red-600">
                         Clear Filters
                     </Button>
