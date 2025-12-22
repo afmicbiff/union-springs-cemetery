@@ -57,13 +57,7 @@ export default function AdminOverview() {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
 
-
-
-
-
-            </div>
         </div>
     );
 }
