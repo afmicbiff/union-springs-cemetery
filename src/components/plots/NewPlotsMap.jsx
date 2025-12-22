@@ -356,7 +356,7 @@ export default function NewPlotsMap({ batchId }) {
                                       const r = byNum[n];
                                       if (!r) {
                                         return (
-                                          <div key={`placeholder-${n}`} className="border border-gray-200 rounded-md p-1 bg-gray-50 opacity-60">
+                                          <div key={`placeholder-${n}`} className="w-1/2 mx-auto border border-gray-200 rounded-md p-1 bg-gray-50 opacity-60">
                                             <div className="flex items-center justify-between">
                                               <div className="text-[9px] font-mono text-gray-400 font-semibold">{n}</div>
                                               <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -372,7 +372,7 @@ export default function NewPlotsMap({ batchId }) {
                                       const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
                                       const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
                                       return (
-                                        <div key={key} title={tip} className="border border-gray-200 rounded-md p-1 bg-gray-50 hover:bg-gray-100 transition">
+                                        <div key={key} title={tip} className="w-1/2 mx-auto border border-gray-200 rounded-md p-1 bg-gray-50 hover:bg-gray-100 transition">
                                           <div className="flex items-center justify-between">
                                             <div className="text-[9px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
                                             <span className={`w-2 h-2 rounded-full ${bg}`}></span>
