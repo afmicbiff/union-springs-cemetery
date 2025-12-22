@@ -136,6 +136,9 @@ export default function MemorialPage() {
             <div className="bg-stone-900 text-stone-100 min-h-[60vh] flex flex-col justify-end py-12 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
                 <div className="max-w-[1240px] mx-auto px-4 w-full relative z-10 text-left">
+                    <Link to={backSearchUrl} className="md:hidden inline-flex items-center gap-2 text-stone-100/90 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-2 rounded-md w-fit mb-4">
+                        <ArrowLeft className="w-4 h-4" /> <span>Back to Search</span>
+                    </Link>
                     {deceased.image_url && (
                         <img 
                             src={deceased.image_url} 
