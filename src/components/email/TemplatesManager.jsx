@@ -17,6 +17,7 @@ export default function TemplatesManager() {
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState(null);
   const [search, setSearch] = React.useState("");
+  const seededRef = React.useRef(false);
 
   const createMut = useMutation({
     mutationFn: async (payload) => base44.entities.EmailTemplate.create(payload),
@@ -34,6 +35,13 @@ export default function TemplatesManager() {
     mutationFn: async () => base44.entities.EmailTemplate.bulkCreate(getStarterTemplates()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
+
+  React.useEffect(() => {
+    if (!isLoading && templates.length === 0 && !seededRef.current && !bulkCreateMut.isPending) {
+      seededRef.current = true;
+      bulkCreateMut.mutate();
+    }
+  }, [isLoading, templates.length]);
 
   const filtered = templates.filter(t => !search || (t.name || "").toLowerCase().includes(search.toLowerCase()) || (t.key || "").toLowerCase().includes(search.toLowerCase()));
 
