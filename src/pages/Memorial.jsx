@@ -171,7 +171,7 @@ export default function MemorialPage() {
             <div className="max-w-4xl mx-auto px-4 py-12">
                 <Tabs defaultValue="obituary" className="space-y-8">
                     <div className="relative flex items-center justify-center border-b border-stone-200">
-                        <Link to={backSearchUrl} className="absolute left-0 text-stone-500 hover:text-teal-700 transition-colors flex items-center gap-2">
+                        <Link to={backSearchUrl} className="hidden md:flex absolute left-0 text-stone-500 hover:text-teal-700 transition-colors items-center gap-2">
                             <ArrowLeft className="w-4 h-4" /> <span className="hidden md:inline">Back to Search</span>
                         </Link>
                         <TabsList className="bg-transparent border-none rounded-none h-auto p-0 gap-8">
