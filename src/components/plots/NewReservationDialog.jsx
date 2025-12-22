@@ -9,24 +9,32 @@ import { createPageUrl } from "@/utils";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
-    request_for: "self",
-    family_member_name: "",
-    requester_name: "",
-    requester_email: "",
-    donation_amount: "",
-    notes: ""
-  });
+            request_for: "self",
+            family_member_name: "",
+            requester_name: "",
+            requester_email: "",
+            contact_by_phone: false,
+            requester_phone: "",
+            requester_phone_secondary: "",
+            donation_amount: "",
+            notes: ""
+          });
   const [submitting, setSubmitting] = React.useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     if (form.request_for === 'family_member' && !String(form.family_member_name || '').trim()) {
-      alert("Please enter the family member's name.");
-      setSubmitting(false);
-      return;
-    }
-    try {
+            alert("Please enter the family member's name.");
+            setSubmitting(false);
+            return;
+          }
+          if (form.contact_by_phone && !String(form.requester_phone || '').trim()) {
+            alert("Please enter your phone number to be contacted by an administrator.");
+            setSubmitting(false);
+            return;
+          }
+          try {
       const today = new Date().toISOString().split('T')[0];
       const EXPIRY_DAYS = 7;
       const expiryDateObj = new Date();
@@ -38,6 +46,8 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         family_member_name: form.request_for === 'family_member' ? form.family_member_name : '',
         requester_name: form.requester_name,
         requester_email: form.requester_email,
+        requester_phone: form.requester_phone || '',
+        requester_phone_secondary: form.requester_phone_secondary || '',
         donation_amount: form.donation_amount ? Number(form.donation_amount) : 0,
         status: "Pending Review",
         requested_date: today,
@@ -59,7 +69,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
       });
 
       onCreated && onCreated();
-      setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", donation_amount: "", notes: "" });
+      setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", contact_by_phone: false, requester_phone: "", requester_phone_secondary: "", donation_amount: "", notes: "" });
       window.alert("Your reservation request has been submitted for review.");
       onOpenChange(false);
     } finally {
@@ -101,6 +111,27 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
             <label className="text-xs text-gray-500">Your Email</label>
             <Input type="email" value={form.requester_email} onChange={(e)=>setForm({...form, requester_email: e.target.value})} />
           </div>
+          <div className="flex items-center gap-2 mt-1">
+            <input
+              id="contact_by_phone"
+              type="checkbox"
+              checked={form.contact_by_phone}
+              onChange={(e)=>setForm({...form, contact_by_phone: e.target.checked})}
+            />
+            <label htmlFor="contact_by_phone" className="text-sm text-gray-700">Request administrator to contact me by phone</label>
+          </div>
+          {form.contact_by_phone && (
+            <>
+              <div>
+                <label className="text-xs text-gray-500">Phone Number</label>
+                <Input type="tel" value={form.requester_phone} onChange={(e)=>setForm({...form, requester_phone: e.target.value})} required />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Second Phone (optional)</label>
+                <Input type="tel" value={form.requester_phone_secondary} onChange={(e)=>setForm({...form, requester_phone_secondary: e.target.value})} />
+              </div>
+            </>
+          )}
           <div>
             <label className="text-xs text-gray-500">Donation Amount</label>
             <Input type="number" step="0.01" value={form.donation_amount} onChange={(e)=>setForm({...form, donation_amount: e.target.value})} />
@@ -109,12 +140,17 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
             <label className="text-xs text-gray-500">Notes</label>
             <Textarea rows={3} value={form.notes} onChange={(e)=>setForm({...form, notes: e.target.value})} />
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="ghost" onClick={()=>onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="bg-teal-700 hover:bg-teal-800 text-white" disabled={submitting}>
-              {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Create Request
-            </Button>
+          <div className="pt-2 space-y-2">
+            <div className="text-xs text-gray-700 bg-amber-50 border border-amber-200 rounded-md p-2">
+              Note: You can hold a plot for up to seven days. After seven days, the plot goes back to Available.
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={()=>onOpenChange(false)}>Cancel</Button>
+              <Button type="submit" className="bg-teal-700 hover:bg-teal-800 text-white" disabled={submitting}>
+                {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Create Request
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
