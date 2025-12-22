@@ -90,6 +90,7 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
     };
 
     const WeatherIcon = item.weather ? getWeatherIcon(item.weather.icon) : null;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
     return (
         <motion.div
@@ -99,12 +100,12 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
             animate={{ 
                 opacity: 1, 
                 scale: 1,
-                flexBasis: isSelected ? "40rem" : "16rem",
-                minWidth: isSelected ? "40rem" : "16rem"
+                flexBasis: isSelected ? (isMobile ? "100%" : "40rem") : (isMobile ? "100%" : "16rem"),
+                minWidth: isSelected ? (isMobile ? "100%" : "40rem") : (isMobile ? "100%" : "16rem")
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
-                "relative flex flex-col transition-all duration-300 ease-in-out cursor-pointer group",
+                "relative w-full md:w-auto flex flex-col transition-all duration-300 ease-in-out cursor-pointer group",
                 "rounded-xl border shadow-md hover:shadow-xl hover:-translate-y-2",
                 isSelected 
                     ? "bg-white border-teal-500 z-20 h-[70vh] md:h-[60vh] overflow-hidden" 
@@ -169,7 +170,7 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
                 </div>
 
                 {/* Card Body */}
-                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar">
                     {/* Thumbnail Image - 2x2 inch approx */}
                     {item.media && item.media.length > 0 && (
                         <div className="float-right ml-4 mb-2 relative z-10">
@@ -209,11 +210,11 @@ const HistoryItem = React.memo(({ item, isSelected, isMatch, searchQuery, onTogg
 
 
                     {isSelected ? (
-                        <div className="prose prose-stone prose-sm max-w-none whitespace-normal">
+                        <div className="prose prose-stone prose-sm max-w-none whitespace-normal break-words">
                             <TextWithFootnotes text={item.text} highlight={searchQuery} footnotes={footnotes} />
                         </div>
                     ) : (
-                        <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed whitespace-normal">
+                        <p className="text-stone-600 text-sm line-clamp-4 leading-relaxed whitespace-normal break-words">
                             <HighlightedText text={item.text.replace(/NOTE\s*\[?\d+\]?/g, '')} highlight={searchQuery} />
                         </p>
                     )}
