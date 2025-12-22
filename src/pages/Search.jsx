@@ -340,10 +340,10 @@ export default function SearchPage() {
                                                       {person.first_name} {person.last_name}
                                                   </h3>
                                                   {person.family_name && (
-                                                      <Badge variant="outline" className="ml-2 text-stone-500 border-stone-300">
-                                                          {person.family_name} Family
-                                                      </Badge>
-                                                  )}
+                                                                                                              <Badge variant="outline" className="hidden md:inline-flex ml-2 text-stone-500 border-stone-300">
+                                                                                                                  {person.family_name} Family
+                                                                                                              </Badge>
+                                                                                                          )}
                                                   {person.veteran_status && (
                                                       <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
                                                   )}
@@ -354,11 +354,22 @@ export default function SearchPage() {
                                                   {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
                                               </p>
                                             </div>
-                                            <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1">
-                                               Section {person.plot_location?.split('-')[0] || 'Main'}
-                                            </Badge>
+                                            <Badge variant="outline" className="hidden md:inline-flex border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
+                                                                                                 Section {person.plot_location?.split('-')[0] || 'Main'}
+                                                                                              </Badge>
                                          </div>
 
+                                         {/* Mobile-centered section and family badges */}
+                                         <div className="md:hidden flex flex-col items-center gap-2 mt-2">
+                                           <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
+                                             Section {person.plot_location?.split('-')[0] || 'Main'}
+                                           </Badge>
+                                           {person.family_name && (
+                                             <Badge variant="outline" className="text-stone-600 border-stone-300">
+                                               {person.family_name} Family
+                                             </Badge>
+                                           )}
+                                         </div>
                                          <div className="space-y-3">
                                            <div className="flex items-center text-stone-600">
                                              <MapPin className="w-4 h-4 mr-2 text-red-600" />
