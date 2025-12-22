@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import InteractionDialog from "./InteractionDialog";
+import ContactForm from "./ContactForm";
 import { Calendar, Plus } from "lucide-react";
 
 export default function CRMContacts() {
@@ -13,6 +14,8 @@ export default function CRMContacts() {
   const [search, setSearch] = React.useState("");
   const [selected, setSelected] = React.useState(null);
   const [open, setOpen] = React.useState(false);
+  const [editMember, setEditMember] = React.useState(null);
+  const [editOpen, setEditOpen] = React.useState(false);
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["crm-members"],
@@ -102,6 +105,7 @@ export default function CRMContacts() {
                     <td className="py-2 pr-0">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="outline" onClick={() => { setSelected(m); setOpen(true); }}>Log Interaction</Button>
+                        <Button size="sm" variant="outline" onClick={() => { setEditMember(m); setEditOpen(true); }}>Edit</Button>
                         <Button size="sm" variant="outline" onClick={() => {
                           const date = new Date();
                           date.setDate(date.getDate() + 7);
@@ -127,6 +131,25 @@ export default function CRMContacts() {
               member={selected}
               onClose={() => { setOpen(false); setSelected(null); }}
               onSaved={() => queryClient.invalidateQueries({ queryKey: ["crm-members"] })}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Contact</DialogTitle>
+          </DialogHeader>
+          {editMember && (
+            <ContactForm
+              initial={editMember}
+              onCancel={() => { setEditOpen(false); setEditMember(null); }}
+              onSave={(data) => {
+                updateMember.mutate({ id: editMember.id, data });
+                setEditOpen(false);
+                setEditMember(null);
+              }}
             />
           )}
         </DialogContent>

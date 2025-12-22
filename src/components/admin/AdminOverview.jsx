@@ -6,6 +6,7 @@ import OverviewNewsCard from "@/components/admin/overview/OverviewNewsCard";
 import OverviewTasksCard from "@/components/admin/overview/OverviewTasksCard";
 import OverviewNotificationsCard from "@/components/admin/overview/OverviewNotificationsCard";
 import OverviewSalesCard from "@/components/admin/overview/OverviewSalesCard";
+import OverviewTasksCard from "@/components/admin/overview/OverviewTasksCard";
 import OverviewPlotsCard from "@/components/admin/overview/OverviewPlotsCard";
 
 export default function AdminOverview() {
