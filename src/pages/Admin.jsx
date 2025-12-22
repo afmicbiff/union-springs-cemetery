@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 import { 
     Bell, 
     Upload, 
@@ -495,7 +495,7 @@ export default function AdminDashboard() {
         {/* Navigation & Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 inline-flex h-auto w-max md:w-full md:grid md:grid-cols-6 lg:grid-cols-12 gap-1">
+                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
                     {tabs.map(tab => (
                         <TabsTrigger 
                             key={tab.id} 
@@ -521,28 +521,15 @@ export default function AdminDashboard() {
                         New Plot Reservation
                     </Link>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="ml-2">
-                          More
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuItem onSelect={() => setNotifPopoverOpen(true)} className="cursor-pointer">
-                          <Bell className="w-4 h-4 mr-2" /> Notifications
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
-                            <Settings className="w-4 h-4 mr-2" /> Notification Settings
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('SendEmail')} className="cursor-pointer">
-                            <Mail className="w-4 h-4 mr-2" /> Email Tool
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>>
+                    <button onClick={() => setNotifPopoverOpen(true)} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                      <Bell className="w-4 h-4" /> Notifications
+                    </button>
+                    <Link to={createPageUrl('NotificationSettings')} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                      <Settings className="w-4 h-4" /> Notification Settings
+                    </Link>
+                    <Link to={createPageUrl('SendEmail')} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                      <Mail className="w-4 h-4" /> Email Tool
+                    </Link>>
                 </TabsList>
             </div>
 
