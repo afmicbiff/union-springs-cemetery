@@ -5,6 +5,7 @@ import CRMContacts from "./ContactsTable";
 import CRMInteractions from "./CRMInteractions";
 import CRMSegments from "./CRMSegments";
 import CRMFollowUps from "./CRMFollowUps";
+import CRMAutomations from "./CRMAutomations";
 
 export default function CRM() {
   return (
@@ -24,6 +25,7 @@ export default function CRM() {
             <TabsTrigger value="interactions">Interactions</TabsTrigger>
             <TabsTrigger value="segments">Segments</TabsTrigger>
             <TabsTrigger value="followups">Follow-ups</TabsTrigger>
+            <TabsTrigger value="automations">Automations</TabsTrigger>
           </TabsList>
 
           <TabsContent value="contacts" className="mt-4">
@@ -37,6 +39,9 @@ export default function CRM() {
           </TabsContent>
           <TabsContent value="followups" className="mt-4">
             <CRMFollowUps />
+          </TabsContent>
+          <TabsContent value="automations" className="mt-4">
+            <CRMAutomations />
           </TabsContent>
         </Tabs>
       </Card>

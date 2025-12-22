@@ -202,6 +202,14 @@ export default function AdminDashboard() {
       refetchOnWindowFocus: false
   });
 
+  // CRM automations
+  useQuery({
+      queryKey: ['run-crm-automations'],
+      queryFn: () => base44.functions.invoke('runCrmAutomations'),
+      refetchInterval: 300 * 1000, // every 5 minutes
+      refetchOnWindowFocus: false
+  });
+
   if (!isAuthorized) {
       return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
   }
