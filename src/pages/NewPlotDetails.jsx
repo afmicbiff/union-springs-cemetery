@@ -194,26 +194,30 @@ export default function NewPlotDetails() {
           </div>
         </section>
 
-        <section className="bg-white rounded-lg border p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-800">Associated Media</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {/* No linked media yet - placeholder */}
-            <div className="col-span-2 text-sm text-gray-500 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4" /> No media linked to this plot.
+        {isAdmin && (
+          <section className="bg-white rounded-lg border p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-800">Associated Media</h2>
             </div>
-          </div>
-        </section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {/* No linked media yet - placeholder */}
+              <div className="col-span-2 text-sm text-gray-500 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" /> No media linked to this plot.
+              </div>
+            </div>
+          </section>
+        )}
 
-        <section className="bg-white rounded-lg border p-5">
-          <h2 className="text-sm font-semibold text-gray-800 mb-3">System</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <InfoRow label="Matched Plot ID" value={row.matched_plot_id} />
-            <InfoRow label="Action Taken" value={row.action_taken} />
-            <InfoRow label="Error" value={row.error} />
-          </div>
-        </section>
+        {isAdmin && (
+          <section className="bg-white rounded-lg border p-5">
+            <h2 className="text-sm font-semibold text-gray-800 mb-3">System</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <InfoRow label="Matched Plot ID" value={row.matched_plot_id} />
+              <InfoRow label="Action Taken" value={row.action_taken} />
+              <InfoRow label="Error" value={row.error} />
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
