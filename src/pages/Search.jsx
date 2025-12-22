@@ -6,16 +6,16 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, Calendar, MapPin, User, ChevronRight, ExternalLink, Sparkles, MessageSquare } from 'lucide-react';
+import { Search, Loader2, Calendar, MapPin, User, ChevronRight, ExternalLink, MessageSquare } from 'lucide-react';
 import { format, isValid } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+
+
 import { Label } from "@/components/ui/label";
 import { Filter, X } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { toast } from "sonner";
+
 
 
 
@@ -39,44 +39,12 @@ export default function SearchPage() {
                              searchParams.get('dMin') || searchParams.get('dMax');
 
   const [showFilters, setShowFilters] = useState(!!hasAdvancedFilters);
-  const [isAiOpen, setIsAiOpen] = useState(false);
-  const [aiQuery, setAiQuery] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState([]);
+  
+  
+  
+  
 
-  const handleAiSearch = async () => {
-      if (!aiQuery.trim()) return;
-      setIsAiLoading(true);
-      try {
-          const res = await base44.functions.invoke('aiSearchParser', { query: aiQuery });
-          const { filters, explanation, related_suggestions } = res.data;
-          
-          // Apply filters
-          if (filters) {
-              setSearchTerm(filters.q || '');
-              setFamilyName(filters.family || '');
-              setSection(filters.section || 'all');
-              setVeteranStatus(filters.veteran || 'all');
-              setBirthYearMin(filters.bMin || '');
-              setBirthYearMax(filters.bMax || '');
-              setDeathYearMin(filters.dMin || '');
-              setDeathYearMax(filters.dMax || '');
-          }
-          
-          if (related_suggestions) {
-              setAiSuggestions(related_suggestions);
-          }
 
-          toast.success("AI Filters Applied", { description: explanation });
-          setIsAiOpen(false);
-          setShowFilters(true); // Show filters so user can see what happened
-      } catch (err) {
-          console.error(err);
-          toast.error("Failed to process AI query");
-      } finally {
-          setIsAiLoading(false);
-      }
-  };
 
   // Debounce state
   const [debouncedParams, setDebouncedParams] = useState({
@@ -223,56 +191,7 @@ export default function SearchPage() {
             </div>
 
             <div className="flex gap-2">
-              <Dialog open={isAiOpen} onOpenChange={setIsAiOpen}>
-                  <DialogTrigger asChild>
-                      <Button 
-                          className="h-12 px-4 bg-teal-700 hover:bg-teal-800 text-white font-serif border-none"
-                      >
-                          <Sparkles className="w-4 h-4 mr-2" /> Search
-                      </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                      <DialogHeader>
-                          <DialogTitle className="flex items-center gap-2 text-indigo-700">
-                              <Sparkles className="w-5 h-5" /> Advanced Search
-                          </DialogTitle>
-                          <DialogDescription>
-                              Describe what you are looking for in natural language.
-                          </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                          <Textarea 
-                              placeholder="e.g. 'Show me veterans from the Smith family who served in WWII' or 'People born before 1900 in the North section'"
-                              value={aiQuery}
-                              onChange={(e) => setAiQuery(e.target.value)}
-                              className="min-h-[100px] text-lg"
-                          />
-                          {aiSuggestions.length > 0 && (
-                              <div className="space-y-2">
-                                  <p className="text-sm text-stone-500 font-medium">Suggestions:</p>
-                                  <div className="flex flex-wrap gap-2">
-                                      {aiSuggestions.map((s, i) => (
-                                          <Badge 
-                                              key={i} 
-                                              variant="secondary" 
-                                              className="cursor-pointer hover:bg-indigo-100 transition-colors"
-                                              onClick={() => setAiQuery(s)}
-                                          >
-                                              {s}
-                                          </Badge>
-                                      ))}
-                                  </div>
-                              </div>
-                          )}
-                      </div>
-                      <DialogFooter>
-                          <Button onClick={handleAiSearch} disabled={isAiLoading || !aiQuery.trim()} className="bg-indigo-600 hover:bg-indigo-700">
-                              {isAiLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                              {isAiLoading ? 'Processing...' : 'Magic Search'}
-                          </Button>
-                      </DialogFooter>
-                  </DialogContent>
-              </Dialog>
+
 
               <Button 
                   variant="outline"
