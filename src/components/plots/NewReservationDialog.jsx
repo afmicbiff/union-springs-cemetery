@@ -28,6 +28,10 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
     }
     try {
       const today = new Date().toISOString().split('T')[0];
+      const EXPIRY_DAYS = 7;
+      const expiryDateObj = new Date();
+      expiryDateObj.setDate(expiryDateObj.getDate() + EXPIRY_DAYS);
+      const expiryDate = expiryDateObj.toISOString().split('T')[0];
       const newReservation = await base44.entities.NewPlotReservation.create({
         new_plot_id: plot.id,
         request_for: form.request_for,
@@ -41,7 +45,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
       });
 
       // Put plot on temporary hold
-      await base44.entities.NewPlot.update(plot.id, { status: "Pending Reservation" });
+      await base44.entities.NewPlot.update(plot.id, { status: "Pending Reservation", reservation_expiry_date: expiryDate });
 
       // Notify admins
       await base44.entities.Notification.create({

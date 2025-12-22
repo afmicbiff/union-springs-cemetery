@@ -8,13 +8,13 @@ import Home from './pages/Home';
 import MemberPortal from './pages/MemberPortal';
 import Memorial from './pages/Memorial';
 import NewPlotDetails from './pages/NewPlotDetails';
+import NewPlotReservations from './pages/NewPlotReservations';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import NewPlotReservations from './pages/NewPlotReservations';
 import __Layout from './Layout.jsx';
 
 
@@ -29,13 +29,13 @@ export const PAGES = {
     "MemberPortal": MemberPortal,
     "Memorial": Memorial,
     "NewPlotDetails": NewPlotDetails,
+    "NewPlotReservations": NewPlotReservations,
     "NewPlotsAndMap": NewPlotsAndMap,
     "Plots": Plots,
     "Profile": Profile,
     "Search": Search,
     "Services": Services,
     "Visitor": Visitor,
-    "NewPlotReservations": NewPlotReservations,
 }
 
 export const pagesConfig = {

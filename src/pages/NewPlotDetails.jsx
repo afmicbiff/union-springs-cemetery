@@ -17,6 +17,7 @@ export default function NewPlotDetails() {
   const [isEditing, setIsEditing] = React.useState(false);
   const [form, setForm] = React.useState({});
   const [reservationOpen, setReservationOpen] = React.useState(false);
+  const [viewerEmail, setViewerEmail] = React.useState("");
   const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me().catch(() => null) });
   const isAdmin = user?.role === 'admin';
 
@@ -133,6 +134,25 @@ export default function NewPlotDetails() {
       <div className="text-gray-900 font-medium">{value || "-"}</div>
     </div>
   );
+
+  const UserReservationList = ({ reservations, email }) => {
+    const mine = (reservations || []).filter(r => (r.requester_email || '').toLowerCase() === (email || '').toLowerCase());
+    if (mine.length === 0) return <div className="text-sm text-gray-500">No requests found for {email}.</div>;
+    return (
+      <div className="space-y-2">
+        {mine.map(r => (
+          <div key={r.id} className="border rounded-md p-3">
+            <div className="text-sm font-medium text-gray-900">{r.status}</div>
+            {r.donation_amount ? <div className="text-xs text-gray-600">Donation: ${r.donation_amount}</div> : null}
+            {r.requested_date ? <div className="text-xs text-gray-600">Requested: {r.requested_date}</div> : null}
+            {r.confirmed_date ? <div className="text-xs text-green-700">Confirmed: {r.confirmed_date}</div> : null}
+            {r.rejected_date ? <div className="text-xs text-red-700">Rejected: {r.rejected_date}</div> : null}
+            {r.rejection_reason ? <div className="text-xs text-red-700">Reason: {r.rejection_reason}</div> : null}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
@@ -251,7 +271,32 @@ export default function NewPlotDetails() {
           </div>
         </section>
 
-        {isAdmin && (
+        {/* Public/User Reservation Status */}
+        {!isAdmin && (
+          <section className="bg-white rounded-lg border p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-800">Your Reservation Request</h2>
+            </div>
+            {user?.email ? (
+              <UserReservationList reservations={reservations} email={user.email} />
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
+                <div className="flex-1 w-full">
+                  <div className="text-xs text-gray-500 mb-1">Enter your email to check status</div>
+                  <Input type="email" value={viewerEmail} onChange={(e)=>setViewerEmail(e.target.value)} placeholder="you@example.com" />
+                </div>
+                <Button onClick={()=>setViewerEmail(viewerEmail.trim())}>Check Status</Button>
+              </div>
+            )}
+            {!user?.email && viewerEmail && (
+              <div className="mt-3">
+                <UserReservationList reservations={reservations} email={viewerEmail} />
+              </div>
+            )}
+          </section>
+        )}
+
+         {isAdmin && (
           <section className="bg-white rounded-lg border p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-gray-800">Reservations</h2>
