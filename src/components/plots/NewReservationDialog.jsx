@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ClipboardList } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/utils";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
@@ -20,7 +21,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
     setSubmitting(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-      await base44.entities.NewPlotReservation.create({
+      const newReservation = await base44.entities.NewPlotReservation.create({
         new_plot_id: plot.id,
         requester_name: form.requester_name,
         requester_email: form.requester_email,
@@ -29,8 +30,24 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         requested_date: today,
         notes: form.notes || ""
       });
+
+      // Put plot on temporary hold
+      await base44.entities.NewPlot.update(plot.id, { status: "Pending Reservation" });
+
+      // Notify admins
+      await base44.entities.Notification.create({
+        message: `New reservation request for plot ${plot.plot_number || ''} (Section ${plot.section || ''}) by ${form.requester_name}.`,
+        type: "alert",
+        is_read: false,
+        user_email: null,
+        related_entity_id: newReservation.id,
+        related_entity_type: "NewPlotReservation",
+        link: createPageUrl('NewPlotDetails') + `?id=${plot.id}`
+      });
+
       onCreated && onCreated();
       setForm({ requester_name: "", requester_email: "", donation_amount: "", notes: "" });
+      window.alert("Your reservation request has been submitted for review.");
       onOpenChange(false);
     } finally {
       setSubmitting(false);
@@ -42,7 +59,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <ClipboardList className="w-4 h-4" /> Start Reservation
+            <ClipboardList className="w-4 h-4" /> Request Reservation
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">

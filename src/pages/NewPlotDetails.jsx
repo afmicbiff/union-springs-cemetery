@@ -74,7 +74,7 @@ export default function NewPlotDetails() {
         await base44.integrations.Core.SendEmail({
           to: reservation.requester_email,
           subject: 'Your plot reservation has been confirmed',
-          body: `Hello ${reservation.requester_name || ''},\n\nYour reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) has been confirmed.\n\nThank you.`
+          body: `Hello ${reservation.requester_name || ''},\n\nYour reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) has been confirmed. The requested donation amount is $${reservation.donation_amount || 0}.\n\nThank you.`
         });
       }
     },
@@ -88,6 +88,7 @@ export default function NewPlotDetails() {
     mutationFn: async ({ reservation, reason }) => {
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Rejected', rejected_date: today, rejection_reason: reason || '' });
+      await base44.entities.NewPlot.update(id, { status: 'Available' });
       if (reservation.requester_email) {
         await base44.integrations.Core.SendEmail({
           to: reservation.requester_email,
@@ -144,9 +145,9 @@ export default function NewPlotDetails() {
             <h1 className="text-xl font-semibold text-gray-900 ml-3">Plot Details</h1>
           </div>
           <div className="flex gap-2">
-            {isAdmin && !isEditing && row.status === 'Available' && (
+            {!isEditing && row.status === 'Available' && (
               <Button className="bg-teal-700 hover:bg-teal-800 text-white" onClick={() => setReservationOpen(true)}>
-                Start Reservation
+                Request Reservation
               </Button>
             )}
             {isAdmin && (
@@ -194,7 +195,7 @@ export default function NewPlotDetails() {
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
-                      {["Available","Reserved","Occupied","Veteran","Unavailable","Unknown","Default"].map(s => (
+                      {["Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Default"].map(s => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>
