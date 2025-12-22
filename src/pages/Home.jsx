@@ -53,14 +53,6 @@ export default function Home() {
           </div>
         </div>
       )}
-      {/* Quick link to resend acknowledgment */}
-      <div className="bg-teal-50 border-b border-teal-200">
-        <div className="max-w-[1240px] mx-auto px-4 py-2 text-sm">
-          <Link to={createPageUrl('ResendAck') + '?plotNumber=1173'} className="text-teal-800 underline hover:text-teal-900">
-            Resend reservation acknowledgment for plot 1173
-          </Link>
-        </div>
-      </div>
       <HeroSection />
       <QuickAccessGrid />
       <InfoSection />
