@@ -130,7 +130,7 @@ export default function NewPlotDetails() {
             <h1 className="text-xl font-semibold text-gray-900 ml-3">Plot Details</h1>
           </div>
           <div className="flex gap-2">
-            {isAdmin && !isEditing && (
+            {isAdmin && !isEditing && row.status === 'Available' && (
               <Button className="bg-teal-700 hover:bg-teal-800 text-white" onClick={() => setReservationOpen(true)}>
                 Start Reservation
               </Button>
