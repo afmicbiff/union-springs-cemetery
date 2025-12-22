@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Image as ImageIcon, Save, Pencil, X } from "lucide-react";
+import { Loader2, ArrowLeft, Image as ImageIcon, Save, Pencil, X, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import NewReservationDialog from "../components/plots/NewReservationDialog";
@@ -44,6 +44,7 @@ export default function NewPlotDetails() {
         death_date: row.death_date || "",
         notes: row.notes || "",
         reservation_expiry_date: row.reservation_expiry_date || "",
+        assigned_admin_email: row.assigned_admin_email || "",
       });
     }
   }, [row]);
@@ -101,7 +102,16 @@ export default function NewPlotDetails() {
     onSuccess: () => {
       refetchReservations();
     },
-  });
+    });
+
+    const handleExtendExpiry = async (days = 7) => {
+    const baseDate = row.reservation_expiry_date ? new Date(row.reservation_expiry_date + 'T00:00:00') : new Date();
+    baseDate.setDate(baseDate.getDate() + days);
+    const newStr = baseDate.toISOString().split('T')[0];
+    await base44.entities.NewPlot.update(id, { reservation_expiry_date: newStr });
+    queryClient.invalidateQueries({ queryKey: ["newplot", id] });
+    alert(`Hold extended to ${newStr}`);
+    };
 
   if (!id) {
     return (

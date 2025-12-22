@@ -13,6 +13,13 @@ Deno.serve(async (req) => {
     // Fetch pending reservation plots (limit reasonable batch)
     const pendingPlots = await base44.entities.NewPlot.filter({ status: 'Pending Reservation' }, undefined, 1000);
 
+  // Load notification settings
+  const settingsList = await base44.entities.NotificationSettings.list();
+  const settings = (settingsList && settingsList[0]) || null;
+  const notifEnabled = settings?.reservation_expirations?.enabled !== false;
+  const inAppEnabled = settings?.reservation_expirations?.in_app !== false;
+  const defaultRecipients = settings?.email_recipients || [];
+
     let expiredCount = 0;
     let soonCount = 0;
 
@@ -22,13 +29,13 @@ Deno.serve(async (req) => {
 
       const expDate = new Date(expStr + 'T00:00:00');
       const diffMs = expDate.getTime() - today.getTime();
-      const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const hoursLeft = Math.floor(diffMs / (1000 * 60 * 60));
 
       // Find the latest pending reservation for this plot
       const reservations = await base44.entities.NewPlotReservation.filter({ new_plot_id: plot.id }, '-created_date', 10);
       const pendingReservation = (reservations || []).find(r => r.status === 'Pending Review' || r.status === 'Pending');
 
-      if (daysLeft <= 0) {
+      if (hoursLeft <= 0) {
         // Expired: release plot and mark reservation as rejected (expired)
         await base44.entities.NewPlot.update(plot.id, { status: 'Available', reservation_expiry_date: '' });
         if (pendingReservation) {
@@ -63,14 +70,16 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Notify admins if expiring soon (<=2 days)
-      if (daysLeft <= 2) {
-        if (pendingReservation) {
+      // Notify targeted admin if expiring within 24 hours
+      if (hoursLeft > 0 && hoursLeft <= 24) {
+        if (!pendingReservation) continue;
+        if (notifEnabled && inAppEnabled) {
+          const targetEmail = plot.assigned_admin_email || (defaultRecipients[0] || null);
           await base44.entities.Notification.create({
-            message: `Reservation for plot ${plot.plot_number || ''} (Section ${plot.section || ''}) will expire in ${daysLeft} day(s) on ${toDateStr(expDate)}.`,
+            message: `Reservation for plot ${plot.plot_number || ''} (Section ${plot.section || ''}) will expire within 24 hours on ${toDateStr(expDate)}.`,
             type: 'alert',
             is_read: false,
-            user_email: null,
+            user_email: targetEmail,
             related_entity_id: pendingReservation.id,
             related_entity_type: 'NewPlotReservation',
             link: `/NewPlotDetails?id=${plot.id}`,
