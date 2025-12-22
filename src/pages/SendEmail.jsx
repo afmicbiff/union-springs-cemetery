@@ -36,14 +36,17 @@ export default function SendEmail() {
     }
     setSending(true);
     try {
-      await base44.integrations.Core.SendEmail({
+      const res = await base44.functions.invoke('sendEmail', {
         to: form.to,
         subject: form.subject,
         body: form.body,
-        from_name: form.from_name || undefined,
       });
-      setResult({ ok: true, message: "Email sent successfully." });
-      setForm({ to: "", subject: "", body: "", from_name: "" });
+      if (res.data?.success === false || res.data?.error) {
+        setResult({ ok: false, message: res.data?.error || 'Failed to send email.' });
+      } else {
+        setResult({ ok: true, message: "Email sent successfully." });
+        setForm({ to: "", subject: "", body: "", from_name: "" });
+      }
     } finally {
       setSending(false);
     }

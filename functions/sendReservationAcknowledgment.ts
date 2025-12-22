@@ -57,14 +57,17 @@ Deno.serve(async (req) => {
     const subject = 'We received your plot reservation request';
     const body = `Hello ${resv.requester_name || 'there'},\n\nThank you for submitting a reservation request${plotLabel ? ` for plot ${plotLabel}` : ''}. Our administrator will review your request and get back to you within 24 hours.\n\nIf you have any questions in the meantime, simply reply to this email.\n\nUnion Springs Cemetery`;
 
-    await base44.integrations.Core.SendEmail({
+    const resp = await base44.functions.invoke('sendEmail', {
       to,
       subject,
-      body,
-      from_name: fromName
+      body
     });
 
-    return Response.json({ success: true, provider: 'core' });
+    if (resp.data?.success === false || resp.data?.error) {
+      return Response.json({ success: false, provider: 'sendgrid', details: resp.data, status: 400 });
+    }
+
+    return Response.json({ success: true, provider: 'sendgrid' });
   } catch (error) {
     return Response.json({ success: false, error: error.message });
   }
