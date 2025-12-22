@@ -845,8 +845,8 @@ export default function PlotsPage() {
       {activeTab === 'map' ? (
           <>
             {/* Legend */}
-            <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-auto z-20">
-                <div className="max-w-7xl mx-auto flex items-center space-x-4 min-w-max">
+            <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
+                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 sm:min-w-max">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
                         <Info size={14} className="mr-1" /> Status Legend
                     </span>
