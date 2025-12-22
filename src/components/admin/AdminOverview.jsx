@@ -21,11 +21,7 @@ export default function AdminOverview() {
         queryFn: () => base44.entities.Notification.list('-created_at', 50),
         initialData: []
     });
-    const { data: tasks = [], isLoading: tasksLoading } = useQuery({
-        queryKey: ['tasks-overview'],
-        queryFn: () => base44.entities.Task.filter({ is_archived: false }, '-created_date', 200),
-        initialData: []
-    });
+
 
     const upcomingEvents = events
         .filter(e => e.start_time && isAfter(parseISO(e.start_time), new Date()))
