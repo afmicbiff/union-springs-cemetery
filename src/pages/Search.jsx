@@ -6,7 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, Calendar, MapPin, User, ChevronRight, ExternalLink, MessageSquare } from 'lucide-react';
+import { Search, Loader2, Calendar, MapPin, ChevronRight, ExternalLink, MessageSquare } from 'lucide-react';
 import { format, isValid } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -329,16 +329,7 @@ export default function SearchPage() {
                                  <div key={person.id} ref={isLastElement ? lastElementRef : null}>
                                    <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-slate-50">
                                      <div className="flex flex-col md:flex-row">
-                                       {/* Image Section */}
-                                       <div className="md:w-48 h-48 md:h-auto bg-stone-200 flex-shrink-0">
-                                         {person.image_url ? (
-                                           <img src={person.image_url} alt={`${person.first_name} ${person.last_name}`} className="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-500" />
-                                         ) : (
-                                           <div className="w-full h-full flex items-center justify-center text-stone-400">
-                                             <User className="w-12 h-12" />
-                                           </div>
-                                         )}
-                                       </div>
+
 
                                        {/* Content Section */}
                                        <CardContent className="p-6 flex-grow flex flex-col justify-between">
