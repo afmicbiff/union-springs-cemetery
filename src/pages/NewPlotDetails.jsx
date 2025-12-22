@@ -180,6 +180,11 @@ export default function NewPlotDetails() {
                 Request Reservation
               </Button>
             )}
+            {isAdmin && row.status === 'Pending Reservation' && !isEditing && (
+              <Button variant="outline" className="gap-2" onClick={() => handleExtendExpiry(7)}>
+                <Clock className="w-4 h-4" /> Extend hold 7d
+              </Button>
+            )}
             {isAdmin && (
               !isEditing ? (
                 <Button variant="outline" onClick={() => setIsEditing(true)} className="gap-2">
@@ -259,6 +264,10 @@ export default function NewPlotDetails() {
                   <label className="text-xs text-gray-500">Reservation Expiry</label>
                   <Input value={form.reservation_expiry_date} onChange={(e) => setForm({ ...form, reservation_expiry_date: e.target.value })} placeholder="YYYY-MM-DD" />
                 </div>
+                <div className="md:col-span-1">
+                  <label className="text-xs text-gray-500">Responsible Admin Email</label>
+                  <Input value={form.assigned_admin_email || ''} onChange={(e) => setForm({ ...form, assigned_admin_email: e.target.value })} placeholder="admin@example.com" />
+                </div>
               </>
             ) : (
               <>
@@ -272,6 +281,7 @@ export default function NewPlotDetails() {
                 <InfoRow label="Birth Date" value={row.birth_date} />
                 <InfoRow label="Death Date" value={row.death_date} />
                 <InfoRow label="Reservation Expiry" value={row.reservation_expiry_date} />
+                <InfoRow label="Responsible Admin" value={row.assigned_admin_email} />
                 <div className="md:col-span-4">
                   <div className="text-xs uppercase tracking-wide text-gray-500">Notes</div>
                   <div className="text-gray-900 whitespace-pre-wrap">{row.notes || "-"}</div>
