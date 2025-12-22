@@ -39,7 +39,7 @@ export default function Layout({ children }) {
       icon: Map,
       isDropdown: true,
       items: [
-        { label: 'Plots & Map', path: '/plots', icon: Map },
+        { label: 'Old Plots and Map', path: '/plots', icon: Map },
         { label: 'New Plots for Reservation', path: '/NewPlotsAndMap', icon: Map }
       ]
     },
