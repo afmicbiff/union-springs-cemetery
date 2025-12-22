@@ -82,6 +82,15 @@ export default function NewPlotDetails() {
         related_entity_type: 'NewPlotReservation',
         link: createPageUrl('NewPlotDetails') + `?id=${id}`
       });
+
+      // Send confirmation email via SendGrid (admins only)
+      if (reservation.requester_email) {
+        await base44.functions.invoke('sendEmail', {
+          to: reservation.requester_email,
+          subject: 'Your plot reservation has been confirmed',
+          body: `Hello ${reservation.requester_name || ''},\n\nYour reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) has been confirmed.${reservation.donation_amount ? ` The requested donation amount is $${reservation.donation_amount}.` : ''}\n\nThank you.`,
+        });
+      }
     },
     onSuccess: () => {
       refetchReservations();
@@ -104,6 +113,15 @@ export default function NewPlotDetails() {
         related_entity_type: 'NewPlotReservation',
         link: createPageUrl('NewPlotDetails') + `?id=${id}`
       });
+
+      // Send rejection email via SendGrid (admins only)
+      if (reservation.requester_email) {
+        await base44.functions.invoke('sendEmail', {
+          to: reservation.requester_email,
+          subject: 'Your plot reservation was rejected',
+          body: `Hello ${reservation.requester_name || ''},\n\nWe’re sorry to inform you that your reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) was rejected.\nReason: ${reason || 'No reason provided'}.\n\nIf you have questions, please reply to this email.`,
+        });
+      }
     },
     onSuccess: () => {
       refetchReservations();

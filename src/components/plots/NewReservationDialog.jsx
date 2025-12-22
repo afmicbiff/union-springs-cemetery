@@ -68,6 +68,9 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         link: createPageUrl('NewPlotDetails') + `?id=${plot.id}`
       });
 
+      // Send acknowledgment via SendGrid backend
+      await base44.functions.invoke('sendReservationAcknowledgment', { reservationId: newReservation.id });
+
 
 
       onCreated && onCreated();
