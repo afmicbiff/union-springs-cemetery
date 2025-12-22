@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, ClipboardList } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
+import { motion } from "framer-motion";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
@@ -47,7 +48,6 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         requester_email: form.requester_email,
         requester_phone: form.requester_phone || '',
         requester_phone_secondary: form.requester_phone_secondary || '',
-        donation_amount: form.donation_amount ? Number(form.donation_amount) : 0,
         status: "Pending Review",
         requested_date: today,
         notes: form.notes || ""
@@ -137,10 +137,6 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
               </div>
             </>
           )}
-          <div>
-            <label className="text-xs text-gray-500">Donation Amount</label>
-            <Input type="number" step="0.01" value={form.donation_amount} onChange={(e)=>setForm({...form, donation_amount: e.target.value})} />
-          </div>
           <div>
             <label className="text-xs text-gray-500">Notes</label>
             <Textarea rows={3} value={form.notes} onChange={(e)=>setForm({...form, notes: e.target.value})} />
