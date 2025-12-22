@@ -25,7 +25,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         requester_name: form.requester_name,
         requester_email: form.requester_email,
         donation_amount: form.donation_amount ? Number(form.donation_amount) : 0,
-        status: "Pending",
+        status: "Pending Review",
         requested_date: today,
         notes: form.notes || ""
       });

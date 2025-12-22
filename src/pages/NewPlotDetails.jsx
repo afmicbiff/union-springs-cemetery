@@ -70,6 +70,13 @@ export default function NewPlotDetails() {
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Confirmed', confirmed_date: today });
       await base44.entities.NewPlot.update(id, { status: 'Reserved' });
+      if (reservation.requester_email) {
+        await base44.integrations.Core.SendEmail({
+          to: reservation.requester_email,
+          subject: 'Your plot reservation has been confirmed',
+          body: `Hello ${reservation.requester_name || ''},\n\nYour reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) has been confirmed.\n\nThank you.`
+        });
+      }
     },
     onSuccess: () => {
       refetchReservations();
@@ -78,9 +85,16 @@ export default function NewPlotDetails() {
   });
 
   const rejectReservation = useMutation({
-    mutationFn: async (reservation) => {
+    mutationFn: async ({ reservation, reason }) => {
       const today = new Date().toISOString().split('T')[0];
-      await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Rejected', rejected_date: today });
+      await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Rejected', rejected_date: today, rejection_reason: reason || '' });
+      if (reservation.requester_email) {
+        await base44.integrations.Core.SendEmail({
+          to: reservation.requester_email,
+          subject: 'Your plot reservation was rejected',
+          body: `Hello ${reservation.requester_name || ''},\n\nWe’re sorry to inform you that your reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) was rejected.\nReason: ${reason || 'No reason provided'}.\n\nIf you have questions, please reply to this email.`
+        });
+      }
     },
     onSuccess: () => {
       refetchReservations();
@@ -252,17 +266,18 @@ export default function NewPlotDetails() {
                     <div key={resv.id} className="flex items-center justify-between border rounded-md p-3">
                       <div className="space-y-0.5">
                         <div className="text-sm font-medium text-gray-900">{resv.requester_name} <span className="text-gray-400">({resv.requester_email || 'n/a'})</span></div>
-                        <div className="text-xs text-gray-600">Status: <span className={`px-1.5 py-0.5 rounded-full border ${resv.status === 'Pending' ? 'bg-amber-50 border-amber-200 text-amber-700' : resv.status === 'Confirmed' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>{resv.status}</span></div>
+                        <div className="text-xs text-gray-600">Status: <span className={`px-1.5 py-0.5 rounded-full border ${(resv.status === 'Pending' || resv.status === 'Pending Review') ? 'bg-amber-50 border-amber-200 text-amber-700' : resv.status === 'Confirmed' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>{resv.status}</span></div>
                         {resv.donation_amount ? <div className="text-xs text-gray-600">Donation: ${resv.donation_amount}</div> : null}
                         {resv.notes ? <div className="text-xs text-gray-600">Notes: {resv.notes}</div> : null}
+                        {resv.rejection_reason ? <div className="text-xs text-red-700">Reason: {resv.rejection_reason}</div> : null}
                       </div>
-                      {resv.status === 'Pending' && (
+                      {(resv.status === 'Pending' || resv.status === 'Pending Review') && (
                         <div className="flex gap-2">
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => confirmReservation.mutate(resv)} disabled={confirmReservation.isPending}>
                             {confirmReservation.isPending ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}
                             Confirm
                           </Button>
-                          <Button size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={() => rejectReservation.mutate(resv)} disabled={rejectReservation.isPending}>
+                          <Button size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={() => { const reason = window.prompt('Enter rejection reason (optional):'); rejectReservation.mutate({ reservation: resv, reason }); }} disabled={rejectReservation.isPending}>
                             Reject
                           </Button>
                         </div>
