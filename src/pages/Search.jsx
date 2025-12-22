@@ -387,6 +387,16 @@ export default function SearchPage() {
                                            )}
                                          </div>
 
+                                         <div className="mt-2 flex justify-end">
+                                            <Link 
+                                              to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&from=search`}
+                                              state={{ search: location.search }}
+                                            >
+                                              <Button variant="outline" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50">
+                                                View on Map
+                                              </Button>
+                                            </Link>
+                                         </div>
                                          <div className="mt-4 flex justify-end">
                                             <Link 
                                               to={`${createPageUrl('Memorial')}?id=${person.id}`}

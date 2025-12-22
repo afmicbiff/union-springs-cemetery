@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -308,6 +310,9 @@ export default function PlotsPage() {
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({});
+  const location = useLocation();
+  const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
+  const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
   
   // Filtering State
   const [filters, setFilters] = useState({
@@ -585,6 +590,20 @@ export default function PlotsPage() {
       processSections(filteredData);
   }, [filteredData]);
 
+  // Scroll into view for a target section if provided via URL (?section=...)
+  useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const sectionParam = params.get('section') || '';
+      const match = sectionParam.match(/\d+/);
+      const key = match ? match[0] : null;
+      if (key) {
+          const el = document.getElementById(`section-${key}`);
+          if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+      }
+  }, [sections]);
+
   const processSections = (data) => {
   // Initialize strictly with Sections 1-5
   const grouped = {
@@ -826,6 +845,16 @@ export default function PlotsPage() {
           </div>
         </div>
       </header>
+
+      {showBackToSearch && (
+        <div className="bg-stone-100 border-b border-stone-200 px-6 py-2">
+          <div className="max-w-7xl mx-auto">
+            <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium">
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
+            </Link>
+          </div>
+        </div>
+      )}
       
       {errorMessage && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
@@ -874,7 +903,7 @@ export default function PlotsPage() {
                         const isCollapsed = collapsedSections[sectionKey];
                         
                         return (
-                            <div key={sectionKey} className="relative">
+                            <div key={sectionKey} id={`section-${sectionKey}`} className="relative">
                                 {/* Section Label */}
                                 <div 
                                     className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
