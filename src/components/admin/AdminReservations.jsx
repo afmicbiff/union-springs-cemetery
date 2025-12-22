@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { jsPDF } from "jspdf";
+import ReservationCalendar from "@/components/admin/ReservationCalendar";
 
 export default function AdminReservations() {
     const { data: reservations } = useQuery({
@@ -92,6 +93,12 @@ export default function AdminReservations() {
                     <Button className="w-full bg-teal-700 hover:bg-teal-800 text-white mt-4">
                         <DollarSign className="w-4 h-4 mr-2" /> Record New Donation
                     </Button>
+
+                    <div className="mt-8">
+                        <h3 className="text-base font-semibold text-stone-900 mb-2">Reservation Calendar</h3>
+                        <p className="text-sm text-stone-600 mb-4">View upcoming reservation holds by expiry date (Pending Reservation).</p>
+                        <ReservationCalendar />
+                    </div>
                 </div>
             </CardContent>
         </Card>

@@ -10,12 +10,12 @@ import Memorial from './pages/Memorial';
 import NewPlotDetails from './pages/NewPlotDetails';
 import NewPlotReservations from './pages/NewPlotReservations';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
+import NotificationSettings from './pages/NotificationSettings';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import NotificationSettings from './pages/NotificationSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -32,12 +32,12 @@ export const PAGES = {
     "NewPlotDetails": NewPlotDetails,
     "NewPlotReservations": NewPlotReservations,
     "NewPlotsAndMap": NewPlotsAndMap,
+    "NotificationSettings": NotificationSettings,
     "Plots": Plots,
     "Profile": Profile,
     "Search": Search,
     "Services": Services,
     "Visitor": Visitor,
-    "NotificationSettings": NotificationSettings,
 }
 
 export const pagesConfig = {

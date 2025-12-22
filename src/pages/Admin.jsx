@@ -505,13 +505,20 @@ export default function AdminDashboard() {
                         </TabsTrigger>
                     ))}
 
-                    {/* Action button beside System Logs */}
+                    {/* Action buttons beside System Logs */}
                     <Link
                         to={createPageUrl('NewPlotReservations')}
                         className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium bg-teal-700 text-white rounded-md hover:bg-teal-800 flex items-center justify-center gap-1 min-w-[80px]"
                     >
                         New Plot Reservation
                     </Link>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('plots')}
+                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium bg-stone-800 text-white rounded-md hover:bg-stone-900 flex items-center justify-center gap-1 min-w-[80px]"
+                    >
+                        Plots
+                    </button>
                 </TabsList>
             </div>
 
