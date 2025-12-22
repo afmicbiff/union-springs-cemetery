@@ -263,7 +263,7 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
 
   return (
   <div
-      id={`plot-${sectionNorm}-${plotNum || ''}`}
+      id={plotNum != null ? `plot-${sectionNorm}-${plotNum}` : undefined}
       onClick={(e) => {
       e.stopPropagation();
       onEdit && onEdit(data);
@@ -611,29 +611,31 @@ export default function PlotsPage() {
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
-      const maxAttempts = 30; // try ~30 frames (~0.5s)
+      const maxAttempts = 120; // try ~2s to allow data + DOM to settle
 
+      let sectionScrolled = false;
       const tryScroll = () => {
           attempts += 1;
-          let scrolled = false;
 
+          // Always prefer exact plot; keep trying until found even if we already scrolled to section
           if (!isNaN(plotNum) && sectionNorm) {
               const plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
               if (plotEl) {
                   plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                  scrolled = true;
+                  return; // success: stop retrying
               }
           }
 
-          if (!scrolled && sectionNorm) {
+          // If plot not found yet, ensure we at least bring the section into view once
+          if (!sectionScrolled && sectionNorm) {
               const sectionEl = document.getElementById(`section-${sectionNorm}`) || document.getElementById(`section-${(rawSection.match(/\d+/) || [sectionNorm])[0]}`);
               if (sectionEl) {
                   sectionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  scrolled = true;
+                  sectionScrolled = true;
               }
           }
 
-          if (!scrolled && attempts < maxAttempts) {
+          if (attempts < maxAttempts) {
               requestAnimationFrame(tryScroll);
           }
       };
