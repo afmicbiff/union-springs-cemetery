@@ -88,17 +88,20 @@ export default function NewPlotsMap({ batchId }) {
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-4">
         {Object.entries({
-                      Available: STATUS_COLORS.Available,
-                      "Pending Reservation": STATUS_COLORS["Pending Reservation"],
-                      Reserved: STATUS_COLORS.Reserved,
-                      Occupied: STATUS_COLORS.Occupied,
-                      Veteran: STATUS_COLORS.Veteran,
-                    }).map(([label, cls]) => (
+          Available: STATUS_COLORS.Available,
+          "Pending Reservation": STATUS_COLORS["Pending Reservation"],
+          Reserved: STATUS_COLORS.Reserved,
+          Occupied: STATUS_COLORS.Occupied,
+          Veteran: STATUS_COLORS.Veteran,
+        }).map(([label, cls]) => (
           <div key={label} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
             <span className={`w-4 h-4 rounded-full ${cls}`}></span>
             <span className="text-xs text-gray-700 font-medium">{label}</span>
           </div>
         ))}
+        <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
+          <span className="text-xs text-gray-700 font-medium">Click on the plot to start the reservation process.</span>
+        </div>
       </div>
 
       {/* Sections */}
