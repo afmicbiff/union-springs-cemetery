@@ -151,14 +151,14 @@ export default function MemorialPage() {
                         </p>
                     )}
 
-                    <div className="flex justify-start gap-4">
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('facebook')}>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full max-w-md">
+                        <Button variant="outline" className="w-full sm:w-auto bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('facebook')}>
                             <Facebook className="w-4 h-4 mr-2" /> Share
                         </Button>
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('twitter')}>
+                        <Button variant="outline" className="w-full sm:w-auto bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('twitter')}>
                             <Twitter className="w-4 h-4 mr-2" /> Tweet
                         </Button>
-                        <Button variant="outline" className="bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('copy')}>
+                        <Button variant="outline" className="w-full sm:w-auto bg-transparent border-stone-400 text-stone-100 hover:bg-white/10 hover:text-white" onClick={() => handleShare('copy')}>
                             <LinkIcon className="w-4 h-4 mr-2" /> Copy Link
                         </Button>
                     </div>
