@@ -24,6 +24,16 @@ export default function AdminPlots() {
     const [quickView, setQuickView] = React.useState(null);
     const queryClient = useQueryClient();
 
+    // Auto-run reservation expiry check hourly
+    React.useEffect(() => {
+        const run = async () => {
+            try { await base44.functions.invoke('checkReservationExpirations', {}); } catch {}
+        };
+        run();
+        const id = setInterval(run, 60 * 60 * 1000);
+        return () => clearInterval(id);
+    }, []);
+
     const sections = React.useMemo(() => {
         const s = new Set((plots || []).map(p => String(p.section || '').trim()).filter(Boolean));
         return Array.from(s).sort();
@@ -76,6 +86,7 @@ export default function AdminPlots() {
                             </Select>
                         </div>
                         <Button variant="ghost" onClick={() => { setStatusFilter('all'); setSectionFilter('all'); }}>Clear</Button>
+                        <Button variant="outline" className="h-8" onClick={async ()=>{ await base44.functions.invoke('checkReservationExpirations', {}); }}>Run Expiry Check</Button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
