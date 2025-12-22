@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, AlertTriangle, Calendar, Bell, CheckSquare } from 'lucide-react';
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
-import FollowUpWidget from "./FollowUpWidget";
+
 
 export default function AdminOverview() {
     // Overview data sources
@@ -46,7 +46,7 @@ export default function AdminOverview() {
 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <FollowUpWidget />
+
                 
                 <Card className="col-span-1">
                     <CardHeader>
@@ -77,7 +77,7 @@ export default function AdminOverview() {
                 </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
