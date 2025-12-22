@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
