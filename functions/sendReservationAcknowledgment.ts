@@ -52,41 +52,19 @@ Deno.serve(async (req) => {
       }
     }
 
-    const apiKey = Deno.env.get('SENDGRID_API_KEY');
-    const fromEmail = Deno.env.get('SENDGRID_FROM_EMAIL');
     const fromName = Deno.env.get('SENDGRID_FROM_NAME') || 'Union Springs';
-
-    if (!apiKey || !fromEmail) {
-      return Response.json({ success: false, error: 'SendGrid not configured' });
-    }
 
     const subject = 'We received your plot reservation request';
     const body = `Hello ${resv.requester_name || 'there'},\n\nThank you for submitting a reservation request${plotLabel ? ` for plot ${plotLabel}` : ''}. Our administrator will review your request and get back to you within 24 hours.\n\nIf you have any questions in the meantime, simply reply to this email.\n\nUnion Springs Cemetery`;
 
-    const sgPayload = {
-      personalizations: [
-        { to: [{ email: to }] },
-      ],
-      from: { email: fromEmail, name: fromName },
+    await base44.integrations.Core.SendEmail({
+      to,
       subject,
-      content: [{ type: 'text/plain', value: body }],
-    };
-
-    const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sgPayload),
+      body,
+      from_name: fromName
     });
 
-    if (!sgRes.ok) {
-      const text = await sgRes.text();
-      return Response.json({ success: false, provider: 'sendgrid', status: sgRes.status, details: text });
-    }
-
-    return Response.json({ success: true });
+    return Response.json({ success: true, provider: 'core' });
   } catch (error) {
     return Response.json({ success: false, error: error.message });
   }
