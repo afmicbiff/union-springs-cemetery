@@ -24,13 +24,13 @@ Deno.serve(async (req) => {
     }
 
     if (!resv) {
-      return Response.json({ error: 'Reservation not found (provide reservationId, plotId, or plotNumber)' }, { status: 404 });
+      return Response.json({ success: false, error: 'Reservation not found (provide reservationId, plotId, or plotNumber)' });
     }
 
     // Require requester_email present
     const to = (resv.requester_email || '').trim();
     if (!to) {
-      return Response.json({ error: 'Reservation has no requester_email' }, { status: 400 });
+      return Response.json({ success: false, error: 'Reservation has no requester_email' });
     }
 
     // Optional freshness check (ensure created within last 24h)
@@ -57,13 +57,13 @@ Deno.serve(async (req) => {
     const fromName = Deno.env.get('SENDGRID_FROM_NAME') || 'Union Springs';
 
     if (!apiKey || !fromEmail) {
-      return Response.json({ error: 'SendGrid not configured' }, { status: 500 });
+      return Response.json({ success: false, error: 'SendGrid not configured' });
     }
 
     const subject = 'We received your plot reservation request';
     const body = `Hello ${resv.requester_name || 'there'},\n\nThank you for submitting a reservation request${plotLabel ? ` for plot ${plotLabel}` : ''}. Our administrator will review your request and get back to you within 24 hours.\n\nIf you have any questions in the meantime, simply reply to this email.\n\nUnion Springs Cemetery`;
 
-    const payload = {
+    const sgPayload = {
       personalizations: [
         { to: [{ email: to }] },
       ],
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(sgPayload),
     });
 
     if (!sgRes.ok) {
@@ -88,6 +88,6 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message });
   }
 });
