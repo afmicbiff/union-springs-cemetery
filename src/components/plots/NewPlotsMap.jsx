@@ -213,10 +213,10 @@ export default function NewPlotsMap({ batchId }) {
                     <h3 className="text-xl font-semibold text-gray-900">Section A</h3>
                     <span className="text-xs text-gray-500">{aRows.length} plots</span>
                   </div>
-                  <div className="flex flex-col md:flex-row gap-6 w-full items-start">
-                    {/* A-2 (right side on md+) */}
+                  <div className="flex flex-col gap-6 w-full items-start">
+                    {/* Left: A-2 */}
                     {a2.length > 0 && (
-                      <div className="w-full md:w-1/2 md:order-2">
+                      <div className="w-full">
                         <div className="text-sm font-semibold text-gray-700 mb-2">Section A-2</div>
                         {(() => {
                           const canonicalA2Number = (row) => {
@@ -308,9 +308,9 @@ export default function NewPlotsMap({ batchId }) {
                         })()}
                       </div>
                     )}
-                    {/* A-1 (left side on md+) */}
+                    {/* Right: A-1 */}
                     {a1.length > 0 && (
-                      <div className="w-full md:w-1/2 md:order-1">
+                      <div className="w-full">
                         <div className="text-sm font-semibold text-gray-700 mb-2">Section A-1</div>
                         {(() => {
                           const byNum = {};
