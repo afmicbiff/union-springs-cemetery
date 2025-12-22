@@ -234,7 +234,7 @@ export default function SearchPage() {
                   <DialogContent>
                       <DialogHeader>
                           <DialogTitle className="flex items-center gap-2 text-indigo-700">
-                              <Sparkles className="w-5 h-5" /> AI Advanced Search
+                              <Sparkles className="w-5 h-5" /> Advanced Search
                           </DialogTitle>
                           <DialogDescription>
                               Describe what you are looking for in natural language.
