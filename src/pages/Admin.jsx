@@ -516,18 +516,18 @@ export default function AdminDashboard() {
                     {/* Action button beside System Logs */}
                     <Link
                         to={createPageUrl('NewPlotReservations')}
-                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium bg-teal-700 text-white rounded-md hover:bg-teal-800 flex items-center justify-center gap-1 min-w-[80px]"
+                        className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
                     >
                         New Plot Reservation
                     </Link>
 
-                    <button onClick={() => setNotifPopoverOpen(true)} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                    <button onClick={() => setNotifPopoverOpen(true)} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
                       <Bell className="w-4 h-4" /> Notifications
                     </button>
-                    <Link to={createPageUrl('NotificationSettings')} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                    <Link to={createPageUrl('NotificationSettings')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
                       <Settings className="w-4 h-4" /> Notification Settings
                     </Link>
-                    <Link to={createPageUrl('SendEmail')} className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium rounded-md border border-stone-200 hover:bg-stone-100 flex items-center justify-center gap-1 min-w-[80px]">
+                    <Link to={createPageUrl('SendEmail')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
                       <Mail className="w-4 h-4" /> Email Tool
                     </Link>>
                 </TabsList>
