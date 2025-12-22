@@ -123,16 +123,6 @@ export default function NewPlotsImport() {
         Import CSV
       </Button>
 
-      <Button
-        size="sm"
-        variant="outline"
-        className="border-teal-700 text-teal-700 hover:bg-teal-50"
-        onClick={() => xlsInputRef.current?.click()}
-        disabled={loading}
-      >
-        {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileSpreadsheet className="h-4 w-4 mr-2" />}
-        Import Excel
-      </Button>
     </div>
   );
 }

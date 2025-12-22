@@ -52,15 +52,9 @@ export default function NewPlotsAndMap() {
               <NewPlotsImport />
               {isAdmin && (
                 <>
-                  <Button variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50" onClick={handlePopulateA1}>
-                    Fill A-1 Missing
-                  </Button>
-                  <Button variant="outline" className="border-amber-600 text-amber-700 hover:bg-amber-50" onClick={handleDeleteA1Unplaced}>
-                    Delete A-1 Unplaced
-                  </Button>
-                  <Button variant="outline" className="border-red-600 text-red-700 hover:bg-red-50" onClick={handleDeleteA1}>
-                    Delete A-1 Plots
-                  </Button>
+
+
+
                 </>
               )}
               <Link to={createPageUrl('Plots')}>
