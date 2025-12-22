@@ -84,12 +84,12 @@ export default function Layout({ children }) {
                 item.isDropdown ? (
                   <DropdownMenu key={item.label}>
                     <DropdownMenuTrigger className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 focus:outline-none ${
-                      location.pathname.startsWith('/admin') || location.pathname === '/Employees' ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
-                    }`}>
-                      <item.icon className="w-3.5 h-3.5" />
-                      {item.label}
-                      <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
-                    </DropdownMenuTrigger>
+                                                (item.items && item.items.some((subItem) => location.pathname === subItem.path)) ? 'bg-teal-700 text-white font-semibold shadow-md' : 'text-stone-300 hover:text-white'
+                                              }`}>
+                                                <item.icon className="w-3.5 h-3.5" />
+                                                {item.label}
+                                                <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+                                              </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-stone-900 border-stone-700 text-stone-200">
                       {item.items.map((subItem) => (
                         <DropdownMenuItem key={subItem.label} asChild className="focus:bg-stone-800 focus:text-white cursor-pointer">
