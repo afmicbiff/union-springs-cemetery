@@ -25,7 +25,8 @@ import {
     Archive,
     Check,
     Eye,
-    X
+    X,
+    Plus
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
@@ -477,6 +478,14 @@ export default function AdminDashboard() {
                     className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50"
                 >
                     <Database className="w-4 h-4 mr-2" /> Backups
+                </Button>
+
+                <Button 
+                    onClick={() => setActiveTab('plots')} 
+                    size="sm" 
+                    className="bg-teal-700 hover:bg-teal-800 text-white"
+                >
+                    <Plus className="w-4 h-4 mr-2" /> Add Plot Reservation
                 </Button>
                 
                 <DataImportDialog />

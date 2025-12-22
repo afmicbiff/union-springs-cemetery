@@ -7,13 +7,13 @@ import History from './pages/History';
 import Home from './pages/Home';
 import MemberPortal from './pages/MemberPortal';
 import Memorial from './pages/Memorial';
+import NewPlotDetails from './pages/NewPlotDetails';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import NewPlotDetails from './pages/NewPlotDetails';
 import __Layout from './Layout.jsx';
 
 
@@ -27,13 +27,13 @@ export const PAGES = {
     "Home": Home,
     "MemberPortal": MemberPortal,
     "Memorial": Memorial,
+    "NewPlotDetails": NewPlotDetails,
     "NewPlotsAndMap": NewPlotsAndMap,
     "Plots": Plots,
     "Profile": Profile,
     "Search": Search,
     "Services": Services,
     "Visitor": Visitor,
-    "NewPlotDetails": NewPlotDetails,
 }
 
 export const pagesConfig = {
