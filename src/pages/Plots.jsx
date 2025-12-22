@@ -645,6 +645,14 @@ export default function PlotsPage() {
       requestAnimationFrame(tryScroll);
   }, [sections]);
 
+  // Disable scroll while centering
+  useEffect(() => {
+    if (!isCentering) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isCentering]);
+
   const processSections = (data) => {
   // Initialize strictly with Sections 1-5
   const grouped = {
