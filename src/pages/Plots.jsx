@@ -321,6 +321,7 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({});
   const [isCentering, setIsCentering] = useState(false);
+  const [isCentering, setIsCentering] = useState(false);
   const location = useLocation();
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
@@ -892,6 +893,14 @@ export default function PlotsPage() {
             <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium">
               <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
             </Link>
+          </div>
+        </div>
+      )}
+
+      {isCentering && (
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-full p-6 shadow-lg border border-stone-200">
+            <Loader2 className="w-8 h-8 animate-spin text-teal-700" />
           </div>
         </div>
       )}
