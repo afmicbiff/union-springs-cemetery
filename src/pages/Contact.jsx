@@ -60,13 +60,13 @@ export default function ContactPage() {
 
                         <div className="grid gap-6">
                             <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-4 p-6">
-                                    <div className="bg-teal-100 p-3 rounded-full">
-                                        <Phone className="w-6 h-6 text-teal-700" />
+                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
+                                    <div className="bg-teal-100 p-2 sm:p-3 rounded-full">
+                                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-teal-700" />
                                     </div>
                                     <div>
-                                        <h3 className="font-serif font-bold text-lg text-stone-800">Phone</h3>
-                                        <p className="text-stone-600 mb-1">Available Mon-Fri, 9am - 5pm</p>
+                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Phone</h3>
+                                        <p className="text-stone-600 text-sm sm:text-base mb-1">Available Mon-Fri, 9am - 5pm</p>
                                         <a href="tel:5551234567" className="text-teal-700 font-semibold hover:underline text-lg">
                                             (555) 123-4567
                                         </a>
@@ -75,13 +75,13 @@ export default function ContactPage() {
                             </Card>
 
                             <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-4 p-6">
-                                    <div className="bg-red-100 p-3 rounded-full">
-                                        <Mail className="w-6 h-6 text-red-700" />
+                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
+                                    <div className="bg-red-100 p-2 sm:p-3 rounded-full">
+                                        <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
                                     </div>
                                     <div>
-                                        <h3 className="font-serif font-bold text-lg text-stone-800">Email</h3>
-                                        <p className="text-stone-600 mb-1">For general inquiries</p>
+                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Email</h3>
+                                        <p className="text-stone-600 text-sm sm:text-base mb-1">For general inquiries</p>
                                         <a href="mailto:office@unionsprings.com" className="text-red-700 font-semibold hover:underline text-lg">
                                             office@unionsprings.com
                                         </a>
@@ -90,13 +90,13 @@ export default function ContactPage() {
                             </Card>
 
                             <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-4 p-6">
-                                    <div className="bg-stone-200 p-3 rounded-full">
-                                        <MapPin className="w-6 h-6 text-stone-700" />
+                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
+                                    <div className="bg-stone-200 p-2 sm:p-3 rounded-full">
+                                        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-stone-700" />
                                     </div>
                                     <div>
-                                        <h3 className="font-serif font-bold text-lg text-stone-800">Office Location</h3>
-                                        <p className="text-stone-600">
+                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Office Location</h3>
+                                        <p className="text-stone-600 text-sm sm:text-base">
                                             1311 Fire Tower Road<br />
                                             Shongaloo, Webster Parish, Louisiana, 71072
                                         </p>
