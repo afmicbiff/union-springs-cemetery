@@ -94,7 +94,7 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
                  onPointerDown={(e) => { handleFocus(); dragControls.start(e); }}
             >
                 <span className="text-xs font-bold text-stone-500 uppercase tracking-wider px-2">Image Viewer</span>
-                <div className="flex gap-1">
+                <div className="hidden md:flex gap-1">
                     <Button 
                         variant="ghost" 
                         size="icon" 
@@ -151,6 +151,39 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
                         }}
                     />
                 )}
+
+                {/* Mobile-centered controls overlay */}
+                <div className="absolute inset-0 flex items-center justify-center md:hidden pointer-events-none">
+                    <div className="bg-black/50 rounded-full p-2 flex items-center gap-2 pointer-events-auto">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className={`h-9 w-9 text-white ${isMagnifying ? 'bg-teal-600/30' : ''}`}
+                            onClick={() => setIsMagnifying(!isMagnifying)}
+                            title="Toggle Magnifying Glass"
+                        >
+                            <ZoomIn className="w-5 h-5" />
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-9 w-9 text-white"
+                            onClick={handleDownloadPDF}
+                            title="Download PDF"
+                        >
+                            <Download className="w-5 h-5" />
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-9 w-9 text-white hover:bg-red-600/30"
+                            onClick={onClose}
+                            title="Close"
+                        >
+                            <X className="w-5 h-5" />
+                        </Button>
+                    </div>
+                </div>
 
                 {/* Resize Handles - Simple 4 corners implementation */}
                 <ResizeHandle onResize={(w, h) => setSize({ width: Math.max(300, w), height: Math.max(200, h) })} size={size} position="br" />
