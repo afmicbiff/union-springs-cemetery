@@ -479,14 +479,6 @@ export default function AdminDashboard() {
                 >
                     <Database className="w-4 h-4 mr-2" /> Backups
                 </Button>
-
-                <Button 
-                    onClick={() => setActiveTab('plots')} 
-                    size="sm" 
-                    className="bg-teal-700 hover:bg-teal-800 text-white"
-                >
-                    <Plus className="w-4 h-4 mr-2" /> Add Plot Reservation
-                </Button>
                 
                 <DataImportDialog />
             </div>
@@ -512,6 +504,14 @@ export default function AdminDashboard() {
                             <span className="whitespace-nowrap">{tab.label}</span>
                         </TabsTrigger>
                     ))}
+
+                    {/* Action button beside System Logs */}
+                    <Link
+                        to={createPageUrl('NewPlotReservations')}
+                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium bg-teal-700 text-white rounded-md hover:bg-teal-800 flex items-center justify-center gap-1 min-w-[80px]"
+                    >
+                        New Plot Reservation
+                    </Link>
                 </TabsList>
             </div>
 
