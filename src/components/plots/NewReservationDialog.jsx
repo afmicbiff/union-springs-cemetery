@@ -7,6 +7,7 @@ import { Loader2, ClipboardList } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function NewReservationDialog({ open, onOpenChange, plot, onCreated }) {
   const [form, setForm] = React.useState({
@@ -78,7 +79,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent asChild>
+      <DialogContent className="max-w-md w-[90vw] sm:w-[520px] p-0">
         <motion.div
           className="max-w-md w-[90vw] sm:w-[520px] resize overflow-auto"
           drag
