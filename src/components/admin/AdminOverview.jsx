@@ -80,42 +80,7 @@ export default function AdminOverview() {
             <div className="grid grid-cols-1 gap-6">
 
 
-              <Card className="col-span-1">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Tasks</CardTitle>
-                    <CardDescription>Your current work queue.</CardDescription>
-                  </div>
-                  <CheckSquare className="w-4 h-4 text-stone-400" />
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[260px] pr-4">
-                    <div className="space-y-3">
-                      {tasksLoading ? (
-                        <div className="text-sm text-stone-500">Loading…</div>
-                      ) : tasksSorted.length === 0 ? (
-                        <div className="text-sm text-stone-500 italic">No active tasks.</div>
-                      ) : (
-                        tasksSorted.slice(0, 20).map(t => (
-                          <div key={t.id} className="p-3 rounded-lg border bg-white hover:bg-stone-50">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="font-medium text-sm text-stone-900 truncate">{t.title}</div>
-                              <div className="flex items-center gap-1">
-                                <Badge variant="outline" className="text-[10px]">{t.status}</Badge>
-                                {t.priority && <Badge variant="outline" className="text-[10px]">{t.priority}</Badge>}
-                              </div>
-                            </div>
-                            <div className="text-[11px] text-stone-500 mt-1">
-                              {t.due_date ? `Due ${format(new Date(t.due_date), 'MMM d')}` : 'No due date'}
-                            </div>
-                            {t.description && <div className="text-xs text-stone-600 mt-1 line-clamp-2">{t.description}</div>}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+
 
 
             </div>
