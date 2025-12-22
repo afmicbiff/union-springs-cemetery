@@ -16,7 +16,6 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
             contact_by_phone: false,
             requester_phone: "",
             requester_phone_secondary: "",
-            donation_amount: "",
             notes: ""
           });
   const [submitting, setSubmitting] = React.useState(false);
@@ -69,7 +68,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
       });
 
       onCreated && onCreated();
-      setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", contact_by_phone: false, requester_phone: "", requester_phone_secondary: "", donation_amount: "", notes: "" });
+      setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", contact_by_phone: false, requester_phone: "", requester_phone_secondary: "", notes: "" });
       window.alert("Your reservation request has been submitted for review.");
       onOpenChange(false);
     } finally {
@@ -79,9 +78,15 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent asChild>
+        <motion.div
+          className="max-w-md w-[90vw] sm:w-[520px] resize overflow-auto"
+          drag
+          dragMomentum={false}
+          style={{ maxHeight: '80vh' }}
+        >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 cursor-move">
             <ClipboardList className="w-4 h-4" /> Request Reservation
           </DialogTitle>
         </DialogHeader>
@@ -153,6 +158,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
             </div>
           </div>
         </form>
+      </motion.div>
       </DialogContent>
     </Dialog>
   );
