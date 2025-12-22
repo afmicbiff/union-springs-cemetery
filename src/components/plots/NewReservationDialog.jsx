@@ -68,6 +68,16 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
         link: createPageUrl('NewPlotDetails') + `?id=${plot.id}`
       });
 
+      // Send acknowledgment email to requester (24-hour reply notice)
+      if ((form.requester_email || '').trim()) {
+        const plotLabel = `${plot.plot_number || ''}${plot.section ? ` (Section ${plot.section})` : ''}`.trim();
+        await base44.integrations.Core.SendEmail({
+          to: form.requester_email.trim(),
+          subject: 'We received your plot reservation request',
+          body: `Hello ${form.requester_name || 'there'},\n\nThank you for submitting a reservation request for plot ${plotLabel}. Our administrator will review your request and get back to you within 24 hours.\n\nIf you have any questions in the meantime, simply reply to this email.\n\nUnion Springs Cemetery`,
+        });
+      }
+
       onCreated && onCreated();
       setForm({ request_for: "self", family_member_name: "", requester_name: "", requester_email: "", contact_by_phone: false, requester_phone: "", requester_phone_secondary: "", notes: "" });
       window.alert("Your reservation request has been submitted for review.");
