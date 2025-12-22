@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, AlertTriangle } from 'lucide-react';
-import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
+
 
 
 export default function AdminOverview() {
@@ -14,7 +14,6 @@ export default function AdminOverview() {
 
     return (
         <div className="space-y-6">
-            <UserSummaryWidget />
 
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
