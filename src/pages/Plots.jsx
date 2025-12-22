@@ -258,7 +258,7 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
   // Changed from w-8 h-16 (Portrait) to w-16 h-8 (Landscape) to rotate 90 degrees.
   const baseClass = `${baseColorClass} opacity-90 hover:opacity-100`;
   const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-100 border-green-600 ring-2 ring-green-500 animate-pulse';
+  const selectedClass = 'bg-green-200 border-green-600 ring-4 ring-green-500 animate-pulse';
   const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
 
   return (
@@ -600,32 +600,45 @@ export default function PlotsPage() {
       processSections(filteredData);
   }, [filteredData]);
 
-  // Scroll into view for a target section/plot if provided via URL (?section=...&plot=...)
+  // Robustly scroll into view for a target section/plot (?section=...&plot=...)
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
-      const sectionParam = params.get('section') || '';
-      const plotParam = params.get('plot') || '';
-      const sectionMatch = sectionParam.match(/\d+/);
-      const sectionKey = sectionMatch ? sectionMatch[0] : null;
+      const rawSection = params.get('section') || '';
+      const rawPlot = params.get('plot') || '';
+      if (!rawSection && !rawPlot) return;
 
-      // 1) Try to scroll to the exact plot if provided
-      if (plotParam) {
-          const plotNum = parseInt(plotParam, 10);
-          const sectionNorm = sectionKey || (sectionParam ? sectionParam : '');
-          const plotEl = document.getElementById(`plot-${sectionNorm}-${isNaN(plotNum) ? '' : plotNum}`);
-          if (plotEl) {
-              plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-              return;
-          }
-      }
+      const sectionNorm = rawSection.replace(/Section\s*/i, '').trim();
+      const plotNum = parseInt(rawPlot, 10);
 
-      // 2) Fallback: scroll to the section container
-      if (sectionKey) {
-          const el = document.getElementById(`section-${sectionKey}`);
-          if (el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      let attempts = 0;
+      const maxAttempts = 30; // try ~30 frames (~0.5s)
+
+      const tryScroll = () => {
+          attempts += 1;
+          let scrolled = false;
+
+          if (!isNaN(plotNum) && sectionNorm) {
+              const plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
+              if (plotEl) {
+                  plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                  scrolled = true;
+              }
           }
-      }
+
+          if (!scrolled && sectionNorm) {
+              const sectionEl = document.getElementById(`section-${sectionNorm}`) || document.getElementById(`section-${(rawSection.match(/\d+/) || [sectionNorm])[0]}`);
+              if (sectionEl) {
+                  sectionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  scrolled = true;
+              }
+          }
+
+          if (!scrolled && attempts < maxAttempts) {
+              requestAnimationFrame(tryScroll);
+          }
+      };
+
+      requestAnimationFrame(tryScroll);
   }, [sections]);
 
   const processSections = (data) => {
