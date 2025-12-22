@@ -241,7 +241,7 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
   const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
-  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum && (!!targetSectionRaw ? sectionNorm === targetSectionRaw : true);
+  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum;
 
   // Handle specific "Veteran" checks in notes if strictly labeled "Occupied"
   let displayStatus = data.Status;
@@ -627,7 +627,11 @@ export default function PlotsPage() {
 
           // Prefer exact plot; stop when found
           if (!isNaN(plotNum) && sectionNorm) {
-              const plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
+              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
+              if (!plotEl) {
+                  // Fallback: find any plot with this number across sections
+                  plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
+              }
               if (plotEl) {
                   plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
                   done = true;
