@@ -49,14 +49,7 @@ export default function NewPlotsAndMap() {
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
             <div className="flex items-center gap-2">
-              <NewPlotsImport />
-              {isAdmin && (
-                <>
-
-
-
-                </>
-              )}
+              {isAdmin && (<NewPlotsImport />)}
               <Link to={createPageUrl('Plots')}>
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
               </Link>
