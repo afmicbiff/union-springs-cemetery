@@ -349,7 +349,7 @@ export default function NewPlotsMap({ batchId }) {
 
                           return (
                             <div className="space-y-3">
-                              <div className="grid grid-cols-4 gap-1">
+                              <div className="grid grid-cols-8 gap-1">
                                 {rows.map((row, ri) => (
                                   <React.Fragment key={`a1-row-${ri}`}>
                                     {row.map((n, ci) => {
