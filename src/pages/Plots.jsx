@@ -321,7 +321,6 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({});
   const [isCentering, setIsCentering] = useState(false);
-  const [isCentering, setIsCentering] = useState(false);
   const location = useLocation();
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
@@ -609,26 +608,35 @@ export default function PlotsPage() {
       const rawPlot = params.get('plot') || '';
       if (!rawSection && !rawPlot) return;
 
+      if (isLoading) return; // wait until data is loaded
+
+      setActiveTab('map');
+      setIsCentering(true);
+
       const sectionNorm = rawSection.replace(/Section\s*/i, '').trim();
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
-      const maxAttempts = 120; // try ~2s to allow data + DOM to settle
-
+      const maxAttempts = 180; // ~3s to allow data + DOM to settle
+      let done = false;
       let sectionScrolled = false;
+
       const tryScroll = () => {
+          if (done) return;
           attempts += 1;
 
-          // Always prefer exact plot; keep trying until found even if we already scrolled to section
+          // Prefer exact plot; stop when found
           if (!isNaN(plotNum) && sectionNorm) {
               const plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
               if (plotEl) {
                   plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                  return; // success: stop retrying
+                  done = true;
+                  setTimeout(() => setIsCentering(false), 400);
+                  return;
               }
           }
 
-          // If plot not found yet, ensure we at least bring the section into view once
+          // Otherwise bring section into view once
           if (!sectionScrolled && sectionNorm) {
               const sectionEl = document.getElementById(`section-${sectionNorm}`) || document.getElementById(`section-${(rawSection.match(/\d+/) || [sectionNorm])[0]}`);
               if (sectionEl) {
@@ -639,11 +647,14 @@ export default function PlotsPage() {
 
           if (attempts < maxAttempts) {
               requestAnimationFrame(tryScroll);
+          } else {
+              done = true;
+              setIsCentering(false);
           }
       };
 
       requestAnimationFrame(tryScroll);
-  }, [sections]);
+  }, [sections, isLoading]);
 
   // Disable scroll while centering
   useEffect(() => {
@@ -921,14 +932,6 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {isCentering && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-full p-6 shadow-lg border border-stone-200">
-            <Loader2 className="w-8 h-8 animate-spin text-teal-700" />
-          </div>
-        </div>
-      )}
-      
       {errorMessage && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
             <p className="font-bold">Error Loading File</p>
