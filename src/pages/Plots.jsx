@@ -235,6 +235,14 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
       );
   }
 
+  // URL target (section + plot) to highlight this specific plot
+  const params = new URLSearchParams(window.location.search);
+  const targetSectionRaw = (params.get('section') || '').replace(/Section\s*/i, '').trim();
+  const targetPlotNum = parseInt(params.get('plot') || '', 10);
+  const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
+  const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
+  const isSelected = !!targetPlotNum && plotNum === targetPlotNum && (!!targetSectionRaw ? sectionNorm === targetSectionRaw : true);
+
   // Handle specific "Veteran" checks in notes if strictly labeled "Occupied"
   let displayStatus = data.Status;
   if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
@@ -248,12 +256,14 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
 
   // ORIENTATION UPDATE: 
   // Changed from w-8 h-16 (Portrait) to w-16 h-8 (Landscape) to rotate 90 degrees.
-  const activeClass = isHovered 
-  ? `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75` 
-  : `${baseColorClass} opacity-90 hover:opacity-100`;
+  const baseClass = `${baseColorClass} opacity-90 hover:opacity-100`;
+  const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
+  const selectedClass = 'bg-green-100 border-green-600 ring-2 ring-green-500 animate-pulse';
+  const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
 
   return (
   <div
+      id={`plot-${sectionNorm}-${plotNum || ''}`}
       onClick={(e) => {
       e.stopPropagation();
       onEdit && onEdit(data);
@@ -590,14 +600,28 @@ export default function PlotsPage() {
       processSections(filteredData);
   }, [filteredData]);
 
-  // Scroll into view for a target section if provided via URL (?section=...)
+  // Scroll into view for a target section/plot if provided via URL (?section=...&plot=...)
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const sectionParam = params.get('section') || '';
-      const match = sectionParam.match(/\d+/);
-      const key = match ? match[0] : null;
-      if (key) {
-          const el = document.getElementById(`section-${key}`);
+      const plotParam = params.get('plot') || '';
+      const sectionMatch = sectionParam.match(/\d+/);
+      const sectionKey = sectionMatch ? sectionMatch[0] : null;
+
+      // 1) Try to scroll to the exact plot if provided
+      if (plotParam) {
+          const plotNum = parseInt(plotParam, 10);
+          const sectionNorm = sectionKey || (sectionParam ? sectionParam : '');
+          const plotEl = document.getElementById(`plot-${sectionNorm}-${isNaN(plotNum) ? '' : plotNum}`);
+          if (plotEl) {
+              plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+              return;
+          }
+      }
+
+      // 2) Fallback: scroll to the section container
+      if (sectionKey) {
+          const el = document.getElementById(`section-${sectionKey}`);
           if (el) {
               el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
