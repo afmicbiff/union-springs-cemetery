@@ -15,6 +15,8 @@ export default function NewPlotDetails() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = React.useState(false);
   const [form, setForm] = React.useState({});
+  const { data: user } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me().catch(() => null) });
+  const isAdmin = user?.role === 'admin';
 
   const { data: row, isLoading } = useQuery({
     queryKey: ["newplot", id],
@@ -96,20 +98,22 @@ export default function NewPlotDetails() {
             <h1 className="text-xl font-semibold text-gray-900 ml-3">Plot Details</h1>
           </div>
           <div className="flex gap-2">
-            {!isEditing ? (
-              <Button variant="outline" onClick={() => setIsEditing(true)} className="gap-2">
-                <Pencil className="w-4 h-4" /> Edit
-              </Button>
-            ) : (
-              <>
-                <Button variant="ghost" onClick={() => { setIsEditing(false); setForm({ ...form, ...row }); }} className="gap-2 text-gray-600">
-                  <X className="w-4 h-4" /> Cancel
+            {isAdmin && (
+              !isEditing ? (
+                <Button variant="outline" onClick={() => isAdmin && setIsEditing(true)} className="gap-2">
+                  <Pencil className="w-4 h-4" /> Edit
                 </Button>
-                <Button onClick={() => updateMutation.mutate()} className="bg-teal-700 hover:bg-teal-800 gap-2">
-                  {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save
-                </Button>
-              </>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => { setIsEditing(false); setForm({ ...form, ...row }); }} className="gap-2 text-gray-600">
+                    <X className="w-4 h-4" /> Cancel
+                  </Button>
+                  <Button onClick={() => updateMutation.mutate()} className="bg-teal-700 hover:bg-teal-800 gap-2">
+                    {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save
+                  </Button>
+                </>
+              )
             )}
           </div>
         </div>
