@@ -273,6 +273,7 @@ export default function NewPlotDetails() {
               </div>
             )}
           </section>
+        )}
 
           {isAdmin && (
           <section className="bg-white rounded-lg border p-5">
