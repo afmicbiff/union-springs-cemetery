@@ -78,39 +78,7 @@ export default function AdminOverview() {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              <Card className="col-span-1">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Upcoming Schedule</CardTitle>
-                    <CardDescription>Next events from the calendar.</CardDescription>
-                  </div>
-                  <Calendar className="w-4 h-4 text-stone-400" />
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[260px] pr-4">
-                    <div className="space-y-3">
-                      {eventsLoading ? (
-                        <div className="text-sm text-stone-500">Loading…</div>
-                      ) : upcomingEvents.length === 0 ? (
-                        <div className="text-sm text-stone-500 italic">No upcoming events.</div>
-                      ) : (
-                        upcomingEvents.slice(0, 20).map(ev => (
-                          <div key={ev.id} className="flex items-start gap-3 p-3 rounded-lg border bg-white hover:bg-stone-50">
-                            <Calendar className="w-4 h-4 text-teal-600 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-[11px] text-stone-500">
-                                <span>{format(parseISO(ev.start_time), 'MMM d, h:mm a')}</span>
-                                {ev.location && <span className="truncate max-w-[120px] text-right">{ev.location}</span>}
-                              </div>
-                              <div className="font-medium text-sm text-stone-900 truncate">{ev.title}</div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+
 
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between">
@@ -149,39 +117,7 @@ export default function AdminOverview() {
                 </CardContent>
               </Card>
 
-              <Card className="col-span-1">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Notifications</CardTitle>
-                    <CardDescription>Latest system activity.</CardDescription>
-                  </div>
-                  <Bell className="w-4 h-4 text-stone-400" />
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[260px] pr-4">
-                    <div className="space-y-3">
-                      {notesLoading ? (
-                        <div className="text-sm text-stone-500">Loading…</div>
-                      ) : notifications.length === 0 ? (
-                        <div className="text-sm text-stone-500 italic">No notifications.</div>
-                      ) : (
-                        notifications.slice(0, 20).map(n => (
-                          <div key={n.id} className={`flex items-start gap-3 p-3 rounded-lg border bg-white hover:bg-stone-50 ${!n.is_read ? 'border-teal-200' : ''}`}>
-                            <Bell className={`w-4 h-4 mt-0.5 ${!n.is_read ? 'text-teal-600' : 'text-stone-400'}`} />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between text-[11px] text-stone-500">
-                                <span>{n.created_at ? format(new Date(n.created_at), 'MMM d, h:mm a') : ''}</span>
-                                {!n.is_read && <span className="inline-block w-2 h-2 rounded-full bg-teal-600" />}
-                              </div>
-                              <div className="text-sm text-stone-800 leading-snug line-clamp-2">{n.message}</div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+
             </div>
         </div>
     );
