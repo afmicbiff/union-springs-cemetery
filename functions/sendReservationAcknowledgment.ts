@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
 
     if (!sgRes.ok) {
       const text = await sgRes.text();
-      return Response.json({ error: 'SendGrid error', details: text }, { status: sgRes.status });
+      return Response.json({ success: false, provider: 'sendgrid', status: sgRes.status, details: text });
     }
 
     return Response.json({ success: true });
