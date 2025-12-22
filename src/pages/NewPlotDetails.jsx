@@ -72,13 +72,16 @@ export default function NewPlotDetails() {
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Confirmed', confirmed_date: today });
       await base44.entities.NewPlot.update(id, { status: 'Reserved' });
-      if (reservation.requester_email) {
-        await base44.integrations.Core.SendEmail({
-          to: reservation.requester_email,
-          subject: 'Your plot reservation has been confirmed',
-          body: `Hello ${reservation.requester_name || ''},\n\nYour reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) has been confirmed. The requested donation amount is $${reservation.donation_amount || 0}.\n\nThank you.`
-        });
-      }
+      // In-app notification instead of external email (platform restricts emailing non-app users)
+      await base44.entities.Notification.create({
+        message: `Reservation confirmed for plot ${row.plot_number || ''} (Section ${row.section || ''}) for ${reservation.requester_name || 'requester'}.`,
+        type: 'info',
+        is_read: false,
+        user_email: null,
+        related_entity_id: reservation.id,
+        related_entity_type: 'NewPlotReservation',
+        link: createPageUrl('NewPlotDetails') + `?id=${id}`
+      });
     },
     onSuccess: () => {
       refetchReservations();
@@ -91,13 +94,16 @@ export default function NewPlotDetails() {
       const today = new Date().toISOString().split('T')[0];
       await base44.entities.NewPlotReservation.update(reservation.id, { status: 'Rejected', rejected_date: today, rejection_reason: reason || '' });
       await base44.entities.NewPlot.update(id, { status: 'Available' });
-      if (reservation.requester_email) {
-        await base44.integrations.Core.SendEmail({
-          to: reservation.requester_email,
-          subject: 'Your plot reservation was rejected',
-          body: `Hello ${reservation.requester_name || ''},\n\nWe’re sorry to inform you that your reservation for plot ${row.plot_number || ''} (Section ${row.section || ''}) was rejected.\nReason: ${reason || 'No reason provided'}.\n\nIf you have questions, please reply to this email.`
-        });
-      }
+      // In-app notification instead of external email (platform restricts emailing non-app users)
+      await base44.entities.Notification.create({
+        message: `Reservation rejected for plot ${row.plot_number || ''} (Section ${row.section || ''}). Reason: ${reason || 'No reason provided'}.`,
+        type: 'alert',
+        is_read: false,
+        user_email: null,
+        related_entity_id: reservation.id,
+        related_entity_type: 'NewPlotReservation',
+        link: createPageUrl('NewPlotDetails') + `?id=${id}`
+      });
     },
     onSuccess: () => {
       refetchReservations();
