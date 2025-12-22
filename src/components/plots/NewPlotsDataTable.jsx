@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function NewPlotsDataTable({ batchId }) {
   const [limit, setLimit] = React.useState(200);
@@ -49,7 +51,15 @@ export default function NewPlotsDataTable({ batchId }) {
             <tbody className="divide-y divide-gray-100">
               {rowsQuery.data.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 font-mono">{r.plot_number || "-"}</td>
+                  <td className="px-3 py-2 font-mono">
+                    {r.plot_number ? (
+                      <Link to={createPageUrl(`NewPlotDetails?id=${r.id}`)} className="text-teal-700 hover:underline">
+                        {r.plot_number}
+                      </Link>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td className="px-3 py-2">{r.row_number || "-"}</td>
                   <td className="px-3 py-2">{r.section || "-"}</td>
                   <td className="px-3 py-2">{r.status || "-"}</td>
