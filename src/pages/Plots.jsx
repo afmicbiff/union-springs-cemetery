@@ -1586,6 +1586,15 @@ export default function PlotsPage() {
           </main>
       )}
 
+      {/* Centering Overlay */}
+      {isCentering && (
+        <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white rounded-full p-5 shadow-lg border border-stone-200">
+            <Loader2 className="w-7 h-7 animate-spin text-teal-700" />
+          </div>
+        </div>
+      )}
+
       {/* Tooltip Portal */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
       
