@@ -1,31 +1,14 @@
 import React from 'react';
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
-import { format, parseISO, isAfter } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertTriangle, Calendar, Bell, CheckSquare } from 'lucide-react';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 
 
 export default function AdminOverview() {
-    // Overview data sources
-    const { data: events = [], isLoading: eventsLoading } = useQuery({
-        queryKey: ['events-overview'],
-        queryFn: () => base44.entities.Event.list('-created_date', 500),
-        initialData: []
-    });
-    const { data: notifications = [], isLoading: notesLoading } = useQuery({
-        queryKey: ['notifications-overview'],
-        queryFn: () => base44.entities.Notification.list('-created_at', 50),
-        initialData: []
-    });
 
 
-    const upcomingEvents = events
-        .filter(e => e.start_time && isAfter(parseISO(e.start_time), new Date()))
-        .sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+
+
 
 
 
