@@ -57,6 +57,7 @@ import DataImportDialog from "@/components/admin/DataImportDialog";
 import BackupManager from "@/components/admin/BackupManager";
 import CommunicationCenter from "@/components/admin/CommunicationCenter";
 import AuditLogViewer from "@/components/admin/AuditLogViewer";
+import LawnCare from "@/components/admin/LawnCare";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -275,6 +276,7 @@ export default function AdminDashboard() {
       { id: "deceased", label: "Deceased", component: <DeceasedManager /> },
       { id: "reservations", label: "Sales", component: <AdminReservations /> },
       { id: "plots", label: "Plots", component: <AdminPlots /> },
+{ id: "lawncare", label: "Lawn Care", component: <LawnCare /> },
       { id: "onboarding", label: "Onboarding", component: (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-1 space-y-6"><OnboardingForm /></div>
