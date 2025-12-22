@@ -3,7 +3,6 @@ import clsx from "clsx";
 
 const STATUS_COLORS = {
   Available: "bg-green-500",
-  "Pending Reservation": "bg-amber-500",
   Reserved: "bg-yellow-500",
   Occupied: "bg-red-500",
   Veteran: "bg-blue-600",

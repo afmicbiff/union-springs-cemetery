@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import AdminPlotMap from "./AdminPlotMap";
 export default function AdminPlots() {
     const { data: plots } = useQuery({
         queryKey: ['plots-admin-list'],
-        queryFn: () => base44.entities.Plot.list(),
+        queryFn: () => base44.entities.Plot.list({ limit: 100 }),
         initialData: [],
     });
 
@@ -22,6 +22,7 @@ export default function AdminPlots() {
     const [sectionFilter, setSectionFilter] = React.useState('all');
     const [bulkStatus, setBulkStatus] = React.useState('');
     const [quickView, setQuickView] = React.useState(null);
+    const queryClient = useQueryClient();
 
     const sections = React.useMemo(() => {
         const s = new Set((plots || []).map(p => String(p.section || '').trim()).filter(Boolean));
@@ -54,7 +55,7 @@ export default function AdminPlots() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All</SelectItem>
-                                    {['Available','Pending Reservation','Reserved','Occupied','Veteran','Unavailable','Unknown','Not Usable'].map(s => (
+                                    {['Available','Reserved','Occupied','Veteran','Unavailable','Unknown','Not Usable'].map(s => (
                                         <SelectItem key={s} value={s}>{s}</SelectItem>
                                     ))}
                                 </SelectContent>
@@ -84,7 +85,7 @@ export default function AdminPlots() {
                                 <SelectValue placeholder="Choose new status" />
                             </SelectTrigger>
                             <SelectContent>
-                                {['Available','Pending Reservation','Reserved','Occupied','Veteran','Unavailable','Unknown','Not Usable'].map(s => (
+                                {['Available','Reserved','Occupied','Veteran','Unavailable','Unknown','Not Usable'].map(s => (
                                     <SelectItem key={s} value={s}>{s}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -94,8 +95,7 @@ export default function AdminPlots() {
                             onClick={async () => {
                                 await Promise.all(selected.map(id => base44.entities.Plot.update(id, { status: bulkStatus })));
                                 setSelected([]);
-                                // simple refetch by reloading query - rely on cache keys
-                                window.location.reload();
+                                await queryClient.invalidateQueries({ queryKey: ['plots-admin-list'] });
                             }}
                             className="bg-teal-700 hover:bg-teal-800 text-white h-8"
                         >
