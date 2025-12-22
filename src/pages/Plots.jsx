@@ -916,14 +916,6 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {isCentering && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-full p-6 shadow-lg border border-stone-200">
-            <Loader2 className="w-8 h-8 animate-spin text-teal-700" />
-          </div>
-        </div>
-      )}
-
       {errorMessage && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
             <p className="font-bold">Error Loading File</p>
