@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import Search from './pages/Search';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import NewPlotDetails from './pages/NewPlotDetails';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Search": Search,
     "Services": Services,
     "Visitor": Visitor,
+    "NewPlotDetails": NewPlotDetails,
 }
 
 export const pagesConfig = {
