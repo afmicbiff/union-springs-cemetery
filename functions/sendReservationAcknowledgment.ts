@@ -3,17 +3,28 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { reservationId } = await req.json();
+    const payload = await req.json();
+    const { reservationId, plotId, plotNumber } = payload || {};
 
-    if (!reservationId) {
-      return Response.json({ error: 'reservationId is required' }, { status: 400 });
+    let resv = null;
+
+    if (reservationId) {
+      const resvs = await base44.asServiceRole.entities.NewPlotReservation.filter({ id: reservationId });
+      resv = resvs?.[0] || null;
+    } else {
+      let targetPlotId = plotId || null;
+      if (!targetPlotId && plotNumber) {
+        const plots = await base44.asServiceRole.entities.NewPlot.filter({ plot_number: String(plotNumber) });
+        targetPlotId = plots?.[0]?.id || null;
+      }
+      if (targetPlotId) {
+        const resvs = await base44.asServiceRole.entities.NewPlotReservation.filter({ new_plot_id: targetPlotId }, '-created_date', 1);
+        resv = resvs?.[0] || null;
+      }
     }
 
-    // Fetch reservation using service role (public submission flow)
-    const resvs = await base44.asServiceRole.entities.NewPlotReservation.filter({ id: reservationId });
-    const resv = resvs?.[0];
     if (!resv) {
-      return Response.json({ error: 'Reservation not found' }, { status: 404 });
+      return Response.json({ error: 'Reservation not found (provide reservationId, plotId, or plotNumber)' }, { status: 404 });
     }
 
     // Require requester_email present
