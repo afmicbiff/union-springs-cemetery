@@ -1,6 +1,7 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { createPageUrl } from "@/utils";
 
 const STATUS_COLORS = {
   Available: "bg-green-500",
@@ -192,7 +193,7 @@ export default function NewPlotsMap({ batchId }) {
                         const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
                         const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
                         return (
-                          <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                          <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => window.location.href = createPageUrl('NewPlotDetails') + `?id=${r.id}` }>
                             <div className="flex items-center justify-between">
                               <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
                               <span className={`w-3 h-3 rounded-full ${bg}`}></span>
@@ -291,7 +292,7 @@ export default function NewPlotsMap({ batchId }) {
                                     const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
                                     const tip = `A-2 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
                                     return (
-                                      <div key={key} title={tip} className="w-1/2 mx-auto border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                                      <div key={key} title={tip} className="w-1/2 mx-auto border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => window.location.href = createPageUrl('NewPlotDetails') + `?id=${r.id}` }>
                                         <div className="flex items-center justify-between">
                                           <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
                                           <span className={`w-3 h-3 rounded-full ${bg}`}></span>
@@ -372,7 +373,7 @@ export default function NewPlotsMap({ batchId }) {
                                       const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
                                       const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
                                       return (
-                                        <div key={key} title={tip} className="w-1/2 mx-auto border border-gray-200 rounded-md p-1 bg-gray-50 hover:bg-gray-100 transition">
+                                        <div key={key} title={tip} className="w-1/2 mx-auto border border-gray-200 rounded-md p-1 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => window.location.href = createPageUrl('NewPlotDetails') + `?id=${r.id}` }>
                                           <div className="flex items-center justify-between">
                                             <div className="text-[9px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
                                             <span className={`w-2 h-2 rounded-full ${bg}`}></span>
@@ -451,7 +452,7 @@ export default function NewPlotsMap({ batchId }) {
                     const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
                     const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
                     return (
-                      <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition">
+                      <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => window.location.href = createPageUrl('NewPlotDetails') + `?id=${r.id}` }>
                         <div className="flex items-center justify-between">
                           <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
                           <span className={`w-3 h-3 rounded-full ${bg}`}></span>
