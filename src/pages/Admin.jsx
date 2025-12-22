@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
     Bell, 
     Upload, 
@@ -26,7 +27,9 @@ import {
     Check,
     Eye,
     X,
-    Plus
+    Plus,
+    Mail,
+    Settings
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
@@ -61,6 +64,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [initialParams, setInitialParams] = useState({});
+  const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -71,6 +75,10 @@ export default function AdminDashboard() {
     const memberId = params.get('memberId');
     if (memberId) {
         setInitialParams(prev => ({ ...prev, memberId }));
+    }
+    const showNotifications = params.get('showNotifications');
+    if (showNotifications === '1' || showNotifications === 'true') {
+        setNotifPopoverOpen(true);
     }
   }, [location.search]);
 
@@ -303,7 +311,7 @@ export default function AdminDashboard() {
                 <AdminSearch onNavigate={handleSearchNavigate} />
                 
                 {/* Notifications */}
-                <Popover>
+                <Popover open={notifPopoverOpen} onOpenChange={setNotifPopoverOpen}>
                     <PopoverTrigger asChild>
                         <motion.button
                             className="relative p-2 rounded-full hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200"
@@ -512,6 +520,29 @@ export default function AdminDashboard() {
                     >
                         New Plot Reservation
                     </Link>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="ml-2">
+                          More
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuItem onSelect={() => setNotifPopoverOpen(true)} className="cursor-pointer">
+                          <Bell className="w-4 h-4 mr-2" /> Notifications
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('NotificationSettings')} className="cursor-pointer">
+                            <Settings className="w-4 h-4 mr-2" /> Notification Settings
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('SendEmail')} className="cursor-pointer">
+                            <Mail className="w-4 h-4 mr-2" /> Email Tool
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>>
                 </TabsList>
             </div>
 
