@@ -53,8 +53,8 @@ export default function Layout({ children }) {
         { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
         { label: 'Board Members & Employees', path: '/Employees', icon: Users },
         { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
-        { label: 'Notification Settings', path: '/NotificationSettings', icon: Settings },
-        { label: 'Email Tool', path: '/SendEmail', icon: Mail }
+
+
         ]
         },
   ];
