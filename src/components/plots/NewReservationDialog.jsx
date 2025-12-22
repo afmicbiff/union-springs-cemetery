@@ -81,7 +81,7 @@ export default function NewReservationDialog({ open, onOpenChange, plot, onCreat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[90vw] sm:w-[520px] p-0">
         <motion.div
-          className="max-w-md w-[90vw] sm:w-[520px] resize overflow-auto"
+          className="max-w-md w-[90vw] sm:w-[520px] resize overflow-y-auto pr-2 p-4 sm:p-6"
           drag
           dragMomentum={false}
           style={{ maxHeight: '80vh' }}
