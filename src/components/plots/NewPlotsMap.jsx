@@ -27,6 +27,22 @@ export default function NewPlotsMap({ batchId }) {
     initialData: [],
   });
 
+  const fuse = React.useMemo(() => {
+    const list = rowsQuery.data || [];
+    return new Fuse(list, {
+      includeScore: true,
+      threshold: 0.4,
+      ignoreLocation: true,
+      keys: [
+        { name: "plot_number", weight: 0.6 },
+        { name: "first_name", weight: 0.3 },
+        { name: "last_name", weight: 0.3 },
+        { name: "family_name", weight: 0.2 },
+        { name: "row_number", weight: 0.15 },
+      ],
+    });
+  }, [rowsQuery.data]);
+
   const grouped = React.useMemo(() => {
     const g = {};
     (rowsQuery.data || []).forEach((r) => {
