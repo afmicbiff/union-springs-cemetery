@@ -15,6 +15,17 @@ export default function NewPlotsDataTable({ batchId, filters = { status: 'All', 
     initialData: [],
   });
 
+  const filteredRows = React.useMemo(() => {
+    const list = rowsQuery.data || [];
+    return list.filter((r) => {
+      const statusOk = !filters || filters.status === 'All' || r.status === filters.status;
+      const secRaw = String(r.section || '').replace(/Section\s*/i, '').trim();
+      const filterSec = (filters?.section || 'All').replace(/Section\s*/i, '').trim();
+      const sectionOk = !filters || filterSec === 'All' || secRaw === filterSec;
+      return statusOk && sectionOk;
+    });
+  }, [rowsQuery.data, filters]);
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
