@@ -1000,42 +1000,41 @@ export default function PlotsPage() {
                                         {sectionKey === '1' ? (
                                             <div className="flex gap-4 justify-center">
                                                 {(() => {
-                                                    const ranges = [
-                                                        { start: 1, end: 26 },
-                                                        { start: 27, end: 52 },
-                                                        { start: 53, end: 78 },
-                                                        { start: 79, end: 104 },
-                                                        { start: 105, end: 130 },
-                                                        { start: 131, end: 156 },
-                                                        { start: 157, end: 182 },
-                                                        { start: 183, end: 208 }
-                                                    ];
+                                                    const plots = sections[sectionKey] || [];
+                                                    const nums = plots
+                                                      .map(p => parseInt(String(p.Grave).replace(/\D/g, '')) || 0)
+                                                      .filter(n => n > 0);
+                                                    const maxNum = nums.length ? Math.max(...nums) : 0;
+                                                    const cols = 8;
+                                                    const perCol = Math.ceil(maxNum / cols) || 0;
+                                                    const ranges = Array.from({ length: cols }, (_, i) => ({
+                                                      start: i * perCol + 1,
+                                                      end: Math.min((i + 1) * perCol, maxNum)
+                                                    }));
 
                                                     return ranges.map((range, idx) => {
-                                                        const colPlots = sections[sectionKey].filter(p => {
-                                                            const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
-                                                            return num >= range.start && num <= range.end;
-                                                        });
+                                                      const colPlots = plots.filter(p => {
+                                                        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                                        return num >= range.start && num <= range.end;
+                                                      }).sort((a, b) => {
+                                                        const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
+                                                        const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
+                                                        return numB - numA;
+                                                      });
 
-                                                        colPlots.sort((a, b) => {
-                                                            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-                                                            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-                                                            return numB - numA;
-                                                        });
-
-                                                        return (
-                                                            <div key={idx} className="flex flex-col gap-1 justify-end">
-                                                                {colPlots.map((plot) => (
-                                                                    <GravePlot 
-                                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                                        data={plot} 
-                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                                        onHover={handleHover}
-                                                                        onEdit={isAdmin ? handleEditClick : undefined}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        );
+                                                      return (
+                                                        <div key={idx} className="flex flex-col gap-1 justify-end">
+                                                          {colPlots.map((plot) => (
+                                                            <GravePlot
+                                                              key={`${plot.Section}-${plot.Row}-${plot.Grave}`}
+                                                              data={plot}
+                                                              baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                              onHover={handleHover}
+                                                              onEdit={isAdmin ? handleEditClick : undefined}
+                                                            />
+                                                          ))}
+                                                        </div>
+                                                      );
                                                     });
                                                 })()}
                                             </div>
