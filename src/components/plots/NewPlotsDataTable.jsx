@@ -60,7 +60,7 @@ export default function NewPlotsDataTable({ batchId, filters = { status: 'All', 
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {rowsQuery.data.map((r) => (
+              {filteredRows.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
                   <td className="px-3 py-2 font-mono">
                     {r.plot_number ? (
