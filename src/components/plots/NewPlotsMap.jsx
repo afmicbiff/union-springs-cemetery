@@ -70,8 +70,35 @@ export default function NewPlotsMap({ batchId }) {
       });
     });
 
-    return g;
-  }, [rowsQuery.data]);
+    const filtered = query.trim()
+      ? (fuzzyResults || []).map(r => r.item)
+      : (rowsQuery.data || []);
+
+    // Rebuild groups from filtered list
+    const g2 = {};
+    filtered.forEach((r) => {
+      const rowStrRaw = String(r.row_number || '').toUpperCase();
+      const cleanedRow = rowStrRaw.replace(/^(ROW|SECTION)\s*:?\s*/i, '').trim();
+      let letterMatch = cleanedRow.match(/[A-Z]/);
+      const plotStr = String(r.plot_number || '').toUpperCase();
+      if (!letterMatch && plotStr) letterMatch = plotStr.match(/[A-Z]/);
+      const sectionKey = (r.section || 'Unassigned').replace(/Section\s*/i, '').trim() || 'Unassigned';
+      const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
+      if (!g2[key]) g2[key] = [];
+      g2[key].push(r);
+    });
+
+    Object.keys(g2).forEach((k) => {
+      g2[k].sort((a, b) => {
+        const na = parseInt(String(a.plot_number).replace(/\D/g, "")) || 0;
+        const nb = parseInt(String(b.plot_number).replace(/\D/g, "")) || 0;
+        if (na !== nb) return na - nb;
+        return String(a.plot_number).localeCompare(String(b.plot_number));
+      });
+    });
+
+    return g2;
+  }, [rowsQuery.data, query, fuzzyResults]);
 
   if (!batchId) return null;
 
