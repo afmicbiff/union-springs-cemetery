@@ -141,6 +141,22 @@ export default function NewPlotsMap({ batchId }) {
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+      {/* Search */}
+      <div className="mb-3">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search plot # or name (e.g., 118 or Smith)"
+            className="pl-8"
+          />
+        </div>
+        {query && fuzzyResults && (
+          <div className="mt-2 text-xs text-gray-500">{fuzzyResults.length} match(es)</div>
+        )}
+      </div>
+
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-4">
         {Object.entries({
