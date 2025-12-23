@@ -123,13 +123,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     </div>
   );
 
-  if (rowsQuery.isLoading) {
-    return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 text-sm text-gray-500">
-        Loading map…
-      </div>
-    );
-  }
+  // Keep render path stable; show placeholders instead of early returns
+  const loadingContent = (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 text-sm text-gray-500">
+      Loading map…
+    </div>
+  );
 
   const sectionKeys = Object.keys(grouped).sort((a, b) => {
     const aLetter = /^[A-Za-z]$/.test(a);
