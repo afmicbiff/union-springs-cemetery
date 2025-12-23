@@ -2,6 +2,9 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { createPageUrl } from "@/utils";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import Fuse from "fuse.js";
 
 const STATUS_COLORS = {
         Available: "bg-green-500",
