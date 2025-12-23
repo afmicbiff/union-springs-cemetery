@@ -42,8 +42,8 @@ export default function NewPlotsDataTable({ batchId, filters = { status: 'All', 
 
       {rowsQuery.isLoading ? (
         <div className="p-4 text-sm text-gray-500">Loading rows…</div>
-      ) : rowsQuery.data?.length === 0 ? (
-        <div className="p-4 text-sm text-gray-500">No rows for this batch.</div>
+      ) : filteredRows.length === 0 ? (
+        <div className="p-4 text-sm text-gray-500">No rows match these filters.</div>
       ) : (
         <div className="overflow-auto">
           <table className="min-w-full text-sm">
