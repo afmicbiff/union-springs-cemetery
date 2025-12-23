@@ -102,6 +102,14 @@ export default function NewPlotsMap({ batchId }) {
 
   if (!batchId) return null;
 
+  React.useEffect(() => {
+    if (!query.trim()) { setFuzzyResults(null); return; }
+    const isNum = /^\d+$/.test(query.trim());
+    const q = isNum ? query.trim() : query.trim();
+    const results = fuse.search(q);
+    setFuzzyResults(results);
+  }, [query, fuse]);
+
   if (rowsQuery.isLoading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 text-sm text-gray-500">
