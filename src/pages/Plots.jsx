@@ -679,18 +679,23 @@ export default function PlotsPage() {
   };
 
     data.forEach(item => {
-        let sectionKey = item.Section || '';
+        const rawSection = (item.Section || '').trim();
+        const rowVal = String(item.Row || '');
+        let sectionKey = rawSection ? rawSection.replace(/Section\s*/i, '').trim() : '';
 
-        // Normalize section key (e.g. "Section 1" -> "1")
-        if (sectionKey) {
-             sectionKey = sectionKey.replace(/Section\s*/i, '').trim();
+        // Fix: Some records label section as "Row D" etc. For Section 1, rows often end with "-1" (e.g., D-1)
+        // Map those to Section "1" so bottom rows render under Section 1.
+        if (!grouped[sectionKey]) {
+            if (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal)) {
+                sectionKey = '1';
+            }
         }
 
         // Only add if it maps to valid sections 1-5
         if (grouped[sectionKey]) {
             grouped[sectionKey].push(item);
         }
-        // Data not matching 1-5 (like 'Row D') is effectively filtered out/deleted from view
+        // Other data not matching 1-5 remains hidden by design
     });
 
     // Sort items within sections by Grave number
