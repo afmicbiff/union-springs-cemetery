@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2 } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
