@@ -116,7 +116,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     setFuzzyResults(results);
   }, [query, fuse]);
 
-  if (!batchId) return null;
+  // Always render consistently to avoid hook order changes
+  const noBatchContent = (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 text-sm text-gray-500">
+      Select an import batch to view plots.
+    </div>
+  );
 
   if (rowsQuery.isLoading) {
     return (
