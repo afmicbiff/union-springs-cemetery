@@ -91,9 +91,18 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
       });
     });
 
-    const filtered = query.trim()
+    const baseList = query.trim()
       ? (fuzzyResults || []).map(r => r.item)
       : (rowsQuery.data || []);
+
+    // Apply filters
+    const filtered = baseList.filter((r) => {
+      const statusOk = !filters || filters.status === 'All' || r.status === filters.status;
+      const secRaw = String(r.section || '').replace(/Section\s*/i, '').trim();
+      const filterSec = (filters?.section || 'All').replace(/Section\s*/i, '').trim();
+      const sectionOk = !filters || filterSec === 'All' || secRaw === filterSec;
+      return statusOk && sectionOk;
+    });
 
     // Rebuild groups from filtered list
     const g2 = {};
