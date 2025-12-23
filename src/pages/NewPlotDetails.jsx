@@ -235,62 +235,82 @@ export default function NewPlotDetails() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {isEditing ? (
               <>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Section</label>
-                  <Input value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} />
+                <div className="md:col-span-4 space-y-4">
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Location & Status</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">Section</label>
+                      <Input value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Row</label>
+                      <Input value={form.row_number} onChange={(e) => setForm({ ...form, row_number: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Plot #</label>
+                      <Input value={form.plot_number} onChange={(e) => setForm({ ...form, plot_number: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Status</label>
+                    <Select value={form.status || ""} onValueChange={(v) => setForm({ ...form, status: v })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"].map(s => (
+                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Row</label>
-                  <Input value={form.row_number} onChange={(e) => setForm({ ...form, row_number: e.target.value })} />
+
+                <div className="md:col-span-4 space-y-4">
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Occupant / Owner Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">First Name</label>
+                      <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Last Name</label>
+                      <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500">Family Name (Owner/Reservation)</label>
+                    <Input value={form.family_name} onChange={(e) => setForm({ ...form, family_name: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">Birth Date</label>
+                      <Input value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} placeholder="MM/DD/YYYY or YYYY-MM-DD" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Death Date</label>
+                      <Input value={form.death_date} onChange={(e) => setForm({ ...form, death_date: e.target.value })} placeholder="MM/DD/YYYY or YYYY-MM-DD" />
+                    </div>
+                  </div>
                 </div>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Plot #</label>
-                  <Input value={form.plot_number} onChange={(e) => setForm({ ...form, plot_number: e.target.value })} />
-                </div>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Status</label>
-                  <Select value={form.status || ""} onValueChange={(v) => setForm({ ...form, status: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Default"].map(s => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="text-xs text-gray-500">First Name</label>
-                  <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="text-xs text-gray-500">Last Name</label>
-                  <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="text-xs text-gray-500">Family / Owner</label>
-                  <Input value={form.family_name} onChange={(e) => setForm({ ...form, family_name: e.target.value })} />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500">Birth Date</label>
-                  <Input value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} placeholder="MM/DD/YYYY or YYYY-MM-DD" />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500">Death Date</label>
-                  <Input value={form.death_date} onChange={(e) => setForm({ ...form, death_date: e.target.value })} placeholder="MM/DD/YYYY or YYYY-MM-DD" />
-                </div>
-                <div className="md:col-span-4">
-                  <label className="text-xs text-gray-500">Notes</label>
+
+                <div className="md:col-span-4 space-y-2">
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Notes</h3>
                   <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
                 </div>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Reservation Expiry</label>
-                  <Input value={form.reservation_expiry_date} onChange={(e) => setForm({ ...form, reservation_expiry_date: e.target.value })} placeholder="YYYY-MM-DD" />
-                </div>
-                <div className="md:col-span-1">
-                  <label className="text-xs text-gray-500">Responsible Admin Email</label>
-                  <Input value={form.assigned_admin_email || ''} onChange={(e) => setForm({ ...form, assigned_admin_email: e.target.value })} placeholder="admin@example.com" />
+
+                <div className="md:col-span-4 space-y-4">
+                  <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider border-b pb-1">Admin / Reservation</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-gray-500">Reservation Expiry</label>
+                      <Input value={form.reservation_expiry_date} onChange={(e) => setForm({ ...form, reservation_expiry_date: e.target.value })} placeholder="YYYY-MM-DD" />
+                    </div>
+                    <div>
+                      <label className="text-xs text-gray-500">Responsible Admin Email</label>
+                      <Input value={form.assigned_admin_email || ''} onChange={(e) => setForm({ ...form, assigned_admin_email: e.target.value })} placeholder="admin@example.com" />
+                    </div>
+                  </div>
                 </div>
               </>
             ) : (
