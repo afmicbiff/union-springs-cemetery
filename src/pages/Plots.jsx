@@ -686,7 +686,7 @@ export default function PlotsPage() {
         // Fix: Some records label section as "Row D" etc. For Section 1, rows often end with "-1" (e.g., D-1)
         // Map those to Section "1" so bottom rows render under Section 1.
         if (!grouped[sectionKey]) {
-            if (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal)) {
+            if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
                 sectionKey = '1';
             }
         }
