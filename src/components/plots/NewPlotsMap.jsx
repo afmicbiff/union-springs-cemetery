@@ -18,6 +18,8 @@ const STATUS_COLORS = {
       };
 
 export default function NewPlotsMap({ batchId }) {
+  const [query, setQuery] = React.useState("");
+  const [fuzzyResults, setFuzzyResults] = React.useState(null);
   const rowsQuery = useQuery({
     queryKey: ["newPlots-map", batchId],
     enabled: !!batchId,
