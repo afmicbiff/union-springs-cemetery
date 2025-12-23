@@ -17,7 +17,7 @@ const STATUS_COLORS = {
         Default: "bg-gray-300",
       };
 
-export default function NewPlotsMap({ batchId, filters = { status: 'All', section: 'All' } }) {
+export default function NewPlotsMap({ batchId, filters = { status: 'All', section: 'All' }, showSearch = true }) {
   const [query, setQuery] = React.useState("");
   const [fuzzyResults, setFuzzyResults] = React.useState(null);
   const rowsQuery = useQuery({
@@ -26,6 +26,13 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     queryFn: async () => base44.entities.NewPlot.filter({ batch_id: batchId }, "plot_number", 2000),
     initialData: [],
   });
+
+  // Sync external search into local fuzzy query
+  React.useEffect(() => {
+    if (filters && Object.prototype.hasOwnProperty.call(filters, 'search')) {
+      setQuery((filters.search || '').toString());
+    }
+  }, [filters?.search]);
 
   const fuse = React.useMemo(() => {
     const list = rowsQuery.data || [];
@@ -80,7 +87,20 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
       const secRaw = String(r.section || '').replace(/Section\s*/i, '').trim();
       const filterSec = (filters?.section || 'All').replace(/Section\s*/i, '').trim();
       const sectionOk = !filters || filterSec === 'All' || secRaw === filterSec;
-      return statusOk && sectionOk;
+
+      const ownerOk = !filters?.owner || String(r.family_name || '').toLowerCase().includes(String(filters.owner).toLowerCase());
+
+      const plotFilter = (filters?.plot || '').toString().trim();
+      let plotOk = true;
+      if (plotFilter) {
+        const plotStr = String(r.plot_number || '').toLowerCase();
+        const wanted = plotFilter.toLowerCase();
+        const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
+        const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
+        plotOk = numWanted != null ? (numItem === numWanted) : plotStr.includes(wanted);
+      }
+
+      return statusOk && sectionOk && ownerOk && plotOk;
     });
 
     // Rebuild groups from filtered list
@@ -153,21 +173,23 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-      {/* Search */}
-      <div className="mb-3">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search plot # or name (e.g., 118 or Smith)"
-            className="pl-8"
-          />
+      {/* Search (hidden when page-level filters control search) */}
+      {showSearch && (
+        <div className="mb-3">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search plot # or name (e.g., 118 or Smith)"
+              className="pl-8"
+            />
+          </div>
+          {query && fuzzyResults && (
+            <div className="mt-2 text-xs text-gray-500">{fuzzyResults.length} match(es)</div>
+          )}
         </div>
-        {query && fuzzyResults && (
-          <div className="mt-2 text-xs text-gray-500">{fuzzyResults.length} match(es)</div>
-        )}
-      </div>
+      )}
 
       {/* If no batch or loading, show appropriate placeholder but keep layout stable */}
       {!batchId ? (

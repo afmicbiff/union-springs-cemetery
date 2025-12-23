@@ -6,9 +6,18 @@ import { Map as MapIcon, FileText } from "lucide-react";
 import NewPlotsDataTable from "./NewPlotsDataTable";
 import NewPlotsMap from "./NewPlotsMap";
 
-export default function NewPlotsBrowser() {
+export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabChange, filters: externalFilters }) {
   const [filters, setFilters] = React.useState({ status: 'All', section: 'All' });
   const [activeTab, setActiveTab] = React.useState("map");
+  const isControlled = controlledActiveTab !== undefined && controlledActiveTab !== null;
+  const currentTab = isControlled ? controlledActiveTab : activeTab;
+  const changeTab = (tab) => {
+    if (isControlled) {
+      onTabChange && onTabChange(tab);
+    } else {
+      setActiveTab(tab);
+    }
+  };
   const [selectedBatchId, setSelectedBatchId] = React.useState(null);
   const statusOptions = ['All','Available','Pending Reservation','Reserved','Occupied','Veteran','Unavailable','Unknown'];
 
@@ -45,64 +54,35 @@ export default function NewPlotsBrowser() {
       <div>
         {/* Tabs + Filters */}
         <div className="flex flex-col gap-2 mb-3">
-          <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
-            <button
-              onClick={() => setActiveTab("map")}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
-                activeTab === "map" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <MapIcon size={14} /> Map View
-            </button>
-            <button
-              onClick={() => setActiveTab("data")}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
-                activeTab === "data" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <FileText size={14} /> Data List
-            </button>
-          </div>
-
-          {/* Filters Bar */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase">Filters:</div>
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="h-8 text-sm border rounded px-2 bg-white"
-            >
-              {statusOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-
-            <select
-              value={filters.section}
-              onChange={(e) => setFilters(prev => ({ ...prev, section: e.target.value }))}
-              className="h-8 text-sm border rounded px-2 bg-white"
-            >
-              {sectionOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-
-            {(filters.status !== 'All' || filters.section !== 'All') && (
+          {!isControlled && (
+            <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
               <button
-                onClick={() => setFilters({ status: 'All', section: 'All' })}
-                className="h-8 text-sm px-2 text-gray-600 hover:text-red-600"
+                onClick={() => changeTab("map")}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
+                  currentTab === "map" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
               >
-                Clear
+                <MapIcon size={14} /> Map View
               </button>
-            )}
-          </div>
+              <button
+                onClick={() => changeTab("data")}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
+                  currentTab === "data" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <FileText size={14} /> Data List
+              </button>
+            </div>
+          )
+
+          {/* Filters handled at page level */}
         </div>
 
 
-        {activeTab === "map" ? (
-          <NewPlotsMap batchId={selectedBatchId} filters={filters} />
+        {(currentTab === "map") ? (
+          <NewPlotsMap batchId={selectedBatchId} filters={externalFilters ?? filters} showSearch={!externalFilters} />
         ) : (
-          <NewPlotsDataTable batchId={selectedBatchId} filters={filters} />
+          <NewPlotsDataTable batchId={selectedBatchId} filters={externalFilters ?? filters} />
         )}
       </div>
     </div>

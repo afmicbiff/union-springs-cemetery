@@ -4,13 +4,27 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsImport from "../components/plots/NewPlotsImport";
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
+import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { Map as MapIcon, FileText } from "lucide-react";
 
 
 export default function NewPlotsAndMap() {
   const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
   const isAdmin = user?.role === 'admin';
+  const [activeTab, setActiveTab] = React.useState("map");
+  const [filters, setFilters] = React.useState({
+    search: "",
+    owner: "",
+    plot: "",
+    status: "All",
+    birthYearStart: "",
+    birthYearEnd: "",
+    deathYearStart: "",
+    deathYearEnd: "",
+    section: "All"
+  });
   const handleDeleteA1 = async () => {
     if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
     const res = await base44.functions.invoke('deleteA1Plots', {});
@@ -49,6 +63,21 @@ export default function NewPlotsAndMap() {
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
             <div className="flex items-center gap-2">
+              {/* Map/Data toggles aligned left of Import CSV */}
+              <div className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg mr-2">
+                <button 
+                  onClick={() => setActiveTab('map')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <MapIcon size={14} /> Map View
+                </button>
+                <button 
+                  onClick={() => setActiveTab('data')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'data' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <FileText size={14} /> Data List
+                </button>
+              </div>
               {isAdmin && (<NewPlotsImport />)}
               <Link to={createPageUrl('Plots')}>
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
@@ -58,9 +87,20 @@ export default function NewPlotsAndMap() {
         </div>
       </header>
 
+      {/* Filters bar similar to old Plots & Map */}
+      <div className="border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <PlotFilters 
+            filters={filters} 
+            onFilterChange={setFilters}
+            statusOptions={["All","Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"]}
+          />
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
-          <NewPlotsBrowser />
+          <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} />
         </div>
       </main>
     </div>

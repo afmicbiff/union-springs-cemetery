@@ -22,7 +22,31 @@ export default function NewPlotsDataTable({ batchId, filters = { status: 'All', 
       const secRaw = String(r.section || '').replace(/Section\s*/i, '').trim();
       const filterSec = (filters?.section || 'All').replace(/Section\s*/i, '').trim();
       const sectionOk = !filters || filterSec === 'All' || secRaw === filterSec;
-      return statusOk && sectionOk;
+
+      const ownerOk = !filters?.owner || String(r.family_name || '').toLowerCase().includes(String(filters.owner).toLowerCase());
+
+      const plotFilter = (filters?.plot || '').toString().trim();
+      let plotOk = true;
+      if (plotFilter) {
+        const plotStr = String(r.plot_number || '').toLowerCase();
+        const wanted = plotFilter.toLowerCase();
+        const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
+        const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
+        plotOk = numWanted != null ? (numItem === numWanted) : plotStr.includes(wanted);
+      }
+
+      const generalSearch = (filters?.search || '').toString().trim().toLowerCase();
+      const generalOk = !generalSearch || [
+        r.plot_number,
+        r.row_number,
+        r.section,
+        r.first_name,
+        r.last_name,
+        r.family_name,
+        r.notes
+      ].map(v => String(v || '').toLowerCase()).join(' ').includes(generalSearch);
+
+      return statusOk && sectionOk && ownerOk && plotOk && generalOk;
     });
   }, [rowsQuery.data, filters]);
 
