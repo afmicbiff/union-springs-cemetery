@@ -73,9 +73,9 @@ export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabC
                 <FileText size={14} /> Data List
               </button>
             </div>
-          )
+          )}
 
-          {/* Filters handled at page level */}
+           {/* Filters handled at page level */}
         </div>
 
 
