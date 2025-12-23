@@ -1001,14 +1001,14 @@ export default function PlotsPage() {
                                             <div className="flex gap-4 justify-center">
                                                 {(() => {
                                                     const ranges = [
-                                                        { start: 1, end: 23 },
-                                                        { start: 24, end: 46 },
-                                                        { start: 47, end: 69 },
-                                                        { start: 70, end: 92 },
-                                                        { start: 93, end: 115 },
-                                                        { start: 116, end: 138 },
-                                                        { start: 139, end: 161 },
-                                                        { start: 162, end: 186 }
+                                                        { start: 1, end: 26 },
+                                                        { start: 27, end: 52 },
+                                                        { start: 53, end: 78 },
+                                                        { start: 79, end: 104 },
+                                                        { start: 105, end: 130 },
+                                                        { start: 131, end: 156 },
+                                                        { start: 157, end: 182 },
+                                                        { start: 183, end: 208 }
                                                     ];
 
                                                     return ranges.map((range, idx) => {
