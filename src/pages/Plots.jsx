@@ -909,6 +909,21 @@ export default function PlotsPage() {
                     <span className="font-medium text-sm">Import CSV</span>
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
                 </label>
+
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const res = await base44.functions.invoke('ensureSection1BottomRows', {});
+                    const msg = res.data?.message || 'Completed';
+                    const created = res.data?.results?.filter(r => r.status === 'created').length || 0;
+                    const exists = res.data?.results?.filter(r => r.status === 'exists').length || 0;
+                    toast.success(`${msg}: ${created} created, ${exists} already existed.`);
+                    queryClient.invalidateQueries({ queryKey: ['plots'] });
+                  }}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Add Missing Bottom Rows
+                </Button>
             </div>
             )}
           </div>
