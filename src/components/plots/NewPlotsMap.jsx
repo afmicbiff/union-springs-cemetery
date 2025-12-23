@@ -5,9 +5,6 @@ import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Fuse from "fuse.js";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import Fuse from "fuse.js";
 
 const STATUS_COLORS = {
         Available: "bg-green-500",
@@ -23,30 +20,12 @@ const STATUS_COLORS = {
 export default function NewPlotsMap({ batchId, filters = { status: 'All', section: 'All' } }) {
   const [query, setQuery] = React.useState("");
   const [fuzzyResults, setFuzzyResults] = React.useState(null);
-  const [query, setQuery] = React.useState("");
-  const [fuzzyResults, setFuzzyResults] = React.useState(null);
   const rowsQuery = useQuery({
     queryKey: ["newPlots-map", batchId],
     enabled: !!batchId,
     queryFn: async () => base44.entities.NewPlot.filter({ batch_id: batchId }, "plot_number", 2000),
     initialData: [],
   });
-
-  const fuse = React.useMemo(() => {
-    const list = rowsQuery.data || [];
-    return new Fuse(list, {
-      includeScore: true,
-      threshold: 0.4,
-      ignoreLocation: true,
-      keys: [
-        { name: "plot_number", weight: 0.6 },
-        { name: "first_name", weight: 0.3 },
-        { name: "last_name", weight: 0.3 },
-        { name: "family_name", weight: 0.2 },
-        { name: "row_number", weight: 0.15 },
-      ],
-    });
-  }, [rowsQuery.data]);
 
   const fuse = React.useMemo(() => {
     const list = rowsQuery.data || [];
@@ -128,17 +107,11 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     });
 
     return g2;
-  }, [rowsQuery.data, query, fuzzyResults]);
+  }, [rowsQuery.data, query, fuzzyResults, filters]);
 
   if (!batchId) return null;
 
-  React.useEffect(() => {
-    if (!query.trim()) { setFuzzyResults(null); return; }
-    const isNum = /^\d+$/.test(query.trim());
-    const q = isNum ? query.trim() : query.trim();
-    const results = fuse.search(q);
-    setFuzzyResults(results);
-  }, [query, fuse]);
+
 
   React.useEffect(() => {
     if (!query.trim()) { setFuzzyResults(null); return; }

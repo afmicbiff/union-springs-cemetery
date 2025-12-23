@@ -97,23 +97,7 @@ export default function NewPlotsBrowser() {
             )}
           </div>
         </div>
-          <button
-            onClick={() => setActiveTab("map")}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
-              activeTab === "map" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <MapIcon size={14} /> Map View
-          </button>
-          <button
-            onClick={() => setActiveTab("data")}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${
-              activeTab === "data" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <FileText size={14} /> Data List
-          </button>
-        </div>
+
 
         {activeTab === "map" ? (
           <NewPlotsMap batchId={selectedBatchId} filters={filters} />
