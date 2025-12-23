@@ -109,16 +109,14 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     return g2;
   }, [rowsQuery.data, query, fuzzyResults, filters]);
 
-  if (!batchId) return null;
-
-
-
   React.useEffect(() => {
     if (!query.trim()) { setFuzzyResults(null); return; }
     const q = query.trim();
     const results = fuse.search(q);
     setFuzzyResults(results);
   }, [query, fuse]);
+
+  if (!batchId) return null;
 
   if (rowsQuery.isLoading) {
     return (
