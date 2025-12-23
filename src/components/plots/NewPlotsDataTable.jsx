@@ -6,7 +6,7 @@ import { RefreshCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
-export default function NewPlotsDataTable({ batchId }) {
+export default function NewPlotsDataTable({ batchId, filters = { status: 'All', section: 'All' } }) {
   const [limit, setLimit] = React.useState(200);
   const rowsQuery = useQuery({
     queryKey: ["newPlots", batchId, limit],
