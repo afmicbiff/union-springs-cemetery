@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, Map } from 'lucide-react';
 
 export default function HeroSection() {
   const [activeImage, setActiveImage] = useState(null);
@@ -107,15 +107,20 @@ export default function HeroSection() {
             A historic sanctuary of remembrance, honoring lives with dignity in a setting of natural granite beauty.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-6 w-full max-w-md mx-auto md:mx-0 sm:max-w-none">
-            <Link to={createPageUrl('Search')} className="w-full sm:w-auto">
+          <div className="flex flex-col gap-4 justify-center md:justify-start pt-6 w-full max-w-md mx-auto md:mx-0">
+            <Link to={createPageUrl('Search')} className="w-full">
               <Button className="w-full bg-teal-700 hover:bg-teal-600 text-white font-serif tracking-widest px-8 py-6 text-lg rounded-sm shadow-xl transition-all hover:scale-105 hover:shadow-2xl">
                 <Search className="mr-2 h-5 w-5" /> Find a Loved One
               </Button>
             </Link>
-            <Link to={createPageUrl('Plots')} className="w-full sm:w-auto">
+            <Link to={createPageUrl('Plots')} className="w-full">
               <Button variant="secondary" className="w-full bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-widest px-8 py-6 text-lg rounded-sm shadow-xl transition-all hover:scale-105 hover:shadow-2xl">
                 <MapPin className="mr-2 h-5 w-5" /> View Plots
+              </Button>
+            </Link>
+            <Link to={createPageUrl('NewPlotsAndMap')} className="w-full">
+              <Button variant="secondary" className="w-full bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-widest px-8 py-6 text-lg rounded-sm shadow-xl transition-all hover:scale-105 hover:shadow-2xl">
+                <Map className="mr-2 h-5 w-5" /> New Plots for Reservation
               </Button>
             </Link>
           </div>
