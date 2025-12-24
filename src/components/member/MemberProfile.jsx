@@ -15,17 +15,19 @@ export default function MemberProfile({ user }) {
         first_name: '',
         last_name: '',
         phone_primary: '',
+        phone_secondary: '',
         address: '',
         city: '',
         state: '',
         zip: '',
+        email_secondary: '',
         comments: ''
     });
 
     const { data: memberRecord, isLoading } = useQuery({
         queryKey: ['member-profile', user.email],
         queryFn: async () => {
-            const res = await base44.entities.Member.list({ email_primary: user.email }, 1);
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
             return res[0] || null;
         },
         enabled: !!user.email
@@ -37,10 +39,12 @@ export default function MemberProfile({ user }) {
                 first_name: memberRecord.first_name || '',
                 last_name: memberRecord.last_name || '',
                 phone_primary: memberRecord.phone_primary || '',
+                phone_secondary: memberRecord.phone_secondary || '',
                 address: memberRecord.address || '',
                 city: memberRecord.city || '',
                 state: memberRecord.state || '',
                 zip: memberRecord.zip || '',
+                email_secondary: memberRecord.email_secondary || '',
                 comments: memberRecord.comments || ''
             });
         } else if (user) {
@@ -126,12 +130,13 @@ export default function MemberProfile({ user }) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label htmlFor="phone">Primary Phone</Label>
                             <Input 
                                 id="phone" 
                                 value={formData.phone_primary}
                                 onChange={e => setFormData({...formData, phone_primary: e.target.value})}
                                 placeholder="(555) 555-5555"
+                                required
                             />
                         </div>
 
@@ -141,6 +146,7 @@ export default function MemberProfile({ user }) {
                                 id="address" 
                                 value={formData.address}
                                 onChange={e => setFormData({...formData, address: e.target.value})}
+                                required
                             />
                         </div>
 
@@ -151,6 +157,7 @@ export default function MemberProfile({ user }) {
                                     id="city" 
                                     value={formData.city}
                                     onChange={e => setFormData({...formData, city: e.target.value})}
+                                    required
                                 />
                             </div>
                             <div className="space-y-2">
@@ -159,6 +166,7 @@ export default function MemberProfile({ user }) {
                                     id="state" 
                                     value={formData.state}
                                     onChange={e => setFormData({...formData, state: e.target.value})}
+                                    required
                                 />
                             </div>
                         </div>
@@ -169,7 +177,31 @@ export default function MemberProfile({ user }) {
                                 id="zip" 
                                 value={formData.zip}
                                 onChange={e => setFormData({...formData, zip: e.target.value})}
+                                required
                             />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="email_secondary">Secondary Email (Optional)</Label>
+                                <Input
+                                  id="email_secondary"
+                                  type="email"
+                                  value={formData.email_secondary}
+                                  onChange={e => setFormData({ ...formData, email_secondary: e.target.value })}
+                                  placeholder="you+alt@example.com"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="phone_secondary">Secondary Phone (Optional)</Label>
+                                <Input
+                                  id="phone_secondary"
+                                  type="tel"
+                                  value={formData.phone_secondary}
+                                  onChange={e => setFormData({ ...formData, phone_secondary: e.target.value })}
+                                  placeholder="(555) 555-5555"
+                                />
+                              </div>
+                            </div>
                         </div>
 
                         <div className="md:col-span-2 space-y-2">
