@@ -12,19 +12,21 @@ import { toast } from "sonner";
 export default function MemberProfile({ user }) {
     const queryClient = useQueryClient();
     const [formData, setFormData] = useState({
-        first_name: '',
-        last_name: '',
-        phone_primary: '',
-        phone_secondary: '',
-        address: '',
-        city: '',
-        state: '',
-        zip: '',
-        email_secondary: '',
-        comments: ''
-    });
+            first_name: '',
+            last_name: '',
+            phone_primary: '',
+            phone_secondary: '',
+            address: '',
+            city: '',
+            state: '',
+            zip: '',
+            email_secondary: '',
+            comments: ''
+        });
+        const [errors, setErrors] = useState({});
+        const requiredFields = ['first_name','last_name','phone_primary','address','city','state','zip'];
 
-    const { data: memberRecord, isLoading } = useQuery({
+        const { data: memberRecord, isLoading } = useQuery({
         queryKey: ['member-profile', user.email],
         queryFn: async () => {
             const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
@@ -81,6 +83,14 @@ export default function MemberProfile({ user }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const missing = requiredFields.filter((f) => !String(formData[f] || '').trim());
+        if (missing.length) {
+            const newErrors = {};
+            missing.forEach((f) => { newErrors[f] = 'Required'; });
+            setErrors((prev) => ({ ...prev, ...newErrors }));
+            toast.error('Please fill all required fields.');
+            return;
+        }
         updateMutation.mutate(formData);
     };
 
@@ -100,22 +110,24 @@ export default function MemberProfile({ user }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="firstName">First Name</Label>
+                            <Label htmlFor="firstName" className={errors.first_name ? 'text-red-600' : ''}>First Name</Label>
                             <Input 
                                 id="firstName" 
                                 value={formData.first_name}
-                                onChange={e => setFormData({...formData, first_name: e.target.value})}
-                                required
+                                onChange={e => { setFormData({...formData, first_name: e.target.value}); if (errors.first_name) setErrors(prev => ({...prev, first_name: undefined})); }}
+                                className={errors.first_name ? 'border-red-500 focus-visible:ring-red-500' : ''}
                             />
+                            {errors.first_name && <p className="text-xs text-red-600 mt-1">Required</p>}
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="lastName">Last Name</Label>
+                            <Label htmlFor="lastName" className={errors.last_name ? 'text-red-600' : ''}>Last Name</Label>
                             <Input 
                                 id="lastName" 
                                 value={formData.last_name}
-                                onChange={e => setFormData({...formData, last_name: e.target.value})}
-                                required
+                                onChange={e => { setFormData({...formData, last_name: e.target.value}); if (errors.last_name) setErrors(prev => ({...prev, last_name: undefined})); }}
+                                className={errors.last_name ? 'border-red-500 focus-visible:ring-red-500' : ''}
                             />
+                            {errors.last_name && <p className="text-xs text-red-600 mt-1">Required</p>}
                         </div>
                         
                         <div className="space-y-2">
@@ -130,55 +142,60 @@ export default function MemberProfile({ user }) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="phone">Primary Phone</Label>
+                            <Label htmlFor="phone" className={errors.phone_primary ? 'text-red-600' : ''}>Primary Phone</Label>
                             <Input 
                                 id="phone" 
                                 value={formData.phone_primary}
-                                onChange={e => setFormData({...formData, phone_primary: e.target.value})}
+                                onChange={e => { setFormData({...formData, phone_primary: e.target.value}); if (errors.phone_primary) setErrors(prev => ({...prev, phone_primary: undefined})); }}
                                 placeholder="(555) 555-5555"
-                                required
+                                className={errors.phone_primary ? 'border-red-500 focus-visible:ring-red-500' : ''}
                             />
+                            {errors.phone_primary && <p className="text-xs text-red-600 mt-1">Required</p>}
                         </div>
 
                         <div className="md:col-span-2 space-y-2">
-                            <Label htmlFor="address">Street Address</Label>
+                            <Label htmlFor="address" className={errors.address ? 'text-red-600' : ''}>Street Address</Label>
                             <Input 
                                 id="address" 
                                 value={formData.address}
-                                onChange={e => setFormData({...formData, address: e.target.value})}
-                                required
+                                onChange={e => { setFormData({...formData, address: e.target.value}); if (errors.address) setErrors(prev => ({...prev, address: undefined})); }}
+                                className={errors.address ? 'border-red-500 focus-visible:ring-red-500' : ''}
                             />
+                            {errors.address && <p className="text-xs text-red-600 mt-1">Required</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="city">City</Label>
+                                <Label htmlFor="city" className={errors.city ? 'text-red-600' : ''}>City</Label>
                                 <Input 
                                     id="city" 
                                     value={formData.city}
-                                    onChange={e => setFormData({...formData, city: e.target.value})}
-                                    required
+                                    onChange={e => { setFormData({...formData, city: e.target.value}); if (errors.city) setErrors(prev => ({...prev, city: undefined})); }}
+                                    className={errors.city ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                 />
+                                {errors.city && <p className="text-xs text-red-600 mt-1">Required</p>}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="state">State</Label>
+                                <Label htmlFor="state" className={errors.state ? 'text-red-600' : ''}>State</Label>
                                 <Input 
                                     id="state" 
                                     value={formData.state}
-                                    onChange={e => setFormData({...formData, state: e.target.value})}
-                                    required
+                                    onChange={e => { setFormData({...formData, state: e.target.value}); if (errors.state) setErrors(prev => ({...prev, state: undefined})); }}
+                                    className={errors.state ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                 />
+                                {errors.state && <p className="text-xs text-red-600 mt-1">Required</p>}
                             </div>
                         </div>
                         
                         <div className="space-y-2">
-                            <Label htmlFor="zip">Zip Code</Label>
+                            <Label htmlFor="zip" className={errors.zip ? 'text-red-600' : ''}>Zip Code</Label>
                             <Input 
                                 id="zip" 
                                 value={formData.zip}
-                                onChange={e => setFormData({...formData, zip: e.target.value})}
-                                required
+                                onChange={e => { setFormData({...formData, zip: e.target.value}); if (errors.zip) setErrors(prev => ({...prev, zip: undefined})); }}
+                                className={errors.zip ? 'border-red-500 focus-visible:ring-red-500' : ''}
                             />
+                            {errors.zip && <p className="text-xs text-red-600 mt-1">Required</p>}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div className="space-y-2">
