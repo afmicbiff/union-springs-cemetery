@@ -29,7 +29,8 @@ export default function ReservePlot() {
   const [acks, setAcks] = React.useState({
     rights: false, rightsDate: '',
     rules: false, rulesDate: '',
-    fees: false, feesDate: ''
+    fees: false, feesDate: '',
+    contract: false, contractDate: ''
   });
   const [ackErrors, setAckErrors] = React.useState({});
 
@@ -107,6 +108,8 @@ export default function ReservePlot() {
       rulesDate: !acks.rulesDate,
       fees: !acks.fees,
       feesDate: !acks.feesDate,
+      contract: !acks.contract,
+      contractDate: !acks.contractDate,
     };
     if (required.some(v => !String(v || '').trim()) || Object.values(ackMissing).some(Boolean)) {
       setAckErrors(ackMissing);
@@ -136,6 +139,8 @@ export default function ReservePlot() {
       ack_rules_date: acks.rulesDate,
       ack_fees: acks.fees,
       ack_fees_date: acks.feesDate,
+      ack_contract: acks.contract,
+      ack_contract_date: acks.contractDate,
       signed_documents: doc ? [{ id: crypto.randomUUID(), name: 'Signature', file_uri: doc, uploaded_at: new Date().toISOString() }] : []
     });
   };
@@ -243,6 +248,31 @@ export default function ReservePlot() {
 
                 {/* Documents Acknowledgements */}
                 <div className="space-y-6 mt-2">
+                  {/* Certificate of Interment Rights (Contract) */}
+                  <div className={`border rounded p-3 ${ackErrors.contract || ackErrors.contractDate ? 'border-red-500' : 'border-gray-200'}`}>
+                    <div className="font-medium mb-2">Certificate of Interment Rights (Contract)</div>
+                    <div className="max-h-40 overflow-auto text-sm text-gray-700 space-y-2">
+                      <p><strong>Union Springs Cemetery</strong> • [City], Louisiana</p>
+                      <p>THIS CERTIFIES THAT [Name of Owner] has been granted the perpetual use and exclusive Right of Interment in the grounds of [Name of Cemetery], subject to the rules and regulations of the Cemetery Authority and the laws of the State of Louisiana.</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 text-sm">
+                        <div>SECTION: <span className="font-mono">{selected?.section || '_____'} </span></div>
+                        <div>Row: <span className="font-mono">{selected?.row_number || '_____'} </span></div>
+                        <div>PLOT: <span className="font-mono">{selected?.plot_number || '_____'} </span></div>
+                        <div>PLOT/GRAVE NUMBER: <span className="font-mono">{selected?.plot_number || '_____'} </span></div>
+                      </div>
+                      <p className="italic">“Blessed are those who mourn, for they will be comforted.” — Matthew 5:4</p>
+                    </div>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                      <label className="text-sm flex items-center gap-2">
+                        <input type="checkbox" checked={acks.contract} onChange={(e)=>{ setAcks({...acks, contract: e.target.checked}); if (ackErrors.contract) setAckErrors(prev=>({...prev, contract: false})); }} />
+                        I have read and understand this certificate.
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Signature date</span>
+                        <Input type="date" value={acks.contractDate} onChange={(e)=>{ setAcks({...acks, contractDate: e.target.value}); if (ackErrors.contractDate) setAckErrors(prev=>({...prev, contractDate: false})); }} className={ackErrors.contractDate ? 'border-red-500' : ''} />
+                      </div>
+                    </div>
+                  </div>
                   {/* Rights Document */}
                   <div className={`border rounded p-3 ${ackErrors.rights || ackErrors.rightsDate ? 'border-red-500' : 'border-gray-200'}`}>
                     <div className="font-medium mb-2">Rights for purchaser and rights Union Springs Cemetery</div>
