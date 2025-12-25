@@ -70,8 +70,11 @@ export default function ReservePlot() {
 
   const createReservation = useMutation({
     mutationFn: async (payload) => base44.entities.NewPlotReservation.create(payload),
-    onSuccess: () => {
+    onSuccess: async (created) => {
       queryClient.invalidateQueries({ queryKey: ['my-reservations', user?.email] });
+      if (created?.id) {
+        await base44.functions.invoke('notifyReservationEvent', { event: 'submission', reservationId: created.id });
+      }
       setStep(3);
     }
   });
