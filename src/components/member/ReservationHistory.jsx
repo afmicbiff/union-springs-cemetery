@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, CreditCard, Plus } from "lucide-react";
 
 const statusColor = (s) => ({
   "Pending": "bg-amber-100 text-amber-800",
@@ -37,7 +37,12 @@ export default function ReservationHistory() {
         {q.isLoading ? (
           <div className="text-sm text-gray-500">Loading…</div>
         ) : q.data?.length === 0 ? (
-          <div className="text-sm text-gray-500">No reservations yet.</div>
+          <div className="text-sm text-gray-500 flex items-center justify-between">
+            <span>No reservations yet.</span>
+            <a href={createPageUrl('ReservePlot')} className="inline-flex items-center gap-1 text-teal-700 underline">
+              <Plus className="w-4 h-4" /> Reserve a Plot
+            </a>
+          </div>
         ) : (
           q.data.map((r) => (
             <div key={r.id} className="border rounded-md p-3 flex items-start justify-between gap-3">
@@ -54,16 +59,26 @@ export default function ReservationHistory() {
                 {r.signed_documents?.length > 0 && (
                   <div className="mt-1 text-xs text-gray-600 flex flex-wrap gap-2">
                     {r.signed_documents.map((d) => (
-                      <a key={d.id || d.file_uri} className="inline-flex items-center gap-1 underline" href={awaitSignedUrl(d.file_uri)} target="_blank" rel="noreferrer">
+                      <button
+                        key={d.id || d.file_uri}
+                        type="button"
+                        onClick={async () => {
+                          const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: d.file_uri, expires_in: 300 });
+                          if (signed_url) window.open(signed_url, '_blank', 'noopener');
+                        }}
+                        className="inline-flex items-center gap-1 underline"
+                      >
                         <ExternalLink className="w-3 h-3" /> {d.name || 'Signed Doc'}
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 {r.payment_status !== 'Paid' && r.status !== 'Rejected' && (
-                  <Button disabled title="Payment setup pending" variant="outline">Pay Now</Button>
+                  <Button title="Pay via Stripe (setup pending)" variant="default" className="gap-1" disabled>
+                    <CreditCard className="w-4 h-4" /> Pay Now
+                  </Button>
                 )}
               </div>
             </div>
