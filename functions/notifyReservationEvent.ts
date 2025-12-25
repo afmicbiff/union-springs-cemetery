@@ -50,10 +50,9 @@ function makeEmail(event, reservation, extra = {}) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Best-effort user detection; proceed even without user (service role will be used for emails)
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
 
     const payload = await req.json();
     const { event, reservationId, status } = payload || {};
@@ -70,7 +69,7 @@ Deno.serve(async (req) => {
     // Send to requester
     const { subject, body } = makeEmail(event, reservation, { status });
     if (reservation.requester_email) {
-      await base44.integrations.Core.SendEmail({ to: reservation.requester_email, subject, body });
+      await base44.asServiceRole.integrations.Core.SendEmail({ to: reservation.requester_email, subject, body });
     }
 
     // Admin notification on new submission
