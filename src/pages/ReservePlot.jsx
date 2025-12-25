@@ -1,0 +1,227 @@
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import SignaturePad from '../components/common/SignaturePad';
+import { Loader2, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+
+export default function ReservePlot() {
+  const queryClient = useQueryClient();
+  const [step, setStep] = React.useState(1);
+  const [selected, setSelected] = React.useState(null);
+  const [signed, setSigned] = React.useState(false);
+  const [sigFileUri, setSigFileUri] = React.useState(null);
+  const [filters, setFilters] = React.useState({ search: '', section: 'All' });
+  const [form, setForm] = React.useState({
+    request_for: 'self',
+    family_member_name: '',
+    requester_name: '',
+    requester_phone: '',
+    requester_phone_secondary: '',
+    donation_amount: '',
+    notes: ''
+  });
+
+  React.useEffect(() => {
+    (async () => {
+      const isAuth = await base44.auth.isAuthenticated();
+      if (!isAuth) {
+        base44.auth.redirectToLogin(window.location.pathname + window.location.search);
+        return;
+      }
+    })();
+  }, []);
+
+  const { data: user } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
+
+  const plots = useQuery({
+    queryKey: ['available-plots'],
+    queryFn: async () => base44.entities.NewPlot.filter({ status: 'Available' }, 'plot_number', 500),
+    initialData: []
+  });
+
+  React.useEffect(() => {
+    if (user && !form.requester_name) {
+      setForm((p) => ({ ...p, requester_name: user.full_name || '' }));
+    }
+  }, [user]);
+
+  const createReservation = useMutation({
+    mutationFn: async (payload) => base44.entities.NewPlotReservation.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-reservations', user?.email] });
+      setStep(3);
+    }
+  });
+
+  const filtered = (plots.data || []).filter((r) => {
+    const q = filters.search.trim().toLowerCase();
+    const matchQ = !q || [r.plot_number, r.first_name, r.last_name, r.family_name, r.row_number, r.section].some(v => String(v || '').toLowerCase().includes(q));
+    const sectionOk = filters.section === 'All' || String(r.section || '').replace(/Section\s*/i,'').trim() === filters.section.replace(/Section\s*/i,'').trim();
+    return matchQ && sectionOk;
+  });
+
+  const sections = React.useMemo(() => {
+    const s = new Set();
+    (plots.data || []).forEach(p => { const v = String(p.section || '').replace(/Section\s*/i,'').trim(); if (v) s.add(v); });
+    return ['All', ...Array.from(s).sort((a,b)=>a.localeCompare(b))];
+  }, [plots.data]);
+
+  const uploadSignature = async () => {
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return null;
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+    const file = new File([blob], 'signature.png', { type: 'image/png' });
+    const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+    setSigFileUri(file_uri);
+    return file_uri;
+  };
+
+  const handleSubmit = async () => {
+    const required = [selected?.id, form.requester_name, user?.email, form.requester_phone];
+    if (required.some(v => !String(v || '').trim())) {
+      alert('Please complete required fields and select a plot.');
+      return;
+    }
+    let doc = null;
+    if (signed) {
+      doc = await uploadSignature();
+    }
+    await createReservation.mutateAsync({
+      new_plot_id: selected.id,
+      request_for: form.request_for,
+      family_member_name: form.request_for === 'family_member' ? form.family_member_name : '',
+      requester_name: form.requester_name,
+      requester_email: user.email,
+      requester_phone: form.requester_phone,
+      requester_phone_secondary: form.requester_phone_secondary,
+      donation_amount: form.donation_amount ? Number(form.donation_amount) : undefined,
+      notes: form.notes || '',
+      requested_date: new Date().toISOString().slice(0,10),
+      status: 'Pending Review',
+      payment_status: 'Pending',
+      signed_documents: doc ? [{ id: crypto.randomUUID(), name: 'Signature', file_uri: doc, uploaded_at: new Date().toISOString() }] : []
+    });
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-50 p-6">
+      <div className="max-w-5xl mx-auto space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Reserve a Plot</CardTitle>
+            <CardDescription>Guided application: select a plot, complete paperwork, and submit. Payment/signature provider setup pending.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2 mb-4 text-sm">
+              <span className={`px-2 py-1 rounded ${step===1? 'bg-teal-600 text-white':'bg-gray-100'}`}>1. Select Plot</span>
+              <span className="text-gray-400">→</span>
+              <span className={`px-2 py-1 rounded ${step===2? 'bg-teal-600 text-white':'bg-gray-100'}`}>2. Paperwork & Signature</span>
+              <span className="text-gray-400">→</span>
+              <span className={`px-2 py-1 rounded ${step===3? 'bg-teal-600 text-white':'bg-gray-100'}`}>3. Submitted</span>
+            </div>
+
+            {step === 1 && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <Input placeholder="Search by plot, name, row…" value={filters.search} onChange={(e)=>setFilters({...filters, search: e.target.value})} />
+                  <Select value={filters.section} onValueChange={(v)=>setFilters({...filters, section: v})}>
+                    <SelectTrigger><SelectValue placeholder="Section" /></SelectTrigger>
+                    <SelectContent>
+                      {sections.map((s)=> (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" onClick={()=>plots.refetch()}>Refresh</Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-auto">
+                  {(filtered || []).map((r)=> (
+                    <button key={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600' : ''}`}>
+                      <div className="text-sm font-medium">Section {r.section || '-'} • Row {r.row_number || '-'} • Plot {r.plot_number || '-'}</div>
+                      <div className="text-xs text-gray-600">{[r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || 'Unnamed'}</div>
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={()=>setStep(2)} disabled={!selected} className="gap-2">
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-4">
+                <div className="p-3 rounded bg-gray-50 text-sm">Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-gray-600">Reservation For</label>
+                    <Select value={form.request_for} onValueChange={(v)=>setForm({...form, request_for: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">Self</SelectItem>
+                        <SelectItem value="family_member">Family Member</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {form.request_for === 'family_member' && (
+                    <div>
+                      <label className="text-xs text-gray-600">Family Member Name</label>
+                      <Input value={form.family_member_name} onChange={(e)=>setForm({...form, family_member_name: e.target.value})} />
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-xs text-gray-600">Your Full Name</label>
+                    <Input value={form.requester_name} onChange={(e)=>setForm({...form, requester_name: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600">Email</label>
+                    <Input value={user?.email || ''} disabled />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600">Phone</label>
+                    <Input value={form.requester_phone} onChange={(e)=>setForm({...form, requester_phone: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600">Phone (Secondary)</label>
+                    <Input value={form.requester_phone_secondary} onChange={(e)=>setForm({...form, requester_phone_secondary: e.target.value})} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600">Donation / Plot Fee (USD)</label>
+                    <Input type="number" value={form.donation_amount} onChange={(e)=>setForm({...form, donation_amount: e.target.value})} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs text-gray-600">Notes</label>
+                    <Textarea value={form.notes} onChange={(e)=>setForm({...form, notes: e.target.value})} />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium mb-1">Signature</div>
+                  <SignaturePad onChange={setSigned} />
+                  <p className="text-xs text-gray-500 mt-1">By signing, you acknowledge the Cemetery Rules & Regulations and the conditions of reservation under Louisiana law.</p>
+                </div>
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={()=>setStep(1)} className="gap-2"><ArrowLeft className="w-4 h-4" /> Back</Button>
+                  <Button onClick={handleSubmit} disabled={createReservation.isPending} className="gap-2">
+                    {createReservation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />} Submit Application
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+                <CheckCircle2 className="w-10 h-10 text-green-600" />
+                <div className="text-lg font-semibold">Application submitted</div>
+                <div className="text-sm text-gray-600">We will review your request. You can track status in your Member Portal under Reservations.</div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

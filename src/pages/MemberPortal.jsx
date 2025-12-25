@@ -69,6 +69,9 @@ export default function MemberPortal() {
                         <Receipt className="w-4 h-4 mr-2 md:inline hidden" /> Invoices
                     </TabsTrigger>
                 </TabsList>
+        <TabsContent value="reservations">
+          {user ? <ReservationHistory /> : <div className="text-sm text-gray-500 p-4">Please log in to view your reservations.</div>}
+        </TabsContent>
 
                 <TabsContent value="dashboard" className="focus-visible:outline-none">
                     <MemberDashboard user={user} setActiveTab={setActiveTab} />

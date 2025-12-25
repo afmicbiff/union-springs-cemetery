@@ -18,6 +18,7 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import ReservePlot from './pages/ReservePlot';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
+    "ReservePlot": ReservePlot,
 }
 
 export const pagesConfig = {
