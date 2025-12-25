@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import SignaturePad from '../components/common/SignaturePad';
 import { Loader2, CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 export default function ReservePlot() {
   const queryClient = useQueryClient();
@@ -37,6 +38,16 @@ export default function ReservePlot() {
   }, []);
 
   const { data: user } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
+
+  const member = useQuery({
+    queryKey: ['memberByEmail', user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const list = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+      return list?.[0] || null;
+    },
+    initialData: null
+  });
 
   const plots = useQuery({
     queryKey: ['available-plots'],
@@ -125,7 +136,17 @@ export default function ReservePlot() {
               <span className={`px-2 py-1 rounded ${step===3? 'bg-teal-600 text-white':'bg-gray-100'}`}>3. Submitted</span>
             </div>
 
-            {step === 1 && (
+            {/* Require Member profile on file */}
+            {(!member.isLoading && !member.data) ? (
+              <div className="space-y-3">
+                <div className="p-4 border rounded bg-amber-50 text-amber-900">
+                  Please complete your Member Profile before requesting a reservation so we have your contact details.
+                </div>
+                <div className="flex justify-end">
+                  <a href={createPageUrl('MemberPortal')} className="underline text-teal-700">Go to Member Portal</a>
+                </div>
+              </div>
+            ) : step === 1 && (
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <Input placeholder="Search by plot, name, row…" value={filters.search} onChange={(e)=>setFilters({...filters, search: e.target.value})} />
