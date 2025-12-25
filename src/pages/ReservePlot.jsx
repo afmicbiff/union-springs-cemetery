@@ -26,6 +26,12 @@ export default function ReservePlot() {
     donation_amount: '',
     notes: ''
   });
+  const [acks, setAcks] = React.useState({
+    rights: false, rightsDate: '',
+    rules: false, rulesDate: '',
+    fees: false, feesDate: ''
+  });
+  const [ackErrors, setAckErrors] = React.useState({});
 
   React.useEffect(() => {
     (async () => {
@@ -94,8 +100,17 @@ export default function ReservePlot() {
 
   const handleSubmit = async () => {
     const required = [selected?.id, form.requester_name, user?.email, form.requester_phone];
-    if (required.some(v => !String(v || '').trim())) {
-      alert('Please complete required fields and select a plot.');
+    const ackMissing = {
+      rights: !acks.rights,
+      rightsDate: !acks.rightsDate,
+      rules: !acks.rules,
+      rulesDate: !acks.rulesDate,
+      fees: !acks.fees,
+      feesDate: !acks.feesDate,
+    };
+    if (required.some(v => !String(v || '').trim()) || Object.values(ackMissing).some(Boolean)) {
+      setAckErrors(ackMissing);
+      alert('Please complete all required fields, acknowledgements, and dates.');
       return;
     }
     let doc = null;
@@ -115,6 +130,12 @@ export default function ReservePlot() {
       requested_date: new Date().toISOString().slice(0,10),
       status: 'Pending Review',
       payment_status: 'Pending',
+      ack_rights: acks.rights,
+      ack_rights_date: acks.rightsDate,
+      ack_rules: acks.rules,
+      ack_rules_date: acks.rulesDate,
+      ack_fees: acks.fees,
+      ack_fees_date: acks.feesDate,
       signed_documents: doc ? [{ id: crypto.randomUUID(), name: 'Signature', file_uri: doc, uploaded_at: new Date().toISOString() }] : []
     });
   };
@@ -219,6 +240,119 @@ export default function ReservePlot() {
                     <Textarea value={form.notes} onChange={(e)=>setForm({...form, notes: e.target.value})} />
                   </div>
                 </div>
+
+                {/* Documents Acknowledgements */}
+                <div className="space-y-6 mt-2">
+                  {/* Rights Document */}
+                  <div className={`border rounded p-3 ${ackErrors.rights || ackErrors.rightsDate ? 'border-red-500' : 'border-gray-200'}`}>
+                    <div className="font-medium mb-2">Rights for purchaser and rights Union Springs Cemetery</div>
+                    <div className="max-h-40 overflow-auto text-sm text-gray-700 space-y-2">
+                      <p>The Louisiana Cemetery Act (Title 8) governs these rights.</p>
+                      <p className="font-semibold">1. Rights of the Purchaser (Grantee)</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Right of Interment (exclusive use of the designated space).</li>
+                        <li>Right of Succession/Descent to heirs if not otherwise willed.</li>
+                        <li>Right to Memorialize, subject to cemetery rules.</li>
+                        <li>Right of Access during open hours and in accordance with rules.</li>
+                        <li>Right to Care as promised (e.g., maintenance; if perpetual care, via trust).</li>
+                      </ul>
+                      <p className="font-semibold">2. Rights of the Cemetery (Grantor)</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Right to Regulate (markers, decorations, hours, conduct) under La. R.S. 8:308.</li>
+                        <li>Right to Collect Fees (opening/closing, monument setting, transfers).</li>
+                        <li>Right to Rectify Errors in good faith.</li>
+                        <li>Right to Reclaim Abandoned Plots per statute after diligent search.</li>
+                        <li>Right of Refusal absent required permits or unpaid fees.</li>
+                      </ul>
+                    </div>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                      <label className="text-sm flex items-center gap-2">
+                        <input type="checkbox" checked={acks.rights} onChange={(e)=>{ setAcks({...acks, rights: e.target.checked}); if (ackErrors.rights) setAckErrors(prev=>({...prev, rights: false})); }} />
+                        I have read and understand this document.
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Signature date</span>
+                        <Input type="date" value={acks.rightsDate} onChange={(e)=>{ setAcks({...acks, rightsDate: e.target.value}); if (ackErrors.rightsDate) setAckErrors(prev=>({...prev, rightsDate: false})); }} className={ackErrors.rightsDate ? 'border-red-500' : ''} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rules & Regulations */}
+                  <div className={`border rounded p-3 ${ackErrors.rules || ackErrors.rulesDate ? 'border-red-500' : 'border-gray-200'}`}>
+                    <div className="font-medium mb-2">Rules and Regulations (Union Springs Cemetery)</div>
+                    <div className="max-h-40 overflow-auto text-sm text-gray-700 space-y-2">
+                      <p className="font-semibold">I. General Supervision</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Management may enforce rules and close grounds as needed.</li>
+                        <li>Admission during posted hours; trespass after dark.</li>
+                        <li>Prohibitions: boisterous/profane language, loitering, alcohol/drugs.</li>
+                      </ul>
+                      <p className="font-semibold">II. Interments and Funerals</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Advance notice required; Burial Transit Permit/cremation certificate required.</li>
+                        <li>Approved vault/liner required; only designated personnel may open/close graves.</li>
+                      </ul>
+                      <p className="font-semibold">III. Decoration of Plots (Strictly Enforced)</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Flowers allowed; unsightly items removed at management discretion; scheduled cleanups.</li>
+                        <li>Prohibited: glass/ceramics, solar lights, metal rods/hooks, loose stones/coping.</li>
+                        <li>No planting without approval; obstructions may be removed.</li>
+                      </ul>
+                      <p className="font-semibold">IV. Memorials and Monuments</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Granite/marble/bronze only; foundation required; cemetery approves size/location.</li>
+                        <li>No liability for vandalism or unavoidable damage.</li>
+                      </ul>
+                      <p className="font-semibold">V. Correction of Errors</p>
+                      <p>The cemetery may correct errors by relocating remains to an equivalent plot.</p>
+                    </div>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                      <label className="text-sm flex items-center gap-2">
+                        <input type="checkbox" checked={acks.rules} onChange={(e)=>{ setAcks({...acks, rules: e.target.checked}); if (ackErrors.rules) setAckErrors(prev=>({...prev, rules: false})); }} />
+                        I have read and understand these rules.
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Signature date</span>
+                        <Input type="date" value={acks.rulesDate} onChange={(e)=>{ setAcks({...acks, rulesDate: e.target.value}); if (ackErrors.rulesDate) setAckErrors(prev=>({...prev, rulesDate: false})); }} className={ackErrors.rulesDate ? 'border-red-500' : ''} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Schedule of Fees */}
+                  <div className={`border rounded p-3 ${ackErrors.fees || ackErrors.feesDate ? 'border-red-500' : 'border-gray-200'}`}>
+                    <div className="font-medium mb-2">Schedule of Fees and Charges</div>
+                    <div className="max-h-40 overflow-auto text-sm text-gray-700 space-y-2">
+                      <p>Effective date: [Month, Day, Year]. All fees due prior to interment.</p>
+                      <p className="font-semibold">I. Interment Rights (Purchase of Plot)</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Standard Adult Plot: $500.00</li>
+                        <li>Cremation Plot / Infant Plot / Second Right of Interment: see current schedule.</li>
+                        <li>Donation option ($400+) subject to Board approval.</li>
+                      </ul>
+                      <p className="font-semibold">II. Opening and Closing Services</p>
+                      <p>Weekday/Weekend/Holiday surcharges may apply; late arrival hourly charges.</p>
+                      <p className="font-semibold">III. Memorialization & Administrative Fees</p>
+                      <p>Marker permit/inspection, deed transfer, duplicate deed per schedule.</p>
+                      <p className="font-semibold">IV. Payment Policies</p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Accepted forms: Cash, Cashier’s Check, Money Order; personal checks pre-need only.</li>
+                        <li>No credit; all fees must be paid before burial.</li>
+                        <li>Perpetual care deposits may apply.</li>
+                      </ul>
+                    </div>
+                    <div className="mt-2 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+                      <label className="text-sm flex items-center gap-2">
+                        <input type="checkbox" checked={acks.fees} onChange={(e)=>{ setAcks({...acks, fees: e.target.checked}); if (ackErrors.fees) setAckErrors(prev=>({...prev, fees: false})); }} />
+                        I have read and understand the fee schedule.
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-600">Signature date</span>
+                        <Input type="date" value={acks.feesDate} onChange={(e)=>{ setAcks({...acks, feesDate: e.target.value}); if (ackErrors.feesDate) setAckErrors(prev=>({...prev, feesDate: false})); }} className={ackErrors.feesDate ? 'border-red-500' : ''} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <div className="text-sm font-medium mb-1">Signature</div>
                   <SignaturePad onChange={setSigned} />
