@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, CreditCard, Plus } from "lucide-react";
+import { createPageUrl } from "@/utils";
 
 const statusColor = (s) => ({
   "Pending": "bg-amber-100 text-amber-800",
@@ -47,7 +48,7 @@ export default function ReservationHistory() {
           q.data.map((r) => (
             <div key={r.id} className="border rounded-md p-3 flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <div className="text-sm font-medium">Section {r.section || "-"} • Plot {r.plot_number || "-"}</div>
+                <div className="text-sm font-medium">Plot ID: {r.new_plot_id || '-'}</div>
                 <div className="text-xs text-gray-600">Requested: {r.requested_date || "-"}</div>
                 <div className="flex flex-wrap gap-2 mt-1">
                   <Badge className={statusColor(r.status)}>{r.status}</Badge>

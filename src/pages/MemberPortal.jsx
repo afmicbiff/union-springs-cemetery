@@ -71,9 +71,7 @@ export default function MemberPortal() {
                     </TabsTrigger>
                     <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">Reservations</TabsTrigger>
                 </TabsList>
-        <TabsContent value="reservations">
-          {user ? <ReservationHistory /> : <div className="text-sm text-gray-500 p-4">Please log in to view your reservations.</div>}
-        </TabsContent>
+
 
                 <TabsContent value="dashboard" className="focus-visible:outline-none">
                     <MemberDashboard user={user} setActiveTab={setActiveTab} />
