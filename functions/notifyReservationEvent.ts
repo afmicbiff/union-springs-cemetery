@@ -45,7 +45,7 @@ function makeEmail(event, reservation, extra = {}) {
     case 'signature_request':
       return {
         subject: 'Action Required: Please Sign Your Certificate',
-        body: `Hello ${who},\n\nPlease log in to your Member Portal to review and digitally sign your Certificate of Interment Rights.\n${plot}\nLink: ${globalThis?.location?.origin || ''}/#/MemberPortal?tab=reservations\n\n— ${title}`,
+        body: `Hello ${who},\n\nPlease log in to your Member Portal and navigate to Reservations to review and digitally sign your Certificate of Interment Rights.\n${plot}\n\n— ${title}`,
       };
     default:
       return { subject: 'Notification', body: 'Update regarding your reservation.' };
