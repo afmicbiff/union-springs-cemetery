@@ -1481,37 +1481,30 @@ export default function PlotsPage() {
                                                 })()}
                                             </div>
                                         ) : (
-                                            {(() => {
-                                                const items = sections[sectionKey] || [];
-                                                const showAll = !!expandedSections[sectionKey];
-                                                const visible = showAll ? items : items.slice(0, 120);
-                                                return (
-                                                    <>
-                                                        <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                                            {visible.map((plot) => (
-                                                                <GravePlot 
-                                                                    key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                                    data={plot} 
-                                                                    baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                        {!showAll && items.length > 120 && (
-                                                            <div className="mt-3">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setExpandedSections(prev => ({ ...prev, [sectionKey]: true }))}
-                                                                    className="text-sm text-teal-700 hover:underline"
-                                                                >
-                                                                    Show more ({items.length - 120} more)
-                                                                </button>
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
+                                            <>
+                                                <div className="flex flex-col-reverse gap-2 content-center items-center">
+                                                    {(expandedSections[sectionKey] ? (sections[sectionKey] || []) : (sections[sectionKey] || []).slice(0, 120)).map((plot) => (
+                                                        <GravePlot 
+                                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                            data={plot} 
+                                                            baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                            onHover={handleHover}
+                                                            onEdit={isAdmin ? handleEditClick : undefined}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                {!expandedSections[sectionKey] && ((sections[sectionKey]?.length || 0) > 120) && (
+                                                    <div className="mt-3">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setExpandedSections(prev => ({ ...prev, [sectionKey]: true }))}
+                                                            className="text-sm text-teal-700 hover:underline"
+                                                        >
+                                                            Show more ({(sections[sectionKey]?.length || 0) - 120} more)
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 )}
