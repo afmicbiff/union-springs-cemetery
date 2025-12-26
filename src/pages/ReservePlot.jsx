@@ -80,7 +80,7 @@ export default function ReservePlot() {
     const el = document.querySelector(`[data-plot-id="${selected.id}"]`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('ring-2','ring-teal-600','bg-teal-50');
+      el.classList.add('border-2','border-teal-200','bg-teal-50');
       setTimeout(() => el.classList.remove('bg-teal-50'), 1500);
     }
   }, [step, selected]);
@@ -223,7 +223,7 @@ export default function ReservePlot() {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-auto">
                   {(filtered || []).map((r)=> (
-                    <button key={r.id} data-plot-id={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600 bg-teal-50' : ''}`}>
+                    <button key={r.id} data-plot-id={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'border-2 border-teal-200 bg-teal-50' : ''}`}>
                       <div className="text-sm font-medium">Section {r.section || '-'} • Row {r.row_number || '-'} • Plot {r.plot_number || '-'}</div>
                       <div className="text-xs text-gray-600">{[r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || 'Unnamed'}</div>
                     </button>
