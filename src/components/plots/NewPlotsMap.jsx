@@ -5,6 +5,7 @@ import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Fuse from "fuse.js";
+import debounce from "lodash/debounce";
 
 const STATUS_COLORS = {
         Available: "bg-green-500",
@@ -19,7 +20,19 @@ const STATUS_COLORS = {
 
 export default function NewPlotsMap({ batchId, filters = { status: 'All', section: 'All' }, showSearch = true, onPlotClick }) {
   const [query, setQuery] = React.useState("");
+  const [searchInput, setSearchInput] = React.useState("");
+  const deferredQuery = React.useDeferredValue(query);
+  const debouncedSetQuery = React.useMemo(() => debounce((v) => setQuery(v), 250), []);
   const [fuzzyResults, setFuzzyResults] = React.useState(null);
+  const [expandedSections, setExpandedSections] = React.useState({});
+
+  // Debounce search input to avoid blocking UI while typing
+  React.useEffect(() => {
+    debouncedSetQuery(searchInput);
+    return () => {
+      if (debouncedSetQuery.cancel) debouncedSetQuery.cancel();
+    };
+  }, [searchInput, debouncedSetQuery]);
   const rowsQuery = useQuery({
     queryKey: ["newPlots-map", batchId],
     enabled: !!batchId,
@@ -30,9 +43,11 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
   // Sync external search into local fuzzy query
   React.useEffect(() => {
     if (filters && Object.prototype.hasOwnProperty.call(filters, 'search')) {
-      setQuery((filters.search || '').toString());
+      const v = (filters.search || '').toString();
+      setSearchInput(v);
+      debouncedSetQuery(v);
     }
-  }, [filters?.search]);
+  }, [filters?.search, debouncedSetQuery]);
 
   const fuse = React.useMemo(() => {
     const list = rowsQuery.data || [];
@@ -54,38 +69,14 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     if (onPlotClick) {
       onPlotClick(row);
     } else {
+      // Avoid hard navigation when possible; fallback only if no handler provided
       window.location.href = createPageUrl('NewPlotDetails') + `?id=${row.id}`;
     }
   }, [onPlotClick]);
 
   const grouped = React.useMemo(() => {
-    const g = {};
-    (rowsQuery.data || []).forEach((r) => {
-      const rowStrRaw = String(r.row_number || '').toUpperCase();
-      const cleanedRow = rowStrRaw.replace(/^(ROW|SECTION)\s*:?\s*/i, '').trim();
-      let letterMatch = cleanedRow.match(/[A-Z]/);
-      const plotStr = String(r.plot_number || '').toUpperCase();
-      if (!letterMatch && plotStr) letterMatch = plotStr.match(/[A-Z]/);
-      const sectionKey = (r.section || 'Unassigned').replace(/Section\s*/i, '').trim() || 'Unassigned';
-      const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
-      if (!g[key]) g[key] = [];
-      g[key].push(r);
-    });
-
-    Object.keys(g).forEach((k) => {
-      if (!g[k] || g[k].length === 0) {
-        delete g[k];
-        return;
-      }
-      g[k].sort((a, b) => {
-        const na = parseInt(String(a.plot_number).replace(/\D/g, "")) || 0;
-        const nb = parseInt(String(b.plot_number).replace(/\D/g, "")) || 0;
-        if (na !== nb) return na - nb;
-        return String(a.plot_number).localeCompare(String(b.plot_number));
-      });
-    });
-
-    const baseList = query.trim()
+    // Build base list from deferred fuzzy results or all data
+    const baseList = (deferredQuery && deferredQuery.trim())
       ? (fuzzyResults || []).map(r => r.item)
       : (rowsQuery.data || []);
 
@@ -111,7 +102,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
       return statusOk && sectionOk && ownerOk && plotOk;
     });
 
-    // Rebuild groups from filtered list
+    // Group filtered list
     const g2 = {};
     filtered.forEach((r) => {
       const rowStrRaw = String(r.row_number || '').toUpperCase();
@@ -135,14 +126,14 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     });
 
     return g2;
-  }, [rowsQuery.data, query, fuzzyResults, filters]);
+  }, [rowsQuery.data, deferredQuery, fuzzyResults, filters]);
 
   React.useEffect(() => {
-    if (!query.trim()) { setFuzzyResults(null); return; }
-    const q = query.trim();
+    if (!deferredQuery.trim()) { setFuzzyResults(null); return; }
+    const q = deferredQuery.trim();
     const results = fuse.search(q);
     setFuzzyResults(results);
-  }, [query, fuse]);
+  }, [deferredQuery, fuse]);
 
   // Always render consistently to avoid hook order changes
   const noBatchContent = (
@@ -187,8 +178,8 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search plot # or name (e.g., 118 or Smith)"
               className="pl-8"
             />
@@ -570,23 +561,43 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                       <h3 className="text-xl font-semibold text-gray-900">Section {section}</h3>
                       <span className="text-xs text-gray-500">{grouped[section].length} plots</span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                      {grouped[section].map((r) => {
-                        const key = r.id;
-                        const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
-                        const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
-                        return (
-                          <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
-                            <div className="flex items-center justify-between">
-                              <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                              <span className={`w-3 h-3 rounded-full ${bg}`}></span>
-                            </div>
-                            <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
-                            <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                    {(() => {
+                      const items = grouped[section] || [];
+                      const showAll = !!expandedSections[section];
+                      const visible = showAll ? items : items.slice(0, 96);
+                      return (
+                        <>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                            {visible.map((r) => {
+                              const key = r.id;
+                              const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
+                              const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                              return (
+                                <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
+                                  <div className="flex items-center justify-between">
+                                    <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
+                                    <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                  </div>
+                                  <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
+                                  <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
+                          {!showAll && items.length > 96 && (
+                            <div className="mt-3">
+                              <button
+                                type="button"
+                                onClick={() => setExpandedSections(prev => ({ ...prev, [section]: true }))}
+                                className="text-sm text-teal-700 hover:underline"
+                              >
+                                Show more ({items.length - 96} more)
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 );
               })
