@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Loader2, Send, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Loader2, Send, CheckCircle2, Map, Search } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { createPageUrl } from '@/utils';
+import { Link } from 'react-router-dom';
 import { toast } from "sonner";
 
 export default function ContactPage() {
@@ -56,6 +58,7 @@ export default function ContactPage() {
                             <p className="text-stone-600 text-lg leading-relaxed">
                                 Whether you have questions about plot availability, genealogy services, or memorial planning, our compassionate staff is here to assist you.
                             </p>
+                            <p className="mt-2 text-stone-700">Need assistance locating a loved one? Our board is here to help.</p>
                         </div>
 
                         <div className="grid gap-6">
@@ -104,6 +107,25 @@ export default function ContactPage() {
                                 </CardContent>
                             </Card>
                         </div>
+
+                        <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
+                            <CardContent className="p-4 sm:p-6">
+                                <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800 mb-2">Contact the Administrator of the Grounds</h3>
+                                <p className="text-stone-600 text-sm sm:text-base mb-4">Quick links to help you find what you need:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <Link to={createPageUrl('Plots')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
+                                        <Map className="w-4 h-4 text-teal-700" /> Old Cemetery Plots and Maps
+                                    </Link>
+                                    <Link to={createPageUrl('Search')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
+                                        <Search className="w-4 h-4 text-teal-700" /> Search Deceased Records
+                                    </Link>
+                                    <Link to={createPageUrl('NewPlotsAndMap')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
+                                        <Map className="w-4 h-4 text-teal-700" /> New Cemetery Plots and Maps
+                                    </Link>
+                                </div>
+                            </CardContent>
+                        </Card>
+
                     </div>
 
                     {/* Contact Form */}
