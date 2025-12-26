@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Wrench } from 'lucide-react';
+import { FileText, Wrench, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import PlotMaintenancePanel from "./PlotMaintenancePanel";
+import MaintenanceWizard from "./MaintenanceWizard";
 import { format } from 'date-fns';
 import AdminPlotMap from "./AdminPlotMap";
 
@@ -24,6 +27,7 @@ export default function AdminPlots() {
     const [bulkStatus, setBulkStatus] = React.useState('');
     const [quickView, setQuickView] = React.useState(null);
     const [maintenanceFor, setMaintenanceFor] = React.useState(null);
+    const [wizardOpen, setWizardOpen] = React.useState(false);
     const queryClient = useQueryClient();
 
     // Auto-run reservation expiry check hourly
@@ -52,8 +56,23 @@ export default function AdminPlots() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Plot Inventory</CardTitle>
-                <CardDescription>Manage capacity (urns/caskets), liners/vaults, and status.</CardDescription>
+                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <CardTitle>Plot Inventory</CardTitle>
+                        <CardDescription>Manage capacity (urns/caskets), liners/vaults, and status.</CardDescription>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Link to={createPageUrl('Plots')}>
+                            <Button variant="outline" className="h-8">Show Old Plots & Map</Button>
+                        </Link>
+                        <Link to={createPageUrl('NewPlotsAndMap')}>
+                            <Button variant="outline" className="h-8">Show New Plot Reservations</Button>
+                        </Link>
+                        <Button className="h-8 bg-teal-700 hover:bg-teal-800" onClick={()=>setWizardOpen(true)}>
+                            <Plus className="w-4 h-4 mr-1" /> Add Maintenance
+                        </Button>
+                    </div>
+                </div>
             </CardHeader>
             <CardContent>
                 {/* Filters & Bulk Actions */}
@@ -243,6 +262,9 @@ export default function AdminPlots() {
                         )}
                     </DialogContent>
                 </Dialog>
+
+                {/* Maintenance Wizard */}
+                <MaintenanceWizard open={wizardOpen} onOpenChange={setWizardOpen} />
 
             </CardContent>
         </Card>
