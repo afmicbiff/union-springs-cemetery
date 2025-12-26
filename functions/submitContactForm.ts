@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { z } from 'npm:zod@3.24.2';
 
 Deno.serve(async (req) => {
     try {
@@ -9,11 +10,31 @@ Deno.serve(async (req) => {
             return new Response(null, { status: 204 });
         }
 
-        const { name, email, subject, message } = await req.json();
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
+        const ua = req.headers.get('user-agent') || '';
 
-        if (!name || !email || !message) {
-            return Response.json({ error: 'Missing required fields' }, { status: 400 });
-        }
+        const body = await req.json();
+        const Schema = z.object({
+            name: z.string().min(2).max(120),
+            email: z.string().email(),
+            subject: z.string().max(200).optional().nullable(),
+            message: z.string().min(10).max(5000)
+        });
+        const { name, email, subject, message } = Schema.parse(body);
+
+        // Record security event for visibility (rate limiting can be added later)
+        try {
+            const base44ForLog = createClientFromRequest(req);
+            await base44ForLog.asServiceRole.entities.SecurityEvent.create({
+                event_type: 'contact_form_submission',
+                severity: 'info',
+                message: `Contact form submission from ${email}`,
+                ip_address: ip,
+                user_agent: ua,
+                user_email: null,
+                route: 'functions/submitContactForm'
+            });
+        } catch (_) {}
 
         // 1. Send notification to Admin
         // Using a placeholder admin email - in production this would be the actual office email
@@ -70,6 +91,19 @@ The Union Springs Cemetery Team
 
         return Response.json({ success: true });
     } catch (error) {
+        try {
+            const base44ForLog = createClientFromRequest(req);
+            const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
+            const ua = req.headers.get('user-agent') || '';
+            await base44ForLog.asServiceRole.entities.SecurityEvent.create({
+                event_type: 'input_validation_error',
+                severity: 'medium',
+                message: error.message || 'Contact form validation error',
+                ip_address: ip,
+                user_agent: ua,
+                route: 'functions/submitContactForm'
+            });
+        } catch (_) {}
         console.error("Contact form error:", error);
         return Response.json({ error: error.message }, { status: 500 });
     }

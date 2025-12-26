@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock } from 'lucide-react';
+import SecurityMonitor from './SecurityMonitor';
 
 export default function AdminSecurity() {
     return (
@@ -46,6 +47,8 @@ export default function AdminSecurity() {
                     <strong>Security Tip:</strong> When downloading reports containing personal information (names, donations), 
                     ensure they are stored in encrypted folders on your personal device.
                 </div>
+
+                <SecurityMonitor />
             </CardContent>
         </Card>
     );
