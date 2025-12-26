@@ -81,7 +81,6 @@ export default function NewPlotsAndMap() {
                 </button>
               </div>
               {isAdmin && (<NewPlotsImport />)}
-              <Button onClick={() => setShowRequest(true)} className="bg-teal-600 hover:bg-teal-700 text-white">Request a Plot</Button>
               <Link to={createPageUrl('Plots')}>
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
               </Link>
@@ -103,6 +102,14 @@ export default function NewPlotsAndMap() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
+          <div className="flex items-center justify-center gap-3">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-700 text-white text-xs sm:text-sm shadow">
+              Click on the plot to start the reservation process.
+            </span>
+            <Button variant="outline" onClick={() => setShowRequest(true)} className="text-teal-800 border-teal-700 hover:bg-teal-50">
+              Request a Plot
+            </Button>
+          </div>
           <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} />
         </div>
       </main>

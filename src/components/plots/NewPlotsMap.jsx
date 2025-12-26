@@ -212,9 +212,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                 <span className="text-xs text-gray-700 font-medium">{label}</span>
               </div>
             ))}
-            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
-              <span className="text-xs text-gray-700 font-medium">Click on the plot to start the reservation process.</span>
-            </div>
+
           </div>
 
           {/* Sections */}
