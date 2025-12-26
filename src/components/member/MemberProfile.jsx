@@ -73,7 +73,8 @@ export default function MemberProfile({ user }) {
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries(['member-profile']);
+            // Invalidate all queries starting with this key (covers dashboard and profile tabs)
+            queryClient.invalidateQueries({ queryKey: ['member-profile'] });
             toast.success("Profile updated successfully");
         },
         onError: (err) => {

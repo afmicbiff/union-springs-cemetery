@@ -12,10 +12,11 @@ export default function MemberDashboard({ user, setActiveTab }) {
     const { data: memberData } = useQuery({
         queryKey: ['member-profile', user.email],
         queryFn: async () => {
-            const res = await base44.entities.Member.list({ email_primary: user.email }, 1);
-            return res[0] || null;
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+            return res?.[0] || null;
         },
-        enabled: !!user.email
+        enabled: !!user.email,
+        initialData: null
     });
 
     // Fetch Reservations (Plots)
