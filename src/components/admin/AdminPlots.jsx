@@ -7,19 +7,29 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileText, Wrench, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import PlotMaintenancePanel from "./PlotMaintenancePanel";
 import MaintenanceWizard from "./MaintenanceWizard";
 import { format } from 'date-fns';
 import AdminPlotMap from "./AdminPlotMap";
 
 export default function AdminPlots() {
-    const { data: plots } = useQuery({
-        queryKey: ['plots-admin-list'],
-        queryFn: () => base44.entities.Plot.list({ limit: 100 }),
+    const [selectedSource, setSelectedSource] = React.useState('Plot');
+
+    const { data: plotsOld } = useQuery({
+        queryKey: ['plots-admin-list', 'Plot'],
+        queryFn: async () => base44.entities.Plot.filter({}, null, 500),
         initialData: [],
+        enabled: selectedSource === 'Plot'
     });
+
+    const { data: plotsNew } = useQuery({
+        queryKey: ['plots-admin-list', 'NewPlot'],
+        queryFn: async () => base44.entities.NewPlot.filter({}, null, 500),
+        initialData: [],
+        enabled: selectedSource === 'NewPlot'
+    });
+
+    const plots = React.useMemo(() => selectedSource === 'Plot' ? (plotsOld || []) : (plotsNew || []), [selectedSource, plotsOld, plotsNew]);
 
     const [selected, setSelected] = React.useState([]);
     const [statusFilter, setStatusFilter] = React.useState('all');
@@ -28,6 +38,7 @@ export default function AdminPlots() {
     const [quickView, setQuickView] = React.useState(null);
     const [maintenanceFor, setMaintenanceFor] = React.useState(null);
     const [wizardOpen, setWizardOpen] = React.useState(false);
+    const [selectedSource, setSelectedSource] = React.useState('Plot');
     const queryClient = useQueryClient();
 
     // Auto-run reservation expiry check hourly
@@ -62,13 +73,19 @@ export default function AdminPlots() {
                         <CardDescription>Manage capacity (urns/caskets), liners/vaults, and status.</CardDescription>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        <Link to={createPageUrl('Plots')}>
-                            <Button variant="outline" className="h-8">Show Old Plots & Map</Button>
-                        </Link>
-                        <Link to={createPageUrl('NewPlotsAndMap')}>
-                            <Button variant="outline" className="h-8">Show New Plot Reservations</Button>
-                        </Link>
-                        <Button className="h-8 bg-teal-700 hover:bg-teal-800" onClick={()=>setWizardOpen(true)}>
+                        <Button
+                          className={`h-8 text-white ${selectedSource==='Plot' ? 'bg-teal-800' : 'bg-teal-700 hover:bg-teal-800'}`}
+                          onClick={() => setSelectedSource('Plot')}
+                        >
+                          Show Old Plots & Map
+                        </Button>
+                        <Button
+                          className={`h-8 text-white ${selectedSource==='NewPlot' ? 'bg-teal-800' : 'bg-teal-700 hover:bg-teal-800'}`}
+                          onClick={() => setSelectedSource('NewPlot')}
+                        >
+                          Show New Plot Reservations
+                        </Button>
+                        <Button className="h-8 bg-teal-700 hover:bg-teal-800 text-white" onClick={()=>setWizardOpen(true)}>
                             <Plus className="w-4 h-4 mr-1" /> Add Maintenance
                         </Button>
                     </div>
@@ -125,9 +142,10 @@ export default function AdminPlots() {
                         <Button
                             disabled={!bulkStatus || selected.length === 0}
                             onClick={async () => {
-                                await Promise.all(selected.map(id => base44.entities.Plot.update(id, { status: bulkStatus })));
-                                setSelected([]);
-                                await queryClient.invalidateQueries({ queryKey: ['plots-admin-list'] });
+                               const api = selectedSource === 'Plot' ? base44.entities.Plot : base44.entities.NewPlot;
+                               await Promise.all(selected.map(id => api.update(id, { status: bulkStatus })));
+                               setSelected([]);
+                               await queryClient.invalidateQueries({ queryKey: ['plots-admin-list', selectedSource] });
                             }}
                             className="bg-teal-700 hover:bg-teal-800 text-white h-8"
                         >
@@ -195,7 +213,7 @@ export default function AdminPlots() {
                                                 <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setQuickView(plot)}>
                                                     <FileText className="w-4 h-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Maintenance" onClick={() => setMaintenanceFor(plot)}>
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Maintenance" onClick={() => setMaintenanceFor({ entity: selectedSource, plot })}>
                                                     <Wrench className="w-4 h-4" />
                                                 </Button>
                                             </div>
@@ -225,26 +243,33 @@ export default function AdminPlots() {
                             <DialogTitle>Plot Details</DialogTitle>
                         </DialogHeader>
                         {quickView && (
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <div className="text-xs text-stone-500">Section</div>
-                                    <div className="font-medium">{quickView.section || '-'}</div>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <div className="text-xs text-stone-500">Section</div>
+                                        <div className="font-medium">{quickView.section || '-'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-stone-500">Row</div>
+                                        <div className="font-medium">{quickView.row_number || '-'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-stone-500">Plot #</div>
+                                        <div className="font-medium">{quickView.plot_number || '-'}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-xs text-stone-500">Status</div>
+                                        <div className="font-medium">{quickView.status || '-'}</div>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <div className="text-xs text-stone-500">Owner / Occupant</div>
+                                        <div className="font-medium">{[quickView.first_name, quickView.last_name].filter(Boolean).join(' ') || quickView.family_name || '-'}</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Row</div>
-                                    <div className="font-medium">{quickView.row_number || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Plot #</div>
-                                    <div className="font-medium">{quickView.plot_number || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Status</div>
-                                    <div className="font-medium">{quickView.status || '-'}</div>
-                                </div>
-                                <div className="col-span-2">
-                                    <div className="text-xs text-stone-500">Owner / Occupant</div>
-                                    <div className="font-medium">{[quickView.first_name, quickView.last_name].filter(Boolean).join(' ') || quickView.family_name || '-'}</div>
+                                <div className="flex justify-end">
+                                    <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white" onClick={() => { setMaintenanceFor({ entity: selectedSource, plot: quickView }); setQuickView(null); }}>
+                                        Add Maintenance
+                                    </Button>
                                 </div>
                             </div>
                         )}
@@ -258,7 +283,7 @@ export default function AdminPlots() {
                             <DialogTitle>Plot Maintenance</DialogTitle>
                         </DialogHeader>
                         {maintenanceFor && (
-                            <PlotMaintenancePanel plot={maintenanceFor} />
+                            <PlotMaintenancePanel plot={maintenanceFor.plot} entity={maintenanceFor.entity} />
                         )}
                     </DialogContent>
                 </Dialog>

@@ -17,14 +17,14 @@ const statusColor = (s) => ({
   cancelled: "bg-stone-100 text-stone-700",
 }[s] || "bg-stone-100 text-stone-700");
 
-export default function PlotMaintenancePanel({ plot }) {
+export default function PlotMaintenancePanel({ plot, entity = "Plot" }) {
   const queryClient = useQueryClient();
   const plotId = plot?.id;
 
   const { data: items, isLoading } = useQuery({
-    queryKey: ["plot-maintenance", "Plot", plotId],
+    queryKey: ["plot-maintenance", entity, plotId],
     enabled: !!plotId,
-    queryFn: async () => base44.entities.PlotMaintenance.filter({ plot_entity: "Plot", plot_ref_id: plotId }, "-created_date", 100),
+    queryFn: async () => base44.entities.PlotMaintenance.filter({ plot_entity: entity, plot_ref_id: plotId }, "-created_date", 100),
     initialData: [],
   });
 
@@ -40,7 +40,7 @@ export default function PlotMaintenancePanel({ plot }) {
   const createMut = useMutation({
     mutationFn: async () => {
       return base44.entities.PlotMaintenance.create({
-        plot_entity: "Plot",
+        plot_entity: entity,
         plot_ref_id: plotId,
         title: form.title,
         category: form.category,
@@ -51,7 +51,7 @@ export default function PlotMaintenancePanel({ plot }) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["plot-maintenance", "Plot", plotId] });
+      queryClient.invalidateQueries({ queryKey: ["plot-maintenance", entity, plotId] });
       setForm({ title: "", category: "other", description: "", status: "open", scheduled_date: "", assignee_id: "" });
     },
   });
