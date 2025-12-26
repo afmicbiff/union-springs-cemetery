@@ -205,7 +205,7 @@ export default function ReservePlot() {
 
             {step === 2 && (
               <div className="space-y-4">
-                <div className="p-3 rounded bg-gray-50 text-sm">Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}</div>
+                <div className="p-3 rounded bg-gray-50 text-sm">Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}<span className="ml-2 text-xs text-gray-500">A certificate PDF will be generated after confirmation.</span></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-gray-600">Reservation For</label>

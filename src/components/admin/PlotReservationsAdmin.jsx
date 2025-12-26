@@ -36,6 +36,8 @@ export default function PlotReservationsAdmin() {
       if (r.new_plot_id) {
         await base44.entities.NewPlot.update(r.new_plot_id, { status: "Reserved" });
       }
+      // Generate certificate automatically upon confirmation
+      await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: false });
       await base44.functions.invoke("notifyReservationEvent", {
         event: "status_change",
         status: "Confirmed",

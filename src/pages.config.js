@@ -14,11 +14,11 @@ import NotificationSettings from './pages/NotificationSettings';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import ResendAck from './pages/ResendAck';
+import ReservePlot from './pages/ReservePlot';
 import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import ReservePlot from './pages/ReservePlot';
 import __Layout from './Layout.jsx';
 
 
@@ -39,11 +39,11 @@ export const PAGES = {
     "Plots": Plots,
     "Profile": Profile,
     "ResendAck": ResendAck,
+    "ReservePlot": ReservePlot,
     "Search": Search,
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "ReservePlot": ReservePlot,
 }
 
 export const pagesConfig = {
