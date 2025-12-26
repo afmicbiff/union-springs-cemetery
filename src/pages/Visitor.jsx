@@ -72,13 +72,17 @@ export default function VisitorPage() {
                     </Button>
                 </Link>
               </div>
-              <div className="flex gap-4 mt-auto">
+              <div className="flex flex-wrap items-center gap-4 mt-auto">
                 <Link to={createPageUrl('Plots')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
-                  Plots & Maps
+                  Old Cemetery Plots and Maps
                 </Link>
                 <span className="text-stone-300">|</span>
                 <Link to={createPageUrl('Search')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
-                  Search Records
+                  Search Deceased Records
+                </Link>
+                <span className="text-stone-300">|</span>
+                <Link to={createPageUrl('NewPlotsAndMap')} className="text-red-700 font-semibold uppercase text-sm tracking-widest hover:text-red-800">
+                  New Cemetery Plots and Maps
                 </Link>
               </div>
             </div>
