@@ -142,7 +142,7 @@ export default function ReservationWizard() {
   const back = () => { setError(""); setStep((s) => Math.max(1, s - 1)); };
 
   return (
-    <Card>
+    <Card className="bg-teal-50">
       <CardHeader>
         <CardTitle>Reserve a Plot (Wizard)</CardTitle>
         <CardDescription>Follow the steps to request a plot and start payment.</CardDescription>
