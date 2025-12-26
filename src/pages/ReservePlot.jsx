@@ -14,6 +14,7 @@ export default function ReservePlot() {
   const queryClient = useQueryClient();
   const [step, setStep] = React.useState(1);
   const [selected, setSelected] = React.useState(null);
+  const [prefill, setPrefill] = React.useState(null);
   const [signed, setSigned] = React.useState(false);
   const [sigFileUri, setSigFileUri] = React.useState(null);
   const [filters, setFilters] = React.useState({ search: '', section: 'All' });
@@ -61,6 +62,28 @@ export default function ReservePlot() {
     queryFn: async () => base44.entities.NewPlot.filter({ status: 'Available' }, 'plot_number', 500),
     initialData: []
   });
+
+  React.useEffect(() => {
+    try {
+      const detailsRaw = localStorage.getItem('selected_plot_details');
+      if (detailsRaw && !prefill) setPrefill(JSON.parse(detailsRaw));
+      const id = localStorage.getItem('selected_plot_id');
+      if (id && plots.data?.length) {
+        const match = plots.data.find(p => p.id === id);
+        if (match) setSelected(match);
+      }
+    } catch (_) {}
+  }, [plots.data]);
+
+  React.useEffect(() => {
+    if (step !== 1 || !selected?.id) return;
+    const el = document.querySelector(`[data-plot-id="${selected.id}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2','ring-teal-600','bg-teal-50');
+      setTimeout(() => el.classList.remove('bg-teal-50'), 1500);
+    }
+  }, [step, selected]);
 
   React.useEffect(() => {
     if (user && !form.requester_name) {
@@ -187,9 +210,20 @@ export default function ReservePlot() {
                   </Select>
                   <Button variant="outline" onClick={()=>plots.refetch()}>Refresh</Button>
                 </div>
+                {(prefill || selected) && (
+                  <div className="rounded-md border border-teal-200 bg-teal-50 p-3 flex items-center justify-between">
+                    <div className="text-sm text-teal-900">
+                      Suggested from your selection:
+                      <span className="ml-2 font-semibold">Section {prefill?.section || selected?.section || '-'}</span>
+                      • Row <span className="font-semibold">{prefill?.row_number || selected?.row_number || '-'}</span>
+                      • Plot <span className="font-semibold text-teal-700">{prefill?.plot_number || selected?.plot_number || '-'}</span>
+                    </div>
+                    <div className="text-xl font-bold text-teal-800">Plot {prefill?.plot_number || selected?.plot_number || '-'}</div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-96 overflow-auto">
                   {(filtered || []).map((r)=> (
-                    <button key={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600' : ''}`}>
+                    <button key={r.id} data-plot-id={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600 bg-teal-50' : ''}`}>
                       <div className="text-sm font-medium">Section {r.section || '-'} • Row {r.row_number || '-'} • Plot {r.plot_number || '-'}</div>
                       <div className="text-xs text-gray-600">{[r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || 'Unnamed'}</div>
                     </button>
@@ -205,7 +239,7 @@ export default function ReservePlot() {
 
             {step === 2 && (
               <div className="space-y-4">
-                <div className="p-3 rounded bg-gray-50 text-sm">Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}<span className="ml-2 text-xs text-gray-500">A certificate PDF will be generated after confirmation.</span></div>
+                <div className="p-3 rounded border border-teal-200 bg-teal-50 text-sm">Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot <span className="font-semibold text-teal-800">{selected?.plot_number || '-'}</span><span className="ml-2 text-xs text-gray-500">A certificate PDF will be generated after confirmation.</span></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-gray-600">Reservation For</label>

@@ -16,6 +16,7 @@ export default function ReservationWizard() {
   const [form, setForm] = React.useState({ donation_amount: "" });
   const [acks, setAcks] = React.useState({ terms: false, rules: false, fees: false });
   const [error, setError] = React.useState("");
+  const [prefill, setPrefill] = React.useState(null);
 
   // Current user and member profile
   const { data: user } = useQuery({ queryKey: ["me"], queryFn: () => base44.auth.me() });
@@ -39,6 +40,10 @@ export default function ReservationWizard() {
   // Prefill from RequestPlotDialog selection if present
   React.useEffect(() => {
     try {
+      const detailsRaw = localStorage.getItem("selected_plot_details");
+      if (detailsRaw && !prefill) {
+        setPrefill(JSON.parse(detailsRaw));
+      }
       const id = localStorage.getItem("selected_plot_id");
       if (id && plots.data?.length) {
         const match = plots.data.find((p) => p.id === id);
@@ -46,6 +51,17 @@ export default function ReservationWizard() {
       }
     } catch (_) {}
   }, [plots.data]);
+
+  // Auto-scroll and emphasize selected plot card in Step 1
+  React.useEffect(() => {
+    if (step !== 1 || !selected?.id) return;
+    const el = document.querySelector(`[data-plot-id="${selected.id}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2','ring-teal-600','bg-teal-50');
+      setTimeout(() => el.classList.remove('bg-teal-50'), 1500);
+    }
+  }, [step, selected]);
 
   const sections = React.useMemo(() => {
     const s = new Set();
@@ -161,9 +177,21 @@ export default function ReservationWizard() {
               <Button variant="outline" onClick={()=>plots.refetch()}>Refresh</Button>
             </div>
 
+            {(prefill || selected) && (
+              <div className="rounded-md border border-teal-200 bg-teal-50 p-3 flex items-center justify-between">
+                <div className="text-sm text-teal-900">
+                  Suggested from your selection:
+                  <span className="ml-2 font-semibold">Section {prefill?.section || selected?.section || '-'}</span>
+                  • Row <span className="font-semibold">{prefill?.row_number || selected?.row_number || '-'}</span>
+                  • Plot <span className="font-semibold text-teal-700">{prefill?.plot_number || selected?.plot_number || '-'}</span>
+                </div>
+                <div className="text-xl font-bold text-teal-800">Plot {prefill?.plot_number || selected?.plot_number || '-'}</div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-80 overflow-auto">
               {(filtered || []).map((r)=> (
-                <button key={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600' : ''}`}>
+                <button key={r.id} data-plot-id={r.id} onClick={()=>setSelected(r)} className={`text-left border rounded p-2 hover:bg-gray-50 ${selected?.id===r.id ? 'ring-2 ring-teal-600 bg-teal-50' : ''}`}>
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">Section {r.section || '-'} • Row {r.row_number || '-'} • Plot {r.plot_number || '-'}</div>
                     <Badge variant="outline" className="text-[10px]">{r.status || 'Unknown'}</Badge>
@@ -181,8 +209,8 @@ export default function ReservationWizard() {
 
         {step === 2 && (
           <div className="space-y-4">
-            <div className="p-3 rounded bg-gray-50 text-sm">
-              Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}
+            <div className="p-3 rounded border border-teal-200 bg-teal-50 text-sm">
+              Selected: Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot <span className="font-semibold text-teal-800">{selected?.plot_number || '-'}</span>
             </div>
             <div className="space-y-3">
               <label className="text-sm flex items-center gap-2">
@@ -211,7 +239,7 @@ export default function ReservationWizard() {
               <MapPin className="w-4 h-4" />
               <div>
                 <div className="font-medium">Review & Payment</div>
-                <div className="text-xs text-gray-600">Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot {selected?.plot_number || '-'}</div>
+                <div className="text-xs text-gray-600">Section {selected?.section || '-'} • Row {selected?.row_number || '-'} • Plot <span className="font-semibold text-teal-800">{selected?.plot_number || '-'}</span></div>
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
