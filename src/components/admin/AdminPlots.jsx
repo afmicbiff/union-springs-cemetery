@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText } from 'lucide-react';
+import { FileText, Wrench } from 'lucide-react';
+import PlotMaintenancePanel from "./PlotMaintenancePanel";
 import { format } from 'date-fns';
 import AdminPlotMap from "./AdminPlotMap";
 
@@ -22,6 +23,7 @@ export default function AdminPlots() {
     const [sectionFilter, setSectionFilter] = React.useState('all');
     const [bulkStatus, setBulkStatus] = React.useState('');
     const [quickView, setQuickView] = React.useState(null);
+    const [maintenanceFor, setMaintenanceFor] = React.useState(null);
     const queryClient = useQueryClient();
 
     // Auto-run reservation expiry check hourly
@@ -170,9 +172,14 @@ export default function AdminPlots() {
                                             {plot.last_maintained ? format(new Date(plot.last_maintained), 'MMM d') : '-'}
                                         </td>
                                         <td className="p-4 text-right">
-                                            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setQuickView(plot)}>
-                                                <FileText className="w-4 h-4" />
-                                            </Button>
+                                            <div className="flex justify-end gap-1">
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setQuickView(plot)}>
+                                                    <FileText className="w-4 h-4" />
+                                                </Button>
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Maintenance" onClick={() => setMaintenanceFor(plot)}>
+                                                    <Wrench className="w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -204,23 +211,20 @@ export default function AdminPlots() {
                                     <div className="text-xs text-stone-500">Section</div>
                                     <div className="font-medium">{quickView.section || '-'}</div>
                                 </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Row</div>
-                                    <div className="font-medium">{quickView.row_number || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Plot #</div>
-                                    <div className="font-medium">{quickView.plot_number || '-'}</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs text-stone-500">Status</div>
-                                    <div className="font-medium">{quickView.status || '-'}</div>
-                                </div>
-                                <div className="col-span-2">
-                                    <div className="text-xs text-stone-500">Owner / Occupant</div>
-                                    <div className="font-medium">{[quickView.first_name, quickView.last_name].filter(Boolean).join(' ') || quickView.family_name || '-'}</div>
-                                </div>
+                                ...
                             </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
+                {/* Maintenance Dialog */}
+                <Dialog open={!!maintenanceFor} onOpenChange={(o) => { if (!o) setMaintenanceFor(null); }}>
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>Plot Maintenance</DialogTitle>
+                        </DialogHeader>
+                        {maintenanceFor && (
+                            <PlotMaintenancePanel plot={maintenanceFor} />
                         )}
                     </DialogContent>
                 </Dialog>

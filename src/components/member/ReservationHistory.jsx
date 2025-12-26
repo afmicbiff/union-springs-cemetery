@@ -4,10 +4,11 @@ import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, CreditCard, Plus } from "lucide-react";
+import { ExternalLink, CreditCard, Plus, Wrench } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import TransferRequestDialog from "./TransferRequestDialog";
 import SignCertificateDialog from "./SignCertificateDialog";
+import MaintenanceHistoryDialog from "./MaintenanceHistoryDialog";
 
 const statusColor = (s) => ({
   "Pending": "bg-amber-100 text-amber-800",
@@ -40,6 +41,7 @@ export default function ReservationHistory() {
 
   const [transferOpenFor, setTransferOpenFor] = React.useState(null);
   const [signOpenFor, setSignOpenFor] = React.useState(null);
+  const [maintenanceOpenFor, setMaintenanceOpenFor] = React.useState(null);
 
   return (
     <Card>
@@ -107,6 +109,9 @@ export default function ReservationHistory() {
                   <>
                     <Button variant="outline" size="sm" onClick={() => setSignOpenFor(r)}>Sign Certificate</Button>
                     <Button variant="outline" size="sm" onClick={() => setTransferOpenFor(r)}>Request Transfer</Button>
+                    <Button variant="outline" size="sm" onClick={() => setMaintenanceOpenFor(r)}>
+                      <Wrench className="w-4 h-4 mr-1" /> Maintenance
+                    </Button>
                   </>
                 )}
                 {r.payment_status !== 'Paid' && r.status !== 'Rejected' && (
@@ -123,6 +128,14 @@ export default function ReservationHistory() {
       )}
       {signOpenFor && (
         <SignCertificateDialog open={!!signOpenFor} onOpenChange={(o) => { if (!o) setSignOpenFor(null); }} reservation={signOpenFor} />
+      )}
+      {maintenanceOpenFor && (
+        <MaintenanceHistoryDialog
+          open={!!maintenanceOpenFor}
+          onOpenChange={(o) => { if (!o) setMaintenanceOpenFor(null); }}
+          plotEntity="NewPlot"
+          plotId={maintenanceOpenFor.new_plot_id}
+        />
       )}
       </CardContent>
     </Card>
