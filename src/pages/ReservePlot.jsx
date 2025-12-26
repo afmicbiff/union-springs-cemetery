@@ -172,7 +172,7 @@ export default function ReservePlot() {
                   Please complete your Member Profile before requesting a reservation so we have your contact details.
                 </div>
                 <div className="flex justify-end">
-                  <a href={createPageUrl('MemberPortal')} className="underline text-teal-700">Go to Member Portal</a>
+                  <a href={createPageUrl('MemberPortal')} className="underline text-teal-700">Go to Member Portal/Account</a>
                 </div>
               </div>
             ) : step === 1 && (

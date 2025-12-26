@@ -67,7 +67,7 @@ export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) 
             </div>
           ) : (
             <div className="p-3 rounded-md bg-green-50 text-green-900 border border-green-200">
-              Profile found. You can continue in the Member Portal to request your plot.
+              Profile found. You can continue in the Member Portal/Account to request your plot.
             </div>
           )}
 
@@ -79,7 +79,7 @@ export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) 
           <div>
             <div className="font-medium mb-2">Steps to get a plot</div>
             <ol className="list-decimal ml-5 space-y-1">
-              <li>Sign up or log in to the Member Portal.</li>
+              <li>Sign up or log in to the Member Portal/Account.</li>
               <li>Fill out your Member Profile (contact details).</li>
               <li>Select your plot, review and sign the documents.</li>
               <li>Complete payment to finalize the reservation.</li>
@@ -88,7 +88,7 @@ export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) 
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-            <Button className="bg-teal-700 hover:bg-teal-800" onClick={goToPortal}>Member Portal</Button>
+            <Button className="bg-teal-700 hover:bg-teal-800" onClick={goToPortal}>Member Portal/Account</Button>
           </div>
         </div>
       </DialogContent>

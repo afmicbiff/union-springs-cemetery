@@ -34,7 +34,7 @@ export default function MemberPortal() {
                     <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <UserCircle className="w-8 h-8 text-teal-700" />
                     </div>
-                    <h2 className="text-2xl font-serif text-teal-900 mb-4">Member Portal</h2>
+                    <h2 className="text-2xl font-serif text-teal-900 mb-4">Member Portal/Account</h2>
                     <p className="text-stone-600 mb-8">Please log in to manage your profile, view your plots, and communicate with administration.</p>
                     <Button onClick={() => base44.auth.redirectToLogin()} className="bg-teal-700 hover:bg-teal-800 w-full text-lg h-12">Log In</Button>
                 </div>
@@ -47,7 +47,7 @@ export default function MemberPortal() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-serif text-teal-900">Welcome, {user.full_name?.split(' ')[0]}</h1>
-                    <p className="text-stone-600">Union Springs Cemetery Member Portal</p>
+                    <p className="text-stone-600">Union Springs Cemetery Member Portal/Account</p>
                 </div>
                 <Button variant="outline" onClick={() => base44.auth.logout()} className="text-stone-600 border-stone-300 hover:bg-stone-50">
                     <LogOut className="w-4 h-4 mr-2" /> Log Out

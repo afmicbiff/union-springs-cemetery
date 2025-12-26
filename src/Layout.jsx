@@ -52,7 +52,7 @@ export default function Layout({ children }) {
       items: [
         { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
         { label: 'Board Members & Employees', path: '/Employees', icon: Users },
-        { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
+        { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
 
 
         ]
