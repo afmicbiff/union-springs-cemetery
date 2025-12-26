@@ -38,6 +38,9 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     enabled: !!batchId,
     queryFn: async () => base44.entities.NewPlot.filter({ batch_id: batchId }, "plot_number", 2000),
     initialData: [],
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   // Sync external search into local fuzzy query
@@ -126,7 +129,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     });
 
     return g2;
-  }, [rowsQuery.data, deferredQuery, fuzzyResults, filters]);
+  }, [rowsQuery.data, deferredQuery, fuzzyResults, filters?.status, filters?.section, filters?.owner, filters?.plot]);
 
   React.useEffect(() => {
     if (!deferredQuery.trim()) { setFuzzyResults(null); return; }
@@ -184,7 +187,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
               className="pl-8"
             />
           </div>
-          {query && fuzzyResults && (
+          {deferredQuery && fuzzyResults && (
             <div className="mt-2 text-xs text-gray-500">{fuzzyResults.length} match(es)</div>
           )}
         </div>

@@ -13,6 +13,9 @@ export default function NewPlotsDataTable({ batchId, filters = { status: 'All', 
     enabled: !!batchId,
     queryFn: async () => base44.entities.NewPlot.filter({ batch_id: batchId }, "-created_date", limit),
     initialData: [],
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const filteredRows = React.useMemo(() => {
