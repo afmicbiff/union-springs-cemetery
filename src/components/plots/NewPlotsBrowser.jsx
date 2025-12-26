@@ -6,7 +6,7 @@ import { Map as MapIcon, FileText } from "lucide-react";
 import NewPlotsDataTable from "./NewPlotsDataTable";
 import NewPlotsMap from "./NewPlotsMap";
 
-export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabChange, filters: externalFilters }) {
+export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabChange, filters: externalFilters, onPlotClick }) {
   const [filters, setFilters] = React.useState({ status: 'All', section: 'All' });
   const [activeTab, setActiveTab] = React.useState("map");
   const isControlled = controlledActiveTab !== undefined && controlledActiveTab !== null;
@@ -80,7 +80,7 @@ export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabC
 
 
         {(currentTab === "map") ? (
-          <NewPlotsMap batchId={selectedBatchId} filters={externalFilters ?? filters} showSearch={!externalFilters} />
+          <NewPlotsMap batchId={selectedBatchId} filters={externalFilters ?? filters} showSearch={!externalFilters} onPlotClick={onPlotClick} />
         ) : (
           <NewPlotsDataTable batchId={selectedBatchId} filters={externalFilters ?? filters} />
         )}

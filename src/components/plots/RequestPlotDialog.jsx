@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
 
-export default function RequestPlotDialog({ open, onOpenChange }) {
+export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) {
   const authQ = useQuery({
     queryKey: ['is-auth'],
     queryFn: () => base44.auth.isAuthenticated(),
@@ -28,7 +28,21 @@ export default function RequestPlotDialog({ open, onOpenChange }) {
   });
 
   const goToPortal = async () => {
-    const portalUrl = createPageUrl('MemberPortal') + '?tab=reservations';
+    const portalUrl = createPageUrl('MemberPortal') + '?tab=reservations' + (selectedPlot?.id ? `&plotId=${encodeURIComponent(selectedPlot.id)}` : '');
+    try {
+      if (selectedPlot?.id) {
+        localStorage.setItem('selected_plot_id', selectedPlot.id);
+        localStorage.setItem('selected_plot_details', JSON.stringify({
+          id: selectedPlot.id,
+          section: selectedPlot.section || '',
+          row_number: selectedPlot.row_number || '',
+          plot_number: selectedPlot.plot_number || ''
+        }));
+        if (await base44.auth.isAuthenticated()) {
+          await base44.auth.updateMe({ last_selected_plot_id: selectedPlot.id });
+        }
+      }
+    } catch (_) {}
     if (!authQ.data) {
       base44.auth.redirectToLogin(portalUrl);
       return;
@@ -57,6 +71,11 @@ export default function RequestPlotDialog({ open, onOpenChange }) {
             </div>
           )}
 
+          {selectedPlot && (
+            <div className="p-2 rounded-md bg-stone-50 border border-stone-200 text-xs">
+              Selected plot: Section {selectedPlot.section || '-'} • Row {selectedPlot.row_number || '-'} • Plot {selectedPlot.plot_number || '-'}
+            </div>
+          )}
           <div>
             <div className="font-medium mb-2">Steps to get a plot</div>
             <ol className="list-decimal ml-5 space-y-1">

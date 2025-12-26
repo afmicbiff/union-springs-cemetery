@@ -9,6 +9,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Map as MapIcon, FileText } from "lucide-react";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
+import { Button } from "@/components/ui/button";
 
 
 export default function NewPlotsAndMap() {
@@ -27,6 +28,22 @@ export default function NewPlotsAndMap() {
     section: "All"
   });
   const [showRequest, setShowRequest] = React.useState(false);
+  const [selectedPlot, setSelectedPlot] = React.useState(null);
+  const handlePlotClick = React.useCallback((plot) => {
+    try {
+      if (plot?.id) {
+        localStorage.setItem('selected_plot_id', plot.id);
+        localStorage.setItem('selected_plot_details', JSON.stringify({
+          id: plot.id,
+          section: plot.section || '',
+          row_number: plot.row_number || '',
+          plot_number: plot.plot_number || ''
+        }));
+      }
+    } catch (_) {}
+    setSelectedPlot(plot || null);
+    setShowRequest(true);
+  }, []);
   const handleDeleteA1 = async () => {
     if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
     const res = await base44.functions.invoke('deleteA1Plots', {});
@@ -102,18 +119,15 @@ export default function NewPlotsAndMap() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center">
             <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-700 text-white text-xs sm:text-sm shadow">
               Click on the plot to start the reservation process.
             </span>
-            <Button variant="outline" onClick={() => setShowRequest(true)} className="text-teal-800 border-teal-700 hover:bg-teal-50">
-              Request a Plot
-            </Button>
           </div>
-          <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} />
+          <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} onPlotClick={handlePlotClick} />
         </div>
       </main>
-      <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} />
+      <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
     </div>
   );
 }
