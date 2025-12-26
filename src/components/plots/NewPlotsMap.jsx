@@ -50,6 +50,14 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     });
   }, [rowsQuery.data]);
 
+  const handleClick = React.useCallback((row) => {
+    if (onPlotClick) {
+      onPlotClick(row);
+    } else {
+      window.location.href = createPageUrl('NewPlotDetails') + `?id=${row.id}`;
+    }
+  }, [onPlotClick]);
+
   const grouped = React.useMemo(() => {
     const g = {};
     (rowsQuery.data || []).forEach((r) => {

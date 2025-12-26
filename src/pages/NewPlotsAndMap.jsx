@@ -9,7 +9,6 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Map as MapIcon, FileText } from "lucide-react";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
-import { Button } from "@/components/ui/button";
 
 
 export default function NewPlotsAndMap() {
