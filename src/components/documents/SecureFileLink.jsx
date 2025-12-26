@@ -20,11 +20,13 @@ export default function SecureFileLink({ doc }) {
         if (doc.file_uri) {
             setIsLoading(true);
             try {
-                const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({
-                    file_uri: doc.file_uri,
-                    expires_in: 300 // 5 minutes
-                });
-                window.open(signed_url, '_blank');
+                const res = await base44.functions.invoke('getSafeFileDownload', { file_uri: doc.file_uri });
+                if (res.data?.signed_url) {
+                    window.open(res.data.signed_url, '_blank', 'noopener');
+                } else {
+                    const msg = res.data?.error || 'Blocked by security policy';
+                    toast.error(msg);
+                }
             } catch (error) {
                 console.error("Failed to sign URL:", error);
                 toast.error("Failed to access secure file: " + error.message);

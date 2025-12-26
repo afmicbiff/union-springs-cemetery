@@ -63,6 +63,13 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
         setUploading(true);
         try {
             const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+
+            // Scan the uploaded file; block persistence if threats detected
+            const scanRes = await base44.functions.invoke('scanFileForVirus', { file_uri, context: 'upload' });
+            if (scanRes.data && scanRes.data.clean === false) {
+                toast.error('Upload blocked: file failed security scan');
+                return;
+            }
             
             const newDoc = {
                 id: crypto.randomUUID(),
