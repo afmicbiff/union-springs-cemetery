@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import debounce from 'lodash/debounce';
 
 // --- MOCK DATA ---
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
@@ -320,9 +321,15 @@ export default function PlotsPage() {
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
+  const deferredSearch = useDeferredValue(searchQuery);
   const [isCentering, setIsCentering] = useState(false);
   const location = useLocation();
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
+  // prevent jank during navigation focus
+  // react-query focus refetch disabled per-query above
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
   
   // Filtering State
@@ -359,7 +366,10 @@ export default function PlotsPage() {
   const { data: plotEntities, isLoading } = useQuery({
       queryKey: ['plots'],
       queryFn: () => base44.entities.Plot.list(null, 2000), // Fetch up to 2000 plots
-      initialData: []
+      initialData: [],
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false
   });
 
   // MUTATIONS
@@ -483,9 +493,9 @@ export default function PlotsPage() {
   // Filtered Data Computation
   const filteredData = useMemo(() => {
       return parsedData.filter(item => {
-          // 1. General Search
-          if (filters.search) {
-              const term = filters.search.toLowerCase();
+          // 1. General Search (debounced + deferred)
+          if (deferredSearch) {
+              const term = deferredSearch.toLowerCase();
               const searchable = [
                   item.Grave, 
                   item.Row, 
@@ -548,7 +558,13 @@ export default function PlotsPage() {
 
           return true;
       });
-  }, [parsedData, filters]);
+  }, [parsedData, deferredSearch, filters.owner, filters.plot, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
+
+  // Sync debounced search with filters.search
+  useEffect(() => {
+    debouncedSetSearchQuery((filters.search || '').toString());
+    return () => { if (debouncedSetSearchQuery.cancel) debouncedSetSearchQuery.cancel(); };
+  }, [filters.search, debouncedSetSearchQuery]);
 
   // Grouped and Sorted Data for Table View
   const processedTableData = useMemo(() => {
@@ -1465,17 +1481,37 @@ export default function PlotsPage() {
                                                 })()}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                                {sections[sectionKey].map((plot) => (
-                                                    <GravePlot 
-                                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                        data={plot} 
-                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                        onHover={handleHover}
-                                                        onEdit={isAdmin ? handleEditClick : undefined}
-                                                    />
-                                                ))}
-                                            </div>
+                                            {(() => {
+                                                const items = sections[sectionKey] || [];
+                                                const showAll = !!expandedSections[sectionKey];
+                                                const visible = showAll ? items : items.slice(0, 120);
+                                                return (
+                                                    <>
+                                                        <div className="flex flex-col-reverse gap-2 content-center items-center">
+                                                            {visible.map((plot) => (
+                                                                <GravePlot 
+                                                                    key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                                                    data={plot} 
+                                                                    baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                                                    onHover={handleHover}
+                                                                    onEdit={isAdmin ? handleEditClick : undefined}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                        {!showAll && items.length > 120 && (
+                                                            <div className="mt-3">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setExpandedSections(prev => ({ ...prev, [sectionKey]: true }))}
+                                                                    className="text-sm text-teal-700 hover:underline"
+                                                                >
+                                                                    Show more ({items.length - 120} more)
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         )}
                                     </div>
                                 )}
