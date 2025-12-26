@@ -8,6 +8,7 @@ import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Map as MapIcon, FileText } from "lucide-react";
+import RequestPlotDialog from "../components/plots/RequestPlotDialog";
 
 
 export default function NewPlotsAndMap() {
@@ -25,6 +26,7 @@ export default function NewPlotsAndMap() {
     deathYearEnd: "",
     section: "All"
   });
+  const [showRequest, setShowRequest] = React.useState(false);
   const handleDeleteA1 = async () => {
     if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
     const res = await base44.functions.invoke('deleteA1Plots', {});
@@ -79,6 +81,7 @@ export default function NewPlotsAndMap() {
                 </button>
               </div>
               {isAdmin && (<NewPlotsImport />)}
+              <Button onClick={() => setShowRequest(true)} className="bg-teal-600 hover:bg-teal-700 text-white">Request a Plot</Button>
               <Link to={createPageUrl('Plots')}>
                 <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
               </Link>
@@ -103,6 +106,7 @@ export default function NewPlotsAndMap() {
           <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} />
         </div>
       </main>
+      <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} />
     </div>
   );
 }

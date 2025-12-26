@@ -12,7 +12,9 @@ import { FileText, Receipt } from 'lucide-react';
 import ReservationHistory from "@/components/member/ReservationHistory";
 
 export default function MemberPortal() {
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialActiveTab = urlParams.get('tab') || 'dashboard';
+    const [activeTab, setActiveTab] = useState(initialActiveTab);
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
 
