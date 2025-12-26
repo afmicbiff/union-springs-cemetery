@@ -17,14 +17,14 @@ export default function AdminPlots() {
 
     const { data: plotsOld } = useQuery({
         queryKey: ['plots-admin-list', 'Plot'],
-        queryFn: async () => base44.entities.Plot.filter({}, null, 500),
+        queryFn: async () => base44.entities.Plot.filter({}, null, 5000),
         initialData: [],
         enabled: selectedSource === 'Plot'
     });
 
     const { data: plotsNew } = useQuery({
         queryKey: ['plots-admin-list', 'NewPlot'],
-        queryFn: async () => base44.entities.NewPlot.filter({}, null, 500),
+        queryFn: async () => base44.entities.NewPlot.filter({}, null, 5000),
         initialData: [],
         enabled: selectedSource === 'NewPlot'
     });
