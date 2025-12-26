@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Eye, Trash2, CheckCircle2, XCircle, Mail, DollarSign, ExternalLink } from "lucide-react";
+import { Eye, Trash2, CheckCircle2, XCircle, Mail, DollarSign, ExternalLink, FileText, Edit3 } from "lucide-react";
 
 function StatusBadge({ status }) {
   const map = {
