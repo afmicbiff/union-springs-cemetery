@@ -10,6 +10,7 @@ import MemberDocuments from "@/components/member/MemberDocuments";
 import MemberInvoices from "@/components/member/MemberInvoices";
 import { FileText, Receipt } from 'lucide-react';
 import ReservationHistory from "@/components/member/ReservationHistory";
+import ReservationWizard from "@/components/member/ReservationWizard";
 
 export default function MemberPortal() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -95,8 +96,11 @@ export default function MemberPortal() {
                     <MemberInvoices user={user} />
                 </TabsContent>
                 <TabsContent value="reservations">
-                    <ReservationHistory />
-                </TabsContent>
+                                          <div className="space-y-6">
+                                              <ReservationWizard />
+                                              <ReservationHistory />
+                                          </div>
+                                      </TabsContent>
             </Tabs>
         </div>
     );
