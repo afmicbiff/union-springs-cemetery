@@ -78,8 +78,9 @@ export default function ReservationHistory() {
                         key={d.id || d.file_uri}
                         type="button"
                         onClick={async () => {
-                          const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: d.file_uri, expires_in: 300 });
-                          if (signed_url) window.open(signed_url, '_blank', 'noopener');
+                          const res = await base44.functions.invoke('getSafeFileDownload', { file_uri: d.file_uri });
+                          if (res.data?.signed_url) window.open(res.data.signed_url, '_blank', 'noopener');
+                          else alert(res.data?.error || 'File blocked by security scan');
                         }}
                         className="inline-flex items-center gap-1 underline"
                       >

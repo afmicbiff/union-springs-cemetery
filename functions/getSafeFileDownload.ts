@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
         const emails = Array.isArray(settings?.[0]?.email_recipients) ? settings[0].email_recipients : [];
         for (const to of emails) {
           try {
-            await base44.integrations.Core.SendEmail({
+            await base44.asServiceRole.integrations.Core.SendEmail({
               to,
               subject: 'Security Alert: Infected file download blocked',
               body: `The system blocked a file download.\nUser: ${user.email}\nThreats: ${threats.join(', ')}\nTime: ${new Date().toISOString()}`

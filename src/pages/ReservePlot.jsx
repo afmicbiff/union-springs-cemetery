@@ -121,6 +121,11 @@ export default function ReservePlot() {
     const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
     const file = new File([blob], 'signature.png', { type: 'image/png' });
     const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+    const scanRes = await base44.functions.invoke('scanFileForVirus', { file_uri, context: 'signature' });
+    if (scanRes.data && scanRes.data.clean === false) {
+      alert('Signature upload blocked by security scan');
+      return null;
+    }
     setSigFileUri(file_uri);
     return file_uri;
   };
