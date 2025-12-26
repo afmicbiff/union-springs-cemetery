@@ -38,6 +38,9 @@ export default function NewPlotsBrowser({ activeTab: controlledActiveTab, onTabC
     enabled: !!selectedBatchId,
     queryFn: async () => base44.entities.NewPlot.filter({ batch_id: selectedBatchId }, null, 1000),
     initialData: [],
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
   });
   const sectionOptions = React.useMemo(() => {
     const set = new Set();

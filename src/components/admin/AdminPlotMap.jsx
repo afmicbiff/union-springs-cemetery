@@ -31,6 +31,7 @@ export default function AdminPlotMap({ plots = [], onSelect }) {
   }, [plots]);
 
   const sectionKeys = React.useMemo(() => Object.keys(grouped).sort(), [grouped]);
+  const [expandedSections, setExpandedSections] = React.useState({});
 
   return (
     <div className="space-y-8">
@@ -43,35 +44,55 @@ export default function AdminPlotMap({ plots = [], onSelect }) {
               <h3 className="text-lg font-semibold text-gray-900">Section {sec}</h3>
               <span className="text-xs text-gray-500">{grouped[sec].length} plots</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-              {grouped[sec].map((p) => {
-                const st = p.status && STATUS_COLORS[p.status] ? p.status : "Unknown";
-                const dot = STATUS_COLORS[st] || STATUS_COLORS.Unknown;
-                const title = `Plot ${p.plot_number || ''} • Row ${p.row_number || '-'} • ${p.status || 'Unknown'}`;
-                return (
-                  <button
-                    key={p.id}
-                    title={title}
-                    onClick={() => onSelect && onSelect(p)}
-                    className={clsx(
-                      "text-left border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="text-[11px] font-mono text-gray-800 font-semibold truncate">
-                        {p.plot_number}
-                      </div>
-                      <span className={clsx("w-3 h-3 rounded-full", dot)}></span>
+            {(() => {
+              const items = grouped[sec] || [];
+              const showAll = !!expandedSections[sec];
+              const visible = showAll ? items : items.slice(0, 96);
+              return (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                    {visible.map((p) => {
+                      const st = p.status && STATUS_COLORS[p.status] ? p.status : "Unknown";
+                      const dot = STATUS_COLORS[st] || STATUS_COLORS.Unknown;
+                      const title = `Plot ${p.plot_number || ''} • Row ${p.row_number || '-'} • ${p.status || 'Unknown'}`;
+                      return (
+                        <button
+                          key={p.id}
+                          title={title}
+                          onClick={() => onSelect && onSelect(p)}
+                          className={clsx(
+                            "text-left border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition",
+                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="text-[11px] font-mono text-gray-800 font-semibold truncate">
+                              {p.plot_number}
+                            </div>
+                            <span className={clsx("w-3 h-3 rounded-full", dot)}></span>
+                          </div>
+                          <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {p.row_number || '-'}</div>
+                          <div className="mt-0.5 text-[11px] text-gray-600 truncate">
+                            {[p.first_name, p.last_name].filter(Boolean).join(" ") || p.family_name || ""}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {!showAll && items.length > 96 && (
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSections((prev) => ({ ...prev, [sec]: true }))}
+                        className="text-sm text-teal-700 hover:underline"
+                      >
+                        Show more ({items.length - 96} more)
+                      </button>
                     </div>
-                    <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {p.row_number || '-'}</div>
-                    <div className="mt-0.5 text-[11px] text-gray-600 truncate">
-                      {[p.first_name, p.last_name].filter(Boolean).join(" ") || p.family_name || ""}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         ))
       )}
