@@ -34,7 +34,7 @@ export default function Layout({ children }) {
     { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
     { label: 'Deceased Search', path: '/search', icon: Search },
     { 
-      label: 'Plots & Map', 
+      label: 'Old Cementery Plots & Map', 
       path: '/plots', 
       icon: Map,
       isDropdown: true,
