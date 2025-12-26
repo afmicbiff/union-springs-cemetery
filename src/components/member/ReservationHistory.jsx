@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, CreditCard, Plus } from "lucide-react";
 import { createPageUrl } from "@/utils";
+import TransferRequestDialog from "./TransferRequestDialog";
 
 const statusColor = (s) => ({
   "Pending": "bg-amber-100 text-amber-800",
@@ -28,6 +29,15 @@ export default function ReservationHistory() {
     queryFn: async () => base44.entities.NewPlotReservation.filter({ requester_email: user.email }, "-created_date", 100),
     initialData: []
   });
+
+  const invoicesQ = useQuery({
+    queryKey: ['my-invoices', user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => base44.entities.Invoice.filter({ member_email: user.email }, "-created_date", 200),
+    initialData: []
+  });
+
+  const [transferOpenFor, setTransferOpenFor] = React.useState(null);
 
   return (
     <Card>
@@ -74,8 +84,26 @@ export default function ReservationHistory() {
                     ))}
                   </div>
                 )}
+                {invoicesQ.data?.some((inv) => inv.reservation_id === r.id) && (
+                  <div className="mt-2 text-xs text-gray-600">
+                    <div className="font-medium text-gray-700">Payment History</div>
+                    <div className="flex flex-col gap-1">
+                      {invoicesQ.data.filter((inv) => inv.reservation_id === r.id).map((inv) => (
+                        <div key={inv.id} className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono">{inv.invoice_number || inv.id}</span>
+                          <Badge className={payColor(inv.status)}>{inv.status}</Badge>
+                          {typeof inv.amount === 'number' && <span>${inv.amount}</span>}
+                          {inv.due_date && <span>Due {inv.due_date}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2">
+                {r.status === 'Confirmed' && (
+                  <Button variant="outline" size="sm" onClick={() => setTransferOpenFor(r)}>Request Transfer</Button>
+                )}
                 {r.payment_status !== 'Paid' && r.status !== 'Rejected' && (
                   <Button title="Pay via Stripe (setup pending)" variant="default" className="gap-1" disabled>
                     <CreditCard className="w-4 h-4" /> Pay Now
@@ -85,6 +113,9 @@ export default function ReservationHistory() {
             </div>
           ))
         )}
+      {transferOpenFor && (
+        <TransferRequestDialog open={!!transferOpenFor} onOpenChange={(o) => { if (!o) setTransferOpenFor(null); }} reservation={transferOpenFor} user={user} />
+      )}
       </CardContent>
     </Card>
   );
