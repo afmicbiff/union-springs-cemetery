@@ -120,7 +120,7 @@ export default function PlotReservationsAdmin() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button size="sm" variant="outline" onClick={() => approveMutation.mutate(r)} disabled={r.status === "Confirmed"} className="gap-1">
                       <CheckCircle2 className="w-4 h-4" /> Approve
                     </Button>
@@ -132,6 +132,18 @@ export default function PlotReservationsAdmin() {
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => sendReminder(r)} className="gap-1">
                       <Mail className="w-4 h-4" /> Payment Reminder
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      // Generate unsigned certificate
+                      await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: false });
+                    }} className="gap-1">
+                      <FileText className="w-4 h-4" /> Gen Certificate
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      // Generate and sign as admin
+                      await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: true });
+                    }} className="gap-1">
+                      <Edit3 className="w-4 h-4" /> Sign as Admin
                     </Button>
                   </div>
                 </div>
