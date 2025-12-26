@@ -136,6 +136,11 @@ export default function PlotReservationsAdmin() {
                       <Mail className="w-4 h-4" /> Payment Reminder
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
+                      await base44.functions.invoke('notifyReservationEvent', { event: 'signature_request', reservationId: r.id });
+                    }} className="gap-1">
+                      <Mail className="w-4 h-4" /> Request Signature
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
                       // Generate unsigned certificate
                       await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: false });
                     }} className="gap-1">

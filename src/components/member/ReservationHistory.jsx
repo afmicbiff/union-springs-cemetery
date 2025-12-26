@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, CreditCard, Plus } from "lucide-react";
 import { createPageUrl } from "@/utils";
 import TransferRequestDialog from "./TransferRequestDialog";
+import SignCertificateDialog from "./SignCertificateDialog";
 
 const statusColor = (s) => ({
   "Pending": "bg-amber-100 text-amber-800",
@@ -38,6 +39,7 @@ export default function ReservationHistory() {
   });
 
   const [transferOpenFor, setTransferOpenFor] = React.useState(null);
+  const [signOpenFor, setSignOpenFor] = React.useState(null);
 
   return (
     <Card>
@@ -102,7 +104,10 @@ export default function ReservationHistory() {
               </div>
               <div className="flex items-center gap-2">
                 {r.status === 'Confirmed' && (
-                  <Button variant="outline" size="sm" onClick={() => setTransferOpenFor(r)}>Request Transfer</Button>
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => setSignOpenFor(r)}>Sign Certificate</Button>
+                    <Button variant="outline" size="sm" onClick={() => setTransferOpenFor(r)}>Request Transfer</Button>
+                  </>
                 )}
                 {r.payment_status !== 'Paid' && r.status !== 'Rejected' && (
                   <Button title="Pay via Stripe (setup pending)" variant="default" className="gap-1" disabled>
@@ -115,6 +120,9 @@ export default function ReservationHistory() {
         )}
       {transferOpenFor && (
         <TransferRequestDialog open={!!transferOpenFor} onOpenChange={(o) => { if (!o) setTransferOpenFor(null); }} reservation={transferOpenFor} user={user} />
+      )}
+      {signOpenFor && (
+        <SignCertificateDialog open={!!signOpenFor} onOpenChange={(o) => { if (!o) setSignOpenFor(null); }} reservation={signOpenFor} />
       )}
       </CardContent>
     </Card>

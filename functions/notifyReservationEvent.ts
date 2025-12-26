@@ -42,6 +42,11 @@ function makeEmail(event, reservation, extra = {}) {
         subject: 'Payment Reminder: Plot Reservation',
         body: `Hello ${who},\n\nThis is a friendly reminder to complete payment for your reservation.\n${plot}\nCurrent payment status: ${reservation?.payment_status || 'Pending'}\n\n— ${title}`,
       };
+    case 'signature_request':
+      return {
+        subject: 'Action Required: Please Sign Your Certificate',
+        body: `Hello ${who},\n\nPlease log in to your Member Portal to review and digitally sign your Certificate of Interment Rights.\n${plot}\nLink: ${globalThis?.location?.origin || ''}/#/MemberPortal?tab=reservations\n\n— ${title}`,
+      };
     default:
       return { subject: 'Notification', body: 'Update regarding your reservation.' };
   }
