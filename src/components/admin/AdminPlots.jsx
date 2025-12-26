@@ -211,7 +211,22 @@ export default function AdminPlots() {
                                     <div className="text-xs text-stone-500">Section</div>
                                     <div className="font-medium">{quickView.section || '-'}</div>
                                 </div>
-                                ...
+                                <div>
+                                    <div className="text-xs text-stone-500">Row</div>
+                                    <div className="font-medium">{quickView.row_number || '-'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs text-stone-500">Plot #</div>
+                                    <div className="font-medium">{quickView.plot_number || '-'}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs text-stone-500">Status</div>
+                                    <div className="font-medium">{quickView.status || '-'}</div>
+                                </div>
+                                <div className="col-span-2">
+                                    <div className="text-xs text-stone-500">Owner / Occupant</div>
+                                    <div className="font-medium">{[quickView.first_name, quickView.last_name].filter(Boolean).join(' ') || quickView.family_name || '-'}</div>
+                                </div>
                             </div>
                         )}
                     </DialogContent>
