@@ -38,7 +38,6 @@ export default function AdminPlots() {
     const [quickView, setQuickView] = React.useState(null);
     const [maintenanceFor, setMaintenanceFor] = React.useState(null);
     const [wizardOpen, setWizardOpen] = React.useState(false);
-    const [selectedSource, setSelectedSource] = React.useState('Plot');
     const queryClient = useQueryClient();
 
     // Auto-run reservation expiry check hourly
