@@ -43,6 +43,29 @@ async function scanFileFromUri(base44, fileUri, context, user, req) {
       route: 'functions/scanFileForVirus',
       details: { context, file_uri: fileUri, cloudmersive: scanJson, threats }
     });
+
+    if (!clean) {
+      // Create alert notification for admins
+      await base44.asServiceRole.entities.Notification.create({
+        message: `Security Alert: Infected file detected during ${context || 'operation'} for user ${user?.email || 'unknown'}`,
+        type: 'alert',
+        is_read: false,
+        user_email: null,
+        related_entity_type: 'document'
+      });
+      // Email configured recipients
+      const settings = await base44.asServiceRole.entities.NotificationSettings.list();
+      const emails = Array.isArray(settings?.[0]?.email_recipients) ? settings[0].email_recipients : [];
+      for (const to of emails) {
+        try {
+          await base44.asServiceRole.integrations.Core.SendEmail({
+            to,
+            subject: 'Security Alert: Infected file detected',
+            body: `The system detected an infected file during ${context || 'an operation'}.\nUser: ${user?.email || 'unknown'}\nThreats: ${threats.join(', ')}\nFile: ${fileUri}\nTime: ${new Date().toISOString()}`
+          });
+        } catch (_) {}
+      }
+    }
   } catch (_e) {}
 
   return { clean, threats, raw: scanJson };
