@@ -1133,75 +1133,51 @@ export default function PlotsPage() {
                                         ) : sectionKey === '3' ? (
                                             <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                                                 {(() => {
-                                                    // Grid Definition: 9 Columns
-                                                    // Bottom Horizontal (justify-end handles bottom alignment)
                                                     const ranges = [
                                                         { start: 251, end: 268 },
-                                                        { start: 326, end: 348 }, // Extended to 348
+                                                        { start: 326, end: 348 },
                                                         { start: 406, end: 430 },
                                                         { start: 489, end: 512 },
-                                                        { start: 605, end: 633 }, // Extended to 633
+                                                        { start: 605, end: 633 },
                                                         { start: 688, end: 711 },
                                                         { start: 765, end: 788 },
                                                         { start: 821, end: 843 },
-                                                        { start: 898, end: 930 }  // Extended to 930
+                                                        { start: 898, end: 930 }
                                                     ];
-
-                                                    // Spacers definition: { after: 507 } means visually above 507.
-                                                    // In High-to-Low sorted array (..., 508, 507, ...), "Above 507" means inserting BEFORE 507.
-                                                    const spacers = [
-                                                        { target: 507 },
-                                                        { target: 709 },
-                                                        { target: 773 },
-                                                        { target: 786 },
-                                                        { target: 633 },
-                                                        { target: 840 },
-                                                        { target: 841 },
-                                                        { target: 930 } // On top of 930
-                                                    ];
-
-                                                    return ranges.map((range, idx) => {
-                                                        const colPlots = sections[sectionKey].filter(p => {
-                                                            const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                    const spacers = [507,709,773,786,633,840,841,930];
+                                                    const renderedKeys = new Set();
+                                                    const cols = ranges.map((range, idx) => {
+                                                        const colPlots = sections[sectionKey]
+                                                          .filter(p => {
+                                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                                             return num >= range.start && num <= range.end;
-                                                        });
-
-                                                        // Sort High to Low (Top of stack comes first in array)
-                                                        colPlots.sort((a, b) => {
-                                                            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-                                                            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-                                                            return numB - numA; 
-                                                        });
-
-                                                        // Inject Spacers
-                                                        // "After X" implies visually above X. 
-                                                        // In a High-to-Low list [508, 507], visually above 507 is between 508 and 507.
-                                                        // So we insert Spacer BEFORE 507.
-                                                        // "On top of 930" (Topmost element) -> Before 930.
+                                                          })
+                                                          .sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
                                                         const plotsWithSpacers = [];
                                                         colPlots.forEach(plot => {
-                                                            const num = parseInt(plot.Grave.replace(/\D/g, '')) || 0;
-                                                            // Check if we need to insert a spacer before this plot
-                                                            if (spacers.some(s => s.target === num)) {
-                                                                plotsWithSpacers.push({ isSpacer: true, _id: `spacer-${num}` });
-                                                            }
-                                                            plotsWithSpacers.push(plot);
+                                                          const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
+                                                          if (spacers.includes(num)) plotsWithSpacers.push({ isSpacer: true, _id: `sp-${num}` });
+                                                          plotsWithSpacers.push(plot);
+                                                          renderedKeys.add(`${num}|${plot._id}`);
                                                         });
-
                                                         return (
-                                                            <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
-                                                                {plotsWithSpacers.map((plot, pIdx) => (
-                                                                    <GravePlot 
-                                                                        key={plot._id || `plot-${pIdx}`} 
-                                                                        data={plot} 
-                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                                        onHover={handleHover}
-                                                                        onEdit={isAdmin ? handleEditClick : undefined}
-                                                                    />
-                                                                ))}
-                                                            </div>
+                                                          <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
+                                                            {plotsWithSpacers.map((plot, pIdx) => (
+                                                              <GravePlot key={plot._id || `plot-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
+                                                            ))}
+                                                          </div>
                                                         );
                                                     });
+                                                    // Fallback column for any unplaced plots (outside ranges or non-numeric)
+                                                    const { unplaced } = getUnplacedForSection('3', sections[sectionKey]);
+                                                    const fallbackCol = (
+                                                      <div key="fallback" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-rose-200 pl-2">
+                                                        {unplaced.map((plot, pIdx) => (
+                                                          <GravePlot key={plot._id || `u3-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
+                                                        ))}
+                                                      </div>
+                                                    );
+                                                    return [...cols, fallbackCol];
                                                 })()}
                                             </div>
                                         ) : sectionKey === '4' ? (
