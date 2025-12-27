@@ -1183,168 +1183,72 @@ export default function PlotsPage() {
                                         ) : sectionKey === '4' ? (
                                             <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                                                 {(() => {
-                                                    // Grid Definition: 11 Columns x 30 High
-                                                    // Layout order per column: Bottom -> Top
                                                     const columnsConfig = [
-                                                        // Col 1: 14 Blanks, then 208-223
-                                                        { 
-                                                            ranges: [{ start: 208, end: 223 }], 
-                                                            blanksStart: 14 
-                                                        },
-                                                        // Col 2: 269-298
-                                                        { 
-                                                            ranges: [{ start: 269, end: 298 }] 
-                                                        },
-                                                        // Col 3: 349-378
-                                                        { 
-                                                            ranges: [{ start: 349, end: 378 }] 
-                                                        },
-                                                        // Col 4: 431-461, Removed spacer under 431
-                                                        { 
-                                                            ranges: [{ start: 431, end: 461 }] 
-                                                        },
-                                                        // Col 5: 513-542, Add spacer under 513
-                                                        { 
-                                                            ranges: [{ start: 513, end: 542 }],
-                                                            spacers: [{ target: 513, position: 'before' }]
-                                                        },
-                                                        // Col 6: 546-576, blank after 562, blank after 559
-                                                        { 
-                                                            ranges: [{ start: 546, end: 576 }],
-                                                            spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }]
-                                                        },
-                                                        // Col 7: 630-658, blank after 641
-                                                        { 
-                                                            ranges: [{ start: 630, end: 658 }],
-                                                            spacers: [{ target: 641, position: 'after' }]
-                                                        },
-                                                        // Col 8: 712-719, plot under 712, plot above 713 (after), blank after 716, 19 blanks after 719
-                                                        { 
-                                                            ranges: [{ start: 712, end: 719 }],
-                                                            spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }],
-                                                            blanksEnd: 19
-                                                        },
-                                                        // Col 9: 789-795, 720-737, blank after 720. 
-                                                        // Ensure NO other blanks under 789 (which is at bottom visually).
-                                                        { 
-                                                            ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }],
-                                                            spacers: [
-                                                                { target: 720, position: 'after' }
-                                                            ],
-                                                            customLayout: true 
-                                                        },
-                                                        // Col 10: Blank, 844-870, blank after 854, 861
-                                                        { 
-                                                            ranges: [{ start: 844, end: 870 }],
-                                                            blanksStart: 1,
-                                                            spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }]
-                                                        },
-                                                        // Col 11: 923-945, blank after 935, 7 blanks end
-                                                        { 
-                                                            ranges: [{ start: 923, end: 945 }],
-                                                            spacers: [{ target: 935, position: 'after' }],
-                                                            blanksEnd: 7
-                                                        }
+                                                        { ranges: [{ start: 208, end: 223 }], blanksStart: 14 },
+                                                        { ranges: [{ start: 269, end: 298 }] },
+                                                        { ranges: [{ start: 349, end: 378 }] },
+                                                        { ranges: [{ start: 431, end: 461 }] },
+                                                        { ranges: [{ start: 513, end: 542 }], spacers: [{ target: 513, position: 'before' }] },
+                                                        { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
+                                                        { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
+                                                        { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
+                                                        { ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
+                                                        { ranges: [{ start: 844, end: 870 }], blanksStart: 1, spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }] },
+                                                        { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
                                                     ];
 
-                                                    return columnsConfig.map((col, idx) => {
-                                                        // 1. Collect Plots
+                                                    const cols = columnsConfig.map((col, idx) => {
                                                         let plots = [];
                                                         col.ranges.forEach(r => {
                                                             const rangePlots = sections[sectionKey].filter(p => {
-                                                                const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
+                                                                const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                                                 return num >= r.start && num <= r.end;
-                                                            });
-                                                            // Sort each range individually (High to Low or Low to High?)
-                                                            // Standard: 208-223 -> 208 bottom, 223 top. (Ascending in visual stack bottom-up)
-                                                            // So standard sort is Ascending (Low to High).
-                                                            rangePlots.sort((a, b) => {
-                                                                const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-                                                                const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-                                                                return numA - numB; 
-                                                            });
+                                                            }).sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                                             plots = [...plots, ...rangePlots];
                                                         });
 
-                                                        // Handle Custom Layout for Col 9 (Mixed Order)
-                                                        if (col.customLayout && idx === 8) { // Col 9
-                                                            // Range 1: 789-795
-                                                            const r1 = sections[sectionKey].filter(p => {
-                                                                const num = parseInt(p.Grave); return num >= 789 && num <= 795;
-                                                            }).sort((a,b) => parseInt(a.Grave) - parseInt(b.Grave));
-                                                            
-                                                            // Range 2: 720-737
-                                                            const r2 = sections[sectionKey].filter(p => {
-                                                                const num = parseInt(p.Grave); return num >= 720 && num <= 737;
-                                                            }).sort((a,b) => parseInt(a.Grave) - parseInt(b.Grave));
-
-                                                            // r1 Splitting: 789-794, 6 Blanks, 795
+                                                        if (col.customLayout && idx === 8) {
+                                                            const r1 = sections[sectionKey].filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 795; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
+                                                            const r2 = sections[sectionKey].filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                                             const r1PartA = r1.filter(p => parseInt(p.Grave) <= 794);
                                                             const r1PartB = r1.filter(p => parseInt(p.Grave) > 794);
                                                             const sixBlanks = Array(6).fill({ isSpacer: true });
-
-                                                            // Construct r2 with spacer after 720
                                                             const r2WithSpacer = [];
-                                                            r2.forEach(p => {
-                                                                r2WithSpacer.push(p);
-                                                                if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' });
-                                                            });
-
+                                                            r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' }); });
                                                             plots = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
-                                                            
-                                                            // Override standard processing
-                                                        } else {
-                                                            // Standard Spacer Injection
-                                                            if (col.spacers) {
-                                                                const withSpacers = [];
-                                                                plots.forEach(p => {
-                                                                    const num = parseInt(p.Grave.replace(/\D/g, '')) || 0;
-                                                                    
-                                                                    // Before
-                                                                    if (col.spacers.some(s => s.target === num && s.position === 'before')) {
-                                                                        withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
-                                                                    }
-                                                                    
-                                                                    withSpacers.push(p);
-
-                                                                    // After
-                                                                    if (col.spacers.some(s => s.target === num && s.position === 'after')) {
-                                                                        withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
-                                                                    }
-                                                                });
-                                                                plots = withSpacers;
-                                                            }
+                                                        } else if (col.spacers) {
+                                                            const withSpacers = [];
+                                                            plots.forEach(p => {
+                                                                const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                                                if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
+                                                                withSpacers.push(p);
+                                                                if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
+                                                            });
+                                                            plots = withSpacers;
                                                         }
 
-                                                        // Add Start/End Blanks
-                                                        if (col.blanksStart) {
-                                                            const startBlanks = Array(col.blanksStart).fill({ isSpacer: true });
-                                                            plots = [...startBlanks, ...plots];
-                                                        }
-                                                        if (col.blanksEnd) {
-                                                            const endBlanks = Array(col.blanksEnd).fill({ isSpacer: true });
-                                                            plots = [...plots, ...endBlanks];
-                                                        }
+                                                        if (col.blanksStart) plots = [...Array(col.blanksStart).fill({ isSpacer: true }), ...plots];
+                                                        if (col.blanksEnd) plots = [...plots, ...Array(col.blanksEnd).fill({ isSpacer: true })];
 
-                                                        // Render Stack (Bottom to Top -> flex-col-reverse)
-                                                        // Wait, if plots array is ordered [BottomItem, ..., TopItem]
-                                                        // flex-col-reverse renders last item at top, first at bottom.
-                                                        // So plots array should be [Bottom, ..., Top].
-                                                        
                                                         return (
                                                             <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                                                 {plots.map((plot, pIdx) => (
-                                                                    <GravePlot 
-                                                                        key={plot._id || `plot-${idx}-${pIdx}`} 
-                                                                        data={plot} 
-                                                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                                        onHover={handleHover}
-                                                                        onEdit={isAdmin ? handleEditClick : undefined}
-                                                                    />
+                                                                    <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
                                                                 ))}
                                                             </div>
                                                         );
                                                     });
+
+                                                    // Fallback column for unplaced plots
+                                                    const { unplaced } = getUnplacedForSection('4', sections[sectionKey]);
+                                                    const fallbackCol = (
+                                                      <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                                        {unplaced.map((plot, pIdx) => (
+                                                          <GravePlot key={plot._id || `u4-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
+                                                        ))}
+                                                      </div>
+                                                    );
+                                                    return [...cols, fallbackCol];
                                                 })()}
                                             </div>
                                         ) : sectionKey === '5' ? (
