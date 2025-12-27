@@ -1286,7 +1286,7 @@ export default function PlotsPage() {
                                                     // Col 11: 16 blanks
                                                     (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
 
-                                                    return columns.map((plots, idx) => (
+                                                    const mapped = columns.map((plots, idx) => (
                                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                                             {plots.map((plot, pIdx) => (
                                                                 <GravePlot
@@ -1299,6 +1299,23 @@ export default function PlotsPage() {
                                                             ))}
                                                         </div>
                                                     ));
+
+                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
+                                                    const fallbackCol = (
+                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                                            {unplaced.map((plot, pIdx) => (
+                                                                <GravePlot
+                                                                    key={plot._id || `u5-${pIdx}`}
+                                                                    data={plot}
+                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                                                    onHover={handleHover}
+                                                                    onEdit={isAdmin ? handleEditClick : undefined}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    );
+
+                                                    return [...mapped, fallbackCol];
                                                 })()}
                                             </div>
                                         ) : sectionKey === '5' ? (
@@ -1336,7 +1353,7 @@ export default function PlotsPage() {
                                                     // Col 11: 16 blanks
                                                     (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
 
-                                                    return columns.map((plots, idx) => (
+                                                    const mapped = columns.map((plots, idx) => (
                                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                                             {plots.map((plot, pIdx) => (
                                                                 <GravePlot
@@ -1349,6 +1366,23 @@ export default function PlotsPage() {
                                                             ))}
                                                         </div>
                                                     ));
+
+                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
+                                                    const fallbackCol = (
+                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                                            {unplaced.map((plot, pIdx) => (
+                                                                <GravePlot
+                                                                    key={plot._id || `u5-${pIdx}`}
+                                                                    data={plot}
+                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                                                    onHover={handleHover}
+                                                                    onEdit={isAdmin ? handleEditClick : undefined}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    );
+
+                                                    return [...mapped, fallbackCol];
                                                 })()}
                                             </div>
                                         ) : sectionKey === '5' ? (
@@ -1386,7 +1420,7 @@ export default function PlotsPage() {
                                                     // Col 11: 16 blanks
                                                     (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
 
-                                                    return columns.map((plots, idx) => (
+                                                    const mapped = columns.map((plots, idx) => (
                                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                                             {plots.map((plot, pIdx) => (
                                                                 <GravePlot
@@ -1399,6 +1433,23 @@ export default function PlotsPage() {
                                                             ))}
                                                         </div>
                                                     ));
+
+                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
+                                                    const fallbackCol = (
+                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                                            {unplaced.map((plot, pIdx) => (
+                                                                <GravePlot
+                                                                    key={plot._id || `u5-${pIdx}`}
+                                                                    data={plot}
+                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                                                    onHover={handleHover}
+                                                                    onEdit={isAdmin ? handleEditClick : undefined}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    );
+
+                                                    return [...mapped, fallbackCol];
                                                 })()}
                                             </div>
                                         ) : (
