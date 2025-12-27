@@ -113,7 +113,7 @@ const PlotTableRow = ({
                         </Button>
                     </div>
                 ) : (
-                    isAdmin && (
+                    (isAdmin && row._entity === 'Plot') && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -267,7 +267,7 @@ const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
       id={plotNum != null ? `plot-${sectionNorm}-${plotNum}` : undefined}
       onClick={(e) => {
       e.stopPropagation();
-      onEdit && onEdit(data);
+      if (onEdit && data && data._entity === 'Plot') onEdit(data);
       }}
       onMouseEnter={(e) => {
       setIsHovered(true);
@@ -365,7 +365,13 @@ export default function PlotsPage() {
 
   const { data: plotEntities, isLoading } = useQuery({
       queryKey: ['plots'],
-      queryFn: () => base44.entities.Plot.list(null, 2000), // Fetch up to 2000 plots
+      queryFn: async () => {
+        const [oldPlots, legacy] = await Promise.all([
+          base44.entities.Plot.list(null, 5000),
+          base44.entities.PlotsAndMaps.list(null, 5000),
+        ]);
+        return [...(oldPlots || []), ...(legacy || [])];
+      },
       initialData: [],
       staleTime: 30_000,
       gcTime: 5 * 60_000,
@@ -474,20 +480,42 @@ export default function PlotsPage() {
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
-      return plotEntities.map(p => ({
+      return (plotEntities || []).map((p) => {
+        // Native Plot entity
+        if (p && (p.plot_number || p.row_number || p.section)) {
+          return {
+            _id: p.id,
+            _entity: 'Plot',
+            Section: p.section,
+            Row: p.row_number,
+            Grave: p.plot_number,
+            Status: p.status || 'Unknown',
+            'First Name': p.first_name,
+            'Last Name': p.last_name,
+            'Family Name': p.family_name,
+            Birth: p.birth_date,
+            Death: p.death_date,
+            Notes: p.notes || '',
+            ...p,
+          };
+        }
+        // Legacy PlotsAndMaps entity
+        return {
           _id: p.id,
-          Section: p.section,
-          Row: p.row_number,
-          Grave: p.plot_number,
-          Status: p.status,
-          'First Name': p.first_name,
-          'Last Name': p.last_name,
-          'Family Name': p.family_name,
-          Birth: p.birth_date,
-          Death: p.death_date,
-          Notes: p.notes,
-          ...p // keep original fields too
-      }));
+          _entity: 'PlotsAndMaps',
+          Section: p.section || '',
+          Row: p.row || '',
+          Grave: p.grave || '',
+          Status: p.status || 'Unknown',
+          'First Name': p.first_name || '',
+          'Last Name': p.last_name || '',
+          'Family Name': p.family_name || '',
+          Birth: p.birth || '',
+          Death: p.death || '',
+          Notes: p.notes || '',
+          ...p,
+        };
+      }).filter(r => r.Grave);
   }, [plotEntities]);
 
   // Filtered Data Computation
