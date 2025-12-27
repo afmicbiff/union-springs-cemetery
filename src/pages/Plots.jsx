@@ -1060,6 +1060,7 @@ export default function PlotsPage() {
                                     <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
                                         {sections[sectionKey].length} Plots
                                     </span>
+                                    {(['3','4','5'].includes(sectionKey)) && (() => { const c = getUnplacedForSection(sectionKey, sections[sectionKey]); return (<span className="mb-1 text-xs text-gray-400 ml-2">• {c.placedCount} placed, {c.unplaced.length} fallback</span>); })()}
                                 </div>
                                 
                                 {/* SECTION CONTAINER */}
