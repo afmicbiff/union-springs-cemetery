@@ -726,6 +726,47 @@ export default function PlotsPage() {
     setSections(grouped);
   };
 
+  // Coverage helper: compute which plots are handled by special layouts and which are unplaced
+  const getUnplacedForSection = (sectionKey, plots) => {
+    const toNum = (g) => {
+      const n = parseInt(String(g || '').replace(/\D/g, ''));
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
+    const included = new Set();
+    const addRange = (start, end) => { for (let i = start; i <= end; i++) included.add(i); };
+
+    switch (String(sectionKey)) {
+      case '3':
+        [
+          [251,268],[326,348],[406,430],[489,512],[605,633],[688,711],[765,788],[821,843],[898,930]
+        ].forEach(([s,e]) => addRange(s,e));
+        break;
+      case '4':
+        [
+          [208,223],[269,298],[349,378],[431,461],[513,542],[546,576],[630,658],[712,719],
+          [720,737],[789,795],[844,870],[923,945]
+        ].forEach(([s,e]) => addRange(s,e));
+        break;
+      case '5':
+        [
+          [224,236],[299,302],[1001,1014],[379,382],[1015,1026],[462,465],[1029,1042],
+          [543,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
+          [738,738],[739,742],[871,874]
+        ].forEach(([s,e]) => addRange(s,e));
+        break;
+      default:
+        // For Sections 1 and 2 (or unknown), assume all numeric-labeled plots are included by their layouts
+        plots.forEach(p => { const n = toNum(p.Grave); if (n) included.add(n); });
+    }
+
+    const unplaced = (plots || []).filter(p => {
+      const n = toNum(p.Grave);
+      if (!n) return true; // non-numeric labels fall back
+      return !included.has(n);
+    });
+    return { included, unplaced, placedCount: (plots || []).length - unplaced.length };
+  };
+
   // Load mock data on mount - REPLACED BY REACT QUERY
   // useEffect(() => {
   //   const data = parseCSV(INITIAL_CSV);
