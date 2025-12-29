@@ -19,6 +19,7 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import PerformanceDashboard from './pages/PerformanceDashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
+    "PerformanceDashboard": PerformanceDashboard,
 }
 
 export const pagesConfig = {

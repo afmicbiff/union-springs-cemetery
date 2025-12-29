@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import GovernanceProvider from '@/components/gov/GovernanceProvider';
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const location = useLocation();
@@ -45,18 +46,17 @@ export default function Layout({ children }) {
     },
     { label: 'Services', path: '/services', icon: Info },
     { 
-      label: 'Admin Dashboard', 
-      path: '/admin', 
-      icon: Lock,
-      isDropdown: true,
-      items: [
-        { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
-        { label: 'Board Members & Employees', path: '/Employees', icon: Users },
-        { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
-
-
-        ]
-        },
+    label: 'Admin Dashboard', 
+    path: '/admin', 
+    icon: Lock,
+    isDropdown: true,
+    items: [
+    { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
+    { label: 'Board Members & Employees', path: '/Employees', icon: Users },
+    { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
+    { label: 'Performance Dashboard', path: '/PerformanceDashboard', icon: Activity }
+    ]
+    },
   ];
 
   return (
@@ -171,7 +171,9 @@ export default function Layout({ children }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         <div className="max-w-[1240px] mx-auto w-full flex-1 flex flex-col">
-          {children}
+          <GovernanceProvider>
+            {children}
+          </GovernanceProvider>
         </div>
       </main>
 
