@@ -102,16 +102,13 @@ export default function AdminSearch({ onNavigate }) {
         queryFn: async () => {
             if (!debouncedQuery || debouncedQuery.length < 2) return [];
             
-            // 1. Search DB
-            let dbResults = [];
+            // 1. Search DB (server-side)
+            let server = null;
             try {
-                const response = await base44.functions.invoke('adminSearch', { query: debouncedQuery, page, limit });
-                if (response?.data?.results) {
-                    dbResults = response.data;
-                }
+                server = await base44.functions.invoke('adminSearch', { query: debouncedQuery, page, limit });
             } catch (err) {
                 console.error("Admin search DB error:", err);
-                // Continue with nav results even if DB fails
+                server = { data: { results: [], pagination: null } };
             }
 
             // 2. Search Navigation (Client-side)
@@ -121,9 +118,10 @@ export default function AdminSearch({ onNavigate }) {
                 section.subLabel.toLowerCase().includes(lower)
             );
 
-            const responseData = (await base44.functions.invoke('adminSearch', { query: lower, page, limit }))?.data || {};
-            const serverItems = Array.isArray(responseData.results) ? responseData.results : [];
-            return { items: [...navResults, ...serverItems], pagination: responseData.pagination || null };
+            const serverData = server?.data || {};
+            const serverItems = Array.isArray(serverData.results) ? serverData.results : [];
+            const items = (page === 1 ? navResults : []).concat(serverItems);
+            return { items, pagination: serverData.pagination || null };
         },
         enabled: debouncedQuery.length >= 2,
         staleTime: 60_000,
@@ -230,38 +228,53 @@ export default function AdminSearch({ onNavigate }) {
                                     <Loader2 className="w-6 h-6 animate-spin" />
                                 </div>
                             ) : results?.items?.length > 0 ? (
-                                <div className="p-2 space-y-1">
+                                <>
+                                  <div className="p-2 space-y-1">
                                     {results.items.map((item, i) => {
-                                        const Icon = getIcon(item.type);
-                                        return (
-                                            <button
-                                                key={i}
-                                                onClick={() => handleSelect(item)}
-                                                className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-stone-50 rounded-md transition-colors text-left group"
-                                            >
-                                                <div className="mt-0.5 p-1.5 bg-stone-100 rounded-md text-stone-500 group-hover:bg-white group-hover:text-teal-600 transition-colors">
-                                                    <Icon className="w-4 h-4" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-0.5">
-                                                        <HighlightedText 
-                                                            text={item.label} 
-                                                            highlight={query} 
-                                                            className="font-medium text-stone-900 truncate" 
-                                                        />
-                                                        <Badge variant="outline" className="text-[10px] h-4 px-1 text-stone-400 capitalize">
-                                                            {item.type}
-                                                        </Badge>
-                                                    </div>
-                                                    <div className="text-xs text-stone-500 truncate">
-                                                        <HighlightedText text={item.subLabel} highlight={query} />
-                                                    </div>
-                                                </div>
-                                                <ChevronRight className="w-4 h-4 text-stone-300 opacity-0 group-hover:opacity-100 self-center" />
-                                            </button>
-                                        );
+                                      const Icon = getIcon(item.type);
+                                      return (
+                                        <button
+                                          key={i}
+                                          onClick={() => handleSelect(item)}
+                                          className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-stone-50 rounded-md transition-colors text-left group"
+                                        >
+                                          <div className="mt-0.5 p-1.5 bg-stone-100 rounded-md text-stone-500 group-hover:bg-white group-hover:text-teal-600 transition-colors">
+                                            <Icon className="w-4 h-4" />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                              <HighlightedText text={item.label} highlight={query} className="font-medium text-stone-900 truncate" />
+                                              <Badge variant="outline" className="text-[10px] h-4 px-1 text-stone-400 capitalize">{item.type}</Badge>
+                                            </div>
+                                            <div className="text-xs text-stone-500 truncate">
+                                              <HighlightedText text={item.subLabel} highlight={query} />
+                                            </div>
+                                          </div>
+                                          <ChevronRight className="w-4 h-4 text-stone-300 opacity-0 group-hover:opacity-100 self-center" />
+                                        </button>
+                                      );
                                     })}
-                                </div>
+                                  </div>
+                                  <div className="flex items-center justify-between px-3 py-2 border-t bg-stone-50 text-xs text-stone-600">
+                                    <button
+                                      className="px-2 py-1 rounded border bg-white hover:bg-stone-100 disabled:opacity-50"
+                                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                                      disabled={page <= 1}
+                                    >
+                                      Prev
+                                    </button>
+                                    <div>
+                                      Page {page} {results?.pagination?.totalPages ? `of ${results.pagination.totalPages}` : ''}
+                                    </div>
+                                    <button
+                                      className="px-2 py-1 rounded border bg-white hover:bg-stone-100 disabled:opacity-50"
+                                      onClick={() => setPage(p => p + 1)}
+                                      disabled={results?.pagination ? page >= (results.pagination.totalPages || 1) : (results?.items?.length < limit)}
+                                    >
+                                      Next
+                                    </button>
+                                  </div>
+                                </>
                             ) : (
                                 <div className="p-8 text-center text-stone-500 text-sm">
                                     No results found for "{query}"
