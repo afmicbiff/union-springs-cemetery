@@ -3,9 +3,9 @@ import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Code } from "lucide-react";
 
-const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel"));
+const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel.jsx"));
 
 export default function PerformanceDashboard() {
   const [metrics, setMetrics] = React.useState(getCurrentMetrics());
