@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -35,30 +35,33 @@ import { motion } from "framer-motion";
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import { Loader2 } from 'lucide-react';
+import { filterEntity } from "@/components/gov/dataClient";
 
-// Components
-import AdminOverview from "@/components/admin/AdminOverview";
-import AdminReservations from "@/components/admin/AdminReservations";
-import AdminPlots from "@/components/admin/AdminPlots";
-import DeceasedManager from "@/components/admin/DeceasedManager";
-import OnboardingForm from "@/components/admin/OnboardingForm";
-import OnboardingProgress from "@/components/admin/OnboardingProgress";
-import OnboardingGuide from "@/components/admin/OnboardingGuide";
-import EmployeeList from "@/components/admin/EmployeeList";
-import VendorManager from "@/components/admin/VendorManager";
-import AdminSecurity from "@/components/admin/AdminSecurity";
-import EventCalendar from "@/components/admin/EventCalendar";
-import AnnouncementManager from "@/components/admin/AnnouncementManager";
-import TaskManager from "@/components/tasks/TaskManager";
-import MembersDirectory from "@/components/admin/MembersDirectory";
+// Components (lazy-loaded to reduce initial bundle)
+const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview"));
+const AdminReservations = React.lazy(() => import("@/components/admin/AdminReservations"));
+const AdminPlots = React.lazy(() => import("@/components/admin/AdminPlots"));
+const DeceasedManager = React.lazy(() => import("@/components/admin/DeceasedManager"));
+const OnboardingForm = React.lazy(() => import("@/components/admin/OnboardingForm"));
+const OnboardingProgress = React.lazy(() => import("@/components/admin/OnboardingProgress"));
+const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide"));
+const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList"));
+const VendorManager = React.lazy(() => import("@/components/admin/VendorManager"));
+const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity"));
+const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar"));
+const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager"));
+const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager"));
+const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory"));
+const AdminBylaws = React.lazy(() => import("@/components/admin/AdminBylaws"));
+const BackupManager = React.lazy(() => import("@/components/admin/BackupManager"));
+const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter"));
+const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer"));
+const LawnCare = React.lazy(() => import("@/components/admin/LawnCare"));
+const CRM = React.lazy(() => import("@/components/crm/CRM"));
+
+// Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
-import AdminBylaws from "@/components/admin/AdminBylaws";
 import DataImportDialog from "@/components/admin/DataImportDialog";
-import BackupManager from "@/components/admin/BackupManager";
-import CommunicationCenter from "@/components/admin/CommunicationCenter";
-import AuditLogViewer from "@/components/admin/AuditLogViewer";
-import LawnCare from "@/components/admin/LawnCare";
-import CRM from "@/components/crm/CRM";
 import QualityAdvisor from "@/components/gov/QualityAdvisor";
 
 export default function AdminDashboard() {
@@ -102,9 +105,9 @@ export default function AdminDashboard() {
   }, []);
 
   // Notifications for Header
-  const { data: notifications } = useQuery({
+  const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => base44.entities.Notification.filter({ is_read: false }, '-created_at', 20),
+    queryFn: () => filterEntity('Notification', { is_read: false }, { sort: '-created_at', limit: 20, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] }),
     initialData: [],
     refetchInterval: 30000,
   });
@@ -174,41 +177,40 @@ export default function AdminDashboard() {
        }
   };
 
-  // Background polling for reminders
-  useQuery({
-    queryKey: ['check-reminders'],
-    queryFn: () => base44.functions.invoke('checkEventReminders'),
-    refetchInterval: 60 * 1000, 
-    refetchOnWindowFocus: true
-  });
-
-  useQuery({
-    queryKey: ['check-doc-expirations'],
-    queryFn: () => base44.functions.invoke('checkDocumentExpirations'),
-    refetchInterval: 300 * 1000, // Check every 5 minutes
-    refetchOnWindowFocus: false
-  });
-
-  useQuery({
-      queryKey: ['check-member-reminders'],
-      queryFn: () => base44.functions.invoke('checkMemberReminders'),
-      refetchInterval: 120 * 1000, // Check every 2 minutes
-      refetchOnWindowFocus: false
-  });
-
-  useQuery({
-      queryKey: ['check-task-due-dates'],
-      queryFn: () => base44.functions.invoke('checkTaskDueDates'),
-      refetchInterval: 300 * 1000, // Check every 5 minutes
-      refetchOnWindowFocus: false
-  });
-
-  // CRM automations
-  useQuery({
-      queryKey: ['run-crm-automations'],
-      queryFn: () => base44.functions.invoke('runCrmAutomations'),
-      refetchInterval: 300 * 1000, // every 5 minutes
-      refetchOnWindowFocus: false
+  // Background polling for reminders (batched)
+  useQueries({
+    queries: [
+      {
+        queryKey: ['check-reminders'],
+        queryFn: () => base44.functions.invoke('checkEventReminders'),
+        refetchInterval: 60 * 1000,
+        refetchOnWindowFocus: true,
+      },
+      {
+        queryKey: ['check-doc-expirations'],
+        queryFn: () => base44.functions.invoke('checkDocumentExpirations'),
+        refetchInterval: 300 * 1000,
+        refetchOnWindowFocus: false,
+      },
+      {
+        queryKey: ['check-member-reminders'],
+        queryFn: () => base44.functions.invoke('checkMemberReminders'),
+        refetchInterval: 120 * 1000,
+        refetchOnWindowFocus: false,
+      },
+      {
+        queryKey: ['check-task-due-dates'],
+        queryFn: () => base44.functions.invoke('checkTaskDueDates'),
+        refetchInterval: 300 * 1000,
+        refetchOnWindowFocus: false,
+      },
+      {
+        queryKey: ['run-crm-automations'],
+        queryFn: () => base44.functions.invoke('runCrmAutomations'),
+        refetchInterval: 300 * 1000,
+        refetchOnWindowFocus: false,
+      },
+    ]
   });
 
   if (!isAuthorized) {
@@ -549,13 +551,15 @@ export default function AdminDashboard() {
 
             {tabs.map(tab => (
                 <TabsContent key={tab.id} value={tab.id} className="focus-visible:outline-none">
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {tab.component}
-                    </motion.div>
+                    <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            {tab.component}
+                        </motion.div>
+                    </React.Suspense>
                 </TabsContent>
             ))}
         </Tabs>

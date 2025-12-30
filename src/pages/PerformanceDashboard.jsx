@@ -212,12 +212,12 @@ export default function PerformanceDashboard() {
               <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />useQueries example</div>
               <pre className="overflow-auto"><code>{`import { useQueries } from '@tanstack/react-query';
 
-        const results = useQueries({
-        queries: [
-        { queryKey: ['plots','page',1], queryFn: fetchPlotsPage1 },
-        { queryKey: ['invoices','recent'], queryFn: fetchRecentInvoices }
-        ],
-        });`}</code></pre>
+              const results = useQueries({
+                queries: [
+                  { queryKey: ['plots','page',1], queryFn: fetchPlotsPage1, staleTime: 60_000 },
+                  { queryKey: ['invoices','recent'], queryFn: fetchRecentInvoices, staleTime: 60_000 }
+                ],
+              });`}</code></pre>
             </div>
           </div>
 
@@ -233,9 +233,10 @@ export default function PerformanceDashboard() {
             <div className="text-xs text-stone-700 bg-white rounded p-2 border">
               <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />Code-splitting</div>
               <pre className="overflow-auto"><code>{`const Heavy = React.lazy(() => import('../components/Heavy'));
-        <React.Suspense fallback={<div>Loading…</div>}>
-        <Heavy />
-        </React.Suspense>`}</code></pre>
+              <React.Suspense fallback={<div>Loading…</div>}>
+                <Heavy />
+              </React.Suspense>
+              // tip: lazy-load admin tabs & modals to cut TTI`}</code></pre>
             </div>
           </div>
 
@@ -252,10 +253,11 @@ export default function PerformanceDashboard() {
               <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />Field selection</div>
               <pre className="overflow-auto"><code>{`import { filterEntity } from '@/components/gov/dataClient';
 
-        await filterEntity('Plot', {}, {
-        limit: 50,
-        select: ['id','section','plot_number','status']
-        });`}</code></pre>
+              await filterEntity('Plot', {}, {
+                sort: '-updated_date',
+                limit: 50,
+                select: ['id','section','plot_number','status']
+              });`}</code></pre>
             </div>
           </div>
         </div>
