@@ -107,9 +107,17 @@ export default function AdminDashboard() {
   // Notifications for Header
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => filterEntity('Notification', { is_read: false }, { sort: '-created_at', limit: 20, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] }),
+    queryFn: ({ signal }) => filterEntity(
+      'Notification',
+      { is_read: false },
+      { sort: '-created_at', limit: 20, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] },
+      { signal }
+    ),
     initialData: [],
-    refetchInterval: 30000,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    refetchInterval: 30_000,
   });
 
   const updateTaskStatus = async (note, status) => {
