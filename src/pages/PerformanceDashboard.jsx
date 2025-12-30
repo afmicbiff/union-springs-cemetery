@@ -98,6 +98,42 @@ export default function PerformanceDashboard() {
   const kb = (n) => (typeof n === "number" ? (n / 1024).toFixed(1) + " KB" : "-");
   const ms = (n) => (typeof n === "number" ? Math.round(n) + " ms" : "-");
 
+  // Severity thresholds (green <=, yellow <=, else red)
+  const thresholds = {
+    loadTime: { green: 2000, yellow: 3500 },
+    payloadBytes: { green: 1 * 1024 * 1024, yellow: 1.5 * 1024 * 1024 },
+    requestCount: { green: 30, yellow: 50 },
+    lcp: { green: 2500, yellow: 4000 },
+    cls: { green: 0.1, yellow: 0.25 },
+    inp: { green: 200, yellow: 300 },
+  };
+  const levelFor = (key, value) => {
+    const t = thresholds[key];
+    if (!t || typeof value !== "number") return "yellow";
+    if (value <= t.green) return "green";
+    if (value <= t.yellow) return "yellow";
+    return "red";
+  };
+  const boxCls = (lvl) => ({
+    green: "bg-green-50 border-green-200 text-green-900",
+    yellow: "bg-amber-50 border-amber-200 text-amber-900",
+    red: "bg-red-50 border-red-200 text-red-900",
+  }[lvl] || "bg-stone-50 border-stone-200 text-stone-800");
+  const dotCls = (lvl) => ({
+    green: "bg-green-500",
+    yellow: "bg-amber-500",
+    red: "bg-red-500",
+  }[lvl] || "bg-stone-400");
+  const MetricTile = ({ label, value, lvl }) => (
+    <div className={`rounded-md border p-3 ${boxCls(lvl)}`}>
+      <div className="flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wide">{label}</span>
+        <span className={`w-2.5 h-2.5 rounded-full ${dotCls(lvl)}`} />
+      </div>
+      <div className="mt-1 font-mono text-base">{value}</div>
+    </div>
+  );
+
   const flags = [];
   if (metrics.payloadBytes > 1.5 * 1024 * 1024) flags.push("Payload large");
   if (metrics.requestCount > 50) flags.push("Many requests");
@@ -116,18 +152,18 @@ export default function PerformanceDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader><CardTitle>Core Metrics</CardTitle></CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between"><span>Load Time</span><span className="font-mono">{ms(metrics.loadTime)}</span></div>
-              <div className="flex justify-between"><span>Payload</span><span className="font-mono">{kb(metrics.payloadBytes)}</span></div>
-              <div className="flex justify-between"><span>Requests</span><span className="font-mono">{metrics.requestCount ?? '-'}</span></div>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <MetricTile label="Load Time" value={ms(metrics.loadTime)} lvl={levelFor('loadTime', metrics.loadTime)} />
+              <MetricTile label="Payload" value={kb(metrics.payloadBytes)} lvl={levelFor('payloadBytes', metrics.payloadBytes)} />
+              <MetricTile label="Requests" value={metrics.requestCount ?? '-'} lvl={levelFor('requestCount', Number(metrics.requestCount))} />
             </CardContent>
           </Card>
           <Card>
             <CardHeader><CardTitle>Web Vitals</CardTitle></CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between"><span>LCP</span><span className="font-mono">{ms(metrics.lcp)}</span></div>
-              <div className="flex justify-between"><span>CLS</span><span className="font-mono">{typeof metrics.cls === 'number' ? metrics.cls.toFixed(3) : '-'}</span></div>
-              <div className="flex justify-between"><span>INP</span><span className="font-mono">{ms(metrics.inp)}</span></div>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <MetricTile label="LCP" value={ms(metrics.lcp)} lvl={levelFor('lcp', metrics.lcp)} />
+              <MetricTile label="CLS" value={typeof metrics.cls === 'number' ? metrics.cls.toFixed(3) : '-'} lvl={levelFor('cls', Number(metrics.cls))} />
+              <MetricTile label="INP" value={ms(metrics.inp)} lvl={levelFor('inp', metrics.inp)} />
             </CardContent>
           </Card>
         </div>
@@ -136,11 +172,26 @@ export default function PerformanceDashboard() {
           <CardHeader><CardTitle>Risk Flags</CardTitle></CardHeader>
           <CardContent className="text-sm">
             {flags.length === 0 ? (
-              <div className="text-green-700">All good. No current risks detected.</div>
+              <div className="rounded-md border p-3 bg-green-50 border-green-200 text-green-800">All good. No current risks detected.</div>
             ) : (
-              <ul className="list-disc pl-5 space-y-1">
-                {flags.map((f, i) => (<li key={i}>{f}</li>))}
-              </ul>
+              <div className="flex flex-wrap gap-2">
+                {flags.map((f, i) => {
+                  const lvl = (() => {
+                    if (f.includes('Payload')) return levelFor('payloadBytes', metrics.payloadBytes);
+                    if (f.includes('Many requests')) return levelFor('requestCount', Number(metrics.requestCount));
+                    if (f.includes('LCP')) return levelFor('lcp', metrics.lcp);
+                    if (f.includes('CLS')) return levelFor('cls', Number(metrics.cls));
+                    if (f.includes('INP')) return levelFor('inp', metrics.inp);
+                    return 'yellow';
+                  })();
+                  return (
+                    <span key={i} className={`px-2.5 py-1 rounded-full border text-xs ${boxCls(lvl)}`}>
+                      <span className={`inline-block w-2 h-2 rounded-full mr-1 ${dotCls(lvl)}`}></span>
+                      {f}
+                    </span>
+                  );
+                })}
+              </div>
             )}
           </CardContent>
         </Card>
