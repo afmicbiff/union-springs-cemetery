@@ -40,6 +40,8 @@ const pick = (obj, fields) => {
   return out;
 };
 
+const inFlight = new Map();
+
 export async function listEntity(entityName, { limit = 50, sort = "-updated_date", select, persist = false, ttlMs = 600000 } = {}, { signal } = {}) {
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
   const cacheKey = persist ? makeKey('list', entityName, { limit, sort, select }) : null;
@@ -47,11 +49,21 @@ export async function listEntity(entityName, { limit = 50, sort = "-updated_date
     const cached = readCache(cacheKey);
     if (cached) return cached;
   }
-  const data = await base44.entities[entityName].list(sort, limit);
-  const arr = Array.isArray(data) ? data : [];
-  const result = select ? arr.map((r) => pick(r, select)) : arr;
-  if (cacheKey) writeCache(cacheKey, result, ttlMs);
-  return result;
+  const reqKey = makeKey('list', entityName, { limit, sort, select });
+  if (inFlight.has(reqKey)) return inFlight.get(reqKey);
+  const p = (async () => {
+    const data = await base44.entities[entityName].list(sort, limit);
+    const arr = Array.isArray(data) ? data : [];
+    const result = select ? arr.map((r) => pick(r, select)) : arr;
+    if (cacheKey) writeCache(cacheKey, result, ttlMs);
+    return result;
+  })();
+  inFlight.set(reqKey, p);
+  try {
+    return await p;
+  } finally {
+    inFlight.delete(reqKey);
+  }
 }
 
 export async function filterEntity(entityName, filter, { limit = 50, sort = "-updated_date", select, persist = false, ttlMs = 600000 } = {}, { signal } = {}) {
@@ -61,11 +73,21 @@ export async function filterEntity(entityName, filter, { limit = 50, sort = "-up
     const cached = readCache(cacheKey);
     if (cached) return cached;
   }
-  const data = await base44.entities[entityName].filter(filter || {}, sort, limit);
-  const arr = Array.isArray(data) ? data : [];
-  const result = select ? arr.map((r) => pick(r, select)) : arr;
-  if (cacheKey) writeCache(cacheKey, result, ttlMs);
-  return result;
+  const reqKey = makeKey('filter', entityName, { filter, limit, sort, select });
+  if (inFlight.has(reqKey)) return inFlight.get(reqKey);
+  const p = (async () => {
+    const data = await base44.entities[entityName].filter(filter || {}, sort, limit);
+    const arr = Array.isArray(data) ? data : [];
+    const result = select ? arr.map((r) => pick(r, select)) : arr;
+    if (cacheKey) writeCache(cacheKey, result, ttlMs);
+    return result;
+  })();
+  inFlight.set(reqKey, p);
+  try {
+    return await p;
+  } finally {
+    inFlight.delete(reqKey);
+  }
 }
 
 export function clearEntityCache(entityName) {
