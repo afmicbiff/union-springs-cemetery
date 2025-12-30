@@ -9,7 +9,11 @@ export default Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { query } = await req.json();
+        const body = await req.json();
+        const query = body?.query;
+        const page = Math.max(1, parseInt(body?.page || 1));
+        const limit = Math.max(1, Math.min(50, parseInt(body?.limit || 20)));
+        const perEntityLimit = Math.max(5, limit);
         
         if (!query || query.length < 2) {
             return Response.json({ results: [] });
@@ -53,7 +57,7 @@ export default Deno.serve(async (req) => {
                         ...fullNameFilter
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'member', results: res })),
 
             base44.entities.User.list({
@@ -83,7 +87,7 @@ export default Deno.serve(async (req) => {
                         { notes: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'plot', results: res })),
 
             base44.entities.Reservation.list({ 
@@ -93,7 +97,7 @@ export default Deno.serve(async (req) => {
                         { owner_email: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'reservation', results: res })),
 
             base44.entities.Employee.list({ 
@@ -108,7 +112,7 @@ export default Deno.serve(async (req) => {
                         ...fullNameFilter
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'employee', results: res })),
 
             base44.entities.Vendor.list({ 
@@ -121,7 +125,7 @@ export default Deno.serve(async (req) => {
                         { phone: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'vendor', results: res })),
 
             base44.entities.Task.list({ 
@@ -131,7 +135,7 @@ export default Deno.serve(async (req) => {
                         { description: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'task', results: res })),
 
             base44.entities.Announcement.list({ 
@@ -141,7 +145,7 @@ export default Deno.serve(async (req) => {
                         { content: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'announcement', results: res })),
 
             base44.entities.Deceased.list({ 
@@ -155,7 +159,7 @@ export default Deno.serve(async (req) => {
                         ...fullNameFilter
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'deceased', results: res })),
 
             base44.entities.Event.list({ 
@@ -165,12 +169,12 @@ export default Deno.serve(async (req) => {
                         { description: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'event', results: res })),
 
             base44.entities.Notification.list({
                 filter: { message: searchRegex },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'notification', results: res })),
 
             base44.entities.MemberSegment.list({
@@ -180,7 +184,7 @@ export default Deno.serve(async (req) => {
                         { description: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'segment', results: res })),
 
             base44.entities.Condolence.list({
@@ -191,7 +195,7 @@ export default Deno.serve(async (req) => {
                         { relation: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'condolence', results: res })),
 
             base44.entities.VendorInvoice.list({
@@ -201,7 +205,7 @@ export default Deno.serve(async (req) => {
                         { notes: searchRegex }
                     ]
                 },
-                limit: 5
+                limit: perEntityLimit
             }).then(res => ({ type: 'invoice', results: res }))
         ];
 
@@ -223,7 +227,11 @@ export default Deno.serve(async (req) => {
             }))
         );
 
-        return Response.json({ results: flatResults });
+        const total = flatResults.length;
+        const totalPages = Math.max(1, Math.ceil(total / limit));
+        const start = (page - 1) * limit;
+        const paged = flatResults.slice(start, start + limit);
+        return Response.json({ results: paged, pagination: { total, page, limit, totalPages } });
 
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });

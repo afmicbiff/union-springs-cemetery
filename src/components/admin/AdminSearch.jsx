@@ -30,6 +30,8 @@ export default function AdminSearch({ onNavigate }) {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState("");
+    const [page, setPage] = useState(1);
+    const limit = 20;
     const [recentSearches, setRecentSearches] = useState([]);
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
@@ -96,14 +98,14 @@ export default function AdminSearch({ onNavigate }) {
     ];
 
     const { data: results, isLoading } = useQuery({
-        queryKey: ['admin-search', debouncedQuery],
+        queryKey: ['admin-search', debouncedQuery, page, limit],
         queryFn: async () => {
             if (!debouncedQuery || debouncedQuery.length < 2) return [];
             
             // 1. Search DB
             let dbResults = [];
             try {
-                const response = await base44.functions.invoke('adminSearch', { query: debouncedQuery });
+                const response = await base44.functions.invoke('adminSearch', { query: debouncedQuery, page, limit });
                 if (response?.data?.results) {
                     dbResults = response.data.results;
                 }
@@ -175,6 +177,7 @@ export default function AdminSearch({ onNavigate }) {
                     onChange={(e) => {
                         setQuery(e.target.value);
                         setIsOpen(true);
+                        setPage(1);
                     }}
                     onFocus={() => setIsOpen(true)}
                     className="pl-9 bg-white border-stone-200 focus-visible:ring-teal-600"
