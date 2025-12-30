@@ -1,6 +1,7 @@
 import React from "react";
 import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Code } from "lucide-react";
@@ -14,6 +15,27 @@ export default function PerformanceDashboard() {
   const [aiLoading, setAiLoading] = React.useState(false);
   const [aiError, setAiError] = React.useState(null);
   const [aiResult, setAiResult] = React.useState(null);
+
+  // Fallback: load latest persisted Web Vitals when local metrics are missing
+  const { data: vitalsLatest } = useQuery({
+    queryKey: ['webVitalsLatest'],
+    queryFn: async () => {
+      const [lcp, inp] = await Promise.all([
+        base44.entities.WebVital.filter({ name: 'LCP' }, '-created_date', 1),
+        base44.entities.WebVital.filter({ name: 'INP' }, '-created_date', 1),
+      ]);
+      return {
+        lcp: Number(lcp?.[0]?.value) || null,
+        inp: Number(inp?.[0]?.value) || null,
+      };
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const lcpValue = typeof metrics.lcp === 'number' ? metrics.lcp : vitalsLatest?.lcp ?? undefined;
+  const inpValue = typeof metrics.inp === 'number' ? metrics.inp : vitalsLatest?.inp ?? undefined;
 
   React.useEffect(() => {
     base44.auth.me().then(setUser).catch(() => setUser(null));
@@ -32,9 +54,9 @@ export default function PerformanceDashboard() {
       const flags = [];
       if (metrics.payloadBytes > 1.5 * 1024 * 1024) flags.push("Payload large");
       if (metrics.requestCount > 50) flags.push("Many requests");
-      if (metrics.lcp > 2500) flags.push("LCP slow");
+      if (lcpValue > 2500) flags.push("LCP slow");
       if (metrics.cls > 0.1) flags.push("CLS high");
-      if (metrics.inp > 200) flags.push("INP slow");
+      if (inpValue > 200) flags.push("INP slow");
 
       const prompt = `You are an expert React performance engineer working on a Base44 (React + Tailwind + React Query) app.\n\nGovernance rules to enforce strictly:\n- Performance-first: minimize payload, defer non-critical work.\n- Data discipline: bounded queries, pagination, field selection, request cancellation.\n- Rendering discipline: memoization, avoid derived state, virtualize large lists.\n- Network: batch calls, dedupe, cache correctly.\n- Asset: lazy-load heavy assets.\n- Layout: prevent CLS.\n- Web Vitals: LCP < 2.5s, CLS < 0.1, INP < 200ms.\n\nGiven current metrics and flags, list prioritized issues with actionable fixes and minimal code snippets tailored to Base44 (use base44 SDK, @tanstack/react-query, AbortController signal from queryFn).\n\nMetrics JSON: ${JSON.stringify(metrics)}\nFlags: ${flags.join(", ") || "none"}\n\nOutput strict JSON: {\n  "global_prompt": string,\n  "issues": [{\n    "title": string,\n    "severity": "low"|"medium"|"high"|"critical",\n    "summary": string,\n    "root_cause": string,\n    "fixes": string[],\n    "code_suggestion": {"language":"js"|"jsx","snippet": string}\n  }]\n}`;
 
@@ -163,9 +185,9 @@ export default function PerformanceDashboard() {
           <Card>
             <CardHeader><CardTitle>Web Vitals</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-              <MetricTile label="LCP" value={ms(metrics.lcp)} lvl={levelFor('lcp', metrics.lcp)} />
+              <MetricTile label="LCP" value={ms(lcpValue)} lvl={levelFor('lcp', lcpValue)} />
               <MetricTile label="CLS" value={typeof metrics.cls === 'number' ? metrics.cls.toFixed(3) : '-'} lvl={levelFor('cls', Number(metrics.cls))} />
-              <MetricTile label="INP" value={ms(metrics.inp)} lvl={levelFor('inp', metrics.inp)} />
+              <MetricTile label="INP" value={ms(inpValue)} lvl={levelFor('inp', inpValue)} />
             </CardContent>
           </Card>
         </div>
@@ -181,9 +203,9 @@ export default function PerformanceDashboard() {
                   const lvl = (() => {
                     if (f.includes('Payload')) return levelFor('payloadBytes', metrics.payloadBytes);
                     if (f.includes('Many requests')) return levelFor('requestCount', Number(metrics.requestCount));
-                    if (f.includes('LCP')) return levelFor('lcp', metrics.lcp);
+                    if (f.includes('LCP')) return levelFor('lcp', lcpValue);
                     if (f.includes('CLS')) return levelFor('cls', Number(metrics.cls));
-                    if (f.includes('INP')) return levelFor('inp', metrics.inp);
+                    if (f.includes('INP')) return levelFor('inp', inpValue);
                     return 'yellow';
                   })();
                   return (
