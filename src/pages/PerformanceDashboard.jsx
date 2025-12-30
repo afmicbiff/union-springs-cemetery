@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Code } from "lucide-react";
 
-const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel.jsx"));
+const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel"));
 
 export default function PerformanceDashboard() {
   const [metrics, setMetrics] = React.useState(getCurrentMetrics());
