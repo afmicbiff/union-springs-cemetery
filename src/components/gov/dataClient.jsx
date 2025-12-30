@@ -54,9 +54,31 @@ export async function listEntity(entityName, { limit = 50, sort = "-updated_date
   return result;
 }
 
-export async function filterEntity(entityName, filter, { limit = 50, sort = "-updated_date", select } = {}, { signal } = {}) {
+export async function filterEntity(entityName, filter, { limit = 50, sort = "-updated_date", select, persist = false, ttlMs = 600000 } = {}, { signal } = {}) {
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+  const cacheKey = persist ? makeKey('filter', entityName, { filter, limit, sort, select }) : null;
+  if (cacheKey) {
+    const cached = readCache(cacheKey);
+    if (cached) return cached;
+  }
   const data = await base44.entities[entityName].filter(filter || {}, sort, limit);
   const arr = Array.isArray(data) ? data : [];
-  return select ? arr.map((r) => pick(r, select)) : arr;
+  const result = select ? arr.map((r) => pick(r, select)) : arr;
+  if (cacheKey) writeCache(cacheKey, result, ttlMs);
+  return result;
+}
+
+export function clearEntityCache(entityName) {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    for (let i = window.localStorage.length - 1; i >= 0; i--) {
+      const k = window.localStorage.key(i);
+      if (!k) continue;
+      if (k.startsWith(CACHE_PREFIX) && k.includes(`:${entityName}:`)) {
+        window.localStorage.removeItem(k);
+      }
+    }
+  } catch {
+    // ignore
+  }
 }
