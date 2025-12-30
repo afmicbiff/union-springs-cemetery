@@ -49,7 +49,7 @@ export function runAccessibilityChecks(pathname = window.location.pathname) {
   // Images alt
   const imgs = Array.from(document.querySelectorAll('img'));
   const missingAlt = imgs.filter(img => !img.hasAttribute('alt'));
-  if (missingAlt.length) res.push(warn({ category: "Accessibility", target: pathname, severity: "high", message: `${missingAlt.length} images missing alt text`, fix: "Add descriptive alt text or alt="" for decorative images." }));
+  if (missingAlt.length) res.push(warn({ category: "Accessibility", target: pathname, severity: "high", message: `${missingAlt.length} images missing alt text`, fix: 'Add descriptive alt text or alt="" for decorative images.' }));
   else res.push(passItem({ category: "Accessibility", target: pathname, message: "All images have alt" }));
 
   // Form labels
