@@ -196,6 +196,70 @@ export default function PerformanceDashboard() {
           </CardContent>
         </Card>
 
+        {/* Optimization Guide */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="rounded-md border p-4 bg-red-50 border-red-200 text-red-900">
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-semibold">Excessive Network Requests</div>
+              <span className="text-xs px-2 py-0.5 rounded bg-white/60 border border-red-300">critical</span>
+            </div>
+            <ul className="list-disc pl-5 text-sm space-y-1 mb-3">
+              <li>Batch concurrent queries with useQueries.</li>
+              <li>Use stable query keys to dedupe in-flight requests.</li>
+              <li>Share common data via context or top-level queries.</li>
+            </ul>
+            <div className="text-xs text-stone-700 bg-white rounded p-2 border">
+              <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />useQueries example</div>
+              <pre className="overflow-auto"><code>{`import { useQueries } from '@tanstack/react-query';
+
+        const results = useQueries({
+        queries: [
+        { queryKey: ['plots','page',1], queryFn: fetchPlotsPage1 },
+        { queryKey: ['invoices','recent'], queryFn: fetchRecentInvoices }
+        ],
+        });`}</code></pre>
+            </div>
+          </div>
+
+          <div className="rounded-md border p-4 bg-amber-50 border-amber-200 text-amber-900">
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-semibold">Load Time Over Threshold</div>
+              <span className="text-xs px-2 py-0.5 rounded bg-white/60 border border-amber-300">high</span>
+            </div>
+            <ul className="list-disc pl-5 text-sm space-y-1 mb-3">
+              <li>Lazy-load non-critical components and images.</li>
+              <li>Prefer modern formats (WebP/AVIF) where possible.</li>
+            </ul>
+            <div className="text-xs text-stone-700 bg-white rounded p-2 border">
+              <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />Code-splitting</div>
+              <pre className="overflow-auto"><code>{`const Heavy = React.lazy(() => import('../components/Heavy'));
+        <React.Suspense fallback={<div>Loading…</div>}>
+        <Heavy />
+        </React.Suspense>`}</code></pre>
+            </div>
+          </div>
+
+          <div className="rounded-md border p-4 bg-sky-50 border-sky-200 text-sky-900">
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-semibold">Payload Size Optimization</div>
+              <span className="text-xs px-2 py-0.5 rounded bg-white/60 border border-sky-300">medium</span>
+            </div>
+            <ul className="list-disc pl-5 text-sm space-y-1 mb-3">
+              <li>Select only needed fields.</li>
+              <li>Paginate large lists.</li>
+            </ul>
+            <div className="text-xs text-stone-700 bg-white rounded p-2 border">
+              <div className="flex items-center gap-2 mb-1"><Code className="h-3 w-3" />Field selection</div>
+              <pre className="overflow-auto"><code>{`import { filterEntity } from '@/components/gov/dataClient';
+
+        await filterEntity('Plot', {}, {
+        limit: 50,
+        select: ['id','section','plot_number','status']
+        });`}</code></pre>
+            </div>
+          </div>
+        </div>
+
         {/* AI Analytics */}
         <Card>
           <CardHeader>
