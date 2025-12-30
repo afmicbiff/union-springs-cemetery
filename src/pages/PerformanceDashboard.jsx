@@ -1,10 +1,11 @@
 import React from "react";
 import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
-import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw, Wand2, Loader2, Code, Lightbulb } from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+
+const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel"));
 
 export default function PerformanceDashboard() {
   const [metrics, setMetrics] = React.useState(getCurrentMetrics());
@@ -262,55 +263,10 @@ export default function PerformanceDashboard() {
           </div>
         </div>
 
-        {/* AI Analytics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Wand2 className="w-4 h-4 text-teal-700" /> AI Analytics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Button onClick={analyzeWithAI} disabled={aiLoading} className="gap-2">
-                {aiLoading ? (<><Loader2 className="h-4 w-4 animate-spin"/>Analyzing…</>) : (<><Wand2 className="h-4 w-4"/>Run Analysis</>)}
-              </Button>
-              {aiError && <span className="text-red-600">{aiError}</span>}
-            </div>
-            {!aiLoading && aiResult && (
-              <div className="space-y-4">
-                {aiResult.global_prompt && (
-                  <div className="p-3 rounded border bg-stone-50">
-                    <div className="flex items-center gap-2 font-medium mb-2"><Lightbulb className="h-4 w-4"/>Actionable Prompt</div>
-                    <pre className="text-xs whitespace-pre-wrap">{aiResult.global_prompt}</pre>
-                  </div>
-                )}
-                {(aiResult.issues || []).map((iss, idx) => (
-                  <div key={idx} className="border rounded p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold">{iss.title}</div>
-                      <span className="text-xs px-2 py-0.5 rounded bg-stone-100 border">{iss.severity}</span>
-                    </div>
-                    {iss.summary && <p className="text-stone-700 mb-2">{iss.summary}</p>}
-                    {iss.root_cause && (
-                      <div className="text-stone-600 text-xs mb-2"><span className="font-medium">Root cause:</span> {iss.root_cause}</div>
-                    )}
-                    {Array.isArray(iss.fixes) && iss.fixes.length > 0 && (
-                      <ul className="list-disc pl-5 text-sm text-stone-700 space-y-1 mb-2">
-                        {iss.fixes.map((f, i) => (<li key={i}>{f}</li>))}
-                      </ul>
-                    )}
-                    {iss.code_suggestion?.snippet && (
-                      <div className="mt-2">
-                        <div className="flex items-center gap-2 text-xs text-stone-500 mb-1"><Code className="h-3 w-3"/>Suggested Code</div>
-                        <pre className="bg-stone-900 text-stone-100 rounded p-3 overflow-auto text-xs"><code>{iss.code_suggestion.snippet}</code></pre>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        {/* AI Analytics (lazy-loaded to improve initial load) */}
+        <React.Suspense fallback={<div className="rounded-md border p-4 bg-stone-50">Loading AI tools…</div>}>
+          <AiAnalyticsPanel metrics={metrics} />
+        </React.Suspense>
       </div>
     </div>
   );
