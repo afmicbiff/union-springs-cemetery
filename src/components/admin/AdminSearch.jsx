@@ -33,6 +33,13 @@ export default function AdminSearch({ onNavigate }) {
     const [recentSearches, setRecentSearches] = useState([]);
     const wrapperRef = useRef(null);
     const inputRef = useRef(null);
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+
+    // Debounce input by 300ms to reduce network calls
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+        return () => clearTimeout(t);
+    }, [query]);
 
     // Load recent searches on mount
     useEffect(() => {
@@ -89,14 +96,14 @@ export default function AdminSearch({ onNavigate }) {
     ];
 
     const { data: results, isLoading } = useQuery({
-        queryKey: ['admin-search', query],
+        queryKey: ['admin-search', debouncedQuery],
         queryFn: async () => {
-            if (query.length < 2) return [];
+            if (!debouncedQuery || debouncedQuery.length < 2) return [];
             
             // 1. Search DB
             let dbResults = [];
             try {
-                const response = await base44.functions.invoke('adminSearch', { query });
+                const response = await base44.functions.invoke('adminSearch', { query: debouncedQuery });
                 if (response?.data?.results) {
                     dbResults = response.data.results;
                 }
@@ -106,15 +113,19 @@ export default function AdminSearch({ onNavigate }) {
             }
 
             // 2. Search Navigation (Client-side)
+            const lower = debouncedQuery.toLowerCase();
             const navResults = adminSections.filter(section => 
-                section.label.toLowerCase().includes(query.toLowerCase()) || 
-                section.subLabel.toLowerCase().includes(query.toLowerCase())
+                section.label.toLowerCase().includes(lower) || 
+                section.subLabel.toLowerCase().includes(lower)
             );
 
             return [...navResults, ...dbResults];
         },
-        enabled: query.length >= 2,
-        staleTime: 1000 * 60, // 1 minute
+        enabled: debouncedQuery.length >= 2,
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
     });
 
     const handleSelect = (item) => {

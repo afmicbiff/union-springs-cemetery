@@ -213,14 +213,13 @@ export default Deno.serve(async (req) => {
             .map(r => r.value);
 
         // Flatten and format results
-        const flatResults = results.flatMap(group => 
+        const flatResults = results.flatMap(group =>
             (group.results.items || group.results).map(item => ({
-                ...item,
+                id: item.id,
                 type: group.type,
-                // Add a consistent label/description for the UI
                 label: getItemLabel(group.type, item),
                 subLabel: getItemSubLabel(group.type, item),
-                link: getItemLink(group.type, item)
+                link: getItemLink(group.type, item),
             }))
         );
 
