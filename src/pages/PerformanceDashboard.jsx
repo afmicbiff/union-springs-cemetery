@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Code } from "lucide-react";
 
 const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel.jsx"));
+const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts.jsx"));
 
 export default function PerformanceDashboard() {
   const [metrics, setMetrics] = React.useState(getCurrentMetrics());
@@ -196,6 +197,10 @@ export default function PerformanceDashboard() {
             )}
           </CardContent>
         </Card>
+
+        <React.Suspense fallback={<div className="rounded-md border p-4 bg-stone-50">Loading charts…</div>}>
+          <PerformanceCharts />
+        </React.Suspense>
 
         {/* Optimization Guide */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -14,13 +14,13 @@ import NotificationSettings from './pages/NotificationSettings';
 import PerformanceDashboard from './pages/PerformanceDashboard';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
+import Reports from './pages/Reports';
 import ResendAck from './pages/ResendAck';
 import ReservePlot from './pages/ReservePlot';
 import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import Reports from './pages/Reports';
 import __Layout from './Layout.jsx';
 
 
@@ -41,13 +41,13 @@ export const PAGES = {
     "PerformanceDashboard": PerformanceDashboard,
     "Plots": Plots,
     "Profile": Profile,
+    "Reports": Reports,
     "ResendAck": ResendAck,
     "ReservePlot": ReservePlot,
     "Search": Search,
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "Reports": Reports,
 }
 
 export const pagesConfig = {
