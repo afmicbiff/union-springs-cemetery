@@ -91,13 +91,25 @@ export async function filterEntity(entityName, filter, { limit = 50, sort = "-up
 }
 
 export function clearEntityCache(entityName) {
-  if (typeof window === 'undefined' || !window.localStorage) return;
+  // Clear persisted cache entries for this entity
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      for (let i = window.localStorage.length - 1; i >= 0; i--) {
+        const k = window.localStorage.key(i);
+        if (!k) continue;
+        if (k.startsWith(CACHE_PREFIX) && k.includes(`:${entityName}:`)) {
+          window.localStorage.removeItem(k);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  // Clear any in-flight deduped requests for this entity
   try {
-    for (let i = window.localStorage.length - 1; i >= 0; i--) {
-      const k = window.localStorage.key(i);
-      if (!k) continue;
-      if (k.startsWith(CACHE_PREFIX) && k.includes(`:${entityName}:`)) {
-        window.localStorage.removeItem(k);
+    for (const key of Array.from(inFlight.keys())) {
+      if (key.includes(`:${entityName}:`)) {
+        inFlight.delete(key);
       }
     }
   } catch {
