@@ -8,6 +8,7 @@ import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Sa
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
+import SmartImage from "@/components/perf/SmartImage.jsx";
 import PlotFilters from "@/components/plots/PlotFilters";
 import {
   DropdownMenu,
@@ -956,10 +957,11 @@ export default function PlotsPage() {
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
-              alt="Union Springs Logo" 
+            <SmartImage
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png"
+              alt="Union Springs Logo"
               className="h-14 w-auto rounded-full"
+              aspectRatio="1/1"
             />
             <div className="flex flex-col">
               <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>

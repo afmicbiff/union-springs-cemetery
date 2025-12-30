@@ -1,6 +1,6 @@
 import { onCLS, onINP, onLCP } from 'web-vitals';
 
-const ENDPOINT = '/functions/vitalsIngest';
+const ENDPOINT = '/functions/vitals';
 
 function send(metric) {
   const payload = {

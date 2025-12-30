@@ -8,7 +8,7 @@ function flush() {
   queue = [];
   timer = null;
 
-  return apiFetch("/functions/batchApi", {
+  return apiFetch("/functions/batch", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ calls: batch.map((x) => x.call) }),
