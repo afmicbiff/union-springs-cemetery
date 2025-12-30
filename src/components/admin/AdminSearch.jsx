@@ -107,7 +107,7 @@ export default function AdminSearch({ onNavigate }) {
             try {
                 const response = await base44.functions.invoke('adminSearch', { query: debouncedQuery, page, limit });
                 if (response?.data?.results) {
-                    dbResults = response.data.results;
+                    dbResults = response.data;
                 }
             } catch (err) {
                 console.error("Admin search DB error:", err);
@@ -121,7 +121,9 @@ export default function AdminSearch({ onNavigate }) {
                 section.subLabel.toLowerCase().includes(lower)
             );
 
-            return [...navResults, ...dbResults];
+            const responseData = (await base44.functions.invoke('adminSearch', { query: lower, page, limit }))?.data || {};
+            const serverItems = Array.isArray(responseData.results) ? responseData.results : [];
+            return { items: [...navResults, ...serverItems], pagination: responseData.pagination || null };
         },
         enabled: debouncedQuery.length >= 2,
         staleTime: 60_000,
@@ -227,9 +229,9 @@ export default function AdminSearch({ onNavigate }) {
                                 <div className="p-8 flex justify-center text-stone-400">
                                     <Loader2 className="w-6 h-6 animate-spin" />
                                 </div>
-                            ) : results?.length > 0 ? (
+                            ) : results?.items?.length > 0 ? (
                                 <div className="p-2 space-y-1">
-                                    {results.map((item, i) => {
+                                    {results.items.map((item, i) => {
                                         const Icon = getIcon(item.type);
                                         return (
                                             <button
