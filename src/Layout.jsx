@@ -72,11 +72,11 @@ export default function Layout({ children }) {
             {/* Logo / Title */}
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
               <SmartImage
-                                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png"
-                                    alt="Union Springs Logo"
-                                    className="h-14 w-auto rounded-full"
-                                    aspectRatio="1/1"
-                                  />
+                                                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png"
+                                                        alt="Union Springs Logo"
+                                                        className="h-10 w-10 rounded-full"
+                                                        aspectRatio="1/1"
+                                                      />
               <div className="flex flex-col">
                 <span className="text-xl md:text-2xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
                 <span className="text-[0.65rem] md:text-xs text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery - Shongaloo, LA</span>
