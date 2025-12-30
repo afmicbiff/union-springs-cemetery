@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
-import { filterEntity } from "@/components/gov/dataClient";
+import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -372,13 +372,13 @@ export default function PlotsPage() {
           filterEntity(
             'Plot',
             {},
-            { sort: '-updated_date', limit: 5000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'] },
+            { sort: '-updated_date', limit: 5000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'], persist: true, ttlMs: 15 * 60_000 },
             { signal }
           ),
           filterEntity(
             'PlotsAndMaps',
             {},
-            { sort: '-updated_date', limit: 5000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'] },
+            { sort: '-updated_date', limit: 5000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'], persist: true, ttlMs: 15 * 60_000 },
             { signal }
           ),
         ]);
@@ -402,6 +402,8 @@ export default function PlotsPage() {
           return response.data;
       },
       onSuccess: () => {
+          clearEntityCache('Plot');
+          clearEntityCache('PlotsAndMaps');
           queryClient.invalidateQueries({ queryKey: ['plots'] });
           toast.success("Plot updated successfully");
       },
@@ -420,6 +422,8 @@ export default function PlotsPage() {
           return response.data;
       },
       onSuccess: (data) => {
+          clearEntityCache('Plot');
+          clearEntityCache('PlotsAndMaps');
           queryClient.invalidateQueries({ queryKey: ['plots'] });
           toast.success(data.message || "Imported plots successfully");
       },
