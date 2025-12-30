@@ -59,6 +59,7 @@ import CommunicationCenter from "@/components/admin/CommunicationCenter";
 import AuditLogViewer from "@/components/admin/AuditLogViewer";
 import LawnCare from "@/components/admin/LawnCare";
 import CRM from "@/components/crm/CRM";
+import QualityAdvisor from "@/components/gov/QualityAdvisor";
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -504,6 +505,7 @@ export default function AdminDashboard() {
             </div>
         </div>
 
+        <QualityAdvisor />
         {/* Navigation & Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
