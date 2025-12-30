@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
+import { filterEntity } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -365,10 +366,20 @@ export default function PlotsPage() {
 
   const { data: plotEntities, isLoading } = useQuery({
       queryKey: ['plots'],
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         const [oldPlots, legacy] = await Promise.all([
-          base44.entities.Plot.list(null, 5000),
-          base44.entities.PlotsAndMaps.list(null, 5000),
+          filterEntity(
+            'Plot',
+            {},
+            { sort: '-updated_date', limit: 5000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'] },
+            { signal }
+          ),
+          filterEntity(
+            'PlotsAndMaps',
+            {},
+            { sort: '-updated_date', limit: 5000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'] },
+            { signal }
+          ),
         ]);
         return [...(oldPlots || []), ...(legacy || [])];
       },
