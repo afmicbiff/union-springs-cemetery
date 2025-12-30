@@ -1,6 +1,7 @@
 import React from "react";
 import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
+import { filterEntity } from "@/components/gov/dataClient";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,14 +20,14 @@ export default function PerformanceDashboard() {
   // Fallback: load latest persisted Web Vitals when local metrics are missing
   const { data: vitalsLatest } = useQuery({
     queryKey: ['webVitalsLatest'],
-    queryFn: async () => {
-      const [lcp, inp] = await Promise.all([
-        base44.entities.WebVital.filter({ name: 'LCP' }, '-created_date', 1),
-        base44.entities.WebVital.filter({ name: 'INP' }, '-created_date', 1),
+    queryFn: async ({ signal }) => {
+      const [lcpArr, inpArr] = await Promise.all([
+        filterEntity('WebVital', { name: 'LCP' }, { sort: '-created_date', limit: 1, select: ['value'], persist: true, ttlMs: 10 * 60_000 }, { signal }),
+        filterEntity('WebVital', { name: 'INP' }, { sort: '-created_date', limit: 1, select: ['value'], persist: true, ttlMs: 10 * 60_000 }, { signal }),
       ]);
       return {
-        lcp: Number(lcp?.[0]?.value) || null,
-        inp: Number(inp?.[0]?.value) || null,
+        lcp: Number(lcpArr?.[0]?.value) || null,
+        inp: Number(inpArr?.[0]?.value) || null,
       };
     },
     staleTime: 60_000,
