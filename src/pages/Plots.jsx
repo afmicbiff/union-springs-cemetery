@@ -322,7 +322,7 @@ export default function PlotsPage() {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
-  const [collapsedSections, setCollapsedSections] = useState({});
+  const [collapsedSections, setCollapsedSections] = useState({ '1': true, '2': true, '3': true, '4': true, '5': false });
   const [expandedSections, setExpandedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
@@ -350,6 +350,12 @@ export default function PlotsPage() {
   const [groupBy, setGroupBy] = useState('none');
   const [sortBy, setSortBy] = useState('Grave');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [page, setPage] = useState(1);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filters.search, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
 
   // Editing State
   const [editingId, setEditingId] = useState(null);
