@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import SmartImage from "@/components/perf/SmartImage.jsx";
 import PlotFilters from "@/components/plots/PlotFilters";
+import DataTablePaginated from "@/components/plots/DataTablePaginated";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -372,23 +373,34 @@ export default function PlotsPage() {
   const isAdmin = user?.role === 'admin';
 
   const { data: plotEntities, isLoading } = useQuery({
-      queryKey: ['plots'],
+      queryKey: ['plotsMap', { open: openSections, tab: activeTab }],
       queryFn: async ({ signal }) => {
-        const [oldPlots, legacy] = await Promise.all([
-          filterEntity(
-            'Plot',
-            {},
-            { sort: '-updated_date', limit: 5000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'], persist: true, ttlMs: 15 * 60_000 },
-            { signal }
-          ),
-          filterEntity(
-            'PlotsAndMaps',
-            {},
-            { sort: '-updated_date', limit: 5000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'], persist: true, ttlMs: 15 * 60_000 },
-            { signal }
-          ),
-        ]);
-        return [...(oldPlots || []), ...(legacy || [])];
+        if (activeTab !== 'map') return [];
+        const sectionsToLoad = (openSections && openSections.length) ? openSections : ['5'];
+
+        const oldPerSection = await Promise.all(
+          sectionsToLoad.map((sec) =>
+            filterEntity(
+              'Plot',
+              { section: sec },
+              { sort: '-updated_date', limit: 2000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'], persist: true, ttlMs: 15 * 60_000 },
+              { signal }
+            )
+          )
+        );
+
+        const legacyPerSection = await Promise.all(
+          sectionsToLoad.map((sec) =>
+            filterEntity(
+              'PlotsAndMaps',
+              { section: sec },
+              { sort: '-updated_date', limit: 2000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'], persist: true, ttlMs: 15 * 60_000 },
+              { signal }
+            )
+          )
+        );
+
+        return [...oldPerSection.flat(), ...legacyPerSection.flat()];
       },
       initialData: [],
       staleTime: 30_000,
