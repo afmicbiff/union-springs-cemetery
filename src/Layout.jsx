@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import GovernanceProvider from '@/components/gov/GovernanceProvider';
-import { initPerf } from './perf/initPerf';
+import { initPerf } from '@/components/perf/initPerf';
 initPerf();
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
