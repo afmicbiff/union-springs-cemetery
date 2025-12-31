@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useMemo, useDeferredValue } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Layers, FileText, AlertCircle, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Trash2, Plus } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
-import SmartImage from "@/components/perf/SmartImage.jsx";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
-import DataTablePaginated from "@/components/plots/DataTablePaginated";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +19,28 @@ import {
 import { toast } from "sonner";
 import debounce from 'lodash/debounce';
 
-// --- MOCK DATA ---
+// --- CONFIGURATION ---
+
+const STATUS_COLORS = {
+  'Available': 'bg-green-500 border-green-700',
+  'Reserved': 'bg-yellow-400 border-yellow-600',
+  'Occupied': 'bg-red-500 border-red-700',
+  'Veteran': 'bg-blue-600 border-blue-800',
+  'Unavailable': 'bg-gray-600 border-gray-800',
+  'Unknown': 'bg-purple-500 border-purple-700',
+  'Default': 'bg-gray-300 border-gray-500'
+};
+
+// Distinct colors for different Sections
+const SECTION_PALETTES = [
+  'bg-blue-100 border-blue-300 text-blue-900',         // Section 1 / Row D
+  'bg-blue-100 border-blue-300 text-blue-900',         // Section 2
+  'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
+  'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
+  'bg-cyan-100 border-cyan-300 text-cyan-900',      // Section 5
+  'bg-lime-100 border-lime-300 text-lime-900',
+];
+
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
 1,A-1,Available,,,,,,,,Section 1
 2,A-1,Occupied,Boutwell,Paul Marshall,5/25/1901,9/3/1982,Boutwell,,Find a Grave,Section 1
@@ -48,8 +67,184 @@ const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Na
 23,D-1,Occupied,Rives,Treable,,,,,,,Row D
 `;
 
-// Helper Component for Table Row to reduce duplication
-const PlotTableRow = ({ 
+// --- HELPERS ---
+
+const getUnplacedForSection = (sectionKey, plots) => {
+    const toNum = (g) => {
+        const n = parseInt(String(g || '').replace(/\D/g, ''));
+        return Number.isFinite(n) && n > 0 ? n : null;
+    };
+    const included = new Set();
+    const addRange = (start, end) => { for (let i = start; i <= end; i++) included.add(i); };
+
+    switch (String(sectionKey)) {
+        case '3':
+            [
+                [251,268],[326,348],[406,430],[489,512],[605,633],[688,711],[765,788],[821,843],[898,930]
+            ].forEach(([s,e]) => addRange(s,e));
+            break;
+        case '4':
+            [
+                [208,223],[269,298],[349,378],[431,461],[513,542],[546,576],[630,658],[712,719],
+                [720,737],[789,795],[844,870],[923,945]
+            ].forEach(([s,e]) => addRange(s,e));
+            break;
+        case '5':
+            [
+                [224,236],[299,302],[1001,1014],[379,382],[1015,1026],[462,465],[1029,1042],
+                [543,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
+                [738,738],[739,742],[871,874]
+            ].forEach(([s,e]) => addRange(s,e));
+            break;
+        default:
+            plots.forEach(p => { const n = toNum(p.Grave); if (n) included.add(n); });
+    }
+
+    const unplaced = (plots || []).filter(p => {
+        const n = toNum(p.Grave);
+        if (!n) return true;
+        return !included.has(n);
+    });
+    return { included, unplaced, placedCount: (plots || []).length - unplaced.length };
+};
+
+// --- COMPONENTS ---
+
+const Tooltip = React.memo(({ data, position, visible }) => {
+  if (!visible || !data) return null;
+
+  const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
+  const isOccupied = data.Status === 'Occupied' || isVeteran;
+  
+  const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
+  const statusColor = STATUS_COLORS[statusKey];
+  const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
+
+  return (
+    <div 
+      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transition-all duration-200 ease-out transform translate-y-2"
+      style={{ 
+        left: `${position.x + 15}px`, 
+        top: `${position.y + 15}px`,
+        opacity: visible ? 1 : 0,
+      }}
+    >
+      <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
+        <div className="flex items-center space-x-2">
+            <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
+            <span className="font-bold text-gray-800 text-lg">Plot {data.Grave}</span>
+        </div>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Row {data.Row}</span>
+      </div>
+      
+      {isOccupied ? (
+        <div className="space-y-2">
+          <div className="bg-gray-50 p-2 rounded border border-gray-100">
+            <p className="text-xs text-gray-400 uppercase font-bold">Occupant</p>
+            <p className="font-bold text-gray-800 text-base">{data['First Name']} {data['Last Name']}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+                <p className="text-xs text-gray-400">Born</p>
+                <p className="font-medium text-gray-700">{data.Birth || 'Unknown'}</p>
+            </div>
+            <div>
+                <p className="text-xs text-gray-400">Died</p>
+                <p className="font-medium text-gray-700">{data.Death || 'Unknown'}</p>
+            </div>
+          </div>
+          {(data.Notes || data['Family Name']) && (
+             <div className="mt-2 pt-2 border-t border-gray-100">
+                <p className="text-xs text-gray-400">Details</p>
+                {data['Family Name'] && <p className="text-xs text-gray-600">Family: {data['Family Name']}</p>}
+                {data.Notes && <p className="text-xs text-gray-600 italic">{data.Notes}</p>}
+             </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-gray-500 py-2 italic text-center bg-gray-50 rounded">
+          {data.Status === 'Reserved' 
+            ? `Reserved for: ${data['Family Name'] || data.Notes || 'Unknown Family'}` 
+            : `Status: ${data.Status}`}
+        </div>
+      )}
+    </div>
+  );
+});
+
+const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  if (data.isSpacer) {
+      return (
+          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
+      );
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const targetSectionRaw = (params.get('section') || '').replace(/Section\s*/i, '').trim();
+  const targetPlotNum = parseInt(params.get('plot') || '', 10);
+  const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
+  const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
+  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum;
+
+  let displayStatus = data.Status;
+  if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
+      displayStatus = 'Veteran';
+  }
+
+  const statusColorFull = STATUS_COLORS[displayStatus] || STATUS_COLORS.Default;
+  const statusBg = statusColorFull.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
+
+  const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
+  const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
+  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-pulse';
+  const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
+
+  return (
+  <div
+      id={plotNum != null ? `plot-${sectionNorm}-${plotNum}` : undefined}
+      onClick={(e) => {
+      e.stopPropagation();
+      if (onEdit && data && data._entity === 'Plot') onEdit(data);
+      }}
+      onMouseEnter={(e) => {
+      setIsHovered(true);
+      onHover(e, data);
+      }}
+      onMouseLeave={() => {
+      setIsHovered(false);
+      onHover(null, null);
+      }}
+      className={`
+      relative transition-all duration-200 ease-in-out cursor-pointer
+      border rounded-[1px] 
+      flex flex-row items-center justify-between px-1.5
+      w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
+      ${activeClass}
+      `}
+      title={`Row: ${data.Row}, Grave: ${data.Grave}`}
+  >
+      <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
+      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">
+      {data.Row}
+      </span>
+      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
+  </div>
+  );
+});
+
+const LegendItem = React.memo(({ label, colorClass }) => {
+    const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
+    return (
+        <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap">
+            <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
+            <span className="text-xs font-semibold text-gray-600">{label}</span>
+        </div>
+    );
+});
+
+const PlotTableRow = React.memo(({ 
     row, 
     editingId, 
     inlineEditData, 
@@ -138,191 +333,334 @@ const PlotTableRow = ({
             </td>
         </tr>
     );
-};
+});
 
-// --- CONFIGURATION ---
+const SectionRenderer = React.memo(({ 
+    sectionKey, 
+    plots, 
+    palette, 
+    isCollapsed, 
+    onToggle, 
+    isExpanded, 
+    onExpand, 
+    isAdmin, 
+    onEdit, 
+    onHover
+}) => {
+    const [bgColor, borderColor, textColor] = palette.split(' ');
 
-const STATUS_COLORS = {
-  'Available': 'bg-green-500 border-green-700',
-  'Reserved': 'bg-yellow-400 border-yellow-600',
-  'Occupied': 'bg-red-500 border-red-700',
-  'Veteran': 'bg-blue-600 border-blue-800',
-  'Unavailable': 'bg-gray-600 border-gray-800',
-  'Unknown': 'bg-purple-500 border-purple-700',
-  'Default': 'bg-gray-300 border-gray-500'
-};
-
-// Distinct colors for different Sections
-const SECTION_PALETTES = [
-  'bg-blue-100 border-blue-300 text-blue-900',         // Section 1 / Row D
-  'bg-blue-100 border-blue-300 text-blue-900',         // Section 2
-  'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
-  'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
-  'bg-cyan-100 border-cyan-300 text-cyan-900',      // Section 5
-  'bg-lime-100 border-lime-300 text-lime-900',
-];
-
-// --- COMPONENTS ---
-
-// Tooltip Component
-const Tooltip = ({ data, position, visible }) => {
-  if (!visible || !data) return null;
-
-  // Determine actual status including Veteran logic
-  const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
-  const isOccupied = data.Status === 'Occupied' || isVeteran;
-  
-  const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
-  const statusColor = STATUS_COLORS[statusKey];
-  // Extract just the bg color for the dot
-  const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
-
-  return (
-    <div 
-      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transition-all duration-200 ease-out transform translate-y-2"
-      style={{ 
-        left: `${position.x + 15}px`, 
-        top: `${position.y + 15}px`,
-        opacity: visible ? 1 : 0,
-      }}
-    >
-      <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
-        <div className="flex items-center space-x-2">
-            <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
-            <span className="font-bold text-gray-800 text-lg">Plot {data.Grave}</span>
-        </div>
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Row {data.Row}</span>
-      </div>
-      
-      {isOccupied ? (
-        <div className="space-y-2">
-          <div className="bg-gray-50 p-2 rounded border border-gray-100">
-            <p className="text-xs text-gray-400 uppercase font-bold">Occupant</p>
-            <p className="font-bold text-gray-800 text-base">{data['First Name']} {data['Last Name']}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-                <p className="text-xs text-gray-400">Born</p>
-                <p className="font-medium text-gray-700">{data.Birth || 'Unknown'}</p>
-            </div>
-            <div>
-                <p className="text-xs text-gray-400">Died</p>
-                <p className="font-medium text-gray-700">{data.Death || 'Unknown'}</p>
-            </div>
-          </div>
-          {(data.Notes || data['Family Name']) && (
-             <div className="mt-2 pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-400">Details</p>
-                {data['Family Name'] && <p className="text-xs text-gray-600">Family: {data['Family Name']}</p>}
-                {data.Notes && <p className="text-xs text-gray-600 italic">{data.Notes}</p>}
-             </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-gray-500 py-2 italic text-center bg-gray-50 rounded">
-          {data.Status === 'Reserved' 
-            ? `Reserved for: ${data['Family Name'] || data.Notes || 'Unknown Family'}` 
-            : `Status: ${data.Status}`}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Individual Burial Plot Component
-const GravePlot = ({ data, baseColorClass, onHover, onEdit }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  // SPACER / EMPTY PLOT VARIANT
-  if (data.isSpacer) {
-      return (
-          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
-      );
-  }
-
-  // URL target (section + plot) to highlight this specific plot
-  const params = new URLSearchParams(window.location.search);
-  const targetSectionRaw = (params.get('section') || '').replace(/Section\s*/i, '').trim();
-  const targetPlotNum = parseInt(params.get('plot') || '', 10);
-  const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
-  const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
-  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum;
-
-  // Handle specific "Veteran" checks in notes if strictly labeled "Occupied"
-  let displayStatus = data.Status;
-  if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
-      displayStatus = 'Veteran';
-  }
-
-  // Get the color string for the status circle
-  const statusColorFull = STATUS_COLORS[displayStatus] || STATUS_COLORS.Default;
-  // Extract background color for the circle (e.g., 'bg-red-500')
-  const statusBg = statusColorFull.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
-
-  // ORIENTATION UPDATE: 
-  // Changed from w-8 h-16 (Portrait) to w-16 h-8 (Landscape) to rotate 90 degrees.
-  const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
-  const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-pulse';
-  const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
-
-  return (
-  <div
-      id={plotNum != null ? `plot-${sectionNorm}-${plotNum}` : undefined}
-      onClick={(e) => {
-      e.stopPropagation();
-      if (onEdit && data && data._entity === 'Plot') onEdit(data);
-      }}
-      onMouseEnter={(e) => {
-      setIsHovered(true);
-      onHover(e, data);
-      }}
-      onMouseLeave={() => {
-      setIsHovered(false);
-      onHover(null, null);
-      }}
-      className={`
-      relative transition-all duration-200 ease-in-out cursor-pointer
-      border rounded-[1px] 
-      flex flex-row items-center justify-between px-1.5
-      w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
-      ${activeClass}
-      `}
-      title={`Row: ${data.Row}, Grave: ${data.Grave}`}
-  >
-      {/* 1. Grave Number */}
-      <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
-
-      {/* 2. Row Number (Small) */}
-      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">
-      {data.Row}
-      </span>
-
-      {/* 3. Status Circle */}
-      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
-  </div>
-  );
-  };
-
-const LegendItem = ({ label, colorClass }) => {
-    const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
     return (
-        <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap">
-            <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
-            <span className="text-xs font-semibold text-gray-600">{label}</span>
+        <div id={`section-${sectionKey}`} className="relative">
+            <div 
+                className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
+                onClick={() => onToggle(sectionKey)}
+            >
+                <div className={`mr-2 mb-1 p-1 rounded-full transition-colors ${isCollapsed ? 'bg-gray-200 text-gray-600' : `bg-white text-${textColor.split('-')[1]}-600 shadow-sm`}`}>
+                    {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                </div>
+                <h2 className={`text-2xl font-bold ${textColor.replace('text', 'text-opacity-80 text')}`}>
+                    {sectionKey === 'Unassigned' ? 'Unassigned Plots' : `Section ${sectionKey.replace('Section', '').trim()}`}
+                </h2>
+                <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
+                <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
+                    {plots.length} Plots
+                </span>
+                {(['3','4','5'].includes(sectionKey)) && (() => { const c = getUnplacedForSection(sectionKey, plots); return (<span className="mb-1 text-xs text-gray-400 ml-2">• {c.placedCount} placed, {c.unplaced.length} fallback</span>); })()}
+            </div>
+            
+            {!isCollapsed && (
+                <div className={`
+                    rounded-xl border-2 border-dashed p-6 transition-colors duration-500
+                    ${borderColor} ${bgColor} bg-opacity-30
+                    overflow-x-auto
+                `}>
+                    {sectionKey === '1' ? (
+                        <div className="flex gap-4 justify-center">
+                            {(() => {
+                                const nums = plots
+                                  .map(p => parseInt(String(p.Grave).replace(/\D/g, '')) || 0)
+                                  .filter(n => n > 0);
+                                const maxNum = nums.length ? Math.max(...nums) : 0;
+                                const cols = 8;
+                                const perCol = Math.ceil(maxNum / cols) || 0;
+                                const ranges = Array.from({ length: cols }, (_, i) => ({
+                                  start: i * perCol + 1,
+                                  end: Math.min((i + 1) * perCol, maxNum)
+                                }));
+
+                                return ranges.map((range, idx) => {
+                                  const colPlots = plots.filter(p => {
+                                    const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                    return num >= range.start && num <= range.end;
+                                  }).sort((a, b) => {
+                                    const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
+                                    const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
+                                    return numB - numA;
+                                  });
+
+                                  return (
+                                    <div key={idx} className="flex flex-col gap-1 justify-end">
+                                      {colPlots.map((plot) => (
+                                        <GravePlot
+                                          key={`${plot.Section}-${plot.Row}-${plot.Grave}`}
+                                          data={plot}
+                                          baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                          onHover={onHover}
+                                          onEdit={isAdmin ? onEdit : undefined}
+                                        />
+                                      ))}
+                                    </div>
+                                  );
+                                });
+                            })()}
+                        </div>
+                    ) : sectionKey === '2' ? (
+                        <div className="flex justify-center overflow-x-auto">
+                             <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))' }}>
+                                {(() => {
+                                    const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+                                    const columns = chunk(plots, 23);
+                                    const renderData = columns.flatMap(col => [...col].reverse());
+
+                                    return renderData.map((plot) => (
+                                        <GravePlot 
+                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                            data={plot} 
+                                            baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                            onHover={onHover}
+                                            onEdit={isAdmin ? onEdit : undefined}
+                                        />
+                                    ));
+                                })()}
+                             </div>
+                        </div>
+                    ) : sectionKey === '3' ? (
+                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                            {(() => {
+                                const ranges = [
+                                    { start: 251, end: 268 },
+                                    { start: 326, end: 348 },
+                                    { start: 406, end: 430 },
+                                    { start: 489, end: 512 },
+                                    { start: 605, end: 633 },
+                                    { start: 688, end: 711 },
+                                    { start: 765, end: 788 },
+                                    { start: 821, end: 843 },
+                                    { start: 898, end: 930 }
+                                ];
+                                const spacers = [507,709,773,786,633,840,841,930];
+                                const renderedKeys = new Set();
+                                const cols = ranges.map((range, idx) => {
+                                    const colPlots = plots
+                                      .filter(p => {
+                                        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                        return num >= range.start && num <= range.end;
+                                      })
+                                      .sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
+                                    const plotsWithSpacers = [];
+                                    colPlots.forEach(plot => {
+                                      const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
+                                      if (spacers.includes(num)) plotsWithSpacers.push({ isSpacer: true, _id: `sp-${num}` });
+                                      plotsWithSpacers.push(plot);
+                                      renderedKeys.add(`${num}|${plot._id}`);
+                                    });
+                                    return (
+                                      <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
+                                        {plotsWithSpacers.map((plot, pIdx) => (
+                                          <GravePlot key={plot._id || `plot-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                        ))}
+                                      </div>
+                                    );
+                                });
+                                const { unplaced } = getUnplacedForSection('3', plots);
+                                const fallbackCol = (
+                                  <div key="fallback" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-rose-200 pl-2">
+                                    {unplaced.map((plot, pIdx) => (
+                                      <GravePlot key={plot._id || `u3-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                    ))}
+                                  </div>
+                                );
+                                return [...cols, fallbackCol];
+                            })()}
+                        </div>
+                    ) : sectionKey === '4' ? (
+                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                            {(() => {
+                                const columnsConfig = [
+                                    { ranges: [{ start: 208, end: 223 }], blanksStart: 14 },
+                                    { ranges: [{ start: 269, end: 298 }] },
+                                    { ranges: [{ start: 349, end: 378 }] },
+                                    { ranges: [{ start: 431, end: 461 }] },
+                                    { ranges: [{ start: 513, end: 542 }], spacers: [{ target: 513, position: 'before' }] },
+                                    { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
+                                    { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
+                                    { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
+                                    { ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
+                                    { ranges: [{ start: 844, end: 870 }], blanksStart: 1, spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }] },
+                                    { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
+                                ];
+
+                                const cols = columnsConfig.map((col, idx) => {
+                                    let plotsArr = [];
+                                    col.ranges.forEach(r => {
+                                        const rangePlots = plots.filter(p => {
+                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                            return num >= r.start && num <= r.end;
+                                        }).sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
+                                        plotsArr = [...plotsArr, ...rangePlots];
+                                    });
+
+                                    if (col.customLayout && idx === 8) {
+                                        const r1 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 795; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
+                                        const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
+                                        const r1PartA = r1.filter(p => parseInt(p.Grave) <= 794);
+                                        const r1PartB = r1.filter(p => parseInt(p.Grave) > 794);
+                                        const sixBlanks = Array(6).fill({ isSpacer: true });
+                                        const r2WithSpacer = [];
+                                        r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' }); });
+                                        plotsArr = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
+                                    } else if (col.spacers) {
+                                        const withSpacers = [];
+                                        plotsArr.forEach(p => {
+                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                            if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
+                                            withSpacers.push(p);
+                                            if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
+                                        });
+                                        plotsArr = withSpacers;
+                                    }
+
+                                    if (col.blanksStart) plotsArr = [...Array(col.blanksStart).fill({ isSpacer: true }), ...plotsArr];
+                                    if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill({ isSpacer: true })];
+
+                                    return (
+                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
+                                            {plotsArr.map((plot, pIdx) => (
+                                                <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                            ))}
+                                        </div>
+                                    );
+                                });
+
+                                const { unplaced } = getUnplacedForSection('4', plots);
+                                const fallbackCol = (
+                                  <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                    {unplaced.map((plot, pIdx) => (
+                                      <GravePlot key={plot._id || `u4-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                    ))}
+                                  </div>
+                                );
+                                return [...cols, fallbackCol];
+                            })()}
+                        </div>
+                    ) : sectionKey === '5' ? (
+                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                            {(() => {
+                                const sectionPlots = plots;
+                                const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
+                                const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
+                                const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
+                                const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
+                                const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}` }); } };
+
+                                const columns = [];
+
+                                // Col 1: 224-236
+                                (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
+                                // Col 2: 299-302, 4 blanks, 1001-1014
+                                (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
+                                // Col 3: 379-382, 4 blanks, 1015-1026
+                                (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
+                                // Col 4: 462-465, 4 blanks, 1029-1042
+                                (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
+                                // Col 5: 543-546, 4 blanks, 1043-1056
+                                (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
+                                // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
+                                (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
+                                // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
+                                (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
+                                // Col 8: 7 blanks, 1085-1102
+                                (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
+                                // Col 9: 738, 1 blank, 739-742, 20 blanks
+                                (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
+                                // Col 10: 871-874, 11 blanks
+                                (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
+                                // Col 11: 16 blanks
+                                (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
+
+                                const mapped = columns.map((plots, idx) => (
+                                    <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
+                                        {plots.map((plot, pIdx) => (
+                                            <GravePlot
+                                                key={plot._id || `s5-${idx}-${pIdx}`}
+                                                data={plot}
+                                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                                onHover={onHover}
+                                                onEdit={isAdmin && !plot.isSpacer ? onEdit : undefined}
+                                            />
+                                        ))}
+                                    </div>
+                                ));
+
+                                const { unplaced } = getUnplacedForSection('5', plots);
+                                const fallbackCol = (
+                                    <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                        {unplaced.map((plot, pIdx) => (
+                                            <GravePlot
+                                                key={plot._id || `u5-${pIdx}`}
+                                                data={plot}
+                                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                                onHover={onHover}
+                                                onEdit={isAdmin ? onEdit : undefined}
+                                            />
+                                        ))}
+                                    </div>
+                                );
+
+                                return [...mapped, fallbackCol];
+                            })()}
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex flex-col-reverse gap-2 content-center items-center">
+                                {(isExpanded ? (plots || []) : (plots || []).slice(0, 120)).map((plot) => (
+                                    <GravePlot 
+                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                        data={plot} 
+                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
+                                        onHover={onHover}
+                                        onEdit={isAdmin ? onEdit : undefined}
+                                    />
+                                ))}
+                            </div>
+                            {!isExpanded && ((plots?.length || 0) > 120) && (
+                                <div className="mt-3">
+                                    <button
+                                        type="button"
+                                        onClick={onExpand}
+                                        className="text-sm text-teal-700 hover:underline"
+                                    >
+                                        Show more ({(plots?.length || 0) - 120} more)
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     );
-};
+});
 
 // --- MAIN APP COMPONENT ---
 
 export default function PlotsPage() {
   const queryClient = useQueryClient();
         
-        const invalidatePlotsMap = () => {
-          queryClient.invalidateQueries({ queryKey: ['plotsMap'] });
-        };
-  const [sections, setSections] = useState({});
+  const invalidatePlotsMap = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['plotsMap'] });
+  }, [queryClient]);
+
   const [hoverData, setHoverData] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
@@ -337,8 +675,6 @@ export default function PlotsPage() {
   const [isCentering, setIsCentering] = useState(false);
   const location = useLocation();
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
-  // prevent jank during navigation focus
-  // react-query focus refetch disabled per-query above
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
   
   // Filtering State
@@ -378,28 +714,6 @@ export default function PlotsPage() {
   
   const isAdmin = user?.role === 'admin';
 
-  // helper: stable key
-  const normalizeSectionsKey = (secs) => (secs || [])
-    .map(String)
-    .map(s => s.replace(/Section\s*/i, '').trim())
-    .filter(Boolean)
-    .sort()
-    .join(',');
-
-  const sectionsToLoad = useMemo(() => {
-    if (activeTab !== 'map') return [];
-    const fallback = ['5'];
-    return (openSections && openSections.length) ? openSections : fallback;
-  }, [openSections, activeTab]);
-
-  const sectionsKey = useMemo(
-    () => normalizeSectionsKey(sectionsToLoad),
-    [sectionsToLoad]
-  );
-
-  const selectPlot = ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'];
-  const selectLegacy = ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'];
-
   const { data: plotEntities = [], isLoading } = usePlotsMapData({
             activeTab,
             openSections,
@@ -409,9 +723,7 @@ export default function PlotsPage() {
   // MUTATIONS
   const updatePlotMutation = useMutation({
       mutationFn: async ({ id, data }) => {
-          // Use backend function for audit logging
           const response = await base44.functions.invoke('updatePlot', { id, data });
-          // Check for error in response data as invoke returns Axios response
           if (response.data && response.data.error) {
               throw new Error(response.data.error);
           }
@@ -431,7 +743,6 @@ export default function PlotsPage() {
 
   const createPlotsMutation = useMutation({
       mutationFn: async (plots) => {
-          // Use backend function for smart import (upsert/merge)
           const response = await base44.functions.invoke('importPlots', { plots });
           if (response.data && response.data.error) {
               throw new Error(response.data.error);
@@ -449,71 +760,6 @@ export default function PlotsPage() {
           toast.error(`Import failed: ${err.message}`);
       }
   });
-
-  const cleanupMutation = useMutation({
-      mutationFn: async () => {
-          const res = await base44.functions.invoke('cleanupSection1Duplicates', {});
-          return res.data;
-      },
-      onSuccess: (data) => {
-                      queryClient.invalidateQueries({ queryKey: ['plots'] });
-                      invalidatePlotsMap();
-                      toast.success(data.message || "Cleanup complete");
-                  },
-      onError: (err) => {
-          // Try to extract backend error message if available
-          const msg = err.response?.data?.error || err.message;
-          toast.error(`Cleanup failed: ${msg}`);
-      }
-  });
-
-  const seedLegacyDataMutation = useMutation({
-      mutationFn: async () => {
-          const res = await base44.functions.invoke('seedPlotsAndMaps', {});
-          if (res.data && res.data.error) throw new Error(res.data.error);
-          return res.data;
-      },
-      onSuccess: (data) => {
-          toast.success(data.message || "Import complete");
-      },
-      onError: (err) => {
-          toast.error(`Import failed: ${err.message}`);
-      }
-  });
-
-  const seedSection3Mutation = useMutation({
-      mutationFn: async () => {
-          const res = await base44.functions.invoke('seedSection3', {});
-          if (res.data && res.data.error) throw new Error(res.data.error);
-          return res.data;
-      },
-      onSuccess: (data) => {
-                      queryClient.invalidateQueries({ queryKey: ['plots'] });
-                      invalidatePlotsMap();
-                      toast.success(`Section 3: ${data.created} created, ${data.skipped} skipped.`);
-                  },
-      onError: (err) => {
-          toast.error(`Section 3 Seed failed: ${err.message}`);
-      }
-  });
-
-  const seedSection4Mutation = useMutation({
-  mutationFn: async () => {
-      const res = await base44.functions.invoke('seedSection4', {});
-      if (res.data && res.data.error) throw new Error(res.data.error);
-      return res.data;
-  },
-  onSuccess: (data) => {
-              queryClient.invalidateQueries({ queryKey: ['plots'] });
-              invalidatePlotsMap();
-              toast.success(`Section 4: ${data.created} created, ${data.skipped} skipped.`);
-          },
-  onError: (err) => {
-      toast.error(`Section 4 Seed failed: ${err.message}`);
-  }
-  });
-
-
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
@@ -583,7 +829,6 @@ export default function PlotsPage() {
           if (filters.plot) {
               const plotStr = String(item.Grave || '').toLowerCase();
               const wanted = filters.plot.toLowerCase();
-              // match either substring or numeric equality if user typed only digits
               const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
               const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
               if (numWanted != null) {
@@ -667,7 +912,6 @@ export default function PlotsPage() {
             if (!groups[groupKey]) groups[groupKey] = [];
             groups[groupKey].push(item);
         });
-        // Return array of group objects for easier rendering
         return Object.keys(groups).sort().map(key => ({
             group: key,
             items: groups[key]
@@ -677,9 +921,40 @@ export default function PlotsPage() {
     return sorted;
   }, [filteredData, groupBy, sortBy, sortOrder]);
 
-  // Update Sections based on Filtered Data
-  useEffect(() => {
-      processSections(filteredData);
+  const sections = useMemo(() => {
+    const grouped = {
+        '1': [],
+        '2': [],
+        '3': [],
+        '4': [],
+        '5': []
+    };
+
+    filteredData.forEach(item => {
+        const rawSection = (item.Section || '').trim();
+        const rowVal = String(item.Row || '');
+        let sectionKey = rawSection ? rawSection.replace(/Section\s*/i, '').trim() : '';
+
+        if (!grouped[sectionKey]) {
+            if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
+                sectionKey = '1';
+            }
+        }
+
+        if (grouped[sectionKey]) {
+            grouped[sectionKey].push(item);
+        }
+    });
+
+    Object.keys(grouped).forEach(key => {
+        grouped[key].sort((a, b) => {
+            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
+            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
+            return numA - numB;
+        });
+    });
+
+    return grouped;
   }, [filteredData]);
 
   // Robustly scroll into view for a target section/plot (?section=...&plot=...)
@@ -689,7 +964,7 @@ export default function PlotsPage() {
       const rawPlot = params.get('plot') || '';
       if (!rawSection && !rawPlot) return;
 
-      if (isLoading) return; // wait until data is loaded
+      if (isLoading) return;
 
       setActiveTab('map');
       setIsCentering(true);
@@ -698,7 +973,7 @@ export default function PlotsPage() {
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
-      const maxAttempts = 180; // ~3s to allow data + DOM to settle
+      const maxAttempts = 180;
       let done = false;
       let sectionScrolled = false;
 
@@ -706,11 +981,9 @@ export default function PlotsPage() {
           if (done) return;
           attempts += 1;
 
-          // Prefer exact plot; stop when found
           if (!isNaN(plotNum) && sectionNorm) {
               let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
               if (!plotEl) {
-                  // Fallback: find any plot with this number across sections
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
@@ -721,7 +994,6 @@ export default function PlotsPage() {
               }
           }
 
-          // Otherwise bring section into view once
           if (!sectionScrolled && sectionNorm) {
               const sectionEl = document.getElementById(`section-${sectionNorm}`) || document.getElementById(`section-${(rawSection.match(/\d+/) || [sectionNorm])[0]}`);
               if (sectionEl) {
@@ -741,7 +1013,6 @@ export default function PlotsPage() {
       requestAnimationFrame(tryScroll);
   }, [sections, isLoading]);
 
-  // Disable scroll while centering
   useEffect(() => {
     if (!isCentering) return;
     const prev = document.body.style.overflow;
@@ -749,97 +1020,8 @@ export default function PlotsPage() {
     return () => { document.body.style.overflow = prev; };
   }, [isCentering]);
 
-  const processSections = (data) => {
-  // Initialize strictly with Sections 1-5
-  const grouped = {
-      '1': [],
-      '2': [],
-      '3': [],
-      '4': [],
-      '5': []
-  };
-
-    data.forEach(item => {
-        const rawSection = (item.Section || '').trim();
-        const rowVal = String(item.Row || '');
-        let sectionKey = rawSection ? rawSection.replace(/Section\s*/i, '').trim() : '';
-
-        // Fix: Some records label section as "Row D" etc. For Section 1, rows often end with "-1" (e.g., D-1)
-        // Map those to Section "1" so bottom rows render under Section 1.
-        if (!grouped[sectionKey]) {
-            if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
-                sectionKey = '1';
-            }
-        }
-
-        // Only add if it maps to valid sections 1-5
-        if (grouped[sectionKey]) {
-            grouped[sectionKey].push(item);
-        }
-        // Other data not matching 1-5 remains hidden by design
-    });
-
-    // Sort items within sections by Grave number
-    Object.keys(grouped).forEach(key => {
-        grouped[key].sort((a, b) => {
-            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-            return numA - numB;
-        });
-    });
-
-    setSections(grouped);
-  };
-
-  // Coverage helper: compute which plots are handled by special layouts and which are unplaced
-  const getUnplacedForSection = (sectionKey, plots) => {
-    const toNum = (g) => {
-      const n = parseInt(String(g || '').replace(/\D/g, ''));
-      return Number.isFinite(n) && n > 0 ? n : null;
-    };
-    const included = new Set();
-    const addRange = (start, end) => { for (let i = start; i <= end; i++) included.add(i); };
-
-    switch (String(sectionKey)) {
-      case '3':
-        [
-          [251,268],[326,348],[406,430],[489,512],[605,633],[688,711],[765,788],[821,843],[898,930]
-        ].forEach(([s,e]) => addRange(s,e));
-        break;
-      case '4':
-        [
-          [208,223],[269,298],[349,378],[431,461],[513,542],[546,576],[630,658],[712,719],
-          [720,737],[789,795],[844,870],[923,945]
-        ].forEach(([s,e]) => addRange(s,e));
-        break;
-      case '5':
-        [
-          [224,236],[299,302],[1001,1014],[379,382],[1015,1026],[462,465],[1029,1042],
-          [543,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
-          [738,738],[739,742],[871,874]
-        ].forEach(([s,e]) => addRange(s,e));
-        break;
-      default:
-        // For Sections 1 and 2 (or unknown), assume all numeric-labeled plots are included by their layouts
-        plots.forEach(p => { const n = toNum(p.Grave); if (n) included.add(n); });
-    }
-
-    const unplaced = (plots || []).filter(p => {
-      const n = toNum(p.Grave);
-      if (!n) return true; // non-numeric labels fall back
-      return !included.has(n);
-    });
-    return { included, unplaced, placedCount: (plots || []).length - unplaced.length };
-  };
-
-  // Load mock data on mount - REPLACED BY REACT QUERY
-  // useEffect(() => {
-  //   const data = parseCSV(INITIAL_CSV);
-  //   if (data.length > 0) processData(data);
-  // }, []);
-
   // CSV Parser
-  const parseCSV = (text) => {
+  const parseCSV = useCallback((text) => {
     const lines = text.trim().split(/\r?\n/);
     
     let headerIndex = -1;
@@ -873,7 +1055,6 @@ export default function PlotsPage() {
         const entry = {};
         headers.forEach((h, index) => { entry[h] = values[index] || ''; });
         
-        // Map CSV keys to Entity keys
         return {
             section: entry['Section'],
             row_number: entry['Row'],
@@ -887,11 +1068,7 @@ export default function PlotsPage() {
             notes: entry['Notes']
         };
     }).filter(row => row.plot_number);
-  };
-
-  const processData = (data) => {
-    // setParsedData(data); // Removed, handled by Query
-  };
+  }, []);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -913,7 +1090,7 @@ export default function PlotsPage() {
     }
   };
 
-  const handleHover = (e, data) => {
+  const handleHover = useCallback((e, data) => {
     if (!data) {
         setIsTooltipVisible(false);
         return;
@@ -922,23 +1099,21 @@ export default function PlotsPage() {
     setMousePos({ x: rect.right, y: rect.top });
     setHoverData(data);
     setIsTooltipVisible(true);
-  };
+  }, []);
 
-  // --- EDITING HANDLERS ---
-
-  const handleEditClick = (plot) => {
+  const handleEditClick = useCallback((plot) => {
     setSelectedPlotForModal(plot);
     setIsEditModalOpen(true);
-  };
+  }, []);
 
-  const handleInlineEditStart = (plot) => {
+  const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
     setInlineEditData({ ...plot });
-  };
+  }, []);
 
-  const handleInlineChange = (field, value) => {
+  const handleInlineChange = useCallback((field, value) => {
     setInlineEditData(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   const handleInlineSave = () => {
     handleUpdatePlot(inlineEditData);
@@ -946,13 +1121,12 @@ export default function PlotsPage() {
     setInlineEditData({});
   };
 
-  const handleInlineCancel = () => {
+  const handleInlineCancel = useCallback(() => {
     setEditingId(null);
     setInlineEditData({});
-  };
+  }, []);
 
-  const handleUpdatePlot = (updatedPlot) => {
-      // Convert UI keys back to Entity keys for update
+  const handleUpdatePlot = useCallback((updatedPlot) => {
       const entityData = {
           section: updatedPlot.Section,
           row_number: updatedPlot.Row,
@@ -966,18 +1140,22 @@ export default function PlotsPage() {
           notes: updatedPlot.Notes
       };
       updatePlotMutation.mutate({ id: updatedPlot._id, data: entityData });
-  };
+  }, [updatePlotMutation]);
 
-  const toggleSection = (sectionKey) => {
+  const toggleSection = useCallback((sectionKey) => {
     setCollapsedSections(prev => ({
         ...prev,
         [sectionKey]: !prev[sectionKey]
     }));
-  };
+  }, []);
+
+  const handleExpandSection = useCallback((sectionKey) => {
+     setExpandedSections(prev => ({ ...prev, [sectionKey]: true }));
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      
+       
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1005,16 +1183,6 @@ export default function PlotsPage() {
 
             {isAdmin && (
             <div className="flex gap-2">
-
-
-
-
-
-
-
-
-
-
                 <label className="flex items-center px-4 py-2 bg-teal-700 text-white rounded-lg cursor-pointer hover:bg-teal-800 transition shadow-sm active:transform active:scale-95">
                     {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
                     <span className="font-medium text-sm">Import CSV</span>
@@ -1094,449 +1262,21 @@ export default function PlotsPage() {
                         return b.localeCompare(a);
                     }).map((sectionKey, index) => {
                         const palette = SECTION_PALETTES[index % SECTION_PALETTES.length];
-                        const [bgColor, borderColor, textColor] = palette.split(' ');
-                        
-                        const isCollapsed = collapsedSections[sectionKey];
                         
                         return (
-                            <div key={sectionKey} id={`section-${sectionKey}`} className="relative">
-                                {/* Section Label */}
-                                <div 
-                                    className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
-                                    onClick={() => toggleSection(sectionKey)}
-                                >
-                                    <div className={`mr-2 mb-1 p-1 rounded-full transition-colors ${isCollapsed ? 'bg-gray-200 text-gray-600' : `bg-white text-${textColor.split('-')[1]}-600 shadow-sm`}`}>
-                                        {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
-                                    </div>
-                                    <h2 className={`text-2xl font-bold ${textColor.replace('text', 'text-opacity-80 text')}`}>
-                                        {sectionKey === 'Unassigned' ? 'Unassigned Plots' : `Section ${sectionKey.replace('Section', '').trim()}`}
-                                    </h2>
-                                    <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
-                                    <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
-                                        {sections[sectionKey].length} Plots
-                                    </span>
-                                    {(['3','4','5'].includes(sectionKey)) && (() => { const c = getUnplacedForSection(sectionKey, sections[sectionKey]); return (<span className="mb-1 text-xs text-gray-400 ml-2">• {c.placedCount} placed, {c.unplaced.length} fallback</span>); })()}
-                                </div>
-                                
-                                {/* SECTION CONTAINER */}
-                                {!isCollapsed && (
-                                    <div className={`
-                                        rounded-xl border-2 border-dashed p-6 transition-colors duration-500
-                                        ${borderColor} ${bgColor} bg-opacity-30
-                                        overflow-x-auto
-                                    `}>
-                                        {sectionKey === '1' ? (
-                                            <div className="flex gap-4 justify-center">
-                                                {(() => {
-                                                    const plots = sections[sectionKey] || [];
-                                                    const nums = plots
-                                                      .map(p => parseInt(String(p.Grave).replace(/\D/g, '')) || 0)
-                                                      .filter(n => n > 0);
-                                                    const maxNum = nums.length ? Math.max(...nums) : 0;
-                                                    const cols = 8;
-                                                    const perCol = Math.ceil(maxNum / cols) || 0;
-                                                    const ranges = Array.from({ length: cols }, (_, i) => ({
-                                                      start: i * perCol + 1,
-                                                      end: Math.min((i + 1) * perCol, maxNum)
-                                                    }));
-
-                                                    return ranges.map((range, idx) => {
-                                                      const colPlots = plots.filter(p => {
-                                                        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                                        return num >= range.start && num <= range.end;
-                                                      }).sort((a, b) => {
-                                                        const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
-                                                        const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
-                                                        return numB - numA;
-                                                      });
-
-                                                      return (
-                                                        <div key={idx} className="flex flex-col gap-1 justify-end">
-                                                          {colPlots.map((plot) => (
-                                                            <GravePlot
-                                                              key={`${plot.Section}-${plot.Row}-${plot.Grave}`}
-                                                              data={plot}
-                                                              baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                              onHover={handleHover}
-                                                              onEdit={isAdmin ? handleEditClick : undefined}
-                                                            />
-                                                          ))}
-                                                        </div>
-                                                      );
-                                                    });
-                                                })()}
-                                            </div>
-                                        ) : sectionKey === '2' ? (
-                                            <div className="flex justify-center overflow-x-auto">
-                                                 <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))' }}>
-                                                    {(() => {
-                                                        const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                                                        const columns = chunk(sections[sectionKey], 23);
-                                                        const renderData = columns.flatMap(col => [...col].reverse());
-
-                                                        return renderData.map((plot) => (
-                                                            <GravePlot 
-                                                                key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                                data={plot} 
-                                                                baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                                onHover={handleHover}
-                                                                onEdit={isAdmin ? handleEditClick : undefined}
-                                                            />
-                                                        ));
-                                                    })()}
-                                                 </div>
-                                            </div>
-                                        ) : sectionKey === '3' ? (
-                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                                                {(() => {
-                                                    const ranges = [
-                                                        { start: 251, end: 268 },
-                                                        { start: 326, end: 348 },
-                                                        { start: 406, end: 430 },
-                                                        { start: 489, end: 512 },
-                                                        { start: 605, end: 633 },
-                                                        { start: 688, end: 711 },
-                                                        { start: 765, end: 788 },
-                                                        { start: 821, end: 843 },
-                                                        { start: 898, end: 930 }
-                                                    ];
-                                                    const spacers = [507,709,773,786,633,840,841,930];
-                                                    const renderedKeys = new Set();
-                                                    const cols = ranges.map((range, idx) => {
-                                                        const colPlots = sections[sectionKey]
-                                                          .filter(p => {
-                                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                                            return num >= range.start && num <= range.end;
-                                                          })
-                                                          .sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
-                                                        const plotsWithSpacers = [];
-                                                        colPlots.forEach(plot => {
-                                                          const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
-                                                          if (spacers.includes(num)) plotsWithSpacers.push({ isSpacer: true, _id: `sp-${num}` });
-                                                          plotsWithSpacers.push(plot);
-                                                          renderedKeys.add(`${num}|${plot._id}`);
-                                                        });
-                                                        return (
-                                                          <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
-                                                            {plotsWithSpacers.map((plot, pIdx) => (
-                                                              <GravePlot key={plot._id || `plot-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
-                                                            ))}
-                                                          </div>
-                                                        );
-                                                    });
-                                                    // Fallback column for any unplaced plots (outside ranges or non-numeric)
-                                                    const { unplaced } = getUnplacedForSection('3', sections[sectionKey]);
-                                                    const fallbackCol = (
-                                                      <div key="fallback" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-rose-200 pl-2">
-                                                        {unplaced.map((plot, pIdx) => (
-                                                          <GravePlot key={plot._id || `u3-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
-                                                        ))}
-                                                      </div>
-                                                    );
-                                                    return [...cols, fallbackCol];
-                                                })()}
-                                            </div>
-                                        ) : sectionKey === '4' ? (
-                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                                                {(() => {
-                                                    const columnsConfig = [
-                                                        { ranges: [{ start: 208, end: 223 }], blanksStart: 14 },
-                                                        { ranges: [{ start: 269, end: 298 }] },
-                                                        { ranges: [{ start: 349, end: 378 }] },
-                                                        { ranges: [{ start: 431, end: 461 }] },
-                                                        { ranges: [{ start: 513, end: 542 }], spacers: [{ target: 513, position: 'before' }] },
-                                                        { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
-                                                        { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
-                                                        { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
-                                                        { ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
-                                                        { ranges: [{ start: 844, end: 870 }], blanksStart: 1, spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }] },
-                                                        { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
-                                                    ];
-
-                                                    const cols = columnsConfig.map((col, idx) => {
-                                                        let plots = [];
-                                                        col.ranges.forEach(r => {
-                                                            const rangePlots = sections[sectionKey].filter(p => {
-                                                                const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                                                return num >= r.start && num <= r.end;
-                                                            }).sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
-                                                            plots = [...plots, ...rangePlots];
-                                                        });
-
-                                                        if (col.customLayout && idx === 8) {
-                                                            const r1 = sections[sectionKey].filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 795; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
-                                                            const r2 = sections[sectionKey].filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
-                                                            const r1PartA = r1.filter(p => parseInt(p.Grave) <= 794);
-                                                            const r1PartB = r1.filter(p => parseInt(p.Grave) > 794);
-                                                            const sixBlanks = Array(6).fill({ isSpacer: true });
-                                                            const r2WithSpacer = [];
-                                                            r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' }); });
-                                                            plots = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
-                                                        } else if (col.spacers) {
-                                                            const withSpacers = [];
-                                                            plots.forEach(p => {
-                                                                const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                                                if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
-                                                                withSpacers.push(p);
-                                                                if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
-                                                            });
-                                                            plots = withSpacers;
-                                                        }
-
-                                                        if (col.blanksStart) plots = [...Array(col.blanksStart).fill({ isSpacer: true }), ...plots];
-                                                        if (col.blanksEnd) plots = [...plots, ...Array(col.blanksEnd).fill({ isSpacer: true })];
-
-                                                        return (
-                                                            <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
-                                                                {plots.map((plot, pIdx) => (
-                                                                    <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
-                                                                ))}
-                                                            </div>
-                                                        );
-                                                    });
-
-                                                    // Fallback column for unplaced plots
-                                                    const { unplaced } = getUnplacedForSection('4', sections[sectionKey]);
-                                                    const fallbackCol = (
-                                                      <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
-                                                        {unplaced.map((plot, pIdx) => (
-                                                          <GravePlot key={plot._id || `u4-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
-                                                        ))}
-                                                      </div>
-                                                    );
-                                                    return [...cols, fallbackCol];
-                                                })()}
-                                            </div>
-                                        ) : sectionKey === '5' ? (
-                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                                                {(() => {
-                                                    const sectionPlots = sections[sectionKey];
-                                                    const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
-                                                    const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
-                                                    const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
-                                                    const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                                                    const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}` }); } };
-
-                                                    const columns = [];
-
-                                                    // Col 1: 224-236
-                                                    (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
-                                                    // Col 2: 299-302, 4 blanks, 1001-1014
-                                                    (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
-                                                    // Col 3: 379-382, 4 blanks, 1015-1026
-                                                    (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
-                                                    // Col 4: 462-465, 4 blanks, 1029-1042
-                                                    (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                                    // Col 5: 543-546, 4 blanks, 1043-1056
-                                                    (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
-                                                    // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
-                                                    // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
-                                                    // Col 8: 7 blanks, 1085-1102
-                                                    (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
-                                                    // Col 9: 738, 1 blank, 739-742, 20 blanks
-                                                    (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
-                                                    // Col 10: 871-874, 11 blanks
-                                                    (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
-                                                    // Col 11: 16 blanks
-                                                    (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
-
-                                                    const mapped = columns.map((plots, idx) => (
-                                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
-                                                            {plots.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `s5-${idx}-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin && !plot.isSpacer ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    ));
-
-                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
-                                                    const fallbackCol = (
-                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
-                                                            {unplaced.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `u5-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    );
-
-                                                    return [...mapped, fallbackCol];
-                                                })()}
-                                            </div>
-                                        ) : sectionKey === '5' ? (
-                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                                                {(() => {
-                                                    const sectionPlots = sections[sectionKey];
-                                                    const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
-                                                    const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
-                                                    const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
-                                                    const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                                                    const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}` }); } };
-
-                                                    const columns = [];
-
-                                                    // Col 1: 224-236
-                                                    (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
-                                                    // Col 2: 299-302, 4 blanks, 1001-1014
-                                                    (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
-                                                    // Col 3: 379-382, 4 blanks, 1015-1026
-                                                    (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
-                                                    // Col 4: 462-465, 4 blanks, 1029-1042
-                                                    (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                                    // Col 5: 543-546, 4 blanks, 1043-1056
-                                                    (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
-                                                    // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
-                                                    // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
-                                                    // Col 8: 7 blanks, 1085-1102
-                                                    (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
-                                                    // Col 9: 738, 1 blank, 739-742, 20 blanks
-                                                    (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
-                                                    // Col 10: 871-874, 11 blanks
-                                                    (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
-                                                    // Col 11: 16 blanks
-                                                    (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
-
-                                                    const mapped = columns.map((plots, idx) => (
-                                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
-                                                            {plots.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `s5-${idx}-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin && !plot.isSpacer ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    ));
-
-                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
-                                                    const fallbackCol = (
-                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
-                                                            {unplaced.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `u5-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    );
-
-                                                    return [...mapped, fallbackCol];
-                                                })()}
-                                            </div>
-                                        ) : sectionKey === '5' ? (
-                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                                                {(() => {
-                                                    const sectionPlots = sections[sectionKey];
-                                                    const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
-                                                    const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
-                                                    const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
-                                                    const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                                                    const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}` }); } };
-
-                                                    const columns = [];
-
-                                                    // Col 1: 224-236
-                                                    (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
-                                                    // Col 2: 299-302, 4 blanks, 1001-1014
-                                                    (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
-                                                    // Col 3: 379-382, 4 blanks, 1015-1026
-                                                    (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
-                                                    // Col 4: 462-465, 4 blanks, 1029-1042
-                                                    (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                                    // Col 5: 543-546, 4 blanks, 1043-1056
-                                                    (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
-                                                    // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
-                                                    // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
-                                                    (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
-                                                    // Col 8: 7 blanks, 1085-1102
-                                                    (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
-                                                    // Col 9: 738, 1 blank, 739-742, 20 blanks
-                                                    (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
-                                                    // Col 10: 871-874, 11 blanks
-                                                    (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
-                                                    // Col 11: 16 blanks
-                                                    (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
-
-                                                    const mapped = columns.map((plots, idx) => (
-                                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
-                                                            {plots.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `s5-${idx}-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin && !plot.isSpacer ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    ));
-
-                                                    const { unplaced } = getUnplacedForSection('5', sections[sectionKey]);
-                                                    const fallbackCol = (
-                                                        <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
-                                                            {unplaced.map((plot, pIdx) => (
-                                                                <GravePlot
-                                                                    key={plot._id || `u5-${pIdx}`}
-                                                                    data={plot}
-                                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                    onHover={handleHover}
-                                                                    onEdit={isAdmin ? handleEditClick : undefined}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    );
-
-                                                    return [...mapped, fallbackCol];
-                                                })()}
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                                    {(expandedSections[sectionKey] ? (sections[sectionKey] || []) : (sections[sectionKey] || []).slice(0, 120)).map((plot) => (
-                                                        <GravePlot 
-                                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                                            data={plot} 
-                                                            baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                                            onHover={handleHover}
-                                                            onEdit={isAdmin ? handleEditClick : undefined}
-                                                        />
-                                                    ))}
-                                                </div>
-                                                {!expandedSections[sectionKey] && ((sections[sectionKey]?.length || 0) > 120) && (
-                                                    <div className="mt-3">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setExpandedSections(prev => ({ ...prev, [sectionKey]: true }))}
-                                                            className="text-sm text-teal-700 hover:underline"
-                                                        >
-                                                            Show more ({(sections[sectionKey]?.length || 0) - 120} more)
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                            <SectionRenderer
+                                key={sectionKey}
+                                sectionKey={sectionKey}
+                                plots={sections[sectionKey]}
+                                palette={palette}
+                                isCollapsed={collapsedSections[sectionKey]}
+                                onToggle={toggleSection}
+                                isExpanded={expandedSections[sectionKey]}
+                                onExpand={() => handleExpandSection(sectionKey)}
+                                isAdmin={isAdmin}
+                                onEdit={handleEditClick}
+                                onHover={handleHover}
+                            />
                         );
                     })}
 
