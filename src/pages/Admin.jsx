@@ -120,6 +120,31 @@ export default function AdminDashboard() {
     refetchInterval: 30_000,
   });
 
+  const dismissibleNotes = React.useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
+
+  const dismissAllNotifications = async () => {
+    try {
+      const user = await base44.auth.me().catch(() => null);
+      await Promise.all(dismissibleNotes.map(async (note) => {
+        await base44.entities.Notification.delete(note.id);
+        if (user?.email) {
+          await base44.entities.AuditLog.create({
+            action: 'dismiss',
+            entity_type: 'Notification',
+            entity_id: note.id,
+            details: `Notification dismissed: "${note.message || ''}"`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }));
+      queryClient.invalidateQueries(['notifications']);
+      toast.success('Dismissed all notifications');
+    } catch (err) {
+      toast.error('Failed to dismiss all');
+    }
+  };
+
   const updateTaskStatus = async (note, status) => {
       if (!note.related_entity_id) return;
       try {
