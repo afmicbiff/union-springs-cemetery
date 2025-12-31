@@ -483,10 +483,9 @@ const SectionRenderer = React.memo(({
                                       const insertRowIdx = Math.max(pos186Row.r - 1, 0); // reverse-rendered grid: r-1 is visually under
                                       for (let c = 0; c < columns.length; c++) {
                                         columns[c].splice(insertRowIdx, 0, { isSpacer: true, _id: `sp-after-186-c${c}-${Math.random().toString(36).slice(2,7)}` });
-                                        // Keep max 23 rows per column, spill to next
-                                        if (columns[c].length > 23 && c + 1 < columns.length) {
-                                          const spill = columns[c].pop();
-                                          columns[c + 1].unshift(spill);
+                                        // Keep max 23 rows per column by trimming excess
+                                        while (columns[c].length > 23) {
+                                          columns[c].pop();
                                         }
                                       }
                                     }
