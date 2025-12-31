@@ -418,8 +418,22 @@ const SectionRenderer = React.memo(({
                         <div className="flex justify-center overflow-x-auto">
                              <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))' }}>
                                 {(() => {
-                                    const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
-                                    const columns = chunk(plots, 23);
+                                    const byNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || 0;
+                                    const ordered = [...plots].sort((a, b) => {
+                                      const na = byNum(a.Grave), nb = byNum(b.Grave);
+                                      if (na !== nb) return na - nb;
+                                      return String(a.Grave).localeCompare(String(b.Grave));
+                                    });
+                                    // Ensure 228-A renders directly after 228
+                                    const idx228A = ordered.findIndex(p => String(p.Grave).trim() === '228-A');
+                                    if (idx228A !== -1) {
+                                      const p228A = ordered.splice(idx228A, 1)[0];
+                                      const idx228 = ordered.findIndex(p => byNum(p.Grave) === 228);
+                                      const insertAt = idx228 !== -1 ? idx228 + 1 : ordered.length;
+                                      ordered.splice(insertAt, 0, p228A);
+                                    }
+                                    const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
+                                    const columns = chunk(ordered, 23);
                                     const renderData = columns.flatMap(col => [...col].reverse());
 
                                     return renderData.map((plot) => (
@@ -1266,7 +1280,7 @@ export default function PlotsPage() {
                   onClick={relocatePlot227ToSection2}
                   className="gap-2"
                 >
-                  <Plus className="w-4 h-4" /> Move 227 								 				 				 				 				 		 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  					 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  
+                  <Plus className="w-4 h-4" /> Move 227 → 228-A (Sec 2) 								 				 				 				 				 		 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  					 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  
 
 
 
@@ -1466,7 +1480,6 @@ export default function PlotsPage() {
 
 
 
-                  228-A (Sec 2)
                 </Button>
             </div>
             )}
