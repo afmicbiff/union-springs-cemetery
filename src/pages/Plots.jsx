@@ -492,11 +492,11 @@ const SectionRenderer = React.memo(({
                                       }
                                     }
 
-                                    const renderData = columns.flatMap(col => [...col].reverse());
+                                    const renderData = columns.flatMap(col => [...col].reverse()).filter(Boolean);
 
                                     return renderData.map((plot, idx) => (
                                         <GravePlot 
-                                            key={plot._id || `${plot.Section || 'sp'}-${plot.Row || ''}-${plot.Grave || ''}-${idx}`} 
+                                            key={plot._id || `s2-${idx}`} 
                                             data={plot} 
                                             baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                             onHover={onHover}
