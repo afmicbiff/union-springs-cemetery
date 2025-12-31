@@ -521,11 +521,20 @@ const SectionRenderer = React.memo(({
                                     const pos229_beside = findPos(columns, 229);
                                     const pos304_beside = findPos(columns, 304);
                                     if (pos229_beside && pos304_beside) {
-                                      const item304 = columns[pos304_beside.c].splice(pos304_beside.r, 1)[0];
-                                      const targetIndex = Math.min(pos229_beside.r, columns[pos304_beside.c].length);
-                                      columns[pos304_beside.c].splice(targetIndex, 0, item304);
-                                      while (columns[pos304_beside.c].length > 23) {
-                                        columns[pos304_beside.c].pop();
+                                      const srcCol = pos304_beside.c;
+                                      const tgtCol = pos229_beside.c;
+                                      const srcLen = columns[srcCol].length;
+                                      const tgtLen = columns[tgtCol].length;
+                                      // Compute visual row of 229 (because columns render reversed)
+                                      const visualRow229 = (tgtLen - 1) - pos229_beside.r;
+                                      // Desired insertion index in src column to match that visual row after reverse
+                                      let desiredIndex = (srcLen - 1) - visualRow229;
+                                      desiredIndex = Math.max(0, Math.min(desiredIndex, columns[srcCol].length));
+                                      const item304 = columns[srcCol].splice(pos304_beside.r, 1)[0];
+                                      columns[srcCol].splice(desiredIndex, 0, item304);
+                                      // Enforce 23 rows max
+                                      while (columns[srcCol].length > 23) {
+                                        columns[srcCol].pop();
                                       }
                                     }
 
