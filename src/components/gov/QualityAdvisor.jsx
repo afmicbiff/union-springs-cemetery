@@ -23,9 +23,17 @@ export default function QualityAdvisor() {
   const [open, setOpen] = React.useState(false);
   const [ack, setAck] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [reRunning, setReRunning] = React.useState(false);
+  const [lastRunAt, setLastRunAt] = React.useState(null);
 
   const rerun = React.useCallback(() => {
-    setItems(runAllChecks());
+    setReRunning(true);
+    requestAnimationFrame(() => {
+      const results = runAllChecks();
+      setItems(results);
+      setLastRunAt(new Date());
+      setTimeout(() => setReRunning(false), 300);
+    });
   }, []);
 
   React.useEffect(() => {
@@ -68,7 +76,10 @@ export default function QualityAdvisor() {
           <span className="flex items-center gap-1"><SevDot sev="medium"/> {counts.medium||0}</span>
           <span className="flex items-center gap-1"><SevDot sev="low"/> {counts.low||0}</span>
           <span className="flex items-center gap-1"><SevDot sev="pass"/> {counts.pass||0}</span>
-          <Button variant="outline" size="sm" onClick={rerun} className="ml-2 gap-1"><RefreshCw className="w-3 h-3"/>Re-run</Button>
+          {lastRunAt && <span className="text-[11px] text-stone-500">Updated {new Date(lastRunAt).toLocaleTimeString()}</span>}
+          <Button variant="outline" size="sm" onClick={rerun} disabled={reRunning} aria-busy={reRunning} title="Re-run checks" className="ml-2 gap-1">
+            <RefreshCw className={`w-3 h-3 ${reRunning ? 'animate-spin' : ''}`}/>{reRunning ? 'Re-running…' : 'Re-run'}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
