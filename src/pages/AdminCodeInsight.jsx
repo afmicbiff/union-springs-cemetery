@@ -64,7 +64,27 @@ export default function AdminCodeInsight() {
         },
       });
 
-      const picked = Array.isArray(aiRes?.paths) ? aiRes.paths.filter(p => allPaths.includes(p)).slice(0, 8) : [];
+      const aiPicked = Array.isArray(aiRes?.paths) ? aiRes.paths.filter(p => allPaths.includes(p)) : [];
+
+      // Fallback: simple keyword ranking over file paths if AI returns nothing or too few
+      const q = query.trim().toLowerCase();
+      const tokens = Array.from(new Set(q.split(/[^a-z0-9]+/).filter(Boolean)));
+      const rank = (p) => {
+        const s = p.toLowerCase();
+        let score = 0;
+        if (q && s.includes(q)) score += 5;
+        tokens.forEach(t => { if (s.includes(t)) score += 2; });
+        if (s.includes('/pages/')) score += 2; // prefer pages first
+        if (s.includes('/components/')) score += 1;
+        return score;
+      };
+      const keywordTop = allPaths
+        .slice()
+        .sort((a,b) => rank(b) - rank(a))
+        .slice(0, 8);
+
+      // Combine AI + keyword picks, de-duplicate, cap to 8
+      const picked = Array.from(new Set([...(aiPicked || []), ...keywordTop])).slice(0, 8);
 
       // Load raw code for each selected path (via Vite loaders)
       const files = [];
