@@ -823,6 +823,7 @@ export default function PlotsPage() {
   const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
+  const [isRenumbering, setIsRenumbering] = useState(false);
 
   // DATA FETCHING
   const { data: user } = useQuery({
