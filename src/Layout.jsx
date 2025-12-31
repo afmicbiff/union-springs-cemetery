@@ -31,6 +31,25 @@ export default function Layout({ children }) {
   };
 
   const isAdmin = location.pathname.startsWith('/admin');
+  React.useEffect(() => {
+    const tags = [
+      ['Cache-Control', 'no-cache, no-store, must-revalidate'],
+      ['Pragma', 'no-cache'],
+      ['Expires', '0'],
+    ];
+    const created = tags.map(([he, content]) => {
+      const m = document.createElement('meta');
+      m.httpEquiv = he;
+      m.content = content;
+      document.head.appendChild(m);
+      return m;
+    });
+    return () => {
+      created.forEach((m) => {
+        if (m && m.parentNode) m.parentNode.removeChild(m);
+      });
+    };
+  }, []);
   const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
 
   const navItems = [
