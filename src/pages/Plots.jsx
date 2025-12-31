@@ -494,9 +494,9 @@ const SectionRenderer = React.memo(({
 
                                     const renderData = columns.flatMap(col => [...col].reverse());
 
-                                    return renderData.map((plot) => (
+                                    return renderData.map((plot, idx) => (
                                         <GravePlot 
-                                            key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
+                                            key={plot._id || `${plot.Section || 'sp'}-${plot.Row || ''}-${plot.Grave || ''}-${idx}`} 
                                             data={plot} 
                                             baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                             onHover={onHover}
