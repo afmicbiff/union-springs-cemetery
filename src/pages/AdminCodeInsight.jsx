@@ -153,7 +153,7 @@ export default function AdminCodeInsight() {
               {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Find Code
             </Button>
-            <div className="text-xs text-stone-500">AI will select the most relevant files and display their contents below.</div>
+            <div className="text-xs text-stone-500">AI will select the most relevant files and display their contents below. If AI can’t decide, we’ll auto-suggest by filename keywords.</div>
           </div>
         </CardContent>
       </Card>
