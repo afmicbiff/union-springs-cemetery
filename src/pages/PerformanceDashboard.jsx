@@ -18,7 +18,7 @@ export default function PerformanceDashboard() {
   const [aiResult, setAiResult] = React.useState(null);
 
   // Fallback: load latest persisted Web Vitals when local metrics are missing
-  const { data: vitalsLatest } = useQuery({
+  const { data: vitalsLatest, refetch: refetchVitals } = useQuery({
     queryKey: ['webVitalsLatest'],
     queryFn: async ({ signal }) => {
       const [lcpArr, inpArr] = await Promise.all([
