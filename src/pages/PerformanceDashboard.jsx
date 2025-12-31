@@ -46,7 +46,7 @@ export default function PerformanceDashboard() {
 
   const reload = async () => {
     setMetrics(getCurrentMetrics());
-    try { await refetchVitals(); } catch {}
+    await refetchVitals();
   };
   const isAdmin = user?.role === "admin";
 
