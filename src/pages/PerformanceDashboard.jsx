@@ -44,7 +44,10 @@ export default function PerformanceDashboard() {
     return () => unsub();
   }, []);
 
-  const reload = () => setMetrics(getCurrentMetrics());
+  const reload = async () => {
+    setMetrics(getCurrentMetrics());
+    try { await refetchVitals(); } catch {}
+  };
   const isAdmin = user?.role === "admin";
 
   const analyzeWithAI = async () => {
