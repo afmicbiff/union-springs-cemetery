@@ -476,6 +476,22 @@ const SectionRenderer = React.memo(({
                                     ];
                                     pairs.forEach(([m, t]) => moveUnder(columns, m, t));
 
+                                    // Shift the row containing plot 303 two columns to the right and leave blanks under plot 304
+                                    const pos303 = findPos(columns, 303);
+                                    if (pos303) {
+                                      const r = pos303.r;
+                                      const makeSpacer = (i) => ({ isSpacer: true, _id: `sp-303-${r}-${i}-${Math.random().toString(36).slice(2,7)}` });
+                                      const rowCells = columns.map(col => col[r]);
+                                      const newRow = Array(columns.length).fill(null).map((_, i) => makeSpacer(i));
+                                      for (let c = 0; c < columns.length; c++) {
+                                        const toC = c + 2;
+                                        if (toC < columns.length) newRow[toC] = rowCells[c];
+                                      }
+                                      for (let c = 0; c < columns.length; c++) {
+                                        columns[c][r] = newRow[c];
+                                      }
+                                    }
+
                                     const renderData = columns.flatMap(col => [...col].reverse());
 
                                     return renderData.map((plot) => (
