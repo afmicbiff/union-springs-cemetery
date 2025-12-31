@@ -21,6 +21,7 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import AdminCodeInsight from './pages/AdminCodeInsight';
 import __Layout from './Layout.jsx';
 
 
@@ -48,6 +49,7 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
+    "AdminCodeInsight": AdminCodeInsight,
 }
 
 export const pagesConfig = {
