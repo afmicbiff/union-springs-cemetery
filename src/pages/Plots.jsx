@@ -433,7 +433,9 @@ const SectionRenderer = React.memo(({
                                       ordered.splice(insertAt, 0, p228A);
                                     }
                                     const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
-                                    let columns = chunk(ordered, 24).slice(0, 10);
+                                    // Remove plot 185 from display
+                                    const orderedFiltered = ordered.filter(p => byNum(p.Grave) !== 185);
+                                    let columns = chunk(orderedFiltered, 24).slice(0, 10);
 
                                     const getNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || null;
                                     const findPos = (cols, num) => {
@@ -464,6 +466,16 @@ const SectionRenderer = React.memo(({
                                       const insertRow = Math.max(targetPos.r - 1, 0); // -1 because columns will be reversed on render (visual "under")
                                       insertIntoColumn(cols, targetPos.c, insertRow, item);
                                     };
+
+                                    // Reorder columns: move the whole column containing 186 next to the column containing 228
+                                    const pos186 = findPos(columns, 186);
+                                    const pos228 = findPos(columns, 228);
+                                    if (pos186 && pos228 && pos186.c !== pos228.c) {
+                                      const movedCol = columns.splice(pos186.c, 1)[0];
+                                      const newPos228 = findPos(columns, 228) || pos228;
+                                      const insertAt = Math.min((newPos228.c ?? 0) + 1, columns.length);
+                                      columns.splice(insertAt, 0, movedCol);
+                                    }
 
                                     const pairs = [
                                       [228, 229],
