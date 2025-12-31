@@ -48,7 +48,7 @@ export default function AdminCodeInsight() {
           "You help locate code files in a React (pages/, components/), functions/ (Deno backend functions), and entities/ (JSON schemas) app.",
           "Given the user's request and the exact list of available file paths below, return ONLY the paths most relevant to implement or display that section.",
           "CRITICAL: Return only exact paths from the provided list; do not invent paths.",
-          "Choose up to 8 paths, ordered by relevance.",
+          "Choose up to 8 paths, ordered by relevance. If none are confident, return an empty array.",
           "User request:",
           query.trim(),
           "Available file paths (newline-separated):",
