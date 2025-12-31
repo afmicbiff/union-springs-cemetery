@@ -44,61 +44,34 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
     queryFn: async ({ signal }) => {
       const sectionFilter = buildSectionFilter(sectionsToLoad);
 
-      // 2 calls total, always
-      const [plots, legacy] = await Promise.all([
-        filterEntity(
-          "Plot",
-          sectionFilter,
-          {
-            sort: "-updated_date",
-            limit: 10_000,
-            select: [
-              "id",
-              "section",
-              "row_number",
-              "plot_number",
-              "status",
-              "first_name",
-              "last_name",
-              "family_name",
-              "birth_date",
-              "death_date",
-              "notes",
-              "updated_date",
-            ],
-            persist: true,
-            ttlMs: 15 * 60_000,
-          },
-          { signal }
-        ),
-        filterEntity(
-          "PlotsAndMaps",
-          sectionFilter,
-          {
-            sort: "-updated_date",
-            limit: 10_000,
-            select: [
-              "id",
-              "section",
-              "row",
-              "grave",
-              "status",
-              "first_name",
-              "last_name",
-              "family_name",
-              "birth",
-              "death",
-              "notes",
-              "updated_date",
-            ],
-            persist: true,
-            ttlMs: 15 * 60_000,
-          },
-          { signal }
-        ),
-      ]);
+      // 1 call total (Plot only)
+      const plots = await filterEntity(
+        "Plot",
+        sectionFilter,
+        {
+          sort: "-updated_date",
+          limit: 10_000,
+          select: [
+            "id",
+            "section",
+            "row_number",
+            "plot_number",
+            "status",
+            "first_name",
+            "last_name",
+            "family_name",
+            "birth_date",
+            "death_date",
+            "notes",
+            "updated_date",
+          ],
+          persist: true,
+          ttlMs: 15 * 60_000,
+        },
+        { signal }
+      );
 
-      return [...(plots || []), ...(legacy || [])];
+      return plots || [];
     },
   });
 }
