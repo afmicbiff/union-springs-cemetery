@@ -433,7 +433,49 @@ const SectionRenderer = React.memo(({
                                       ordered.splice(insertAt, 0, p228A);
                                     }
                                     const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
-                                    const columns = chunk(ordered, 24).slice(0, 10);
+                                    let columns = chunk(ordered, 24).slice(0, 10);
+
+                                    const getNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || null;
+                                    const findPos = (cols, num) => {
+                                      for (let c = 0; c < cols.length; c++) {
+                                        const r = cols[c].findIndex(p => getNum(p.Grave) === num);
+                                        if (r !== -1) return { c, r };
+                                      }
+                                      return null;
+                                    };
+                                    const insertIntoColumn = (cols, c, r, item) => {
+                                      cols[c].splice(r, 0, item);
+                                      // Maintain max 24 rows per column: spill last item to next column
+                                      for (let i = c; i < cols.length; i++) {
+                                        if (cols[i].length <= 24) break;
+                                        const spill = cols[i].pop();
+                                        if (i + 1 < cols.length) {
+                                          cols[i + 1].unshift(spill);
+                                        }
+                                      }
+                                    };
+                                    const moveUnder = (cols, movingNum, targetNum) => {
+                                      const posT = findPos(cols, targetNum);
+                                      const posM = findPos(cols, movingNum);
+                                      if (!posT || !posM) return;
+                                      const item = cols[posM.c].splice(posM.r, 1)[0];
+                                      // Adjust indices if removal was from the same column and above target
+                                      const targetPos = findPos(cols, targetNum) || posT;
+                                      const insertRow = Math.max(targetPos.r - 1, 0); // -1 because columns will be reversed on render (visual "under")
+                                      insertIntoColumn(cols, targetPos.c, insertRow, item);
+                                    };
+
+                                    const pairs = [
+                                      [228, 229],
+                                      [304, 305],
+                                      [470, 471],
+                                      [587, 588],
+                                      [671, 872],
+                                      [750, 751],
+                                      [803, 804],
+                                    ];
+                                    pairs.forEach(([m, t]) => moveUnder(columns, m, t));
+
                                     const renderData = columns.flatMap(col => [...col].reverse());
 
                                     return renderData.map((plot) => (
