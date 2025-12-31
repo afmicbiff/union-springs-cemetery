@@ -373,40 +373,54 @@ export default function PlotsPage() {
   
   const isAdmin = user?.role === 'admin';
 
+  // helper: stable key
+  const normalizeSectionsKey = (secs) => (secs || [])
+    .map(String)
+    .map(s => s.replace(/Section\s*/i, '').trim())
+    .filter(Boolean)
+    .sort()
+    .join(',');
+
+  const sectionsToLoad = useMemo(() => {
+    if (activeTab !== 'map') return [];
+    const fallback = ['5'];
+    return (openSections && openSections.length) ? openSections : fallback;
+  }, [openSections, activeTab]);
+
+  const sectionsKey = useMemo(
+    () => normalizeSectionsKey(sectionsToLoad),
+    [sectionsToLoad]
+  );
+
+  const selectPlot = ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'];
+  const selectLegacy = ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'];
+
   const { data: plotEntities, isLoading } = useQuery({
-      queryKey: ['plotsMap', { open: openSections, tab: activeTab }],
-      queryFn: async ({ signal }) => {
-        if (activeTab !== 'map') return [];
-        const sectionsToLoad = (openSections && openSections.length) ? openSections : ['5'];
+    queryKey: ['plotsMap', { tab: activeTab, sectionsKey }],
+    enabled: activeTab === 'map' && sectionsToLoad.length > 0,
+    queryFn: async ({ signal }) => {
+      // Critical change: 1 request per entity type
+      const [plots, legacy] = await Promise.all([
+        filterEntity(
+          'Plot',
+          { section: { $in: sectionsToLoad } },
+          { sort: '-updated_date', limit: 10_000, select: selectPlot, persist: true, ttlMs: 15 * 60_000 },
+          { signal }
+        ),
+        filterEntity(
+          'PlotsAndMaps',
+          { section: { $in: sectionsToLoad } },
+          { sort: '-updated_date', limit: 10_000, select: selectLegacy, persist: true, ttlMs: 15 * 60_000 },
+          { signal }
+        ),
+      ]);
 
-        const oldPerSection = await Promise.all(
-          sectionsToLoad.map((sec) =>
-            filterEntity(
-              'Plot',
-              { section: sec },
-              { sort: '-updated_date', limit: 2000, select: ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'], persist: true, ttlMs: 15 * 60_000 },
-              { signal }
-            )
-          )
-        );
-
-        const legacyPerSection = await Promise.all(
-          sectionsToLoad.map((sec) =>
-            filterEntity(
-              'PlotsAndMaps',
-              { section: sec },
-              { sort: '-updated_date', limit: 2000, select: ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'], persist: true, ttlMs: 15 * 60_000 },
-              { signal }
-            )
-          )
-        );
-
-        return [...oldPerSection.flat(), ...legacyPerSection.flat()];
-      },
-      initialData: [],
-      staleTime: 30_000,
-      gcTime: 5 * 60_000,
-      refetchOnWindowFocus: false
+      return [...plots, ...legacy];
+    },
+    initialData: [],
+    staleTime: 15 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   // MUTATIONS
