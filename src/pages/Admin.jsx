@@ -348,8 +348,11 @@ export default function AdminDashboard() {
                         </motion.button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-0" align="end">
-                        <div className="p-3 border-b bg-stone-50">
+                        <div className="p-3 border-b bg-stone-50 flex items-center justify-between">
                             <h4 className="font-semibold text-stone-900 text-sm">Notifications</h4>
+                            <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-stone-700" disabled={dismissibleNotes.length === 0} onClick={dismissAllNotifications}>
+                              Dismiss All
+                            </Button>
                         </div>
                         <div className="max-h-[400px] overflow-y-auto">
                             {notifications.length === 0 ? (
