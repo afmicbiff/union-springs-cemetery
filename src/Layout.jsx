@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity, BarChart2, Code } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity, BarChart2, Code, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -284,7 +284,7 @@ export default function Layout({ children }) {
             <p>Gates: Sunrise to Sunset</p>
             <p>Office: Contact the administrator by email or phone</p>
             
-            <div className="mt-6">
+            <div className="mt-6 space-y-2">
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="bg-transparent border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800 hover:border-stone-600 w-full justify-start">
@@ -326,6 +326,9 @@ export default function Layout({ children }) {
                   </div>
                 </DialogContent>
               </Dialog>
+              <Button variant="outline" size="sm" onClick={clearSiteCache} className="bg-transparent border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800 hover:border-stone-600 w-full justify-start">
+                <Trash2 className="w-4 h-4 mr-2" /> Clear Cache
+              </Button>
             </div>
           </div>
         </div>
