@@ -731,7 +731,7 @@ export default function PlotsPage() {
       },
       onSuccess: () => {
                       clearEntityCache('Plot');
-                      clearEntityCache('PlotsAndMaps');
+                      
                       queryClient.invalidateQueries({ queryKey: ['plots'] });
                       invalidatePlotsMap();
                       toast.success("Plot updated successfully");
@@ -751,7 +751,7 @@ export default function PlotsPage() {
       },
       onSuccess: (data) => {
                       clearEntityCache('Plot');
-                      clearEntityCache('PlotsAndMaps');
+                      
                       queryClient.invalidateQueries({ queryKey: ['plots'] });
                       invalidatePlotsMap();
                       toast.success(data.message || "Imported plots successfully");
@@ -763,42 +763,21 @@ export default function PlotsPage() {
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
-      return (plotEntities || []).map((p) => {
-        // Native Plot entity
-        if (p && (p.plot_number || p.row_number || p.section)) {
-          return {
-            _id: p.id,
-            _entity: 'Plot',
-            Section: p.section,
-            Row: p.row_number,
-            Grave: p.plot_number,
-            Status: p.status || 'Unknown',
-            'First Name': p.first_name,
-            'Last Name': p.last_name,
-            'Family Name': p.family_name,
-            Birth: p.birth_date,
-            Death: p.death_date,
-            Notes: p.notes || '',
-            ...p,
-          };
-        }
-        // Legacy PlotsAndMaps entity
-        return {
-          _id: p.id,
-          _entity: 'PlotsAndMaps',
-          Section: p.section || '',
-          Row: p.row || '',
-          Grave: p.grave || '',
-          Status: p.status || 'Unknown',
-          'First Name': p.first_name || '',
-          'Last Name': p.last_name || '',
-          'Family Name': p.family_name || '',
-          Birth: p.birth || '',
-          Death: p.death || '',
-          Notes: p.notes || '',
-          ...p,
-        };
-      }).filter(r => r.Grave);
+      return (plotEntities || []).map((p) => ({
+        _id: p.id,
+        _entity: 'Plot',
+        Section: p.section,
+        Row: p.row_number,
+        Grave: p.plot_number,
+        Status: p.status || 'Unknown',
+        'First Name': p.first_name,
+        'Last Name': p.last_name,
+        'Family Name': p.family_name,
+        Birth: p.birth_date,
+        Death: p.death_date,
+        Notes: p.notes || '',
+        ...p,
+      })).filter(r => r.Grave);
   }, [plotEntities]);
 
   // Filtered Data Computation
