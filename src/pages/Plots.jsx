@@ -790,7 +790,44 @@ export default function PlotsPage() {
     queryClient.invalidateQueries({ queryKey: ['plots'] });
     invalidatePlotsMap();
     toast.success('Added/updated plots 227 and 302 as Not Usable in Section 5');
-  };
+    };
+
+    const relocatePlot227ToSection2 = async () => {
+    const target = { section: '2', plot_number: '228-A', status: 'Not Usable' };
+    const originalArr = await base44.entities.Plot.filter(
+      { $and: [
+          { plot_number: '227' },
+          { $or: [ { section: '5' }, { section: 'Section 5' } ] }
+        ] },
+      '-updated_date',
+      1
+    );
+    const original = Array.isArray(originalArr) ? originalArr[0] : originalArr?.[0];
+    if (original?.id) {
+      await base44.entities.Plot.update(original.id, target);
+    } else {
+      const existingArr = await base44.entities.Plot.filter(
+        { $and: [
+            { plot_number: target.plot_number },
+            { $or: [ { section: '2' }, { section: 'Section 2' } ] }
+          ] },
+        '-updated_date',
+        1
+      );
+      const existing = Array.isArray(existingArr) ? existingArr[0] : existingArr?.[0];
+      if (existing?.id) {
+        if (existing.status !== target.status) {
+          await base44.entities.Plot.update(existing.id, { status: target.status });
+        }
+      } else {
+        await base44.entities.Plot.create(target);
+      }
+    }
+    clearEntityCache('Plot');
+    queryClient.invalidateQueries({ queryKey: ['plots'] });
+    invalidatePlotsMap();
+    toast.success('Moved 227 to Section 2 as 228-A (Not Usable)');
+    };
 
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
@@ -958,9 +995,10 @@ export default function PlotsPage() {
 
     Object.keys(grouped).forEach(key => {
         grouped[key].sort((a, b) => {
-            const numA = parseInt(a.Grave.replace(/\D/g, '')) || 0;
-            const numB = parseInt(b.Grave.replace(/\D/g, '')) || 0;
-            return numA - numB;
+            const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
+            const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
+            if (numA !== numB) return numA - numB;
+            return String(a.Grave).localeCompare(String(b.Grave));
         });
     });
 
@@ -1221,6 +1259,214 @@ export default function PlotsPage() {
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" /> Add Plots 227 & 302 (Not Usable)
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={relocatePlot227ToSection2}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Move 227 								 				 				 				 				 		 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  					 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  <Plus className="w-4 h-4" /> Move 227                                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  228-A (Sec 2)
                 </Button>
             </div>
             )}
