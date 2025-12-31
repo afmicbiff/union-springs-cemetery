@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import SmartImage from "@/components/perf/SmartImage.jsx";
 import PlotFilters from "@/components/plots/PlotFilters";
+import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import DataTablePaginated from "@/components/plots/DataTablePaginated";
 import {
   DropdownMenu,
@@ -317,6 +318,10 @@ const LegendItem = ({ label, colorClass }) => {
 
 export default function PlotsPage() {
   const queryClient = useQueryClient();
+        
+        const invalidatePlotsMap = () => {
+          queryClient.invalidateQueries({ queryKey: ['plotsMap'] });
+        };
   const [sections, setSections] = useState({});
   const [hoverData, setHoverData] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -395,33 +400,11 @@ export default function PlotsPage() {
   const selectPlot = ['id','section','row_number','plot_number','status','first_name','last_name','family_name','birth_date','death_date','notes'];
   const selectLegacy = ['id','section','row','grave','status','first_name','last_name','family_name','birth','death','notes'];
 
-  const { data: plotEntities, isLoading } = useQuery({
-    queryKey: ['plotsMap', { tab: activeTab, sectionsKey }],
-    enabled: activeTab === 'map' && sectionsToLoad.length > 0,
-    queryFn: async ({ signal }) => {
-      // Critical change: 1 request per entity type
-      const [plots, legacy] = await Promise.all([
-        filterEntity(
-          'Plot',
-          { section: { $in: sectionsToLoad } },
-          { sort: '-updated_date', limit: 10_000, select: selectPlot, persist: true, ttlMs: 15 * 60_000 },
-          { signal }
-        ),
-        filterEntity(
-          'PlotsAndMaps',
-          { section: { $in: sectionsToLoad } },
-          { sort: '-updated_date', limit: 10_000, select: selectLegacy, persist: true, ttlMs: 15 * 60_000 },
-          { signal }
-        ),
-      ]);
-
-      return [...plots, ...legacy];
-    },
-    initialData: [],
-    staleTime: 15 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-  });
+  const { data: plotEntities = [], isLoading } = usePlotsMapData({
+            activeTab,
+            openSections,
+            filterEntity,
+          });
 
   // MUTATIONS
   const updatePlotMutation = useMutation({
@@ -435,11 +418,12 @@ export default function PlotsPage() {
           return response.data;
       },
       onSuccess: () => {
-          clearEntityCache('Plot');
-          clearEntityCache('PlotsAndMaps');
-          queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success("Plot updated successfully");
-      },
+                      clearEntityCache('Plot');
+                      clearEntityCache('PlotsAndMaps');
+                      queryClient.invalidateQueries({ queryKey: ['plots'] });
+                      invalidatePlotsMap();
+                      toast.success("Plot updated successfully");
+                  },
       onError: (err) => {
           toast.error(`Update failed: ${err.message}`);
       }
@@ -455,11 +439,12 @@ export default function PlotsPage() {
           return response.data;
       },
       onSuccess: (data) => {
-          clearEntityCache('Plot');
-          clearEntityCache('PlotsAndMaps');
-          queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success(data.message || "Imported plots successfully");
-      },
+                      clearEntityCache('Plot');
+                      clearEntityCache('PlotsAndMaps');
+                      queryClient.invalidateQueries({ queryKey: ['plots'] });
+                      invalidatePlotsMap();
+                      toast.success(data.message || "Imported plots successfully");
+                  },
       onError: (err) => {
           toast.error(`Import failed: ${err.message}`);
       }
@@ -471,9 +456,10 @@ export default function PlotsPage() {
           return res.data;
       },
       onSuccess: (data) => {
-          queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success(data.message || "Cleanup complete");
-      },
+                      queryClient.invalidateQueries({ queryKey: ['plots'] });
+                      invalidatePlotsMap();
+                      toast.success(data.message || "Cleanup complete");
+                  },
       onError: (err) => {
           // Try to extract backend error message if available
           const msg = err.response?.data?.error || err.message;
@@ -502,9 +488,10 @@ export default function PlotsPage() {
           return res.data;
       },
       onSuccess: (data) => {
-          queryClient.invalidateQueries({ queryKey: ['plots'] });
-          toast.success(`Section 3: ${data.created} created, ${data.skipped} skipped.`);
-      },
+                      queryClient.invalidateQueries({ queryKey: ['plots'] });
+                      invalidatePlotsMap();
+                      toast.success(`Section 3: ${data.created} created, ${data.skipped} skipped.`);
+                  },
       onError: (err) => {
           toast.error(`Section 3 Seed failed: ${err.message}`);
       }
@@ -517,9 +504,10 @@ export default function PlotsPage() {
       return res.data;
   },
   onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['plots'] });
-      toast.success(`Section 4: ${data.created} created, ${data.skipped} skipped.`);
-  },
+              queryClient.invalidateQueries({ queryKey: ['plots'] });
+              invalidatePlotsMap();
+              toast.success(`Section 4: ${data.created} created, ${data.skipped} skipped.`);
+          },
   onError: (err) => {
       toast.error(`Section 4 Seed failed: ${err.message}`);
   }
@@ -1041,7 +1029,8 @@ export default function PlotsPage() {
                     const created = res.data?.results?.filter(r => r.status === 'created').length || 0;
                     const exists = res.data?.results?.filter(r => r.status === 'exists').length || 0;
                     toast.success(`${msg}: ${created} created, ${exists} already existed.`);
-                    queryClient.invalidateQueries({ queryKey: ['plots'] });
+                                              queryClient.invalidateQueries({ queryKey: ['plots'] });
+                                              invalidatePlotsMap();
                   }}
                   className="gap-2"
                 >
