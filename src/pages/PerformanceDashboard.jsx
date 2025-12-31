@@ -2,16 +2,18 @@ import React from "react";
 import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
 import { filterEntity } from "@/components/gov/dataClient";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw, Code } from "lucide-react";
+import { AlertTriangle, RefreshCw, Code, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel.jsx"));
 const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts.jsx"));
 
 export default function PerformanceDashboard() {
-  const [metrics, setMetrics] = React.useState(getCurrentMetrics());
+        const queryClient = useQueryClient();
+        const [metrics, setMetrics] = React.useState(getCurrentMetrics());
   const [user, setUser] = React.useState(null);
   const [aiLoading, setAiLoading] = React.useState(false);
   const [aiError, setAiError] = React.useState(null);
@@ -47,6 +49,11 @@ export default function PerformanceDashboard() {
   const reload = async () => {
     setMetrics(getCurrentMetrics());
     await refetchVitals();
+  };
+  const clearWebsiteCache = () => {
+    try { localStorage.clear(); sessionStorage.clear(); } catch {}
+    try { queryClient.clear(); } catch {}
+    toast.success("Website cache cleared");
   };
   const isAdmin = user?.role === "admin";
 
@@ -174,7 +181,12 @@ export default function PerformanceDashboard() {
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-serif">Performance Dashboard</h1>
-          <Button variant="outline" onClick={reload} className="gap-2"><RefreshCw className="w-4 h-4"/>Refresh</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={clearWebsiteCache} className="gap-2 text-red-700 border-red-300 hover:bg-red-50">
+              <Trash2 className="w-4 h-4"/> Clear Cache
+            </Button>
+            <Button variant="outline" onClick={reload} className="gap-2"><RefreshCw className="w-4 h-4"/>Refresh</Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
