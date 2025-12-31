@@ -416,7 +416,7 @@ const SectionRenderer = React.memo(({
                         </div>
                     ) : sectionKey === '2' ? (
                         <div className="flex justify-center overflow-x-auto">
-                             <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: 'repeat(24, minmax(0, 1fr))', gridTemplateColumns: 'repeat(10, max-content)', gridAutoColumns: 'max-content' }}>
+                             <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))', gridTemplateColumns: 'repeat(10, max-content)', gridAutoColumns: 'max-content' }}>
                                 {(() => {
                                     const byNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || 0;
                                     const ordered = [...plots].sort((a, b) => {
@@ -435,7 +435,7 @@ const SectionRenderer = React.memo(({
                                     const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
                                     // Remove plot 185 from display
                                     const orderedFiltered = ordered.filter(p => byNum(p.Grave) !== 185);
-                                    let columns = chunk(orderedFiltered, 24).slice(0, 10);
+                                    let columns = chunk(orderedFiltered, 23).slice(0, 10);
 
                                     const getNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || null;
                                     const findPos = (cols, num) => {
@@ -447,9 +447,9 @@ const SectionRenderer = React.memo(({
                                     };
                                     const insertIntoColumn = (cols, c, r, item) => {
                                       cols[c].splice(r, 0, item);
-                                      // Maintain max 24 rows per column: spill last item to next column
-                                      for (let i = c; i < cols.length; i++) {
-                                        if (cols[i].length <= 24) break;
+                                      // Maintain max 23 rows per column: spill last item to next column
+                                                                                for (let i = c; i < cols.length; i++) {
+                                                                                  if (cols[i].length <= 23) break;
                                         const spill = cols[i].pop();
                                         if (i + 1 < cols.length) {
                                           cols[i + 1].unshift(spill);
@@ -475,6 +475,20 @@ const SectionRenderer = React.memo(({
                                       const newPos228 = findPos(columns, 228) || pos228;
                                       const insertAt = Math.min((newPos228.c ?? 0) + 1, columns.length);
                                       columns.splice(insertAt, 0, movedCol);
+                                    }
+
+                                    // Insert a full blank row directly under the row containing plot 186 (visual row)
+                                    const pos186Row = findPos(columns, 186);
+                                    if (pos186Row) {
+                                      const insertRowIdx = Math.max(pos186Row.r - 1, 0); // reverse-rendered grid: r-1 is visually under
+                                      for (let c = 0; c < columns.length; c++) {
+                                        columns[c].splice(insertRowIdx, 0, { isSpacer: true, _id: `sp-after-186-c${c}-${Math.random().toString(36).slice(2,7)}` });
+                                        // Keep max 23 rows per column, spill to next
+                                        if (columns[c].length > 23 && c + 1 < columns.length) {
+                                          const spill = columns[c].pop();
+                                          columns[c + 1].unshift(spill);
+                                        }
+                                      }
                                     }
 
                                     const pairs = [
