@@ -823,7 +823,7 @@ export default function PlotsPage() {
   const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
-  const [isRenumbering, setIsRenumbering] = useState(false);
+
 
   // DATA FETCHING
   const { data: user } = useQuery({
@@ -1356,30 +1356,7 @@ export default function PlotsPage() {
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
                 </label>
 
-                <Button
-                  variant="outline"
-                  disabled={isRenumbering}
-                  onClick={async () => {
-                    if (!window.confirm('Renumber Section 2 plot numbers now? This cannot be undone.')) return;
-                    setIsRenumbering(true);
-                    try {
-                      const res = await base44.functions.invoke('renumberSection2', {});
-                      const msg = res.data?.message || 'Section 2 renumbered';
-                      toast.success(`${msg} (${res.data?.updated_count || 0} updated)`);
-                    } catch (e) {
-                      toast.error('Renumber failed');
-                    } finally {
-                      setIsRenumbering(false);
-                      clearEntityCache('Plot');
-                      queryClient.invalidateQueries({ queryKey: ['plots'] });
-                      invalidatePlotsMap();
-                    }
-                  }}
-                  className="gap-2"
-                >
-                  {isRenumbering ? <Loader2 className="animate-spin w-4 h-4" /> : null}
-                  Apply Section 2 Renumber
-                </Button>
+
 
 
 
