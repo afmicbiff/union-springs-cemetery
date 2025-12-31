@@ -13,14 +13,17 @@ function normalizeSectionsKey(sections) {
 
 // Choose one filter style that matches Base44
 function buildSectionFilter(sectionsToLoad) {
-  // Option A: Mongo style
-  return { section: { $in: sectionsToLoad } };
-
-  // Option B: "in" style
-  // return { section: { in: sectionsToLoad } };
-
-  // Option C: OR list style
-  // return { OR: sectionsToLoad.map(sec => ({ section: sec })) };
+  const normalized = (sectionsToLoad || [])
+    .map((s) => String(s).replace(/Section\s*/i, "").trim())
+    .filter(Boolean);
+  // Support both raw numbers ("5") and prefixed values ("Section 5")
+  const withPrefixes = normalized.map((n) => `Section ${n}`);
+  return {
+    $or: [
+      { section: { $in: normalized } },
+      { section: { $in: withPrefixes } },
+    ],
+  };
 }
 
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
