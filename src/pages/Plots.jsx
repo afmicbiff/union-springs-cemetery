@@ -416,7 +416,7 @@ const SectionRenderer = React.memo(({
                         </div>
                     ) : sectionKey === '2' ? (
                         <div className="flex justify-center overflow-x-auto">
-                             <div className="grid grid-flow-col gap-3 auto-cols-max" style={{ gridTemplateRows: 'repeat(24, minmax(0, 1fr))' }}>
+                             <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: 'repeat(24, minmax(0, 1fr))', gridTemplateColumns: 'repeat(10, max-content)', gridAutoColumns: 'max-content' }}>
                                 {(() => {
                                     const byNum = (g) => parseInt(String(g || '').replace(/\D/g, '')) || 0;
                                     const ordered = [...plots].sort((a, b) => {
