@@ -517,6 +517,18 @@ const SectionRenderer = React.memo(({
                                       }
                                     }
 
+                                    // Align plot 304 to be beside 229 (same visual row)
+                                    const pos229_beside = findPos(columns, 229);
+                                    const pos304_beside = findPos(columns, 304);
+                                    if (pos229_beside && pos304_beside) {
+                                      const item304 = columns[pos304_beside.c].splice(pos304_beside.r, 1)[0];
+                                      const targetIndex = Math.min(pos229_beside.r, columns[pos304_beside.c].length);
+                                      columns[pos304_beside.c].splice(targetIndex, 0, item304);
+                                      while (columns[pos304_beside.c].length > 23) {
+                                        columns[pos304_beside.c].pop();
+                                      }
+                                    }
+
                                     const renderData = columns.flatMap(col => [...col].reverse()).filter(Boolean);
 
                                     return renderData.map((plot, idx) => (
