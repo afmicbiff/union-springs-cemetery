@@ -433,7 +433,7 @@ const SectionRenderer = React.memo(({
                                       ordered.splice(insertAt, 0, p228A);
                                     }
                                     const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size));
-                                    const columns = chunk(ordered, 24);
+                                    const columns = chunk(ordered, 24).slice(0, 10);
                                     const renderData = columns.flatMap(col => [...col].reverse());
 
                                     return renderData.map((plot) => (
