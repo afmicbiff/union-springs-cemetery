@@ -349,10 +349,7 @@ const SectionRenderer = React.memo(({
 }) => {
     const [bgColor, borderColor, textColor] = palette.split(' ');
 
-    // Hide Section 2 from map view
-    if (sectionKey === '2') return null;
-
-    return (
+          return (
         <div id={`section-${sectionKey}`} className="relative">
             <div 
                 className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
