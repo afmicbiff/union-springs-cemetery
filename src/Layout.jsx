@@ -52,6 +52,61 @@ export default function Layout({ children }) {
   }, []);
   const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
 
+  // Clear client-side caches and reload app
+  const clearSiteCache = async () => {
+    if (typeof window === 'undefined') return;
+    const ok = window.confirm('This will clear local data (localStorage, sessionStorage, caches) and reload the app. Continue?');
+    if (!ok) return;
+
+    // Clear Web Storage
+    try { window.localStorage?.clear?.(); } catch {}
+    try { window.sessionStorage?.clear?.(); } catch {}
+
+    // Clear Cache Storage
+    try {
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+    } catch {}
+
+    // Unregister Service Workers
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch {}
+
+    // Best-effort clear IndexedDB (where supported)
+    try {
+      const anyIDB = window.indexedDB;
+      const hasList = typeof anyIDB?.databases === 'function';
+      if (hasList) {
+        const dbs = await anyIDB.databases();
+        await Promise.all(
+          (dbs || []).map((db) =>
+            new Promise((resolve) => {
+              try {
+                const req = anyIDB.deleteDatabase(db.name);
+                req.onsuccess = req.onerror = req.onblocked = () => resolve();
+              } catch { resolve(); }
+            })
+          )
+        );
+      }
+    } catch {}
+
+    // Reload with cache-busting param
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('v', String(Date.now()));
+      window.location.replace(url.toString());
+    } catch {
+      window.location.reload();
+    }
+  };
+
   const navItems = [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
