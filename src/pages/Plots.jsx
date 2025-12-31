@@ -761,6 +761,37 @@ export default function PlotsPage() {
       }
   });
 
+  const addNotUsablePlots = async () => {
+    const targets = [
+      { section: '5', plot_number: '227', status: 'Not Usable' },
+      { section: '5', plot_number: '302', status: 'Not Usable' },
+    ];
+
+    await Promise.all(targets.map(async (t) => {
+      const existingArr = await base44.entities.Plot.filter(
+        { $and: [
+            { plot_number: t.plot_number },
+            { $or: [ { section: '5' }, { section: 'Section 5' } ] }
+          ] },
+        '-updated_date',
+        1
+      );
+      const existing = Array.isArray(existingArr) ? existingArr[0] : existingArr?.[0];
+      if (existing?.id) {
+        if (existing.status !== t.status) {
+          await base44.entities.Plot.update(existing.id, { status: t.status });
+        }
+      } else {
+        await base44.entities.Plot.create(t);
+      }
+    }));
+
+    clearEntityCache('Plot');
+    queryClient.invalidateQueries({ queryKey: ['plots'] });
+    invalidatePlotsMap();
+    toast.success('Added/updated plots 227 and 302 as Not Usable in Section 5');
+  };
+
   // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
       return (plotEntities || []).map((p) => ({
@@ -1182,6 +1213,14 @@ export default function PlotsPage() {
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" /> Add Missing Bottom Rows
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={addNotUsablePlots}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" /> Add Plots 227 & 302 (Not Usable)
                 </Button>
             </div>
             )}
