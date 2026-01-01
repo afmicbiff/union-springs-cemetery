@@ -490,7 +490,7 @@ const SectionRenderer = React.memo(({
                                             const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                             return num >= r.start && num <= r.end;
                                         });
-                                        // For 513–542, sort descending so with flex-col-reverse it renders 513 at bottom → 542 at top
+                                        // For 513–542, sort ascending then reverse the column (flex-col-reverse) so 513 starts at the bottom next to 432
                                         if (r.start === 513 && r.end === 542) {
                                             rangePlots.sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
                                         } else {
