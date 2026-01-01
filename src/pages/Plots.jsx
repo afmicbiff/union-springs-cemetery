@@ -475,7 +475,7 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 349, end: 378 }] },
                                     { ranges: [{ start: 431, end: 461 }] },
                                           { ranges: [], blanksStart: 1 },
-                                    { ranges: [{ start: 513, end: 542 }] },
+                                    { ranges: [{ start: 513, end: 542 }], blanksStart: 1 },
                                     { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
@@ -500,7 +500,7 @@ const SectionRenderer = React.memo(({
                                         plotsArr = [...plotsArr, ...rangePlots];
                                     });
 
-                                    if (col.customLayout && idx === 8) {
+                                    if (col.customLayout) {
                                         const r1 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 795; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                         const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                         const r1PartA = r1.filter(p => parseInt(p.Grave) <= 794);
