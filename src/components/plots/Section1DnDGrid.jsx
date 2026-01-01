@@ -109,7 +109,16 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     });
   };
 
-  const renderCell = (c, r) => {
+  const undoLast = React.useCallback(() => {
+    setHistory((prev) => {
+      if (!prev.length) return prev;
+      const last = prev[prev.length - 1];
+      setCells(last);
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+   const renderCell = (c, r) => {
     const idx = c * perCol + r;
     const item = cells[idx];
     const droppableId = `s1-c${c}-r${r}`;
