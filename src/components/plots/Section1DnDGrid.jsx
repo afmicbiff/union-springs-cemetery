@@ -62,9 +62,9 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
         })
         .sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0)); // ascending -> 1 at bottom
 
-      // Place ascending such that smallest index is at bottom (row 0 bottom)
+      // Place ascending with the smallest number at the bottom of the column
       colPlots.forEach((plot, idx) => {
-        const row = idx; // bottom index 0 upward
+        const row = perCol - 1 - idx; // bottom (last DOM child) hosts the first (smallest) item
         if (row >= 0 && row < perCol) {
           const cellIndex = c * perCol + row;
           nextCells[cellIndex] = plot;
@@ -110,6 +110,12 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     const item = cells[idx];
     const droppableId = `s1-c${c}-r${r}`;
 
+    const isVet = item && ((item.Status === 'Veteran') || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied'));
+    const statusKey = item ? (isVet ? 'Veteran' : ((statusColors && statusColors[item.Status]) ? item.Status : 'Default')) : 'Default';
+    const fullClass = (statusColors && statusColors[statusKey]) || '';
+    const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
+    const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
+
     return (
       <Droppable key={droppableId} droppableId={droppableId} type="S1CELL" isDropDisabled={!isAdmin}>
         {(dropProvided, dropSnapshot) => (
@@ -142,9 +148,9 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                         }}
                         title={`Row: ${item.Row}, Grave: ${item.Grave}`}
                       >
-                        <span className="text-[10px] leading-none font-black text-gray-800">{item.Grave}</span>
+                        <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                         <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
-                        <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm bg-gray-400`}></div>
+                        <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
                       </div>
                     </div>
                   )}
@@ -160,9 +166,9 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                   }}
                   title={`Row: ${item.Row}, Grave: ${item.Grave}`}
                 >
-                  <span className="text-[10px] leading-none font-black text-gray-800">{item.Grave}</span>
+                  <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                   <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
-                  <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm bg-gray-400`}></div>
+                  <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
                 </div>
               )
             ) : (
@@ -177,7 +183,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
 
   return (
     <DragDropContext onDragEnd={isAdmin ? onDragEnd : () => {}}>
-      <div className="flex gap-4 justify-center overflow-x-auto">
+      <div className="flex gap-4 justify-center overflow-x-auto pb-2">
         {Array.from({ length: cols }).map((_, c) => (
           <div key={c} className="flex flex-col gap-1 justify-end">
             {Array.from({ length: perCol }).map((__, r) => renderCell(c, r))}

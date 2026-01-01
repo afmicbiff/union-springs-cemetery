@@ -382,6 +382,7 @@ const SectionRenderer = React.memo(({
                           isAdmin={isAdmin}
                           onHover={onHover}
                           onEdit={isAdmin ? onEdit : undefined}
+                          statusColors={STATUS_COLORS}
                         />
                     ) : sectionKey === '2' ? (
                         <div className="flex justify-center overflow-x-auto">
