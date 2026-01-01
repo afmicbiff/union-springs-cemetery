@@ -71,6 +71,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Failed to upload optimized images' }, { status: 500 });
     }
 
+    // Attempt to read basic dimensions via browser Image decoder substitute (optional best-effort)
+    let width = 0, height = 0;
+    try {
+      // Use Web Image Decoder in future; for now, keep placeholders
+      width = 0; height = 0;
+    } catch {}
+
+
     // We don't reliably have dimensions here; store 0 as placeholder
     let imageRecord;
     if (mode === 'overwrite' && imageId) {
