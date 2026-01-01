@@ -44,6 +44,19 @@ export default function ImageManager() {
     }
   };
 
+  const handleDownload = async (url, filename) => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename || 'download';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  };
+
   if (!user) {
     return (
       <div className="max-w-5xl mx-auto p-6">
