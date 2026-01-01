@@ -48,6 +48,10 @@ Deno.serve(async (req) => {
       convert('to/webp')
     ]);
 
+    const originalSize = input.byteLength;
+    const jpegSize = jpegBytes.byteLength;
+    const webpSize = webpBytes.byteLength;
+
     // Upload optimized files back to storage
     const jpegFile = new File([jpegBytes], `img-${Date.now()}.jpg`, { type: 'image/jpeg' });
     const webpFile = new File([webpBytes], `img-${Date.now()}.webp`, { type: 'image/webp' });
@@ -69,6 +73,9 @@ Deno.serve(async (req) => {
       alt_text: altText,
       width: 0,
       height: 0,
+      original_size: originalSize,
+      jpeg_size: jpegSize,
+      webp_size: webpSize,
     });
 
     return Response.json({

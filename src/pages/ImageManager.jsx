@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Image as ImageIcon, Loader2, Download } from 'lucide-react';
+import { Upload, Image as ImageIcon, Loader2, Download, Copy } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 
@@ -55,6 +55,19 @@ export default function ImageManager() {
     a.click();
     a.remove();
     URL.revokeObjectURL(objectUrl);
+  };
+
+  const handleCopy = async (text) => {
+    try { await navigator.clipboard.writeText(text); } catch {}
+  };
+
+  const formatBytes = (bytes) => {
+    if (!bytes && bytes !== 0) return '';
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 B';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const val = bytes / Math.pow(1024, i);
+    return `${val.toFixed(val >= 10 ? 0 : 1)} ${sizes[i]}`;
   };
 
   if (!user) {
@@ -120,12 +133,21 @@ export default function ImageManager() {
                         <img src={img.jpeg_url} alt={img.alt_text || ''} className="w-full h-48 object-cover rounded" loading="lazy"/>
                       </picture>
                     </div>
-                    <div className="p-3 space-y-2 text-sm">
+                    <div className="p-3 space-y-3 text-sm">
                       <div className="text-stone-700">{img.alt_text || '—'}</div>
-                      <div className="text-stone-500">{img.width}×{img.height}px</div>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleDownload(img.webp_url, `image-${img.id}.webp`)} className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> WebP</button>
-                        <button onClick={() => handleDownload(img.jpeg_url, `image-${img.id}.jpg`)} className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> JPEG</button>
+                      {(img.width > 0 && img.height > 0) && (
+                        <div className="text-stone-500">{img.width}×{img.height}px</div>
+                      )}
+                      <div className="grid grid-cols-3 gap-2 text-xs text-stone-600">
+                        <div><span className="font-medium text-stone-700">Original:</span> {formatBytes(img.original_size) || '—'}</div>
+                        <div><span className="font-medium text-stone-700">WebP:</span> {formatBytes(img.webp_size) || '—'}</div>
+                        <div><span className="font-medium text-stone-700">JPEG:</span> {formatBytes(img.jpeg_size) || '—'}</div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        <Button variant="outline" size="sm" onClick={() => handleDownload(img.webp_url, `image-${img.id}.webp`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> WebP</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDownload(img.jpeg_url, `image-${img.id}.jpg`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> JPEG</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleCopy(img.webp_url)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy WebP URL</Button>
+                        <Button variant="outline" size="sm" onClick={() => handleCopy(`<picture>\n  <source srcset='${img.webp_url}' type='image/webp' />\n  <img src='${img.jpeg_url}' alt='${(img.alt_text||'').replace(/'/g, "&#39;")}'${(img.width>0&&img.height>0)?` width='${img.width}' height='${img.height}'`:''} />\n</picture>`)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy HTML</Button>
                       </div>
                     </div>
                   </div>
