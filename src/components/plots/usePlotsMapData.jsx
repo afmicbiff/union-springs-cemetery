@@ -18,12 +18,19 @@ function buildSectionFilter(sectionsToLoad) {
     .filter(Boolean);
   // Support both raw numbers ("5") and prefixed values ("Section 5")
   const withPrefixes = normalized.map((n) => `Section ${n}`);
-  return {
-    $or: [
-      { section: { $in: normalized } },
-      { section: { $in: withPrefixes } },
-    ],
-  };
+
+  const orClauses = [
+    { section: { $in: normalized } },
+    { section: { $in: withPrefixes } },
+  ];
+
+  // Ensure Section 4 also pulls 513–542 regardless of recorded section (data hygiene fallback)
+  if (normalized.includes('4')) {
+    const seq = Array.from({ length: 542 - 513 + 1 }, (_, i) => String(513 + i));
+    orClauses.push({ plot_number: { $in: seq } });
+  }
+
+  return { $or: orClauses };
 }
 
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
