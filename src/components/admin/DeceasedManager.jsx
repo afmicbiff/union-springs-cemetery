@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Search, Plus, Pencil, Flag, Loader2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import PaginationControls from "@/components/ui/PaginationControls";
-import DeceasedEditDialog from './DeceasedEditDialog';
+const DeceasedEditDialog = React.lazy(() => import('./DeceasedEditDialog'));
 import AdvancedDateFilter from "@/components/common/AdvancedDateFilter";
 import SavedSearchManager from "@/components/common/SavedSearchManager";
 
@@ -47,7 +47,30 @@ export default function DeceasedManager() {
             });
             return response.data;
         },
-        placeholderData: keepPreviousData
+        placeholderData: keepPreviousData,
+        staleTime: 5 * 60_000,
+        gcTime: 15 * 60_000,
+        refetchOnWindowFocus: false,
+        select: (data) => {
+            if (!data) return data;
+            return {
+                ...data,
+                results: (data.results || []).map(r => ({
+                    id: r.id,
+                    first_name: r.first_name,
+                    last_name: r.last_name,
+                    family_name: r.family_name,
+                    date_of_birth: r.date_of_birth,
+                    date_of_death: r.date_of_death,
+                    plot_location: r.plot_location,
+                    entity_type: r.entity_type,
+                    burial_type: r.burial_type,
+                    veteran_status: r.veteran_status,
+                    status: r.status,
+                    obituary: !!r.obituary,
+                })),
+            };
+        },
     });
 
     const handleApplySavedSearch = (filters) => {
@@ -70,13 +93,16 @@ export default function DeceasedManager() {
         ...dateFilters
     };
 
-    const filteredList = (searchResults?.results || []).sort((a, b) => {
-        const nameA = (a.last_name || '').toLowerCase();
-        const nameB = (b.last_name || '').toLowerCase();
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
-        return 0;
-    });
+    const filteredList = useMemo(() => {
+        const arr = searchResults?.results || [];
+        return arr.slice().sort((a, b) => {
+            const nameA = (a.last_name || '').toLowerCase();
+            const nameB = (b.last_name || '').toLowerCase();
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+        });
+    }, [searchResults?.results]);
 
     const handleEdit = (record) => {
         setSelectedDeceased(record);
@@ -317,12 +343,14 @@ export default function DeceasedManager() {
                         )}
                         </CardContent>
 
-            <DeceasedEditDialog 
-                isOpen={isEditOpen} 
-                onClose={() => setIsEditOpen(false)} 
-                deceased={selectedDeceased} 
-                mode={mode} 
-            />
+            <React.Suspense fallback={null}>
+                <DeceasedEditDialog 
+                    isOpen={isEditOpen} 
+                    onClose={() => setIsEditOpen(false)} 
+                    deceased={selectedDeceased} 
+                    mode={mode} 
+                />
+            </React.Suspense>
         </Card>
     );
 }
