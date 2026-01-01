@@ -32,17 +32,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Cloudmersive API key not configured' }, { status: 500 });
     }
 
-    async function convert(endpointBase, quality) {
+    async function convert(endpointBase, _quality) {
       const form = new FormData();
       form.append('imageFile', new Blob([input], { type: 'application/octet-stream' }), 'upload.bin');
-      const endpoint = quality ? `${endpointBase}/${quality}` : endpointBase;
+      const endpoint = endpointBase; // Use default quality; some endpoints do not accept path quality
       const r = await fetch(`https://api.cloudmersive.com/image/convert/${endpoint}`, {
         method: 'POST',
         headers: { 'Apikey': apiKey },
         body: form
       });
       if (!r.ok) {
-        throw new Error(`Cloudmersive ${endpoint} failed (${r.status})`);
+        const text = await r.text().catch(()=> '');
+        throw new Error(`Cloudmersive ${endpoint} failed (${r.status}) ${text}`);
       }
       const ab = await r.arrayBuffer();
       return new Uint8Array(ab);
