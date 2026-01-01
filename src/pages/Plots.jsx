@@ -1260,7 +1260,13 @@ export default function PlotsPage() {
           family_name: updatedPlot['Family Name'],
           birth_date: updatedPlot.Birth,
           death_date: updatedPlot.Death,
-          notes: updatedPlot.Notes
+          notes: updatedPlot.Notes,
+          capacity: updatedPlot.capacity,
+          current_occupancy: updatedPlot.current_occupancy,
+          burial_type: updatedPlot.burial_type,
+          burial_type_options: updatedPlot.burial_type_options,
+          container_type: updatedPlot.container_type,
+          liner_vault_options: updatedPlot.liner_vault_options
       };
       updatePlotMutation.mutate({ id: updatedPlot._id, data: entityData });
   }, [updatePlotMutation]);
