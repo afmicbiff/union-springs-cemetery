@@ -656,7 +656,10 @@ export default function PlotsPage() {
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': true, '2': false, '3': false, '4': true, '5': false });
-  const openSections = useMemo(() => Object.keys(collapsedSections).filter((k) => !collapsedSections[k]), [collapsedSections]);
+  const openSections = useMemo(() => {
+    const open = Object.keys(collapsedSections).filter((k) => !collapsedSections[k]);
+    return open.includes('4') ? open : [...open, '4'];
+  }, [collapsedSections]);
   const [expandedSections, setExpandedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
