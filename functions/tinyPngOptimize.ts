@@ -43,9 +43,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'TinyPNG did not return a Location header' }, { status: 502 });
     }
 
-    // 2) Directly pass TinyPNG output URL to our optimizer (no intermediate download)
+    // 2) Download TinyPNG output (requires Authorization) and upload to storage
+    const compFetch = await fetch(compressedUrl, { headers: { Authorization: auth } });
+    if (!compFetch.ok) {
+      const t = await compFetch.text();
+      return Response.json({ error: 'Failed to download TinyPNG output', details: t }, { status: 502 });
+    }
+    const compBuf = new Uint8Array(await compFetch.arrayBuffer());
+
+    const ext = compressedMime.includes('png') ? '.png' : (compressedMime.includes('jpeg') ? '.jpg' : '.img');
+    const filename = `compressed-${Date.now()}${ext}`;
+    const compressedFile = new File([compBuf], filename, { type: compressedMime });
+    const upload = await base44.integrations.Core.UploadFile({ file: compressedFile });
+    const compressedFileUrl = upload?.file_url;
+    if (!compressedFileUrl) {
+      return Response.json({ error: 'Failed to upload compressed file' }, { status: 500 });
+    }
+
+    // 3) Optimize variants using our existing function with a public URL
     const optimizeResp = await base44.functions.invoke('optimizeImage', {
-      file_url: compressedUrl,
+      file_url: compressedFileUrl,
       alt_text,
       quality_jpeg,
       quality_webp,
