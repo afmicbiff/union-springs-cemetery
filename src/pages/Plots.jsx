@@ -1133,12 +1133,15 @@ export default function PlotsPage() {
           attempts += 1;
 
           if (!isNaN(plotNum) && sectionNorm) {
-              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
+              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`) || document.querySelector(`[id^="plot-${sectionNorm}-"][id$="-${plotNum}"]`);
               if (!plotEl) {
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
                   plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                  // Force highlight class for 30s
+                  plotEl.classList.add('blink-strong-green');
+                  setTimeout(() => plotEl.classList.remove('blink-strong-green'), 30000);
                   done = true;
                   setTimeout(() => setIsCentering(false), 400);
                   return;
