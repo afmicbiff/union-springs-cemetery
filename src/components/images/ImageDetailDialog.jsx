@@ -175,3 +175,61 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
     </Dialog>
   );
 }
+
+function UsageSection({ image, open }) {
+  const { data: matches = [], isLoading: scanning } = useQuery({
+    queryKey: ['scan-usage', image?.id],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('scanImageUsage', { image_id: image.id });
+      return res.data?.matches || [];
+    },
+    enabled: !!image?.id && open,
+    staleTime: 60_000,
+  });
+
+  const { data: activity = [] } = useQuery({
+    queryKey: ['image-activity', image?.id],
+    queryFn: async () => {
+      const logs = await base44.entities.ImageUsage.filter({ image_id: image.id }, '-timestamp', 10);
+      return logs || [];
+    },
+    enabled: !!image?.id && open,
+    staleTime: 30_000,
+  });
+
+  return (
+    <div className="mt-2 space-y-3">
+      <div>
+        <h4 className="text-sm font-medium">Usage across site</h4>
+        {scanning ? (
+          <div className="text-xs text-stone-500 mt-1 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin"/>Scanning…</div>
+        ) : matches.length === 0 ? (
+          <div className="text-xs text-stone-500 mt-1">No direct references found yet.</div>
+        ) : (
+          <ul className="mt-1 space-y-1 text-xs">
+            {matches.map((m, i) => (
+              <li key={i} className="text-stone-700">
+                <span className="font-medium">{m.entity}</span> #{m.id} {m.label ? `(${m.label})` : ''} • fields: {Array.isArray(m.fields) ? m.fields.join(', ') : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <h4 className="text-sm font-medium">Recent activity</h4>
+        {activity.length === 0 ? (
+          <div className="text-xs text-stone-500 mt-1">No recent interactions logged.</div>
+        ) : (
+          <ul className="mt-1 space-y-1 text-xs">
+            {activity.map((a) => (
+              <li key={a.id} className="text-stone-700">
+                {new Date(a.timestamp || a.created_date || Date.now()).toLocaleString()} • {a.action} {a.page_or_component ? `from ${a.page_or_component}` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
