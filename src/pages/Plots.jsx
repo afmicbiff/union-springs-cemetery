@@ -897,7 +897,7 @@ export default function PlotsPage() {
 
     // MAP ENTITIES TO UI FORMAT
   const parsedData = useMemo(() => {
-      return (plotEntities || []).map((p) => ({
+      const arr = (plotEntities || []).map((p) => ({
         _id: p.id,
         _entity: 'Plot',
         Section: p.section,
@@ -910,8 +910,13 @@ export default function PlotsPage() {
         Birth: p.birth_date,
         Death: p.death_date,
         Notes: p.notes || '',
+        photo_url: p.photo_url,
+        photo_url_small: p.photo_url_small,
+        photo_url_medium: p.photo_url_medium,
+        photo_url_large: p.photo_url_large,
         ...p,
       })).filter(r => r.Grave);
+      return arr;
   }, [plotEntities]);
 
   // Filtered Data Computation
