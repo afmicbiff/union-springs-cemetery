@@ -46,12 +46,12 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   );
 
   return useQuery({
-    queryKey: ["plotsMap_v3", { tab: activeTab, sectionsKey }],
-    enabled: activeTab === "map" && sectionsToLoad.length > 0,
-    staleTime: 15 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-    queryFn: async ({ signal }) => {
+          queryKey: ["plotsMap_v3", { tab: activeTab, sectionsKey, ts: Date.now() }],
+          enabled: activeTab === "map" && sectionsToLoad.length > 0,
+          staleTime: 0,
+          gcTime: 0,
+          refetchOnWindowFocus: true,
+          queryFn: async ({ signal }) => {
       const sectionFilter = buildSectionFilter(sectionsToLoad);
 
       // 1 call total (Plot only)
