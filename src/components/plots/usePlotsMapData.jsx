@@ -46,7 +46,7 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   );
 
   return useQuery({
-    queryKey: ["plotsMap", { tab: activeTab, sectionsKey }],
+    queryKey: ["plotsMap_v2", { tab: activeTab, sectionsKey }],
     enabled: activeTab === "map" && sectionsToLoad.length > 0,
     staleTime: 15 * 60_000,
     gcTime: 30 * 60_000,
