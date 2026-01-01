@@ -11,6 +11,7 @@ import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import Section1DnDGrid from "@/components/plots/Section1DnDGrid";
+import Section2DnDGrid from "@/components/plots/Section2DnDGrid";
 import {
   DropdownMenu,
   DropdownMenuContent,
