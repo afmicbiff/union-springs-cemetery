@@ -139,13 +139,13 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => handleDownload(image.webp_url, `${filename.replace(/\.[^.]+$/, '')}.webp`)}>
+              <Button variant="outline" size="sm" onClick={() => handleDownload(image.webp_url, `${filename.replace(/\.[^.]+$/, '')}.webp`, 'download_webp')}>
                 <Download className="w-4 h-4 mr-1"/> Download WebP
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleDownload(image.jpeg_url, `${filename.replace(/\.[^.]+$/, '')}.jpg`)}>
+              <Button variant="outline" size="sm" onClick={() => handleDownload(image.jpeg_url, `${filename.replace(/\.[^.]+$/, '')}.jpg`, 'download_jpeg')}>
                 <Download className="w-4 h-4 mr-1"/> Download JPEG
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleCopy(image.webp_url)}>
+              <Button variant="outline" size="sm" onClick={() => handleCopy(image.webp_url, 'copy_url')}>
                 <Copy className="w-4 h-4 mr-1"/> Copy WebP URL
               </Button>
               <Button variant="outline" size="sm" onClick={copyHTML}>
