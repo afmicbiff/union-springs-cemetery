@@ -710,6 +710,11 @@ export default function PlotsPage() {
             filterEntity,
           });
 
+  // Force refetch to avoid stale cache when adjusting grouping/sorting logic
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["plotsMap_v3"] });
+  }, [queryClient, activeTab, openSections]);
+
   // MUTATIONS
   const updatePlotMutation = useMutation({
       mutationFn: async ({ id, data }) => {
