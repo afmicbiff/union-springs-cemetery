@@ -1,6 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
 import Fuse from 'npm:fuse.js@^7.0.0';
 
+const CACHE_TTL_MS = 60_000;
+const __cache = new Map();
+
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -20,6 +23,14 @@ export default Deno.serve(async (req) => {
         
         const pageNum = Math.max(1, parseInt(page));
         const limitNum = Math.max(1, parseInt(limit));
+
+        // Simple in-memory cache to reduce repeated heavy queries
+        const cacheKey = JSON.stringify({ query, family_name, section, birth_year_min, birth_year_max, death_year_min, death_year_max, veteran_status, status_filter, page: pageNum, limit: limitNum });
+        const now = Date.now();
+        const cached = __cache.get(cacheKey);
+        if (cached && (now - cached.t) < CACHE_TTL_MS) {
+            return Response.json(cached.data);
+        }
 
         // Fetch only what's needed (reduce load)
         let allDeceased = [];
@@ -174,25 +185,34 @@ export default Deno.serve(async (req) => {
             return true;
         });
 
-        // 2. Apply Fuzzy Search if query exists
-        if (query) {
-            const fuse = new Fuse(filtered, {
-                keys: [
-                    { name: 'first_name', weight: 0.3 },
-                    { name: 'last_name', weight: 0.4 },
-                    { name: 'family_name', weight: 0.2 },
-                    { name: 'plot_location', weight: 0.3 },
-                    { name: 'obituary', weight: 0.1 },
-                    { name: 'notes', weight: 0.1 }
-                ],
-                threshold: 0.4, // Match algorithm sensitivity (0.0 = perfect match, 1.0 = match anything)
-                distance: 100,
-                includeScore: true
-            });
-
-            const fuzzyResults = fuse.search(query);
-            // Fuse returns { item, score, ... }. map back to item
-            filtered = fuzzyResults.map(result => result.item);
+        // 2. Apply Fuzzy Search if query exists (guard for huge datasets)
+        if (query && String(query).trim().length >= 2) {
+            if (filtered.length <= 5000) {
+                const fuse = new Fuse(filtered, {
+                    keys: [
+                        { name: 'first_name', weight: 0.3 },
+                        { name: 'last_name', weight: 0.4 },
+                        { name: 'family_name', weight: 0.2 },
+                        { name: 'plot_location', weight: 0.3 },
+                        { name: 'obituary', weight: 0.1 },
+                        { name: 'notes', weight: 0.1 }
+                    ],
+                    threshold: 0.4,
+                    distance: 100,
+                    includeScore: false
+                });
+                filtered = fuse.search(String(query)).map(r => r.item);
+            } else {
+                const q = String(query).toLowerCase();
+                filtered = filtered.filter(r => (
+                    (r.first_name && r.first_name.toLowerCase().includes(q)) ||
+                    (r.last_name && r.last_name.toLowerCase().includes(q)) ||
+                    (r.family_name && r.family_name.toLowerCase().includes(q)) ||
+                    (r.plot_location && r.plot_location.toLowerCase().includes(q)) ||
+                    (r.obituary && r.obituary.toLowerCase().includes(q)) ||
+                    (r.notes && String(r.notes).toLowerCase().includes(q))
+                ));
+            }
         }
 
         // Veteran Status logic was moved up to pre-filtering
@@ -208,7 +228,7 @@ export default Deno.serve(async (req) => {
         const startIndex = (pageNum - 1) * limitNum;
         const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
 
-        return Response.json({ 
+        const payload = { 
             results: paginatedResults,
             pagination: {
                 total,
@@ -226,7 +246,9 @@ export default Deno.serve(async (req) => {
                 total_unknown: unknownPlots.length,
                 raw_total: allDeceased.length
             }
-        });
+        };
+        __cache.set(cacheKey, { t: now, data: payload });
+        return Response.json(payload);
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
     }
