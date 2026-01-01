@@ -1117,6 +1117,10 @@ export default function PlotsPage() {
       setIsCentering(true);
 
       const sectionNorm = rawSection.replace(/Section\s*/i, '').trim();
+      // Ensure the target section is expanded before searching for the plot element
+      if (sectionNorm) {
+        setCollapsedSections(prev => ({ ...prev, [sectionNorm]: false }));
+      }
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
