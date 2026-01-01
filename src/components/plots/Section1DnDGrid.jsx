@@ -7,7 +7,7 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit }) {
+export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit, statusColors }) {
   // Build grid dimensions from numeric graves
   const nums = React.useMemo(() => (
     (plots || [])
@@ -19,6 +19,17 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
   const cols = 8;
   const perCol = Math.max(1, Math.ceil(maxNum / cols));
   const total = cols * perCol;
+
+  // Text colors to mimic legend semantics on numbers
+  const STATUS_TEXT = {
+    Available: 'text-green-700',
+    Reserved: 'text-yellow-700',
+    Occupied: 'text-red-700',
+    Veteran: 'text-blue-700',
+    Unavailable: 'text-gray-700',
+    Unknown: 'text-purple-700',
+    Default: 'text-gray-700',
+  };
 
   // We keep local layout state (cell -> plot object or null). No persistence.
   const layoutKey = React.useMemo(() => {
@@ -49,7 +60,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
           const n = parseNum(p.Grave);
           return n && n >= start && n <= end;
         })
-        .sort((a, b) => (parseNum(b.Grave) || 0) - (parseNum(a.Grave) || 0)); // descending (bottom-up)
+        .sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0)); // ascending -> 1 at bottom
 
       colPlots.forEach((plot, idx) => {
         const row = perCol - 1 - idx; // bottom-up placement
