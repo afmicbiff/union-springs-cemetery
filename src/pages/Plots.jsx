@@ -40,9 +40,21 @@ const SECTION_PALETTES = [
   'bg-blue-100 border-blue-300 text-blue-900',         // Section 2
   'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
   'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
-  'bg-cyan-100 border-cyan-300 text-cyan-900',      // Section 5
+  'bg-purple-100 border-purple-300 text-purple-900',// Section 5 (purple)
   'bg-lime-100 border-lime-300 text-lime-900',
 ];
+
+// Stable palette by section key
+const getSectionPalette = (key) => {
+  switch (String(key)) {
+    case '1': return 'bg-blue-100 border-blue-300 text-blue-900';
+    case '2': return 'bg-blue-100 border-blue-300 text-blue-900';
+    case '3': return 'bg-rose-100 border-rose-300 text-rose-900';
+    case '4': return 'bg-amber-100 border-amber-300 text-amber-900';
+    case '5': return 'bg-purple-100 border-purple-300 text-purple-900';
+    default:  return 'bg-lime-100 border-lime-300 text-lime-900';
+  }
+};
 
 const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
 1,A-1,Available,,,,,,,,Section 1
@@ -647,12 +659,12 @@ const SectionRenderer = React.memo(({
                                 (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
 
                                 const mapped = columns.map((plots, idx) => (
-                                    <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
+                                    <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2">
                                         {plots.map((plot, pIdx) => (
                                             <GravePlot
                                                 key={plot._id || `s5-${idx}-${pIdx}`}
                                                 data={plot}
-                                  computedSectionKey={sectionKey}
+                                                computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin && !plot.isSpacer ? onEdit : undefined}
@@ -663,12 +675,12 @@ const SectionRenderer = React.memo(({
 
                                 const { unplaced } = getUnplacedForSection('5', plots);
                                 const fallbackCol = (
-                                    <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                    <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-purple-200 pl-2">
                                         {unplaced.map((plot, pIdx) => (
                                             <GravePlot
                                                 key={plot._id || `u5-${pIdx}`}
                                                 data={plot}
-                                  computedSectionKey={sectionKey}
+                                                computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin ? onEdit : undefined}
@@ -1438,7 +1450,7 @@ export default function PlotsPage() {
                         if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
                         return b.localeCompare(a);
                     }).map((sectionKey, index) => {
-                        const palette = SECTION_PALETTES[index % SECTION_PALETTES.length];
+                        const palette = getSectionPalette(sectionKey);
                         
                         return (
                             <SectionRenderer
