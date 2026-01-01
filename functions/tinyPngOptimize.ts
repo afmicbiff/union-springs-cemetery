@@ -30,8 +30,15 @@ Deno.serve(async (req) => {
     });
 
     if (!shrinkRes.ok) {
-      const details = await shrinkRes.text();
-      return Response.json({ error: 'TinyPNG shrink failed', details }, { status: 502 });
+      // Fallback: TinyPNG couldn't process (unsupported type, etc.) → run our optimizer directly
+      const optimizeResp = await base44.functions.invoke('optimizeImage', {
+        file_url,
+        alt_text,
+        quality_jpeg,
+        quality_webp,
+        mode
+      });
+      return Response.json({ ...optimizeResp.data, fallback: 'direct_optimize' });
     }
 
     const shrinkJson = await shrinkRes.json().catch(() => null);
