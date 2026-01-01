@@ -54,7 +54,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
 
   const [cells, setCells] = React.useState(buildInitial);
   const [dragging, setDragging] = React.useState(false);
-  React.useEffect(() => { setCells(buildInitial()); }, [buildInitial]);
+  const [history, setHistory] = React.useState([]);
+  React.useEffect(() => { setCells(buildInitial()); setHistory([]); }, [buildInitial]);
 
   const onDragEnd = (result) => {
     const { source, destination, draggableId } = result || {};
@@ -67,6 +68,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     if (sIdx === dIdx) return;
 
     setCells(prev => {
+      setHistory((h) => [...h, prev]);
       const next = [...prev];
       const item = next[sIdx];
       const destItem = next[dIdx] || null;
@@ -76,8 +78,22 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     });
   };
 
+  const undoLast = React.useCallback(() => {
+    setHistory((prev) => {
+      if (!prev.length) return prev;
+      const last = prev[prev.length - 1];
+      setCells(last);
+      return prev.slice(0, -1);
+    });
+  }, []);
+
   return (
-    <div className={`flex justify-center overflow-x-auto pb-2 ${dragging ? 'select-none cursor-grabbing' : ''}`}>
+    <div className={`flex flex-col items-stretch overflow-x-auto pb-2 ${dragging ? 'select-none cursor-grabbing' : ''}`}>
+      <div className="flex items-center justify-end mb-2 pr-2">
+        <button type="button" onClick={undoLast} disabled={!isAdmin || history.length === 0} className="self-end text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed" title="Undo last move">
+          Undo
+        </button>
+      </div>
       <DragDropContext onDragStart={() => setDragging(true)} onDragEnd={(res) => { if (isAdmin) onDragEnd(res); setDragging(false); }}>
         <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
           {Array.from({ length: cols * perCol }).map((_, idx) => {
@@ -99,7 +115,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
             return (
               <Droppable key={droppableId} droppableId={droppableId} isDropDisabled={!isAdmin} isCombineEnabled={false}>
                 {(provided, snapshot) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className="flex">
+                  <div ref={provided.innerRef} {...provided.droppableProps} className={`flex ${snapshot.isDraggingOver ? 'ring-2 ring-teal-500 ring-offset-2 rounded-[2px]' : ''}`}>
                     {item ? (
                       <Draggable draggableId={`s2-${item._id || item.id || idx}`} index={0} isDragDisabled={!isAdmin}>
                         {(draggableProvided, draggableSnapshot) => (
@@ -114,7 +130,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                               if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
                             }}
                           >
-                            <CellWrapper active={draggableSnapshot.isDragging}>
+                            <CellWrapper active={draggableSnapshot.isDragging || snapshot.isDraggingOver}>
                               <div className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-pointer transform-gpu will-change-transform">
                                 <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                                 <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
@@ -126,7 +142,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                       </Draggable>
                     ) : (
                       // Placeholder cell: remain blank, but is droppable (including bottom row r===0)
-                      <CellWrapper active={false}>
+                      <CellWrapper active={snapshot.isDraggingOver}>
                         <div className="w-full h-full" />
                       </CellWrapper>
                     )}

@@ -38,12 +38,14 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
   }, [plots]);
 
   const [cells, setCells] = React.useState(Array(total).fill(null));
+  const [history, setHistory] = React.useState([]);
   const [readyForKey, setReadyForKey] = React.useState("");
 
   // Initialize grid so it mirrors existing Section 1 visual: numbers split into 8 columns, descending within each column.
   React.useEffect(() => {
     if (!plots || !plots.length) {
       setCells(Array(total).fill(null));
+      setHistory([]);
       setReadyForKey(layoutKey);
       return;
     }
@@ -73,6 +75,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     }
 
     setCells(nextCells);
+    setHistory([]);
     setReadyForKey(layoutKey);
   }, [plots, cols, perCol, maxNum, layoutKey, readyForKey, total]);
 
@@ -95,6 +98,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     const di = d.c * perCol + d.r;
 
     setCells((prev) => {
+      setHistory((h) => [...h, prev]);
       const next = [...prev];
       const a = next[si] || null;
       const b = next[di] || null;
@@ -124,7 +128,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
             {...dropProvided.droppableProps}
             className={
               `w-16 h-8 m-0.5 rounded-[1px] relative ` +
-              (dropSnapshot.isDraggingOver ? "ring-2 ring-blue-400 ring-offset-2 " : "")
+              (dropSnapshot.isDraggingOver ? "ring-2 ring-teal-500 ring-offset-2 bg-teal-50/40 " : "")
             }
           >
             {item ? (
@@ -183,6 +187,17 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
 
   return (
     <DragDropContext onDragEnd={isAdmin ? onDragEnd : () => {}}>
+      <div className="flex items-center justify-end mb-2 pr-2">
+        <button
+          type="button"
+          onClick={undoLast}
+          disabled={!isAdmin || history.length === 0}
+          className="text-xs px-2 py-1 rounded border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          title="Undo last move"
+        >
+          Undo
+        </button>
+      </div>
       <div className="flex gap-4 justify-center overflow-x-auto pb-2">
         {Array.from({ length: cols }).map((_, c) => (
           <div key={c} className="flex flex-col gap-1 justify-end">
