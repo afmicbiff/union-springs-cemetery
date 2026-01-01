@@ -21,11 +21,25 @@ export default Deno.serve(async (req) => {
         const pageNum = Math.max(1, parseInt(page));
         const limitNum = Math.max(1, parseInt(limit));
 
-        // Fetch all records
-        const [allDeceased, allPlots] = await Promise.all([
-            base44.asServiceRole.entities.Deceased.list('-created_date', 10000),
-            base44.asServiceRole.entities.Plot.list(null, 10000)
-        ]);
+        // Fetch only what's needed (reduce load)
+        let allDeceased = [];
+        let allPlots = [];
+
+        if (!status_filter || status_filter === 'Deceased') {
+            allDeceased = await base44.asServiceRole.entities.Deceased.list('-created_date', 10000);
+        } else if (['Reserved','Available','Unknown'].includes(status_filter)) {
+            allPlots = await base44.asServiceRole.entities.Plot.filter({ status: status_filter }, '-created_date', 10000);
+        } else if (status_filter === 'Not Usable') {
+            allPlots = await base44.asServiceRole.entities.Plot.filter({ status: { $in: ['Not Usable','Unavailable'] } }, '-created_date', 10000);
+        } else if (status_filter === 'Veteran') {
+            allDeceased = await base44.asServiceRole.entities.Deceased.filter({ veteran_status: true }, '-created_date', 10000);
+            allPlots = await base44.asServiceRole.entities.Plot.filter({ status: 'Veteran' }, '-created_date', 10000);
+        } else if (status_filter === 'All') {
+            allDeceased = await base44.asServiceRole.entities.Deceased.list('-created_date', 10000);
+            allPlots = await base44.asServiceRole.entities.Plot.filter({ status: { $in: ['Reserved','Available','Not Usable','Unavailable','Unknown','Veteran'] } }, '-created_date', 10000);
+        } else {
+            allDeceased = await base44.asServiceRole.entities.Deceased.list('-created_date', 10000);
+        }
 
         // Helper to format plot location
         const formatPlotLoc = (p) => {
