@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import sharp from 'npm:sharp@0.33.4';
 
 Deno.serve(async (req) => {
   try {
@@ -21,22 +20,37 @@ Deno.serve(async (req) => {
     if (!res.ok) {
       return Response.json({ error: `Failed to fetch original image (${res.status})` }, { status: 400 });
     }
-    const arrBuf = await res.arrayBuffer();
-    const input = new Uint8Array(arrBuf);
+    const input = new Uint8Array(await res.arrayBuffer());
 
-    // Read metadata for dimensions
-    const meta = await sharp(input).metadata();
-    const width = meta.width || 0;
-    const height = meta.height || 0;
+    // Use Cloudmersive API for conversion (works on this platform)
+    const apiKey = Deno.env.get('CLOUDMERSIVE_API_KEY');
+    if (!apiKey) {
+      return Response.json({ error: 'Cloudmersive API key not configured' }, { status: 500 });
+    }
 
-    // Generate JPEG (quality 80, mozjpeg)
-    const jpegBuffer = await sharp(input).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
-    // Generate WebP (quality 80)
-    const webpBuffer = await sharp(input).webp({ quality: 80 }).toBuffer();
+    async function convert(endpoint) {
+      const form = new FormData();
+      form.append('imageFile', new Blob([input], { type: 'application/octet-stream' }), 'upload.bin');
+      const r = await fetch(`https://api.cloudmersive.com/image/convert/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Apikey': apiKey },
+        body: form
+      });
+      if (!r.ok) {
+        throw new Error(`Cloudmersive ${endpoint} failed (${r.status})`);
+      }
+      const ab = await r.arrayBuffer();
+      return new Uint8Array(ab);
+    }
+
+    const [jpegBytes, webpBytes] = await Promise.all([
+      convert('to/jpg'),
+      convert('to/webp')
+    ]);
 
     // Upload optimized files back to storage
-    const jpegFile = new File([jpegBuffer], `img-${Date.now()}.jpg`, { type: 'image/jpeg' });
-    const webpFile = new File([webpBuffer], `img-${Date.now()}.webp`, { type: 'image/webp' });
+    const jpegFile = new File([jpegBytes], `img-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const webpFile = new File([webpBytes], `img-${Date.now()}.webp`, { type: 'image/webp' });
 
     const uploadedJpeg = await base44.integrations.Core.UploadFile({ file: jpegFile });
     const uploadedWebp = await base44.integrations.Core.UploadFile({ file: webpFile });
@@ -47,14 +61,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Failed to upload optimized images' }, { status: 500 });
     }
 
-    // Persist in Image entity
+    // We don't reliably have dimensions here; store 0 as placeholder
     const imageRecord = await base44.entities.Image.create({
       original_url: fileUrl,
       jpeg_url,
       webp_url,
       alt_text: altText,
-      width,
-      height,
+      width: 0,
+      height: 0,
     });
 
     return Response.json({
