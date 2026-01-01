@@ -1340,7 +1340,8 @@ export default function PlotsPage() {
 
       {/* Main Area */}
       {activeTab === 'map' ? (
-          <>
+                      <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
+
             {/* Legend */}
             <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 sm:min-w-max">
@@ -1405,8 +1406,8 @@ export default function PlotsPage() {
                     )}
                 </div>
             </main>
-          </>
-      ) : (
+          </React.Suspense>
+          ) : (
           /* Data Table View */
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
               <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
