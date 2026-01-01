@@ -40,7 +40,7 @@ function buildSectionFilter(sectionsToLoad) {
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   const sectionsToLoad = useMemo(() => {
     if (activeTab !== "map") return [];
-    const fallback = ["5", "4"];
+    const fallback = ["1", "2", "3", "4", "5"];
     return openSections && openSections.length ? openSections : fallback;
   }, [openSections, activeTab]);
 
@@ -50,13 +50,13 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   );
 
   return useQuery({
-          queryKey: ["plotsMap_v3", { tab: activeTab, sectionsKey }],
-          enabled: activeTab === "map" && sectionsToLoad.length > 0,
+          queryKey: ["plotsMap_v3_all", { tab: activeTab }],
+          enabled: activeTab === "map",
           staleTime: 15 * 60_000,
           gcTime: 30 * 60_000,
           refetchOnWindowFocus: false,
           queryFn: async ({ signal }) => {
-      const sectionFilter = buildSectionFilter(sectionsToLoad);
+      const sectionFilter = {}; // fetch all plots in one request for instant hover data
 
       // 1 call total (Plot only)
       const plots = await filterEntity(
