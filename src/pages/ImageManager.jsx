@@ -47,6 +47,7 @@ export default function ImageManager() {
 
   const [altEdits, setAltEdits] = React.useState({});
   const [perImageQuality, setPerImageQuality] = React.useState({});
+        const [reoptLoading, setReoptLoading] = React.useState({});
 
   const handleUpload = async () => {
     if (!file) return;
@@ -80,8 +81,25 @@ export default function ImageManager() {
   };
 
   const handleCopy = async (text) => {
-    try { await navigator.clipboard.writeText(text); } catch {}
-  };
+            try {
+              await navigator.clipboard.writeText(text);
+              toast.success('Copied to clipboard');
+            } catch {
+              try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                toast.success('Copied to clipboard');
+              } catch (e) {
+                toast.error('Copy failed');
+              }
+            }
+          };
 
   const updateAlt = async (id, newAlt) => {
     await base44.entities.Image.update(id, { alt_text: newAlt || '' });
@@ -89,17 +107,26 @@ export default function ImageManager() {
   };
 
   const reOptimize = async (img, mode) => {
-    const q = perImageQuality[img.id] ?? 80;
-    await base44.functions.invoke('optimizeImage', {
-      file_url: img.original_url,
-      alt_text: img.alt_text || '',
-      quality_jpeg: q,
-      quality_webp: q,
-      mode,
-      image_id: img.id
-    });
-    qc.invalidateQueries({ queryKey: ['images'] });
-  };
+            const q = perImageQuality[img.id] ?? 80;
+            setReoptLoading(prev => ({ ...prev, [img.id]: true }));
+            try {
+              const res = await base44.functions.invoke('optimizeImage', {
+                file_url: img.original_url,
+                alt_text: img.alt_text || '',
+                quality_jpeg: q,
+                quality_webp: q,
+                mode,
+                image_id: img.id
+              });
+              if (res?.data?.error) throw new Error(res.data.error);
+              toast.success('Image re-optimized');
+              qc.invalidateQueries({ queryKey: ['images'] });
+            } catch (err) {
+              toast.error(`Re-optimization failed${err?.message ? `: ${err.message}` : ''}`);
+            } finally {
+              setReoptLoading(prev => ({ ...prev, [img.id]: false }));
+            }
+          };
 
   const deleteImage = async (id) => {
     if (!window.confirm('Delete this image from the library?')) return;
@@ -325,14 +352,18 @@ export default function ImageManager() {
                         <div><span className="font-medium text-stone-700">JPEG:</span> {formatBytes(img.jpeg_size) || '—'}</div>
                       </div>
                       <div className="pt-1">
-                        <Label className="text-xs text-stone-500">Compression quality</Label>
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <Slider value={[perImageQuality[img.id] ?? 80]} onValueChange={(v)=> setPerImageQuality(prev=>({ ...prev, [img.id]: v[0] }))} min={1} max={100} step={1} className="w-40" />
-                          <span className="text-xs text-stone-600">{perImageQuality[img.id] ?? 80}</span>
-                          <Button size="sm" className="h-8 px-2" onClick={() => reOptimize(img, 'overwrite')}>Re‑optimize (overwrite)</Button>
-                          <Button size="sm" variant="outline" className="h-8 px-2" onClick={() => reOptimize(img, 'new')}>Re‑optimize as new</Button>
-                        </div>
-                      </div>
+                                                    <Label className="text-xs text-stone-500">Compression quality</Label>
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                      <Slider value={[perImageQuality[img.id] ?? 80]} onValueChange={(v)=> setPerImageQuality(prev=>({ ...prev, [img.id]: v[0] }))} min={1} max={100} step={1} className="w-40" />
+                                                      <span className="text-xs text-stone-600">{perImageQuality[img.id] ?? 80}</span>
+                                                      <Button size="sm" className="h-8 px-2" disabled={!!reoptLoading[img.id]} onClick={() => reOptimize(img, 'overwrite')}>
+                                                        {reoptLoading[img.id] ? (<><Loader2 className="w-4 h-4 mr-1 animate-spin"/> Re‑optimizing…</>) : 'Re‑optimize (overwrite)'}
+                                                      </Button>
+                                                      <Button size="sm" variant="outline" className="h-8 px-2" disabled={!!reoptLoading[img.id]} onClick={() => reOptimize(img, 'new')}>
+                                                        {reoptLoading[img.id] ? (<><Loader2 className="w-4 h-4 mr-1 animate-spin"/> Re‑optimizing…</>) : 'Re‑optimize as new'}
+                                                      </Button>
+                                                    </div>
+                                                  </div>
 
                       <div className="flex flex-wrap gap-2 pt-2">
                         <Button variant="outline" size="sm" onClick={() => handleDownload(img.webp_url, `image-${img.id}.webp`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> WebP</Button>
