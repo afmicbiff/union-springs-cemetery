@@ -178,6 +178,8 @@ const Tooltip = React.memo(({ data, position, visible }) => {
             alt={`Plot ${data.Grave}`}
             width={288}
             height={128}
+            loading="lazy"
+            decoding="async"
             sizes="(max-width: 640px) 80vw, 288px"
             srcSetVariants={{
               small: data.photo_url_small,
