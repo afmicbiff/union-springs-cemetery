@@ -55,7 +55,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
           // Custom sequence: place 326–348 immediately to the right of the column with 267
           const seqStart = 326;
           const seqEnd = 348;
-          const anchorNum = 267;
+          const anchorNum = 268;
 
           const byNum = new Map();
           sorted.forEach((p) => {
