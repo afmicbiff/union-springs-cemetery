@@ -1213,51 +1213,17 @@ export default function PlotsPage() {
     }
   };
 
-  const detailsCache = useRef(new Map());
-  const handleHover = useCallback(async (e, data) => {
+  // detailsCache removed; data is prefetched in initial query
+  const handleHover = useCallback((e, data) => {
     if (!data) {
         setIsTooltipVisible(false);
         return;
     }
     const rect = e.target.getBoundingClientRect();
     setMousePos({ x: rect.right, y: rect.top });
-    // show minimal immediately
+    // Data already prefetched; just show instantly
     setHoverData(data);
     setIsTooltipVisible(true);
-
-    const id = data._id;
-    if (!id) return;
-
-    const cached = detailsCache.current.get(id);
-    if (cached && cached !== 'loading') {
-      setHoverData(prev => (prev && prev._id === id ? { ...prev, ...cached } : prev));
-      return;
-    }
-    if (cached === 'loading') return;
-
-    try {
-      detailsCache.current.set(id, 'loading');
-      const arr = await base44.entities.Plot.filter({ id }, '-updated_date', 1);
-      const full = Array.isArray(arr) ? arr[0] : arr;
-      if (full) {
-        const mapped = {
-          'First Name': full.first_name,
-          'Last Name': full.last_name,
-          'Family Name': full.family_name,
-          Birth: full.birth_date,
-          Death: full.death_date,
-          Notes: full.notes ?? data.Notes,
-          photo_url: full.photo_url,
-          photo_url_small: full.photo_url_small,
-          photo_url_medium: full.photo_url_medium,
-          photo_url_large: full.photo_url_large,
-        };
-        detailsCache.current.set(id, mapped);
-        setHoverData(prev => (prev && prev._id === id ? { ...prev, ...mapped } : prev));
-      }
-    } catch (_) {
-      // ignore
-    }
   }, []);
 
   const handleEditClick = useCallback((plot) => {

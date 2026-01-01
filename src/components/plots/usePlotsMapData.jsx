@@ -71,7 +71,16 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
             "row_number",
             "plot_number",
             "status",
-            "notes"
+            "notes",
+            "first_name",
+            "last_name",
+            "family_name",
+            "birth_date",
+            "death_date",
+            "photo_url",
+            "photo_url_small",
+            "photo_url_medium",
+            "photo_url_large"
           ],
           persist: false,
           ttlMs: 15 * 60_000,
