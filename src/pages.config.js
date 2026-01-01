@@ -6,6 +6,7 @@ import EmployeeProfile from './pages/EmployeeProfile';
 import Employees from './pages/Employees';
 import History from './pages/History';
 import Home from './pages/Home';
+import ImageGallery from './pages/ImageGallery';
 import ImageManager from './pages/ImageManager';
 import MemberPortal from './pages/MemberPortal';
 import Memorial from './pages/Memorial';
@@ -23,7 +24,6 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import ImageGallery from './pages/ImageGallery';
 import __Layout from './Layout.jsx';
 
 
@@ -36,6 +36,7 @@ export const PAGES = {
     "Employees": Employees,
     "History": History,
     "Home": Home,
+    "ImageGallery": ImageGallery,
     "ImageManager": ImageManager,
     "MemberPortal": MemberPortal,
     "Memorial": Memorial,
@@ -53,7 +54,6 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "ImageGallery": ImageGallery,
 }
 
 export const pagesConfig = {

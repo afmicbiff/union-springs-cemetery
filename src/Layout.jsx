@@ -172,6 +172,11 @@ export default function Layout({ children }) {
             {/* Logo / Title */}
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
 
+              <picture className="shrink-0">
+                <source srcSet="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dfd4d861f_img-1767265605524.webp" type="image/webp" />
+                <img src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/308ce6802_img-1767265605524.jpg" alt="logo" className="h-10 w-auto md:h-12" />
+              </picture>
+
               <div className="flex flex-col">
                 <span className="text-xl md:text-2xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
                 <span className="text-[0.65rem] md:text-xs text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery - Shongaloo, LA</span>
