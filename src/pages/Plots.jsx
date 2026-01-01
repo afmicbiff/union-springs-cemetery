@@ -417,13 +417,36 @@ const SectionRenderer = React.memo(({
                                         return num >= range.start && num <= range.end;
                                       })
                                       .sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
-                                    const plotsWithSpacers = [];
-                                    colPlots.forEach(plot => {
-                                      const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
-                                      if (spacers.includes(num)) plotsWithSpacers.push({ isSpacer: true, _id: `sp-${num}` });
-                                      plotsWithSpacers.push(plot);
-                                      renderedKeys.add(`${num}|${plot._id}`);
-                                    });
+                                    const plotsWithSpacers = (() => {
+                                      // Special handling for 326-348: ensure continuous sequence from 326 (bottom) up to 348 (top)
+                                      if (range.start === 326 && range.end === 348) {
+                                        const byNum = new Map();
+                                        colPlots.forEach(p => {
+                                          const n = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                          byNum.set(n, p);
+                                        });
+                                        const seq = [];
+                                        for (let n = 348; n >= 326; n--) {
+                                          const p = byNum.get(n);
+                                          if (p) {
+                                            seq.push(p);
+                                            renderedKeys.add(`${n}|${p._id}`);
+                                          } else {
+                                            seq.push({ isSpacer: true, _id: `sp-${n}` });
+                                          }
+                                        }
+                                        return seq;
+                                      }
+                                      // Default behavior for other ranges
+                                      const arr = [];
+                                      colPlots.forEach(plot => {
+                                        const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
+                                        if (spacers.includes(num)) arr.push({ isSpacer: true, _id: `sp-${num}` });
+                                        arr.push(plot);
+                                        renderedKeys.add(`${num}|${plot._id}`);
+                                      });
+                                      return arr;
+                                    })();
                                     return (
                                       <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
                                         {plotsWithSpacers.map((plot, pIdx) => (
