@@ -34,12 +34,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'TinyPNG shrink failed', details }, { status: 502 });
     }
 
-    const shrinkJson = await shrinkRes.json();
-    const compressedUrl = shrinkJson?.output?.url;
+    const shrinkJson = await shrinkRes.json().catch(() => null);
+    const headerUrl = shrinkRes.headers.get('Location') || shrinkRes.headers.get('location');
+    const compressedUrl = headerUrl || shrinkJson?.output?.url;
     const compressedMime = shrinkJson?.output?.type || 'application/octet-stream';
 
     if (!compressedUrl) {
-      return Response.json({ error: 'TinyPNG did not return output URL' }, { status: 502 });
+      return Response.json({ error: 'TinyPNG did not return a Location header' }, { status: 502 });
     }
 
     // 2) Directly pass TinyPNG output URL to our optimizer (no intermediate download)
