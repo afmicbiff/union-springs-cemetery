@@ -237,7 +237,8 @@ export default function ImageManager() {
             ) : images.length === 0 ? (
               <div className="text-stone-500">No images yet.</div>
             ) : (
-              <div className="mb-4 flex flex-wrap items-end gap-3">
+              <>
+                <div className="mb-4 flex flex-wrap items-end gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Original type</Label>
                   <Select value={filters.originalType} onValueChange={(v)=> setFilters(f=>({...f, originalType: v}))}>
