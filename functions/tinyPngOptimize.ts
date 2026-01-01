@@ -42,15 +42,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'TinyPNG did not return output URL' }, { status: 502 });
     }
 
-    // 2) Download the compressed bytes
-    const compFetch = await fetch(compressedUrl);
-    if (!compFetch.ok) {
-      const t = await compFetch.text();
-      return Response.json({ error: 'Failed to download TinyPNG output', details: t }, { status: 502 });
-    }
-    const compBuf = new Uint8Array(await compFetch.arrayBuffer());
-
-    // 3) Directly pass TinyPNG output URL to our optimizer (keeps user auth context)
+    // 2) Directly pass TinyPNG output URL to our optimizer (no intermediate download)
     const optimizeResp = await base44.functions.invoke('optimizeImage', {
       file_url: compressedUrl,
       alt_text,
