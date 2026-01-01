@@ -11,7 +11,10 @@ export default function OverviewNotificationsCard() {
     queryKey: ["overview-notifications"],
     queryFn: () => base44.entities.Notification.filter({ is_read: false }, "-created_at", 20),
     initialData: [],
+    staleTime: 30 * 1000,
+    gcTime: 60 * 1000,
     refetchInterval: 30000,
+    refetchOnWindowFocus: false,
   });
 
   return (

@@ -10,6 +10,9 @@ export default function OverviewPlotsCard() {
     queryKey: ["overview-plots"],
     queryFn: () => base44.entities.Plot.list({ limit: 1000 }),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const counts = (plots || []).reduce(

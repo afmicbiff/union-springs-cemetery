@@ -8,6 +8,9 @@ export default function OverviewLawnCareStats() {
     queryKey: ["lawncare-schedules-overview"],
     queryFn: () => base44.entities.LawnCareSchedule.list("-created_date", 500),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   return <LawnCareStats schedules={schedules} />;

@@ -9,8 +9,11 @@ import { format } from "date-fns";
 export default function OverviewNewsCard() {
   const { data: announcements = [] } = useQuery({
     queryKey: ["overview-announcements"],
-    queryFn: () => base44.entities.Announcement.list("-created_date", 20),
+    queryFn: () => base44.entities.Announcement.list({ limit: 20, select: ["id", "title", "date", "is_active"] }),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const active = (announcements || []).filter((a) => a.is_active !== false);

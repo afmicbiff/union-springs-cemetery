@@ -10,6 +10,9 @@ export default function OverviewTasksCard() {
     queryKey: ["overview-tasks"],
     queryFn: () => base44.entities.Task.filter({ is_archived: false }, "-created_date", 200),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const pending = (tasks || []).filter((t) => t.status === "To Do" || t.status === "In Progress");

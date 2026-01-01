@@ -9,8 +9,11 @@ import { format } from "date-fns";
 export default function OverviewSalesCard() {
   const { data: reservations = [] } = useQuery({
     queryKey: ["overview-reservations"],
-    queryFn: () => base44.entities.NewPlotReservation.list("-created_date", 100),
+    queryFn: () => base44.entities.NewPlotReservation.list({ limit: 100, select: ["id", "requester_name", "requested_date", "status"] }),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const pending = (reservations || []).filter(
