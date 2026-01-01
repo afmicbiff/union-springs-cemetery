@@ -62,8 +62,9 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
         })
         .sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0)); // ascending -> 1 at bottom
 
+      // Place ascending such that smallest index is at bottom (row 0 bottom)
       colPlots.forEach((plot, idx) => {
-        const row = perCol - 1 - idx; // bottom-up placement
+        const row = idx; // bottom index 0 upward
         if (row >= 0 && row < perCol) {
           const cellIndex = c * perCol + row;
           nextCells[cellIndex] = plot;
