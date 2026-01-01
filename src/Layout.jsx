@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import GovernanceProvider from '@/components/gov/GovernanceProvider';
+import ImageContextMenu from '@/components/common/ImageContextMenu';
 import { initPerf } from "./components/perf/initPerf";
 
 initPerf();
@@ -284,6 +285,7 @@ export default function Layout({ children }) {
       </main>
 
       <Toaster />
+      <ImageContextMenu />
       {/* Footer */}
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800 mt-auto">
         <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
