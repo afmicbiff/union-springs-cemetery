@@ -89,6 +89,8 @@ export default function SearchPage() {
       return () => clearTimeout(timer);
   }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
 
+  const queryClient = useQueryClient();
+
   const {
       data,
       fetchNextPage,
