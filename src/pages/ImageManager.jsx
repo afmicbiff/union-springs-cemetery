@@ -56,7 +56,7 @@ export default function ImageManager() {
       const file_url = uploaded?.file_url;
       if (!file_url) throw new Error('Upload failed');
       // 2) Optimize via backend
-      await base44.functions.invoke('optimizeImage', { file_url, alt_text: alt, quality_jpeg: qualityJpeg, quality_webp: qualityWebp, mode: 'new' });
+      await base44.functions.invoke('tinyPngOptimize', { file_url, alt_text: alt, quality_jpeg: qualityJpeg, quality_webp: qualityWebp, mode: 'new' });
       setFile(null);
       setAlt('');
       qc.invalidateQueries({ queryKey: ['images'] });
