@@ -416,7 +416,7 @@ const SectionRenderer = React.memo(({
                             />
                           </React.Suspense>
                         ) : (
-                          <div className="flex flex-col gap-1 items-center justify-start">
+                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
                             {plots.map((plot, pIdx) => (
                               <GravePlot
                                 key={plot._id || `s1-${pIdx}`}
@@ -442,7 +442,7 @@ const SectionRenderer = React.memo(({
                             />
                           </React.Suspense>
                         ) : (
-                          <div className="flex flex-col gap-1 items-center justify-start">
+                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
                             {plots.map((plot, pIdx) => (
                               <GravePlot
                                 key={plot._id || `s2-${pIdx}`}
@@ -1431,8 +1431,8 @@ export default function PlotsPage() {
                     {Object.keys(sections).sort((a, b) => {
                         const numA = parseInt(a);
                         const numB = parseInt(b);
-                        if (!isNaN(numA) && !isNaN(numB)) return numA - numB; // ASCENDING order (1 -> 5)
-                        return a.localeCompare(b);
+                        if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
+                        return b.localeCompare(a);
                     }).map((sectionKey, index) => {
                         const palette = SECTION_PALETTES[index % SECTION_PALETTES.length];
                         
