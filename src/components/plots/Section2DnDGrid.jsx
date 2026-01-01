@@ -38,19 +38,69 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
 
   // Build initial cells with reserved bottom row as null (placeholders)
   const buildInitial = React.useCallback(() => {
-    const next = Array(total).fill(null);
-    let i = 0;
-    for (let c = 0; c < cols; c++) {
-      // Fill from just above the reserved bottom row upwards (bottom-most occupied row first)
-      for (let r = perCol - 1 - reservedBottomRows; r >= 0; r--) {
-        const arrIdx = i++;
-        if (arrIdx >= sorted.length) break;
-        const cellIndex = c * perCol + r;
-        next[cellIndex] = sorted[arrIdx];
-      }
-    }
-    return next;
-  }, [total, cols, perCol, reservedBottomRows, sorted]);
+          const fillRows = perCol - reservedBottomRows;
+
+          // Build base columns from sorted data
+          const baseColumns = [];
+          let i = 0;
+          while (i < sorted.length) {
+            const col = Array(perCol).fill(null);
+            for (let r = perCol - 1 - reservedBottomRows; r >= 0; r--) {
+              if (i >= sorted.length) break;
+              col[r] = sorted[i++];
+            }
+            baseColumns.push(col);
+          }
+
+          // Custom sequence: place 326–348 immediately to the right of the column with 267
+          const seqStart = 326;
+          const seqEnd = 348;
+          const anchorNum = 267;
+
+          const byNum = new Map();
+          sorted.forEach((p) => {
+            const n = parseNum(p?.Grave);
+            if (n != null) byNum.set(n, p);
+          });
+
+          // Remove 326–348 from original columns to avoid duplicates
+          for (let c = 0; c < baseColumns.length; c++) {
+            for (let r = 0; r < perCol; r++) {
+              const cell = baseColumns[c][r];
+              const n = parseNum(cell?.Grave);
+              if (n != null && n >= seqStart && n <= seqEnd) {
+                baseColumns[c][r] = null;
+              }
+            }
+          }
+
+          // Build the sequence column bottom-up (326 at bottom, up to 348)
+          const seqCol = Array(perCol).fill(null);
+          let rPtr = perCol - 1 - reservedBottomRows;
+          for (let n = seqStart; n <= seqEnd && rPtr >= 0; n++, rPtr--) {
+            const p = byNum.get(n);
+            if (p) seqCol[rPtr] = p; // leave null as placeholder if missing
+          }
+
+          // Find anchor column containing 267
+          let anchorIdx = baseColumns.findIndex((col) =>
+            col.some((cell) => parseNum(cell?.Grave) === anchorNum)
+          );
+          if (anchorIdx < 0) anchorIdx = baseColumns.length - 1;
+
+          // Insert sequence column to the right of anchor
+          baseColumns.splice(anchorIdx + 1, 0, seqCol);
+
+          // Flatten to cells array
+          const colsFinal = baseColumns.length;
+          const out = Array(colsFinal * perCol).fill(null);
+          for (let c = 0; c < colsFinal; c++) {
+            for (let r = 0; r < perCol; r++) {
+              out[c * perCol + r] = baseColumns[c][r];
+            }
+          }
+          return out;
+        }, [perCol, reservedBottomRows, sorted]);
 
   const [cells, setCells] = React.useState(buildInitial);
   const [dragging, setDragging] = React.useState(false);
@@ -95,8 +145,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
         </button>
       </div>
       <DragDropContext onDragStart={() => setDragging(true)} onDragEnd={(res) => { if (isAdmin) onDragEnd(res); setDragging(false); }}>
-        <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
-          {Array.from({ length: cols * perCol }).map((_, idx) => {
+        <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${Math.max(1, Math.floor(cells.length / perCol))}, max-content)`, gridAutoColumns: 'max-content' }}>
+          {Array.from({ length: cells.length }).map((_, idx) => {
             const c = Math.floor(idx / perCol);
             const r = idx % perCol; // r === perCol - 1 is the reserved bottom row (droppable placeholders)
             const item = cells[idx];
