@@ -77,8 +77,6 @@ export async function filterEntity(entityName, filter, { limit = 50, sort = "-up
   if (inFlight.has(reqKey)) return inFlight.get(reqKey);
   const p = (async () => {
     const data = await base44.entities[entityName].filter(filter || {}, sort, limit);
-    // Force no persistence layer issues
-    if (!Array.isArray(data)) return [];
     const arr = Array.isArray(data) ? data : [];
     const result = select ? arr.map((r) => pick(r, select)) : arr;
     if (cacheKey) writeCache(cacheKey, result, ttlMs);
