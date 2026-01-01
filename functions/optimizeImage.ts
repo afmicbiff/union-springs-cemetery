@@ -50,8 +50,8 @@ Deno.serve(async (req) => {
     }
 
     const [jpegBytes, webpBytes] = await Promise.all([
-      convert('to/jpg', qualityJpeg),
-      convert('to/webp', qualityWebp)
+      convert('to/jpg'),
+      convert('to/webp')
     ]);
 
     const originalSize = input.byteLength;
