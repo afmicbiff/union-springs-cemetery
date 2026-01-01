@@ -96,35 +96,59 @@ export default function SearchPage() {
       isFetchingNextPage,
       isLoading,
       error
-  } = useInfiniteQuery({
-      queryKey: ['searchDeceased', debouncedParams],
-      queryFn: async ({ pageParam = 1 }) => {
-          try {
-              const response = await base44.functions.invoke('searchDeceased', {
-                  query: debouncedParams.term,
-                  family_name: debouncedParams.family,
-                  section: debouncedParams.section,
-                  veteran_status: debouncedParams.veteran,
-                  birth_year_min: debouncedParams.bMin,
-                  birth_year_max: debouncedParams.bMax,
-                  death_year_min: debouncedParams.dMin,
-                  death_year_max: debouncedParams.dMax,
-                  page: pageParam,
-                  limit: 12
-              });
-              return response.data || { results: [], pagination: { total: 0, totalPages: 0, page: pageParam } };
-          } catch (err) {
-              console.error("Failed to search deceased records:", err);
-              return { results: [], pagination: { total: 0, totalPages: 0 } };
-          }
-      },
-      getNextPageParam: (lastPage, allPages) => {
-          const current = lastPage.pagination.page || allPages.length;
-          const total = lastPage.pagination.totalPages;
-          return current < total ? current + 1 : undefined;
-      },
-      initialPageParam: 1,
-  });
+   } = useInfiniteQuery({
+       queryKey: ['searchDeceased', debouncedParams],
+       enabled: Boolean(
+         debouncedParams.term || debouncedParams.family ||
+         debouncedParams.section !== 'all' || debouncedParams.veteran !== 'all' ||
+         debouncedParams.bMin || debouncedParams.bMax || debouncedParams.dMin || debouncedParams.dMax
+       ),
+       queryFn: async ({ pageParam = 1 }) => {
+           try {
+               const response = await base44.functions.invoke('searchDeceased', {
+                   query: debouncedParams.term,
+                   family_name: debouncedParams.family,
+                   section: debouncedParams.section,
+                   veteran_status: debouncedParams.veteran,
+                   birth_year_min: debouncedParams.bMin,
+                   birth_year_max: debouncedParams.bMax,
+                   death_year_min: debouncedParams.dMin,
+                   death_year_max: debouncedParams.dMax,
+                   page: pageParam,
+                   limit: 24
+               });
+               const d = response.data || { results: [], pagination: { total: 0, totalPages: 0, page: pageParam } };
+               return {
+                 ...d,
+                 results: (d.results || []).map(p => ({
+                   id: p.id,
+                   first_name: p.first_name,
+                   last_name: p.last_name,
+                   family_name: p.family_name,
+                   date_of_birth: p.date_of_birth,
+                   date_of_death: p.date_of_death,
+                   plot_location: p.plot_location,
+                   notes: p.notes,
+                   obituary: p.obituary,
+                   veteran_status: p.veteran_status,
+                 })),
+               };
+           } catch (err) {
+               console.error("Failed to search deceased records:", err);
+               return { results: [], pagination: { total: 0, totalPages: 0, page: pageParam } };
+           }
+       },
+       getNextPageParam: (lastPage, allPages) => {
+           const current = lastPage.pagination.page || allPages.length;
+           const total = lastPage.pagination.totalPages;
+           return current < total ? current + 1 : undefined;
+       },
+       initialPageParam: 1,
+       staleTime: 5 * 60_000,
+       gcTime: 15 * 60_000,
+       refetchOnWindowFocus: false,
+       refetchOnReconnect: false,
+   });
 
   const observer = useRef();
   const lastElementRef = useCallback(node => {
