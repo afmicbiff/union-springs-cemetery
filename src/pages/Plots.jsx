@@ -700,7 +700,7 @@ export default function PlotsPage() {
   const queryClient = useQueryClient();
         
   const invalidatePlotsMap = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['plotsMap'] });
+    queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
   }, [queryClient]);
 
   const [hoverData, setHoverData] = useState(null);
@@ -765,7 +765,7 @@ export default function PlotsPage() {
 
   // Force refetch to avoid stale cache when adjusting grouping/sorting logic
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["plotsMap_v3"] });
+    queryClient.invalidateQueries({ queryKey: ["plotsMap_v3_all"] });
   }, [queryClient, activeTab, openSections]);
 
   // MUTATIONS
