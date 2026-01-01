@@ -1141,7 +1141,15 @@ export default function PlotsPage() {
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
+                  // Scroll into view vertically and horizontally
                   plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                  const hContainer = plotEl.closest('[class*="overflow-x-auto"]');
+                  if (hContainer) {
+                    const elRect = plotEl.getBoundingClientRect();
+                    const cRect = hContainer.getBoundingClientRect();
+                    const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
+                    hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+                  }
                   // Force highlight class for 30s
                   plotEl.classList.add('blink-strong-green');
                   setTimeout(() => plotEl.classList.remove('blink-strong-green'), 30000);
