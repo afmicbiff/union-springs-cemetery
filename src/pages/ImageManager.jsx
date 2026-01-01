@@ -54,6 +54,16 @@ export default function ImageManager() {
       </div>
     );
   }
+  if (user.role !== 'admin') {
+    return (
+      <div className="max-w-5xl mx-auto p-6">
+        <Card>
+          <CardHeader><CardTitle>Not authorized</CardTitle></CardHeader>
+          <CardContent>Only administrators can access Image Management.</CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-6 bg-stone-100">
