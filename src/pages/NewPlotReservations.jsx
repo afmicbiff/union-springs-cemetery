@@ -16,16 +16,29 @@ export default function NewPlotReservations() {
     enabled: !!user?.email,
     queryFn: async () => (await base44.entities.Member.filter({ email_primary: user.email }, null, 1))?.[0] || null,
     initialData: null,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const employeeQ = useQuery({
     queryKey: ['employeeByEmail', user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      try { const r = await base44.entities.Employee.filter({ email: user.email }, null, 1); if (r?.[0]) return r[0]; } catch (_) {}
-      try { const r2 = await base44.entities.Employee.filter({ work_email: user.email }, null, 1); return r2?.[0] || null; } catch (_) {}
-      return null;
+      if (!user?.email) return null;
+      const result = await base44.entities.Employee.filter(
+        {
+          $or: [
+            { email: user.email },
+            { work_email: user.email }
+          ]
+        },
+        null,
+        1
+      );
+      return result?.[0] || null;
     },
     initialData: null,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const employee = employeeQ.data;
   const isAdmin = user?.role === 'admin';
