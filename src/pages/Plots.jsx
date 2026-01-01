@@ -474,7 +474,8 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 269, end: 298 }] },
                                     { ranges: [{ start: 349, end: 378 }] },
                                     { ranges: [{ start: 431, end: 461 }] },
-                                    { ranges: [{ start: 513, end: 542 }], blanksStart: 1 },
+                                          { ranges: [], blanksStart: 1 },
+                                    { ranges: [{ start: 513, end: 542 }] },
                                     { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
@@ -492,7 +493,7 @@ const SectionRenderer = React.memo(({
                                         });
                                         // For 513–542, sort ascending then reverse the column (flex-col-reverse) so 513 starts at the bottom next to 432
                                         if (r.start === 513 && r.end === 542) {
-                                            rangePlots.sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
+                                            rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                         } else {
                                             rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                         }
