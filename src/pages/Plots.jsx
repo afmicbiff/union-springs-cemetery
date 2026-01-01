@@ -992,6 +992,12 @@ export default function PlotsPage() {
         const rowVal = String(item.Row || '');
         let sectionKey = rawSection ? rawSection.replace(/Section\s*/i, '').trim() : '';
 
+        // Force known range 513–542 to Section 4 to ensure proper rendering
+        const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
+        if (graveNum >= 513 && graveNum <= 542) {
+            sectionKey = '4';
+        }
+
         if (!grouped[sectionKey]) {
             if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
                 sectionKey = '1';
