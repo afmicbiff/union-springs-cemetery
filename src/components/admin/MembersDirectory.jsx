@@ -85,7 +85,18 @@ export default function MembersDirectory({ openMemberId }) {
         queryFn: async () => {
             const items = await listEntity(
                 'Member',
-                { limit: 1000, sort: '-updated_date', persist: true, ttlMs: 10 * 60_000 }
+                {
+                    limit: 1000,
+                    sort: '-updated_date',
+                    select: [
+                        'id','first_name','last_name','address','city','state','zip',
+                        'phone_primary','phone_secondary','email_primary','email_secondary',
+                        'donation','comments','last_donation_date','last_contact_date',
+                        'follow_up_date','follow_up_status','follow_up_notes','follow_up_assignee_id'
+                    ],
+                    persist: true,
+                    ttlMs: 10 * 60_000
+                }
             );
             return items;
         },
