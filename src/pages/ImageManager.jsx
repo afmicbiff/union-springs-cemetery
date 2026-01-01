@@ -124,8 +124,8 @@ export default function ImageManager() {
                       <div className="text-stone-700">{img.alt_text || '—'}</div>
                       <div className="text-stone-500">{img.width}×{img.height}px</div>
                       <div className="flex gap-2">
-                        <a href={img.webp_url} download className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> WebP</a>
-                        <a href={img.jpeg_url} download className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> JPEG</a>
+                        <button onClick={() => handleDownload(img.webp_url, `image-${img.id}.webp`)} className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> WebP</button>
+                        <button onClick={() => handleDownload(img.jpeg_url, `image-${img.id}.jpg`)} className="inline-flex items-center gap-1 text-teal-700 hover:underline"><Download className="w-4 h-4"/> JPEG</button>
                       </div>
                     </div>
                   </div>
