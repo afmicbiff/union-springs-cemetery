@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useDeferredValue, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -1213,15 +1213,51 @@ export default function PlotsPage() {
     }
   };
 
-  const handleHover = useCallback((e, data) => {
+  const detailsCache = useRef(new Map());
+  const handleHover = useCallback(async (e, data) => {
     if (!data) {
         setIsTooltipVisible(false);
         return;
     }
     const rect = e.target.getBoundingClientRect();
     setMousePos({ x: rect.right, y: rect.top });
+    // show minimal immediately
     setHoverData(data);
     setIsTooltipVisible(true);
+
+    const id = data._id;
+    if (!id) return;
+
+    const cached = detailsCache.current.get(id);
+    if (cached && cached !== 'loading') {
+      setHoverData(prev => (prev && prev._id === id ? { ...prev, ...cached } : prev));
+      return;
+    }
+    if (cached === 'loading') return;
+
+    try {
+      detailsCache.current.set(id, 'loading');
+      const arr = await base44.entities.Plot.filter({ id }, '-updated_date', 1);
+      const full = Array.isArray(arr) ? arr[0] : arr;
+      if (full) {
+        const mapped = {
+          'First Name': full.first_name,
+          'Last Name': full.last_name,
+          'Family Name': full.family_name,
+          Birth: full.birth_date,
+          Death: full.death_date,
+          Notes: full.notes ?? data.Notes,
+          photo_url: full.photo_url,
+          photo_url_small: full.photo_url_small,
+          photo_url_medium: full.photo_url_medium,
+          photo_url_large: full.photo_url_large,
+        };
+        detailsCache.current.set(id, mapped);
+        setHoverData(prev => (prev && prev._id === id ? { ...prev, ...mapped } : prev));
+      }
+    } catch (_) {
+      // ignore
+    }
   }, []);
 
   const handleEditClick = useCallback((plot) => {
@@ -1481,7 +1517,7 @@ export default function PlotsPage() {
                       <tbody className="bg-white divide-y divide-gray-200">
                           {groupBy === 'none' ? (
                               // Flat List Render
-                              processedTableData.map((row) => (
+                              processedTableData.slice((page-1)*50, page*50).map((row) => (
                                   <PlotTableRow 
                                       key={row._id} 
                                       row={row} 
@@ -1525,7 +1561,16 @@ export default function PlotsPage() {
                           )}
                       </tbody>
                   </table>
-              </div>
+                  {groupBy === 'none' && (
+                    <div className="flex items-center justify-between p-3 border-t bg-white">
+                      <div className="text-xs text-gray-500">Page {page} of {Math.max(1, Math.ceil(processedTableData.length / 50))}</div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                        <Button variant="outline" size="sm" disabled={page >= Math.max(1, Math.ceil(processedTableData.length / 50))} onClick={() => setPage(p => p + 1)}>Next</Button>
+                      </div>
+                    </div>
+                  )}
+                  </div>
           </main>
       )}
 
