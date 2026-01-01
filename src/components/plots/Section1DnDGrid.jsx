@@ -1,8 +1,6 @@
 import React from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import GravePlot from "./../../pages/Plots"; // placeholder to satisfy import analyzer (we won't use it)
-
-// We will import GravePlot indirectly by rendering via props.renderPlot to avoid circular deps
+// Intentionally no direct GravePlot import to avoid circular dependencies
 
 function parseNum(g) {
   const n = parseInt(String(g || "").replace(/\D/g, ""), 10);

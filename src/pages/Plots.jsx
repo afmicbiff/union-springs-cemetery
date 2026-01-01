@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
+import Section1DnDGrid from "@/components/plots/Section1DnDGrid";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -375,45 +376,13 @@ const SectionRenderer = React.memo(({
                     overflow-x-auto
                 `}>
                     {sectionKey === '1' ? (
-                        <div className="flex gap-4 justify-center">
-                            {(() => {
-                                const nums = plots
-                                  .map(p => parseInt(String(p.Grave).replace(/\D/g, '')) || 0)
-                                  .filter(n => n > 0);
-                                const maxNum = nums.length ? Math.max(...nums) : 0;
-                                const cols = 8;
-                                const perCol = Math.ceil(maxNum / cols) || 0;
-                                const ranges = Array.from({ length: cols }, (_, i) => ({
-                                  start: i * perCol + 1,
-                                  end: Math.min((i + 1) * perCol, maxNum)
-                                }));
-
-                                return ranges.map((range, idx) => {
-                                  const colPlots = plots.filter(p => {
-                                    const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                    return num >= range.start && num <= range.end;
-                                  }).sort((a, b) => {
-                                    const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
-                                    const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
-                                    return numB - numA;
-                                  });
-
-                                  return (
-                                    <div key={idx} className="flex flex-col gap-1 justify-end">
-                                      {colPlots.map((plot) => (
-                                        <GravePlot
-                                          key={`${plot.Section}-${plot.Row}-${plot.Grave}`}
-                                          data={plot}
-                                          baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                          onHover={onHover}
-                                          onEdit={isAdmin ? onEdit : undefined}
-                                        />
-                                      ))}
-                                    </div>
-                                  );
-                                });
-                            })()}
-                        </div>
+                        <Section1DnDGrid
+                          plots={plots}
+                          baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                          isAdmin={isAdmin}
+                          onHover={onHover}
+                          onEdit={isAdmin ? onEdit : undefined}
+                        />
                     ) : sectionKey === '2' ? (
                         <div className="flex justify-center overflow-x-auto">
                              <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: 'repeat(23, minmax(0, 1fr))', gridTemplateColumns: 'repeat(10, max-content)', gridAutoColumns: 'max-content' }}>
