@@ -1341,6 +1341,8 @@ export default function PlotsPage() {
       {/* Main Area */}
       {activeTab === 'map' ? (
                       <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
+                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only */}
+                        <noscript data-note="perf: third-party disabled on map page" />
 
             {/* Legend */}
             <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
