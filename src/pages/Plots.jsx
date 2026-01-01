@@ -489,7 +489,13 @@ const SectionRenderer = React.memo(({
                                         const rangePlots = plots.filter(p => {
                                             const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                             return num >= r.start && num <= r.end;
-                                        }).sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
+                                        });
+                                        // For 513–542, sort descending so with flex-col-reverse it renders 513 at bottom → 542 at top
+                                        if (r.start === 513 && r.end === 542) {
+                                            rangePlots.sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
+                                        } else {
+                                            rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
+                                        }
                                         plotsArr = [...plotsArr, ...rangePlots];
                                     });
 
