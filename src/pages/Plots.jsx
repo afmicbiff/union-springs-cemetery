@@ -461,19 +461,7 @@ const SectionRenderer = React.memo(({
                           </div>
                         )
                     ) : sectionKey === '3' ? (
-                                                  isAdmin ? (
-                                                    <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
-                                                      <Section3DnDGrid
-                                                        plots={plots}
-                                                        baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                        isAdmin={isAdmin}
-                                                        onHover={onHover}
-                                                        onEdit={isAdmin ? onEdit : undefined}
-                                                        statusColors={STATUS_COLORS}
-                                                      />
-                                                    </React.Suspense>
-                                                  ) : (
-                                                    <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                                                  <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                                                       {(() => {
                                                           const ranges = [
                                                               { start: 251, end: 268 },
@@ -496,6 +484,7 @@ const SectionRenderer = React.memo(({
                                                                 })
                                                                 .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                                               const plotsWithSpacers = (() => {
+                                                                // Special handling for 326-348: ensure continuous sequence from 326 (bottom) up to 348 (top)
                                                                 if (range.start === 326 && range.end === 348) {
                                                                   const byNum = new Map();
                                                                   colPlots.forEach(p => {
@@ -514,6 +503,7 @@ const SectionRenderer = React.memo(({
                                                                   }
                                                                   return seq;
                                                                 }
+                                                                // Default behavior for other ranges
                                                                 const arr = [];
                                                                 colPlots.forEach(plot => {
                                                                   const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
@@ -545,22 +535,9 @@ const SectionRenderer = React.memo(({
                                                           );
                                                           return [...cols, fallbackCol];
                                                       })()}
-                                                    </div>
-                                                  )
+                                                  </div>
                                               ) : sectionKey === '4' ? (
-                                                                            isAdmin ? (
-                                                                              <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
-                                                                                <Section4DnDGrid
-                                                                                  plots={plots}
-                                                                                  baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                                  isAdmin={isAdmin}
-                                                                                  onHover={onHover}
-                                                                                  onEdit={isAdmin ? onEdit : undefined}
-                                                                                  statusColors={STATUS_COLORS}
-                                                                                />
-                                                                              </React.Suspense>
-                                                                            ) : (
-                                                                              <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                                                                            <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                                                                                 {(() => {
                                                                                     const columnsConfig = [
                                                                                         { ranges: [{ start: 208, end: 223 }], blanksStart: 14 },
@@ -583,6 +560,7 @@ const SectionRenderer = React.memo(({
                                                                                                 const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                                                                                 return num >= r.start && num <= r.end;
                                                                                             });
+                                                                                            // For 513–542, sort ascending then reverse the column (flex-col-reverse) so 513 starts at the bottom next to 432
                                                                                             if (r.start === 513 && r.end === 542) {
                                                                                                 rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                                                                             } else {
@@ -635,22 +613,9 @@ const SectionRenderer = React.memo(({
                                                                                     );
                                                                                     return [...cols, fallbackCol];
                                                                                 })()}
-                                                                              </div>
-                                                                            )
+                                                                            </div>
                                                                         ) : sectionKey === '5' ? (
-                                                                                                      isAdmin ? (
-                                                                                                        <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
-                                                                                                          <Section5DnDGrid
-                                                                                                            plots={plots}
-                                                                                                            baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                                                                            isAdmin={isAdmin}
-                                                                                                            onHover={onHover}
-                                                                                                            onEdit={isAdmin ? onEdit : undefined}
-                                                                                                            statusColors={STATUS_COLORS}
-                                                                                                          />
-                                                                                                        </React.Suspense>
-                                                                                                      ) : (
-                                                                                                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+                                                                                                      <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                                                                                                           {(() => {
                                                                                                               const sectionPlots = plots;
                                                                                                               const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
@@ -661,16 +626,27 @@ const SectionRenderer = React.memo(({
 
                                                                                                               const columns = [];
 
+                                                                                                              // Col 1: 224-236
                                                                                                               (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
+                                                                                                              // Col 2: 299-302, 4 blanks, 1001-1014
                                                                                                               (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
+                                                                                                              // Col 3: 379-382, 4 blanks, 1015-1026
                                                                                                               (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
+                                                                                                              // Col 4: 462-465, 4 blanks, 1029-1042
                                                                                                               (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
+                                                                                                              // Col 5: 543-546, 4 blanks, 1043-1056
                                                                                                               (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
+                                                                                                              // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
                                                                                                               (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
+                                                                                                              // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
                                                                                                               (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
+                                                                                                              // Col 8: 7 blanks, 1085-1102
                                                                                                               (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
+                                                                                                              // Col 9: 738, 1 blank, 739-742, 20 blanks
                                                                                                               (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
+                                                                                                              // Col 10: 871-874, 11 blanks
                                                                                                               (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
+                                                                                                              // Col 11: 16 blanks
                                                                                                               (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
 
                                                                                                               const mapped = columns.map((plots, idx) => (
@@ -706,8 +682,7 @@ const SectionRenderer = React.memo(({
 
                                                                                                               return [...mapped, fallbackCol];
                                                                                                           })()}
-                                                                                                        </div>
-                                                                                                      )
+                                                                                                      </div>
                                                                                                   ) : (
                         <>
                             <div className="flex flex-col-reverse gap-2 content-center items-center">
