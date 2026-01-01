@@ -53,6 +53,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
   }, [total, cols, perCol, reservedBottomRows, sorted]);
 
   const [cells, setCells] = React.useState(buildInitial);
+  const [dragging, setDragging] = React.useState(false);
   React.useEffect(() => { setCells(buildInitial()); }, [buildInitial]);
 
   const onDragEnd = (result) => {
@@ -76,8 +77,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
   };
 
   return (
-    <div className="flex justify-center overflow-x-auto pb-2">
-      <DragDropContext onDragEnd={isAdmin ? onDragEnd : undefined}>
+    <div className={`flex justify-center overflow-x-auto pb-2 ${dragging ? 'select-none cursor-grabbing' : ''}`}>
+      <DragDropContext onDragStart={() => setDragging(true)} onDragEnd={(res) => { if (isAdmin) onDragEnd(res); setDragging(false); }}>
         <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
           {Array.from({ length: cols * perCol }).map((_, idx) => {
             const c = Math.floor(idx / perCol);
@@ -91,12 +92,12 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
             const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
             const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
 
-            const CellWrapper = ({ children }) => (
-              <div className={`relative transition-all duration-200 ease-in-out ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>{children}</div>
+            const CellWrapper = ({ children, active }) => (
+              <div className={`relative ${active ? 'transition-none ring-2 ring-teal-500 scale-[1.03]' : 'transition-all duration-200 ease-in-out'} transform-gpu will-change-transform ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>{children}</div>
             );
 
             return (
-              <Droppable key={droppableId} droppableId={droppableId} isDropDisabled={!isAdmin}>
+              <Droppable key={droppableId} droppableId={droppableId} isDropDisabled={!isAdmin} isCombineEnabled={false}>
                 {(provided, snapshot) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="flex">
                     {item ? (
@@ -113,8 +114,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                               if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
                             }}
                           >
-                            <CellWrapper>
-                              <div className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-pointer">
+                            <CellWrapper active={draggableSnapshot.isDragging}>
+                              <div className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-pointer transform-gpu will-change-transform">
                                 <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                                 <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
                                 <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
@@ -125,7 +126,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                       </Draggable>
                     ) : (
                       // Placeholder cell: remain blank, but is droppable (including bottom row r===0)
-                      <CellWrapper>
+                      <CellWrapper active={false}>
                         <div className="w-full h-full" />
                       </CellWrapper>
                     )}
