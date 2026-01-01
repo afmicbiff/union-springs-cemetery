@@ -117,7 +117,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                 {(provided, snapshot) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className={`flex ${snapshot.isDraggingOver ? 'ring-2 ring-teal-500 ring-offset-2 rounded-[2px]' : ''}`}>
                     {item ? (
-                      <Draggable draggableId={`s2-${item._id || item.id || idx}`} index={0} isDragDisabled={!isAdmin}>
+                      <Draggable draggableId={`s2-${item._id || item.id || idx}`} index={idx} isDragDisabled={!isAdmin}>
                         {(draggableProvided, draggableSnapshot) => (
                           <div
                             ref={draggableProvided.innerRef}
@@ -131,7 +131,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                             }}
                           >
                             <CellWrapper active={draggableSnapshot.isDragging || snapshot.isDraggingOver}>
-                              <div className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-pointer transform-gpu will-change-transform">
+                              <div className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-move transform-gpu will-change-transform">
                                 <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                                 <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
                                 <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
