@@ -170,8 +170,13 @@ const Tooltip = React.memo(({ data, position, visible }) => {
             : `Status: ${data.Status}`}
         </div>
       )}
-    </div>
-  );
+      {data.photo_url && (
+        <div className="mt-3">
+          <img src={data.photo_url} alt={`Plot ${data.Grave}`} loading="lazy" className="w-full h-32 object-cover rounded border border-gray-200" />
+        </div>
+      )}
+      </div>
+      );
 });
 
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit }) => {
