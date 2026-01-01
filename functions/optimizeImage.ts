@@ -11,6 +11,10 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const fileUrl = payload?.file_url;
     const altText = payload?.alt_text || '';
+    const qualityJpeg = Math.min(100, Math.max(1, Number(payload?.quality_jpeg || 85)));
+    const qualityWebp = Math.min(100, Math.max(1, Number(payload?.quality_webp || 80)));
+    const mode = (payload?.mode === 'overwrite') ? 'overwrite' : 'new';
+    const imageId = payload?.image_id || null;
     if (!fileUrl) {
       return Response.json({ error: 'file_url is required' }, { status: 400 });
     }
@@ -28,9 +32,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Cloudmersive API key not configured' }, { status: 500 });
     }
 
-    async function convert(endpoint) {
+    async function convert(endpointBase, quality) {
       const form = new FormData();
       form.append('imageFile', new Blob([input], { type: 'application/octet-stream' }), 'upload.bin');
+      const endpoint = quality ? `${endpointBase}/${quality}` : endpointBase;
       const r = await fetch(`https://api.cloudmersive.com/image/convert/${endpoint}`, {
         method: 'POST',
         headers: { 'Apikey': apiKey },
@@ -44,8 +49,8 @@ Deno.serve(async (req) => {
     }
 
     const [jpegBytes, webpBytes] = await Promise.all([
-      convert('to/jpg'),
-      convert('to/webp')
+      convert('to/jpg', qualityJpeg),
+      convert('to/webp', qualityWebp)
     ]);
 
     const originalSize = input.byteLength;
@@ -66,17 +71,32 @@ Deno.serve(async (req) => {
     }
 
     // We don't reliably have dimensions here; store 0 as placeholder
-    const imageRecord = await base44.entities.Image.create({
-      original_url: fileUrl,
-      jpeg_url,
-      webp_url,
-      alt_text: altText,
-      width: 0,
-      height: 0,
-      original_size: originalSize,
-      jpeg_size: jpegSize,
-      webp_size: webpSize,
-    });
+    let imageRecord;
+    if (mode === 'overwrite' && imageId) {
+      imageRecord = await base44.entities.Image.update(imageId, {
+        original_url: fileUrl,
+        jpeg_url,
+        webp_url,
+        alt_text: altText,
+        width: 0,
+        height: 0,
+        original_size: originalSize,
+        jpeg_size: jpegSize,
+        webp_size: webpSize,
+      });
+    } else {
+      imageRecord = await base44.entities.Image.create({
+        original_url: fileUrl,
+        jpeg_url,
+        webp_url,
+        alt_text: altText,
+        width: 0,
+        height: 0,
+        original_size: originalSize,
+        jpeg_size: jpegSize,
+        webp_size: webpSize,
+      });
+    }
 
     return Response.json({
       message: 'Image optimized successfully',
