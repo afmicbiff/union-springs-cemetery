@@ -63,6 +63,24 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
             if (n != null) byNum.set(n, p);
           });
 
+          // Only apply the custom column if at least one plot in 326–348 exists in Section 2 data
+          const hasAnySeq = (() => {
+            for (let n = seqStart; n <= seqEnd; n++) if (byNum.has(n)) return true;
+            return false;
+          })();
+
+          if (!hasAnySeq) {
+            // Flatten baseColumns and return without inserting an empty column
+            const colsFinal = baseColumns.length;
+            const out = Array(colsFinal * perCol).fill(null);
+            for (let c = 0; c < colsFinal; c++) {
+              for (let r = 0; r < perCol; r++) {
+                out[c * perCol + r] = baseColumns[c][r];
+              }
+            }
+            return out;
+          }
+
           // Remove 326–348 from original columns to avoid duplicates
           for (let c = 0; c < baseColumns.length; c++) {
             for (let r = 0; r < perCol; r++) {
