@@ -24,9 +24,13 @@ function buildSectionFilter(sectionsToLoad) {
     { section: { $in: withPrefixes } },
   ];
 
-  // Ensure Section 4 also pulls 513–542 regardless of recorded section (data hygiene fallback)
+  // Ensure Section 4 also pulls key ranges regardless of recorded section (data hygiene fallback)
   if (normalized.includes('4')) {
-    const seq = Array.from({ length: 542 - 513 + 1 }, (_, i) => String(513 + i));
+    const seqA = Array.from({ length: 542 - 513 + 1 }, (_, i) => String(513 + i));
+    const seqB = Array.from({ length: 559 - 548 + 1 }, (_, i) => String(548 + i));
+    const seqC = Array.from({ length: 562 - 560 + 1 }, (_, i) => String(560 + i));
+    const seqD = Array.from({ length: 576 - 564 + 1 }, (_, i) => String(564 + i));
+    const seq = [...seqA, ...seqB, ...seqC, ...seqD];
     orClauses.push({ plot_number: { $in: seq } });
   }
 
