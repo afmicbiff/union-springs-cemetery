@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Download, Copy, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 export default function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
   const [quality, setQuality] = React.useState(80);
@@ -38,10 +39,23 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
     return `${val.toFixed(val >= 10 ? 0 : 1)} ${sizes[i]}`;
   };
 
-  const handleCopy = async (text) => {
+  const logUsage = async (action, note) => {
+    await base44.entities.ImageUsage.create({
+      image_id: image.id,
+      source: 'ImageDetailDialog',
+      action,
+      page_or_component: 'ImageDetailDialog',
+      referrer: window.location.pathname,
+      note: note || null,
+      timestamp: new Date().toISOString(),
+    });
+  };
+
+  const handleCopy = async (text, action) => {
     try {
       await navigator.clipboard.writeText(text);
       toast.success('Copied to clipboard');
+      if (action) { try { await logUsage(action); } catch {} }
     } catch {
       try {
         const ta = document.createElement('textarea');
@@ -53,13 +67,14 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
         document.execCommand('copy');
         document.body.removeChild(ta);
         toast.success('Copied to clipboard');
+      if (action) { try { await logUsage(action); } catch {} }
       } catch (e) {
         toast.error('Copy failed');
       }
     }
   };
 
-  const handleDownload = async (url, out) => {
+  const handleDownload = async (url, out, action) => {
     const res = await fetch(url);
     const blob = await res.blob();
     const objectUrl = URL.createObjectURL(blob);
@@ -70,11 +85,12 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
     a.click();
     a.remove();
     URL.revokeObjectURL(objectUrl);
+    if (action) { try { await logUsage(action); } catch {} }
   };
 
   const copyHTML = () => {
     const html = `<picture>\n  <source srcset='${image.webp_url}' type='image/webp' />\n  <img src='${image.jpeg_url}' alt='${(image.alt_text || '').replace(/'/g, "&#39;")}'${(image.width>0&&image.height>0)?` width='${image.width}' height='${image.height}'`:''} />\n</picture>`;
-    handleCopy(html);
+    handleCopy(html, 'copy_html');
   };
 
   const reOptimize = async (mode) => {
@@ -152,6 +168,7 @@ export default function ImageDetailDialog({ image, open, onOpenChange, onOptimiz
                 </Button>
               </div>
             </div>
+            <UsageSection image={image} open={open} />
           </div>
         </div>
       </DialogContent>

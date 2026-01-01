@@ -12,6 +12,8 @@ import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
       import { toast } from 'sonner';
 
+import ImageDetailDialog from '@/components/images/ImageDetailDialog';
+
 export default function ImageManager() {
   const qc = useQueryClient();
 
@@ -48,6 +50,8 @@ export default function ImageManager() {
   const [altEdits, setAltEdits] = React.useState({});
   const [perImageQuality, setPerImageQuality] = React.useState({});
         const [reoptLoading, setReoptLoading] = React.useState({});
+        const [detailOpen, setDetailOpen] = React.useState(false);
+        const [selectedImage, setSelectedImage] = React.useState(null);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -132,6 +136,18 @@ export default function ImageManager() {
     if (!window.confirm('Delete this image from the library?')) return;
     await base44.entities.Image.delete(id);
     qc.invalidateQueries({ queryKey: ['images'] });
+  };
+
+  const logUsage = async (imageId, action, note) => {
+    await base44.entities.ImageUsage.create({
+      image_id: imageId,
+      source: 'ImageManager',
+      action,
+      page_or_component: 'ImageManager',
+      referrer: window.location.pathname,
+      note: note || null,
+      timestamp: new Date().toISOString(),
+    });
   };
 
   const formatBytes = (bytes) => {
@@ -371,9 +387,10 @@ export default function ImageManager() {
                                                   </div>
 
                       <div className="flex flex-wrap gap-2 pt-2">
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedImage(img); setDetailOpen(true); }} className="h-8 px-2">Details</Button>
                         <Button variant="outline" size="sm" onClick={() => handleDownload(img.webp_url, `image-${img.id}.webp`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> WebP</Button>
                         <Button variant="outline" size="sm" onClick={() => handleDownload(img.jpeg_url, `image-${img.id}.jpg`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> JPEG</Button>
-                        <Button variant="outline" size="sm" onClick={() => handleCopy(img.webp_url)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy WebP URL</Button>
+                        <Button variant="outline" size="sm" onClick={() => { handleCopy(img.webp_url); logUsage(img.id, 'copy_url'); }} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy WebP URL</Button>
                         <Button variant="outline" size="sm" onClick={() => handleCopy(`<picture>\n  <source srcset='${img.webp_url}' type='image/webp' />\n  <img src='${img.jpeg_url}' alt='${(img.alt_text||'').replace(/'/g, "&#39;")}'${(img.width>0&&img.height>0)?` width='${img.width}' height='${img.height}'`:''} />\n</picture>`)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy HTML</Button>
                         <Button variant="destructive" size="sm" onClick={() => deleteImage(img.id)} className="h-8 px-2"><Trash2 className="w-4 h-4 mr-1"/> Delete</Button>
                       </div>
