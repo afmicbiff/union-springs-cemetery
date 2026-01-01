@@ -443,7 +443,7 @@ export default function SearchPage() {
                        <div className="flex justify-center py-6">
                            <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
                        </div>
-                   )}
+                   ) : null}
                 </div>
               ) : (
                 <div className="text-center py-12 bg-white rounded-sm border border-stone-200 space-y-4">
