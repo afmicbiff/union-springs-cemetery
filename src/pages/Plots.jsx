@@ -763,10 +763,7 @@ export default function PlotsPage() {
             filterEntity,
           });
 
-  // Force refetch to avoid stale cache when adjusting grouping/sorting logic
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ["plotsMap_v3_all"] });
-  }, [queryClient, activeTab, openSections]);
+
 
   // MUTATIONS
   const updatePlotMutation = useMutation({
@@ -920,6 +917,13 @@ export default function PlotsPage() {
       })).filter(r => r.Grave);
       return arr;
   }, [plotEntities]);
+
+  // Index for instant hover lookups
+  const plotIndex = useMemo(() => {
+      const m = new Map();
+      (parsedData || []).forEach((p) => { if (p?._id) m.set(p._id, p); });
+      return m;
+  }, [parsedData]);
 
   // Filtered Data Computation
   const filteredData = useMemo(() => {
@@ -1229,9 +1233,10 @@ export default function PlotsPage() {
     const rect = e.target.getBoundingClientRect();
     setMousePos({ x: rect.right, y: rect.top });
     // Data already prefetched; just show instantly
-    setHoverData(data);
+    const merged = data && plotIndex.get(data._id) ? plotIndex.get(data._id) : data;
+    setHoverData(merged);
     setIsTooltipVisible(true);
-  }, []);
+    }, [plotIndex]);
 
   const handleEditClick = useCallback((plot) => {
     setSelectedPlotForModal(plot);
