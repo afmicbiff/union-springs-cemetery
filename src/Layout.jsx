@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity, BarChart2, Code, Trash2 } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity, BarChart2, Code, Trash2, Image } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -157,9 +157,10 @@ export default function Layout({ children }) {
     { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
     { label: 'Performance Dashboard', path: '/PerformanceDashboard', icon: Activity },
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
-    { label: 'Code Insight', path: '/AdminCodeInsight', icon: Code }
+    { label: 'Code Insight', path: '/AdminCodeInsight', icon: Code },
+    { label: 'Image Management', path: '/ImageManager', icon: Image }
     ]
-    },
+    }
   ];
 
   return (
