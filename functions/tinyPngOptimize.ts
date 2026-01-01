@@ -71,7 +71,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       ...optimizeResp.data,
-      compressed_source_url: compressedUrl,
+      tiny_png_output_url: compressedUrl,
+      compressed_file_url: compressedFileUrl,
       source_file_url: file_url
     });
   } catch (error) {
