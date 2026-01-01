@@ -20,17 +20,6 @@ Deno.serve(async (req) => {
 
     // 1) Ask TinyPNG to shrink the uploaded file by URL
     const auth = 'Basic ' + btoa(`api:${apiKey}`);
-
-    // Workaround for some Deno environments lacking btoa on non-ASCII: ensure ascii
-    // TinyPNG keys are ASCII; still, guard against undefined btoa
-    if (typeof btoa !== 'function') {
-      const text = `api:${apiKey}`;
-      const bytes = new TextEncoder().encode(text);
-      let binary = '';
-      bytes.forEach(b => { binary += String.fromCharCode(b); });
-      // simple base64
-      const base64 = btoa(binary);
-    }
     const shrinkRes = await fetch('https://api.tinify.com/shrink', {
       method: 'POST',
       headers: {
