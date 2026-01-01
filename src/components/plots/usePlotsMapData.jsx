@@ -36,7 +36,7 @@ function buildSectionFilter(sectionsToLoad) {
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   const sectionsToLoad = useMemo(() => {
     if (activeTab !== "map") return [];
-    const fallback = ["5"];
+    const fallback = ["5", "4"];
     return openSections && openSections.length ? openSections : fallback;
   }, [openSections, activeTab]);
 
@@ -46,7 +46,7 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   );
 
   return useQuery({
-    queryKey: ["plotsMap_v2", { tab: activeTab, sectionsKey }],
+    queryKey: ["plotsMap_v3", { tab: activeTab, sectionsKey }],
     enabled: activeTab === "map" && sectionsToLoad.length > 0,
     staleTime: 15 * 60_000,
     gcTime: 30 * 60_000,
@@ -75,7 +75,7 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
             "notes",
             "updated_date",
           ],
-          persist: true,
+          persist: false,
           ttlMs: 15 * 60_000,
         },
         { signal }
