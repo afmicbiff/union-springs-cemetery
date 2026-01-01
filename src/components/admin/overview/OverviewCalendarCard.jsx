@@ -9,8 +9,11 @@ import { format, parseISO, isAfter } from "date-fns";
 export default function OverviewCalendarCard() {
   const { data: events = [] } = useQuery({
     queryKey: ["overview-events"],
-    queryFn: () => base44.entities.Event.list("-created_date", 100),
+    queryFn: () => base44.entities.Event.list({ limit: 100, select: ["id", "start_time", "title"] }),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const upcoming = (events || [])
