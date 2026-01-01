@@ -426,7 +426,7 @@ const SectionRenderer = React.memo(({
                                           byNum.set(n, p);
                                         });
                                         const seq = [];
-                                        for (let n = 348; n >= 326; n--) {
+                                        for (let n = 326; n <= 348; n++) {
                                           const p = byNum.get(n);
                                           if (p) {
                                             seq.push(p);
@@ -448,7 +448,7 @@ const SectionRenderer = React.memo(({
                                       return arr;
                                     })();
                                     return (
-                                      <div key={idx} className="flex flex-col gap-1 justify-end min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
+                                      <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
                                         {plotsWithSpacers.map((plot, pIdx) => (
                                           <GravePlot key={plot._id || `plot-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
                                         ))}
