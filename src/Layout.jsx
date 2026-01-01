@@ -50,6 +50,30 @@ export default function Layout({ children }) {
       });
     };
   }, []);
+
+  // On the Plots page, block third-party trackers and heavy CDNs to reduce JS cost
+  React.useEffect(() => {
+    const isPlots = location.pathname.toLowerCase().startsWith('/plots');
+    if (!isPlots) return;
+    try {
+      const selectors = [
+        'script[src*="googletagmanager.com"]',
+        'script[src*="gtm.js"]',
+        'script[src*="connect.facebook.net"]',
+        'script[src*="js.stripe.com"]',
+        'script[src*="cdn.tailwindcss.com"]'
+      ];
+      const nodes = document.querySelectorAll(selectors.join(','));
+      nodes.forEach((n) => { try { n.parentNode && n.parentNode.removeChild(n); } catch {} });
+      // Prevent re-insertion during this session and stub common globals
+      window.__thirdPartyBlocked = true;
+      window.dataLayer = window.dataLayer || [];
+      if (!window.fbq) {
+        window.fbq = (...args) => { (window.__fbqQueue = window.__fbqQueue || []).push(args); };
+      }
+    } catch {}
+  }, [location.pathname]);
+
   const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
 
   // Clear client-side caches and reload app
