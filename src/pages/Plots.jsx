@@ -636,7 +636,7 @@ const SectionRenderer = React.memo(({
                                                                                     return [...cols, fallbackCol];
                                                                                 })()}
                                                                             </div>
-                                                                        ) : sectionKey === '5' ? (
+                                                                        ) : (sectionKey === '5' ? ()
                                                                                                       isAdmin ? (
                                                                                                         <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
                                                                                                           <Section5DnDGrid
