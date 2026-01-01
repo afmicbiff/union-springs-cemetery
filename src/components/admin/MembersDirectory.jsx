@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { listEntity } from "@/components/gov/dataClient";
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -64,27 +65,35 @@ export default function MembersDirectory({ openMemberId }) {
 
     const { data: employees } = useQuery({
         queryKey: ['employees-list'],
+        enabled: isDialogOpen,
+        refetchOnWindowFocus: false,
         queryFn: async () => {
-            if (!(await base44.auth.isAuthenticated())) return [];
-            return base44.entities.Employee.list();
+            const items = await listEntity(
+                'Employee',
+                { limit: 500, sort: '-updated_date', select: ['id','first_name','last_name'], persist: true, ttlMs: 30 * 60_000 }
+            );
+            return items;
         },
-        initialData: []
+        initialData: [],
+        staleTime: 10 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
     });
 
     const { data: members, isLoading, isError, error } = useQuery({
         queryKey: ['members'],
+        refetchOnWindowFocus: false,
         queryFn: async () => {
-            if (!(await base44.auth.isAuthenticated())) {
-                base44.auth.redirectToLogin();
-                throw new Error("User not authenticated.");
-            }
-            return base44.entities.Member.list(undefined, 1000);
+            const items = await listEntity(
+                'Member',
+                { limit: 1000, sort: '-updated_date', persist: true, ttlMs: 10 * 60_000 }
+            );
+            return items;
         },
         initialData: [],
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
         onError: (err) => {
-            if (err.message !== "User not authenticated.") {
-                toast.error("Failed to load members: " + err.message);
-            }
+            toast.error("Failed to load members: " + err.message);
         },
     });
 
@@ -100,11 +109,18 @@ export default function MembersDirectory({ openMemberId }) {
 
     const { data: savedSegments } = useQuery({
         queryKey: ['member-segments'],
+        enabled: showAdvancedFilters,
+        refetchOnWindowFocus: false,
         queryFn: async () => {
-            if (!(await base44.auth.isAuthenticated())) return [];
-            return base44.entities.MemberSegment.list();
+            const items = await listEntity(
+                'MemberSegment',
+                { limit: 500, sort: '-updated_date', persist: true, ttlMs: 60 * 60_000 }
+            );
+            return items;
         },
-        initialData: []
+        initialData: [],
+        staleTime: 30 * 60 * 1000,
+        gcTime: 60 * 60 * 1000,
     });
 
     const saveSegmentMutation = useMutation({
