@@ -154,6 +154,7 @@ export default function ImageManager() {
                         <Button variant="outline" size="sm" onClick={() => handleDownload(img.jpeg_url, `image-${img.id}.jpg`)} className="h-8 px-2"><Download className="w-4 h-4 mr-1"/> JPEG</Button>
                         <Button variant="outline" size="sm" onClick={() => handleCopy(img.webp_url)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy WebP URL</Button>
                         <Button variant="outline" size="sm" onClick={() => handleCopy(`<picture>\n  <source srcset='${img.webp_url}' type='image/webp' />\n  <img src='${img.jpeg_url}' alt='${(img.alt_text||'').replace(/'/g, "&#39;")}'${(img.width>0&&img.height>0)?` width='${img.width}' height='${img.height}'`:''} />\n</picture>`)} className="h-8 px-2"><Copy className="w-4 h-4 mr-1"/> Copy HTML</Button>
+                        <Button variant="destructive" size="sm" onClick={() => deleteImage(img.id)} className="h-8 px-2"><Trash2 className="w-4 h-4 mr-1"/> Delete</Button>
                       </div>
                     </div>
                   </div>
