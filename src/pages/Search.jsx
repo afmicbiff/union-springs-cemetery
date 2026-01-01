@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,7 +89,7 @@ export default function SearchPage() {
       return () => clearTimeout(timer);
   }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
 
-  const queryClient = useQueryClient();
+
 
   const {
       data,

@@ -50,13 +50,13 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   );
 
   return useQuery({
-          queryKey: ["plotsMap_v3_all", { tab: activeTab }],
+          queryKey: ["plotsMap_v3_all", { tab: activeTab, sectionsKey }],
           enabled: activeTab === "map",
           staleTime: 15 * 60_000,
           gcTime: 30 * 60_000,
           refetchOnWindowFocus: false,
           queryFn: async ({ signal }) => {
-      const sectionFilter = {}; // fetch all plots in one request for instant hover data
+      const sectionFilter = buildSectionFilter(sectionsToLoad);
 
       // 1 call total (Plot only)
       const plots = await filterEntity(
