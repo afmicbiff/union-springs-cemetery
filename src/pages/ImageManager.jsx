@@ -61,6 +61,12 @@ export default function ImageManager() {
     try { await navigator.clipboard.writeText(text); } catch {}
   };
 
+  const deleteImage = async (id) => {
+    if (!window.confirm('Delete this image from the library?')) return;
+    await base44.entities.Image.delete(id);
+    qc.invalidateQueries({ queryKey: ['images'] });
+  };
+
   const formatBytes = (bytes) => {
     if (!bytes && bytes !== 0) return '';
     const sizes = ['B', 'KB', 'MB', 'GB'];
