@@ -344,6 +344,7 @@ export default function ImageManager() {
                   </div>
                 ))}
               </div>
+              </>
             )}
           </CardContent>
         </Card>
