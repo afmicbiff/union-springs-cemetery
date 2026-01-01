@@ -41,7 +41,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     const next = Array(total).fill(null);
     let i = 0;
     for (let c = 0; c < cols; c++) {
-      for (let r = reservedBottomRows; r < perCol; r++) { // start at row 1 (leave row 0 empty)
+      // Fill from just above the reserved bottom row upwards (bottom-most occupied row first)
+      for (let r = perCol - 1 - reservedBottomRows; r >= 0; r--) {
         const arrIdx = i++;
         if (arrIdx >= sorted.length) break;
         const cellIndex = c * perCol + r;
@@ -79,7 +80,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
         <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
           {Array.from({ length: cols * perCol }).map((_, idx) => {
             const c = Math.floor(idx / perCol);
-            const r = idx % perCol; // r === 0 is reserved bottom row (droppable placeholders)
+            const r = idx % perCol; // r === perCol - 1 is the reserved bottom row (droppable placeholders)
             const item = cells[idx];
             const droppableId = `s2-c${c}-r${r}`;
 
