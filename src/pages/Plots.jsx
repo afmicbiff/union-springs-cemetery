@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
+import SmartImage from "@/components/perf/SmartImage";
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
 import {
@@ -172,7 +173,20 @@ const Tooltip = React.memo(({ data, position, visible }) => {
       )}
       {data.photo_url && (
         <div className="mt-3">
-          <img src={data.photo_url} alt={`Plot ${data.Grave}`} loading="lazy" className="w-full h-32 object-cover rounded border border-gray-200" />
+          <SmartImage
+            src={data.photo_url_small || data.photo_url}
+            alt={`Plot ${data.Grave}`}
+            width={288}
+            height={128}
+            sizes="(max-width: 640px) 80vw, 288px"
+            srcSetVariants={{
+              small: data.photo_url_small,
+              medium: data.photo_url_medium,
+              large: data.photo_url_large,
+              original: data.photo_url,
+            }}
+            className="w-full h-32 object-cover rounded border border-gray-200"
+          />
         </div>
       )}
       </div>
