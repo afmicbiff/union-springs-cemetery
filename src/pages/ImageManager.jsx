@@ -144,7 +144,7 @@ export default function ImageManager() {
                       {(img.width > 0 && img.height > 0) && (
                         <div className="text-stone-500">{img.width}×{img.height}px</div>
                       )}
-                      <div className="grid grid-cols-3 gap-2 text-xs text-stone-600">
+                      <div className="grid grid-cols-3 gap-2 text-xs text-stone-600 items-center">
                         <div><span className="font-medium text-stone-700">Original:</span> {formatBytes(img.original_size) || '—'}</div>
                         <div><span className="font-medium text-stone-700">WebP:</span> {formatBytes(img.webp_size) || '—'}</div>
                         <div><span className="font-medium text-stone-700">JPEG:</span> {formatBytes(img.jpeg_size) || '—'}</div>
