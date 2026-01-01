@@ -474,7 +474,7 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 269, end: 298 }] },
                                     { ranges: [{ start: 349, end: 378 }] },
                                     { ranges: [{ start: 431, end: 461 }] },
-                                    { ranges: [{ start: 513, end: 542 }], spacers: [{ target: 513, position: 'before' }] },
+                                    { ranges: [{ start: 513, end: 542 }] },
                                     { ranges: [{ start: 546, end: 576 }], spacers: [{ target: 562, position: 'after' }, { target: 559, position: 'after' }] },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
