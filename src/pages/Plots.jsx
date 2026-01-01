@@ -479,7 +479,7 @@ const SectionRenderer = React.memo(({
                                         const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                         return num >= range.start && num <= range.end;
                                       })
-                                      .sort((a,b) => (parseInt(String(b.Grave).replace(/\D/g, ''))||0) - (parseInt(String(a.Grave).replace(/\D/g, ''))||0));
+                                      .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                     const plotsWithSpacers = (() => {
                                       // Special handling for 326-348: ensure continuous sequence from 326 (bottom) up to 348 (top)
                                       if (range.start === 326 && range.end === 348) {
@@ -521,11 +521,13 @@ const SectionRenderer = React.memo(({
                                 });
                                 const { unplaced } = getUnplacedForSection('3', plots);
                                 const fallbackCol = (
-                                  <div key="fallback" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-rose-200 pl-2">
-                                    {unplaced.map((plot, pIdx) => (
-                                      <GravePlot key={plot._id || `u3-${pIdx}`} data={plot}
+                                  <div key="fallback" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-rose-200 pl-2">
+                                    {unplaced
+                                      .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0))
+                                      .map((plot, pIdx) => (
+                                        <GravePlot key={plot._id || `u3-${pIdx}`} data={plot}
                                   computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
-                                    ))}
+                                      ))}
                                   </div>
                                 );
                                 return [...cols, fallbackCol];
