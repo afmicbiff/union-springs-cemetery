@@ -205,7 +205,9 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   }
 
   const params = new URLSearchParams(window.location.search);
-  const targetSectionNormParam = (params.get('section') || '').replace(/Section\s*/i, '').trim();
+  const rawSectionParam = params.get('section') || '';
+  const targetSectionNormParam = rawSectionParam.replace(/Section\s*/i, '').trim();
+  const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
   const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
@@ -213,7 +215,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const isSelected = Number.isFinite(targetPlotNum) 
     && Number.isFinite(plotNum) 
     && plotNum === targetPlotNum 
-    && (!targetSectionNormParam || sectionForId === targetSectionNormParam);
+    && (!targetKeyParam || sectionForId === targetKeyParam);
 
   let displayStatus = data.Status;
   if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
@@ -1116,7 +1118,8 @@ export default function PlotsPage() {
       setActiveTab('map');
       setIsCentering(true);
 
-      const sectionNorm = rawSection.replace(/Section\s*/i, '').trim();
+      const rawNorm = rawSection.replace(/Section\s*/i, '').trim();
+      const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
       // Ensure the target section is expanded before searching for the plot element
       if (sectionNorm) {
         setCollapsedSections(prev => ({ ...prev, [sectionNorm]: false }));
