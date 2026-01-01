@@ -50,19 +50,9 @@ Deno.serve(async (req) => {
     }
     const compBuf = new Uint8Array(await compFetch.arrayBuffer());
 
-    // 3) Upload compressed file to storage
-    const ext = compressedMime.includes('png') ? '.png' : (compressedMime.includes('jpeg') ? '.jpg' : '.img');
-    const filename = `compressed-${Date.now()}${ext}`;
-    const compressedFile = new File([compBuf], filename, { type: compressedMime });
-    const upload = await base44.asServiceRole.integrations.Core.UploadFile({ file: compressedFile });
-    const compressedFileUrl = upload?.file_url;
-    if (!compressedFileUrl) {
-      return Response.json({ error: 'Failed to upload compressed file' }, { status: 500 });
-    }
-
-    // 4) Reuse existing optimizer to generate JPEG/WEBP variants & create Image record
-    const optimizeResp = await base44.asServiceRole.functions.invoke('optimizeImage', {
-      file_url: compressedFileUrl,
+    // 3) Directly pass TinyPNG output URL to our optimizer (keeps user auth context)
+    const optimizeResp = await base44.functions.invoke('optimizeImage', {
+      file_url: compressedUrl,
       alt_text,
       quality_jpeg,
       quality_webp,
@@ -71,7 +61,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       ...optimizeResp.data,
-      compressed_file_url: compressedFileUrl,
+      compressed_source_url: compressedUrl,
       source_file_url: file_url
     });
   } catch (error) {
