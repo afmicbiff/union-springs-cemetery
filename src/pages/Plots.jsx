@@ -813,7 +813,7 @@ export default function PlotsPage() {
     toast.success('Moved 227 to Section 2 as 228-A (Not Usable)');
     };
 
-    const fix326to348ToSection2 = async () => {
+    const fix326to348ToSection3 = async () => {
       const nums = Array.from({ length: (348 - 326 + 1) }, (_, i) => String(326 + i));
       const results = await base44.entities.Plot.filter({ plot_number: { $in: nums } }, '-updated_date', 1000);
       const arr = Array.isArray(results) ? results : (results || []);
@@ -821,8 +821,8 @@ export default function PlotsPage() {
       await Promise.all(
         arr.map(async (p) => {
           const sect = String(p.section || '').replace(/Section\s*/i, '').trim();
-          if (sect !== '2') {
-            await base44.entities.Plot.update(p.id, { section: '2' });
+          if (sect !== '3') {
+            await base44.entities.Plot.update(p.id, { section: 'Section 3' });
           }
         })
       );
@@ -830,7 +830,7 @@ export default function PlotsPage() {
       clearEntityCache('Plot');
       queryClient.invalidateQueries({ queryKey: ['plots'] });
       invalidatePlotsMap();
-      toast.success('Updated plots 326–348 to Section 2');
+      toast.success('Updated plots 326–348 to Section 3');
     };
 
     // MAP ENTITIES TO UI FORMAT
@@ -1240,6 +1240,9 @@ export default function PlotsPage() {
                     <span className="font-medium text-sm">Import CSV</span>
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
                 </label>
+                <Button variant="outline" onClick={fix326to348ToSection3} className="bg-white">
+                  326–348 → Section 3
+                </Button>
 
 
 
