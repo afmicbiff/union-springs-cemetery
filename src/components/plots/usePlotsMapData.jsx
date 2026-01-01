@@ -77,6 +77,7 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
             "birth_date",
             "death_date",
             "notes",
+            "photo_url",
             "updated_date",
           ],
           persist: false,

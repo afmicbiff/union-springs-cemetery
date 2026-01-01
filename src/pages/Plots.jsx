@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
-import Section1DnDGrid from "@/components/plots/Section1DnDGrid";
-import Section2DnDGrid from "@/components/plots/Section2DnDGrid";
+const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
+const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -377,23 +377,55 @@ const SectionRenderer = React.memo(({
                     overflow-x-auto
                 `}>
                     {sectionKey === '1' ? (
-                        <Section1DnDGrid
-                          plots={plots}
-                          baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                          isAdmin={isAdmin}
-                          onHover={onHover}
-                          onEdit={isAdmin ? onEdit : undefined}
-                          statusColors={STATUS_COLORS}
-                        />
+                        isAdmin ? (
+                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
+                            <Section1DnDGrid
+                              plots={plots}
+                              baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                              isAdmin={isAdmin}
+                              onHover={onHover}
+                              onEdit={isAdmin ? onEdit : undefined}
+                              statusColors={STATUS_COLORS}
+                            />
+                          </React.Suspense>
+                        ) : (
+                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
+                            {plots.map((plot, pIdx) => (
+                              <GravePlot
+                                key={plot._id || `s1-${pIdx}`}
+                                data={plot}
+                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                onHover={onHover}
+                                onEdit={undefined}
+                              />
+                            ))}
+                          </div>
+                        )
                     ) : sectionKey === '2' ? (
-                        <Section2DnDGrid
-                          plots={plots}
-                          baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                          isAdmin={isAdmin}
-                          onHover={onHover}
-                          onEdit={isAdmin ? onEdit : undefined}
-                          statusColors={STATUS_COLORS}
-                        />
+                        isAdmin ? (
+                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
+                            <Section2DnDGrid
+                              plots={plots}
+                              baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                              isAdmin={isAdmin}
+                              onHover={onHover}
+                              onEdit={isAdmin ? onEdit : undefined}
+                              statusColors={STATUS_COLORS}
+                            />
+                          </React.Suspense>
+                        ) : (
+                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
+                            {plots.map((plot, pIdx) => (
+                              <GravePlot
+                                key={plot._id || `s2-${pIdx}`}
+                                data={plot}
+                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                onHover={onHover}
+                                onEdit={undefined}
+                              />
+                            ))}
+                          </div>
+                        )
                     ) : sectionKey === '3' ? (
                         <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                             {(() => {
