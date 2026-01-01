@@ -431,16 +431,18 @@ const SectionRenderer = React.memo(({
                         )
                     ) : sectionKey === '2' ? (
                         isAdmin ? (
-                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
-                            <Section2DnDGrid
-                              plots={plots}
-                              baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                              isAdmin={isAdmin}
-                              onHover={onHover}
-                              onEdit={isAdmin ? onEdit : undefined}
-                              statusColors={STATUS_COLORS}
-                            />
-                          </React.Suspense>
+                          <div className="flex justify-center">
+                            <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
+                              <Section2DnDGrid
+                                plots={plots}
+                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                isAdmin={isAdmin}
+                                onHover={onHover}
+                                onEdit={isAdmin ? onEdit : undefined}
+                                statusColors={STATUS_COLORS}
+                              />
+                            </React.Suspense>
+                          </div>
                         ) : (
                           <div className="flex flex-col-reverse gap-1 items-center justify-start">
                             {plots.map((plot, pIdx) => (
