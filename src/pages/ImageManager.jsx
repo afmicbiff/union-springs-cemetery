@@ -237,7 +237,12 @@ export default function ImageManager() {
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold flex items-center gap-2"><ImageIcon className="w-5 h-5"/> Image Management</h1>
-          <Link to={createPageUrl('Admin')}><Button variant="outline">Back to Admin</Button></Link>
+          <div className="flex items-center gap-2">
+            <Link to={createPageUrl('ImageGallery')}>
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white">Open Image Gallery</Button>
+            </Link>
+            <Link to={createPageUrl('Admin')}><Button variant="outline">Back to Admin</Button></Link>
+          </div>
         </div>
 
         <Card>
