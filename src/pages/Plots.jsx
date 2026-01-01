@@ -195,7 +195,7 @@ const Tooltip = React.memo(({ data, position, visible }) => {
       );
 });
 
-const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit }) => {
+const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   if (data.isSpacer) {
@@ -205,11 +205,15 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit }) => {
   }
 
   const params = new URLSearchParams(window.location.search);
-  const targetSectionRaw = (params.get('section') || '').replace(/Section\s*/i, '').trim();
+  const targetSectionNormParam = (params.get('section') || '').replace(/Section\s*/i, '').trim();
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
   const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
-  const isSelected = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum;
+  const sectionForId = String(computedSectionKey || sectionNorm || '');
+  const isSelected = Number.isFinite(targetPlotNum) 
+    && Number.isFinite(plotNum) 
+    && plotNum === targetPlotNum 
+    && (!targetSectionNormParam || sectionForId === targetSectionNormParam);
 
   let displayStatus = data.Status;
   if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
@@ -221,12 +225,12 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit }) => {
 
   const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
   const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-pulse';
+  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl blink-strong-green';
   const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
 
   return (
   <div
-      id={plotNum != null ? `plot-${sectionNorm}-${plotNum}` : undefined}
+      id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined}
       onClick={(e) => {
       e.stopPropagation();
       if (onEdit && data && data._entity === 'Plot') onEdit(data);
@@ -415,6 +419,7 @@ const SectionRenderer = React.memo(({
                               <GravePlot
                                 key={plot._id || `s1-${pIdx}`}
                                 data={plot}
+                                  computedSectionKey={sectionKey}
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                 onHover={onHover}
                                 onEdit={undefined}
@@ -440,6 +445,7 @@ const SectionRenderer = React.memo(({
                               <GravePlot
                                 key={plot._id || `s2-${pIdx}`}
                                 data={plot}
+                                  computedSectionKey={sectionKey}
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                 onHover={onHover}
                                 onEdit={undefined}
@@ -503,7 +509,8 @@ const SectionRenderer = React.memo(({
                                     return (
                                       <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
                                         {plotsWithSpacers.map((plot, pIdx) => (
-                                          <GravePlot key={plot._id || `plot-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                          <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
+                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
                                         ))}
                                       </div>
                                     );
@@ -512,7 +519,8 @@ const SectionRenderer = React.memo(({
                                 const fallbackCol = (
                                   <div key="fallback" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-rose-200 pl-2">
                                     {unplaced.map((plot, pIdx) => (
-                                      <GravePlot key={plot._id || `u3-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                      <GravePlot key={plot._id || `u3-${pIdx}`} data={plot}
+                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
                                     ))}
                                   </div>
                                 );
@@ -578,7 +586,8 @@ const SectionRenderer = React.memo(({
                                     return (
                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                             {plotsArr.map((plot, pIdx) => (
-                                                <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                                <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot}
+                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
                                             ))}
                                         </div>
                                     );
@@ -588,7 +597,8 @@ const SectionRenderer = React.memo(({
                                 const fallbackCol = (
                                   <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
                                     {unplaced.map((plot, pIdx) => (
-                                      <GravePlot key={plot._id || `u4-${pIdx}`} data={plot} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                      <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
+                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
                                     ))}
                                   </div>
                                 );
@@ -636,6 +646,7 @@ const SectionRenderer = React.memo(({
                                             <GravePlot
                                                 key={plot._id || `s5-${idx}-${pIdx}`}
                                                 data={plot}
+                                  computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin && !plot.isSpacer ? onEdit : undefined}
@@ -651,6 +662,7 @@ const SectionRenderer = React.memo(({
                                             <GravePlot
                                                 key={plot._id || `u5-${pIdx}`}
                                                 data={plot}
+                                  computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin ? onEdit : undefined}
@@ -668,7 +680,8 @@ const SectionRenderer = React.memo(({
                                 {(isExpanded ? (plots || []) : (plots || []).slice(0, 120)).map((plot) => (
                                     <GravePlot 
                                         key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                        data={plot} 
+                                        data={plot}
+                                  computedSectionKey={sectionKey} 
                                         baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                         onHover={onHover}
                                         onEdit={isAdmin ? onEdit : undefined}
@@ -1298,6 +1311,7 @@ export default function PlotsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}50%{box-shadow:0 0 0 6px rgba(34,197,94,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out 6;}`}</style>
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
