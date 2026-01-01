@@ -68,8 +68,9 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     setCells(prev => {
       const next = [...prev];
       const item = next[sIdx];
-      next[sIdx] = null;
+      const destItem = next[dIdx] || null;
       next[dIdx] = item;
+      next[sIdx] = destItem; // swap if occupied, otherwise leave null
       return next;
     });
   };
@@ -99,7 +100,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                 {(provided, snapshot) => (
                   <div ref={provided.innerRef} {...provided.droppableProps} className="flex">
                     {item ? (
-                      <Draggable draggableId={`s2-${item._id || item.id || idx}`} index={idx} isDragDisabled={!isAdmin}>
+                      <Draggable draggableId={`s2-${item._id || item.id || idx}`} index={0} isDragDisabled={!isAdmin}>
                         {(draggableProvided, draggableSnapshot) => (
                           <div
                             ref={draggableProvided.innerRef}
