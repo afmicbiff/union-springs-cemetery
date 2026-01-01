@@ -225,6 +225,7 @@ export default function Layout({ children }) {
             <button
               className="md:hidden p-2 rounded-md text-stone-300 hover:text-white hover:bg-stone-800"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle navigation"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
