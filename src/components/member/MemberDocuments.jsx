@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Upload, Trash2, Eye, Loader2, Download } from 'lucide-react';
+import { FileText, Upload, Trash2, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
 import SecureFileLink from "@/components/documents/SecureFileLink";
@@ -18,13 +18,15 @@ export default function MemberDocuments({ user }) {
     const [expirationDate, setExpirationDate] = useState('');
     const [category, setCategory] = useState('Other');
     const [notes, setNotes] = useState('');
+    const [category, setCategory] = useState('Other');
+    const [notes, setNotes] = useState('');
 
     // 1. Fetch Member Record to get documents list
     const { data: memberRecord } = useQuery({
         queryKey: ['member-profile', user.email],
         queryFn: async () => {
-            const res = await base44.entities.Member.list({ email_primary: user.email }, 1);
-            return res[0] || null;
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+            return (res && res[0]) || null;
         },
         enabled: !!user.email
     });
@@ -147,25 +149,7 @@ export default function MemberDocuments({ user }) {
         }
     };
 
-    // 5. View/Download Document
-    const handleView = async (doc) => {
-        const toastId = toast.loading("Generating secure link...");
-        try {
-            const res = await base44.integrations.Core.CreateFileSignedUrl({ 
-                file_uri: doc.file_uri,
-                expires_in: 60 // 1 minute
-            });
-            
-            if (res.signed_url) {
-                window.open(res.signed_url, '_blank');
-                toast.dismiss(toastId);
-            } else {
-                throw new Error("Could not generate link");
-            }
-        } catch (err) {
-            toast.error("Error: " + err.message, { id: toastId });
-        }
-    };
+
 
     return (
         <Card>

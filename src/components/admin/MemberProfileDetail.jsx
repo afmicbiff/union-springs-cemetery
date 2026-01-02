@@ -20,7 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import AIEmailAssistant from './AIEmailAssistant';
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Eye, ArrowRight, Trash2 } from 'lucide-react';
+import { FileText, ArrowRight, Trash2 } from 'lucide-react';
 import MoveDocumentDialog from './MoveDocumentDialog';
 import MemberInvoicesAdmin from './MemberInvoicesAdmin';
 import SecureFileLink from "@/components/documents/SecureFileLink";
@@ -258,6 +258,22 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0">
                                                 <SecureFileLink doc={doc} />
+                                                <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-red-700" title="Delete"
+                                                   onClick={async () => {
+                                                       try {
+                                                           const docs = Array.isArray(member.documents) ? member.documents : [];
+                                                           const updated = docs.filter(d => (d.id || '') !== (doc.id || ''));
+                                                           await base44.entities.Member.update(member.id, { documents: updated });
+                                                           toast.success('Document removed');
+                                                           queryClient.invalidateQueries(['members']);
+                                                           queryClient.invalidateQueries(['member', member.id]);
+                                                       } catch (e) {
+                                                           toast.error('Failed to delete');
+                                                       }
+                                                   }}
+                                                >
+                                                   <Trash2 className="w-3.5 h-3.5" />
+                                                </Button
                                                 <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => setMoveDoc(doc)} title="Move to Record">
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </Button>
