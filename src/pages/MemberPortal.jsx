@@ -40,6 +40,29 @@ export default function MemberPortal() {
     });
     const unreadCount = (convData?.threads || []).reduce((sum, t) => sum + (t.unread_count || 0), 0);
 
+    // Member tasks indicator (blink when due/overdue tasks exist)
+    const { data: memberForTasks } = useQuery({
+        queryKey: ['member-for-tasks', user?.email],
+        queryFn: async () => {
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+            return (res && res[0]) || null;
+        },
+        enabled: !!user
+    });
+
+    const { data: memberTasksForIndicator = [] } = useQuery({
+        queryKey: ['member-tasks-indicator', memberForTasks?.id],
+        queryFn: async () => {
+            if (!memberForTasks?.id) return [];
+            return base44.entities.Task.filter({ member_id: memberForTasks.id, is_archived: false }, '-created_date', 50);
+        },
+        enabled: !!memberForTasks?.id,
+        refetchInterval: 30000,
+        initialData: []
+    });
+
+    const tasksDueCount = memberTasksForIndicator.filter(t => t.status !== 'Completed' && t.due_date && new Date(t.due_date) <= new Date()).length;
+
     if (authLoading) return <div className="min-h-[60vh] flex items-center justify-center text-teal-800"><Loader2 className="animate-spin w-8 h-8 mr-2" /> Loading portal...</div>;
     
     if (!user) {
