@@ -30,7 +30,8 @@ import {
     X,
     Plus,
     Mail,
-    Settings
+    Settings,
+    ChevronDown
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { format } from 'date-fns';
@@ -563,7 +564,10 @@ export default function AdminDashboard() {
                                 ${tab.id === 'communication' ? 'ml-4 md:ml-0 md:col-span-2 px-6' : ''}
                             `}
                         >
-                            <span className="whitespace-nowrap">{tab.label}</span>
+                            <div className="whitespace-nowrap flex items-center gap-1">
+                                {tab.label}
+                                {tab.id === 'communication' && (<ChevronDown className="w-3 h-3 opacity-70" />)}
+                            </div>
                         </TabsTrigger>
                     ))}
 
@@ -585,7 +589,7 @@ export default function AdminDashboard() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                          <Bell className="w-4 h-4" /> Notifications
+                          <Bell className="w-4 h-4" /> Notifications <ChevronDown className="w-3 h-3 opacity-70" />
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start" className="min-w-[200px]">

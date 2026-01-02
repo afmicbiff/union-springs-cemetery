@@ -1,5 +1,6 @@
 import Admin from './pages/Admin';
 import AdminCodeInsight from './pages/AdminCodeInsight';
+import Bylaws from './pages/Bylaws';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
 import Employees from './pages/Employees';
@@ -23,13 +24,13 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import Bylaws from './pages/Bylaws';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Admin": Admin,
     "AdminCodeInsight": AdminCodeInsight,
+    "Bylaws": Bylaws,
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
     "Employees": Employees,
@@ -53,7 +54,6 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "Bylaws": Bylaws,
 }
 
 export const pagesConfig = {
