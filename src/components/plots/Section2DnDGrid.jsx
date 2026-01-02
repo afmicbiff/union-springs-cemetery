@@ -8,9 +8,9 @@ function parseNum(v) {
 }
 
 export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
-  // Config: keep a reserved bottom row of placeholders (droppable) with no items initially
-  const perCol = 24; // total rows per column including the reserved bottom row
-  const reservedBottomRows = 1;
+  // Config: fixed 23 rows x 10 columns for Section 2
+  const perCol = 23; // total plot rows per column
+  const reservedBottomRows = 0;
 
   // Legend-like text color for plot number
   const STATUS_TEXT = {
@@ -33,26 +33,25 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     return asc;
   }, [plots]);
 
-  const cols = Math.max(1, Math.ceil(sorted.length / (perCol - reservedBottomRows)));
+  const cols = 10;
   const total = cols * perCol;
 
   // Build initial cells with reserved bottom row as null (placeholders)
   const buildInitial = React.useCallback(() => {
           const fillRows = perCol - reservedBottomRows;
 
-          // Build base columns from sorted data
-          const baseColumns = [];
+          // Initialize fixed number of columns
+          const baseColumns = Array.from({ length: cols }, () => Array(perCol).fill(null));
+
+          // Fill columns bottom-up starting from plot 186 (sorted already pivoted)
           let i = 0;
-          while (i < sorted.length) {
-            const col = Array(perCol).fill(null);
-            for (let r = perCol - 1 - reservedBottomRows; r >= 0; r--) {
-              if (i >= sorted.length) break;
-              col[r] = sorted[i++];
+          for (let c = 0; c < cols && i < sorted.length; c++) {
+            for (let r = perCol - 1 - reservedBottomRows; r >= 0 && i < sorted.length; r--) {
+              baseColumns[c][r] = sorted[i++];
             }
-            baseColumns.push(col);
           }
 
-          // Custom sequence: place 326–348 immediately to the right of the column with 267
+          // Custom sequence 326–348: merge into column right of anchor (268) without exceeding fixed cols
           const seqStart = 326;
           const seqEnd = 348;
           const anchorNum = 268;
@@ -63,62 +62,49 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
             if (n != null) byNum.set(n, p);
           });
 
-          // Only apply the custom column if at least one plot in 326–348 exists in Section 2 data
-          const hasAnySeq = (() => {
-            for (let n = seqStart; n <= seqEnd; n++) if (byNum.has(n)) return true;
-            return false;
-          })();
+          let hasAnySeq = false;
+          for (let n = seqStart; n <= seqEnd; n++) { if (byNum.has(n)) { hasAnySeq = true; break; } }
 
-          if (!hasAnySeq) {
-            // Flatten baseColumns and return without inserting an empty column
-            const colsFinal = baseColumns.length;
-            const out = Array(colsFinal * perCol).fill(null);
-            for (let c = 0; c < colsFinal; c++) {
+          if (hasAnySeq) {
+            // Remove sequence numbers from wherever they landed
+            for (let c = 0; c < cols; c++) {
               for (let r = 0; r < perCol; r++) {
-                out[c * perCol + r] = baseColumns[c][r];
+                const cell = baseColumns[c][r];
+                const n = parseNum(cell?.Grave);
+                if (n != null && n >= seqStart && n <= seqEnd) {
+                  baseColumns[c][r] = null;
+                }
               }
             }
-            return out;
-          }
 
-          // Remove 326–348 from original columns to avoid duplicates
-          for (let c = 0; c < baseColumns.length; c++) {
+            // Build sequence column bottom-up
+            const seqCol = Array(perCol).fill(null);
+            let rPtr = perCol - 1 - reservedBottomRows;
+            for (let n = seqStart; n <= seqEnd && rPtr >= 0; n++, rPtr--) {
+              const p = byNum.get(n);
+              if (p) seqCol[rPtr] = p;
+            }
+
+            // Find anchor column containing 268
+            let anchorIdx = baseColumns.findIndex((col) => col.some((cell) => parseNum(cell?.Grave) === anchorNum));
+            if (anchorIdx < 0) anchorIdx = 0;
+            const targetIdx = Math.min(anchorIdx + 1, cols - 1);
+
+            // Merge seqCol into target column, preferring seq values
             for (let r = 0; r < perCol; r++) {
-              const cell = baseColumns[c][r];
-              const n = parseNum(cell?.Grave);
-              if (n != null && n >= seqStart && n <= seqEnd) {
-                baseColumns[c][r] = null;
-              }
+              if (seqCol[r]) baseColumns[targetIdx][r] = seqCol[r];
             }
           }
 
-          // Build the sequence column bottom-up (326 at bottom, up to 348)
-          const seqCol = Array(perCol).fill(null);
-          let rPtr = perCol - 1 - reservedBottomRows;
-          for (let n = seqStart; n <= seqEnd && rPtr >= 0; n++, rPtr--) {
-            const p = byNum.get(n);
-            if (p) seqCol[rPtr] = p; // leave null as placeholder if missing
-          }
-
-          // Find anchor column containing 267
-          let anchorIdx = baseColumns.findIndex((col) =>
-            col.some((cell) => parseNum(cell?.Grave) === anchorNum)
-          );
-          if (anchorIdx < 0) anchorIdx = baseColumns.length - 1;
-
-          // Insert sequence column to the right of anchor
-          baseColumns.splice(anchorIdx + 1, 0, seqCol);
-
-          // Flatten to cells array
-          const colsFinal = baseColumns.length;
-          const out = Array(colsFinal * perCol).fill(null);
-          for (let c = 0; c < colsFinal; c++) {
+          // Flatten to fixed-size cells array
+          const out = Array(cols * perCol).fill(null);
+          for (let c = 0; c < cols; c++) {
             for (let r = 0; r < perCol; r++) {
               out[c * perCol + r] = baseColumns[c][r];
             }
           }
           return out;
-        }, [perCol, reservedBottomRows, sorted]);
+        }, [perCol, reservedBottomRows, sorted, cols]);
 
   const [cells, setCells] = React.useState(buildInitial);
   const [dragging, setDragging] = React.useState(false);
@@ -163,10 +149,10 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
         </button>
       </div>
       <DragDropContext onDragStart={() => setDragging(true)} onDragEnd={(res) => { if (isAdmin) onDragEnd(res); setDragging(false); }}>
-        <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${Math.max(1, Math.floor(cells.length / perCol))}, max-content)`, gridAutoColumns: 'max-content' }}>
+        <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
           {Array.from({ length: cells.length }).map((_, idx) => {
             const c = Math.floor(idx / perCol);
-            const r = idx % perCol; // r === perCol - 1 is the reserved bottom row (droppable placeholders)
+            const r = idx % perCol; // 0..perCol-1 (no reserved bottom row)
             const item = cells[idx];
             const droppableId = `s2-c${c}-r${r}`;
 
@@ -209,8 +195,8 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                         )}
                       </Draggable>
                     ) : (
-                      // Placeholder cell: remain blank, but is droppable (including bottom row r===0)
-                      <CellWrapper active={snapshot.isDraggingOver}>
+                     // Placeholder cell: remain blank, but is droppable
+                     <CellWrapper active={snapshot.isDraggingOver}>
                         <div className="w-full h-full" />
                       </CellWrapper>
                     )}
