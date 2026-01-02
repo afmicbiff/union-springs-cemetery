@@ -392,9 +392,11 @@ export default function Layout({ children }) {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline" size="sm" onClick={clearSiteCache} className="bg-transparent border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800 hover:border-stone-600 w-full justify-start">
-                <Trash2 className="w-4 h-4 mr-2" /> Clear Cache
-              </Button>
+              {isAdminUser && (
+                <Button variant="outline" size="sm" onClick={clearSiteCache} className="bg-transparent border-stone-700 text-stone-400 hover:text-white hover:bg-stone-800 hover:border-stone-600 w-full justify-start">
+                  <Trash2 className="w-4 h-4 mr-2" /> Clear Cache
+                </Button>
+              )}
             </div>
           </div>
         </div>
