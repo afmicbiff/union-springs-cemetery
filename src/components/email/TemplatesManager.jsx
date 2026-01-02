@@ -122,6 +122,31 @@ export default function TemplatesManager() {
   );
 }
 
+function getCoreMemberTemplates() {
+  return [
+    {
+      name: "New Member Welcome",
+      key: "member_welcome",
+      category: "member",
+      description: "Sent when a new member is created",
+      subject: "Welcome to Union Springs, {{first_name}}",
+      body: "Dear {{first_name}},\n\nWelcome to the Union Springs Cemetery Association. We're glad to have you in our community.\n\nSincerely,\nUnion Springs Cemetery",
+      placeholders: ["first_name","last_name"],
+      is_active: true
+    },
+    {
+      name: "Donation Thank You",
+      key: "donation_thank_you",
+      category: "member",
+      description: "Sent when a member makes a new donation",
+      subject: "Thank you for your donation, {{first_name}}",
+      body: "Dear {{first_name}},\n\nWe gratefully acknowledge your donation of {{donation}}.\nYour support helps us maintain and improve the cemetery.\n\nSincerely,\nUnion Springs Cemetery",
+      placeholders: ["first_name","donation"],
+      is_active: true
+    }
+  ];
+}
+
 function getStarterTemplates() {
   return [
     {
