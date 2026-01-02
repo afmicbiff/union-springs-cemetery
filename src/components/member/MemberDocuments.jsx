@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Upload, Trash2, Eye, Loader2, Download } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
+import SecureFileLink from "@/components/documents/SecureFileLink";
 
 export default function MemberDocuments({ user }) {
     const queryClient = useQueryClient();
@@ -45,12 +46,22 @@ export default function MemberDocuments({ user }) {
             
             if (!uploadRes.file_uri) throw new Error("Upload failed");
 
-            // B. Update Member Entity with new document reference
+            // Security scan
+            const scanRes = await base44.functions.invoke('scanFileForVirus', { file_uri: uploadRes.file_uri, context: 'member_upload' });
+            if (scanRes.data && scanRes.data.clean === false) {
+                throw new Error('Upload blocked: file failed security scan');
+            }
+
+            // B. Update Member Entity with new document reference (versioned)
             const newDoc = {
                 id: crypto.randomUUID(),
+                group_id: crypto.randomUUID(),
+                version: 1,
                 name: file.name,
                 file_uri: uploadRes.file_uri,
                 type: docType,
+                category: category,
+                notes: notes || '',
                 expiration_date: expirationDate || null,
                 uploaded_at: new Date().toISOString()
             };
@@ -74,6 +85,7 @@ export default function MemberDocuments({ user }) {
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input
             setExpirationDate('');
+            setNotes('');
         } catch (err) {
             console.error(err);
             toast.error("Upload Error: " + err.message);
@@ -94,7 +106,46 @@ export default function MemberDocuments({ user }) {
         }
     });
 
-    // 4. View/Download Document
+    // 4. Upload New Version
+    const handleUploadNewVersion = async (e, baseDoc) => {
+        const file = e.target.files[0];
+        if (!file || !memberRecord) return;
+        try {
+            setUploading(true);
+            const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+            const scanRes = await base44.functions.invoke('scanFileForVirus', { file_uri, context: 'member_version_upload' });
+            if (scanRes.data && scanRes.data.clean === false) {
+                toast.error('Upload blocked: file failed security scan');
+                return;
+            }
+            const groupId = baseDoc.group_id || baseDoc.id;
+            const groupDocs = documents.filter(d => (d.group_id || d.id) === groupId);
+            const nextVersion = Math.max(...groupDocs.map(d => d.version || 1), 1) + 1;
+            const newDoc = {
+                id: crypto.randomUUID(),
+                group_id: groupId,
+                version: nextVersion,
+                name: file.name,
+                file_uri,
+                type: baseDoc.type || docType,
+                category: baseDoc.category || category,
+                notes: 'Updated version',
+                expiration_date: baseDoc.expiration_date || null,
+                uploaded_at: new Date().toISOString()
+            };
+            const updatedDocs = [...documents, newDoc];
+            await base44.entities.Member.update(memberRecord.id, { documents: updatedDocs });
+            queryClient.invalidateQueries(['member-profile']);
+            toast.success('New version uploaded');
+        } catch (err) {
+            toast.error('Failed to upload new version: ' + err.message);
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    // 5. View/Download Document
     const handleView = async (doc) => {
         const toastId = toast.loading("Generating secure link...");
         try {
@@ -137,9 +188,25 @@ export default function MemberDocuments({ user }) {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Identification">Identification (ID/Passport)</SelectItem>
-                                    <SelectItem value="Deed/Certificate">Deed / Certificate</SelectItem>
-                                    <SelectItem value="Form/Application">Form / Application</SelectItem>
+                                    <SelectItem value="Will">Will</SelectItem>
+                                    <SelectItem value="Deed/Certificate">Burial Deed / Certificate</SelectItem>
+                                    <SelectItem value="Family Records">Family Records</SelectItem>
+                                    <SelectItem value="Identification">Identification</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="w-full sm:w-1/3 space-y-1.5">
+                            <Label htmlFor="category" className="text-xs">Category</Label>
+                            <Select value={category} onValueChange={setCategory}>
+                                <SelectTrigger id="category" className="bg-white h-9">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Legal">Legal</SelectItem>
+                                    <SelectItem value="Deed/Certificate">Deed/Certificate</SelectItem>
+                                    <SelectItem value="Identification">Identification</SelectItem>
+                                    <SelectItem value="Family Records">Family Records</SelectItem>
                                     <SelectItem value="Other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -167,6 +234,11 @@ export default function MemberDocuments({ user }) {
                                 {uploading && <Loader2 className="w-9 h-9 p-2 animate-spin text-teal-600 shrink-0" />}
                             </div>
                         </div>
+
+                        <div className="w-full mt-3 space-y-1.5">
+                            <Label htmlFor="notes" className="text-xs">Notes (Optional)</Label>
+                            <Input id="notes" className="bg-white h-9" placeholder="Add context..." value={notes} onChange={(e) => setNotes(e.target.value)} />
+                        </div>
                     </div>
                 </div>
 
@@ -186,9 +258,14 @@ export default function MemberDocuments({ user }) {
                                             <FileText className="w-4 h-4" />
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="font-medium text-sm truncate">{doc.name}</div>
+                                            <div className="font-medium text-sm truncate flex items-center gap-2">
+                                                <span className="truncate">{doc.name}</span>
+                                                <span className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px]">v{doc.version || 1}</span>
+                                            </div>
                                             <div className="text-xs text-stone-500 flex gap-2 flex-wrap">
                                                 <span>{doc.type}</span>
+                                                <span>•</span>
+                                                <span>{doc.category || 'Other'}</span>
                                                 <span>•</span>
                                                 <span>Uploaded: {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy') : 'Unknown'}</span>
                                                 {doc.expiration_date && (
@@ -200,9 +277,11 @@ export default function MemberDocuments({ user }) {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
-                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-teal-600 hover:text-teal-700 hover:bg-teal-50" onClick={() => handleView(doc)} title="View/Download">
-                                            <Eye className="w-4 h-4" />
+                                        <input id={`newver-${doc.id || idx}`} type="file" className="hidden" onChange={(e) => handleUploadNewVersion(e, doc)} />
+                                        <Button size="sm" variant="outline" className="h-8 text-teal-700 border-teal-200 hover:bg-teal-50" onClick={() => document.getElementById(`newver-${doc.id || idx}`).click()} title="Upload New Version">
+                                            New Ver
                                         </Button>
+                                        <SecureFileLink doc={doc} />
                                         <Button size="icon" variant="ghost" className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => deleteMutation.mutate(doc.id)} title="Delete">
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
