@@ -323,7 +323,7 @@ export default function Layout({ children }) {
       <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800 mt-auto">
         <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
           <div>
-            <h3 className="text-teal-500 font-serif text-lg mb-4 uppercase tracking-widest">Union Springs</h3>
+            <h3 className="text-teal-500 text-xl md:text-2xl font-serif tracking-wider uppercase mb-4">Union Springs</h3>
             <p className="mb-4">Ideally located in a granite setting, providing a peaceful final resting place with dignity and respect.</p>
             <p>&copy; {new Date().getFullYear()} Union Springs Cemetery Association</p>
           </div>
