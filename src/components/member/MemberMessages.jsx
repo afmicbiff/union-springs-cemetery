@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from 'date-fns';
-import { Send, MessageSquare, Loader2, Plus, Mail } from 'lucide-react';
+import { Send, MessageSquare, Loader2, Plus, Mail, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -56,7 +56,21 @@ export default function MemberMessages({ user }) {
         }
     });
 
-    const threads = threadsData?.threads || [];
+    const deleteThreadMutation = useMutation({
+        mutationFn: async (threadId) => {
+            return await base44.functions.invoke('communication', {
+                action: 'manageThread',
+                thread_id: threadId,
+                operation: 'delete'
+            });
+        },
+        onSuccess: () => {
+            if (selectedThread?.id) setSelectedThread(null);
+            queryClient.invalidateQueries(['member-conversations']);
+        }
+    });
+
+     const threads = threadsData?.threads || [];
 
     React.useEffect(() => {
         const t = threadsData?.threads || [];
@@ -107,7 +121,16 @@ export default function MemberMessages({ user }) {
                             >
                                 <div className="flex justify-between mb-1">
                                     <span className="font-semibold text-sm text-stone-900 truncate">{thread.subject}</span>
-                                    {thread.unread_count > 0 && <span className="bg-red-500 w-2 h-2 rounded-full"></span>}
+                                    <div className="flex items-center gap-2">
+                                        {thread.unread_count > 0 && <span className="bg-red-500 w-2 h-2 rounded-full"></span>}
+                                        <button
+                                            className="p-1 rounded hover:bg-red-50 text-stone-400 hover:text-red-600"
+                                            onClick={(e) => { e.stopPropagation(); deleteThreadMutation.mutate(thread.id); }}
+                                            title="Delete thread"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="text-xs text-stone-500 mb-1">{format(new Date(thread.last_message), 'MMM d, h:mm a')}</div>
                                 <div className="text-sm text-stone-600 truncate">{thread.messages[thread.messages.length-1]?.body}</div>
