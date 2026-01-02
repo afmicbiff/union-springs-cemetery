@@ -94,8 +94,7 @@ export default function MembersDirectory({ openMemberId }) {
                         'donation','comments','last_donation_date','last_contact_date',
                         'follow_up_date','follow_up_status','follow_up_notes','follow_up_assignee_id'
                     ],
-                    persist: true,
-                    ttlMs: 10 * 60_000
+                    persist: false
                 }
             );
             return items;
