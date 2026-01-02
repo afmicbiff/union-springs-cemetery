@@ -44,6 +44,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
         }
     };
     const [noteContent, setNoteContent] = useState("");
+  const [interactionDate, setInteractionDate] = useState("");
     
     const { data: employees } = useQuery({
         queryKey: ['employees-profile-detail'],
@@ -70,7 +71,8 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                 id: member.id, 
                 data: {
                     type: noteType,
-                    note: noteContent
+                    note: noteContent,
+                    timestamp: interactionDate ? new Date(interactionDate).toISOString() : undefined
                 }
             });
             if (res.data.error) throw new Error(res.data.error);
@@ -80,6 +82,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
             queryClient.invalidateQueries(['members']);
             queryClient.invalidateQueries(['member', member.id]);
             setNoteContent("");
+            setInteractionDate("");
             toast.success("Log added");
         },
         onError: (err) => toast.error("Failed to add log: " + err.message)
@@ -286,18 +289,25 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                         <div className="space-y-3">
                             <div className="flex gap-2">
                                 <Select value={noteType} onValueChange={setNoteType}>
-                                    <SelectTrigger className="w-[110px]">
-                                        <SelectValue />
+                                    <SelectTrigger className="w-[130px]">
+                                        <SelectValue placeholder="Type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="note">Note</SelectItem>
                                         <SelectItem value="call">Call</SelectItem>
                                         <SelectItem value="email">Email</SelectItem>
                                         <SelectItem value="meeting">Meeting</SelectItem>
+                                        <SelectItem value="note">Note</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <Input
+                                    type="datetime-local"
+                                    className="w-[190px]"
+                                    value={interactionDate}
+                                    onChange={(e) => setInteractionDate(e.target.value)}
+                                    placeholder="Date/time"
+                                />
                                 <Input 
-                                    placeholder="Add a note..." 
+                                    placeholder="Add notes..." 
                                     value={noteContent}
                                     onChange={(e) => setNoteContent(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && noteContent && addLogMutation.mutate()}

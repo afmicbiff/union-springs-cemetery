@@ -73,9 +73,9 @@ Deno.serve(async (req) => {
                 memberName = `${oldMember.first_name} ${oldMember.last_name}`;
                 
                 const newLog = {
-                    timestamp: new Date().toISOString(),
-                    type: data.type || 'note',
-                    note: data.note || '',
+                    timestamp: (data && data.timestamp) ? data.timestamp : new Date().toISOString(),
+                    type: (data && data.type) ? data.type : 'note',
+                    note: (data && data.note) ? data.note : '',
                     logged_by: userName
                 };
 
