@@ -23,7 +23,9 @@ export default function AdminBylaws() {
     });
 
     useEffect(() => {
-        if (!selectedDoc && bylaws.length) setSelectedDoc(bylaws[0]);
+        if (selectedDoc || !bylaws.length) return;
+        const target = bylaws.find(d => (d.name || '').toLowerCase().includes('union springs cemetery management'));
+        setSelectedDoc(target || bylaws[0]);
     }, [bylaws, selectedDoc]);
 
     const currentExt = useMemo(() => (selectedDoc ? ((selectedDoc.type || selectedDoc.name?.split('.').pop() || '').toLowerCase()) : ''), [selectedDoc]);
