@@ -147,6 +147,92 @@ export default function AdminBylaws() {
                                 </div>
                             ))}
                         </div>
+
+                        <div className="mt-4 border rounded-md bg-stone-50 p-4">
+                            <h3 className="text-sm font-semibold mb-2 text-stone-800">Cemetery Management System & Website Requirement Specification</h3>
+                            <pre className="text-xs whitespace-pre-wrap leading-relaxed text-stone-700">{`Cemetery Management System & Website Requirement Specification
+Cemetery Address: 1311 Fire Tower Rd, Shongaloo, LA 71072 Developer: Anthony Handy Hosting Provider: Ionos Systems
+1. Website Development, Domain, Maintenance & Deliverables
+The project requires the creation of a dedicated website that serves as both the public face for the cemetery and the administrative portal for management.
+•	Prototypes & Turnover:
+	o	Deliverables: The Developer must provide two (2) distinct prototypes of the website for review.
+	o	Approval: The Client will select or refine a design from these options before the final website is constructed.
+	o	Turnover: The project is considered complete only after the final website is fully operational and turned over to the user.
+•	Domain & Hosting:
+	o	Provider: Ionos Systems shall provide hosting and security services to ensure data integrity and site stability.
+	o	Costs: The Client assumes responsibility for the purchase of the domain name and all associated hosting costs.
+•	Maintenance & Updates:
+	o	Rates: Ongoing maintenance and updates are billed at a rate of $60.00 per hour or $30.00 per 30-minute increment.
+	o	Scope: Maintenance includes security patches, content updates, and functional repairs.
+•	Administrative Access:
+	o	The Administrator shall have restricted permissions focused solely on the ability to change, modify, or update information within the system.
+2. Visual Design Specifications
+The visual identity of the platform must adhere to the following strict style guide:
+•	1. Primary Color: Teal
+•	2. Secondary Color: Red
+•	3. Background Color: Granite
+•	4. Surface Color: Silver
+•	5. Text Color (Main): Black
+•	6. Status Colors: Standard
+•	7. Heading Font: Antique Central
+•	8. Body Font: Electra
+•	9. Base Font Size: 16 pixels
+•	10. Line Height: 1.5
+•	11. Border Radius: Soft
+•	12. Shadow Style: Subtle
+•	13. Whitespace: Compact
+•	14. Button Style: Bible (Thematic shape/style if possible)
+•	15. Input Style: Single line entry Hover
+•	16. Max Container Width: 1140px - 1240px
+•	17. Animation Speed: Smooth
+3. Mobile Accessibility & Software Architecture
+The system must be fully responsive and optimized for mobile devices.
+•	Mobile Functionality:
+	o	Public View: Visitors must be able to navigate the map, search for graves, and view information seamlessly on smartphones.
+	o	Admin View: Administrators require the ability to complete all management tasks (updating statuses, approving notifications, reviewing records) directly from a mobile interface.
+•	Scalability:
+	o	The architecture must allow for the future addition of new modules without requiring a complete rebuild of the core system.
+•	Software Stack:
+	o	To ensure compatibility with Ionos Systems and meet the scalability requirements, the suggested technology stack includes:
+			Frontend: HTML5, CSS3, and JavaScript (React or Vue.js) for responsive, smooth animations.
+			Backend: PHP (Laravel Framework) or Node.js for robust data handling.
+			Database: MySQL or PostgreSQL for secure record storage.
+4. Plot Management & Inventory
+•	Terminology: The system shall use the term "Reserved" for all claims. The term "Sold" is prohibited as plots are assigned via donation.
+•	Burial Capacity:
+	o	Standard: One Casket.
+	o	Cremation: The system must allow entry of up to three urns per single plot.
+•	Administrative Notifications: An alert system is required to notify administrators of any updates or plot status changes needing review.
+5. Digital Mapping
+•	Color Coding: The digital map must utilize specific colors to denote status:
+	o	Reserved
+	o	Occupied
+	o	Open
+	o	Veteran
+	o	More than one status
+	o	Unavailable
+•	Public Access: A dedicated public portal shall provide read-only access to the map.
+•	Interactive Signage: The system must generate links or QR codes compatible with physical signage to aid on-site navigation.
+•	Search Capabilities: Users must be able to search by name. The display shall include a map view alongside a list view of names.
+6. Sales Processing & Record Keeping
+•	Sales Details: Records must support individual line items and automatically trigger a status update to "Reserved" upon transaction completion.
+•	Templates: The system shall generate templates for reservation receipts and confirmation letters.
+•	Tracking: The database must include specific tracking for plots containing liners or vaults.
+7. Reporting & Data Security
+•	Reports: The system requires advanced reporting capabilities, specifically highlighting details related to perpetual care (lawn and site maintenance).
+•	Data Archiving:
+	o	The interface must provide clear instructions and functionality for saving and archiving data.
+	o	The process for saving data to personal devices must be explicitly defined.
+•	Security: Comprehensive security measures must be visible and active to ensure user confidence and data ease of use.
+8. Client Responsibilities
+•	Content & Assets: The Client retains sole responsibility for providing all necessary website content, including text, images, logos, and specific cemetery data required to populate the various sections of the website.
+•	Timely Submission: The Client must submit all required materials in a timely manner to facilitate the development schedule.
+9. Standard Development Provisions
+•	Browser Compatibility: The website shall be tested and optimized for performance on all major modern web browsers (Chrome, Safari, Firefox, Edge).
+•	Search Engine Optimization (SEO): The development includes basic on-page SEO setup, including meta tags, headers, and site map generation to ensure visibility.
+•	Training & Documentation: The Developer shall provide a user manual or conduct a training session to ensure the Administrator can effectively operate the system.
+•	Ownership: Upon completion and full payment, full ownership of the website code, design assets, and database transfers to the Client.`}</pre>
+                        </div>
                     </div>
                 </div>
             </CardContent>
