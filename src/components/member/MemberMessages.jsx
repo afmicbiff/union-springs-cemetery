@@ -58,7 +58,14 @@ export default function MemberMessages({ user }) {
 
     const threads = threadsData?.threads || [];
 
-    return (
+    React.useEffect(() => {
+        const t = threadsData?.threads || [];
+        if (t.length > 0 && !selectedThread) {
+            setSelectedThread(t[0]);
+        }
+    }, [threadsData, selectedThread]);
+
+     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <div>

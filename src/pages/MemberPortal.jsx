@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, LayoutDashboard, UserCircle, MessageSquare, LogOut } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,6 +27,18 @@ export default function MemberPortal() {
         }).catch(() => setAuthLoading(false));
     }, []);
 
+    // Fetch conversations to detect unread messages
+    const { data: convData } = useQuery({
+        queryKey: ['member-conversations'],
+        queryFn: async () => {
+            const res = await base44.functions.invoke('communication', { action: 'getConversations' });
+            return res.data;
+        },
+        enabled: !!user,
+        refetchInterval: 30000,
+    });
+    const unreadCount = (convData?.threads || []).reduce((sum, t) => sum + (t.unread_count || 0), 0);
+
     if (authLoading) return <div className="min-h-[60vh] flex items-center justify-center text-teal-800"><Loader2 className="animate-spin w-8 h-8 mr-2" /> Loading portal...</div>;
     
     if (!user) {
@@ -50,9 +63,16 @@ export default function MemberPortal() {
                     <h1 className="text-3xl font-serif text-teal-900">Welcome, {user.full_name?.split(' ')[0]}</h1>
                     <p className="text-stone-600">Union Springs Cemetery Member Portal/Account</p>
                 </div>
-                <Button variant="outline" onClick={() => base44.auth.logout()} className="text-stone-600 border-stone-300 hover:bg-stone-50">
-                    <LogOut className="w-4 h-4 mr-2" /> Log Out
-                </Button>
+                <div className="flex gap-2">
+                    {unreadCount > 0 && (
+                        <Button onClick={() => setActiveTab('messages')} className="bg-green-600 hover:bg-green-700 text-white animate-pulse">
+                            <MessageSquare className="w-4 h-4 mr-2" /> See Messages
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={() => base44.auth.logout()} className="text-stone-600 border-stone-300 hover:bg-stone-50">
+                        <LogOut className="w-4 h-4 mr-2" /> Log Out
+                    </Button>
+                </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -63,8 +83,8 @@ export default function MemberPortal() {
                     <TabsTrigger value="profile" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <UserCircle className="w-4 h-4 mr-2 md:inline hidden" /> My Profile
                     </TabsTrigger>
-                    <TabsTrigger value="messages" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
-                        <MessageSquare className="w-4 h-4 mr-2 md:inline hidden" /> Messages
+                    <TabsTrigger value="messages" className={`data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 ${unreadCount > 0 ? 'ring-2 ring-green-500 text-green-700 animate-pulse' : ''}`}>
+                        <MessageSquare className="w-4 h-4 mr-2 md:inline hidden" /> Messages {unreadCount > 0 && <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-600 text-white text-[10px]">{unreadCount}</span>}
                     </TabsTrigger>
                     <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
