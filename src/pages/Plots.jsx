@@ -1379,9 +1379,6 @@ export default function PlotsPage() {
                     <span className="font-medium text-sm">Import CSV</span>
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
                 </label>
-                <Button variant="outline" onClick={fix326to348ToSection3} className="bg-white">
-                  326–348 → Section 3
-                </Button>
 
 
 
