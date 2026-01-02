@@ -62,7 +62,7 @@ const CRM = React.lazy(() => import("@/components/crm/CRM"));
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
 import DataImportDialog from "@/components/admin/DataImportDialog";
-import QualityAdvisor from "@/components/gov/QualityAdvisor";
+
 
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
@@ -598,7 +598,7 @@ export default function AdminDashboard() {
                 </TabsContent>
             ))}
         </Tabs>
-        <QualityAdvisor />
+
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ import NewPlotReservations from './pages/NewPlotReservations';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import NotificationSettings from './pages/NotificationSettings';
 import PerformanceDashboard from './pages/PerformanceDashboard';
+import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import ResendAck from './pages/ResendAck';
@@ -23,7 +24,6 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import Plots from './pages/Plots';
 import __Layout from './Layout.jsx';
 
 
@@ -45,6 +45,7 @@ export const PAGES = {
     "NewPlotsAndMap": NewPlotsAndMap,
     "NotificationSettings": NotificationSettings,
     "PerformanceDashboard": PerformanceDashboard,
+    "Plots": Plots,
     "Profile": Profile,
     "Reports": Reports,
     "ResendAck": ResendAck,
@@ -53,7 +54,6 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "Plots": Plots,
 }
 
 export const pagesConfig = {

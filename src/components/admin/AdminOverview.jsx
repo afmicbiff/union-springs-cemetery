@@ -8,6 +8,7 @@ import OverviewNotificationsCard from "@/components/admin/overview/OverviewNotif
 import OverviewSalesCard from "@/components/admin/overview/OverviewSalesCard";
 import OverviewPlotsCard from "@/components/admin/overview/OverviewPlotsCard";
 import OverviewLawnCareStats from "@/components/admin/overview/OverviewLawnCareStats";
+import QualityAdvisor from "@/components/gov/QualityAdvisor";
 
 export default function AdminOverview() {
 
@@ -30,6 +31,7 @@ export default function AdminOverview() {
                 <OverviewPlotsCard />
 
                 <OverviewLawnCareStats />
+                <QualityAdvisor />
             </div>
 
 
