@@ -1,6 +1,5 @@
 import Admin from './pages/Admin';
 import AdminCodeInsight from './pages/AdminCodeInsight';
-import Bylaws from './pages/Bylaws';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
 import Employees from './pages/Employees';
@@ -30,7 +29,6 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "Admin": Admin,
     "AdminCodeInsight": AdminCodeInsight,
-    "Bylaws": Bylaws,
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
     "Employees": Employees,

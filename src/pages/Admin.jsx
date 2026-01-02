@@ -52,7 +52,7 @@ const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar"
 const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager"));
 const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager"));
 const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory"));
-const AdminBylaws = React.lazy(() => import("@/components/admin/AdminBylaws"));
+
 const BackupManager = React.lazy(() => import("@/components/admin/BackupManager"));
 const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter"));
 const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer"));
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
           overview: 'overview',
           onboarding: 'onboarding',
           security: 'security',
-          bylaws: 'bylaws',
+          
           calendar: 'calendar',
           reservations: 'reservations',
           plots: 'plots',
@@ -338,7 +338,7 @@ export default function AdminDashboard() {
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
       { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
-      { id: "bylaws", label: "Bylaws", component: <AdminBylaws /> },
+
       { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },
       { id: "logs", label: "System Logs", component: <AuditLogViewer /> },
