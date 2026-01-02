@@ -18,6 +18,7 @@ export default function TemplatesManager() {
   const [editing, setEditing] = React.useState(null);
   const [search, setSearch] = React.useState("");
   const seededRef = React.useRef(false);
+  const seededCoreRef = React.useRef(false);
 
   const createMut = useMutation({
     mutationFn: async (payload) => base44.entities.EmailTemplate.create(payload),
@@ -35,6 +36,10 @@ export default function TemplatesManager() {
     mutationFn: async () => base44.entities.EmailTemplate.bulkCreate(getStarterTemplates()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
+  const bulkCreateCoreMut = useMutation({
+    mutationFn: async (payload) => base44.entities.EmailTemplate.bulkCreate(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
+  });
 
   React.useEffect(() => {
     if (!isLoading && templates.length === 0 && !seededRef.current && !bulkCreateMut.isPending) {
@@ -42,6 +47,17 @@ export default function TemplatesManager() {
       bulkCreateMut.mutate();
     }
   }, [isLoading, templates.length]);
+
+  React.useEffect(() => {
+    if (isLoading) return;
+    if (seededCoreRef.current || bulkCreateCoreMut.isPending) return;
+    const keys = new Set((templates || []).map(t => t.key));
+    const coreMissing = getCoreMemberTemplates().filter(t => !keys.has(t.key));
+    if (coreMissing.length) {
+      seededCoreRef.current = true;
+      bulkCreateCoreMut.mutate(coreMissing);
+    }
+  }, [isLoading, templates]);
 
   const filtered = templates.filter(t => !search || (t.name || "").toLowerCase().includes(search.toLowerCase()) || (t.key || "").toLowerCase().includes(search.toLowerCase()));
 
