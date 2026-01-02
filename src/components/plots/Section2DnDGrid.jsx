@@ -9,7 +9,7 @@ function parseNum(v) {
 
 export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   // Config: fixed 23 rows x 10 columns for Section 2
-  const perCol = 23; // total plot rows per column
+  const perCol = 24; // total plot rows per column
   const reservedBottomRows = 0;
 
   // Legend-like text color for plot number
