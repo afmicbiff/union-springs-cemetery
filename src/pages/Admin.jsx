@@ -615,6 +615,11 @@ export default function AdminDashboard() {
                             <Mail className="w-4 h-4 mr-2" /> Open Send Email
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={`${createPageUrl('SendEmail')}#templates-section`} className="flex items-center">
+                            <FileText className="w-4 h-4 mr-2" /> Templates
+                          </Link>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                 </TabsList>

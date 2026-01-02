@@ -31,7 +31,16 @@ export default function SendEmail() {
     checkAuth();
   }, []);
 
-  const handleSubmit = async (e) => {
+  React.useEffect(() => {
+    if (!isAuthorized) return;
+    const hash = window.location.hash;
+    if (hash === '#templates' || hash === '#templates-section') {
+      const el = document.getElementById('templates-section');
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 0);
+    }
+  }, [isAuthorized]);
+
+   const handleSubmit = async (e) => {
             e.preventDefault();
             setResult(null);
             if (!form.to || !form.subject || !form.body) {
