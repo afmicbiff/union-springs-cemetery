@@ -9,7 +9,8 @@ import MemberProfile from "@/components/member/MemberProfile";
 import MemberMessages from "@/components/member/MemberMessages";
 import MemberDocuments from "@/components/member/MemberDocuments";
 import MemberInvoices from "@/components/member/MemberInvoices";
-import { FileText, Receipt } from 'lucide-react';
+import MemberTasks from "@/components/member/MemberTasks";
+import { FileText, Receipt, CheckCircle2 } from 'lucide-react';
 import ReservationHistory from "@/components/member/ReservationHistory";
 import ReservationWizard from "@/components/member/ReservationWizard";
 
@@ -89,6 +90,9 @@ export default function MemberPortal() {
                     <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
                     </TabsTrigger>
+                    <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
+                        <CheckCircle2 className="w-4 h-4 mr-2 md:inline hidden" /> Tasks
+                    </TabsTrigger>
                     <TabsTrigger value="invoices" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <Receipt className="w-4 h-4 mr-2 md:inline hidden" /> Invoices
                     </TabsTrigger>
@@ -110,6 +114,10 @@ export default function MemberPortal() {
 
                 <TabsContent value="documents" className="focus-visible:outline-none">
                     <MemberDocuments user={user} />
+                </TabsContent>
+
+                <TabsContent value="tasks" className="focus-visible:outline-none">
+                    <MemberTasks user={user} />
                 </TabsContent>
 
                 <TabsContent value="invoices" className="focus-visible:outline-none">
