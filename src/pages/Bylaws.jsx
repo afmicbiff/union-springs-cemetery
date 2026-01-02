@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Search, History } from 'lucide-react';
+import { X, Search, History, ArrowLeft } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function Bylaws() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +71,12 @@ export default function Bylaws() {
     <div className="min-h-screen bg-stone-200 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <Breadcrumbs items={[{ label: 'Bylaws' }]} />
+
+        <div className="flex justify-start">
+          <Link to={createPageUrl('Admin')} className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-stone-300 text-stone-700 hover:bg-stone-50">
+            <ArrowLeft className="w-4 h-4" /> Back to Admin
+          </Link>
+        </div>
 
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Union Springs Association By-Laws</h1>
