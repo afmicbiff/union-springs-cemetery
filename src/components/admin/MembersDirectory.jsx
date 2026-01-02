@@ -39,6 +39,7 @@ export default function MembersDirectory({ openMemberId }) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+    const [activitySearch, setActivitySearch] = useState("");
     const [selectedMember, setSelectedMember] = useState(null);
     const [editingMember, setEditingMember] = useState(null);
     const topScrollRef = useRef(null);
@@ -207,10 +208,29 @@ export default function MembersDirectory({ openMemberId }) {
     });
 
     const { data: activityLogs } = useQuery({
-        queryKey: ['member-activity'],
-        queryFn: () => base44.entities.MemberActivityLog.list('-timestamp', 50),
-        enabled: isActivityLogOpen
-    });
+            queryKey: ['member-activity'],
+            queryFn: () => base44.entities.MemberActivityLog.list('-timestamp', 50),
+            enabled: isActivityLogOpen
+        });
+
+        const filteredActivityLogs = React.useMemo(() => {
+            const list = activityLogs || [];
+            const q = (activitySearch || "").trim().toLowerCase();
+            if (!q) return list;
+            return list.filter((log) => {
+                const fields = [
+                    log.action,
+                    log.member_name,
+                    log.details,
+                    log.performed_by,
+                    log.timestamp
+                ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+                return fields.includes(q);
+            });
+        }, [activityLogs, activitySearch]);
 
     const uniqueStates = [...new Set((members || []).map(m => m.state).filter(Boolean))].sort();
 
@@ -758,10 +778,21 @@ export default function MembersDirectory({ openMemberId }) {
                             <History className="w-5 h-5 text-teal-600" /> Member Directory Audit Log
                         </DialogTitle>
                     </DialogHeader>
-                    <div className="flex-1 overflow-y-auto mt-4 pr-2">
-                        {activityLogs?.length > 0 ? (
+                    <div className="px-1 mt-2">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                            <Input
+                                value={activitySearch}
+                                onChange={(e) => setActivitySearch(e.target.value)}
+                                placeholder="Search logs (member, action, user, details)..."
+                                className="pl-9"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto mt-2 pr-2">
+                        {filteredActivityLogs.length > 0 ? (
                             <div className="space-y-4">
-                                {activityLogs.map((log) => (
+                                {filteredActivityLogs.map((log) => (
                                     <div key={log.id} className="flex gap-3 text-sm pb-3 border-b border-stone-100 last:border-0">
                                         <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${
                                             log.action === 'create' ? 'bg-green-500' : 
