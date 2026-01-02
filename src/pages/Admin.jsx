@@ -575,6 +575,13 @@ export default function AdminDashboard() {
                         New Plot Reservation
                     </Link>
 
+                    <Link
+                        to={createPageUrl('Bylaws')}
+                        className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                    >
+                        Bylaws
+                    </Link>
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
