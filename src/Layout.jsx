@@ -181,7 +181,24 @@ export default function Layout({ children }) {
   });
 
   return (
-    <div className={`min-h-screen ${pageBackground} font-serif text-stone-900 flex flex-col`}>
+    <div className={`min-h-screen ${pageBackground} font-sans text-stone-900 flex flex-col app-font-scope`}>
+      <style>{`
+        .app-font-scope {
+          --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+          --font-heading: Georgia, "Times New Roman", Times, serif;
+        }
+        .app-font-scope, .app-font-scope :where(p, li, span, a, small, input, button, textarea, select) {
+          font-family: var(--font-body);
+        }
+        .app-font-scope :where(h1, h2, h3, h4, h5, h6, .heading-serif) {
+          font-family: var(--font-heading);
+        }
+        /* Responsive type scale */
+        .app-font-scope h1 { font-size: clamp(1.75rem, 2.5vw, 2.25rem); line-height: 1.2; }
+        .app-font-scope h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); line-height: 1.25; }
+        .app-font-scope h3 { font-size: clamp(1.125rem, 1.5vw, 1.375rem); line-height: 1.3; }
+        .app-font-scope :where(p, li) { line-height: 1.6; }
+      `}</style>
       {/* Header */}
       <header className="bg-stone-900 text-stone-100 shadow-md sticky top-0 z-50 border-b-4 border-teal-700">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
