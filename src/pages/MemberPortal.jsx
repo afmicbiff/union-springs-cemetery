@@ -142,7 +142,7 @@ export default function MemberPortal() {
                         <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
                     </TabsTrigger>
                     <TabsTrigger value="tasks" className={`data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 ${tasksDueCount > 0 ? 'ring-2 ring-green-500 text-green-700 animate-pulse' : ''}`}>
-                        <CheckCircle2 className="w-4 h-4 mr-2 md:inline hidden" /> Tasks
+                        <CheckCircle2 className="w-4 h-4 mr-2 md:inline hidden" /> Tasks {tasksDueCount > 0 && <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-600 text-white text-[10px]">{tasksDueCount}</span>}
                     </TabsTrigger>
                     <TabsTrigger value="invoices" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <Receipt className="w-4 h-4 mr-2 md:inline hidden" /> Invoices
