@@ -24,8 +24,11 @@ export default function AdminBylaws() {
 
     useEffect(() => {
         if (selectedDoc || !bylaws.length) return;
-        const target = bylaws.find(d => (d.name || '').toLowerCase().includes('union springs cemetery management'));
-        setSelectedDoc(target || bylaws[0]);
+        const lower = (s) => String(s || '').toLowerCase();
+        const targetPdf = bylaws.find(d => lower(d.name).includes('union springs cemetery bylaws') && (lower(d.type) === 'pdf' || lower(d.name).endsWith('.pdf')));
+        if (targetPdf) { setSelectedDoc(targetPdf); return; }
+        const fallbackMgmt = bylaws.find(d => lower(d.name).includes('union springs cemetery management'));
+        setSelectedDoc(fallbackMgmt || bylaws[0]);
     }, [bylaws, selectedDoc]);
 
     const currentExt = useMemo(() => (selectedDoc ? ((selectedDoc.type || selectedDoc.name?.split('.').pop() || '').toLowerCase()) : ''), [selectedDoc]);
