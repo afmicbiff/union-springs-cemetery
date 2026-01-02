@@ -83,21 +83,15 @@ export default function MembersDirectory({ openMemberId }) {
         queryKey: ['members'],
         refetchOnWindowFocus: false,
         queryFn: async () => {
-            const items = await listEntity(
-                'Member',
-                {
-                    limit: 1000,
-                    sort: '-updated_date',
-                    select: [
-                        'id','first_name','last_name','address','city','state','zip',
-                        'phone_primary','phone_secondary','email_primary','email_secondary',
-                        'donation','comments','last_donation_date','last_contact_date',
-                        'follow_up_date','follow_up_status','follow_up_notes','follow_up_assignee_id'
-                    ],
-                    persist: false
+            const records = await base44.entities.Member.list('-updated_date', 1000);
+            return (records || []).map((r) => {
+                const flat = { ...(r || {}) };
+                if (r?.data && typeof r.data === 'object') {
+                    Object.assign(flat, r.data);
                 }
-            );
-            return items;
+                flat.id = r.id || flat.id;
+                return flat;
+            });
         },
         initialData: [],
         staleTime: 5 * 60 * 1000,
