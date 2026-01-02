@@ -6,14 +6,14 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function Bylaws() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState([]);
 
   useEffect(() => {
     const saved = localStorage.getItem('bylaws_recent_searches');
     if (saved) setRecentSearches(JSON.parse(saved));
   }, []);
 
-  const handleSearch = (term: string) => {
+  const handleSearch = (term) => {
     setSearchTerm(term);
     if (!term.trim()) return;
     const next = [term, ...recentSearches.filter(s => s !== term)].slice(0, 6);
@@ -23,7 +23,7 @@ export default function Bylaws() {
 
   const clearSearch = () => setSearchTerm("");
 
-  const HighlightedText = ({ text }: { text: string }) => {
+  const HighlightedText = ({ text }) => {
     if (!searchTerm.trim()) return <span>{text}</span>;
     try {
       const pattern = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -44,7 +44,7 @@ export default function Bylaws() {
     }
   };
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  const Section = ({ title, children }) => (
     <section className="mb-8 scroll-mt-24">
       <h2 className="text-2xl font-serif font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">
         <HighlightedText text={title} />
@@ -53,13 +53,13 @@ export default function Bylaws() {
     </section>
   );
 
-  const ListItem = ({ children }: { children: React.ReactNode }) => (
+  const ListItem = ({ children }) => (
     <li className="ml-4 pl-2 list-decimal marker:text-stone-500 marker:font-medium">
       <div className="pl-1">{children}</div>
     </li>
   );
 
-  const SubListItem = ({ children }: { children: React.ReactNode }) => (
+  const SubListItem = ({ children }) => (
     <li className="ml-4 pl-2 list-disc marker:text-stone-400">
       <div className="pl-1">{children}</div>
     </li>
