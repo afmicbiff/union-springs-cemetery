@@ -60,6 +60,7 @@ const CommunicationCenter = React.lazy(() => import("@/components/admin/Communic
 const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer"));
 const LawnCare = React.lazy(() => import("@/components/admin/LawnCare"));
 const CRM = React.lazy(() => import("@/components/crm/CRM"));
+const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminDocumentsManager"));
 
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
@@ -340,6 +341,7 @@ export default function AdminDashboard() {
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
       { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
+      { id: "documents", label: "Documents", component: <AdminDocumentsManager /> },
 
       { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },
