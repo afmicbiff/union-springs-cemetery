@@ -40,6 +40,29 @@ export default function MemberPortal() {
     });
     const unreadCount = (convData?.threads || []).reduce((sum, t) => sum + (t.unread_count || 0), 0);
 
+  // Member tasks indicator (blink when due/overdue tasks exist)
+  const { data: memberForTasks } = useQuery({
+      queryKey: ['member-for-tasks', user?.email],
+      queryFn: async () => {
+          const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+          return (res && res[0]) || null;
+      },
+      enabled: !!user
+  });
+
+  const { data: memberTasksForIndicator = [] } = useQuery({
+      queryKey: ['member-tasks-indicator', memberForTasks?.id],
+      queryFn: async () => {
+          if (!memberForTasks?.id) return [];
+          return base44.entities.Task.filter({ member_id: memberForTasks.id, is_archived: false }, '-created_date', 50);
+      },
+      enabled: !!memberForTasks?.id,
+      refetchInterval: 30000,
+      initialData: []
+  });
+
+  const tasksDueCount = memberTasksForIndicator.filter(t => t.status !== 'Completed' && t.due_date && new Date(t.due_date) <= new Date()).length;
+
     if (authLoading) return <div className="min-h-[60vh] flex items-center justify-center text-teal-800"><Loader2 className="animate-spin w-8 h-8 mr-2" /> Loading portal...</div>;
     
     if (!user) {
@@ -70,6 +93,11 @@ export default function MemberPortal() {
                             <MessageSquare className="w-4 h-4 mr-2" /> See Messages
                         </Button>
                     )}
+                    {tasksDueCount > 0 && (
+                        <Button onClick={() => setActiveTab('tasks')} className="bg-green-600 hover:bg-green-700 text-white animate-pulse">
+                            <CheckCircle2 className="w-4 h-4 mr-2" /> See Tasks
+                        </Button>
+                    )}
                     <Button variant="outline" onClick={() => base44.auth.logout()} className="text-stone-600 border-stone-300 hover:bg-stone-50">
                         <LogOut className="w-4 h-4 mr-2" /> Log Out
                     </Button>
@@ -90,7 +118,7 @@ export default function MemberPortal() {
                     <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
                         <FileText className="w-4 h-4 mr-2 md:inline hidden" /> Documents
                     </TabsTrigger>
-                    <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">
+                    <TabsTrigger value="tasks" className={`data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 ${tasksDueCount > 0 ? 'ring-2 ring-green-500 text-green-700 animate-pulse' : ''}`}>
                         <CheckCircle2 className="w-4 h-4 mr-2 md:inline hidden" /> Tasks
                     </TabsTrigger>
                     <TabsTrigger value="invoices" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2">

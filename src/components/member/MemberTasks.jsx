@@ -27,14 +27,15 @@ export default function MemberTasks({ user }) {
 
   // 2) Load tasks assigned to this member
   const { data: tasks = [], isLoading } = useQuery({
-    queryKey: ['member-tasks', member?.id],
-    queryFn: async () => {
-      if (!member?.id) return [];
-      return base44.entities.Task.filter({ member_id: member.id, is_archived: false }, '-created_date', 100);
-    },
-    enabled: !!member?.id,
-    initialData: []
-  });
+      queryKey: ['member-tasks', member?.id],
+      queryFn: async () => {
+        if (!member?.id) return [];
+        return base44.entities.Task.filter({ member_id: member.id, is_archived: false }, '-created_date', 100);
+      },
+      enabled: !!member?.id,
+      initialData: [],
+      refetchInterval: 30000
+    });
 
   const toggleStatus = useMutation({
     mutationFn: async (task) => {
