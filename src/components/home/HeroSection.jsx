@@ -115,7 +115,7 @@ export default function HeroSection() {
             </Link>
             <Link to={createPageUrl('Plots')} className="w-full">
               <Button variant="secondary" className="w-full bg-stone-100 hover:bg-white text-stone-900 font-serif tracking-widest px-8 py-6 text-lg rounded-sm shadow-xl transition-all hover:scale-105 hover:shadow-2xl">
-                <MapPin className="mr-2 h-5 w-5" /> View Plots
+                <MapPin className="mr-2 h-5 w-5" /> View Old Cemetery Plots
               </Button>
             </Link>
             <Link to={createPageUrl('NewPlotsAndMap')} className="w-full">
