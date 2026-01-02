@@ -6,6 +6,7 @@ import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 import { 
     Bell, 
@@ -530,12 +531,7 @@ export default function AdminDashboard() {
                     </PopoverContent>
                 </Popover>
 
-                <Link to={createPageUrl('Bylaws')} className="hidden md:flex">
-                  <button className="border border-stone-300 text-stone-700 hover:bg-stone-50 px-3 py-2 rounded-md text-sm flex items-center">
-                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"></path><path d="M14 2v6h6"></path></svg>
-                    Bylaws
-                  </button>
-                </Link>
+
 
                 <Button 
                     onClick={() => setActiveTab('backups')} 
@@ -579,12 +575,23 @@ export default function AdminDashboard() {
                         New Plot Reservation
                     </Link>
 
-                    <button onClick={() => setNotifPopoverOpen(true)} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                      <Bell className="w-4 h-4" /> Notifications
-                    </button>
-                    <Link to={createPageUrl('NotificationSettings')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                      <Settings className="w-4 h-4" /> Notification Settings
-                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
+                          <Bell className="w-4 h-4" /> Notifications
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="min-w-[200px]">
+                        <DropdownMenuItem onClick={() => setNotifPopoverOpen(true)}>
+                          <Bell className="w-4 h-4 mr-2" /> Open Notifications
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('NotificationSettings')} className="flex items-center">
+                            <Settings className="w-4 h-4 mr-2" /> Notification Settings
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Link to={createPageUrl('SendEmail')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
                       <Mail className="w-4 h-4" /> Email Tool
                     </Link>
