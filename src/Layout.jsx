@@ -15,11 +15,18 @@ import {
 import GovernanceProvider from '@/components/gov/GovernanceProvider';
 import ImageContextMenu from '@/components/common/ImageContextMenu';
 import { initPerf } from "./components/perf/initPerf";
+import { base44 } from '@/api/base44Client';
 
 initPerf();
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const location = useLocation();
+  const [isAdminUser, setIsAdminUser] = React.useState(false);
+  React.useEffect(() => {
+    let mounted = true;
+    base44.auth.me().then(u => { if (mounted) setIsAdminUser(u?.role === 'admin'); }).catch(() => { if (mounted) setIsAdminUser(false); });
+    return () => { mounted = false; };
+  }, []);
 
   // Design System Constants mapped to Tailwind classes
   const colors = {
@@ -164,6 +171,15 @@ export default function Layout({ children }) {
     }
   ];
 
+  const navItemsFiltered = navItemsFiltered.map((item) => {
+    if (item.label === 'Admin Dashboard' && item.items) {
+      const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Code Insight', 'Image Management'];
+      const items = isAdminUser ? item.items : item.items.filter((s) => !adminOnly.includes(s.label));
+      return { ...item, items };
+    }
+    return item;
+  });
+
   return (
     <div className={`min-h-screen ${pageBackground} font-serif text-stone-900 flex flex-col`}>
       {/* Header */}
@@ -186,7 +202,7 @@ export default function Layout({ children }) {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
-              {navItems.map((item) => (
+              {navItemsFiltered.map((item) => (
                 item.isDropdown ? (
                   <DropdownMenu key={item.label}>
                     <DropdownMenuTrigger className={`flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-all duration-300 hover:text-teal-400 focus:outline-none ${
@@ -237,7 +253,7 @@ export default function Layout({ children }) {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-stone-900 border-t border-stone-800">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navItems.map((item) => (
+              {navItemsFiltered.map((item) => (
                 item.isDropdown ? (
                   <div key={item.label} className="space-y-1">
                     <div className="flex items-center gap-3 px-3 py-4 text-base font-medium text-stone-300">
@@ -329,7 +345,7 @@ export default function Layout({ children }) {
                     <DialogTitle className="font-serif text-2xl text-stone-900 border-b border-stone-200 pb-2">Site Map</DialogTitle>
                   </DialogHeader>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 py-4">
-                      {navItems.map((item) => (
+                      {navItemsFiltered.map((item) => (
                         <div key={item.label}>
                           {item.isDropdown ? (
                             <div className="space-y-2">
