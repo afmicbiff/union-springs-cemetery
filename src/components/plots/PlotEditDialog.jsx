@@ -232,13 +232,13 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
               <div className="space-y-2">
                 <Label>Allowed Container Types</Label>
                 <div className="flex flex-wrap gap-3">
-                  {['None','Concrete','Metal'].map(opt => ()
+                  {['None','Concrete','Metal'].map(opt => (
                     <label key={opt} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
                         checked={(formData.liner_vault_options || ['None','Concrete','Metal']).includes(opt)}
                         onChange={(e) => {
-                          const prev = new Set(formData.liner_vault_options || ['None','Liner','Vault']);
+                          const prev = new Set(formData.liner_vault_options || ['None','Concrete','Metal']);
                           e.target.checked ? prev.add(opt) : prev.delete(opt);
                           handleChange('liner_vault_options', Array.from(prev));
                         }}
@@ -319,13 +319,13 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
               <div className="space-y-2">
                 <Label>Allowed Container Types</Label>
                 <div className="flex flex-wrap gap-3">
-                  {['None','Concrete','Metal'].map(opt => ()
+                  {['None','Concrete','Metal'].map(opt => (
                     <label key={opt} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
                         checked={(formData.liner_vault_options || ['None','Concrete','Metal']).includes(opt)}
                         onChange={(e) => {
-                          const prev = new Set(formData.liner_vault_options || ['None','Liner','Vault']);
+                          const prev = new Set(formData.liner_vault_options || ['None','Concrete','Metal']);
                           e.target.checked ? prev.add(opt) : prev.delete(opt);
                           handleChange('liner_vault_options', Array.from(prev));
                         }}
