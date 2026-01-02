@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
 
-    const { action, documents, new_category } = await req.json();
+    const { action, documents, new_category, new_expiration } = await req.json();
     if (!Array.isArray(documents) || documents.length === 0) {
       return Response.json({ error: 'No documents provided' }, { status: 400 });
     }
@@ -61,6 +61,49 @@ Deno.serve(async (req) => {
                 performed_by: user.email,
                 timestamp: new Date().toISOString(),
                 details: `Category: ${old} -> ${new_category}`
+              });
+              success++;
+              return nd;
+            }
+            return d;
+          });
+          await base44.asServiceRole.entities.Member.update(memberId, { documents: updated });
+        } else if (action === 'bulk_set_expiration') {
+          if (!new_expiration) { failed += docIds.length; continue; }
+          const toUpdate = new Set(docIds);
+          const updated = docs.map(d => {
+            if (toUpdate.has(d.id)) {
+              const old = d.expiration_date || null;
+              const nd = { ...d, expiration_date: new_expiration };
+              base44.asServiceRole.entities.DocumentAuditLog.create({
+                action: 'set_expiration',
+                document_id: d.id,
+                member_id: memberId,
+                member_name: `${member.first_name || ''} ${member.last_name || ''}`.trim(),
+                performed_by: user.email,
+                timestamp: new Date().toISOString(),
+                details: `Expiration: ${old || 'none'} -> ${new_expiration}`
+              });
+              success++;
+              return nd;
+            }
+            return d;
+          });
+          await base44.asServiceRole.entities.Member.update(memberId, { documents: updated });
+        } else if (action === 'bulk_clear_expiration') {
+          const toUpdate = new Set(docIds);
+          const updated = docs.map(d => {
+            if (toUpdate.has(d.id)) {
+              const old = d.expiration_date || null;
+              const nd = { ...d, expiration_date: null };
+              base44.asServiceRole.entities.DocumentAuditLog.create({
+                action: 'clear_expiration',
+                document_id: d.id,
+                member_id: memberId,
+                member_name: `${member.first_name || ''} ${member.last_name || ''}`.trim(),
+                performed_by: user.email,
+                timestamp: new Date().toISOString(),
+                details: `Expiration: ${old || 'none'} -> cleared`
               });
               success++;
               return nd;

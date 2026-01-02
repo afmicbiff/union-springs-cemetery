@@ -53,6 +53,7 @@ export default function AdminDocumentsManager() {
   const [sortDir, setSortDir] = React.useState('desc');
   const [selected, setSelected] = React.useState({}); // key -> true
   const [newCategory, setNewCategory] = React.useState('Legal');
+  const [newExpDate, setNewExpDate] = React.useState('');
 
   const toggleAll = (checked, list) => {
     const m = {};
@@ -65,9 +66,11 @@ export default function AdminDocumentsManager() {
   const bulkMutation = useMutation({
     mutationFn: async ({ mode }) => {
       const docs = selectedList.map(r => ({ member_id: r.member_id, doc_id: r.doc_id }));
-      const payload = mode === 'delete'
-        ? { action: 'bulk_delete', documents: docs }
-        : { action: 'bulk_categorize', documents: docs, new_category: newCategory };
+      let payload;
+      if (mode === 'delete') payload = { action: 'bulk_delete', documents: docs };
+      else if (mode === 'categorize') payload = { action: 'bulk_categorize', documents: docs, new_category: newCategory };
+      else if (mode === 'set_expiration') payload = { action: 'bulk_set_expiration', documents: docs, new_expiration: newExpDate };
+      else if (mode === 'clear_expiration') payload = { action: 'bulk_clear_expiration', documents: docs };
       const res = await base44.functions.invoke('manageDocuments', payload);
       if (res.data?.error) throw new Error(res.data.error);
       return res.data;
@@ -162,18 +165,25 @@ export default function AdminDocumentsManager() {
             <div className="text-sm">{selectedList.length} selected</div>
             <div className="flex gap-2">
               <Button variant="destructive" onClick={() => bulkMutation.mutate({ mode: 'delete' })} className="gap-2"><Trash2 className="w-4 h-4"/>Delete</Button>
-              <div className="flex gap-2">
-                <Select value={newCategory} onValueChange={setNewCategory}>
-                  <SelectTrigger className="w-[180px]"><SelectValue placeholder="Category"/></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Legal">Legal</SelectItem>
-                    <SelectItem value="Deed/Certificate">Deed/Certificate</SelectItem>
-                    <SelectItem value="Identification">Identification</SelectItem>
-                    <SelectItem value="Family Records">Family Records</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={() => bulkMutation.mutate({ mode: 'categorize' })} className="gap-2"><Tags className="w-4 h-4"/>Set Category</Button>
+              <div className="flex flex-col md:flex-row gap-2 md:items-center">
+                <div className="flex gap-2 items-center">
+                  <Select value={newCategory} onValueChange={setNewCategory}>
+                    <SelectTrigger className="w-[180px]"><SelectValue placeholder="Category"/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Legal">Legal</SelectItem>
+                      <SelectItem value="Deed/Certificate">Deed/Certificate</SelectItem>
+                      <SelectItem value="Identification">Identification</SelectItem>
+                      <SelectItem value="Family Records">Family Records</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={() => bulkMutation.mutate({ mode: 'categorize' })} className="gap-2"><Tags className="w-4 h-4"/>Set Category</Button>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Input type="date" value={newExpDate} onChange={(e) => setNewExpDate(e.target.value)} className="w-[180px]" />
+                  <Button variant="outline" disabled={!newExpDate} onClick={() => bulkMutation.mutate({ mode: 'set_expiration' })}>Set Expiration</Button>
+                  <Button variant="outline" onClick={() => bulkMutation.mutate({ mode: 'clear_expiration' })}>Clear Expiration</Button>
+                </div>
               </div>
             </div>
           </div>

@@ -10,8 +10,10 @@ import { FileText, Upload, Trash2, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
 import { format } from 'date-fns';
 import SecureFileLink from "@/components/documents/SecureFileLink";
+import SignDocumentDialog from "@/components/documents/SignDocumentDialog";
 
 export default function MemberDocuments({ user }) {
+    const [signDoc, setSignDoc] = useState(null);
     const queryClient = useQueryClient();
     const [uploading, setUploading] = useState(false);
     const [docType, setDocType] = useState('Identification');
@@ -247,6 +249,9 @@ export default function MemberDocuments({ user }) {
                                                 <span className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 text-[10px]">v{doc.version || 1}</span>
                                             </div>
                                             <div className="text-xs text-stone-500 flex gap-2 flex-wrap">
+                                                {doc.signed_at && (
+                                                  <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700">Signed</span>
+                                                )}
                                                 <span>{doc.type}</span>
                                                 <span>•</span>
                                                 <span>{doc.category || 'Other'}</span>
@@ -266,6 +271,9 @@ export default function MemberDocuments({ user }) {
                                             New Ver
                                         </Button>
                                         <SecureFileLink doc={doc} />
+                                        <Button size="sm" variant="outline" className="h-8 text-stone-700 border-stone-200 hover:bg-stone-50" onClick={() => setSignDoc(doc)} title="Sign Document">
+                                            Sign
+                                        </Button>
                                         <Button size="icon" variant="ghost" className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => deleteMutation.mutate(doc.id)} title="Delete">
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
@@ -276,6 +284,13 @@ export default function MemberDocuments({ user }) {
                     )}
                 </div>
             </CardContent>
+            <SignDocumentDialog 
+                isOpen={!!signDoc}
+                onClose={() => setSignDoc(null)}
+                document={signDoc}
+                memberId={memberRecord?.id}
+                onSigned={() => queryClient.invalidateQueries(['member-profile'])}
+            />
         </Card>
     );
 }
