@@ -273,7 +273,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                                    }}
                                                 >
                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </Button
+                                                </Button>
                                                 <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => setMoveDoc(doc)} title="Move to Record">
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </Button>
