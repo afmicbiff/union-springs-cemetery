@@ -304,56 +304,24 @@ export default function MembersDirectory({ openMemberId }) {
     };
 
     const filteredMembers = (members || []).filter(member => {
-        // Basic Filters
-        const search = searchTerm.toLowerCase();
-        const matchesSearch = (
-            (member.last_name || "").toLowerCase().includes(search) ||
-            (member.first_name || "").toLowerCase().includes(search) ||
-            (member.city || "").toLowerCase().includes(search) ||
-            (member.email_primary || "").toLowerCase().includes(search) ||
-            (member.phone_primary || "").toLowerCase().includes(search)
-        );
+                  // Temporarily disable all filters to verify rendering of records
+                  return true;
+              }).sort((a, b) => {
+                  const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
+                  const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
 
-        const matchesState = stateFilter === 'all' || member.state === stateFilter;
-        
-        const matchesDonation = donationFilter === 'all' 
-            ? true 
-            : donationFilter === 'donated' 
-                ? !!member.donation 
-                : !member.donation;
+                  if (sortConfig.key === 'donation') {
+                       const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
+                       const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
+                       if (!isNaN(aNum) && !isNaN(bNum)) {
+                           return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+                       }
+                  }
 
-        let matchesFollowUp = true;
-        if (followUpFilter === 'due') {
-            matchesFollowUp = member.follow_up_status === 'pending' && member.follow_up_date && (isPast(parseISO(member.follow_up_date)) || format(parseISO(member.follow_up_date), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'));
-        } else if (followUpFilter === 'pending') {
-            matchesFollowUp = member.follow_up_status === 'pending';
-        }
-
-        // Advanced Segment Filters
-        let matchesSegment = true;
-        if (showAdvancedFilters && segmentCriteria.rules.length > 0) {
-            const results = segmentCriteria.rules.map(rule => evaluateRule(member, rule));
-            matchesSegment = segmentCriteria.match === 'all' ? results.every(Boolean) : results.some(Boolean);
-        }
-
-        return matchesSearch && matchesState && matchesDonation && matchesFollowUp && matchesSegment;
-    }).sort((a, b) => {
-        const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
-        const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
-        
-        if (sortConfig.key === 'donation') {
-             // Try to sort donation numerically if possible
-             const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
-             const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
-             if (!isNaN(aNum) && !isNaN(bNum)) {
-                 return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-             }
-        }
-
-        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-        return 0;
-    });
+                  if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                  if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                  return 0;
+              });
 
     const handleSave = (e) => {
         e.preventDefault();
