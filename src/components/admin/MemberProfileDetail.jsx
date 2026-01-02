@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileText, Eye, ArrowRight, Trash2 } from 'lucide-react';
 import MoveDocumentDialog from './MoveDocumentDialog';
 import MemberInvoicesAdmin from './MemberInvoicesAdmin';
+import SecureFileLink from "@/components/documents/SecureFileLink";
 
 export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
@@ -244,7 +245,8 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                                 <div className="truncate flex flex-col">
                                                     <div>
                                                         <span className="font-medium text-stone-800">{doc.name}</span>
-                                                        <span className="text-stone-500 text-xs ml-2">({doc.type})</span>
+                                                        <span className="text-stone-500 text-xs ml-2">({doc.type}{doc.category ? ` • ${doc.category}` : ''})</span>
+                                                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-stone-100 text-stone-600">v{doc.version || 1}</span>
                                                     </div>
                                                     {doc.expiration_date && (
                                                         <div className={`text-xs mt-0.5 ${new Date(doc.expiration_date) < new Date() ? 'text-red-600 font-medium' : 'text-stone-400'}`}>
@@ -255,9 +257,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1 shrink-0">
-                                                <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => handleViewDoc(doc)} title="View">
-                                                    <Eye className="w-3.5 h-3.5" />
-                                                </Button>
+                                                <SecureFileLink doc={doc} />
                                                 <Button size="icon" variant="ghost" className="h-7 w-7 text-stone-500 hover:text-stone-700" onClick={() => setMoveDoc(doc)} title="Move to Record">
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </Button>

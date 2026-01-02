@@ -27,6 +27,19 @@ Deno.serve(async (req) => {
     const { file_uri } = await req.json();
     if (!file_uri) return Response.json({ error: 'file_uri required' }, { status: 400 });
 
+    // Permission check: Non-admins can only access their own member documents
+    if (user.role !== 'admin') {
+      try {
+        const members = await base44.asServiceRole.entities.Member.filter({ email_primary: user.email }, null, 5);
+        const allowed = (members || []).some(m => Array.isArray(m.documents) && m.documents.some(d => d.file_uri === file_uri));
+        if (!allowed) {
+          return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
+      } catch (_e) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
     const ua = req.headers.get('user-agent') || '';
 
