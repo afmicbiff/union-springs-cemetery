@@ -603,9 +603,20 @@ export default function AdminDashboard() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <Link to={createPageUrl('SendEmail')} className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                      <Mail className="w-4 h-4" /> Email Tool
-                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
+                          <Mail className="w-4 h-4" /> Email Tool <ChevronDown className="w-3 h-3 opacity-70" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="min-w-[200px]">
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('SendEmail')} className="flex items-center">
+                            <Mail className="w-4 h-4 mr-2" /> Open Send Email
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                 </TabsList>
             </div>
 

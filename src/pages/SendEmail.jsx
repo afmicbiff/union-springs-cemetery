@@ -73,11 +73,19 @@ export default function SendEmail() {
             <Mail className="w-5 h-5 text-teal-700" />
             <h1 className="text-xl font-semibold text-gray-900">Send Email</h1>
           </div>
-          <Link to={createPageUrl('Admin')}>
-            <Button variant="outline" className="gap-2">
-              <ArrowLeft className="w-4 h-4" /> Back to Admin
+          <div className="flex items-center gap-2">
+            <Link to={createPageUrl('Admin')}>
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="w-4 h-4" /> Back to Admin
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={() => {
+              const el = document.getElementById('templates-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              Templates
             </Button>
-          </Link>
+          </div>
         </div>
       </header>
 
@@ -143,7 +151,9 @@ export default function SendEmail() {
             )}
           </form>
         </div>
-      <TemplatesManager />
+      <div id="templates-section">
+        <TemplatesManager />
+      </div>
       </main>
     </div>
   );
