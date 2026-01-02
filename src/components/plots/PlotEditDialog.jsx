@@ -26,7 +26,17 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
 
   useEffect(() => {
     if (plot) {
-      setFormData({ ...plot });
+      const mapContainer = (val) => (val === 'Liner' ? 'Concrete' : (val === 'Vault' ? 'Metal' : (val || 'None')));
+      const mapOptions = (arr) => (arr || []).map(mapContainer);
+      setFormData(() => {
+        const base = { ...plot };
+        base.container_type = mapContainer(base.container_type);
+        const opts = (base.liner_vault_options && base.liner_vault_options.length)
+          ? Array.from(new Set(mapOptions(base.liner_vault_options)))
+          : ['None','Concrete','Metal'];
+        base.liner_vault_options = opts;
+        return base;
+      });
     }
   }, [plot]);
 
@@ -191,7 +201,7 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
                 >
                   <SelectTrigger><SelectValue placeholder="Select Container Type" /></SelectTrigger>
                   <SelectContent>
-                    {(formData.liner_vault_options && formData.liner_vault_options.length ? formData.liner_vault_options : ['None','Liner','Vault']).map(opt => (
+                    {(formData.liner_vault_options && formData.liner_vault_options.length ? formData.liner_vault_options : ['None','Concrete','Metal']).map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
@@ -222,11 +232,11 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
               <div className="space-y-2">
                 <Label>Allowed Container Types</Label>
                 <div className="flex flex-wrap gap-3">
-                  {['None','Liner','Vault'].map(opt => (
+                  {['None','Concrete','Metal'].map(opt => ()
                     <label key={opt} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={(formData.liner_vault_options || ['None','Liner','Vault']).includes(opt)}
+                        checked={(formData.liner_vault_options || ['None','Concrete','Metal']).includes(opt)}
                         onChange={(e) => {
                           const prev = new Set(formData.liner_vault_options || ['None','Liner','Vault']);
                           e.target.checked ? prev.add(opt) : prev.delete(opt);
@@ -278,7 +288,7 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
                 >
                   <SelectTrigger><SelectValue placeholder="Select Container Type" /></SelectTrigger>
                   <SelectContent>
-                    {(formData.liner_vault_options && formData.liner_vault_options.length ? formData.liner_vault_options : ['None','Liner','Vault']).map(opt => (
+                    {(formData.liner_vault_options && formData.liner_vault_options.length ? formData.liner_vault_options : ['None','Concrete','Metal']).map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
@@ -309,11 +319,11 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
               <div className="space-y-2">
                 <Label>Allowed Container Types</Label>
                 <div className="flex flex-wrap gap-3">
-                  {['None','Liner','Vault'].map(opt => (
+                  {['None','Concrete','Metal'].map(opt => ()
                     <label key={opt} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={(formData.liner_vault_options || ['None','Liner','Vault']).includes(opt)}
+                        checked={(formData.liner_vault_options || ['None','Concrete','Metal']).includes(opt)}
                         onChange={(e) => {
                           const prev = new Set(formData.liner_vault_options || ['None','Liner','Vault']);
                           e.target.checked ? prev.add(opt) : prev.delete(opt);
