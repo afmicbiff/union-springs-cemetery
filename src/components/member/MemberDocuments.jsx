@@ -18,8 +18,6 @@ export default function MemberDocuments({ user }) {
     const [expirationDate, setExpirationDate] = useState('');
     const [category, setCategory] = useState('Other');
     const [notes, setNotes] = useState('');
-    const [category, setCategory] = useState('Other');
-    const [notes, setNotes] = useState('');
 
     // 1. Fetch Member Record to get documents list
     const { data: memberRecord } = useQuery({
