@@ -23,6 +23,7 @@ import Search from './pages/Search';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import Bylaws from './pages/Bylaws';
 import __Layout from './Layout.jsx';
 
 
@@ -52,6 +53,7 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
+    "Bylaws": Bylaws,
 }
 
 export const pagesConfig = {

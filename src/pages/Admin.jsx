@@ -530,6 +530,13 @@ export default function AdminDashboard() {
                     </PopoverContent>
                 </Popover>
 
+                <Link to={createPageUrl('Bylaws')} className="hidden md:flex">
+                  <button className="border border-stone-300 text-stone-700 hover:bg-stone-50 px-3 py-2 rounded-md text-sm flex items-center">
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"></path><path d="M14 2v6h6"></path></svg>
+                    Bylaws
+                  </button>
+                </Link>
+
                 <Button 
                     onClick={() => setActiveTab('backups')} 
                     variant="outline" 
