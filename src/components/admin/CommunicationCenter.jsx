@@ -491,7 +491,7 @@ function InboxView() {
     });
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh] min-h-0">
             {/* Thread List Column */}
             <div className="md:col-span-1 flex flex-col h-full min-h-0 bg-stone-50 border rounded-md">
                 {/* Search & Filters */}
@@ -536,10 +536,7 @@ function InboxView() {
                         filteredThreads.map(thread => (
                             <div 
                                 key={thread.id}
-                                className={`p-4 border-b cursor-pointer transition-colors group relative
-                                    ${selectedThread?.id === thread.id ? 'bg-white border-l-4 border-l-teal-600 shadow-sm' : 'hover:bg-stone-100'}
-                                    ${thread.unread_count > 0 ? 'bg-blue-50' : ''}
-                                `}
+                                className={`p-4 border-b cursor-pointer transition-colors group relative ${selectedThread?.id === thread.id ? 'bg-white border-l-4 border-l-teal-600 shadow-sm' : 'hover:bg-stone-100'} ${thread.unread_count > 0 ? 'bg-blue-50' : ''}`
                                 onClick={() => setSelectedThread(thread)}
                             >
                                 <div className="flex justify-between mb-1 items-start">
@@ -656,7 +653,7 @@ function InboxView() {
                         </div>
                         
                         {/* Messages */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50">
+                        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-stone-50">
                             {selectedThread.messages.map(msg => {
                                 const isAdmin = !selectedThread.participants.includes(msg.sender_email);
                                 return (
