@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb, Megaphone, X, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, CheckCircle2, Sparkles, Lightbulb, Megaphone, X, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon, Tag, AlertTriangle, Smile, Meh, Frown, Wand2 } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -418,6 +418,26 @@ function InboxView() {
         }
     });
 
+    const suggestReplyMutation = useMutation({
+        mutationFn: async () => {
+            if (!selectedThread) return { data: {} };
+            const lastFromMember = [...selectedThread.messages].slice().reverse().find(m => selectedThread.participants.includes(m.sender_email));
+            const res = await base44.functions.invoke('aiCommunicationAssistant', {
+                action: 'suggest_reply',
+                data: {
+                    message: lastFromMember?.body || selectedThread.messages[selectedThread.messages.length-1]?.body || '',
+                    subject: selectedThread.subject
+                }
+            });
+            return res;
+        },
+        onSuccess: (res) => {
+            const reply = res?.data?.reply;
+            if (reply) setReplyText(reply);
+            else toast.error('AI could not generate a reply');
+        }
+    });
+
     const handleReply = () => {
         if (!replyText.trim()) return;
         const recipient = selectedThread.participants[0]; 
@@ -431,6 +451,27 @@ function InboxView() {
     if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
 
     const allThreads = data?.threads || [];
+
+    // AI classification for threads (topic, urgency, sentiment)
+    const { data: aiClass } = useQuery({
+        queryKey: ['ai-classify-threads', allThreads.map(t => t.id).join(',')],
+        queryFn: async () => {
+            const threads = allThreads.slice(0, 100).map(t => ({ id: t.id, subject: t.subject || '', body: t.messages?.[t.messages.length-1]?.body || '' }));
+            const res = await base44.functions.invoke('aiCommunicationAssistant', { action: 'classify_threads', data: { threads } });
+            return res.data;
+        },
+        enabled: allThreads.length > 0,
+        staleTime: 5 * 60 * 1000
+    });
+
+    const getClass = (id) => aiClass?.classifications?.[id];
+    const urgencyColor = {
+        low: 'bg-green-100 text-green-700',
+        medium: 'bg-amber-100 text-amber-700',
+        high: 'bg-orange-100 text-orange-700',
+        urgent: 'bg-red-100 text-red-700'
+    };
+    const sentimentIcon = (s) => s === 'positive' ? <Smile className="w-3 h-3" /> : s === 'negative' ? <Frown className="w-3 h-3" /> : <Meh className="w-3 h-3" />;
     
     // Filter Threads
     const filteredThreads = allThreads.filter(thread => {
@@ -516,6 +557,17 @@ function InboxView() {
                                 <div className="text-xs text-stone-500 truncate pr-4">
                                     {thread.messages[thread.messages.length-1]?.body}
                                 </div>
+                                {getClass(thread.id) && (
+                                    <div className="mt-1 flex items-center gap-1.5 flex-wrap text-[10px]">
+                                        <span className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 inline-flex items-center gap-1"><Tag className="w-3 h-3" /> {getClass(thread.id)?.topic}</span>
+                                        <span className={`px-1.5 py-0.5 rounded inline-flex items-center gap-1 ${urgencyColor[getClass(thread.id)?.urgency] || 'bg-stone-100 text-stone-600'}`}>
+                                            <AlertTriangle className="w-3 h-3" /> {getClass(thread.id)?.urgency}
+                                        </span>
+                                        <span className="px-1.5 py-0.5 rounded bg-stone-100 text-stone-600 inline-flex items-center gap-1">
+                                            {sentimentIcon(getClass(thread.id)?.sentiment)} {getClass(thread.id)?.sentiment}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         ))
                     )}
@@ -537,9 +589,25 @@ function InboxView() {
                                     <User className="w-4 h-4" />
                                     {selectedThread.participants.join(', ')}
                                 </div>
+                                {getClass(selectedThread.id) && (
+                                    <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
+                                        <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-700 inline-flex items-center gap-1"><Tag className="w-3 h-3" /> {getClass(selectedThread.id)?.topic}</span>
+                                        <span className={`px-2 py-0.5 rounded inline-flex items-center gap-1 ${urgencyColor[getClass(selectedThread.id)?.urgency] || 'bg-stone-100 text-stone-700'}`}>
+                                            <AlertTriangle className="w-3 h-3" /> {getClass(selectedThread.id)?.urgency}
+                                        </span>
+                                        <span className="px-2 py-0.5 rounded bg-stone-100 text-stone-700 inline-flex items-center gap-1">
+                                            {sentimentIcon(getClass(selectedThread.id)?.sentiment)} {getClass(selectedThread.id)?.sentiment}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             
-                            <DropdownMenu>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => suggestReplyMutation.mutate()} disabled={!selectedThread || suggestReplyMutation.isPending}>
+                                    {suggestReplyMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                                    AI Suggest Reply
+                                </Button>
+                                <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-stone-500 hover:text-stone-900">
                                         <MoreVertical className="w-4 h-4" />

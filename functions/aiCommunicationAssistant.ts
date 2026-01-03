@@ -146,6 +146,37 @@ Deno.serve(async (req) => {
             },
             required: ["campaigns"]
         };
+    } else if (action === 'suggest_reply') {
+        const { message, subject, thread_context } = data || {};
+        prompt = `You are helping an admin reply to a member. Read the member's latest message and draft a concise, empathetic reply.\n\nSubject: ${subject || ''}\nMember message: "${message || ''}"\nThread context (recent lines, optional): ${thread_context || ''}\n\nWrite a short reply (4-7 sentences max). Avoid asking for info already provided. If scheduling or documentation is needed, suggest the next concrete step. Return JSON: {"reply": string}.`;
+        jsonSchema = {
+            type: 'object',
+            properties: { reply: { type: 'string' } },
+            required: ['reply']
+        };
+    } else if (action === 'classify_message') {
+        const { message, subject } = data || {};
+        prompt = `Classify this incoming message for an admin inbox.\nSubject: ${subject || ''}\nBody: ${message || ''}\n\nReturn JSON with: {"topic": string (one of: reservations, plots, billing, maintenance, records, general), "urgency": string (one of: low, medium, high, urgent), "sentiment": string (positive|neutral|negative)}`;
+        jsonSchema = {
+            type: 'object',
+            properties: {
+                topic: { type: 'string' },
+                urgency: { type: 'string' },
+                sentiment: { type: 'string' }
+            },
+            required: ['topic','urgency','sentiment']
+        };
+    } else if (action === 'classify_threads') {
+        const { threads } = data || { threads: [] };
+        const sample = (threads || []).slice(0, 100).map(t => ({ id: t.id, subject: t.subject || '', body: t.body || '' }));
+        prompt = `For each item, classify topic, urgency, and sentiment.\nAllowed topics: reservations, plots, billing, maintenance, records, general.\nUrgency: low, medium, high, urgent. Sentiment: positive, neutral, negative.\nReturn JSON {"classifications": { [id]: { topic, urgency, sentiment } } }.\nItems: ${JSON.stringify(sample)}`;
+        jsonSchema = {
+            type: 'object',
+            properties: {
+                classifications: { type: 'object' }
+            },
+            required: ['classifications']
+        };
     } else {
         return Response.json({ error: "Invalid action" }, { status: 400 });
     }
@@ -172,6 +203,21 @@ Deno.serve(async (req) => {
             output = { analysis: "Clear and respectful.", suggestions: ["Personalize greeting", "Tighten subject", "Add clear CTA"], improved_version: { subject: "Updated Subject", body: "Hello {first_name},\n\n..." } };
         } else if (action === 'suggest_followup') {
             output = { suggested_task: null, suggested_log_type: "note" };
+        } else if (action === 'suggest_reply') {
+            output = { reply: "Thank you for reaching out. We appreciate the details you provided and are happy to help. Could you please confirm any preferred dates/times, and we’ll proceed with the next step.\n\nBest regards,\nUnion Springs Cemetery" };
+        } else if (action === 'classify_message') {
+            output = { topic: 'general', urgency: 'medium', sentiment: 'neutral' };
+        } else if (action === 'classify_threads') {
+            // Build a neutral classification for each thread id in request if available
+            try {
+                const input = await req.json();
+                const ids = (input?.data?.threads || []).map(t => t.id);
+                const classifications = {};
+                ids.forEach(id => { classifications[id] = { topic: 'general', urgency: 'low', sentiment: 'neutral' }; });
+                output = { classifications };
+            } catch {
+                output = { classifications: {} };
+            }
         }
     }
 
