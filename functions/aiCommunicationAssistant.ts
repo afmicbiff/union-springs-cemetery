@@ -208,16 +208,11 @@ Deno.serve(async (req) => {
         } else if (action === 'classify_message') {
             output = { topic: 'general', urgency: 'medium', sentiment: 'neutral' };
         } else if (action === 'classify_threads') {
-            // Build a neutral classification for each thread id in request if available
-            try {
-                const input = await req.json();
-                const ids = (input?.data?.threads || []).map(t => t.id);
-                const classifications = {};
-                ids.forEach(id => { classifications[id] = { topic: 'general', urgency: 'low', sentiment: 'neutral' }; });
-                output = { classifications };
-            } catch {
-                output = { classifications: {} };
-            }
+            // Build a neutral classification for each thread id in original request data
+            const ids = (data?.threads || []).map(t => t.id);
+            const classifications = {};
+            ids.forEach(id => { classifications[id] = { topic: 'general', urgency: 'low', sentiment: 'neutral' }; });
+            output = { classifications };
         }
     }
 
