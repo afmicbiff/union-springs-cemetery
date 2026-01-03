@@ -40,7 +40,7 @@ import { Loader2 } from 'lucide-react';
 import { filterEntity } from "@/components/gov/dataClient";
 
 // Components (lazy-loaded to reduce initial bundle)
-const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview"));
+const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview.jsx"));
 const AdminReservations = React.lazy(() => import("@/components/admin/AdminReservations"));
 const AdminPlots = React.lazy(() => import("@/components/admin/AdminPlots"));
 const DeceasedManager = React.lazy(() => import("@/components/admin/DeceasedManager"));
