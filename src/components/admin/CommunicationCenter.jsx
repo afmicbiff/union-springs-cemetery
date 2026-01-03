@@ -629,10 +629,10 @@ function InboxView() {
                                         value: selectedThread.unread_count > 0
                                     })}>
                                         {selectedThread.unread_count > 0 ? (
-                                            <><MailOpen className="w-4 h-4 mr-2" /> Mark as Read</>
-                                        ) : (
-                                            <><MailIcon className="w-4 h-4 mr-2" /> Mark as Unread</>
-                                        )}
+                                                                                        <span className="flex items-center"><MailOpen className="w-4 h-4 mr-2" /> <span>Mark as Read</span></span>
+                                                                                    ) : (
+                                                                                        <span className="flex items-center"><MailIcon className="w-4 h-4 mr-2" /> <span>Mark as Unread</span></span>
+                                                                                    )}
                                     </DropdownMenuItem>
                                     
                                     <DropdownMenuItem onClick={() => manageThreadMutation.mutate({ 
