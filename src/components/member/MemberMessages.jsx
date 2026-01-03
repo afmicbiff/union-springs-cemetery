@@ -157,7 +157,9 @@ export default function MemberMessages({ user }) {
                                                     <span>{isMe ? 'You' : 'Admin'}</span>
                                                     <span>{format(new Date(msg.created_date), 'p')}</span>
                                                 </div>
-                                                <div className="whitespace-pre-wrap text-sm">{msg.body}</div>
+                                                <div className="max-h-60 overflow-y-auto pr-1">
+                                                    <div className="whitespace-pre-wrap text-sm">{msg.body}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     );
