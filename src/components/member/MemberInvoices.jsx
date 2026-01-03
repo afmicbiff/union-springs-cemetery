@@ -18,8 +18,8 @@ export default function MemberInvoices({ user }) {
         enabled: !!user?.email
     });
 
-    const { data: invoices, isLoading } = useQuery({
-        queryKey: ['member-invoices', member?.id],
+    const { data: invoices = [], isLoading } = useQuery({
+        queryKey: ['member-invoices', member?.id || 'none'],
         queryFn: async () => {
             if (!member?.id) return [];
             return await base44.entities.Invoice.filter({ member_id: member.id }, '-due_date', 50);
