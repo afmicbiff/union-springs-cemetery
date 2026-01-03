@@ -103,9 +103,9 @@ export default function MemberMessages({ user }) {
                 </Dialog>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh] bg-white rounded-xl shadow-sm border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh] min-h-0 bg-white rounded-xl shadow-sm border">
                 {/* Thread List */}
-                <div className="border-r bg-stone-50 overflow-y-auto">
+                <div className="h-full min-h-0 border-r bg-stone-50 overflow-y-auto">
                     {threads.length === 0 ? (
                         <div className="p-8 text-center text-stone-500">
                             <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -140,7 +140,7 @@ export default function MemberMessages({ user }) {
                 </div>
 
                 {/* Message View */}
-                <div className="md:col-span-2 flex flex-col h-full">
+                <div className="md:col-span-2 flex flex-col h-full min-h-0">
                     {selectedThread ? (
                         <>
                             <div className="p-4 border-b bg-white shadow-sm z-10">
