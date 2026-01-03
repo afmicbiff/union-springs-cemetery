@@ -491,9 +491,9 @@ function InboxView() {
     });
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[650px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh]">
             {/* Thread List Column */}
-            <div className="md:col-span-1 flex flex-col h-full bg-stone-50 border rounded-md overflow-hidden">
+            <div className="md:col-span-1 flex flex-col h-full bg-stone-50 border rounded-md">
                 {/* Search & Filters */}
                 <div className="p-3 border-b bg-white space-y-3">
                     <div className="relative">
@@ -575,7 +575,7 @@ function InboxView() {
             </div>
 
             {/* Message Detail Column */}
-            <div className="md:col-span-2 flex flex-col h-full bg-white border rounded-md overflow-hidden shadow-sm">
+            <div className="md:col-span-2 flex flex-col h-full bg-white border rounded-md shadow-sm">
                 {selectedThread ? (
                     <div>
                         {/* Header */}

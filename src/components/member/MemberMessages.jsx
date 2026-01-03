@@ -103,7 +103,7 @@ export default function MemberMessages({ user }) {
                 </Dialog>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[600px] bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh] bg-white rounded-xl shadow-sm border">
                 {/* Thread List */}
                 <div className="border-r bg-stone-50 overflow-y-auto">
                     {threads.length === 0 ? (
