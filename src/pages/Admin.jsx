@@ -56,7 +56,7 @@ const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager"));
 const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory"));
 
 const BackupManager = React.lazy(() => import("@/components/admin/BackupManager"));
-const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter.jsx"));
+const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter"));
 const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer"));
 const LawnCare = React.lazy(() => import("@/components/admin/LawnCare"));
 const CRM = React.lazy(() => import("@/components/crm/CRM"));
