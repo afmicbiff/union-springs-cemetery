@@ -577,7 +577,7 @@ function InboxView() {
             {/* Message Detail Column */}
             <div className="md:col-span-2 flex flex-col h-full bg-white border rounded-md overflow-hidden shadow-sm">
                 {selectedThread ? (
-                    <>
+                    <div>
                         {/* Header */}
                         <div className="p-4 border-b bg-stone-50 flex justify-between items-start">
                             <div className="overflow-hidden mr-4">
