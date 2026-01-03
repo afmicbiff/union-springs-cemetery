@@ -197,7 +197,7 @@ function MassNotificationForm({ onSuccess }) {
                             <label className="flex items-center space-x-2"><input type="checkbox" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} /> <span className="text-sm">Email</span></label>
                             <label className="flex items-center space-x-2"><input type="checkbox" checked={sendInApp} onChange={(e) => setSendInApp(e.target.checked)} /> <span className="text-sm">In-App Notification</span></label>
                         </div>
-                    </div}
+                    </div>
                 </div>
                 <div className="flex justify-end">
                     <Sheet open={isAIOpen} onOpenChange={setIsAIOpen}>
