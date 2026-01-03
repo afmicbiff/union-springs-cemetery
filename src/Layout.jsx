@@ -332,7 +332,9 @@ export default function Layout({ children }) {
             <p>1311 Fire Tower Road</p>
             <p>Shongaloo, Webster Parish, Louisiana, 71072</p>
             <p className="mt-2">Phone: (555) 123-4567</p>
-            <p>Email: office@unionsprings.com</p>
+            <p>
+              Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="text-teal-400 hover:text-teal-300 underline">office@unionsprings.com</Link>
+            </p>
           </div>
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-center mb-4">
