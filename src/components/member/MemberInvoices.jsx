@@ -9,12 +9,13 @@ import { format } from 'date-fns';
 
 export default function MemberInvoices({ user }) {
     const { data: member } = useQuery({
-        queryKey: ['member-profile', user.email],
+        queryKey: ['member-profile', user?.email],
         queryFn: async () => {
-            const res = await base44.entities.Member.list({ email_primary: user.email }, 1);
-            return res[0];
+            if (!user?.email) return null;
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+            return (res && res[0]) || null;
         },
-        enabled: !!user.email
+        enabled: !!user?.email
     });
 
     const { data: invoices, isLoading } = useQuery({
