@@ -623,13 +623,10 @@ function InboxView() {
                                         {selectedThread.is_starred ? 'Unstar' : 'Star'}
                                     </DropdownMenuItem>
                                     
-                                    <DropdownMenuItem onClick={() => manageThreadMutation.mutate({ 
-                                        threadId: selectedThread.id, 
-                                        operation: 'read', 
-                                        value: selectedThread.unread_count > 0 // if unread > 0, we want to mark read (true). Wait. if unread>0, it IS unread. so we want to mark read? 
-                                        // Logic: if unread, mark read. If read, mark unread.
-                                        // unread_count > 0 means it has unread messages. So we want to mark READ (is_read=true).
-                                        // If unread_count == 0, we want to mark UNREAD (is_read=false).
+                                    <DropdownMenuItem onClick={() => manageThreadMutation.mutate({
+                                        threadId: selectedThread.id,
+                                        operation: 'read',
+                                        value: selectedThread.unread_count > 0
                                     })}>
                                         {selectedThread.unread_count > 0 ? (
                                             <><MailOpen className="w-4 h-4 mr-2" /> Mark as Read</>
