@@ -709,7 +709,7 @@ function InboxView() {
                                 Press Enter to send, Shift+Enter for new line
                             </div>
                         </div>
-                    </>
+                    </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-stone-300">
                         <MessageSquare className="w-16 h-16 mb-4 opacity-50" />
