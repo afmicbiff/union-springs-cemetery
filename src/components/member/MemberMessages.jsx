@@ -147,7 +147,7 @@ export default function MemberMessages({ user }) {
                                 <h3 className="font-semibold text-lg text-teal-900">{selectedThread.subject}</h3>
                             </div>
                             
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50/50">
+                            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-stone-50/50">
                                 {selectedThread.messages.map(msg => {
                                     const isMe = msg.sender_email === user.email;
                                     return (
