@@ -28,7 +28,6 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     const [editingTask, setEditingTask] = useState(null);
     const [loggingTask, setLoggingTask] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-
     const [statusFilter, setStatusFilter] = useState("all");
     const [showArchived, setShowArchived] = useState(false);
     
@@ -53,8 +52,6 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
         queryFn: () => base44.entities.Employee.list(null, 1000),
         initialData: []
     });
-    const employeesById = {};
-    (employees || []).forEach(e => { if (e?.id) employeesById[e.id] = e; });
 
     // Mutations
     const createTaskMutation = useMutation({
@@ -147,7 +144,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     // Helpers
     const getAssigneeName = (id) => {
         if (!id) return "Unassigned";
-        const emp = employeesById[id];
+        const emp = employees.find(e => e.id === id);
         return emp ? `${emp.first_name} ${emp.last_name}` : "Unknown";
     };
 
@@ -181,7 +178,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     };
 
     // Filter Logic
-    const filteredTasks = (tasks || []).filter(task => {
+    const filteredTasks = tasks.filter(task => {
         // Archive Filter
         if (showArchived) {
             if (!task.is_archived) return false;
@@ -206,6 +203,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
             if (!dateStr) return false; // If filtering by date but task has none, exclude it
             
             const taskDate = new Date(dateStr);
+            // Reset times for date-only comparison
             taskDate.setHours(0, 0, 0, 0);
 
             if (dateRange.start) {
@@ -222,9 +220,10 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
         // Fuzzy Search
         if (searchTerm) {
-            const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-            const hay = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
-            return terms.every(t => hay.includes(t));
+            const searchTerms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+            const textToSearch = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
+            // All terms must match (AND logic)
+            return searchTerms.every(term => textToSearch.includes(term));
         }
 
         return true;
