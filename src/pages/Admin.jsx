@@ -551,7 +551,7 @@ export default function AdminDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
-                    {tabs.filter(t => t.id !== 'security').map(tab => {
+                    {tabs.map(tab => {
                       // Keep an invisible Archives trigger to maintain Tabs structure and avoid hook/order issues
                       if (tab.id === 'archives') {
                         return (
