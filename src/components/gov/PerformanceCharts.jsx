@@ -235,7 +235,7 @@ export default function PerformanceCharts() {
           </>
         ) : (
           <div className="text-sm text-stone-500">Charts will render when visible…</div>
-        )}
+        ))}
         </div>
       </CardContent>
     </Card>
