@@ -18,6 +18,50 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'TinyPNG API key not configured' }, { status: 500 });
     }
 
+    // Proactive virus scan using Cloudmersive before processing
+    const cmKey = Deno.env.get('CLOUDMERSIVE_API_KEY');
+    if (cmKey) {
+      const fileRes = await fetch(file_url);
+      if (!fileRes.ok) {
+        return Response.json({ error: `Failed to fetch file for scanning (${fileRes.status})` }, { status: 400 });
+      }
+      const buf = new Uint8Array(await fileRes.arrayBuffer());
+      const fd = new FormData();
+      fd.append('inputFile', new Blob([buf], { type: 'application/octet-stream' }), 'upload.bin');
+      const scanRes = await fetch('https://api.cloudmersive.com/virus/scan/file', {
+        method: 'POST',
+        headers: { 'Apikey': cmKey },
+        body: fd
+      });
+      const scanJson = await scanRes.json().catch(() => ({}));
+      const clean = !!scanJson.CleanResult || (scanJson.FoundViruses == null || (Array.isArray(scanJson.FoundViruses) && scanJson.FoundViruses.length === 0));
+      if (!clean) {
+        const threats = Array.isArray(scanJson.FoundViruses) ? scanJson.FoundViruses.map(v => v.VirusName || v.Name || JSON.stringify(v)) : [];
+        try {
+          const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
+          const ua = req.headers.get('user-agent') || '';
+          await base44.asServiceRole.entities.SecurityEvent.create({
+            event_type: 'file_upload_blocked',
+            severity: 'critical',
+            message: `Blocked upload due to threats: ${threats.join(', ')}`,
+            ip_address: ip,
+            user_agent: ua,
+            user_email: user.email,
+            route: 'functions/tinyPngOptimize',
+            details: { file_url, cloudmersive: scanJson, threats }
+          });
+          await base44.asServiceRole.entities.Notification.create({
+            message: `Security Alert: Blocked infected file upload for user ${user.email}`,
+            type: 'alert',
+            is_read: false,
+            user_email: null,
+            related_entity_type: 'document'
+          });
+        } catch (_e) {}
+        return Response.json({ error: 'File blocked due to detected threats', threats }, { status: 403 });
+      }
+    }
+
     // 1) Ask TinyPNG to shrink the uploaded file by URL
     const auth = 'Basic ' + btoa(`api:${apiKey}`);
     const shrinkRes = await fetch('https://api.tinify.com/shrink', {

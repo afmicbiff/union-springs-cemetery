@@ -26,6 +26,42 @@ Deno.serve(async (req) => {
     }
     const input = new Uint8Array(await res.arrayBuffer());
 
+    // Proactive virus scan using Cloudmersive before processing
+    const cmKey = Deno.env.get('CLOUDMERSIVE_API_KEY');
+    if (!cmKey) {
+      return Response.json({ error: 'Cloudmersive API key not configured' }, { status: 500 });
+    }
+    const scanForm = new FormData();
+    scanForm.append('inputFile', new Blob([input], { type: 'application/octet-stream' }), 'upload.bin');
+    const scanRes = await fetch('https://api.cloudmersive.com/virus/scan/file', { method: 'POST', headers: { 'Apikey': cmKey }, body: scanForm });
+    const scanJson = await scanRes.json().catch(() => ({}));
+    const clean = !!scanJson.CleanResult || (scanJson.FoundViruses == null || (Array.isArray(scanJson.FoundViruses) && scanJson.FoundViruses.length === 0));
+    if (!clean) {
+      const threats = Array.isArray(scanJson.FoundViruses) ? scanJson.FoundViruses.map(v => v.VirusName || v.Name || JSON.stringify(v)) : [];
+      try {
+        const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
+        const ua = req.headers.get('user-agent') || '';
+        await base44.asServiceRole.entities.SecurityEvent.create({
+          event_type: 'image_optimize_blocked',
+          severity: 'critical',
+          message: `Blocked optimize due to threats: ${threats.join(', ')}`,
+          ip_address: ip,
+          user_agent: ua,
+          user_email: user.email,
+          route: 'functions/optimizeImage',
+          details: { file_url: fileUrl, cloudmersive: scanJson, threats }
+        });
+        await base44.asServiceRole.entities.Notification.create({
+          message: `Security Alert: Blocked infected image processing for ${user.email}`,
+          type: 'alert',
+          is_read: false,
+          user_email: null,
+          related_entity_type: 'document'
+        });
+      } catch (_e) {}
+      return Response.json({ error: 'File blocked due to detected threats', threats }, { status: 403 });
+    }
+
     // Use Cloudmersive API for conversion (works on this platform)
     const apiKey = Deno.env.get('CLOUDMERSIVE_API_KEY');
     if (!apiKey) {
