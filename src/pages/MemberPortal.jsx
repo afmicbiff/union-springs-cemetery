@@ -6,13 +6,15 @@ import { Loader2, LayoutDashboard, UserCircle, MessageSquare, LogOut } from 'luc
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MemberDashboard from "@/components/member/MemberDashboard";
 import MemberProfile from "@/components/member/MemberProfile";
-import MemberMessages from "@/components/member/MemberMessages";
-import MemberDocuments from "@/components/member/MemberDocuments";
-import MemberInvoices from "@/components/member/MemberInvoices";
-import MemberTasks from "@/components/member/MemberTasks";
 import { FileText, Receipt, CheckCircle2 } from 'lucide-react';
-import ReservationHistory from "@/components/member/ReservationHistory";
-import ReservationWizard from "@/components/member/ReservationWizard";
+
+// Lazy-load heavy tabs to avoid eager data fetching
+const MemberMessages = React.lazy(() => import("@/components/member/MemberMessages"));
+const MemberDocuments = React.lazy(() => import("@/components/member/MemberDocuments"));
+const MemberInvoices = React.lazy(() => import("@/components/member/MemberInvoices"));
+const MemberTasks = React.lazy(() => import("@/components/member/MemberTasks"));
+const ReservationHistory = React.lazy(() => import("@/components/member/ReservationHistory"));
+const ReservationWizard = React.lazy(() => import("@/components/member/ReservationWizard"));
 
 export default function MemberPortal() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -40,24 +42,27 @@ export default function MemberPortal() {
     });
     const unreadCount = (convData?.threads || []).reduce((sum, t) => sum + (t.unread_count || 0), 0);
 
-    // Member tasks indicator (blink when due/overdue tasks exist)
-    const { data: memberForTasks } = useQuery({
-        queryKey: ['member-for-tasks', user?.email],
-        queryFn: async () => {
-            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
-            return (res && res[0]) || null;
-        },
-        enabled: !!user
-    });
+    // Resolve memberId once after login to avoid repeated queries
+      const [memberId, setMemberId] = useState(null);
+      React.useEffect(() => {
+          let mounted = true;
+          if (!user?.email) { setMemberId(null); return; }
+          (async () => {
+              const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+              if (mounted) setMemberId((res && res[0]?.id) || null);
+          })();
+          return () => { mounted = false; };
+      }, [user?.email]);
 
     const { data: memberTasksForIndicator = [] } = useQuery({
-        queryKey: ['member-tasks-indicator', memberForTasks?.id],
+        queryKey: ['member-tasks-indicator', memberId],
         queryFn: async () => {
-            if (!memberForTasks?.id) return [];
-            return base44.entities.Task.filter({ member_id: memberForTasks.id, is_archived: false }, '-created_date', 50);
+            if (!memberId) return [];
+            return base44.entities.Task.filter({ member_id: memberId, is_archived: false }, '-created_date', 50);
         },
-        enabled: !!memberForTasks?.id,
-        refetchInterval: 30000,
+        enabled: !!memberId,
+        refetchInterval: 120000,
+        refetchOnWindowFocus: false,
         initialData: []
     });
 
@@ -136,27 +141,47 @@ export default function MemberPortal() {
                     <MemberProfile user={user} />
                 </TabsContent>
 
-                <TabsContent value="messages" className="focus-visible:outline-none">
-                    <MemberMessages user={user} />
-                </TabsContent>
+                {activeTab === 'messages' && (
+                    <TabsContent value="messages" className="focus-visible:outline-none">
+                        <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                            <MemberMessages user={user} />
+                        </React.Suspense>
+                    </TabsContent>
+                )}
 
-                <TabsContent value="documents" className="focus-visible:outline-none">
-                    <MemberDocuments user={user} />
-                </TabsContent>
+                {activeTab === 'documents' && (
+                    <TabsContent value="documents" className="focus-visible:outline-none">
+                        <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                            <MemberDocuments user={user} />
+                        </React.Suspense>
+                    </TabsContent>
+                )}
 
-                <TabsContent value="tasks" className="focus-visible:outline-none">
-                    <MemberTasks user={user} />
-                </TabsContent>
+                {activeTab === 'tasks' && (
+                    <TabsContent value="tasks" className="focus-visible:outline-none">
+                        <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                            <MemberTasks user={user} />
+                        </React.Suspense>
+                    </TabsContent>
+                )}
 
-                <TabsContent value="invoices" className="focus-visible:outline-none">
-                    <MemberInvoices user={user} />
-                </TabsContent>
-                <TabsContent value="reservations">
-                                          <div className="space-y-6">
-                                              <ReservationWizard />
-                                              <ReservationHistory />
-                                          </div>
-                                      </TabsContent>
+                {activeTab === 'invoices' && (
+                    <TabsContent value="invoices" className="focus-visible:outline-none">
+                        <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                            <MemberInvoices user={user} />
+                        </React.Suspense>
+                    </TabsContent>
+                )}
+                {activeTab === 'reservations' && (
+                    <TabsContent value="reservations">
+                        <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
+                            <div className="space-y-6">
+                                <ReservationWizard />
+                                <ReservationHistory />
+                            </div>
+                        </React.Suspense>
+                    </TabsContent>
+                )}
             </Tabs>
         </div>
     );
