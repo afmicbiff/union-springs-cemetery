@@ -48,7 +48,7 @@ const OnboardingForm = React.lazy(() => import("@/components/admin/OnboardingFor
 const OnboardingProgress = React.lazy(() => import("@/components/admin/OnboardingProgress.jsx"));
 const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide.jsx"));
 const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList.jsx"));
-const VendorManager = React.lazy(() => import("@/components/admin/VendorManager.jsx"));
+const VendorManager = React.lazy(() => import("@/components/admin/VendorManager"));
 const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity.jsx"));
 const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar.jsx"));
 const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager.jsx"));
