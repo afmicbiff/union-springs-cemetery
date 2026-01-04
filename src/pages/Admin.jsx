@@ -734,7 +734,7 @@ export default function AdminDashboard() {
                 </TabsList>
             </div>
 
-            {tabs.filter(t => t.id !== 'security').map(tab => ()
+            {tabs.filter(t => t.id !== 'security').map(tab => (
                 <TabsContent key={tab.id} value={tab.id} className="focus-visible:outline-none">
                     <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
                         <motion.div
