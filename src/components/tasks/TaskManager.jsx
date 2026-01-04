@@ -57,11 +57,8 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
         queryFn: () => base44.entities.Employee.list(null, 1000),
         initialData: []
     });
-    const employeesById = React.useMemo(() => {
-        const map = {};
-        (employees || []).forEach(e => { if (e?.id) map[e.id] = e; });
-        return map;
-    }, [employees]);
+    const employeesById = {};
+    (employees || []).forEach(e => { if (e?.id) employeesById[e.id] = e; });
 
     // Mutations
     const createTaskMutation = useMutation({
@@ -188,57 +185,54 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     };
 
     // Filter Logic
-    const filteredTasks = React.useMemo(() => {
-        const list = tasks || [];
-        return list.filter(task => {
-            // Archive Filter
-            if (showArchived) {
-                if (!task.is_archived) return false;
-            } else {
-                if (task.is_archived) return false;
+    const filteredTasks = (tasks || []).filter(task => {
+        // Archive Filter
+        if (showArchived) {
+            if (!task.is_archived) return false;
+        } else {
+            if (task.is_archived) return false;
+        }
+
+        // Permission Filter
+        if (!isAdmin && currentEmployeeId && task.assignee_id !== currentEmployeeId) {
+            return false;
+        }
+
+        // Status Filter
+        if (statusFilter !== "all" && task.status !== statusFilter) return false;
+
+        // Priority Filter
+        if (priorityFilter !== "all" && task.priority !== priorityFilter) return false;
+
+        // Date Range Filter
+        if (dateRange.start || dateRange.end) {
+            const dateStr = dateFilterType === 'created_date' ? task.created_date : task.due_date;
+            if (!dateStr) return false; // If filtering by date but task has none, exclude it
+            
+            const taskDate = new Date(dateStr);
+            taskDate.setHours(0, 0, 0, 0);
+
+            if (dateRange.start) {
+                const start = new Date(dateRange.start);
+                start.setHours(0, 0, 0, 0);
+                if (taskDate < start) return false;
             }
-
-            // Permission Filter
-            if (!isAdmin && currentEmployeeId && task.assignee_id !== currentEmployeeId) {
-                return false;
+            if (dateRange.end) {
+                const end = new Date(dateRange.end);
+                end.setHours(23, 59, 59, 999);
+                if (taskDate > end) return false;
             }
+        }
 
-            // Status Filter
-            if (statusFilter !== "all" && task.status !== statusFilter) return false;
+        // Debounced Fuzzy Search
+        if (debouncedSearch) {
+            const terms = debouncedSearch.toLowerCase().split(/\s+/).filter(Boolean);
+            const hay = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
+            return terms.every(t => hay.includes(t));
+        }
 
-            // Priority Filter
-            if (priorityFilter !== "all" && task.priority !== priorityFilter) return false;
-
-            // Date Range Filter
-            if (dateRange.start || dateRange.end) {
-                const dateStr = dateFilterType === 'created_date' ? task.created_date : task.due_date;
-                if (!dateStr) return false; // If filtering by date but task has none, exclude it
-                
-                const taskDate = new Date(dateStr);
-                taskDate.setHours(0, 0, 0, 0);
-
-                if (dateRange.start) {
-                    const start = new Date(dateRange.start);
-                    start.setHours(0, 0, 0, 0);
-                    if (taskDate < start) return false;
-                }
-                if (dateRange.end) {
-                    const end = new Date(dateRange.end);
-                    end.setHours(23, 59, 59, 999);
-                    if (taskDate > end) return false;
-                }
-            }
-
-            // Debounced Fuzzy Search
-            if (debouncedSearch) {
-                const terms = debouncedSearch.toLowerCase().split(/\s+/).filter(Boolean);
-                const hay = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
-                return terms.every(t => hay.includes(t));
-            }
-
-            return true;
-        });
-    }, [tasks, showArchived, isAdmin, currentEmployeeId, statusFilter, priorityFilter, dateRange.start, dateRange.end, dateFilterType, debouncedSearch]);
+        return true;
+    });
 
     const getPriorityColor = (p) => {
         switch (p) {
