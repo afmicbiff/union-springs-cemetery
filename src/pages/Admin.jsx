@@ -40,27 +40,27 @@ import { Loader2 } from 'lucide-react';
 import { filterEntity } from "@/components/gov/dataClient";
 
 // Components (lazy-loaded to reduce initial bundle)
-const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview"));
-const AdminReservations = React.lazy(() => import("@/components/admin/AdminReservations"));
-const AdminPlots = React.lazy(() => import("@/components/admin/AdminPlots"));
-const DeceasedManager = React.lazy(() => import("@/components/admin/DeceasedManager"));
-const OnboardingForm = React.lazy(() => import("@/components/admin/OnboardingForm"));
-const OnboardingProgress = React.lazy(() => import("@/components/admin/OnboardingProgress"));
-const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide"));
-const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList"));
-const VendorManager = React.lazy(() => import("@/components/admin/VendorManager"));
-const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity"));
-const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar"));
-const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager"));
-const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager"));
-const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory"));
+const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview.jsx"));
+const AdminReservations = React.lazy(() => import("@/components/admin/AdminReservations.jsx"));
+const AdminPlots = React.lazy(() => import("@/components/admin/AdminPlots.jsx"));
+const DeceasedManager = React.lazy(() => import("@/components/admin/DeceasedManager.jsx"));
+const OnboardingForm = React.lazy(() => import("@/components/admin/OnboardingForm.jsx"));
+const OnboardingProgress = React.lazy(() => import("@/components/admin/OnboardingProgress.jsx"));
+const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide.jsx"));
+const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList.jsx"));
+const VendorManager = React.lazy(() => import("@/components/admin/VendorManager.jsx"));
+const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity.jsx"));
+const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar.jsx"));
+const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager.jsx"));
+const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager.jsx"));
+const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory.jsx"));
 
-const BackupManager = React.lazy(() => import("@/components/admin/BackupManager"));
-const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter"));
-const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer"));
-const LawnCare = React.lazy(() => import("@/components/admin/LawnCare"));
-const CRM = React.lazy(() => import("@/components/crm/CRM"));
-const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminDocumentsManager"));
+const BackupManager = React.lazy(() => import("@/components/admin/BackupManager.jsx"));
+const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter.jsx"));
+const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer.jsx"));
+const LawnCare = React.lazy(() => import("@/components/admin/LawnCare.jsx"));
+const CRM = React.lazy(() => import("@/components/crm/CRM.jsx"));
+const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminDocumentsManager.jsx"));
 
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
