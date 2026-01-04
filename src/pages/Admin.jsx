@@ -120,7 +120,7 @@ export default function AdminDashboard() {
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
-    refetchInterval: 30_000,
+    refetchInterval: 120_000,
   });
 
   const dismissibleNotes = React.useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
