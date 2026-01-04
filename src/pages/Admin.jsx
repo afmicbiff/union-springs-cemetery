@@ -603,9 +603,43 @@ export default function AdminDashboard() {
                             </DropdownMenu>
                           </div>
                         );
-                      }
+                        }
+                        if (tab.id === 'communication') {
+                          const isCommActive = activeTab === 'communication';
+                          return (
+                            <div key="communication-group" className="flex items-stretch">
+                              <TabsTrigger 
+                                value="communication"
+                                className={`
+                                  px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
+                                  data-[state=active]:bg-teal-700 data-[state=active]:text-white
+                                  hover:text-green-700 hover:bg-green-50
+                                  flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
+                                  min-w-[80px] md:min-w-0
+                                  ${isCommActive ? 'bg-teal-700 text-white' : ''}
+                                `}
+                              >
+                                <div className="whitespace-nowrap flex items-center gap-1">Communications</div>
+                              </TabsTrigger>
 
-                      return (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
+                                    aria-label="Communications options"
+                                  >
+                                    <ChevronDown className="w-4 h-4" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="min-w-[160px]">
+                                  <DropdownMenuItem onClick={() => setActiveTab('communication')}>Open</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          );
+                        }
+
+                        return (
                         <TabsTrigger 
                           key={tab.id} 
                           value={tab.id} 
@@ -641,42 +675,64 @@ export default function AdminDashboard() {
                         Bylaws
                     </Link>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                          <Bell className="w-4 h-4" /> Notifications <ChevronDown className="w-3 h-3 opacity-70" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="min-w-[200px]">
-                        <DropdownMenuItem onClick={() => setNotifPopoverOpen(true)}>
-                          <Bell className="w-4 h-4 mr-2" /> Open Notifications
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('NotificationSettings')} className="flex items-center">
-                            <Settings className="w-4 h-4 mr-2" /> Notification Settings
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]">
-                          <Mail className="w-4 h-4" /> Email Tool <ChevronDown className="w-3 h-3 opacity-70" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="min-w-[200px]">
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('SendEmail')} className="flex items-center">
-                            <Mail className="w-4 h-4 mr-2" /> Open Send Email
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to={`${createPageUrl('SendEmail')}#templates-section`} className="flex items-center">
-                            <FileText className="w-4 h-4 mr-2" /> Templates
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-stretch">
+                      <button
+                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                        onClick={() => setNotifPopoverOpen(true)}
+                      >
+                        <Bell className="w-4 h-4" /> Notifications
+                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
+                            aria-label="Notifications options"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="min-w-[200px]">
+                          <DropdownMenuItem onClick={() => setNotifPopoverOpen(true)}>
+                            <Bell className="w-4 h-4 mr-2" /> Open Notifications
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={createPageUrl('NotificationSettings')} className="flex items-center">
+                              <Settings className="w-4 h-4 mr-2" /> Notification Settings
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className="flex items-stretch">
+                      <Link
+                        to={createPageUrl('SendEmail')}
+                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                      >
+                        <Mail className="w-4 h-4" /> Email Tool
+                      </Link>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
+                            aria-label="Email tool options"
+                          >
+                            <ChevronDown className="w-4 h-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="min-w-[200px]">
+                          <DropdownMenuItem asChild>
+                            <Link to={createPageUrl('SendEmail')} className="flex items-center">
+                              <Mail className="w-4 h-4 mr-2" /> Open Send Email
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`${createPageUrl('SendEmail')}#templates-section`} className="flex items-center">
+                              <FileText className="w-4 h-4 mr-2" /> Templates
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                 </TabsList>
             </div>
 
