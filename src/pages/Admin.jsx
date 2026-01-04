@@ -49,6 +49,7 @@ const OnboardingProgress = React.lazy(() => import("@/components/admin/Onboardin
 const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide.jsx"));
 const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList.jsx"));
 const VendorManager = React.lazy(() => import("@/components/admin/VendorManager"));
+const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity.jsx"));
 const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar.jsx"));
 const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager.jsx"));
 const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager.jsx"));
@@ -77,10 +78,6 @@ export default function AdminDashboard() {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab === 'security') {
-        window.location.href = createPageUrl('SecurityDashboard');
-        return;
-    }
     if (tab) {
         setActiveTab(tab);
     }
@@ -256,19 +253,7 @@ export default function AdminDashboard() {
       return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
   }
 
-  // Redirect legacy Security tab to the new dedicated page
-  React.useEffect(() => {
-    if (activeTab === 'security') {
-      window.location.href = createPageUrl('SecurityDashboard');
-    }
-  }, [activeTab]);
-
   const handleSearchNavigate = (link) => {
-      // Redirect security results to the dedicated page
-      if (link.type === 'security') {
-          window.location.href = createPageUrl('SecurityDashboard');
-          return;
-      }
       // Map search result types to tabs
       const tabMap = {
           member: 'members',
@@ -281,7 +266,8 @@ export default function AdminDashboard() {
           // Navigation types map directly or via aliases
           overview: 'overview',
           onboarding: 'onboarding',
-
+          security: 'security',
+          
           calendar: 'calendar',
           reservations: 'reservations',
           plots: 'plots',
@@ -334,6 +320,7 @@ export default function AdminDashboard() {
       { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
       { id: "archives", label: "Archives", component: <EmployeeList view="archived" /> },
       { id: "vendors", label: "Vendors", component: <VendorManager /> },
+      { id: "security", label: "Security", component: <AdminSecurity /> },
       { id: "calendar", label: "Calendar", component: <EventCalendar /> },
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
@@ -550,7 +537,7 @@ export default function AdminDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
-                    {tabs.filter(t => t.id !== 'security').map(tab => {
+                    {tabs.map(tab => {
                       // Keep an invisible Archives trigger to maintain Tabs structure and avoid hook/order issues
                       if (tab.id === 'archives') {
                         return (
@@ -733,7 +720,7 @@ export default function AdminDashboard() {
                 </TabsList>
             </div>
 
-            {tabs.filter(t => t.id !== 'security').map(tab => ()
+            {tabs.map(tab => (
                 <TabsContent key={tab.id} value={tab.id} className="focus-visible:outline-none">
                     <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
                         <motion.div

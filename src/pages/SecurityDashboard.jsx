@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { PieChart, Pie, Cell, Tooltip as RTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
-import SecurityMonitor from '@/components/admin/SecurityMonitor';
 
 const SEV_COLORS = { info: '#94a3b8', low: '#10b981', medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
 const sevBadge = (s) => ({
@@ -242,49 +241,6 @@ export default function SecurityDashboard() {
                 )}
               </tbody>
             </table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Data Security & Archiving
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="prose text-stone-700 space-y-8 max-w-none">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h4 className="font-bold text-lg mb-2 text-stone-900">Data Storage</h4>
-                  <p className="leading-relaxed">
-                    All cemetery records are securely stored in the cloud database. This ensures redundancy and access from any authorized device.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-2 text-stone-900">Backups</h4>
-                  <p className="leading-relaxed">
-                    It is recommended to perform a manual export once a month. Save this JSON file to a secure external hard drive or a dedicated organizational cloud storage.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-2 text-stone-900">Restoration</h4>
-                  <p className="leading-relaxed">
-                    In the event of data loss, the exported JSON file can be used by the technical team to restore the database to its previous state.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-2 text-stone-900">Access Control</h4>
-                  <p className="leading-relaxed">
-                    Only authorized administrators should have access to this dashboard. Regularly review who has access credentials.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-yellow-50 text-yellow-800 rounded-sm border-l-4 border-yellow-400">
-              <strong>Security Tip:</strong> When downloading reports containing personal information, ensure they are stored in encrypted folders on your device.
-            </div>
-
-            <SecurityMonitor />
           </CardContent>
         </Card>
 
