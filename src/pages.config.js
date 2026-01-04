@@ -1,3 +1,4 @@
+import Admin from './pages/Admin';
 import Bylaws from './pages/Bylaws';
 import Contact from './pages/Contact';
 import EmployeeProfile from './pages/EmployeeProfile';
@@ -19,15 +20,15 @@ import Reports from './pages/Reports';
 import ResendAck from './pages/ResendAck';
 import ReservePlot from './pages/ReservePlot';
 import Search from './pages/Search';
+import SecurityDashboard from './pages/SecurityDashboard';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
-import Admin from './pages/Admin';
-import SecurityDashboard from './pages/SecurityDashboard';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Admin": Admin,
     "Bylaws": Bylaws,
     "Contact": Contact,
     "EmployeeProfile": EmployeeProfile,
@@ -49,11 +50,10 @@ export const PAGES = {
     "ResendAck": ResendAck,
     "ReservePlot": ReservePlot,
     "Search": Search,
+    "SecurityDashboard": SecurityDashboard,
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
-    "Admin": Admin,
-    "SecurityDashboard": SecurityDashboard,
 }
 
 export const pagesConfig = {

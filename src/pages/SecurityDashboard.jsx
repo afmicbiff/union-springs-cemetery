@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { PieChart, Pie, Cell, Tooltip as RTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
@@ -29,6 +30,10 @@ export default function SecurityDashboard() {
   const [end, setEnd] = React.useState('');
   const [details, setDetails] = React.useState(null);
   const [blockModal, setBlockModal] = React.useState({ open: false, ip: '', minutes: 60, reason: '' });
+  const [blockedView, setBlockedView] = React.useState('active');
+  const [insights, setInsights] = React.useState(null);
+  const [insightsLoading, setInsightsLoading] = React.useState(false);
+  const [secCfg, setSecCfg] = React.useState({ enabled: true, failed_login_threshold: 5, window_minutes: 10, auto_block_enabled: false, auto_block_minutes: 60, notify_email: true, notify_in_app: true, severity_for_threshold: 'high' });
 
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['sec-events'],
@@ -44,12 +49,58 @@ export default function SecurityDashboard() {
     staleTime: 60_000,
   });
 
+  const { data: blockedAll = [] } = useQuery({
+    queryKey: ['blocked-all'],
+    queryFn: () => base44.entities.BlockedIP.list('-created_date', 500),
+    initialData: [],
+    staleTime: 60_000,
+  });
+
+  const { data: nsData } = useQuery({
+    queryKey: ['notification-settings'],
+    queryFn: async () => {
+      const list = await base44.entities.NotificationSettings.list('-updated_date', 1);
+      return list[0] || null;
+    },
+    initialData: null,
+    staleTime: 60_000,
+  });
+
   const blockedSet = React.useMemo(() => {
     const now = Date.now();
     const set = new Set();
     (blocked || []).forEach(b => { if (b.active && new Date(b.blocked_until).getTime() > now) set.add(b.ip_address); });
     return set;
   }, [blocked]);
+
+  const filteredBlocked = React.useMemo(() => {
+    const arr = Array.isArray(blockedAll) ? blockedAll : [];
+    const now = Date.now();
+    return arr.filter(rec => {
+      const isActive = rec.active && new Date(rec.blocked_until).getTime() > now;
+      if (blockedView === 'active') return isActive;
+      if (blockedView === 'inactive') return !isActive;
+      return true;
+    });
+  }, [blockedAll, blockedView]);
+
+  const unblockIp = async (rec) => {
+    try {
+      await base44.entities.BlockedIP.update(rec.id, { active: false });
+      toast.success(`Unblocked ${rec.ip_address}`);
+      qc.invalidateQueries({ queryKey: ['blocked-ips'] });
+      qc.invalidateQueries({ queryKey: ['blocked-all'] });
+    } catch (e) {
+      toast.error('Unblock failed');
+    }
+  };
+
+  React.useEffect(() => {
+    if (nsData) {
+      const cfg = nsData.security_alerts || {};
+      setSecCfg(prev => ({ ...prev, ...cfg }));
+    }
+  }, [nsData]);
 
   const types = React.useMemo(() => {
     const t = new Set();
@@ -106,6 +157,52 @@ export default function SecurityDashboard() {
       qc.invalidateQueries({ queryKey: ['blocked-ips'] });
     } catch (e) {
       toast.error(e?.message || 'Block failed');
+    }
+  };
+
+  const generateInsights = async () => {
+    try {
+      setInsightsLoading(true);
+      const eventsForLLM = (events || []).slice(0, 200).map(e => ({
+        severity: e.severity,
+        type: e.event_type,
+        ip: e.ip_address,
+        when: e.created_date,
+        message: e.message
+      }));
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt: `Analyze these security events and summarize key insights, top risks, suspicious IPs, and concrete recommendations. Return a JSON per the schema. Events: ${JSON.stringify(eventsForLLM)}`,
+        add_context_from_internet: false,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            summary: { type: 'string' },
+            top_risks: { type: 'array', items: { type: 'string' } },
+            suspicious_ips: { type: 'array', items: { type: 'string' } },
+            recommendations: { type: 'array', items: { type: 'string' } }
+          },
+          required: ['summary', 'recommendations']
+        }
+      });
+      setInsights(res);
+    } catch (e) {
+      toast.error('Failed to generate insights');
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  const saveSecCfg = async () => {
+    try {
+      if (nsData && nsData.id) {
+        await base44.entities.NotificationSettings.update(nsData.id, { security_alerts: secCfg });
+      } else {
+        await base44.entities.NotificationSettings.create({ security_alerts: secCfg });
+      }
+      toast.success('Alert settings saved');
+      qc.invalidateQueries({ queryKey: ['notification-settings'] });
+    } catch (e) {
+      toast.error('Save failed');
     }
   };
 
@@ -201,6 +298,147 @@ export default function SecurityDashboard() {
 
         <Card>
           <CardHeader>
+            <CardTitle className="text-lg">Automated Security Insights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-sm text-stone-600">Get an AI summary of recent events</div>
+              <Button onClick={generateInsights} disabled={insightsLoading} className="gap-2">
+                {insightsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                {insightsLoading ? 'Generating...' : 'Generate Insights'}
+              </Button>
+            </div>
+            {insights && (
+              <div className="space-y-3 text-sm">
+                {insights.summary && <p className="text-stone-800">{insights.summary}</p>}
+                {Array.isArray(insights.top_risks) && insights.top_risks.length > 0 && (
+                  <div>
+                    <div className="font-medium mb-1">Top Risks</div>
+                    <ul className="list-disc ml-5">{insights.top_risks.map((r,i)=>(<li key={i}>{r}</li>))}</ul>
+                  </div>
+                )}
+                {Array.isArray(insights.suspicious_ips) && insights.suspicious_ips.length > 0 && (
+                  <div>
+                    <div className="font-medium mb-1">Suspicious IPs</div>
+                    <div className="flex flex-wrap gap-2">{insights.suspicious_ips.map((ip,i)=>(<Badge key={i} variant="outline">{ip}</Badge>))}</div>
+                  </div>
+                )}
+                {Array.isArray(insights.recommendations) && insights.recommendations.length > 0 && (
+                  <div>
+                    <div className="font-medium mb-1">Recommendations</div>
+                    <ul className="list-disc ml-5">{insights.recommendations.map((r,i)=>(<li key={i}>{r}</li>))}</ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Alert Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <label className="flex items-center gap-2"><Checkbox checked={secCfg.enabled} onCheckedChange={(v)=> setSecCfg({ ...secCfg, enabled: !!v })} /> Enable Alerts</label>
+              <label className="flex items-center gap-2"><Checkbox checked={secCfg.notify_in_app} onCheckedChange={(v)=> setSecCfg({ ...secCfg, notify_in_app: !!v })} /> In-App Notifications</label>
+              <label className="flex items-center gap-2"><Checkbox checked={secCfg.notify_email} onCheckedChange={(v)=> setSecCfg({ ...secCfg, notify_email: !!v })} /> Email Notifications</label>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div>
+                <div className="text-xs text-stone-500 mb-1">Failed Logins Threshold</div>
+                <Input type="number" min={1} value={secCfg.failed_login_threshold} onChange={(e)=> setSecCfg({ ...secCfg, failed_login_threshold: Number(e.target.value||0) })} className="bg-white" />
+              </div>
+              <div>
+                <div className="text-xs text-stone-500 mb-1">Window (minutes)</div>
+                <Input type="number" min={1} value={secCfg.window_minutes} onChange={(e)=> setSecCfg({ ...secCfg, window_minutes: Number(e.target.value||0) })} className="bg-white" />
+              </div>
+              <div>
+                <div className="text-xs text-stone-500 mb-1">Severity</div>
+                <Select value={secCfg.severity_for_threshold} onValueChange={(v)=> setSecCfg({ ...secCfg, severity_for_threshold: v })}>
+                  <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <div className="text-xs text-stone-500 mb-1">Auto-block (minutes)</div>
+                <Input type="number" min={1} disabled={!secCfg.auto_block_enabled} value={secCfg.auto_block_minutes} onChange={(e)=> setSecCfg({ ...secCfg, auto_block_minutes: Number(e.target.value||0) })} className="bg-white" />
+              </div>
+            </div>
+            <label className="flex items-center gap-2"><Checkbox checked={secCfg.auto_block_enabled} onCheckedChange={(v)=> setSecCfg({ ...secCfg, auto_block_enabled: !!v })} /> Enable Auto-block when threshold is met</label>
+            <div className="flex justify-end">
+              <Button onClick={saveSecCfg}>Save Settings</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Blocked IPs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-sm text-stone-600">Manage active and historical blocks</div>
+              <Select value={blockedView} onValueChange={setBlockedView}>
+                <SelectTrigger className="w-40 bg-white"><SelectValue placeholder="View"/></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive/Expired</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-stone-50">
+                  <tr>
+                    <th className="p-2 text-left">IP</th>
+                    <th className="p-2 text-left">Reason</th>
+                    <th className="p-2 text-left">Blocked Until</th>
+                    <th className="p-2 text-left">Status</th>
+                    <th className="p-2 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredBlocked.length === 0 ? (
+                    <tr><td className="p-3" colSpan={5}>No records</td></tr>
+                  ) : (
+                    filteredBlocked.map((rec) => {
+                      const isActive = rec.active && new Date(rec.blocked_until).getTime() > Date.now();
+                      const status = isActive ? 'Active' : (rec.active ? 'Expired' : 'Inactive');
+                      return (
+                        <tr key={rec.id} className="hover:bg-stone-50">
+                          <td className="p-2">{rec.ip_address}</td>
+                          <td className="p-2">{rec.reason || '-'}</td>
+                          <td className="p-2">{rec.blocked_until ? format(new Date(rec.blocked_until), 'MMM d, yyyy HH:mm') : '-'}</td>
+                          <td className="p-2">
+                            <Badge className={isActive ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-600'}>{status}</Badge>
+                          </td>
+                          <td className="p-2">
+                            {isActive ? (
+                              <Button size="sm" variant="outline" onClick={() => unblockIp(rec)}>Unblock</Button>
+                            ) : (
+                              <span className="text-stone-400 text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="text-lg">Events ({filtered.length})</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
@@ -249,6 +487,16 @@ export default function SecurityDashboard() {
             <DialogHeader>
               <DialogTitle>Event Details</DialogTitle>
             </DialogHeader>
+            {details?.ip_address && (
+              <div className="flex gap-2 mb-2">
+                <Button size="sm" onClick={() => openBlockIp(details.ip_address)} disabled={blockedSet.has(details.ip_address)}>
+                  {blockedSet.has(details.ip_address) ? 'Already Blocked' : 'Block IP'}
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(details.ip_address); toast.success('IP copied'); }}>
+                  Copy IP
+                </Button>
+              </div>
+            )}
             {details && (
               <div className="space-y-2 text-sm">
                 <div><span className="font-medium">When:</span> {new Date(details.created_date).toLocaleString()}</div>
