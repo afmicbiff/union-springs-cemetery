@@ -543,7 +543,7 @@ export default function AdminDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
-                    {tabs.map(tab => {
+                    {tabs.filter(t => t.id !== 'security').map(tab => {
                       // Keep an invisible Archives trigger to maintain Tabs structure and avoid hook/order issues
                       if (tab.id === 'archives') {
                         return (
@@ -726,7 +726,7 @@ export default function AdminDashboard() {
                 </TabsList>
             </div>
 
-            {tabs.map(tab => (
+            {tabs.filter(t => t.id !== 'security').map(tab => ()
                 <TabsContent key={tab.id} value={tab.id} className="focus-visible:outline-none">
                     <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
                         <motion.div
