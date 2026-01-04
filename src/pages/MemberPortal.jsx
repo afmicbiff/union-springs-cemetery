@@ -38,7 +38,8 @@ export default function MemberPortal() {
             return res.data;
         },
         enabled: !!user,
-        refetchInterval: 30000,
+        refetchInterval: 120000,
+        refetchOnWindowFocus: false,
     });
     const unreadCount = (convData?.threads || []).reduce((sum, t) => sum + (t.unread_count || 0), 0);
 
