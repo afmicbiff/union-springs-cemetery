@@ -19,6 +19,11 @@ import { Button } from "@/components/ui/button";
 import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 
 const STORAGE_KEY = "perfHistory";
+const MAX_HISTORY_STORAGE = 1000;
+const MAX_RENDER_POINTS = 300;
+const FLUSH_INTERVAL_MS = 1000;
+const SAVE_INTERVAL_MS = 2000;
+const SAVE_EVERY = 20;
 
 function loadHistory() {
   try {
@@ -38,6 +43,9 @@ function saveHistory(samples) {
 }
 
 export default function PerformanceCharts() {
+  const [live, setLive] = React.useState(true);
+  const [inView, setInView] = React.useState(false);
+  const containerRef = React.useRef(null);
   const [samples, setSamples] = React.useState(() => {
     const hist = loadHistory();
     const now = Date.now();
@@ -50,19 +58,64 @@ export default function PerformanceCharts() {
     return hist;
   });
 
-  // Subscribe to metrics updates and append to history
+  // Subscribe to metrics updates with throttling and merge
   React.useEffect(() => {
+    if (!live) return;
+    const bufferRef = { items: [] };
+    let flushTimer = null;
+
+    const flush = () => {
+      if (bufferRef.items.length === 0) return;
+      const last = bufferRef.items[bufferRef.items.length - 1];
+      bufferRef.items = [];
+      flushTimer = null;
+      React.startTransition(() => {
+        setSamples((prev) => {
+          const next = [...prev, last].slice(-MAX_HISTORY_STORAGE);
+          return next;
+        });
+      });
+    };
+
     const unsub = subscribeMetrics?.((m) => {
       const entry = { ts: Date.now(), ...m };
-      setSamples((prev) => {
-        const next = [...prev, entry].slice(-1000); // keep last 1000 points
-        saveHistory(next);
-        return next;
-      });
+      bufferRef.items.push(entry);
+      if (!flushTimer) {
+        flushTimer = setTimeout(flush, FLUSH_INTERVAL_MS);
+      }
     });
+
     return () => {
       if (typeof unsub === "function") unsub();
+      if (flushTimer) clearTimeout(flushTimer);
     };
+  }, [live]);
+
+  // Batch-persist history to localStorage
+  const saveCounterRef = React.useRef(0);
+  const lastSaveRef = React.useRef(Date.now());
+  React.useEffect(() => {
+    saveCounterRef.current += 1;
+    const now = Date.now();
+    if (saveCounterRef.current >= SAVE_EVERY || (now - lastSaveRef.current) >= SAVE_INTERVAL_MS) {
+      saveHistory(samples);
+      saveCounterRef.current = 0;
+      lastSaveRef.current = now;
+    }
+  }, [samples]);
+
+  // Lazy render charts only when in view
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setInView(true);
+        obs.disconnect();
+      }
+    }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => { try { obs.disconnect(); } catch {} };
   }, []);
 
   const data = React.useMemo(() => {
@@ -79,6 +132,7 @@ export default function PerformanceCharts() {
   }, [samples]);
 
   const hasData = data.length > 0;
+  const renderData = React.useMemo(() => (data.length > MAX_RENDER_POINTS ? data.slice(-MAX_RENDER_POINTS) : data), [data]);
 
   const clearHistory = () => {
     saveHistory([]);
@@ -89,7 +143,12 @@ export default function PerformanceCharts() {
     <Card>
       <CardHeader className="flex items-center justify-between">
         <CardTitle>Performance Trends</CardTitle>
-        <Button variant="outline" size="sm" onClick={clearHistory}>Clear History</Button>
+        <div className="flex items-center gap-2">
+          <Button variant={live ? "secondary" : "outline"} size="sm" onClick={() => setLive(v => !v)}>
+            {live ? "Live: On" : "Live: Off"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={clearHistory}>Clear History</Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-8">
         {!hasData ? (
@@ -99,7 +158,7 @@ export default function PerformanceCharts() {
             {/* Load Time & Requests */}
             <div className="h-64 w-full">
               <ResponsiveContainer>
-                <LineChart data={data} syncId="perf">
+                <LineChart data={renderData} syncId="perf">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" minTickGap={24} />
                   <YAxis yAxisId="left" label={{ value: "ms", angle: -90, position: "insideLeft" }} />
@@ -116,7 +175,7 @@ export default function PerformanceCharts() {
             {/* Web Vitals: LCP & INP */}
             <div className="h-64 w-full">
               <ResponsiveContainer>
-                <LineChart data={data} syncId="perf">
+                <LineChart data={renderData} syncId="perf">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" minTickGap={24} />
                   <YAxis label={{ value: "ms", angle: -90, position: "insideLeft" }} />
@@ -131,7 +190,7 @@ export default function PerformanceCharts() {
             {/* CLS separate scale */}
             <div className="h-48 w-full">
               <ResponsiveContainer>
-                <AreaChart data={data} syncId="perf">
+                <AreaChart data={renderData} syncId="perf">
                   <defs>
                     <linearGradient id="clsFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
@@ -151,7 +210,7 @@ export default function PerformanceCharts() {
             {/* Payload (KB) */}
             <div className="h-48 w-full">
               <ResponsiveContainer>
-                <BarChart data={data} syncId="perf">
+                <BarChart data={renderData} syncId="perf">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" minTickGap={24} />
                   <YAxis label={{ value: "KB", angle: -90, position: "insideLeft" }} />
@@ -165,7 +224,7 @@ export default function PerformanceCharts() {
             {/* Shared zoom/brush at the end to control all charts */}
             <div className="h-20 w-full">
               <ResponsiveContainer>
-                <LineChart data={data} syncId="perf">
+                <LineChart data={renderData} syncId="perf">
                   <XAxis dataKey="time" hide />
                   <Brush dataKey="time" height={24} travellerWidth={8} />
                 </LineChart>
