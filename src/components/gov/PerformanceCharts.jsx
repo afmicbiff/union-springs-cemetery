@@ -151,10 +151,12 @@ export default function PerformanceCharts() {
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
+        <div ref={containerRef}>
         {!hasData ? (
           <div className="text-sm text-stone-500">No samples yet. Browse the app to generate metrics.</div>
         ) : (
-          <>
+          inView ? (
+            <>
             {/* Load Time & Requests */}
             <div className="h-64 w-full">
               <ResponsiveContainer>
@@ -232,6 +234,7 @@ export default function PerformanceCharts() {
             </div>
           </>
         )}
+        </div>
       </CardContent>
     </Card>
   );
