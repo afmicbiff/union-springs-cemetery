@@ -323,7 +323,6 @@ export default function AdminDashboard() {
       { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
       { id: "archives", label: "Archives", component: <EmployeeList view="archived" /> },
       { id: "vendors", label: "Vendors", component: <VendorManager /> },
-      { id: "security", label: "Security", component: <AdminSecurity /> },
       { id: "calendar", label: "Calendar", component: <EventCalendar /> },
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
