@@ -536,14 +536,12 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
                 allTasks={tasks}
             />
 
-            {loggingTask && (
-                <TaskTimeLogDialog
-                    isOpen={!!loggingTask}
-                    onClose={() => setLoggingTask(null)}
-                    task={loggingTask}
-                    currentEmployeeId={currentEmployeeId}
-                />
-            )}
+            <TaskTimeLogDialog
+                isOpen={!!loggingTask}
+                onClose={() => setLoggingTask(null)}
+                task={loggingTask}
+                currentEmployeeId={currentEmployeeId}
+            />
             </Card>
             );
             }
