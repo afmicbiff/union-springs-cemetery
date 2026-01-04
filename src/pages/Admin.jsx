@@ -111,12 +111,7 @@ export default function AdminDashboard() {
     checkAuth();
   }, []);
 
-  // Redirect legacy Security tab to the new dedicated page
-  React.useEffect(() => {
-    if (activeTab === 'security') {
-      window.location.href = createPageUrl('SecurityDashboard');
-    }
-  }, [activeTab]);
+
 
   // Notifications for Header
   const { data: notifications = [] } = useQuery({
