@@ -22,6 +22,7 @@ import MemberProfileDialog from './MemberProfileDialog';
 import SegmentBuilder from './SegmentBuilder';
 import BulkActionDialog from './BulkActionDialog';
 import { Checkbox } from "@/components/ui/checkbox";
+import VirtualTableBody from "@/components/common/VirtualTableBody";
 
 export default function MembersDirectory({ openMemberId }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -323,25 +324,46 @@ export default function MembersDirectory({ openMemberId }) {
         return false;
     };
 
-    const filteredMembers = (members || []).filter(member => {
-                  // Temporarily disable all filters to verify rendering of records
-                  return true;
-              }).sort((a, b) => {
-                  const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
-                  const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
+    const filteredMembers = React.useMemo(() => {
+  const term = (searchTerm || '').trim().toLowerCase();
+  let arr = (members || []).filter((m) => {
+    const stateOk = stateFilter === 'all' || (m.state || '').toLowerCase() === stateFilter.toLowerCase();
+    const donationOk = donationFilter === 'all' || (donationFilter === 'donated' ? !!m.donation : !m.donation);
+    const followOk = followUpFilter === 'all' || (
+      followUpFilter === 'pending' ? ((m.follow_up_status || 'pending') === 'pending') : (
+        m.follow_up_date && ((m.follow_up_status || 'pending') === 'pending') && isPast(parseISO(m.follow_up_date))
+      )
+    );
+    const text = [m.first_name, m.last_name, m.city, m.email_primary, m.phone_primary]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    const searchOk = !term || text.includes(term);
+    return stateOk && donationOk && followOk && searchOk;
+  });
+  if (segmentCriteria?.rules?.length) {
+    arr = arr.filter((m) => {
+      const results = segmentCriteria.rules.map((r) => evaluateRule(m, r));
+      return (segmentCriteria.match || 'all') === 'all' ? results.every(Boolean) : results.some(Boolean);
+    });
+  }
+  return arr.sort((a, b) => {
+    const aValue = (a[sortConfig.key] || '').toString().toLowerCase();
+    const bValue = (b[sortConfig.key] || '').toString().toLowerCase();
 
-                  if (sortConfig.key === 'donation') {
-                       const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
-                       const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
-                       if (!isNaN(aNum) && !isNaN(bNum)) {
-                           return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-                       }
-                  }
+    if (sortConfig.key === 'donation') {
+      const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ''));
+      const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ''));
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+      }
+    }
 
-                  if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-                  if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-                  return 0;
-              });
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+}, [members, searchTerm, stateFilter, donationFilter, followUpFilter, sortConfig, segmentCriteria]);
 
     const handleSave = (e) => {
         e.preventDefault();
@@ -493,7 +515,7 @@ export default function MembersDirectory({ openMemberId }) {
                             <div className="h-4 min-w-[1400px]"></div>
                         </div>
 
-                    <div ref={tableScrollRef} className="overflow-x-auto max-h-[600px]">
+                    <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto max-h-[600px]">
                     <table className="w-full text-sm text-left min-w-[1400px]">
                         <thead className="bg-stone-100 text-stone-700 font-serif sticky top-0 z-10">
                             <tr>
@@ -551,75 +573,82 @@ export default function MembersDirectory({ openMemberId }) {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredMembers.map(member => (
-                                        <tr 
-                                            key={member.id} 
-                                            className={`hover:bg-teal-50/50 transition-colors cursor-pointer ${selectedMemberIds.includes(member.id) ? 'bg-teal-50' : ''}`}
-                                            onClick={() => { setSelectedMember(member); setIsProfileOpen(true); }}
-                                        >
-                                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                                                <Checkbox 
-                                                    checked={selectedMemberIds.includes(member.id)}
-                                                    onCheckedChange={(checked) => {
-                                                        if (checked) {
-                                                            setSelectedMemberIds([...selectedMemberIds, member.id]);
-                                                        } else {
-                                                            setSelectedMemberIds(selectedMemberIds.filter(id => id !== member.id));
-                                                        }
-                                                    }}
-                                                />
-                                            </td>
-                                            <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
-                                            <td className="p-4 text-stone-700">{member.first_name}</td>
-                                            <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
-                                            <td className="p-4 text-stone-600 text-xs">
-                                                {member.phone_primary && <div className="flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> {member.phone_primary}</div>}
-                                                {member.email_primary && <div className="flex items-center gap-1"><Mail className="w-3 h-3" /> {member.email_primary}</div>}
-                                            </td>
-                                            <td className="p-4 text-stone-600">{member.city}</td>
-                                            <td className="p-4 text-stone-600">{member.state}</td>
-                                            <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
-                                            <td className="p-4 text-stone-600">{member.donation}</td>
-                                            <td className="p-4">
-                                                {member.follow_up_date && member.follow_up_status === 'pending' && (
-                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit mb-1 ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                        <Calendar className="w-3 h-3" />
-                                                        {format(parseISO(member.follow_up_date), 'MMM d')}
-                                                    </div>
-                                                )}
-                                                {member.last_contact_date && isPast(addDays(parseISO(member.last_contact_date), 180)) && (
-                                                    <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit bg-purple-100 text-purple-700" title="No contact in 6+ months">
-                                                        <Bell className="w-3 h-3" /> Re-engage
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="p-4 text-right">
-                                                <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                    {/* External Link button removed */}
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-8 w-8 text-stone-400 hover:text-teal-600"
-                                                        onClick={() => { setEditingMember(member); setIsDialogOpen(true); }}
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
-                                                        className="h-8 w-8 text-stone-400 hover:text-red-600"
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this member?')) {
-                                                                deleteMutation.mutate(member.id);
+                                    <VirtualTableBody
+                                        items={filteredMembers}
+                                        rowHeight={72}
+                                        overscan={8}
+                                        colCount={11}
+                                        scrollContainerRef={tableScrollRef}
+                                        renderRow={(member) => (
+                                            <tr 
+                                                key={member.id} 
+                                                className={`hover:bg-teal-50/50 transition-colors cursor-pointer ${selectedMemberIds.includes(member.id) ? 'bg-teal-50' : ''} h-[72px]`}
+                                                onClick={() => { setSelectedMember(member); setIsProfileOpen(true); }}
+                                            >
+                                                <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                                                    <Checkbox 
+                                                        checked={selectedMemberIds.includes(member.id)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setSelectedMemberIds([...selectedMemberIds, member.id]);
+                                                            } else {
+                                                                setSelectedMemberIds(selectedMemberIds.filter(id => id !== member.id));
                                                             }
                                                         }}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                    />
+                                                </td>
+                                                <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
+                                                <td className="p-4 text-stone-700">{member.first_name}</td>
+                                                <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
+                                                <td className="p-4 text-stone-600 text-xs">
+                                                    {member.phone_primary && <div className="flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> {member.phone_primary}</div>}
+                                                    {member.email_primary && <div className="flex items-center gap-1"><Mail className="w-3 h-3" /> {member.email_primary}</div>}
+                                                </td>
+                                                <td className="p-4 text-stone-600">{member.city}</td>
+                                                <td className="p-4 text-stone-600">{member.state}</td>
+                                                <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
+                                                <td className="p-4 text-stone-600">{member.donation}</td>
+                                                <td className="p-4">
+                                                    {member.follow_up_date && member.follow_up_status === 'pending' && (
+                                                        <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit mb-1 ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                            <Calendar className="w-3 h-3" />
+                                                            {format(parseISO(member.follow_up_date), 'MMM d')}
+                                                        </div>
+                                                    )}
+                                                    {member.last_contact_date && isPast(addDays(parseISO(member.last_contact_date), 180)) && (
+                                                        <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit bg-purple-100 text-purple-700" title="No contact in 6+ months">
+                                                            <Bell className="w-3 h-3" /> Re-engage
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                        {/* External Link button removed */}
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-8 w-8 text-stone-400 hover:text-teal-600"
+                                                            onClick={() => { setEditingMember(member); setIsDialogOpen(true); }}
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-8 w-8 text-stone-400 hover:text-red-600"
+                                                            onClick={() => {
+                                                                if (confirm('Are you sure you want to delete this member?')) {
+                                                                    deleteMutation.mutate(member.id);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    />
                                 )}
                             </tbody>
                         </table>
