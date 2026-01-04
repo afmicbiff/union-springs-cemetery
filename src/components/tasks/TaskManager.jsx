@@ -28,11 +28,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     const [editingTask, setEditingTask] = useState(null);
     const [loggingTask, setLoggingTask] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
-    React.useEffect(() => {
-        const t = setTimeout(() => setDebouncedSearch(searchTerm), 250);
-        return () => clearTimeout(t);
-    }, [searchTerm]);
+
     const [statusFilter, setStatusFilter] = useState("all");
     const [showArchived, setShowArchived] = useState(false);
     
@@ -47,7 +43,7 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
     // 1. Fetch Tasks
     const { data: tasks, isLoading: isLoadingTasks } = useQuery({
         queryKey: ['tasks'],
-        queryFn: () => base44.entities.Task.list('-created_date', 250), // Fetch a bit more to reduce refetches
+        queryFn: () => base44.entities.Task.list('-created_date', 100), // Sort by newest
         initialData: []
     });
 
@@ -224,9 +220,9 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
             }
         }
 
-        // Debounced Fuzzy Search
-        if (debouncedSearch) {
-            const terms = debouncedSearch.toLowerCase().split(/\s+/).filter(Boolean);
+        // Fuzzy Search
+        if (searchTerm) {
+            const terms = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
             const hay = `${task.title} ${task.description || ''} ${getAssigneeName(task.assignee_id)}`.toLowerCase();
             return terms.every(t => hay.includes(t));
         }
