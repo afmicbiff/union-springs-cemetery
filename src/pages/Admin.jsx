@@ -77,6 +77,10 @@ export default function AdminDashboard() {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
+    if (tab === 'security') {
+        window.location.href = createPageUrl('SecurityDashboard');
+        return;
+    }
     if (tab) {
         setActiveTab(tab);
     }
