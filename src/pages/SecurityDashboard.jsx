@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { PieChart, Pie, Cell, Tooltip as RTooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
+import SecurityMonitor from '@/components/admin/SecurityMonitor';
 
 const SEV_COLORS = { info: '#94a3b8', low: '#10b981', medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
 const sevBadge = (s) => ({

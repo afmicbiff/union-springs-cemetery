@@ -49,7 +49,6 @@ const OnboardingProgress = React.lazy(() => import("@/components/admin/Onboardin
 const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide.jsx"));
 const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList.jsx"));
 const VendorManager = React.lazy(() => import("@/components/admin/VendorManager"));
-const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity.jsx"));
 const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar.jsx"));
 const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager.jsx"));
 const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager.jsx"));
@@ -254,6 +253,11 @@ export default function AdminDashboard() {
   }
 
   const handleSearchNavigate = (link) => {
+      // Redirect security results to the dedicated page
+      if (link.type === 'security') {
+          window.location.href = createPageUrl('SecurityDashboard');
+          return;
+      }
       // Map search result types to tabs
       const tabMap = {
           member: 'members',
@@ -266,8 +270,7 @@ export default function AdminDashboard() {
           // Navigation types map directly or via aliases
           overview: 'overview',
           onboarding: 'onboarding',
-          security: 'security',
-          
+
           calendar: 'calendar',
           reservations: 'reservations',
           plots: 'plots',
