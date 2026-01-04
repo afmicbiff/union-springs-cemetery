@@ -233,6 +233,8 @@ export default function PerformanceCharts() {
               </ResponsiveContainer>
             </div>
           </>
+        ) : (
+          <div className="text-sm text-stone-500">Charts will render when visible…</div>
         )}
         </div>
       </CardContent>
