@@ -219,31 +219,31 @@ export default function AdminDashboard() {
       {
         queryKey: ['check-reminders'],
         queryFn: () => base44.functions.invoke('checkEventReminders'),
-        refetchInterval: 60 * 1000,
-        refetchOnWindowFocus: true,
+        refetchInterval: 300_000, // 5 minutes
+        refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-doc-expirations'],
         queryFn: () => base44.functions.invoke('checkDocumentExpirations'),
-        refetchInterval: 300 * 1000,
+        refetchInterval: 900_000, // 15 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-member-reminders'],
         queryFn: () => base44.functions.invoke('checkMemberReminders'),
-        refetchInterval: 120 * 1000,
+        refetchInterval: 600_000, // 10 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-task-due-dates'],
         queryFn: () => base44.functions.invoke('checkTaskDueDates'),
-        refetchInterval: 300 * 1000,
+        refetchInterval: 600_000, // 10 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['run-crm-automations'],
         queryFn: () => base44.functions.invoke('runCrmAutomations'),
-        refetchInterval: 300 * 1000,
+        refetchInterval: 900_000, // 15 minutes
         refetchOnWindowFocus: false,
       },
     ]
@@ -287,32 +287,16 @@ export default function AdminDashboard() {
   const exportData = async () => {
     const toastId = toast.loading("Preparing backup...");
     try {
-        const [plots, reservations, allNotes] = await Promise.all([
-            base44.entities.Plot.list({ limit: 1000 }),
-            base44.entities.Reservation.list({ limit: 1000 }),
-            base44.entities.Notification.list({ limit: 1000 })
-        ]);
-
-        const dataStr = JSON.stringify({ plots, reservations, notifications: allNotes }, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
+        const res = await base44.functions.invoke('exportAdminData', {});
+        const blob = new Blob([res.data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `UnionSprings_Backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Audit Log
-        const user = await base44.auth.me();
-        await base44.entities.AuditLog.create({
-            action: 'export',
-            entity_type: 'System',
-            details: 'Full system backup exported.',
-            performed_by: user.email,
-            timestamp: new Date().toISOString()
-        });
-
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `UnionSprings_Backup_${format(new Date(), 'yyyy-MM-dd')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
         toast.success("Backup downloaded successfully", { id: toastId });
     } catch (error) {
         toast.error("Backup failed: " + error.message, { id: toastId });

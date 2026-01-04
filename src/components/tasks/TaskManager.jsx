@@ -43,19 +43,23 @@ export default function TaskManager({ isAdmin = false, currentEmployeeId = null 
 
     // 1. Fetch Tasks
     const { data: tasks = [], isLoading: isLoadingTasks } = useQuery({
-        queryKey: ['tasks', isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived],
-        queryFn: () => {
-            const where = { is_archived: showArchived };
-            if (!isAdmin && currentEmployeeId) where.assignee_id = currentEmployeeId;
-            if (statusFilter !== 'all') where.status = statusFilter;
-            if (priorityFilter !== 'all') where.priority = priorityFilter;
-            return base44.entities.Task.filter(where, '-updated_date', 200);
-        },
-        initialData: [],
-        staleTime: 90_000,
-        gcTime: 10 * 60_000,
-        refetchOnWindowFocus: false,
-    });
+            queryKey: ['tasks', isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, debouncedSearchTerm],
+            queryFn: async () => {
+                const where = { is_archived: showArchived };
+                if (!isAdmin && currentEmployeeId) where.assignee_id = currentEmployeeId;
+                if (statusFilter !== 'all') where.status = statusFilter;
+                if (priorityFilter !== 'all') where.priority = priorityFilter;
+                if (debouncedSearchTerm) {
+                    const res = await base44.functions.invoke('searchTasks', { isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, searchTerm: debouncedSearchTerm });
+                    return res.data.tasks || [];
+                }
+                return base44.entities.Task.filter(where, '-updated_date', 200);
+            },
+            initialData: [],
+            staleTime: 90_000,
+            gcTime: 10 * 60_000,
+            refetchOnWindowFocus: false,
+        });
 
     // 2. Fetch Employees (for assignment mapping)
     const { data: employees = [] } = useQuery({

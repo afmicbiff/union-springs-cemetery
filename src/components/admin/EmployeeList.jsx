@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Users, Mail, Phone, MapPin, ExternalLink, Download, Layers } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
 import BulkActionDialog from "@/components/admin/BulkActionDialog";
 import { toast } from "sonner";
@@ -18,6 +19,9 @@ export default function EmployeeList({ view = 'active' }) {
     const [debouncedTerm, setDebouncedTerm] = useState("");
     const [selectedEmployees, setSelectedEmployees] = useState([]);
     const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(50);
+    const [total, setTotal] = useState(0);
 
     // Debounce search term
     React.useEffect(() => {
@@ -28,39 +32,22 @@ export default function EmployeeList({ view = 'active' }) {
     }, [searchTerm]);
 
     const { data: employees, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['employees', debouncedTerm, view],
+        queryKey: ['employees', view, debouncedTerm, page, pageSize],
         queryFn: async () => {
-            // Fetch all employees and filter client-side to ensure robust handling of legacy data (missing status)
-            const allEmployees = await base44.entities.Employee.list(null, 1000);
-            
-            return allEmployees.filter(emp => {
-                // Default missing status to 'active'
-                const status = emp.status || 'active';
-                
-                // Filter by View Mode
-                const matchesView = (view === 'active' && status === 'active') || 
-                                  (view === 'archived' && status === 'inactive');
-                
-                if (!matchesView) return false;
-
-                // Filter by Search Term
-                if (debouncedTerm) {
-                    const term = debouncedTerm.toLowerCase();
-                    return (
-                        (emp.first_name || '').toLowerCase().includes(term) ||
-                        (emp.last_name || '').toLowerCase().includes(term) ||
-                        (emp.email || '').toLowerCase().includes(term) ||
-                        (emp.employee_number || '').toLowerCase().includes(term)
-                    );
-                }
-
-                return true;
+            const { data } = await base44.functions.invoke('queryEmployees', {
+                status: view === 'archived' ? 'archived' : 'active',
+                searchTerm: debouncedTerm,
+                page,
+                pageSize,
             });
+            setTotal(data.total || 0);
+            return data.items || [];
         },
         initialData: [],
+        keepPreviousData: true,
     });
 
-    // Use server-returned employees directly (they are already filtered)
+    // Use server-returned employees directly (paginated)
     const filteredEmployees = employees || [];
 
     const handleSelectAll = (checked) => {
@@ -82,38 +69,12 @@ export default function EmployeeList({ view = 'active' }) {
     const handleBulkAction = async (actionType, config) => {
         const toastId = toast.loading(`Processing ${actionType}...`);
         try {
-            const updates = selectedEmployees.map(id => {
-                let data = {};
-                if (actionType === 'change_role') {
-                    data = { employment_type: config.employment_type };
-                } else if (actionType === 'deactivate') {
-                    data = { status: 'inactive' };
-                } else if (actionType === 'reactivate') {
-                    data = { status: 'active' };
-                }
-                if (Object.keys(data).length > 0) {
-                    return base44.entities.Employee.update(id, data);
-                }
-                return Promise.resolve();
+            const { data } = await base44.functions.invoke('bulkUpdateEmployees', {
+                ids: selectedEmployees,
+                actionType,
+                data: config
             });
-
-            await Promise.all(updates);
-            
-            // Audit Log
-            try {
-                const user = await base44.auth.me();
-                await base44.entities.AuditLog.create({
-                    action: 'bulk_update',
-                    entity_type: 'Employee',
-                    details: `Bulk action "${actionType}" performed on ${selectedEmployees.length} employees.`,
-                    performed_by: user.email,
-                    timestamp: new Date().toISOString()
-                });
-            } catch (e) {
-                console.error("Failed to log audit", e);
-            }
-
-            toast.success(`Successfully updated ${selectedEmployees.length} employees`, { id: toastId });
+            toast.success(`Updated ${data.updated || selectedEmployees.length} employees`, { id: toastId });
             setSelectedEmployees([]);
             refetch();
         } catch (err) {
@@ -184,7 +145,7 @@ export default function EmployeeList({ view = 'active' }) {
                                 placeholder="Search employees..."
                                 className="pl-9"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                             />
                         </div>
                     </div>
@@ -212,19 +173,19 @@ export default function EmployeeList({ view = 'active' }) {
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-stone-500">
-                                        Loading records...
+                                    <TableCell colSpan={7} className="text-center py-8 text-stone-500">
+                                        <div className="flex items-center justify-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Loading records...</div>
                                     </TableCell>
                                 </TableRow>
                             ) : isError ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-red-500">
+                                    <TableCell colSpan={7} className="text-center py-8 text-red-500">
                                         Error loading employees: {error?.message || "Unknown error"}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredEmployees.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-stone-500">
+                                    <TableCell colSpan={7} className="text-center py-8 text-stone-500">
                                         No employees found.
                                     </TableCell>
                                 </TableRow>
@@ -285,6 +246,17 @@ export default function EmployeeList({ view = 'active' }) {
                     </Table>
                 </div>
             </CardContent>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 px-6 pb-6">
+                <div className="text-xs text-stone-500">Showing {(total === 0) ? 0 : ((page-1)*pageSize + 1)}–{Math.min(page*pageSize, total)} of {total}</div>
+                <div className="flex items-center gap-2">
+                    <select className="border rounded px-2 py-1 text-xs" value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}>
+                        {[25,50,100].map(sz => <option key={sz} value={sz}>{sz} / page</option>)}
+                    </select>
+                    <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p-1))}>Prev</Button>
+                    <Button variant="outline" size="sm" disabled={page*pageSize >= total} onClick={() => setPage(p => p+1)}>Next</Button>
+                </div>
+            </div>
             
             <BulkActionDialog 
                 isOpen={isBulkDialogOpen}
