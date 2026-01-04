@@ -256,6 +256,13 @@ export default function AdminDashboard() {
       return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
   }
 
+  // Redirect legacy Security tab to the new dedicated page
+  React.useEffect(() => {
+    if (activeTab === 'security') {
+      window.location.href = createPageUrl('SecurityDashboard');
+    }
+  }, [activeTab]);
+
   const handleSearchNavigate = (link) => {
       // Redirect security results to the dedicated page
       if (link.type === 'security') {
