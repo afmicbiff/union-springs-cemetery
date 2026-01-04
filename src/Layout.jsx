@@ -165,6 +165,7 @@ export default function Layout({ children }) {
     { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
     { label: 'Performance Dashboard', path: '/PerformanceDashboard', icon: Activity },
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
+    { label: 'Security Dashboard', path: '/SecurityDashboard', icon: Activity },
 
     { label: 'Image Management', path: '/ImageManager', icon: Image }
     ]
@@ -173,7 +174,7 @@ export default function Layout({ children }) {
 
   const navItemsFiltered = navItems.map((item) => {
     if (item.label === 'Admin Dashboard' && item.items) {
-      const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Image Management'];
+      const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Image Management', 'Security Dashboard'];
       const items = isAdminUser ? item.items : item.items.filter((s) => !adminOnly.includes(s.label));
       return { ...item, items };
     }
