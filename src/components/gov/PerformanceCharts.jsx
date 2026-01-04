@@ -71,7 +71,7 @@ export default function PerformanceCharts() {
       flushTimer = null;
       React.startTransition(() => {
         setSamples((prev) => {
-          const next = [...prev, last].slice(-MAX_HISTORY_STORAGE);
+          const next = [...prev, last];
           return next;
         });
       });
