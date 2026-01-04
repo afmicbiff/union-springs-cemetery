@@ -553,25 +553,66 @@ export default function AdminDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
-                    {tabs.map(tab => (
-                        <TabsTrigger 
-                            key={tab.id} 
-                            value={tab.id} 
-                            className={`
+                    {tabs.map(tab => {
+                      // Hide standalone Archives tab; it will live under Employees dropdown
+                      if (tab.id === 'archives') return null;
+
+                      if (tab.id === 'employees') {
+                        const isEmployeesGroupActive = activeTab === 'employees' || activeTab === 'archives';
+                        return (
+                          <div key="employees-group" className="flex items-stretch">
+                            <TabsTrigger 
+                              value="employees"
+                              className={`
                                 px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
                                 data-[state=active]:bg-teal-700 data-[state=active]:text-white
                                 hover:text-green-700 hover:bg-green-50
                                 flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
                                 min-w-[80px] md:min-w-0
-                                ${tab.id === 'communication' ? 'ml-4 md:ml-0 md:col-span-2 px-6' : ''}
-                            `}
+                                ${isEmployeesGroupActive && activeTab === 'archives' ? 'bg-teal-700 text-white' : ''}
+                              `}
+                            >
+                              <div className="whitespace-nowrap flex items-center gap-1">Employees</div>
+                            </TabsTrigger>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isEmployeesGroupActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
+                                  aria-label="Employees options"
+                                >
+                                  <ChevronDown className="w-4 h-4" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="min-w-[160px]">
+                                <DropdownMenuItem onClick={() => setActiveTab('employees')}>Employees</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setActiveTab('archives')}>Archives</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <TabsTrigger 
+                          key={tab.id} 
+                          value={tab.id} 
+                          className={`
+                            px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
+                            data-[state=active]:bg-teal-700 data-[state=active]:text-white
+                            hover:text-green-700 hover:bg-green-50
+                            flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
+                            min-w-[80px] md:min-w-0
+                            ${tab.id === 'communication' ? 'ml-4 md:ml-0 md:col-span-2 px-6' : ''}
+                          `}
                         >
-                            <div className="whitespace-nowrap flex items-center gap-1">
-                                {tab.label}
-                                {tab.id === 'communication' && (<ChevronDown className="w-3 h-3 opacity-70" />)}
-                            </div>
+                          <div className="whitespace-nowrap flex items-center gap-1">
+                            {tab.label}
+                            {tab.id === 'communication' && (<ChevronDown className="w-3 h-3 opacity-70" />)}
+                          </div>
                         </TabsTrigger>
-                    ))}
+                      );
+                    })}
 
                     {/* Action button beside System Logs */}
                     <Link
