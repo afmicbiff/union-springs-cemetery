@@ -20,8 +20,12 @@ export default function EmployeesPage() {
     });
 
     React.useEffect(() => {
-        if (!isAuthLoading && !user) {
-            base44.auth.redirectToLogin(window.location.pathname);
+        if (!isAuthLoading) {
+            if (!user) {
+                base44.auth.redirectToLogin(window.location.pathname);
+            } else if (user.role !== 'admin') {
+                window.location.href = '/';
+            }
         }
     }, [user, isAuthLoading]);
 
