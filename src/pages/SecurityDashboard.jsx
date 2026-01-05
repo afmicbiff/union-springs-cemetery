@@ -228,6 +228,53 @@ export default function SecurityDashboard() {
     }
   };
 
+  const exportEventsJSON = () => {
+    const data = (filtered || []).map((e) => ({
+      id: e.id,
+      created_date: e.created_date,
+      event_type: e.event_type,
+      severity: e.severity,
+      message: e.message,
+      ip_address: e.ip_address || null,
+      user_agent: e.user_agent || null,
+      route: e.route || null,
+      user_email: e.user_email || null,
+      details: e.details || {}
+    }));
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'security_events.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const toCsv = (rows) => {
+    const headers = ['id','created_date','event_type','severity','message','ip_address','user_agent','route','user_email','details'];
+    const esc = (v) => {
+      const s = (v === null || v === undefined) ? '' : String(v);
+      return '"' + s.replace(/"/g, '""') + '"';
+    };
+    const lines = [headers.map(esc).join(',')];
+    (rows || []).forEach((e) => {
+      const d = JSON.stringify(e.details || {});
+      lines.push([
+        e.id, e.created_date, e.event_type, e.severity, e.message, e.ip_address || '', e.user_agent || '', e.route || '', e.user_email || '', d
+      ].map(esc).join(','));
+    });
+    return lines.join('\n');
+  };
+
+  const exportEventsCSV = () => {
+    const csv = toCsv(filtered || []);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'security_events.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen p-6 bg-stone-100">
       <div className="max-w-6xl mx-auto space-y-6">
