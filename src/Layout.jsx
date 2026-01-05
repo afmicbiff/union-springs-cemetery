@@ -174,7 +174,7 @@ export default function Layout({ children }) {
 
   const navItemsFiltered = navItems.map((item) => {
     if (item.label === 'Admin Dashboard' && item.items) {
-      const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Image Management', 'Security Dashboard'];
+      const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Image Management', 'Security Dashboard', 'Board Members & Employees'];
       const items = isAdminUser ? item.items : item.items.filter((s) => !adminOnly.includes(s.label));
       return { ...item, items };
     }
