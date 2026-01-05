@@ -102,25 +102,6 @@ export default function SecurityDashboard() {
     }
   }, [nsData]);
 
-  const indicators = React.useMemo(() => {
-    const s = new Set();
-    (filtered || []).forEach(e => e.ip_address && s.add(e.ip_address));
-    (filteredBlocked || []).forEach(r => r.ip_address && s.add(r.ip_address));
-    return Array.from(s).slice(0, 100);
-  }, [filtered, filteredBlocked]);
-
-  const { data: intel = { results: {} }, isFetching: intelLoading } = useQuery({
-    queryKey: ['threat-intel', indicators],
-    queryFn: async () => {
-      if (!indicators || indicators.length === 0) return { results: {} };
-      const res = await base44.functions.invoke('threatIntelLookup', { indicators });
-      return res?.data || { results: {} };
-    },
-    enabled: (indicators || []).length > 0,
-    staleTime: 300_000,
-  });
-
-  const intelMap = (intel && intel.results) ? intel.results : {};
 
   const types = React.useMemo(() => {
     const t = new Set();
@@ -142,6 +123,27 @@ export default function SecurityDashboard() {
     }
     return arr;
   }, [events, severity, type, start, end]);
+
+  const indicators = React.useMemo(() => {
+    const s = new Set();
+    (filtered || []).forEach(e => e.ip_address && s.add(e.ip_address));
+    (filteredBlocked || []).forEach(r => r.ip_address && s.add(r.ip_address));
+    return Array.from(s).slice(0, 100);
+  }, [filtered, filteredBlocked]);
+
+  const { data: intel = { results: {} }, isFetching: intelLoading } = useQuery({
+    queryKey: ['threat-intel', indicators],
+    queryFn: async () => {
+      if (!indicators || indicators.length === 0) return { results: {} };
+      const res = await base44.functions.invoke('threatIntelLookup', { indicators });
+      return res?.data || { results: {} };
+    },
+    enabled: (indicators || []).length > 0,
+    staleTime: 300_000,
+  });
+
+  const intelMap = (intel && intel.results) ? intel.results : {};
+
 
   const severityData = React.useMemo(() => {
     const map = { info: 0, low: 0, medium: 0, high: 0, critical: 0 };
