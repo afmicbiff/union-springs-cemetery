@@ -1,12 +1,32 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import Papa from 'npm:papaparse@5.4.1';
 import { format, parse } from 'npm:date-fns@3.6.0';
 
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        // Using the text file URL from the user's latest context
-        const fileUrl = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/31609118e_UnionSpringsCemeterySpreadsheet_as_of_12_04_20251ssssss.txt";
+        // Admin-only access
+        const user = await base44.auth.me().catch(() => null);
+        if (!user) { return Response.json({ error: 'Unauthorized' }, { status: 401 }); }
+        if (user.role !== 'admin') { return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 }); }
+        // Resolve source file from request or environment
+        let fileUrl = '';
+        let body = null;
+        try { body = await req.json(); } catch {}
+        const inputFileUrl = body?.file_url;
+        const inputFileUri = body?.file_uri;
+        if (inputFileUrl) {
+            fileUrl = inputFileUrl;
+        } else if (inputFileUri) {
+            const signed = await base44.asServiceRole.integrations.Core.CreateFileSignedUrl({ file_uri: inputFileUri });
+            fileUrl = signed?.signed_url || '';
+        } else {
+            const envUrl = Deno.env.get('CEMETERY_IMPORT_FILE_URL') || '';
+            if (envUrl) fileUrl = envUrl;
+        }
+        if (!fileUrl) {
+            return Response.json({ error: 'No file provided. Pass file_url or file_uri, or set CEMETERY_IMPORT_FILE_URL.' }, { status: 400 });
+        }
 
         // 1. Fetch File
         const fileRes = await fetch(fileUrl);
