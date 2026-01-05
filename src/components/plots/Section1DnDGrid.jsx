@@ -37,7 +37,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     return ids.join("|");
   }, [plots]);
 
-  const [cells, setCells] = React.useState(Array(total).fill(null));
+  const [cells, setCells] = React.useState(() => Array(total).fill(null));
   const [history, setHistory] = React.useState([]);
   const [readyForKey, setReadyForKey] = React.useState("");
 
