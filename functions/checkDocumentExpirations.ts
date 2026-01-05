@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
     try {
@@ -7,15 +7,28 @@ Deno.serve(async (req) => {
         // But for now, we'll assume it's triggered by an admin user or scheduled task which has permissions
         // Let's use service role to be safe as it accesses all employees
         
-        // Check if caller is authorized (if called via API)
-        const user = await base44.auth.me().catch(() => null);
-        if (!user && !req.headers.get("x-scheduled-task")) {
-             // Allow if it's a scheduled task (implementation detail: base44 might not send specific header, 
-             // but usually we check for auth. If this is run by "cron", we might need service role)
-             // For this environment, we'll check if user is admin OR if it's a background call (we can't easily verify background call here without secrets)
-             // So we'll rely on the fact that this function is internal. 
-             // But to be safe, let's require admin user if triggered manually.
-        }
+        // Authorization: require admin user OR a valid job secret for headless runs
+          const user = await base44.auth.me().catch(() => null);
+          const expectedSecret = Deno.env.get('DOC_EXPIRATIONS_JOB_SECRET') || '';
+          const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+          const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+
+          if (!user && !authorizedBySecret) {
+              try {
+                  await base44.asServiceRole.entities.SecurityEvent.create({
+                      event_type: 'unauthorized_access',
+                      severity: 'high',
+                      message: 'checkDocumentExpirations unauthorized invocation',
+                      ip_address: req.headers.get('x-forwarded-for') || null,
+                      user_agent: req.headers.get('user-agent') || null,
+                      route: 'functions/checkDocumentExpirations'
+                  });
+              } catch (_) {}
+              return Response.json({ error: 'Unauthorized' }, { status: 401 });
+          }
+          if (user && user.role !== 'admin') {
+              return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+          }
 
         const employees = await base44.asServiceRole.entities.Employee.list({ limit: 1000, status: 'active' });
         const members = await base44.asServiceRole.entities.Member.list({ limit: 1000 });
