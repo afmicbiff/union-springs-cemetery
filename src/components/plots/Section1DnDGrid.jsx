@@ -107,7 +107,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
       next[si] = b;
       return next;
     });
-  };
+  }, [perCol]);
 
   const undoLast = React.useCallback(() => {
     setHistory((prev) => {
