@@ -469,7 +469,13 @@ export default function SecurityDashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Events ({filtered.length})</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-lg">Events ({filtered.length})</CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={exportEventsJSON}>Export JSON</Button>
+                <Button variant="outline" size="sm" onClick={exportEventsCSV}>Export CSV</Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -539,6 +545,9 @@ export default function SecurityDashboard() {
                 <div><span className="font-medium">Type:</span> {details.event_type}</div>
                 <div><span className="font-medium">IP:</span> {details.ip_address || '-'} {details?.ip_address && intelMap[details.ip_address]?.matched && (<Badge className="ml-2 bg-red-100 text-red-700">Threat</Badge>)}</div>
                 <div className="mt-2"><span className="font-medium">Message:</span> {details.message}</div>
+                <div><span className="font-medium">User:</span> {details.user_email || '-'}</div>
+                <div><span className="font-medium">Route:</span> {details.route || '-'}</div>
+                <div className="break-words"><span className="font-medium">User Agent:</span> <span className="text-stone-600">{details.user_agent || '-'}</span></div>
                 {details?.ip_address && (
                   <div className="mt-2">
                     <div className="font-medium">Threat Intelligence</div>
