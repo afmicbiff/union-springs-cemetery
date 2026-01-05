@@ -1,14 +1,16 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
         
         // Authenticate user
-        const user = await base44.auth.me();
-        if (!user) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const user = await base44.auth.me().catch(() => null);
+        const expectedSecret = Deno.env.get('AUTO_REMINDERS_JOB_SECRET') || '';
+        const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+        const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+        if (!user && !authorizedBySecret) { return Response.json({ error: 'Unauthorized' }, { status: 401 }); }
+        if (user && user.role !== 'admin') { return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 }); }
 
         // Get all employees
         const employees = await base44.entities.Employee.list({ limit: 1000 });

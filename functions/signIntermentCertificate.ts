@@ -99,6 +99,8 @@ function drawCertificateWithSignature(doc, { plot, reservation, signatureDataUrl
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const payload = await req.json();
     const { reservationId, userSignatureFileUri } = payload || {};
     if (!reservationId || !userSignatureFileUri) {
@@ -109,6 +111,15 @@ Deno.serve(async (req) => {
     const rList = await base44.asServiceRole.entities.NewPlotReservation.filter({ id: reservationId }, null, 1);
     const reservation = rList?.[0];
     if (!reservation) return Response.json({ error: 'Reservation not found' }, { status: 404 });
+
+    // Authorization: requester or admin only
+    if (user.role !== 'admin') {
+      const requester = (reservation.requester_email || '').toLowerCase();
+      const me = (user.email || '').toLowerCase();
+      if (!requester || requester !== me) {
+        return Response.json({ error: 'Forbidden: Not your reservation' }, { status: 403 });
+      }
+    }
 
     let plot = null;
     if (reservation.new_plot_id) {

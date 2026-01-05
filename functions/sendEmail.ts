@@ -1,9 +1,18 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    // Proceed regardless of auth to support system-triggered emails (admin UI already gated)
+    
+    // Admin or system-only authorization
+    let user = null;
+    try { user = await base44.auth.me(); } catch (_) { user = null; }
+    const expectedSecret = Deno.env.get('SYSTEM_EMAIL_JOB_SECRET') || '';
+    const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+    const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+    if (!user && !authorizedBySecret) { return Response.json({ error: 'Unauthorized' }, { status: 401 }); }
+    if (user && user.role !== 'admin') { return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 }); }
+    
 
     function renderTemplate(str, vars) {
       let s = String(str || '');

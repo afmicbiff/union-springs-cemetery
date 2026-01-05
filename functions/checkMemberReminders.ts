@@ -1,9 +1,21 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { format, isPast, parseISO, subDays } from 'npm:date-fns@3.6.0';
 
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
+        
+        // Admin or system-only authorization
+        const user = await base44.auth.me().catch(() => null);
+        const expectedSecret = Deno.env.get('MEMBER_REMINDERS_JOB_SECRET') || '';
+        const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+        const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+        if (!user && !authorizedBySecret) {
+          return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        if (user && user.role !== 'admin') {
+          return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+        }
         
         // Fetch all members (limit 1000)
         const members = await base44.entities.Member.list(null, 1000);

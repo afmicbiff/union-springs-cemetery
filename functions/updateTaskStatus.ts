@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { addDays, addWeeks, addMonths, parseISO, format } from 'npm:date-fns@3.6.0';
 
 Deno.serve(async (req) => {
@@ -16,6 +16,15 @@ Deno.serve(async (req) => {
         }
         const task = tasks[0];
 
+        // Authorization: admin or owner (assignee/member)
+        if (user.role !== 'admin') {
+            const isAssignee = task.assignee_id && user.employee_id && String(task.assignee_id) === String(user.employee_id);
+            const isMemberOwner = task.member_id && user.member_id && String(task.member_id) === String(user.member_id);
+            if (!isAssignee && !isMemberOwner) {
+                return Response.json({ error: 'Forbidden: Not allowed to update this task' }, { status: 403 });
+            }
+        }
+        
         // Update the current task status
         const updatedTask = await base44.entities.Task.update(id, { status });
 

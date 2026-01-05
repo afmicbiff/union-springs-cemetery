@@ -49,9 +49,15 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Try to get user; allow service role (no user) for scheduled runs
+    // Admin or system-only authorization
     let user = null;
     try { user = await base44.auth.me(); } catch (_) { user = null; }
+    const expectedSecret = Deno.env.get('SECURITY_AUTORESPOND_JOB_SECRET') || '';
+    const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+    const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+    if (!user && !authorizedBySecret) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     if (user && user.role !== 'admin') {
       return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
