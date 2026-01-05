@@ -102,6 +102,26 @@ export default function SecurityDashboard() {
     }
   }, [nsData]);
 
+  const indicators = React.useMemo(() => {
+    const s = new Set();
+    (filtered || []).forEach(e => e.ip_address && s.add(e.ip_address));
+    (filteredBlocked || []).forEach(r => r.ip_address && s.add(r.ip_address));
+    return Array.from(s).slice(0, 100);
+  }, [filtered, filteredBlocked]);
+
+  const { data: intel = { results: {} }, isFetching: intelLoading } = useQuery({
+    queryKey: ['threat-intel', indicators],
+    queryFn: async () => {
+      if (!indicators || indicators.length === 0) return { results: {} };
+      const res = await base44.functions.invoke('threatIntelLookup', { indicators });
+      return res?.data || { results: {} };
+    },
+    enabled: (indicators || []).length > 0,
+    staleTime: 300_000,
+  });
+
+  const intelMap = (intel && intel.results) ? intel.results : {};
+
   const types = React.useMemo(() => {
     const t = new Set();
     (events || []).forEach(e => { if (e.event_type) t.add(e.event_type); });
@@ -402,12 +422,13 @@ export default function SecurityDashboard() {
                     <th className="p-2 text-left">Reason</th>
                     <th className="p-2 text-left">Blocked Until</th>
                     <th className="p-2 text-left">Status</th>
+                    <th className="p-2 text-left">Intel</th>
                     <th className="p-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {filteredBlocked.length === 0 ? (
-                    <tr><td className="p-3" colSpan={5}>No records</td></tr>
+                    <tr><td className="p-3" colSpan={6}>No records</td></tr>
                   ) : (
                     filteredBlocked.map((rec) => {
                       const isActive = rec.active && new Date(rec.blocked_until).getTime() > Date.now();
@@ -419,6 +440,13 @@ export default function SecurityDashboard() {
                           <td className="p-2">{rec.blocked_until ? format(new Date(rec.blocked_until), 'MMM d, yyyy HH:mm') : '-'}</td>
                           <td className="p-2">
                             <Badge className={isActive ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-600'}>{status}</Badge>
+                          </td>
+                          <td className="p-2">
+                            {intelMap[rec.ip_address]?.matched ? (
+                              <Badge className="bg-red-100 text-red-700">Threat</Badge>
+                            ) : (
+                              <span className="text-stone-400 text-xs">—</span>
+                            )}
                           </td>
                           <td className="p-2">
                             {isActive ? (
@@ -465,7 +493,12 @@ export default function SecurityDashboard() {
                       <td className="p-2"><Badge className={sevBadge(e.severity)}>{e.severity}</Badge></td>
                       <td className="p-2">{e.event_type}</td>
                       <td className="p-2 max-w-[380px] truncate" title={e.message}>{e.message}</td>
-                      <td className="p-2">{e.ip_address || '-'}</td>
+                      <td className="p-2">
+                        {e.ip_address || '-'}
+                        {e.ip_address && intelMap[e.ip_address]?.matched && (
+                          <Badge className="ml-2 bg-red-100 text-red-700">Threat</Badge>
+                        )}
+                      </td>
                       <td className="p-2">
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => setDetails(e)}>View</Button>
@@ -502,8 +535,41 @@ export default function SecurityDashboard() {
                 <div><span className="font-medium">When:</span> {new Date(details.created_date).toLocaleString()}</div>
                 <div><span className="font-medium">Severity:</span> {details.severity}</div>
                 <div><span className="font-medium">Type:</span> {details.event_type}</div>
-                <div><span className="font-medium">IP:</span> {details.ip_address || '-'}</div>
+                <div><span className="font-medium">IP:</span> {details.ip_address || '-'} {details?.ip_address && intelMap[details.ip_address]?.matched && (<Badge className="ml-2 bg-red-100 text-red-700">Threat</Badge>)}</div>
                 <div className="mt-2"><span className="font-medium">Message:</span> {details.message}</div>
+                {details?.ip_address && (
+                  <div className="mt-2">
+                    <div className="font-medium">Threat Intelligence</div>
+                    {intelLoading ? (
+                      <div className="text-xs text-stone-500">Checking…</div>
+                    ) : (
+                      intelMap[details.ip_address]?.matched ? (
+                        <div className="text-xs">
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {(intelMap[details.ip_address].families || []).map((f,i)=>(<Badge key={i} className="bg-red-100 text-red-700">{f}</Badge>))}
+                          </div>
+                          {intelMap[details.ip_address].last_seen && (
+                            <div className="text-stone-500">Last seen: {format(new Date(intelMap[details.ip_address].last_seen), 'MMM d, yyyy')}</div>
+                          )}
+                          <div className="mt-2">
+                            <Button size="sm" onClick={async ()=>{
+                              await base44.entities.SecurityEvent.create({
+                                event_type: 'threat_intel_match',
+                                severity: 'critical',
+                                message: `High-severity threat intel match: ${details.ip_address}`,
+                                ip_address: details.ip_address,
+                                details: intelMap[details.ip_address]
+                              });
+                              toast.success('Critical alert created');
+                            }}>Raise High-Severity Alert</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-stone-600">No known threats for this IP</div>
+                      )
+                    )}
+                  </div>
+                )}
                 <div className="mt-2">
                   <div className="font-medium">Details JSON</div>
                   <pre className="bg-stone-100 p-2 rounded text-xs overflow-auto max-h-80">{JSON.stringify(details.details || {}, null, 2)}</pre>
