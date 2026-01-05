@@ -553,7 +553,7 @@ export default function SecurityDashboard() {
                           {intelMap[details.ip_address].last_seen && (
                             <div className="text-stone-500">Last seen: {format(new Date(intelMap[details.ip_address].last_seen), 'MMM d, yyyy')}</div>
                           )}
-                          <div className="mt-2">
+                          <div className="mt-2 flex gap-2">
                             <Button size="sm" onClick={async ()=>{
                               await base44.entities.SecurityEvent.create({
                                 event_type: 'threat_intel_match',
@@ -564,6 +564,13 @@ export default function SecurityDashboard() {
                               });
                               toast.success('Critical alert created');
                             }}>Raise High-Severity Alert</Button>
+                            <Button size="sm" variant="outline" onClick={async ()=>{
+                              const res = await base44.functions.invoke('autoRespondToEvent', { event_id: details.id });
+                              if (res?.data?.error) { toast.error(res.data.error); return; }
+                              toast.success('Auto-response executed');
+                              qc.invalidateQueries({ queryKey: ['blocked-ips'] });
+                              qc.invalidateQueries({ queryKey: ['blocked-all'] });
+                            }}>Auto-Respond (Block + Notify)</Button>
                           </div>
                         </div>
                       ) : (
