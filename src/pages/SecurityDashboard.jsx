@@ -275,6 +275,79 @@ export default function SecurityDashboard() {
     URL.revokeObjectURL(url);
   };
 
+  // ---- SIEM Exports ----
+  const cefSeverity = (s) => ({ info:1, low:3, medium:5, high:8, critical:10 }[s] ?? 1);
+  const cefEscape = (v) => String(v ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .replace(/=/g, '\\=')
+    .replace(/\n/g, ' ');
+  const cefHeaderEscape = (v) => String(v ?? '').replace(/\|/g, ' ').replace(/\n/g, ' ');
+
+  const exportEventsCEF = () => {
+    const lines = (filtered || []).map((e) => {
+      const ver = 0;
+      const vendor = 'Base44';
+      const product = 'SecurityDashboard';
+      const dver = '1.0';
+      const sig = cefHeaderEscape(e.event_type || 'event');
+      const name = cefHeaderEscape(e.message || e.event_type || 'event');
+      const sev = cefSeverity(e.severity);
+      const rt = new Date(e.created_date).getTime();
+      const ext = [];
+      if (e.ip_address) ext.push(`src=${cefEscape(e.ip_address)}`);
+      if (e.route) ext.push(`request=${cefEscape(e.route)}`);
+      if (e.user_agent) ext.push(`requestClientApplication=${cefEscape(e.user_agent)}`);
+      if (e.user_email) ext.push(`suser=${cefEscape(e.user_email)}`);
+      if (e.message) ext.push(`msg=${cefEscape(e.message)}`);
+      if (e.id) ext.push(`externalId=${cefEscape(e.id)}`);
+      if (e.details) { ext.push(`cs1Label=details`); ext.push(`cs1=${cefEscape(JSON.stringify(e.details))}`); }
+      ext.push(`rt=${rt}`);
+      return `CEF:${ver}|${vendor}|${product}|${dver}|${sig}|${name}|${sev}|` + ext.join(' ');
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'security_events.cef';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const syslogSeverityCode = (s) => ({ critical:2, high:3, medium:4, low:5, info:6 }[s] ?? 6);
+  const syslogEscape = (v) => String(v ?? '').replace(/\n/g, ' ');
+  const sdValueEscape = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/\]/g, '\\]').replace(/\"/g, '\\"');
+
+  const exportEventsSyslog = () => {
+    const host = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : 'localhost';
+    const app = 'SecurityDashboard';
+    const procid = '-';
+    const sdid = 'base44@41058';
+    const facility = 16; // local0
+    const lines = (filtered || []).map((e) => {
+      const ts = new Date(e.created_date).toISOString();
+      const prival = facility * 8 + syslogSeverityCode(e.severity);
+      const msgid = (e.event_type || 'event').toUpperCase();
+      const sd = [
+        `event_id=\"${sdValueEscape(e.id)}\"`,
+        e.ip_address ? `ip=\"${sdValueEscape(e.ip_address)}\"` : null,
+        e.route ? `route=\"${sdValueEscape(e.route)}\"` : null,
+        e.user_email ? `user=\"${sdValueEscape(e.user_email)}\"` : null,
+        e.user_agent ? `ua=\"${sdValueEscape(e.user_agent)}\"` : null,
+        `severity=\"${sdValueEscape(e.severity)}\"`,
+        `details=\"${sdValueEscape(JSON.stringify(e.details || {}))}\"`
+      ].filter(Boolean).join(' ');
+      const structured = `[${sdid} ${sd}]`;
+      const msg = syslogEscape(e.message || '');
+      return `<${prival}>1 ${ts} ${host} ${app} ${procid} ${msgid} ${structured} ${msg}`;
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'security_events.syslog';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen p-6 bg-stone-100">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -518,9 +591,11 @@ export default function SecurityDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
               <CardTitle className="text-lg">Events ({filtered.length})</CardTitle>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={exportEventsJSON}>Export JSON</Button>
                 <Button variant="outline" size="sm" onClick={exportEventsCSV}>Export CSV</Button>
+                <Button variant="outline" size="sm" onClick={exportEventsCEF}>Export CEF</Button>
+                <Button variant="outline" size="sm" onClick={exportEventsSyslog}>Export Syslog</Button>
               </div>
             </div>
           </CardHeader>
