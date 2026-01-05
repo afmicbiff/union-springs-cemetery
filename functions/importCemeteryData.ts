@@ -63,7 +63,7 @@ export default Deno.serve(async (req) => {
         // Fetching all might be heavy, but necessary for de-dup. 
         // We'll limit to 2000 recent ones or rely on loop checks if bulk fetch fails.
         // Assuming < 5000 total plots for now.
-        const allPlots = await base44.entities.Plot.list({ limit: 5000 });
+        const allPlots = await base44.entities.Plot.list('-updated_date', 5000);
         const plotMap = new Map();
         allPlots.forEach(p => plotMap.set(`${p.row_number}-${p.plot_number}`, p));
 
