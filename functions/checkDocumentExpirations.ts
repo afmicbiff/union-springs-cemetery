@@ -30,8 +30,9 @@ Deno.serve(async (req) => {
               return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
           }
 
-        const employees = await base44.asServiceRole.entities.Employee.list({ limit: 1000, status: 'active' });
-        const members = await base44.asServiceRole.entities.Member.list({ limit: 1000 });
+        // Service role operations allowed only after auth passed (admin or job secret)
+        const employees = await base44.asServiceRole.entities.Employee.filter({ status: 'active' }, '-updated_date', 1000);
+        const members = await base44.asServiceRole.entities.Member.list('-updated_date', 1000);
 
         const notifications = [];
         const today = new Date();
