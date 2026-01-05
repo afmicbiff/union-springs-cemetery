@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
           if (!c || !allowed.has(c.path)) return { ok: false, status: 400, data: { error: 'Blocked' } };
 
           if (c.path === '/api/data') {
-            const data = await getDataWithFieldsAndPagination(c.query || {});
+            const data = await getDataWithFieldsAndPagination(base44, c.query || {});
             return { ok: true, status: 200, data };
           }
           if (c.path === '/api/dashboard') {
@@ -48,28 +48,35 @@ Deno.serve(async (req) => {
   }
 });
 
-async function getDataWithFieldsAndPagination(query) {
-  const fields = String(query.fields || 'id,name').split(',').map((s) => s.trim());
-  const limit = Math.min(Number(query.limit || 10), 50);
-  const cursor = query.cursor ? String(query.cursor) : null;
+async function getDataWithFieldsAndPagination(base44, query) {
+  const entity = typeof query.entity === 'string' && query.entity.trim() ? query.entity.trim() : null;
+  if (!entity || !base44?.entities?.[entity]) {
+    return { items: [], nextCursor: null, error: 'Invalid or missing entity' };
+  }
 
-  const items = fakeDbFetch({ fields, limit, cursor });
-  return {
-    items,
-    nextCursor: items.length === limit ? items[items.length - 1].id : null,
-  };
+  const fields = String(query.fields || '').split(',').map((s) => s.trim()).filter(Boolean);
+  const limit = Math.min(Math.max(parseInt(query.limit ?? 10, 10) || 10, 1), 50);
+  const sort = typeof query.sort === 'string' && query.sort.trim() ? query.sort.trim() : '-updated_date';
+  const where = (query.where && typeof query.where === 'object') ? query.where : {};
+
+  // RLS is enforced by base44.entities, so this respects user permissions
+  const items = Object.keys(where).length > 0
+    ? await base44.entities[entity].filter(where, sort, limit)
+    : await base44.entities[entity].list(sort, limit);
+
+  // Optionally project fields if requested
+  const projected = (fields.length > 0)
+    ? items.map((row) => {
+        const out = {};
+        fields.forEach((f) => { if (f in row) out[f] = row[f]; });
+        return out;
+      })
+    : items;
+
+  return { items: projected, nextCursor: null };
 }
 
-function fakeDbFetch({ fields, limit }) {
-  const all = Array.from({ length: limit }, (_, i) => ({ id: `id_${i}`, name: `Name ${i}`, extra: 'drop-me' }));
-  return all.map((row) => {
-    const out = {};
-    fields.forEach((f) => {
-      if (f in row) out[f] = row[f];
-    });
-    return out;
-  });
-}
+// Removed fakeDbFetch; now using real Base44 entities with RLS-enforced access.
 
 async function getDashboard() {
   return { summary: { ok: true }, items: [] };
