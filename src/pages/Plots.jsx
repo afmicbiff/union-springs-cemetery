@@ -416,8 +416,7 @@ const SectionRenderer = React.memo(({
                     overflow-x-auto
                 `}>
                     {sectionKey === '1' ? (
-                        isAdmin ? (
-                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
+                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
                             <Section1DnDGrid
                               plots={plots}
                               baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
@@ -427,24 +426,9 @@ const SectionRenderer = React.memo(({
                               statusColors={STATUS_COLORS}
                             />
                           </React.Suspense>
-                        ) : (
-                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
-                            {plots.map((plot, pIdx) => (
-                              <GravePlot
-                                key={plot._id || `s1-${pIdx}`}
-                                data={plot}
-                                  computedSectionKey={sectionKey}
-                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                onHover={onHover}
-                                onEdit={undefined}
-                              />
-                            ))}
-                          </div>
-                        )
                     ) : sectionKey === '2' ? (
-                        isAdmin ? (
                           <div className="flex justify-center">
-                            <React.Suspense fallback={<div className="text-xs text-gray-500">Loading editor…</div>}>
+                            <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
                               <Section2DnDGrid
                                 plots={plots}
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
@@ -455,20 +439,6 @@ const SectionRenderer = React.memo(({
                               />
                             </React.Suspense>
                           </div>
-                        ) : (
-                          <div className="flex flex-col-reverse gap-1 items-center justify-start">
-                            {plots.map((plot, pIdx) => (
-                              <GravePlot
-                                key={plot._id || `s2-${pIdx}`}
-                                data={plot}
-                                  computedSectionKey={sectionKey}
-                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                onHover={onHover}
-                                onEdit={undefined}
-                              />
-                            ))}
-                          </div>
-                        )
                     ) : sectionKey === '3' ? (
                         <div className="flex gap-4 justify-center overflow-x-auto pb-4">
                             {(() => {
