@@ -72,6 +72,12 @@ if (!parsed.success) {
 }
 const { query } = parsed.data;
 
+// Require authentication to prevent public LLM abuse
+const user = await base44.auth.me().catch(() => null);
+if (!user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+}
+
         if (!query) {
             return Response.json({ error: "Query is required" }, { status: 400 });
         }
