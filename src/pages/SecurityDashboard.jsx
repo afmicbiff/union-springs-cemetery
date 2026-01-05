@@ -29,6 +29,40 @@ export default function SecurityDashboard() {
   const [start, setStart] = React.useState('');
   const [end, setEnd] = React.useState('');
   const [details, setDetails] = React.useState(null);
+
+  // Endpoint correlation (fetch matching endpoints by IP or user)
+  const { data: matchedEndpoints = [], isFetching: endpointsLoading } = useQuery({
+    queryKey: ['endpoints-for-event', details?.id, details?.ip_address, details?.user_email],
+    queryFn: async () => {
+      if (!details) return [];
+      const results = [];
+      if (details.ip_address) {
+        const byIp = await base44.entities.Endpoint.filter({ last_ip: details.ip_address }, '-updated_date', 5);
+        results.push(...byIp);
+      }
+      if (details.user_email) {
+        const byUser = await base44.entities.Endpoint.filter({ owner_email: details.user_email }, '-updated_date', 5);
+        results.push(...byUser);
+      }
+      const map = new Map();
+      for (const e of results) map.set(e.id, e);
+      return Array.from(map.values());
+    },
+    enabled: !!details,
+    initialData: []
+  });
+
+  const selectedEndpoint = React.useMemo(() => (matchedEndpoints && matchedEndpoints[0]) || null, [matchedEndpoints]);
+
+  const { data: endpointLogs = [], isFetching: logsLoading } = useQuery({
+    queryKey: ['endpoint-logs', selectedEndpoint?.id],
+    queryFn: async () => {
+      if (!selectedEndpoint) return [];
+      return base44.entities.EndpointEvent.filter({ endpoint_id: selectedEndpoint.id }, '-timestamp', 50);
+    },
+    enabled: !!selectedEndpoint,
+    initialData: []
+  });
   const [blockModal, setBlockModal] = React.useState({ open: false, ip: '', minutes: 60, reason: '' });
   const [blockedView, setBlockedView] = React.useState('active');
   const [insights, setInsights] = React.useState(null);
@@ -710,6 +744,61 @@ export default function SecurityDashboard() {
                     )}
                   </div>
                 )}
+                {/* Endpoint Intelligence */}
+                <div className="mt-4">
+                  <div className="font-medium">Endpoint Intelligence</div>
+                  {endpointsLoading ? (
+                    <div className="text-xs text-stone-500">Loading endpoint data…</div>
+                  ) : selectedEndpoint ? (
+                    <div className="text-xs space-y-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                        <div><span className="font-medium">Hostname:</span> {selectedEndpoint.hostname || '-'}</div>
+                        <div><span className="font-medium">Device ID:</span> {selectedEndpoint.device_id || '-'}</div>
+                        <div><span className="font-medium">Owner:</span> {selectedEndpoint.owner_email || '-'}</div>
+                        <div><span className="font-medium">OS:</span> {selectedEndpoint.os || '-'}</div>
+                        <div><span className="font-medium">Last IP:</span> {selectedEndpoint.last_ip || '-'}</div>
+                        <div><span className="font-medium">Agent:</span> {selectedEndpoint.agent_version || '-'}</div>
+                        <div><span className="font-medium">Status:</span> {selectedEndpoint.status || '-'}</div>
+                        <div><span className="font-medium">Security Posture:</span> {selectedEndpoint.security_posture || '-'}</div>
+                        <div><span className="font-medium">Last Seen:</span> {selectedEndpoint.last_seen ? new Date(selectedEndpoint.last_seen).toLocaleString() : '-'}</div>
+                      </div>
+                      <div className="mt-2">
+                        <div className="font-medium">Recent Endpoint Logs</div>
+                        {logsLoading ? (
+                          <div className="text-xs text-stone-500">Loading logs…</div>
+                        ) : endpointLogs.length === 0 ? (
+                          <div className="text-xs text-stone-500">No recent logs</div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                              <thead className="bg-stone-100">
+                                <tr>
+                                  <th className="p-2 text-left">Time</th>
+                                  <th className="p-2 text-left">Type</th>
+                                  <th className="p-2 text-left">Process/File</th>
+                                  <th className="p-2 text-left">Details</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y">
+                                {endpointLogs.map((log) => (
+                                  <tr key={log.id}>
+                                    <td className="p-2">{log.timestamp ? new Date(log.timestamp).toLocaleString() : '-'}</td>
+                                    <td className="p-2">{log.type}</td>
+                                    <td className="p-2">{log.process_name || log.file_path || '-'}</td>
+                                    <td className="p-2 max-w-[400px] truncate" title={log.description || ''}>{log.description || (log.details ? JSON.stringify(log.details) : '')}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-stone-600">No associated endpoint found</div>
+                  )}
+                </div>
+
                 <div className="mt-2">
                   <div className="font-medium">Details JSON</div>
                   <pre className="bg-stone-100 p-2 rounded text-xs overflow-auto max-h-80">{JSON.stringify(details.details || {}, null, 2)}</pre>
