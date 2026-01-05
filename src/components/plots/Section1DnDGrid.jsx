@@ -79,7 +79,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     setReadyForKey(layoutKey);
   }, [plots, cols, perCol, maxNum, layoutKey, readyForKey, total]);
 
-  const onDragEnd = (result) => {
+  const onDragEnd = React.useCallback((result) => {
     const { source, destination } = result || {};
     if (!destination) return;
     if (source.droppableId === destination.droppableId) return;
