@@ -192,7 +192,7 @@ export default Deno.serve(async (req) => {
             }
             
             // Re-fetch all plots to update map with new IDs
-            const updatedAllPlots = await base44.entities.Plot.list({ limit: 5000 });
+            const updatedAllPlots = await base44.entities.Plot.list('-updated_date', 5000);
             updatedAllPlots.forEach(p => plotMap.set(`${p.row_number}-${p.plot_number}`, p));
         }
 
