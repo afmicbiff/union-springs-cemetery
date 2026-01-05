@@ -208,7 +208,7 @@ export default Deno.serve(async (req) => {
         // 7. Execution Phase - Deceased
         // Filter out existing deceased to avoid duplicates
         // We'll list all deceased first
-        const allDeceased = await base44.entities.Deceased.list({ limit: 5000 });
+        const allDeceased = await base44.entities.Deceased.list('-updated_date', 5000);
         const deceasedMap = new Set(allDeceased.map(d => `${d.last_name}|${d.plot_location}`));
 
         const finalDeceasedPayload = [];
