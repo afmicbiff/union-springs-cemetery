@@ -53,24 +53,24 @@ Deno.serve(async (req) => {
         // Send Email (non-blocking)
         try {
             await base44.integrations.Core.SendEmail({
-            to: adminEmail,
-            subject: `New Contact Inquiry: ${subject || 'General Inquiry'}`,
-            body: `
-New message received from the Contact Us form.
+                to: adminEmail,
+                subject: `New Contact Inquiry: ${subject || 'General Inquiry'}`,
+                body: `
+            New message received from the Contact Us form.
 
-Details:
---------------------------------
-Name: ${name}
-Email: ${email}
-Subject: ${subject || 'N/A'}
+            Details:
+            --------------------------------
+            Name: ${name}
+            Email: ${email}
+            Subject: ${subject || 'N/A'}
 
-Message:
-${message}
---------------------------------
+            Message:
+            ${message}
+            --------------------------------
 
-Please reply to the user at ${email}.
-            `
-        });
+            Please reply to the user at ${email}.
+                `
+            }).catch(console.error);
 
 
 
