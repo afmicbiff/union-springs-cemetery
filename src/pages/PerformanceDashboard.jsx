@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Code, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel.jsx"));
-const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts.jsx"));
+const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel"));
+const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts"));
 
 export default function PerformanceDashboard() {
         const queryClient = useQueryClient();
