@@ -41,9 +41,10 @@ export default function PerformanceDashboard() {
   const inpValue = typeof metrics.inp === 'number' ? metrics.inp : vitalsLatest?.inp ?? undefined;
 
   React.useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => setUser(null));
+    let mounted = true;
+    base44.auth.me().then(u => { if (mounted) setUser(u); }).catch(() => { if (mounted) setUser(null); });
     const unsub = subscribeMetrics(setMetrics);
-    return () => unsub();
+    return () => { mounted = false; unsub(); };
   }, []);
 
   const reload = async () => {
