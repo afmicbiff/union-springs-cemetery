@@ -93,6 +93,8 @@ The Union Springs Cemetery Team
     const isValidation = error && (error.name === 'ZodError' || (typeof error.format === 'function' && Array.isArray(error.issues)));
     try {
       const base44 = createClientFromRequest(req);
+      const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
+      const ua = req.headers.get('user-agent') || '';
       await base44.asServiceRole.entities.SecurityEvent.create({
         event_type: isValidation ? 'contact_form_validation_error' : 'contact_form_error',
         severity: isValidation ? 'low' : 'medium',
