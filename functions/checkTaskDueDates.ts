@@ -5,6 +5,18 @@ export default Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
         
+        // Admin or system-only authorization
+        const user = await base44.auth.me().catch(() => null);
+        const expectedSecret = Deno.env.get('TASK_DUE_DATES_JOB_SECRET') || '';
+        const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
+        const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
+        if (!user && !authorizedBySecret) {
+            return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        if (user && user.role !== 'admin') {
+            return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+        }
+        
         // 1. Get all active tasks
         const tasks = await base44.asServiceRole.entities.Task.list({ limit: 1000 });
         const activeTasks = tasks.filter(t => t.status !== 'Completed' && !t.is_archived && t.due_date);
