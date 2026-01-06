@@ -255,9 +255,10 @@ export default function AdminDashboard() {
     ]
   });
 
-  if (!isAuthorized) {
-      return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
-  }
+  // Keep hook order stable: avoid returning before all hooks are declared. Use a guarded render block instead.
+  const notAuthorizedView = (
+    <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>
+  );
 
   const handleSearchNavigate = (link) => {
       // Redirect security results to the dedicated page
