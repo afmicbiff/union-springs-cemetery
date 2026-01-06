@@ -115,6 +115,22 @@ Deno.serve(async (req) => {
       plot = pList?.[0] || null;
     }
 
+    // Permission checks
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (signAsAdmin) {
+      if (user.role !== 'admin') {
+        return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      }
+    } else {
+      const reqEmail = String(reservation?.requester_email || '').toLowerCase();
+      const userEmail = String(user?.email || '').toLowerCase();
+      if (!reqEmail || userEmail !== reqEmail) {
+        return Response.json({ error: 'Forbidden: You can only generate your own certificate' }, { status: 403 });
+      }
+    }
+
     // Create PDF
     const doc = new jsPDF();
     const adminSigner = signAsAdmin && user?.full_name ? user.full_name : null;
