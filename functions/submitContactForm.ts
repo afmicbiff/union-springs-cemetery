@@ -114,6 +114,6 @@ Deno.serve(async (req) => {
         if (isValidation) {
             return Response.json({ error: 'Validation failed', issues: error.issues }, { status: 400 });
         }
-        return Response.json({ error: 'Failed to send message' }, { status: 500 });
+        return Response.json({ error: error.message || 'Failed to send message' }, { status: 500 });
     }
 });
