@@ -22,25 +22,37 @@ Deno.serve(async (req) => {
         });
         const { name, email, subject, message } = Schema.parse(body);
 
-        // Create in-app Notification for Admin Communications
-        try {
-            const base44ForLog = createClientFromRequest(req);
-            await base44ForLog.asServiceRole.entities.Notification.create({
-                message: `New Contact Inquiry: ${subject || 'General Inquiry'} from ${name} (${email})`,
-                type: "message",
-                is_read: false,
-                user_email: null,
-                related_entity_type: "message",
-                created_at: new Date().toISOString()
-            });
-        } catch (_) {}
+        // Create a thread and message for Communication Center
+        const threadId = crypto.randomUUID();
+        const newMsg = await base44.asServiceRole.entities.Message.create({
+            sender_email: email,
+            recipient_email: 'ADMIN',
+            subject: subject || 'General Inquiry',
+            body: message,
+            thread_id: threadId,
+            type: 'contact',
+            is_read: false
+        });
+
+        // Create in-app Notification referencing the message
+        await base44.asServiceRole.entities.Notification.create({
+            message: `New Contact Inquiry: ${subject || 'General Inquiry'} from ${name} (${email})`,
+            type: "message",
+            is_read: false,
+            user_email: null,
+            related_entity_type: "message",
+            related_entity_id: newMsg.id,
+            link: "/admin?tab=communication",
+            created_at: new Date().toISOString()
+        });
 
         // 1. Send notification to Admin
         // Using a placeholder admin email - in production this would be the actual office email
         const adminEmail = "office@unionsprings.com"; 
-        
-        // Send Email
-        await base44.integrations.Core.SendEmail({
+
+        // Send Email (non-blocking)
+        try {
+            await base44.integrations.Core.SendEmail({
             to: adminEmail,
             subject: `New Contact Inquiry: ${subject || 'General Inquiry'}`,
             body: `
