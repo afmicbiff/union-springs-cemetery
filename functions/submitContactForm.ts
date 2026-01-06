@@ -79,19 +79,19 @@ Deno.serve(async (req) => {
             to: email,
             subject: "We received your message - Union Springs Cemetery",
             body: `
-Dear ${name},
+        Dear ${name},
 
-Thank you for reaching out to Union Springs Cemetery. 
+        Thank you for reaching out to Union Springs Cemetery.
 
-We have received your message regarding "${subject || 'your inquiry'}" and one of our advisors will review it shortly. We typically respond within 24-48 business hours.
+        We have received your message regarding "${subject || 'your inquiry'}" and one of our advisors will review it shortly. We typically respond within 24-48 business hours.
 
-If this is an urgent matter, please call our office at (555) 123-4567 during business hours.
+        If this is an urgent matter, please call our office at (555) 123-4567 during business hours.
 
-Sincerely,
-The Union Springs Cemetery Team
-123 Granite Way, Union Springs
+        Sincerely,
+        The Union Springs Cemetery Team
+        123 Granite Way, Union Springs
             `
-        });
+        }).catch(console.error);
 
         return Response.json({ success: true });
     } catch (error) {
