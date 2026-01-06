@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
             subject: subject || 'General Inquiry',
             body: message,
             thread_id: threadId,
-            type: 'contact',
+            type: 'inquiry',
             is_read: false
         });
 
