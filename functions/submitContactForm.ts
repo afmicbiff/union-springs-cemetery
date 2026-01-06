@@ -51,8 +51,7 @@ Deno.serve(async (req) => {
         const adminEmail = "office@unionsprings.com"; 
 
         // Send Email (non-blocking)
-        try {
-            await base44.integrations.Core.SendEmail({
+        await base44.integrations.Core.SendEmail({
                 to: adminEmail,
                 subject: `New Contact Inquiry: ${subject || 'General Inquiry'}`,
                 body: `
