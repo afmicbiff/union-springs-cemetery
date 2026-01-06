@@ -22,17 +22,16 @@ Deno.serve(async (req) => {
         });
         const { name, email, subject, message } = Schema.parse(body);
 
-        // Record security event for visibility (rate limiting can be added later)
+        // Create in-app Notification for Admin Communications
         try {
             const base44ForLog = createClientFromRequest(req);
-            await base44ForLog.asServiceRole.entities.SecurityEvent.create({
-                event_type: 'contact_form_submission',
-                severity: 'info',
-                message: `Contact form submission from ${email}`,
-                ip_address: ip,
-                user_agent: ua,
+            await base44ForLog.asServiceRole.entities.Notification.create({
+                message: `New Contact Inquiry: ${subject || 'General Inquiry'} from ${name} (${email})`,
+                type: "message",
+                is_read: false,
                 user_email: null,
-                route: 'functions/submitContactForm'
+                related_entity_type: "message",
+                created_at: new Date().toISOString()
             });
         } catch (_) {}
 
@@ -61,14 +60,7 @@ Please reply to the user at ${email}.
             `
         });
 
-        // Create In-App Notification for Admin
-        await base44.asServiceRole.entities.Notification.create({
-            message: `New Contact Inquiry from ${name}: ${subject || 'No Subject'}`,
-            type: "info",
-            is_read: false,
-            user_email: null, // System-wide / Admin
-            created_at: new Date().toISOString()
-        });
+
 
         // 2. Send acknowledgement to User
         await base44.integrations.Core.SendEmail({
