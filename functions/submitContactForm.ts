@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { z } from 'npm:zod@3.24.2';
 
 Deno.serve(async (req) => {
@@ -91,20 +91,25 @@ The Union Springs Cemetery Team
 
         return Response.json({ success: true });
     } catch (error) {
+        const isValidation = error && (error.name === 'ZodError' || (typeof error.format === 'function' && Array.isArray(error.issues)));
         try {
             const base44ForLog = createClientFromRequest(req);
             const ip = req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '';
             const ua = req.headers.get('user-agent') || '';
             await base44ForLog.asServiceRole.entities.SecurityEvent.create({
-                event_type: 'input_validation_error',
-                severity: 'medium',
-                message: error.message || 'Contact form validation error',
+                event_type: isValidation ? 'contact_form_validation_error' : 'contact_form_error',
+                severity: isValidation ? 'low' : 'medium',
+                message: error.message || (isValidation ? 'Validation error' : 'Contact form error'),
                 ip_address: ip,
                 user_agent: ua,
-                route: 'functions/submitContactForm'
+                route: 'functions/submitContactForm',
+                details: isValidation ? { issues: error.issues } : {}
             });
         } catch (_) {}
         console.error("Contact form error:", error);
-        return Response.json({ error: error.message }, { status: 500 });
+        if (isValidation) {
+            return Response.json({ error: 'Validation failed', issues: error.issues }, { status: 400 });
+        }
+        return Response.json({ error: 'Failed to send message' }, { status: 500 });
     }
 });

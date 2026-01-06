@@ -31,7 +31,8 @@ export default function ContactPage() {
             toast.success("Message sent successfully!");
         },
         onError: (error) => {
-            toast.error("Failed to send message. Please try again.");
+            const msg = error?.response?.data?.error || "Failed to send message. Please check the form and try again.";
+            toast.error(msg);
             console.error(error);
         }
     });
@@ -165,6 +166,7 @@ export default function ContactPage() {
                                             id="name"
                                             name="name"
                                             placeholder="John Doe"
+                                            minLength={2}
                                             required
                                             value={formData.name}
                                             onChange={handleChange}
@@ -192,6 +194,7 @@ export default function ContactPage() {
                                             id="subject"
                                             name="subject"
                                             placeholder="e.g. Plot Reservation Inquiry"
+                                            maxLength={200}
                                             required
                                             value={formData.subject}
                                             onChange={handleChange}
@@ -205,6 +208,7 @@ export default function ContactPage() {
                                             id="message"
                                             name="message"
                                             placeholder="How can we help you?"
+                                            minLength={10}
                                             required
                                             value={formData.message}
                                             onChange={handleChange}
