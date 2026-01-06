@@ -19,8 +19,8 @@ export default Deno.serve(async (req) => {
         const pageNum = Math.max(1, parseInt(page));
         const limitNum = Math.max(1, parseInt(limit));
 
-        // Fetch all records - using service role
-        const allPlots = await base44.asServiceRole.entities.Plot.list(null, 10000);
+        // Fetch records with user-scoped access (respect RLS)
+        const allPlots = await base44.entities.Plot.list(null, 10000);
 
         const getYear = (dateStr) => {
             if (!dateStr) return null;
