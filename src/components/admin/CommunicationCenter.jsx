@@ -257,6 +257,20 @@ function InboxView() {
     },
   });
 
+  // Call dependent hooks before any early return to keep hook order stable
+  const allThreads = data?.threads || [];
+
+  const { data: aiClass } = useQuery({
+    queryKey: ['ai-classify-threads', allThreads.map(t => t.id).join(',')],
+    queryFn: async () => {
+      const threads = allThreads.slice(0, 100).map(t => ({ id: t.id, subject: t.subject || '', body: t.messages?.[t.messages.length-1]?.body || '' }));
+      const res = await base44.functions.invoke('aiCommunicationAssistant', { action: 'classify_threads', data: { threads } });
+      return res.data;
+    },
+    enabled: allThreads.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const manageThreadMutation = useMutation({
     mutationFn: async ({ threadId, operation, value }) => base44.functions.invoke('communication', { action: 'manageThread', thread_id: threadId, operation, value }),
     onSuccess: (_d, v) => {
@@ -290,19 +304,6 @@ function InboxView() {
   });
 
   if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
-
-  const allThreads = data?.threads || [];
-
-  const { data: aiClass } = useQuery({
-    queryKey: ['ai-classify-threads', allThreads.map(t => t.id).join(',')],
-    queryFn: async () => {
-      const threads = allThreads.slice(0, 100).map(t => ({ id: t.id, subject: t.subject || '', body: t.messages?.[t.messages.length-1]?.body || '' }));
-      const res = await base44.functions.invoke('aiCommunicationAssistant', { action: 'classify_threads', data: { threads } });
-      return res.data;
-    },
-    enabled: allThreads.length > 0,
-    staleTime: 5 * 60 * 1000,
-  });
 
   const getClass = (id) => aiClass?.classifications?.[id];
   const urgencyColor = { low: 'bg-green-100 text-green-700', medium: 'bg-amber-100 text-amber-700', high: 'bg-orange-100 text-orange-700', urgent: 'bg-red-100 text-red-700' };
