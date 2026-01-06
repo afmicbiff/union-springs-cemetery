@@ -342,6 +342,10 @@ export default function AdminDashboard() {
       { id: "logs", label: "System Logs", component: <AuditLogViewer /> },
   ];
 
+  if (!isAuthorized) {
+    return notAuthorizedView;
+  }
+
   return (
     <div className="p-4 md:p-6 w-full max-w-[1600px] mx-auto">
       <div className="space-y-6 md:space-y-8">
