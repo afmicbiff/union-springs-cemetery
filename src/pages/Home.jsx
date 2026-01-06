@@ -17,13 +17,13 @@ export default function Home() {
     setDismissedIds(dismissed);
   }, []);
 
-  const { data: notifications } = useQuery({
+  const { data: notifications = [] } = useQuery({
     queryKey: ['active-home-notifications'],
     queryFn: () => base44.entities.HomeNotification.list('-created_at', 5),
     initialData: []
   });
 
-  const activeNotification = notifications?.find(n => n.is_active && !dismissedIds.includes(n.id));
+  const activeNotification = (notifications || []).find(n => n.is_active && !dismissedIds.includes(n.id));
 
   const handleDismiss = (id) => {
     const newDismissed = [...dismissedIds, id];
