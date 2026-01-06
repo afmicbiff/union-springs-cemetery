@@ -70,8 +70,7 @@ Deno.serve(async (req) => {
             Please reply to the user at ${email}.
                 `
             }).catch(console.error);
-
-
+        }
 
         // 2. Send acknowledgement to User
         await base44.integrations.Core.SendEmail({
