@@ -1402,7 +1402,7 @@ export default function PlotsPage() {
           };
           .current = onClick;
           */
-        }, [clearBlink, handleEditClick, isAdmin]);
+        */
 
   const doQuickSearch = useCallback((q) => {
                   const nq = normalize(q);
