@@ -45,31 +45,33 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
     stateRef.current.dragging = false;
   };
 
-  // Wheel zoom around cursor
+  // Wheel: pan by default; hold Ctrl/Cmd to zoom around cursor
   const onWheel = (e) => {
     if (!contentRef.current) return;
-    // Allow natural page scroll if not on trackpad (no ctrl) but still support zoom with ctrl/cmd
-    const isZoomIntent = e.ctrlKey || e.metaKey || Math.abs(e.deltaY) < 1;
-    if (!isZoomIntent) return;
     e.preventDefault();
 
+    // PAN with wheel/trackpad by default
+    if (!(e.ctrlKey || e.metaKey)) {
+      setTx((prev) => prev - (e.deltaX || 0));
+      setTy((prev) => prev - (e.deltaY || 0));
+      return;
+    }
+
+    // ZOOM when Ctrl/Cmd pressed
     const rect = contentRef.current.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
 
-    const prev = scale;
-    const next = clamp(prev * (e.deltaY > 0 ? 0.9 : 1.1), minScale, maxScale);
-    if (next === prev) return;
+    setScale((prevScale) => {
+      const next = clamp(prevScale * (e.deltaY > 0 ? 0.9 : 1.1), minScale, maxScale);
+      if (next === prevScale) return prevScale;
 
-    // Adjust translation so the zoom focal point stays under cursor
-    const nx = cx / prev;
-    const ny = cy / prev;
-    const txNew = tx - (nx * (next - prev));
-    const tyNew = ty - (ny * (next - prev));
-
-    setScale(next);
-    setTx(txNew);
-    setTy(tyNew);
+      const nx = cx / prevScale;
+      const ny = cy / prevScale;
+      setTx((prevTx) => prevTx - (nx * (next - prevScale)));
+      setTy((prevTy) => prevTy - (ny * (next - prevScale)));
+      return next;
+    });
   };
 
   // Pinch zoom (two pointers)
@@ -145,7 +147,12 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       </div>
 
       {/* Controls */}
-      <div className="absolute right-3 top-3 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1">
+      <div
+        className="absolute right-3 top-3 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
+        data-zoom-controls="true"
+        onPointerDown={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+      >
         <button aria-label="Zoom in" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1.15)}>+</button>
         <button aria-label="Zoom out" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1/1.15)}>-</button>
         <button aria-label="Reset view" className="px-2 py-1 text-xs hover:bg-gray-100 rounded" onClick={reset}>Reset</button>
