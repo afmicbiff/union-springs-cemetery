@@ -711,6 +711,19 @@ export default function PlotsPage() {
   const [activeTab, setActiveTab] = useState('map'); 
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
+
+        // Collapse non-target sections on direct deep link to speed up initial render
+        useEffect(() => {
+          const params = new URLSearchParams(window.location.search);
+          const rawSection = params.get('section') || '';
+          const rawPlot = params.get('plot') || '';
+          if (!rawSection && !rawPlot) return;
+          const rawNorm = rawSection.replace(/Section\s/i, '').trim();
+          const targetKey = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : (rawNorm || '');
+          if (targetKey && ['1','2','3','4','5'].includes(targetKey)) {
+            setCollapsedSections({ '1': true, '2': true, '3': true, '4': true, '5': true, [targetKey]: false });
+          }
+        }, []);
   const openSections = useMemo(() => Object.keys(collapsedSections).filter((k) => !collapsedSections[k]), [collapsedSections]);
   const [expandedSections, setExpandedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -1115,7 +1128,8 @@ export default function PlotsPage() {
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
-      const maxAttempts = 1800;
+      // Reduce attempts to shorten time-to-center and avoid long rAF loops
+      const maxAttempts = 240;
       let done = false;
       let sectionScrolled = false;
 
