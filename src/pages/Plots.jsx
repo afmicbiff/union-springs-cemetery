@@ -218,11 +218,11 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   const params = new URLSearchParams(window.location.search);
   const rawSectionParam = params.get('section') || '';
-  const targetSectionNormParam = rawSectionParam.replace(/Section\s*/i, '').trim();
+  const targetSectionNormParam = rawSectionParam.replace(/Section\si, '').trim();
   const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
-  const sectionNorm = String(data.Section || '').replace(/Section\s*/i, '').trim();
+  const sectionNorm = String(data.Section || '').replace(/Section\si, '').trim();
   const sectionForId = String(computedSectionKey || sectionNorm || '');
   const isSelected = Number.isFinite(targetPlotNum) 
     && Number.isFinite(plotNum) 
@@ -883,7 +883,7 @@ export default function PlotsPage() {
 
       await Promise.all(
         arr.map(async (p) => {
-          const sect = String(p.section || '').replace(/Section\s*/i, '').trim();
+          const sect = String(p.section || '').replace(/Section\si, '').trim();
           if (sect !== '3') {
             await base44.entities.Plot.update(p.id, { section: 'Section 3' });
           }
@@ -1059,7 +1059,7 @@ export default function PlotsPage() {
     filteredData.forEach(item => {
         const rawSection = (item.Section || '').trim();
         const rowVal = String(item.Row || '');
-        let sectionKey = rawSection ? rawSection.replace(/Section\s*/i, '').trim() : '';
+        let sectionKey = rawSection ? rawSection.replace(/Section\si, '').trim() : '';
 
         // Force key ranges into Section 4 to ensure proper rendering
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
@@ -1106,7 +1106,7 @@ export default function PlotsPage() {
                   
                   setIsCentering(true);
 
-      const rawNorm = rawSection.replace(/Section\s*/i, '').trim();
+      const rawNorm = rawSection.replace(/Section\si, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
       // Ensure the target section is expanded before searching for the plot element
       if (sectionNorm) {
@@ -1319,7 +1319,7 @@ export default function PlotsPage() {
 
   const quickIndex = useMemo(() => {
     return (parsedData || []).map((p) => {
-      let sectionKey = String(p.Section || '').replace(/Section\s*/i, '').trim();
+      let sectionKey = String(p.Section || '').replace(/Section\si, '').trim();
       const raw = String(p.Section || '');
       if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
       const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
@@ -1400,7 +1400,7 @@ export default function PlotsPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
           
        
-      {/* Header */}
+      {/* Header }
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3"></div>
@@ -1463,7 +1463,7 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {/* Quick Locate */}
+      {/* Quick Locate }
       <div className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="max-w-7xl mx-auto">
           <div className="relative max-w-md">
@@ -1476,20 +1476,20 @@ export default function PlotsPage() {
         </div>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar }
       <PlotFilters 
           filters={filters} 
           onFilterChange={setFilters} 
           statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
       />
 
-      {/* Main Area */}
+      {/* Main Area }
       {activeTab === 'map' ? (
                       <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
-                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only */}
+                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only }
                         <noscript data-note="perf: third-party disabled on map page" />
 
-            {/* Legend */}
+            {/* Legend }
             <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 sm:min-w-max">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
@@ -1503,10 +1503,10 @@ export default function PlotsPage() {
                 </div>
             </div>
 
-            {/* Map Canvas */}
+            {/* Map Canvas }
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
-                    {/* Sections 1-5 Sorted Descending */}
+                    {/* Sections 1-5 Sorted Descending }
                     {Object.keys(sections).sort((a, b) => {
                         const numA = parseInt(a);
                         const numB = parseInt(b);
@@ -1555,7 +1555,7 @@ export default function PlotsPage() {
             </main>
           </React.Suspense>
           ) : (
-          /* Data Table View */
+          /* Data Table View 
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
               <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2">
@@ -1663,7 +1663,7 @@ export default function PlotsPage() {
           </main>
       )}
 
-      {/* Centering Overlay */}
+      {/* Centering Overlay }
       {isCentering && (
         <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white rounded-full p-5 shadow-lg border border-stone-200">
@@ -1672,10 +1672,10 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {/* Tooltip Portal */}
+      {/* Tooltip Portal }
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
       
-      {/* Edit Dialog */}
+      {/* Edit Dialog }
       <PlotEditDialog 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
