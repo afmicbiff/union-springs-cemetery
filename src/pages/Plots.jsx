@@ -1373,6 +1373,7 @@ export default function PlotsPage() {
           blinkingPlotRef.current = null;
           activeBlinkIdRef.current = null;
           setActiveBlinkPlotId(null);
+          setBlinkOn(false);
         }, []);
 
   const centerElement = useCallback((el) => {
