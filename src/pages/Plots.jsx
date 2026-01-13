@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus, Search } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -1315,6 +1315,116 @@ export default function PlotsPage() {
 
   const handleExpandSection = useCallback((sectionKey) => {
      setExpandedSections(prev => ({ ...prev, [sectionKey]: true }));
+   }, []);
+
+  // Quick Locate (in-memory) -------------------------------------------------
+  const blinkingElRef = useRef(null);
+  const blinkingClickHandlerRef = useRef(null);
+  const blinkingPlotRef = useRef(null);
+
+  const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
+
+  const quickIndex = useMemo(() => {
+    return (parsedData || []).map((p) => {
+      let sectionKey = String(p.Section || '').replace(/Section\s*/i, '').trim();
+      const raw = String(p.Section || '');
+      if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
+      const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
+      const text = normalize([
+        p.Grave,
+        p.Row,
+        p.Section,
+        p['First Name'],
+        p['Last Name'],
+        p['Family Name'],
+        p._id,
+      ].filter(Boolean).join(' '));
+      return { sectionKey, plotNum, text, p };
+    });
+  }, [parsedData, normalize]);
+
+  const clearBlink = useCallback(() => {
+    const el = blinkingElRef.current;
+    if (el) {
+      el.classList.remove('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+      if (blinkingClickHandlerRef.current) {
+        el.removeEventListener('click', blinkingClickHandlerRef.current);
+      }
+    }
+    blinkingElRef.current = null;
+    blinkingClickHandlerRef.current = null;
+    blinkingPlotRef.current = null;
+  }, []);
+
+  const centerElement = useCallback((el) => {
+    if (!el) return;
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      const hContainer = el.closest('[class*="overflow-x-auto"]');
+      if (hContainer) {
+        const elRect = el.getBoundingClientRect();
+        const cRect = hContainer.getBoundingClientRect();
+        const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
+        hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+      }
+    } catch {}
+  }, []);
+
+  const findPlotElement = useCallback((sectionKey, plotNum) => {
+    if (!sectionKey || !plotNum) return null;
+    let el = document.getElementById(`plot-${sectionKey}-${plotNum}`);
+    if (!el) {
+      el = document.querySelector(`[data-section="${sectionKey}"][data-plot-num="${plotNum}"]`);
+    }
+    if (!el) {
+      el = document.querySelector(`[id^="plot-${sectionKey}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
+    }
+    return el;
+  }, []);
+
+  const startBlink = useCallback((el, plotObj) => {
+    clearBlink();
+    if (!el) return;
+    blinkingElRef.current = el;
+    blinkingPlotRef.current = plotObj;
+    el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+
+    const onClick = () => {
+      clearBlink();
+      if (isAdmin && plotObj) {
+        handleEditClick(plotObj);
+      }
+    };
+    blinkingClickHandlerRef.current = onClick;
+    el.addEventListener('click', onClick, { once: true });
+  }, [clearBlink, handleEditClick, isAdmin]);
+
+  const doQuickSearch = useCallback((q) => {
+    const nq = normalize(q);
+    if (!nq) return;
+    let match = quickIndex.find((it) => it.text.includes(nq));
+    if (!match) {
+      const tokens = nq.split(' ').filter(Boolean);
+      match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
+    }
+    if (match && match.sectionKey && match.plotNum) {
+      const el = findPlotElement(match.sectionKey, match.plotNum);
+      if (el) {
+        centerElement(el);
+        startBlink(el, match.p);
+      }
+    }
+  }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
+
+  const debouncedSearchRef = useRef(null);
+  useEffect(() => {
+    debouncedSearchRef.current = debounce((val) => doQuickSearch(val), 200);
+    return () => { if (debouncedSearchRef.current?.cancel) debouncedSearchRef.current.cancel(); };
+  }, [doQuickSearch]);
+
+  const onQuickLocateChange = useCallback((e) => {
+    const v = e.target.value || '';
+    if (debouncedSearchRef.current) debouncedSearchRef.current(v);
   }, []);
 
   return (
@@ -1383,6 +1493,16 @@ export default function PlotsPage() {
             <p>{errorMessage}</p>
         </div>
       )}
+
+      {/* Quick Locate */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative max-w-md">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input placeholder="Find plot, name, or ID..." onChange={onQuickLocateChange} className="pl-8" />
+          </div>
+        </div>
+      </div>
 
       {/* Filter Bar */}
       <PlotFilters 
