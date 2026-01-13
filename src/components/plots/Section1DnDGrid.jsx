@@ -159,7 +159,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                           e.stopPropagation();
                           if (onEdit && item && item._entity === 'Plot') onEdit(item);
                         }}
-                        title={`Row: ${item.Row}, Grave: ${item.Grave}`}
+                        id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
                       >
                         <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                         <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
@@ -177,7 +177,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                     e.stopPropagation();
                     if (onEdit && item && item._entity === 'Plot') onEdit(item);
                   }}
-                  title={`Row: ${item.Row}, Grave: ${item.Grave}`}
+                  id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
                 >
                   <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                   <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
