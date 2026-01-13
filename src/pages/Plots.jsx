@@ -11,6 +11,7 @@ import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import SmartImage from "@/components/perf/SmartImage";
+import ZoomPan from "@/components/common/ZoomPan";
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
 import {
@@ -1533,31 +1534,35 @@ export default function PlotsPage() {
             {/* Map Canvas */}
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
-                    {/* Sections 1-5 Sorted Descending */}
-                    {Object.keys(sections).sort((a, b) => {
-                        const numA = parseInt(a);
-                        const numB = parseInt(b);
-                        if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
-                        return b.localeCompare(a);
-                    }).map((sectionKey, index) => {
-                        const palette = getSectionPalette(sectionKey);
-                        
-                        return (
-                            <SectionRenderer
-                                key={sectionKey}
-                                sectionKey={sectionKey}
-                                plots={sections[sectionKey]}
-                                palette={palette}
-                                isCollapsed={collapsedSections[sectionKey]}
-                                onToggle={toggleSection}
-                                isExpanded={expandedSections[sectionKey]}
-                                onExpand={() => handleExpandSection(sectionKey)}
-                                isAdmin={isAdmin}
-                                onEdit={handleEditClick}
-                                onHover={handleHover}
-                            />
-                        );
-                    })}
+                    {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
+                    <ZoomPan className="w-full h-[70vh] md:h-[78vh] bg-white rounded-lg border border-gray-200">
+                      <div className="p-4 inline-block min-w-max space-y-10">
+                        {Object.keys(sections).sort((a, b) => {
+                            const numA = parseInt(a);
+                            const numB = parseInt(b);
+                            if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
+                            return b.localeCompare(a);
+                        }).map((sectionKey, index) => {
+                            const palette = getSectionPalette(sectionKey);
+
+                            return (
+                                <SectionRenderer
+                                    key={sectionKey}
+                                    sectionKey={sectionKey}
+                                    plots={sections[sectionKey]}
+                                    palette={palette}
+                                    isCollapsed={collapsedSections[sectionKey]}
+                                    onToggle={toggleSection}
+                                    isExpanded={expandedSections[sectionKey]}
+                                    onExpand={() => handleExpandSection(sectionKey)}
+                                    isAdmin={isAdmin}
+                                    onEdit={handleEditClick}
+                                    onHover={handleHover}
+                                />
+                            );
+                        })}
+                      </div>
+                    </ZoomPan>
 
                     {Object.keys(sections).length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">

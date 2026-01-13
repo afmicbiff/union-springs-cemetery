@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Fuse from "fuse.js";
 import debounce from "lodash/debounce";
+import ZoomPan from "@/components/common/ZoomPan";
 
 const STATUS_COLORS = {
         Available: "bg-green-500",
@@ -217,12 +218,13 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
 
           </div>
 
-          {/* Sections */}
-          <div className="space-y-8">
-            {sectionKeys.length === 0 ? (
-              <div className="text-sm text-gray-500">No rows for this batch.</div>
-            ) : (
-              sectionKeys.map((section) => {
+          {/* Sections with Zoom/Pan */}
+          <ZoomPan className="w-full h-[70vh] md:h-[78vh] rounded-lg border border-gray-200">
+            <div className="p-2 inline-block min-w-max space-y-8">
+              {sectionKeys.length === 0 ? (
+                <div className="text-sm text-gray-500">No rows for this batch.</div>
+              ) : (
+                sectionKeys.map((section) => {
                 if (section === 'A') {
                   const aRows = grouped[section] || [];
                   const numFromPlot = (row) => {
