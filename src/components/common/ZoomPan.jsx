@@ -148,13 +148,14 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
       {/* Controls */}
       <div
-        className="absolute right-3 top-3 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
+        className="fixed right-3 top-28 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
       >
         <button aria-label="Zoom in" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1.15)}>+</button>
         <button aria-label="Zoom out" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1/1.15)}>-</button>
+        <div className="px-2 pt-1 text-[10px] text-gray-500 text-center select-none">Left Click to Pan</div>
         <button aria-label="Reset view" className="px-2 py-1 text-xs hover:bg-gray-100 rounded" onClick={reset}>Reset</button>
       </div>
     </div>
