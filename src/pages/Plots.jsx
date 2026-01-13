@@ -1400,7 +1400,7 @@ export default function PlotsPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
           
        
-      {/* Header }
+      {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3"></div>
@@ -1463,7 +1463,7 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {/* Quick Locate }
+      {/* Quick Locate */}
       <div className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="max-w-7xl mx-auto">
           <div className="relative max-w-md">
@@ -1486,10 +1486,10 @@ export default function PlotsPage() {
       {/* Main Area }
       {activeTab === 'map' ? (
                       <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
-                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only }
+                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only */}
                         <noscript data-note="perf: third-party disabled on map page" />
 
-            {/* Legend }
+            {/* Legend */}
             <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
                 <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 sm:min-w-max">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
@@ -1503,10 +1503,10 @@ export default function PlotsPage() {
                 </div>
             </div>
 
-            {/* Map Canvas }
+            {/* Map Canvas */}
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
-                    {/* Sections 1-5 Sorted Descending }
+                    {/* Sections 1-5 Sorted Descending */}
                     {Object.keys(sections).sort((a, b) => {
                         const numA = parseInt(a);
                         const numB = parseInt(b);
@@ -1555,7 +1555,7 @@ export default function PlotsPage() {
             </main>
           </React.Suspense>
           ) : (
-          /* Data Table View 
+          /* Data Table View */
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
               <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2">
@@ -1663,7 +1663,7 @@ export default function PlotsPage() {
           </main>
       )}
 
-      {/* Centering Overlay }
+      {/* Centering Overlay */}
       {isCentering && (
         <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-white rounded-full p-5 shadow-lg border border-stone-200">
@@ -1672,10 +1672,10 @@ export default function PlotsPage() {
         </div>
       )}
 
-      {/* Tooltip Portal }
+      {/* Tooltip Portal */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
       
-      {/* Edit Dialog }
+      {/* Edit Dialog */}
       <PlotEditDialog 
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
