@@ -258,12 +258,13 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
       onHover(null, null);
       }}
       className={`
-      relative transition-all duration-200 ease-in-out cursor-pointer
-      border rounded-[1px] 
-      flex flex-row items-center justify-between px-1.5
-      w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
-      ${activeClass}
-      `}
+                  relative transition-all duration-200 ease-in-out cursor-pointer
+                  border rounded-[1px] 
+                  flex flex-row items-center justify-between px-1.5
+                  w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
+                  ${activeClass}
+                  plot-element
+                  `}
       title={`Row: ${data.Row}, Grave: ${data.Grave}`}
   >
       <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
@@ -1322,6 +1323,8 @@ export default function PlotsPage() {
           const blinkingClickHandlerRef = useRef(null);
           const blinkingPlotRef = useRef(null);
           const blinkRafRef = useRef(0);
+          const [activeBlinkPlotId, setActiveBlinkPlotId] = useState(null);
+          const activeBlinkIdRef = useRef(null);
 
   const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
 
@@ -1362,6 +1365,8 @@ export default function PlotsPage() {
           blinkingElRef.current = null;
           blinkingClickHandlerRef.current = null;
           blinkingPlotRef.current = null;
+          activeBlinkIdRef.current = null;
+          setActiveBlinkPlotId(null);
         }, []);
 
   const centerElement = useCallback((el) => {
@@ -1395,25 +1400,25 @@ export default function PlotsPage() {
           if (!el) return;
           blinkingElRef.current = el;
           blinkingPlotRef.current = plotObj;
+          activeBlinkIdRef.current = el.id;
+          setActiveBlinkPlotId(el.id);
           el.setAttribute('data-blink-active', '1');
           el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
 
-          // Start RAF-based toggle for explicit green highlight (prevents theme overrides)
+          // Start RAF-based toggle that survives rerenders by referencing activeBlinkIdRef
           let lastToggle = 0;
           let show = true;
           const tick = (ts) => {
-            const target = blinkingElRef.current;
-            if (!target || !target.hasAttribute('data-blink-active')) return; // stopped
+            const id = activeBlinkIdRef.current;
+            if (!id) { blinkRafRef.current = 0; return; }
+            const target = document.getElementById(id);
+            if (!target) { blinkRafRef.current = requestAnimationFrame(tick); return; }
             if (ts - lastToggle > 650) {
               show = !show;
-              if (show) {
-                target.classList.add('plot-blink-green');
-              } else {
-                target.classList.remove('plot-blink-green');
-              }
-              // Ensure ring pulse class persists even if React rerenders
+              if (show) target.classList.add('plot-blink-green');
+              else target.classList.remove('plot-blink-green');
               target.classList.add('blink-strong-green');
-              console.debug('[plots] blink:toggle', target.id, show);
+              console.debug('[plots] blink:toggle', id, show);
               lastToggle = ts;
             }
             blinkRafRef.current = requestAnimationFrame(tick);
@@ -1434,21 +1439,24 @@ export default function PlotsPage() {
         }, [clearBlink, handleEditClick, isAdmin]);
 
   const doQuickSearch = useCallback((q) => {
-    const nq = normalize(q);
-    if (!nq) return;
-    let match = quickIndex.find((it) => it.text.includes(nq));
-    if (!match) {
-      const tokens = nq.split(' ').filter(Boolean);
-      match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
-    }
-    if (match && match.sectionKey && match.plotNum) {
-      const el = findPlotElement(match.sectionKey, match.plotNum);
-      if (el) {
-        centerElement(el);
-        startBlink(el, match.p);
-      }
-    }
-  }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
+          const nq = normalize(q);
+          if (!nq) return;
+          let match = quickIndex.find((it) => it.text.includes(nq));
+          if (!match) {
+            const tokens = nq.split(' ').filter(Boolean);
+            match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
+          }
+          if (match && match.sectionKey && match.plotNum) {
+            const el = findPlotElement(match.sectionKey, match.plotNum);
+            if (el) {
+              centerElement(el);
+              // persist active id even if element is re-rendered
+              activeBlinkIdRef.current = el.id;
+              setActiveBlinkPlotId(el.id);
+              startBlink(el, match.p);
+            }
+          }
+        }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
@@ -1457,9 +1465,29 @@ export default function PlotsPage() {
   }, [doQuickSearch]);
 
   const onQuickLocateChange = useCallback((e) => {
-    const v = e.target.value || '';
-    if (debouncedSearchRef.current) debouncedSearchRef.current(v);
-  }, []);
+          const v = e.target.value || '';
+          if (debouncedSearchRef.current) debouncedSearchRef.current(v);
+        }, []);
+
+        // Keep blinking across rerenders; re-apply classes and listener if element is recreated
+        useEffect(() => {
+          if (!activeBlinkPlotId) return;
+          const id = activeBlinkPlotId;
+          const el = document.getElementById(id);
+          if (el) {
+            el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+            const onClick = () => {
+              clearBlink();
+              if (isAdmin && blinkingPlotRef.current) {
+                handleEditClick(blinkingPlotRef.current);
+              }
+            };
+            el.addEventListener('click', onClick, { once: true });
+            return () => {
+              try { el.removeEventListener('click', onClick); } catch {}
+            };
+          }
+        }, [activeBlinkPlotId, clearBlink, isAdmin, handleEditClick]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
