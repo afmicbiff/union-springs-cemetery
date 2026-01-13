@@ -1324,7 +1324,9 @@ export default function PlotsPage() {
           const blinkingPlotRef = useRef(null);
           const blinkRafRef = useRef(0);
           const [activeBlinkPlotId, setActiveBlinkPlotId] = useState(null);
+          const [blinkOn, setBlinkOn] = useState(false);
           const activeBlinkIdRef = useRef(null);
+          const blinkIntervalRef = useRef(0);
 
   const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
 
@@ -1353,6 +1355,10 @@ export default function PlotsPage() {
           if (blinkRafRef.current) {
             cancelAnimationFrame(blinkRafRef.current);
             blinkRafRef.current = 0;
+          }
+          if (blinkIntervalRef.current) {
+            clearInterval(blinkIntervalRef.current);
+            blinkIntervalRef.current = 0;
           }
           if (el) {
             el.removeAttribute('data-blink-active');
@@ -1405,28 +1411,25 @@ export default function PlotsPage() {
           el.setAttribute('data-blink-active', '1');
           el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
 
-          // Start RAF-based toggle that survives rerenders by referencing activeBlinkIdRef
-          let lastToggle = 0;
+          // Start timer-based toggle that persists across rerenders
+          if (blinkIntervalRef.current) { clearInterval(blinkIntervalRef.current); blinkIntervalRef.current = 0; }
           let show = true;
-          const tick = (ts) => {
+          const run = () => {
             const id = activeBlinkIdRef.current;
-            if (!id) { blinkRafRef.current = 0; return; }
+            if (!id) return;
             const target = document.getElementById(id);
-            if (!target) { blinkRafRef.current = requestAnimationFrame(tick); return; }
-            if (ts - lastToggle > 650) {
-              show = !show;
-              if (show) target.classList.add('plot-blink-green');
-              else target.classList.remove('plot-blink-green');
-              target.classList.add('blink-strong-green');
-              console.debug('[plots] blink:toggle', id, show);
-              lastToggle = ts;
-            }
-            blinkRafRef.current = requestAnimationFrame(tick);
+            if (!target) return;
+            show = !show;
+            if (show) target.classList.add('plot-blink-on');
+            else target.classList.remove('plot-blink-on');
+            setBlinkOn(show);
+            console.debug('[plots] blink:toggle', id, show);
           };
           // Immediate visual feedback
-          el.classList.add('plot-blink-green');
+          el.classList.add('plot-blink-green', 'plot-blink-on');
+          setBlinkOn(true);
           console.debug('[plots] blink:start', el.id);
-          blinkRafRef.current = requestAnimationFrame(tick);
+          blinkIntervalRef.current = window.setInterval(run, 350);
 
           const onClick = () => {
             clearBlink();
@@ -1476,6 +1479,7 @@ export default function PlotsPage() {
           const el = document.getElementById(id);
           if (el) {
             el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+            if (blinkOn) el.classList.add('plot-blink-on'); else el.classList.remove('plot-blink-on');
             const onClick = () => {
               clearBlink();
               if (isAdmin && blinkingPlotRef.current) {
@@ -1487,11 +1491,11 @@ export default function PlotsPage() {
               try { el.removeEventListener('click', onClick); } catch {}
             };
           }
-        }, [activeBlinkPlotId, clearBlink, isAdmin, handleEditClick]);
+        }, [activeBlinkPlotId, blinkOn, clearBlink, isAdmin, handleEditClick]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}50%{box-shadow:0 0 0 12px rgba(34,197,94,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{background-color:#10b981 !important; border-color:#047857 !important; color:#0b2e1f !important;}`}</style>
+          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(0,255,59,0)}50%{box-shadow:0 0 0 12px rgba(0,255,59,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{outline:3px solid #00ff3b !important; box-shadow:0 0 0 3px #00ff3b,0 0 14px 4px rgba(0,255,59,.6) !important; border-color:#00ff3b !important;} .plot-blink-on{background-color:rgba(0,255,59,.35) !important; border-color:#00ff3b !important;}`}</style>
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
