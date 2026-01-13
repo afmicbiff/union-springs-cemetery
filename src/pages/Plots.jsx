@@ -1379,7 +1379,7 @@ export default function PlotsPage() {
                       
                     }
                   }
-                }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
+                }, [quickIndex, normalize, findPlotElement, centerElement]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
