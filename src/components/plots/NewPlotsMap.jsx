@@ -219,7 +219,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
           </div>
 
           {/* Sections with Zoom/Pan */}
-          <ZoomPan className="w-full h-[70vh] md:h-[78vh] rounded-lg border border-gray-200">
+          <ZoomPan className="w-full h-[70vh] md:h-[78vh] rounded-lg border border-gray-200" minScale={0.35} maxScale={2.5} initialScale={0.9}>
             <div className="p-2 inline-block min-w-max space-y-8">
               {sectionKeys.length === 0 ? (
                 <div className="text-sm text-gray-500">No rows for this batch.</div>
