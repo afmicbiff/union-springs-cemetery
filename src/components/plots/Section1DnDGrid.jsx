@@ -152,15 +152,17 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                     >
                       {/* Use the existing GravePlot from the page via window.__B44_GravePlot if exposed, else fallback simple */}
                       <div
-                        className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90`}
-                        onMouseEnter={(e) => onHover && onHover(e, item)}
-                        onMouseLeave={() => onHover && onHover(null, null)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (onEdit && item && item._entity === 'Plot') onEdit(item);
-                        }}
-                        id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
-                      >
+                                                    className={`plot-element border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90`}
+                                                    data-section="1"
+                                                    data-plot-num={parseNum(item.Grave)}
+                                                    onMouseEnter={(e) => onHover && onHover(e, item)}
+                                                    onMouseLeave={() => onHover && onHover(null, null)}
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      if (onEdit && item && item._entity === 'Plot') onEdit(item);
+                                                    }}
+                                                    id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
+                                                  >
                         <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                         <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
                         <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
@@ -170,15 +172,17 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                 </Draggable>
               ) : (
                 <div
-                  className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90`}
-                  onMouseEnter={(e) => onHover && onHover(e, item)}
-                  onMouseLeave={() => onHover && onHover(null, null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onEdit && item && item._entity === 'Plot') onEdit(item);
-                  }}
-                  id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
-                >
+                                        className={`plot-element border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90`}
+                                        data-section="1"
+                                        data-plot-num={parseNum(item.Grave)}
+                                        onMouseEnter={(e) => onHover && onHover(e, item)}
+                                        onMouseLeave={() => onHover && onHover(null, null)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (onEdit && item && item._entity === 'Plot') onEdit(item);
+                                        }}
+                                        id={`plot-1-${parseNum(item.Grave)}`} title={`Row: ${item.Row}, Grave: ${item.Grave}`}
+                                      >
                   <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                   <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
                   <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
