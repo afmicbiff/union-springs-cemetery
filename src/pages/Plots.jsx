@@ -239,7 +239,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
   const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl blink-strong-green'; // keep for static state; runtime also enforces for 30s
+  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl'; // static highlight; blinking handled runtime until user clicks
   const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
 
   return (
@@ -1136,9 +1136,13 @@ export default function PlotsPage() {
                     const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
                     hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
                   }
-                  // Force highlight class for 30s
+                  // Start blinking until user clicks this plot
                   plotEl.classList.add('blink-strong-green');
-                  setTimeout(() => plotEl.classList.remove('blink-strong-green'), 30000);
+                  const stopBlink = () => {
+                    plotEl.classList.remove('blink-strong-green');
+                    plotEl.removeEventListener('click', stopBlink);
+                  };
+                  plotEl.addEventListener('click', stopBlink, { once: true });
                   done = true;
                   setTimeout(() => setIsCentering(false), 400);
                   return;
