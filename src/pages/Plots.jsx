@@ -1138,14 +1138,7 @@ export default function PlotsPage() {
                     const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
                     hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
                   }
-                  // Start blinking until user clicks this plot
-                                          plotEl.classList.add('blink-strong-green');
-                                          const stopBlink = () => {
-                                            plotEl.classList.remove('blink-strong-green');
-                                            plotEl.removeEventListener('click', stopBlink);
-                                          };
-                                          plotEl.addEventListener('click', stopBlink, { once: true });
-                                          done = true;
+                  done = true;
                                           setTimeout(() => setIsCentering(false), 400);
                                           return;
               }
@@ -1320,14 +1313,7 @@ export default function PlotsPage() {
    }, []);
 
   // Quick Locate (in-memory) -------------------------------------------------
-  const blinkingElRef = useRef(null);
-          const blinkingClickHandlerRef = useRef(null);
-          const blinkingPlotRef = useRef(null);
-          const blinkRafRef = useRef(0);
-          const [activeBlinkPlotId, setActiveBlinkPlotId] = useState(null);
-          const [blinkOn, setBlinkOn] = useState(false);
-          const activeBlinkIdRef = useRef(null);
-          const blinkIntervalRef = useRef(0);
+  
 
   const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
 
@@ -1350,32 +1336,7 @@ export default function PlotsPage() {
     });
   }, [parsedData, normalize]);
 
-  const clearBlink = useCallback(() => {
-                  const el = blinkingElRef.current;
-                  console.debug('[plots] blink:stop', el?.id);
-          if (blinkRafRef.current) {
-            cancelAnimationFrame(blinkRafRef.current);
-            blinkRafRef.current = 0;
-          }
-          if (blinkIntervalRef.current) {
-            clearInterval(blinkIntervalRef.current);
-            blinkIntervalRef.current = 0;
-          }
-          if (el) {
-            el.removeAttribute('data-blink-active');
-            el.classList.remove('plot-blink-green', 'plot-blink-on');
-            el.classList.remove('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
-            if (blinkingClickHandlerRef.current) {
-              el.removeEventListener('click', blinkingClickHandlerRef.current);
-            }
-          }
-          blinkingElRef.current = null;
-          blinkingClickHandlerRef.current = null;
-          blinkingPlotRef.current = null;
-          activeBlinkIdRef.current = null;
-          setActiveBlinkPlotId(null);
-          setBlinkOn(false);
-        }, []);
+  
 
   const centerElement = useCallback((el) => {
     if (!el) return;
@@ -1474,32 +1435,9 @@ export default function PlotsPage() {
           if (debouncedSearchRef.current) debouncedSearchRef.current(v);
         }, []);
 
-        // Keep blinking across rerenders; re-apply classes and listener if element is recreated
-        useEffect(() => {
-          if (!activeBlinkPlotId) return;
-          const id = activeBlinkPlotId;
-          const el = document.getElementById(id);
-          if (el) {
-                            
-                            el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
-                            if (blinkOn) el.classList.add('plot-blink-on'); else el.classList.remove('plot-blink-on');
-            const onClick = () => {
-              clearBlink();
-              if (isAdmin && blinkingPlotRef.current) {
-                handleEditClick(blinkingPlotRef.current);
-              }
-            };
-            el.addEventListener('click', onClick, { once: true });
-            return () => {
-              try { el.removeEventListener('click', onClick); } catch {}
-            };
-          }
-        }, [activeBlinkPlotId, blinkOn, clearBlink, isAdmin, handleEditClick]);
 
-        // Clear blink on unmount (e.g., navigating away to deceased search)
-        useEffect(() => {
-                        return () => { clearBlink(); };
-                      }, [clearBlink]);
+
+        
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
