@@ -607,7 +607,8 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                 );
               })
             )}
-          </div>
+            </div>
+          </ZoomPan>
         </>
       )}
     </div>
