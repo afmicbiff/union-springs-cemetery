@@ -1103,7 +1103,8 @@ export default function PlotsPage() {
       if (isLoading) return;
 
       setActiveTab('map');
-      setIsCentering(true);
+                  console.debug('[plots] centering:start', { section: sectionNorm, plot: plotNum });
+                  setIsCentering(true);
 
       const rawNorm = rawSection.replace(/Section\s*/i, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
@@ -1137,16 +1138,27 @@ export default function PlotsPage() {
                     const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
                     hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
                   }
-                  // Start blinking until user clicks this plot
-                  plotEl.classList.add('blink-strong-green');
-                  const stopBlink = () => {
-                    plotEl.classList.remove('blink-strong-green');
-                    plotEl.removeEventListener('click', stopBlink);
-                  };
-                  plotEl.addEventListener('click', stopBlink, { once: true });
-                  done = true;
-                  setTimeout(() => setIsCentering(false), 400);
-                  return;
+                  console.debug('[plots] centering:end', plotEl.id);
+                                          done = true;
+                                          // Find the plot object for edit-on-click
+                                          const ds = plotEl.dataset || {};
+                                          const sec = ds.section;
+                                          const num = parseInt(ds.plotNum || ds.plotnum || '', 10);
+                                          let matchPlot = null;
+                                          if (Number.isFinite(num)) {
+                                            matchPlot = (parsedData || []).find((p) => {
+                                              const pn = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+                                              let s = String(p.Section || '').replace(/Section\s*/i, '').trim();
+                                              if (/^[A-D]$/i.test(s)) s = '1';
+                                              return pn === num && s === String(sec || '').trim();
+                                            }) || null;
+                                          }
+                                          // Delay slightly so scroll completes, then start blink
+                                          setTimeout(() => {
+                                            startBlink(plotEl, matchPlot);
+                                            setIsCentering(false);
+                                          }, 350);
+                                          return;
               }
           }
 
@@ -1349,9 +1361,9 @@ export default function PlotsPage() {
     });
   }, [parsedData, normalize]);
 
-  const clearBlink = useCallback(() => {
-          const el = blinkingElRef.current;
-          console.debug('[plots] blink:stop', el?.id);
+  const clearBlink = useCallback((reason) => {
+                  const el = blinkingElRef.current;
+                  console.debug('[plots] blink:stop', el?.id, 'reason:', reason);
           if (blinkRafRef.current) {
             cancelAnimationFrame(blinkRafRef.current);
             blinkRafRef.current = 0;
@@ -1403,7 +1415,7 @@ export default function PlotsPage() {
   }, []);
 
   const startBlink = useCallback((el, plotObj) => {
-          clearBlink();
+                  clearBlink('new_match');
           if (!el) return;
           blinkingElRef.current = el;
           blinkingPlotRef.current = plotObj;
@@ -1433,7 +1445,7 @@ export default function PlotsPage() {
           blinkIntervalRef.current = window.setInterval(run, 350);
 
           const onClick = () => {
-            clearBlink();
+                              clearBlink('plot_click');
             if (isAdmin && plotObj) {
               handleEditClick(plotObj);
             }
@@ -1479,8 +1491,9 @@ export default function PlotsPage() {
           const id = activeBlinkPlotId;
           const el = document.getElementById(id);
           if (el) {
-            el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
-            if (blinkOn) el.classList.add('plot-blink-on'); else el.classList.remove('plot-blink-on');
+                            el.setAttribute('data-blink-active','1');
+                            el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+                            if (blinkOn) el.classList.add('plot-blink-on'); else el.classList.remove('plot-blink-on');
             const onClick = () => {
               clearBlink();
               if (isAdmin && blinkingPlotRef.current) {
@@ -1496,12 +1509,12 @@ export default function PlotsPage() {
 
         // Clear blink on unmount (e.g., navigating away to deceased search)
         useEffect(() => {
-          return () => { clearBlink(); };
-        }, [clearBlink]);
+                        return () => { clearBlink('unmount'); };
+                      }, [clearBlink]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(0,255,59,0)}50%{box-shadow:0 0 0 12px rgba(0,255,59,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{outline:3px solid #00ff3b !important; box-shadow:0 0 0 3px #00ff3b,0 0 14px 4px rgba(0,255,59,.6) !important; border-color:#00ff3b !important;} .plot-blink-on{background-color:rgba(0,255,59,.35) !important; border-color:#00ff3b !important;}`}</style>
+          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(0,255,59,0)}50%{box-shadow:0 0 0 12px rgba(0,255,59,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{outline:3px solid #00ff3b !important; box-shadow:0 0 0 3px #00ff3b,0 0 14px 4px rgba(0,255,59,.6) !important; border-color:#00ff3b !important;} .plot-blink-on{background-color:rgba(0,255,59,.35) !important; border-color:#00ff3b !important;} .plot-element[data-blink-active="1"]:hover{ transform:none !important; }`}</style>
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
@@ -1572,10 +1585,10 @@ export default function PlotsPage() {
           <div className="relative max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input placeholder="Find plot, name, or ID..."
-                   onFocus={() => { clearBlink(); }}
-                   onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink(); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
-                   onChange={(e) => { clearBlink(); onQuickLocateChange(e); }}
-                   className="pl-8" />
+                                     onFocus={() => { clearBlink('new_search'); }}
+                                     onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink('new_search'); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
+                                     onChange={(e) => { clearBlink('new_search'); onQuickLocateChange(e); }}
+                                     className="pl-8" />
           </div>
         </div>
       </div>
