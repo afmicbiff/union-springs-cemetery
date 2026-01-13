@@ -1319,8 +1319,9 @@ export default function PlotsPage() {
 
   // Quick Locate (in-memory) -------------------------------------------------
   const blinkingElRef = useRef(null);
-  const blinkingClickHandlerRef = useRef(null);
-  const blinkingPlotRef = useRef(null);
+          const blinkingClickHandlerRef = useRef(null);
+          const blinkingPlotRef = useRef(null);
+          const blinkRafRef = useRef(0);
 
   const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
 
@@ -1344,17 +1345,24 @@ export default function PlotsPage() {
   }, [parsedData, normalize]);
 
   const clearBlink = useCallback(() => {
-    const el = blinkingElRef.current;
-    if (el) {
-      el.classList.remove('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
-      if (blinkingClickHandlerRef.current) {
-        el.removeEventListener('click', blinkingClickHandlerRef.current);
-      }
-    }
-    blinkingElRef.current = null;
-    blinkingClickHandlerRef.current = null;
-    blinkingPlotRef.current = null;
-  }, []);
+          const el = blinkingElRef.current;
+          console.debug('[plots] blink:stop', el?.id);
+          if (blinkRafRef.current) {
+            cancelAnimationFrame(blinkRafRef.current);
+            blinkRafRef.current = 0;
+          }
+          if (el) {
+            el.removeAttribute('data-blink-active');
+            el.classList.remove('plot-blink-green');
+            el.classList.remove('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+            if (blinkingClickHandlerRef.current) {
+              el.removeEventListener('click', blinkingClickHandlerRef.current);
+            }
+          }
+          blinkingElRef.current = null;
+          blinkingClickHandlerRef.current = null;
+          blinkingPlotRef.current = null;
+        }, []);
 
   const centerElement = useCallback((el) => {
     if (!el) return;
@@ -1383,21 +1391,47 @@ export default function PlotsPage() {
   }, []);
 
   const startBlink = useCallback((el, plotObj) => {
-    clearBlink();
-    if (!el) return;
-    blinkingElRef.current = el;
-    blinkingPlotRef.current = plotObj;
-    el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
+          clearBlink();
+          if (!el) return;
+          blinkingElRef.current = el;
+          blinkingPlotRef.current = plotObj;
+          el.setAttribute('data-blink-active', '1');
+          el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
 
-    const onClick = () => {
-      clearBlink();
-      if (isAdmin && plotObj) {
-        handleEditClick(plotObj);
-      }
-    };
-    blinkingClickHandlerRef.current = onClick;
-    el.addEventListener('click', onClick, { once: true });
-  }, [clearBlink, handleEditClick, isAdmin]);
+          // Start RAF-based toggle for explicit green highlight (prevents theme overrides)
+          let lastToggle = 0;
+          let show = true;
+          const tick = (ts) => {
+            const target = blinkingElRef.current;
+            if (!target || !target.hasAttribute('data-blink-active')) return; // stopped
+            if (ts - lastToggle > 650) {
+              show = !show;
+              if (show) {
+                target.classList.add('plot-blink-green');
+              } else {
+                target.classList.remove('plot-blink-green');
+              }
+              // Ensure ring pulse class persists even if React rerenders
+              target.classList.add('blink-strong-green');
+              console.debug('[plots] blink:toggle', target.id, show);
+              lastToggle = ts;
+            }
+            blinkRafRef.current = requestAnimationFrame(tick);
+          };
+          // Immediate visual feedback
+          el.classList.add('plot-blink-green');
+          console.debug('[plots] blink:start', el.id);
+          blinkRafRef.current = requestAnimationFrame(tick);
+
+          const onClick = () => {
+            clearBlink();
+            if (isAdmin && plotObj) {
+              handleEditClick(plotObj);
+            }
+          };
+          blinkingClickHandlerRef.current = onClick;
+          el.addEventListener('click', onClick, { once: true });
+        }, [clearBlink, handleEditClick, isAdmin]);
 
   const doQuickSearch = useCallback((q) => {
     const nq = normalize(q);
@@ -1429,7 +1463,7 @@ export default function PlotsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0);background-color:rgba(134,239,172,1)}50%{box-shadow:0 0 0 12px rgba(34,197,94,.75);background-color:rgba(34,197,94,1)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;}`}</style>
+          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}50%{box-shadow:0 0 0 12px rgba(34,197,94,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{background-color:#10b981 !important; border-color:#047857 !important; color:#0b2e1f !important;}`}</style>
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
