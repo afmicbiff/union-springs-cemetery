@@ -135,12 +135,39 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
+  // Tooltip positioning helpers: keep within viewport and fallback to right-center when overflowing
+  const tooltipRef = React.useRef(null);
+  const [coords, setCoords] = React.useState({ left: 0, top: 0 });
+  React.useEffect(() => {
+    if (!visible || !data) return;
+    const margin = 12;
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 0;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 0;
+    const width = 288; // Tailwind w-72
+    const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 180;
+    let left = position.x + 15;
+    let top = position.y + 15;
+
+    // If overflowing to the right, dock to right-center
+    if (left + width + margin > vw) {
+      left = Math.max(vw - width - margin, margin);
+      top = Math.max(Math.floor((vh - height) / 2), margin);
+    } else {
+      // Clamp to viewport
+      if (top + height + margin > vh) top = Math.max(vh - height - margin, margin);
+      if (top < margin) top = margin;
+      if (left < margin) left = margin;
+    }
+    setCoords({ left, top });
+  }, [position, visible, data]);
+
   return (
     <div 
       className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transition-all duration-200 ease-out transform translate-y-2"
+      ref={tooltipRef}
       style={{ 
-        left: `${position.x + 15}px`, 
-        top: `${position.y + 15}px`,
+        left: `${coords.left}px`, 
+        top: `${coords.top}px`,
         opacity: visible ? 1 : 0,
       }}
     >
