@@ -1555,7 +1555,7 @@ export default function PlotsPage() {
             </main>
           </React.Suspense>
           ) : (
-          /* Data Table View */
+          {/* Data Table View */} */
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
               <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2">
