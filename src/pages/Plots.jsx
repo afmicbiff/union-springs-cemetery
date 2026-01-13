@@ -1364,46 +1364,6 @@ export default function PlotsPage() {
     return el;
   }, []);
 
-  const startBlink = undefined;
-                  
-          if (!el) return;
-          blinkingElRef.current = el;
-          .current = plotObj;
-          .current = el.id;
-          setActiveBlinkPlotId(el.id);
-          
-          el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
-
-          // Start timer-based toggle that persists across rerenders
-          if (.current) { clearInterval(.current); .current = 0; }
-          let show = true;
-          const run = () => {
-            const id = .current;
-            if (!id) return;
-            const target = document.getElementById(id);
-            if (!target) return;
-            show = !show;
-            if (show) target.classList.add('plot-blink-on');
-            else target.classList.remove('plot-blink-on');
-            setBlinkOn(show);
-            console.debug('[plots] blink:toggle', id, show);
-          };
-          // Immediate visual feedback
-          el.classList.add('plot-blink-green', 'plot-blink-on');
-          setBlinkOn(true);
-          console.debug('[plots] blink:start', el.id);
-          .current = window.setInterval(run, 350);
-
-          const onClick = () => {
-                              
-            if (isAdmin && plotObj) {
-              handleEditClick(plotObj);
-            }
-          };
-          .current = onClick;
-          */
-        */
-
   const doQuickSearch = useCallback((q) => {
                   const nq = normalize(q);
                   if (!nq) return;
@@ -1416,9 +1376,6 @@ export default function PlotsPage() {
                     const el = findPlotElement(match.sectionKey, match.plotNum);
                     if (el) {
                       centerElement(el);
-                      // persist active id even if element is re-rendered
-                      .current = el.id;
-                      setActiveBlinkPlotId(el.id);
                       
                     }
                   }
