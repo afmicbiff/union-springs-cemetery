@@ -32,7 +32,7 @@ export default function HeroSection() {
                  : '-rotate-6 -translate-x-8 z-10 hover:scale-105 hover:z-50'
              }`}
            >
-             <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
+             <div className="max-w-[280px] md:max-w-[340px] rounded-sm">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
                   alt="Union Springs Cemetery" 
@@ -50,7 +50,7 @@ export default function HeroSection() {
                  : 'rotate-6 translate-x-8 translate-y-4 z-20 hover:scale-105 hover:z-50'
              }`}
            >
-             <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
+             <div className="max-w-[280px] md:max-w-[340px] rounded-sm">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png" 
                   alt="Union Springs Cemetery Gate" 
@@ -68,7 +68,7 @@ export default function HeroSection() {
                  : '-rotate-12 -translate-y-24 -translate-x-6 z-0 hover:scale-105 hover:z-50'
              }`}
            >
-             <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
+             <div className="max-w-[280px] md:max-w-[340px] rounded-sm">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png" 
                   alt="Union Springs History" 
@@ -86,7 +86,7 @@ export default function HeroSection() {
                  : 'rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:scale-105 hover:z-50'
              }`}
            >
-             <div className="bg-[#f4f1ea] p-3 pb-12 md:pb-16 shadow-[0_40px_70px_rgba(0,0,0,0.95),inset_0_0_60px_rgba(60,40,20,0.05)] border border-[#e6e2d3] rounded-sm max-w-[280px] md:max-w-[340px]">
+             <div className="max-w-[280px] md:max-w-[340px] rounded-sm">
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
                   alt="Union Springs Church" 
