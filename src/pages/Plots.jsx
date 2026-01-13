@@ -135,7 +135,7 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
-  // Tooltip positioning helpers: keep within viewport and fallback to right-center when overflowing
+  // Tooltip positioning helpers: anchor to plot, clamp within viewport (no center docking)
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   React.useEffect(() => {
@@ -145,30 +145,28 @@ const Tooltip = React.memo(({ data, position, visible }) => {
     const vh = typeof window !== 'undefined' ? window.innerHeight : 0;
     const width = 288; // Tailwind w-72
     const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 180;
-    let left = position.x + 15;
-    let top = position.y + 15;
+    let left = position.x + 12;
+    let top = position.y + 12;
 
-    // If overflowing to the right, dock to right-center
-    if (left + width + margin > vw) {
-      left = Math.max(vw - width - margin, margin);
-      top = Math.max(Math.floor((vh - height) / 2), margin);
-    } else {
-      // Clamp to viewport
-      if (top + height + margin > vh) top = Math.max(vh - height - margin, margin);
-      if (top < margin) top = margin;
-      if (left < margin) left = margin;
-    }
+    // Clamp to viewport edges to avoid overflow
+    if (left + width + margin > vw) left = vw - width - margin;
+    if (left < margin) left = margin;
+    if (top + height + margin > vh) top = vh - height - margin;
+    if (top < margin) top = margin;
+
     setCoords({ left, top });
   }, [position, visible, data]);
 
   return (
     <div 
-      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transition-all duration-200 ease-out transform translate-y-2"
+      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transform translate-y-1"
       ref={tooltipRef}
       style={{ 
-        left: `${coords.left}px`, 
-        top: `${coords.top}px`,
+        left: `${(coords.left || ((position?.x ?? 0) + 12))}px`, 
+        top: `${(coords.top || ((position?.y ?? 0) + 12))}px`,
         opacity: visible ? 1 : 0,
+        transition: 'left 120ms ease-out, top 120ms ease-out, opacity 120ms ease-out, transform 120ms ease-out',
+        willChange: 'left, top, opacity, transform',
       }}
     >
       <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
@@ -1288,7 +1286,7 @@ export default function PlotsPage() {
         return;
     }
     const rect = e.target.getBoundingClientRect();
-    setMousePos({ x: rect.right, y: rect.top });
+    setMousePos({ x: rect.right, y: rect.top + rect.height / 2 });
     // Data already prefetched; just show instantly
     const merged = data && plotIndex.get(data._id) ? plotIndex.get(data._id) : data;
     setHoverData(merged);
