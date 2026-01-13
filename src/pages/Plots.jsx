@@ -1368,17 +1368,17 @@ export default function PlotsPage() {
                   
           if (!el) return;
           blinkingElRef.current = el;
-          blinkingPlotRef.current = plotObj;
-          activeBlinkIdRef.current = el.id;
+          .current = plotObj;
+          .current = el.id;
           setActiveBlinkPlotId(el.id);
           
           el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
 
           // Start timer-based toggle that persists across rerenders
-          if (blinkIntervalRef.current) { clearInterval(blinkIntervalRef.current); blinkIntervalRef.current = 0; }
+          if (.current) { clearInterval(.current); .current = 0; }
           let show = true;
           const run = () => {
-            const id = activeBlinkIdRef.current;
+            const id = .current;
             if (!id) return;
             const target = document.getElementById(id);
             if (!target) return;
@@ -1392,7 +1392,7 @@ export default function PlotsPage() {
           el.classList.add('plot-blink-green', 'plot-blink-on');
           setBlinkOn(true);
           console.debug('[plots] blink:start', el.id);
-          blinkIntervalRef.current = window.setInterval(run, 350);
+          .current = window.setInterval(run, 350);
 
           const onClick = () => {
                               
@@ -1400,8 +1400,8 @@ export default function PlotsPage() {
               handleEditClick(plotObj);
             }
           };
-          blinkingClickHandlerRef.current = onClick;
-          el.addEventListener('click', onClick, { once: true });
+          .current = onClick;
+          */
         }, [clearBlink, handleEditClick, isAdmin]);
 
   const doQuickSearch = useCallback((q) => {
@@ -1417,7 +1417,7 @@ export default function PlotsPage() {
                     if (el) {
                       centerElement(el);
                       // persist active id even if element is re-rendered
-                      activeBlinkIdRef.current = el.id;
+                      .current = el.id;
                       setActiveBlinkPlotId(el.id);
                       
                     }
