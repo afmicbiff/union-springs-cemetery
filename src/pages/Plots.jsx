@@ -1138,26 +1138,15 @@ export default function PlotsPage() {
                     const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
                     hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
                   }
-                  console.debug('[plots] centering:end', plotEl.id);
+                  // Start blinking until user clicks this plot
+                                          plotEl.classList.add('blink-strong-green');
+                                          const stopBlink = () => {
+                                            plotEl.classList.remove('blink-strong-green');
+                                            plotEl.removeEventListener('click', stopBlink);
+                                          };
+                                          plotEl.addEventListener('click', stopBlink, { once: true });
                                           done = true;
-                                          // Find the plot object for edit-on-click
-                                          const ds = plotEl.dataset || {};
-                                          const sec = ds.section;
-                                          const num = parseInt(ds.plotNum || ds.plotnum || '', 10);
-                                          let matchPlot = null;
-                                          if (Number.isFinite(num)) {
-                                            matchPlot = (parsedData || []).find((p) => {
-                                              const pn = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                              let s = String(p.Section || '').replace(/Section\s*/i, '').trim();
-                                              if (/^[A-D]$/i.test(s)) s = '1';
-                                              return pn === num && s === String(sec || '').trim();
-                                            }) || null;
-                                          }
-                                          // Delay slightly so scroll completes, then start blink
-                                          setTimeout(() => {
-                                            startBlink(plotEl, matchPlot);
-                                            setIsCentering(false);
-                                          }, 350);
+                                          setTimeout(() => setIsCentering(false), 400);
                                           return;
               }
           }
@@ -1421,7 +1410,7 @@ export default function PlotsPage() {
           blinkingPlotRef.current = plotObj;
           activeBlinkIdRef.current = el.id;
           setActiveBlinkPlotId(el.id);
-          el.setAttribute('data-blink-active', '1');
+          
           el.classList.add('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
 
           // Start timer-based toggle that persists across rerenders
@@ -1465,13 +1454,11 @@ export default function PlotsPage() {
                   if (match && match.sectionKey && match.plotNum) {
                     const el = findPlotElement(match.sectionKey, match.plotNum);
                     if (el) {
-                      console.debug('[plots] centering:start', { section: match.sectionKey, plot: match.plotNum, via: 'quick' });
                       centerElement(el);
-                      // Start blink AFTER scrolling finishes
-                      window.setTimeout(() => {
-                        console.debug('[plots] centering:end', el.id);
-                        startBlink(el, match.p);
-                      }, 350);
+                      // persist active id even if element is re-rendered
+                      activeBlinkIdRef.current = el.id;
+                      setActiveBlinkPlotId(el.id);
+                      startBlink(el, match.p);
                     }
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
