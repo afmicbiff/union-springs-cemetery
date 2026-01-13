@@ -23,6 +23,8 @@ export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  React.useEffect(() => { window.scrollTo(0, 0); }, []);
+
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [familyName, setFamilyName] = useState(searchParams.get('family') || '');
   const [section, setSection] = useState(searchParams.get('section') || 'all');
