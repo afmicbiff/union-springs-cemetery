@@ -1476,14 +1476,14 @@ export default function PlotsPage() {
         </div>
       </div>
 
-      {/* Filter Bar }
+      {/* Filter Bar */}
       <PlotFilters 
           filters={filters} 
           onFilterChange={setFilters} 
           statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
       />
 
-      {/* Main Area }
+      {/* Main Area */}
       {activeTab === 'map' ? (
                       <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
                         {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only */}
@@ -1555,7 +1555,7 @@ export default function PlotsPage() {
             </main>
           </React.Suspense>
           ) : (
-          {/* Data Table View */} */
+          {/* Data Table View */}
           <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
               <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
                   <div className="flex items-center gap-2">
