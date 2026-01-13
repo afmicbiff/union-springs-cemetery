@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ZoomPan({ children, className = "", minScale = 0.4, maxScale = 2.5, initialScale = 1 }) {
+export default function ZoomPan({ children, className = "", minScale = 0.4, maxScale = 2.5, initialScale = 1, controlsTop }) {
   const containerRef = React.useRef(null);
   const contentRef = React.useRef(null);
 
@@ -148,7 +148,8 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
       {/* Controls */}
       <div
-        className="fixed right-3 top-28 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
+        className="fixed right-3 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
+        style={{ top: typeof controlsTop === 'number' ? `${controlsTop}px` : (controlsTop || '7rem') }}
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}

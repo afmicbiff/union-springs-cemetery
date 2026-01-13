@@ -305,11 +305,11 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 const LegendItem = React.memo(({ label, colorClass }) => {
     const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
     return (
-        <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap">
-            <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
-            <span className="text-xs font-semibold text-gray-600">{label}</span>
-        </div>
-    );
+            <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap" data-legend={label}>
+                <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
+                <span className="text-xs font-semibold text-gray-600">{label}</span>
+            </div>
+        );
 });
 
 const PlotTableRow = React.memo(({ 
@@ -735,6 +735,7 @@ export default function PlotsPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('map'); 
+  const [controlsTop, setControlsTop] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
 
@@ -759,6 +760,22 @@ export default function PlotsPage() {
   const location = useLocation();
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
+
+  React.useEffect(() => {
+    if (activeTab !== 'map') return;
+    const update = () => {
+      const el = document.querySelector('[data-legend="Unavailable"]');
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setControlsTop(rect.top + rect.height / 2);
+    };
+    const id = setTimeout(update, 0);
+    window.addEventListener('resize', update);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener('resize', update);
+    };
+  }, [activeTab]);
   
   // Filtering State
   const [filters, setFilters] = useState({
@@ -1559,7 +1576,7 @@ export default function PlotsPage() {
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
-                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9}>
+                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9} controlsTop={controlsTop}>
                       <div className="p-4 inline-block min-w-max space-y-10">
                         {singlePlotMode && selectedSectionKeyForPlot ? (
                           (() => {
