@@ -1365,7 +1365,7 @@ export default function PlotsPage() {
   }, []);
 
   const startBlink = undefined;
-                  clearBlink();
+                  
           if (!el) return;
           blinkingElRef.current = el;
           blinkingPlotRef.current = plotObj;
@@ -1395,7 +1395,7 @@ export default function PlotsPage() {
           blinkIntervalRef.current = window.setInterval(run, 350);
 
           const onClick = () => {
-                              clearBlink();
+                              
             if (isAdmin && plotObj) {
               handleEditClick(plotObj);
             }
@@ -1419,7 +1419,7 @@ export default function PlotsPage() {
                       // persist active id even if element is re-rendered
                       activeBlinkIdRef.current = el.id;
                       setActiveBlinkPlotId(el.id);
-                      startBlink(el, match.p);
+                      
                     }
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
