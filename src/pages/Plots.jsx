@@ -276,7 +276,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
       id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined} data-plot-num={plotNum != null ? plotNum : undefined} data-section={sectionForId}
       onClick={(e) => {
       e.stopPropagation();
-      if (onEdit && data && data._entity === 'Plot') onEdit(data);
+      if (onEdit && data && !data.isSpacer) onEdit(data);
       }}
       onMouseEnter={(e) => {
       setIsHovered(true);
