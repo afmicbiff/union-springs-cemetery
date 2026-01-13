@@ -1512,9 +1512,8 @@ export default function PlotsPage() {
           <div className="relative max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input placeholder="Find plot, name, or ID..."
-                                     onFocus={() => { clearBlink(); }}
-                                     onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink(); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
-                                     onChange={(e) => { clearBlink(); onQuickLocateChange(e); }}
+                                     onKeyDown={(e) => { if (e.key === 'Enter') { const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
+                                     onChange={onQuickLocateChange}
                                      className="pl-8" />
           </div>
         </div>
