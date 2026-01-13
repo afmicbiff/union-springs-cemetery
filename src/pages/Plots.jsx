@@ -1132,6 +1132,30 @@ export default function PlotsPage() {
     return grouped;
   }, [filteredData]);
 
+  // Single-plot mode from Deceased Search (?from=search&plot=...)
+  const selectedPlotNum = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const p = parseInt(params.get('plot') || '', 10);
+    return Number.isFinite(p) ? p : null;
+  }, [location.search]);
+
+  const singlePlotMode = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('from') === 'search' && selectedPlotNum != null;
+  }, [location.search, selectedPlotNum]);
+
+  const selectedSectionKeyForPlot = React.useMemo(() => {
+    if (!singlePlotMode || selectedPlotNum == null) return null;
+    for (const key of Object.keys(sections)) {
+      const items = sections[key] || [];
+      if (items.some(it => {
+        const n = parseInt(String(it.Grave).replace(/\D/g, '')) || 0;
+        return n === selectedPlotNum;
+      })) return key;
+    }
+    return null;
+  }, [singlePlotMode, selectedPlotNum, sections]);
+
   // Robustly scroll into view for a target section/plot (?section=...&plot=...)
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
@@ -1537,30 +1561,55 @@ export default function PlotsPage() {
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
                     <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9}>
                       <div className="p-4 inline-block min-w-max space-y-10">
-                        {Object.keys(sections).sort((a, b) => {
+                        {singlePlotMode && selectedSectionKeyForPlot ? (
+                          (() => {
+                            const sectionKey = selectedSectionKeyForPlot;
+                            const palette = getSectionPalette(sectionKey);
+                            const items = (sections[sectionKey] || []).filter(it => {
+                              const n = parseInt(String(it.Grave).replace(/\D/g, '')) || 0;
+                              return selectedPlotNum != null && n === selectedPlotNum;
+                            });
+                            return (
+                              <SectionRenderer
+                                key={sectionKey}
+                                sectionKey={sectionKey}
+                                plots={items}
+                                palette={palette}
+                                isCollapsed={false}
+                                onToggle={() => {}}
+                                isExpanded={true}
+                                onExpand={() => {}}
+                                isAdmin={isAdmin}
+                                onEdit={handleEditClick}
+                                onHover={handleHover}
+                              />
+                            );
+                          })()
+                        ) : (
+                          Object.keys(sections).sort((a, b) => {
                             const numA = parseInt(a);
                             const numB = parseInt(b);
                             if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
                             return b.localeCompare(a);
-                        }).map((sectionKey, index) => {
+                          }).map((sectionKey) => {
                             const palette = getSectionPalette(sectionKey);
-
                             return (
-                                <SectionRenderer
-                                    key={sectionKey}
-                                    sectionKey={sectionKey}
-                                    plots={sections[sectionKey]}
-                                    palette={palette}
-                                    isCollapsed={collapsedSections[sectionKey]}
-                                    onToggle={toggleSection}
-                                    isExpanded={expandedSections[sectionKey]}
-                                    onExpand={() => handleExpandSection(sectionKey)}
-                                    isAdmin={isAdmin}
-                                    onEdit={handleEditClick}
-                                    onHover={handleHover}
-                                />
+                              <SectionRenderer
+                                key={sectionKey}
+                                sectionKey={sectionKey}
+                                plots={sections[sectionKey]}
+                                palette={palette}
+                                isCollapsed={collapsedSections[sectionKey]}
+                                onToggle={toggleSection}
+                                isExpanded={expandedSections[sectionKey]}
+                                onExpand={() => handleExpandSection(sectionKey)}
+                                isAdmin={isAdmin}
+                                onEdit={handleEditClick}
+                                onHover={handleHover}
+                              />
                             );
-                        })}
+                          })
+                        )}
                       </div>
                     </ZoomPan>
 

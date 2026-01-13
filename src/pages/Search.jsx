@@ -453,7 +453,7 @@ export default function SearchPage() {
                                               to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
                                               state={{ search: location.search }}
                                             >
-                                              <Button variant="outline" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50">
+                                              <Button variant="outline" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50" title="View only this plot on the map">
                                                 View on Map
                                               </Button>
                                             </Link>
