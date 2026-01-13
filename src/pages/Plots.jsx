@@ -1341,13 +1341,9 @@ export default function PlotsPage() {
     }, [plotIndex]);
 
   const handleEditClick = useCallback((plot) => {
-    if (!isAdmin) {
-      toast.error('Admin access required');
-      return;
-    }
     setSelectedPlotForModal(plot);
     setIsEditModalOpen(true);
-  }, [isAdmin]);
+  }, []);
 
   const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
