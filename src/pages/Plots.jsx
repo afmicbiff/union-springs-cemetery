@@ -1319,7 +1319,7 @@ export default function PlotsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0);background-color:rgba(134,239,172,1)}50%{box-shadow:0 0 0 12px rgba(34,197,94,.75);background-color:rgba(34,197,94,1)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite;}`}</style>
+          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0);background-color:rgba(134,239,172,1)}50%{box-shadow:0 0 0 12px rgba(34,197,94,.75);background-color:rgba(34,197,94,1)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;}`}</style>
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
