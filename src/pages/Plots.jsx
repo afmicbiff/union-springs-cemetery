@@ -452,7 +452,7 @@ const SectionRenderer = React.memo(({
                               baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                               isAdmin={isAdmin}
                               onHover={onHover}
-                              onEdit={isAdmin ? onEdit : undefined}
+                              onEdit={onEdit}
                               statusColors={STATUS_COLORS}
                             />
                           </React.Suspense>
@@ -464,7 +464,7 @@ const SectionRenderer = React.memo(({
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                 isAdmin={isAdmin}
                                 onHover={onHover}
-                                onEdit={isAdmin ? onEdit : undefined}
+                                onEdit={onEdit}
                                 statusColors={STATUS_COLORS}
                               />
                             </React.Suspense>
@@ -526,7 +526,7 @@ const SectionRenderer = React.memo(({
                                       <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
                                         {plotsWithSpacers.map((plot, pIdx) => (
                                           <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
-                                          computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                          computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                         ))}
                                       </div>
                                     );
@@ -538,7 +538,7 @@ const SectionRenderer = React.memo(({
                                       .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0))
                                       .map((plot, pIdx) => (
                                         <GravePlot key={plot._id || `u3-${pIdx}`} data={plot}
-                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                       ))}
                                   </div>
                                 );
@@ -605,7 +605,7 @@ const SectionRenderer = React.memo(({
                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                             {plotsArr.map((plot, pIdx) => (
                                                 <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot}
-                                                computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                                computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                             ))}
                                         </div>
                                     );
@@ -616,7 +616,7 @@ const SectionRenderer = React.memo(({
                                   <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
                                     {unplaced.map((plot, pIdx) => (
                                         <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
-                                    computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                    computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                     ))}
                                   </div>
                                 );
@@ -667,7 +667,7 @@ const SectionRenderer = React.memo(({
                                                 computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
-                                                onEdit={isAdmin && !plot.isSpacer ? onEdit : undefined}
+                                                onEdit={!plot.isSpacer ? onEdit : undefined}
                                             />
                                         ))}
                                     </div>
@@ -683,7 +683,7 @@ const SectionRenderer = React.memo(({
                                                 computedSectionKey={sectionKey}
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
-                                                onEdit={isAdmin ? onEdit : undefined}
+                                                onEdit={onEdit}
                                             />
                                         ))}
                                     </div>
@@ -702,7 +702,7 @@ const SectionRenderer = React.memo(({
                                   computedSectionKey={sectionKey} 
                                         baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                         onHover={onHover}
-                                        onEdit={isAdmin ? onEdit : undefined}
+                                        onEdit={onEdit}
                                     />
                                 ))}
                             </div>
@@ -1341,9 +1341,13 @@ export default function PlotsPage() {
     }, [plotIndex]);
 
   const handleEditClick = useCallback((plot) => {
+    if (!isAdmin) {
+      toast.error('Admin access required');
+      return;
+    }
     setSelectedPlotForModal(plot);
     setIsEditModalOpen(true);
-  }, []);
+  }, [isAdmin]);
 
   const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
