@@ -1363,7 +1363,7 @@ export default function PlotsPage() {
 
   const clearBlink = useCallback((reason) => {
                   const el = blinkingElRef.current;
-                  console.debug('[plots] blink:stop', el?.id, 'reason:', reason);
+                  console.debug('[plots] blink:stop', el?.id, 'reason:', reason, '\nstack:', (new Error()).stack);
           if (blinkRafRef.current) {
             cancelAnimationFrame(blinkRafRef.current);
             blinkRafRef.current = 0;
@@ -1455,24 +1455,26 @@ export default function PlotsPage() {
         }, [clearBlink, handleEditClick, isAdmin]);
 
   const doQuickSearch = useCallback((q) => {
-          const nq = normalize(q);
-          if (!nq) return;
-          let match = quickIndex.find((it) => it.text.includes(nq));
-          if (!match) {
-            const tokens = nq.split(' ').filter(Boolean);
-            match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
-          }
-          if (match && match.sectionKey && match.plotNum) {
-            const el = findPlotElement(match.sectionKey, match.plotNum);
-            if (el) {
-              centerElement(el);
-              // persist active id even if element is re-rendered
-              activeBlinkIdRef.current = el.id;
-              setActiveBlinkPlotId(el.id);
-              startBlink(el, match.p);
-            }
-          }
-        }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
+                  const nq = normalize(q);
+                  if (!nq) return;
+                  let match = quickIndex.find((it) => it.text.includes(nq));
+                  if (!match) {
+                    const tokens = nq.split(' ').filter(Boolean);
+                    match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
+                  }
+                  if (match && match.sectionKey && match.plotNum) {
+                    const el = findPlotElement(match.sectionKey, match.plotNum);
+                    if (el) {
+                      console.debug('[plots] centering:start', { section: match.sectionKey, plot: match.plotNum, via: 'quick' });
+                      centerElement(el);
+                      // Start blink AFTER scrolling finishes
+                      window.setTimeout(() => {
+                        console.debug('[plots] centering:end', el.id);
+                        startBlink(el, match.p);
+                      }, 350);
+                    }
+                  }
+                }, [quickIndex, normalize, findPlotElement, centerElement, startBlink]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
