@@ -36,7 +36,7 @@ export default function HeroSection() {
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
                   alt="Union Springs Cemetery" 
-                  className="w-full h-auto shadow-xl md:shadow-2xl"
+                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
                />
              </div>
            </div>
@@ -54,7 +54,7 @@ export default function HeroSection() {
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png" 
                   alt="Union Springs Cemetery Gate" 
-                  className="w-full h-auto shadow-xl md:shadow-2xl"
+                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
                />
              </div>
            </div>
@@ -72,7 +72,7 @@ export default function HeroSection() {
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png" 
                   alt="Union Springs History" 
-                  className="w-full h-auto shadow-xl md:shadow-2xl"
+                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
                />
              </div>
            </div>
@@ -90,7 +90,7 @@ export default function HeroSection() {
                <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
                   alt="Union Springs Church" 
-                  className="w-full h-auto shadow-xl md:shadow-2xl"
+                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
                />
              </div>
            </div>
