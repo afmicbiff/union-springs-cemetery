@@ -41,6 +41,35 @@ export default function SearchPage() {
                              searchParams.get('dMin') || searchParams.get('dMax');
 
   const [showFilters, setShowFilters] = useState(!!hasAdvancedFilters);
+
+        // If user returns via header link, hydrate last search from localStorage
+        React.useEffect(() => {
+            const hasAny = ['q','family','section','veteran','bMin','bMax','dMin','dMax'].some(k => searchParams.get(k));
+            if (hasAny) return;
+            try {
+                const saved = JSON.parse(localStorage.getItem('deceased_search_params') || 'null');
+                if (!saved) return;
+                setSearchTerm(saved.term || '');
+                setFamilyName(saved.family || '');
+                setSection(saved.section || 'all');
+                setVeteranStatus(saved.veteran || 'all');
+                setBirthYearMin(saved.bMin || '');
+                setBirthYearMax(saved.bMax || '');
+                setDeathYearMin(saved.dMin || '');
+                setDeathYearMax(saved.dMax || '');
+
+                const params = {};
+                if (saved.term) params.q = saved.term;
+                if (saved.family) params.family = saved.family;
+                if (saved.section && saved.section !== 'all') params.section = saved.section;
+                if (saved.veteran && saved.veteran !== 'all') params.veteran = saved.veteran;
+                if (saved.bMin) params.bMin = saved.bMin;
+                if (saved.bMax) params.bMax = saved.bMax;
+                if (saved.dMin) params.dMin = saved.dMin;
+                if (saved.dMax) params.dMax = saved.dMax;
+                setSearchParams(params, { replace: true });
+            } catch {}
+        }, []);
   
   
   
@@ -62,34 +91,38 @@ export default function SearchPage() {
 
   // Effect to debounce inputs
   React.useEffect(() => {
-      const timer = setTimeout(() => {
-          setDebouncedParams({
-              term: searchTerm,
-              family: familyName,
-              section: section,
-              veteran: veteranStatus,
-              bMin: birthYearMin,
-              bMax: birthYearMax,
-              dMin: deathYearMin,
-              dMax: deathYearMax
-          });
-          
-          // Update URL
-          const params = {};
-          if (searchTerm) params.q = searchTerm;
-          if (familyName) params.family = familyName;
-          if (section && section !== 'all') params.section = section;
-          if (veteranStatus && veteranStatus !== 'all') params.veteran = veteranStatus;
-          if (birthYearMin) params.bMin = birthYearMin;
-          if (birthYearMax) params.bMax = birthYearMax;
-          if (deathYearMin) params.dMin = deathYearMin;
-          if (deathYearMax) params.dMax = deathYearMax;
-          
-          setSearchParams(params, { replace: true });
-      }, 500);
+              const timer = setTimeout(() => {
+                  const next = {
+                      term: searchTerm,
+                      family: familyName,
+                      section: section,
+                      veteran: veteranStatus,
+                      bMin: birthYearMin,
+                      bMax: birthYearMax,
+                      dMin: deathYearMin,
+                      dMax: deathYearMax
+                  };
+                  setDebouncedParams(next);
 
-      return () => clearTimeout(timer);
-  }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
+                  // Persist last search so navigation via header keeps the query
+                  try { localStorage.setItem('deceased_search_params', JSON.stringify(next)); } catch {}
+
+                  // Update URL
+                  const params = {};
+                  if (searchTerm) params.q = searchTerm;
+                  if (familyName) params.family = familyName;
+                  if (section && section !== 'all') params.section = section;
+                  if (veteranStatus && veteranStatus !== 'all') params.veteran = veteranStatus;
+                  if (birthYearMin) params.bMin = birthYearMin;
+                  if (birthYearMax) params.bMax = birthYearMax;
+                  if (deathYearMin) params.dMin = deathYearMin;
+                  if (deathYearMax) params.dMax = deathYearMax;
+
+                  setSearchParams(params, { replace: true });
+              }, 500);
+
+              return () => clearTimeout(timer);
+          }, [searchTerm, familyName, section, veteranStatus, birthYearMin, birthYearMax, deathYearMin, deathYearMax]);
 
 
 
