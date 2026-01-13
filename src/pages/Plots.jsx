@@ -218,11 +218,11 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   const params = new URLSearchParams(window.location.search);
   const rawSectionParam = params.get('section') || '';
-  const targetSectionNormParam = rawSectionParam.replace(/Section\si, '').trim();
+  const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
   const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
-  const sectionNorm = String(data.Section || '').replace(/Section\si, '').trim();
+  const sectionNorm = String(data.Section || '').replace(/Section\s/i, '').trim();
   const sectionForId = String(computedSectionKey || sectionNorm || '');
   const isSelected = Number.isFinite(targetPlotNum) 
     && Number.isFinite(plotNum) 
@@ -883,7 +883,7 @@ export default function PlotsPage() {
 
       await Promise.all(
         arr.map(async (p) => {
-          const sect = String(p.section || '').replace(/Section\si, '').trim();
+          const sect = String(p.section || '').replace(/Section\s/i, '').trim();
           if (sect !== '3') {
             await base44.entities.Plot.update(p.id, { section: 'Section 3' });
           }
@@ -1059,7 +1059,7 @@ export default function PlotsPage() {
     filteredData.forEach(item => {
         const rawSection = (item.Section || '').trim();
         const rowVal = String(item.Row || '');
-        let sectionKey = rawSection ? rawSection.replace(/Section\si, '').trim() : '';
+        let sectionKey = rawSection ? rawSection.replace(/Section\s/i, '').trim() : '';
 
         // Force key ranges into Section 4 to ensure proper rendering
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
@@ -1106,7 +1106,7 @@ export default function PlotsPage() {
                   
                   setIsCentering(true);
 
-      const rawNorm = rawSection.replace(/Section\si, '').trim();
+      const rawNorm = rawSection.replace(/Section\s/i, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
       // Ensure the target section is expanded before searching for the plot element
       if (sectionNorm) {
@@ -1319,7 +1319,7 @@ export default function PlotsPage() {
 
   const quickIndex = useMemo(() => {
     return (parsedData || []).map((p) => {
-      let sectionKey = String(p.Section || '').replace(/Section\si, '').trim();
+      let sectionKey = String(p.Section || '').replace(/Section\s/i, '').trim();
       const raw = String(p.Section || '');
       if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
       const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
