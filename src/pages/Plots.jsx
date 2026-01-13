@@ -1362,7 +1362,7 @@ export default function PlotsPage() {
           }
           if (el) {
             el.removeAttribute('data-blink-active');
-            el.classList.remove('plot-blink-green');
+            el.classList.remove('plot-blink-green', 'plot-blink-on');
             el.classList.remove('blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
             if (blinkingClickHandlerRef.current) {
               el.removeEventListener('click', blinkingClickHandlerRef.current);
@@ -1494,6 +1494,11 @@ export default function PlotsPage() {
           }
         }, [activeBlinkPlotId, blinkOn, clearBlink, isAdmin, handleEditClick]);
 
+        // Clear blink on unmount (e.g., navigating away to deceased search)
+        useEffect(() => {
+          return () => { clearBlink(); };
+        }, [clearBlink]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
           <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(0,255,59,0)}50%{box-shadow:0 0 0 12px rgba(0,255,59,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{outline:3px solid #00ff3b !important; box-shadow:0 0 0 3px #00ff3b,0 0 14px 4px rgba(0,255,59,.6) !important; border-color:#00ff3b !important;} .plot-blink-on{background-color:rgba(0,255,59,.35) !important; border-color:#00ff3b !important;}`}</style>
@@ -1566,7 +1571,11 @@ export default function PlotsPage() {
         <div className="max-w-7xl mx-auto">
           <div className="relative max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input placeholder="Find plot, name, or ID..." onChange={onQuickLocateChange} className="pl-8" />
+            <Input placeholder="Find plot, name, or ID..."
+                   onFocus={() => { clearBlink(); }}
+                   onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink(); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
+                   onChange={(e) => { clearBlink(); onQuickLocateChange(e); }}
+                   className="pl-8" />
           </div>
         </div>
       </div>
