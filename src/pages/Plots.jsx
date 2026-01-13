@@ -1364,7 +1364,7 @@ export default function PlotsPage() {
     return el;
   }, []);
 
-  const startBlink = useCallback((el, plotObj) => {
+  const startBlink = undefined;
                   clearBlink();
           if (!el) return;
           blinkingElRef.current = el;
@@ -1441,7 +1441,7 @@ export default function PlotsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-          <style>{`@keyframes blinkGreen{0%,100%{box-shadow:0 0 0 0 rgba(0,255,59,0)}50%{box-shadow:0 0 0 12px rgba(0,255,59,.6)}} .blink-strong-green{animation:blinkGreen 1s ease-in-out infinite; pointer-events:auto;} .plot-blink-green{outline:3px solid #00ff3b !important; box-shadow:0 0 0 3px #00ff3b,0 0 14px 4px rgba(0,255,59,.6) !important; border-color:#00ff3b !important;} .plot-blink-on{background-color:rgba(0,255,59,.35) !important; border-color:#00ff3b !important;} .plot-element[data-blink-active="1"]:hover{ transform:none !important; }`}</style>
+          
        
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
