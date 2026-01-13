@@ -19,6 +19,19 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
   React.useEffect(() => { applyTransform(); }, [applyTransform]);
 
+  const clampTranslate = React.useCallback((nx, ny, s = scale) => {
+    if (!containerRef.current || !contentRef.current) return { x: nx, y: ny };
+    const cw = containerRef.current.clientWidth;
+    const ch = containerRef.current.clientHeight;
+    const contentW = contentRef.current.scrollWidth * s;
+    const contentH = contentRef.current.scrollHeight * s;
+    const minX = Math.min(0, cw - contentW);
+    const minY = Math.min(0, ch - contentH);
+    const maxX = 0;
+    const maxY = 0;
+    return { x: clamp(nx, minX, maxX), y: clamp(ny, minY, maxY) };
+  }, [scale]);
+
   // Drag/Pan (mouse and single-finger touch)
   const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0 });
 
@@ -36,8 +49,9 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
     if (!st.dragging) return;
     const dx = e.clientX - st.startX;
     const dy = e.clientY - st.startY;
-    setTx(st.startTx + dx);
-    setTy(st.startTy + dy);
+    const clamped = clampTranslate(st.startTx + dx, st.startTy + dy);
+    setTx(clamped.x);
+    setTy(clamped.y);
   };
   const onPointerUp = (e) => {
     if (!containerRef.current) return;
@@ -52,8 +66,11 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
     // PAN with wheel/trackpad by default
     if (!(e.ctrlKey || e.metaKey)) {
-      setTx((prev) => prev - (e.deltaX || 0));
-      setTy((prev) => prev - (e.deltaY || 0));
+      const nx = tx - (e.deltaX || 0);
+      const ny = ty - (e.deltaY || 0);
+      const cl = clampTranslate(nx, ny);
+      setTx(cl.x);
+      setTy(cl.y);
       return;
     }
 
@@ -66,10 +83,16 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       const next = clamp(prevScale * (e.deltaY > 0 ? 0.9 : 1.1), minScale, maxScale);
       if (next === prevScale) return prevScale;
 
-      const nx = cx / prevScale;
-      const ny = cy / prevScale;
-      setTx((prevTx) => prevTx - (nx * (next - prevScale)));
-      setTy((prevTy) => prevTy - (ny * (next - prevScale)));
+      const nxLocal = cx / prevScale;
+      const nyLocal = cy / prevScale;
+      const delta = next - prevScale;
+
+      const newTx = tx - (nxLocal * delta);
+      const newTy = ty - (nyLocal * delta);
+
+      const cl = clampTranslate(newTx, newTy, next);
+      setTx(cl.x);
+      setTy(cl.y);
       return next;
     });
   };
@@ -115,9 +138,11 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       const txNew = pr.startTx - (nx * (next - pr.startScale));
       const tyNew = pr.startTy - (ny * (next - pr.startScale));
 
+      const cl = clampTranslate(txNew, tyNew, next);
+
       setScale(next);
-      setTx(txNew);
-      setTy(tyNew);
+      setTx(cl.x);
+      setTy(cl.y);
     } else if (stateRef.current.dragging) {
       onPointerMove(e);
     }
@@ -129,7 +154,12 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   };
 
   const zoomBy = (factor) => setScale((s) => clamp(s * factor, minScale, maxScale));
-  const reset = () => { setScale(initialScale); setTx(0); setTy(0); };
+  const reset = () => {
+    setScale(initialScale);
+    const cl = clampTranslate(0, 0, initialScale);
+    setTx(cl.x);
+    setTy(cl.y);
+  };
 
   return (
     <div
@@ -142,7 +172,7 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       onPointerCancel={onPinchPointerUp}
       onWheel={onWheel}
     >
-      <div ref={contentRef} className="origin-top-left will-change-transform inline-block">
+      <div ref={contentRef} className="origin-top-left will-change-transform block">
         {children}
       </div>
 

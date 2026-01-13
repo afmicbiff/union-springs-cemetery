@@ -1576,7 +1576,7 @@ export default function PlotsPage() {
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
-                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9} controlsTop={controlsTop}>
+                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9} controlsTop={controlsTop}>
                       <div className="p-4 inline-block min-w-max space-y-10">
                         {singlePlotMode && selectedSectionKeyForPlot ? (
                           (() => {
