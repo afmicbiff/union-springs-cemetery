@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus, Search } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus, Search, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
@@ -12,6 +12,7 @@ import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import SmartImage from "@/components/perf/SmartImage";
 import ZoomPan from "@/components/common/ZoomPan";
+import PlotMarker from "@/components/plots/PlotMarker";
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
 import {
@@ -233,7 +234,7 @@ const Tooltip = React.memo(({ data, position, visible }) => {
       );
 });
 
-const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
+const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey, selectedPlot, onSelectPlot }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   if (data.isSpacer) {
@@ -255,6 +256,8 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
     && plotNum === targetPlotNum 
     && (!targetKeyParam || sectionForId === targetKeyParam);
 
+  const isMarkedSelected = selectedPlot && selectedPlot.plot === plotNum && selectedPlot.sectionKey === sectionForId;
+
   let displayStatus = data.Status;
   if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
       displayStatus = 'Veteran';
@@ -266,7 +269,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
   const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
   const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl'; // static highlight; blinking handled runtime until user clicks
-  const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
+  const activeClass = (isSelected || isMarkedSelected) ? selectedClass : (isHovered ? hoverClass : baseClass);
 
   return (
   <div
@@ -293,6 +296,16 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
                   `}
       title={`Row: ${data.Row}, Grave: ${data.Grave}`}
   >
+      <PlotMarker
+        selected={isSelected || isMarkedSelected}
+        onMouseEnter={(e) => onHover(e, data)}
+        onMouseLeave={() => onHover(null, null)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectPlot && onSelectPlot({ sectionKey: sectionForId, plotNum });
+          if (onEdit && data && data._entity === 'Plot') onEdit(data);
+        }}
+      />
       <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
       <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">
       {data.Row}
@@ -404,17 +417,19 @@ const PlotTableRow = React.memo(({
 });
 
 const SectionRenderer = React.memo(({ 
-    sectionKey, 
-    plots, 
-    palette, 
-    isCollapsed, 
-    onToggle, 
-    isExpanded, 
-    onExpand, 
-    isAdmin, 
-    onEdit, 
-    onHover
-}) => {
+          sectionKey, 
+          plots, 
+          palette, 
+          isCollapsed, 
+          onToggle, 
+          isExpanded, 
+          onExpand, 
+          isAdmin, 
+          onEdit, 
+          onHover,
+          selectedPlot,
+          onSelectPlot
+      }) => {
     const [bgColor, borderColor, textColor] = palette.split(' ');
 
           return (
@@ -523,7 +538,7 @@ const SectionRenderer = React.memo(({
                                       <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
                                         {plotsWithSpacers.map((plot, pIdx) => (
                                           <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
-                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                          computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} selectedPlot={selectedPlot} onSelectPlot={onSelectPlot} />
                                         ))}
                                       </div>
                                     );
@@ -602,7 +617,7 @@ const SectionRenderer = React.memo(({
                                         <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
                                             {plotsArr.map((plot, pIdx) => (
                                                 <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot}
-                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                                computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} selectedPlot={selectedPlot} onSelectPlot={onSelectPlot} />
                                             ))}
                                         </div>
                                     );
@@ -612,8 +627,8 @@ const SectionRenderer = React.memo(({
                                 const fallbackCol = (
                                   <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
                                     {unplaced.map((plot, pIdx) => (
-                                      <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
-                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} />
+                                        <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
+                                    computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={isAdmin ? onEdit : undefined} selectedPlot={selectedPlot} onSelectPlot={onSelectPlot} />
                                     ))}
                                   </div>
                                 );
@@ -665,6 +680,8 @@ const SectionRenderer = React.memo(({
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin && !plot.isSpacer ? onEdit : undefined}
+                                                selectedPlot={selectedPlot}
+                                                onSelectPlot={onSelectPlot}
                                             />
                                         ))}
                                     </div>
@@ -681,6 +698,8 @@ const SectionRenderer = React.memo(({
                                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                 onHover={onHover}
                                                 onEdit={isAdmin ? onEdit : undefined}
+                                                selectedPlot={selectedPlot}
+                                                onSelectPlot={onSelectPlot}
                                             />
                                         ))}
                                     </div>
@@ -700,6 +719,8 @@ const SectionRenderer = React.memo(({
                                         baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
                                         onHover={onHover}
                                         onEdit={isAdmin ? onEdit : undefined}
+                                        selectedPlot={selectedPlot}
+                                        onSelectPlot={onSelectPlot}
                                     />
                                 ))}
                             </div>
@@ -788,6 +809,10 @@ export default function PlotsPage() {
           owner: '',
           plot: ''
       });
+  const [selectedPlot, setSelectedPlot] = useState(null);
+  const handleSelectPlot = useCallback(({ sectionKey, plotNum }) => {
+    setSelectedPlot({ sectionKey, plot: plotNum });
+  }, []);
 
   // Table View State
   const [groupBy, setGroupBy] = useState('none');
@@ -1581,17 +1606,19 @@ export default function PlotsPage() {
                             });
                             return (
                               <SectionRenderer
-                                key={sectionKey}
-                                sectionKey={sectionKey}
-                                plots={items}
-                                palette={palette}
-                                isCollapsed={false}
-                                onToggle={() => {}}
-                                isExpanded={true}
-                                onExpand={() => {}}
-                                isAdmin={isAdmin}
-                                onEdit={handleEditClick}
-                                onHover={handleHover}
+                              key={sectionKey}
+                              sectionKey={sectionKey}
+                              plots={items}
+                              palette={palette}
+                              isCollapsed={false}
+                              onToggle={() => {}}
+                              isExpanded={true}
+                              onExpand={() => {}}
+                              isAdmin={isAdmin}
+                              onEdit={handleEditClick}
+                              onHover={handleHover}
+                              selectedPlot={selectedPlot}
+                              onSelectPlot={handleSelectPlot}
                               />
                             );
                           })()
@@ -1616,6 +1643,8 @@ export default function PlotsPage() {
                                 isAdmin={isAdmin}
                                 onEdit={handleEditClick}
                                 onHover={handleHover}
+                                selectedPlot={selectedPlot}
+                                onSelectPlot={handleSelectPlot}
                               />
                             );
                           })
