@@ -37,7 +37,7 @@ const STATUS_COLORS = {
 // Distinct colors for different Sections
 const SECTION_PALETTES = [
   'bg-blue-100 border-blue-300 text-blue-900',         // Section 1 / Row D
-  'bg-blue-100 border-blue-300 text-blue-900',         // Section 2
+  'bg-green-100 border-green-300 text-green-900',         // Section 2
   'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
   'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
   'bg-purple-100 border-purple-300 text-purple-900',// Section 5 (purple)
@@ -48,7 +48,7 @@ const SECTION_PALETTES = [
 const getSectionPalette = (key) => {
   switch (String(key)) {
     case '1': return 'bg-blue-100 border-blue-300 text-blue-900';
-    case '2': return 'bg-blue-100 border-blue-300 text-blue-900';
+    case '2': return 'bg-green-100 border-green-300 text-green-900';
     case '3': return 'bg-rose-100 border-rose-300 text-rose-900';
     case '4': return 'bg-amber-100 border-amber-300 text-amber-900';
     case '5': return 'bg-purple-100 border-purple-300 text-purple-900';
