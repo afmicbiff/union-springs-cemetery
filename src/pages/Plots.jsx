@@ -1103,7 +1103,7 @@ export default function PlotsPage() {
       if (isLoading) return;
 
       setActiveTab('map');
-                  console.debug('[plots] centering:start', { section: sectionNorm, plot: plotNum });
+                  
                   setIsCentering(true);
 
       const rawNorm = rawSection.replace(/Section\s*/i, '').trim();
@@ -1361,9 +1361,9 @@ export default function PlotsPage() {
     });
   }, [parsedData, normalize]);
 
-  const clearBlink = useCallback((reason) => {
+  const clearBlink = useCallback(() => {
                   const el = blinkingElRef.current;
-                  console.debug('[plots] blink:stop', el?.id, 'reason:', reason, '\nstack:', (new Error()).stack);
+                  console.debug('[plots] blink:stop', el?.id);
           if (blinkRafRef.current) {
             cancelAnimationFrame(blinkRafRef.current);
             blinkRafRef.current = 0;
@@ -1415,7 +1415,7 @@ export default function PlotsPage() {
   }, []);
 
   const startBlink = useCallback((el, plotObj) => {
-                  clearBlink('new_match');
+                  clearBlink();
           if (!el) return;
           blinkingElRef.current = el;
           blinkingPlotRef.current = plotObj;
@@ -1445,7 +1445,7 @@ export default function PlotsPage() {
           blinkIntervalRef.current = window.setInterval(run, 350);
 
           const onClick = () => {
-                              clearBlink('plot_click');
+                              clearBlink();
             if (isAdmin && plotObj) {
               handleEditClick(plotObj);
             }
@@ -1493,7 +1493,7 @@ export default function PlotsPage() {
           const id = activeBlinkPlotId;
           const el = document.getElementById(id);
           if (el) {
-                            el.setAttribute('data-blink-active','1');
+                            
                             el.classList.add('plot-blink-green', 'blink-strong-green', 'ring-8', 'ring-green-500', 'ring-offset-2', 'ring-offset-white', 'scale-110', 'z-30', 'shadow-2xl');
                             if (blinkOn) el.classList.add('plot-blink-on'); else el.classList.remove('plot-blink-on');
             const onClick = () => {
@@ -1511,7 +1511,7 @@ export default function PlotsPage() {
 
         // Clear blink on unmount (e.g., navigating away to deceased search)
         useEffect(() => {
-                        return () => { clearBlink('unmount'); };
+                        return () => { clearBlink(); };
                       }, [clearBlink]);
 
   return (
@@ -1587,9 +1587,9 @@ export default function PlotsPage() {
           <div className="relative max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input placeholder="Find plot, name, or ID..."
-                                     onFocus={() => { clearBlink('new_search'); }}
-                                     onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink('new_search'); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
-                                     onChange={(e) => { clearBlink('new_search'); onQuickLocateChange(e); }}
+                                     onFocus={() => { clearBlink(); }}
+                                     onKeyDown={(e) => { if (e.key === 'Enter') { clearBlink(); const v = e.currentTarget.value || ''; if (debouncedSearchRef.current) debouncedSearchRef.current(v); } }}
+                                     onChange={(e) => { clearBlink(); onQuickLocateChange(e); }}
                                      className="pl-8" />
           </div>
         </div>

@@ -152,9 +152,8 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                     >
                       {/* Use the existing GravePlot from the page via window.__B44_GravePlot if exposed, else fallback simple */}
                       <div
-                                                    className={`plot-element border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90`}
-                                                    data-section="1"
-                                                    data-plot-num={parseNum(item.Grave)}
+                                                    className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90`}
+
                                                     onMouseEnter={(e) => onHover && onHover(e, item)}
                                                     onMouseLeave={() => onHover && onHover(null, null)}
                                                     onClick={(e) => {
@@ -172,9 +171,8 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                 </Draggable>
               ) : (
                 <div
-                                        className={`plot-element border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90`}
-                                        data-section="1"
-                                        data-plot-num={parseNum(item.Grave)}
+                                        className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90`}
+
                                         onMouseEnter={(e) => onHover && onHover(e, item)}
                                         onMouseLeave={() => onHover && onHover(null, null)}
                                         onClick={(e) => {

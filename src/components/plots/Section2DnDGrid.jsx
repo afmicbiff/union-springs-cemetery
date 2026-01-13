@@ -185,7 +185,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
                             }}
                           >
                             <CellWrapper active={draggableSnapshot.isDragging || snapshot.isDraggingOver}>
-                              <div id={`plot-2-${parseNum(item.Grave)}`} data-section="2" data-plot-num={parseNum(item.Grave)} className="plot-element flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-move transform-gpu will-change-transform">
+                              <div id={`plot-2-${parseNum(item.Grave)}`} className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-move transform-gpu will-change-transform">
                                 <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
                                 <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
                                 <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
