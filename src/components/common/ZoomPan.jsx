@@ -37,6 +37,11 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
   const onPointerDown = (e) => {
     if (!containerRef.current) return;
+    // Allow clicks on interactive children (e.g., plot elements) to reach their onClick handlers
+    const target = e.target;
+    if (target && typeof target.closest === 'function' && target.closest('.plot-element')) {
+      return; // do not start panning or capture pointer; let child handle click
+    }
     containerRef.current.setPointerCapture(e.pointerId);
     stateRef.current.dragging = true;
     stateRef.current.startX = e.clientX;
