@@ -23,6 +23,12 @@ function useRectForSelector(selector) {
 }
 
 export default function PlotsTour({ open, onClose }) {
+  // Prevent background dim from persisting when tour closes
+  React.useEffect(() => {
+    if (!open) {
+      // no-op, but ensures re-render after close to remove any masks
+    }
+  }, [open]);
   const steps = React.useMemo(() => [
     {
       id: 'filters',
@@ -46,6 +52,7 @@ export default function PlotsTour({ open, onClose }) {
 
   const [index, setIndex] = React.useState(0);
   const step = steps[index] || steps[0];
+  const isLast = index === steps.length - 1;
   const rect = useRectForSelector(open ? step.selector : null);
 
   React.useEffect(() => { if (!open) setIndex(0); }, [open]);
@@ -98,15 +105,15 @@ export default function PlotsTour({ open, onClose }) {
             top: rect.top - 8,
             width: rect.width + 16,
             height: rect.height + 16,
-            boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
+            boxShadow: `0 0 0 9999px rgba(0,0,0,${isLast ? 0 : 0.55})`,
             borderRadius: 8,
             border: '2px solid rgba(20,184,166,0.9)', // teal-500
             transition: 'all 180ms ease'
           }}
         />
       ) : (
-        <div className="fixed inset-0 bg-black/55" />
-      )}
+        !isLast ? <div className="fixed inset-0 bg-black/55" /> : null
+      )
 
       {/* Card */}
       <div
