@@ -1072,6 +1072,12 @@ export default function PlotsPage() {
     return () => { if (debouncedSetSearchQuery.cancel) debouncedSetSearchQuery.cancel(); };
   }, [filters.search, debouncedSetSearchQuery]);
 
+  // Auto-center on search input when possible
+  useEffect(() => {
+    if (!deferredSearch) return;
+    doQuickSearch(deferredSearch);
+  }, [deferredSearch, doQuickSearch]);
+
   // Grouped and Sorted Data for Table View
   const processedTableData = useMemo(() => {
     // 1. Sort Data
@@ -1468,19 +1474,25 @@ export default function PlotsPage() {
                     match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
                   }
                   if (match && match.sectionKey && match.plotNum) {
-                    // Ensure the section containing the plot is expanded so the element exists in the DOM
+                    setActiveTab('map');
                     setCollapsedSections(prev => ({
                       ...prev,
                       [match.sectionKey]: false,
                     }));
-
-                    // Allow the section expansion to render, then locate and center the plot
-                    setTimeout(() => {
+                    let attempts = 0;
+                    const maxAttempts = 240;
+                    const tryFind = () => {
+                      attempts++;
                       const el = findPlotElement(match.sectionKey, match.plotNum);
                       if (el) {
                         centerElement(el);
+                        return;
                       }
-                    }, 80);
+                      if (attempts < maxAttempts) {
+                        requestAnimationFrame(tryFind);
+                      }
+                    };
+                    requestAnimationFrame(tryFind);
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement]);
 
