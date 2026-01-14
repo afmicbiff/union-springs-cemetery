@@ -5,18 +5,46 @@ import { X, ChevronRight, ChevronLeft, Info } from "lucide-react";
 function useRectForSelector(selector) {
   const [rect, setRect] = React.useState(null);
   React.useLayoutEffect(() => {
-    const el = selector ? document.querySelector(selector) : null;
-    if (!el) { setRect(null); return; }
+    let observer;
+    const findEl = () => (selector ? document.querySelector(selector) : null);
+    let el = findEl();
+
     const update = () => {
+      if (!el) return;
       const r = el.getBoundingClientRect();
       setRect({ left: r.left + window.scrollX, top: r.top + window.scrollY, width: r.width, height: r.height });
     };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
+
+    const attachListeners = () => {
+      window.addEventListener('resize', update);
+      window.addEventListener('scroll', update, true);
+      return () => {
+        window.removeEventListener('resize', update);
+        window.removeEventListener('scroll', update, true);
+      };
+    };
+
+    let removeListeners = () => {};
+
+    if (!el) {
+      setRect(null);
+      observer = new MutationObserver(() => {
+        el = findEl();
+        if (el) {
+          update();
+          removeListeners = attachListeners();
+          if (observer) observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    } else {
+      update();
+      removeListeners = attachListeners();
+    }
+
     return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
+      if (observer) observer.disconnect();
+      removeListeners && removeListeners();
     };
   }, [selector]);
   return rect;
