@@ -406,12 +406,12 @@ export default function SearchPage() {
                                const isLastElement = index === dedupedResults.length - 1;
                                return (
                                  <div key={person.id} ref={isLastElement ? lastElementRef : null}>
-                                   <Card className="h-full min-h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
+                                   <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
                                      <div className="flex flex-col">
 
 
                                        {/* Content Section */}
-                                       <CardContent className="p-5 flex-1 flex flex-col">
+                                       <CardContent className="p-5 flex-1 flex flex-col min-w-0">
                                          <div className="flex justify-between items-start">
                                             <div>
                                               <div className="flex items-center gap-2 mb-1">
@@ -459,12 +459,12 @@ export default function SearchPage() {
                                            )}
                                          </div>
 
-                                         <div className="mt-auto pt-4 border-t border-stone-200 flex justify-end gap-3">
+                                         <div className="mt-auto pt-4 border-t border-stone-200 flex flex-wrap items-center gap-3 sm:justify-between justify-start">
                                             <Link 
                                               to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
                                               state={{ search: location.search }}
                                             >
-                                              <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4" title="View only this plot on the map">
+                                              <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4 w-full sm:w-auto" title="View only this plot on the map">
                                                 View on Map
                                               </Button>
                                             </Link>
@@ -472,7 +472,7 @@ export default function SearchPage() {
                                               to={`${createPageUrl('Memorial')}?id=${person.id}`}
                                               state={{ search: location.search }}
                                             >
-                                                <Button size="default" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md px-4">
+                                                <Button size="default" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md px-4 w-full sm:w-auto">
                                                    View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
                                                 </Button>
                                             </Link>
