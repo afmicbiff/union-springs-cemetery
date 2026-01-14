@@ -398,7 +398,7 @@ export default function SearchPage() {
                 <div className="flex justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
                 </div>
-              ) : (totalResults > 0) ? (
+              ) : (dedupedResults.length > 0) ? (
                 <div className="grid gap-6">
                    {data?.pages?.map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
