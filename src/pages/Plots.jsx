@@ -1588,7 +1588,7 @@ export default function PlotsPage() {
                       onPointerDown={(e) => e.stopPropagation()}
                       onWheel={(e) => e.stopPropagation()}
                     >
-                      <Button variant="outline" size="sm" className="bg-white/90 backdrop-blur border-gray-200 shadow-md" onClick={() => { setTourSession(s => s + 1); setIsTourOpen(true); }}>
+                      <Button variant="outline" size="sm" className="bg-white/90 backdrop-blur border-gray-200 shadow-md" onClick={() => { setTourSession(s => s + 1); setTourSession(s => s + 1); setIsTourOpen(true); }}>
                         <Info className="w-4 h-4 mr-1" /> Tour
                       </Button>
                     </div>
@@ -1790,7 +1790,7 @@ export default function PlotsPage() {
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
 
       {/* Guided Tour */}
-      <PlotsTour open={isTourOpen} onClose={() => setIsTourOpen(false)} />
+      <PlotsTour key={tourSession} open={isTourOpen} onClose={() => setIsTourOpen(false)} />
       
       {/* Edit Dialog */}
       <PlotEditDialog 
