@@ -41,14 +41,14 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   }, [scale]);
 
   // Drag/Pan (mouse and single-finger touch)
-  const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0 });
+  const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0, allowClickThrough: false, downTarget: null, moved: false });
 
   const onPointerDown = (e) => {
     if (!containerRef.current) return;
     const target = e.target;
-    const isPlotEl = target && typeof target.closest === 'function' && target.closest('.plot-element');
+    const plotEl = target && typeof target.closest === 'function' ? target.closest('.plot-element') : null;
     const shouldPan = forcePan || e.button === 1 || e.button === 2 || e.altKey || e.metaKey || e.ctrlKey;
-    if (isPlotEl && !shouldPan) {
+    if (plotEl && !shouldPan) {
       return; // let plot elements handle simple left-clicks
     }
     if (e.button === 2) { // right click pan
@@ -60,12 +60,18 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
     stateRef.current.startY = e.clientY;
     stateRef.current.startTx = tx;
     stateRef.current.startTy = ty;
+    stateRef.current.allowClickThrough = !!plotEl;
+    stateRef.current.downTarget = plotEl || target;
+    stateRef.current.moved = false;
   };
   const onPointerMove = (e) => {
     const st = stateRef.current;
     if (!st.dragging) return;
     const dx = e.clientX - st.startX;
     const dy = e.clientY - st.startY;
+    if (!st.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      st.moved = true;
+    }
     const clamped = clampTranslate(st.startTx + dx, st.startTy + dy);
     setTx(clamped.x);
     setTy(clamped.y);
@@ -73,7 +79,19 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   const onPointerUp = (e) => {
     if (!containerRef.current) return;
     try { containerRef.current.releasePointerCapture(e.pointerId); } catch {}
-    stateRef.current.dragging = false;
+    const st = stateRef.current;
+    const wasDragging = st.dragging;
+    st.dragging = false;
+
+    // If we started on a plot element, and didn't really move, forward a click to it
+    if (wasDragging && st.allowClickThrough && !st.moved && st.downTarget) {
+      // Defer to ensure pointerup settles before dispatch
+      setTimeout(() => {
+        try {
+          st.downTarget.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        } catch {}
+      }, 0);
+    }
   };
 
   // Wheel: pan by default; hold Ctrl/Cmd to zoom around cursor
@@ -131,6 +149,8 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       // Gesture center (screen coords)
       pinchRef.current.centerX = (pts[0].x + pts[1].x) / 2;
       pinchRef.current.centerY = (pts[0].y + pts[1].y) / 2;
+      // Multi-touch: do not treat as click-through
+      stateRef.current.allowClickThrough = false;
     }
   };
   const onPinchPointerMove = (e) => {
