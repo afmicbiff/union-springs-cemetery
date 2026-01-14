@@ -459,12 +459,12 @@ export default function SearchPage() {
                                            )}
                                          </div>
 
-                                         <div className="mt-auto flex justify-end gap-2">
+                                         <div className="mt-auto pt-4 border-t border-stone-200 flex justify-end gap-3">
                                             <Link 
                                               to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
                                               state={{ search: location.search }}
                                             >
-                                              <Button variant="outline" size="sm" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50" title="View only this plot on the map">
+                                              <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4" title="View only this plot on the map">
                                                 View on Map
                                               </Button>
                                             </Link>
@@ -472,7 +472,7 @@ export default function SearchPage() {
                                               to={`${createPageUrl('Memorial')}?id=${person.id}`}
                                               state={{ search: location.search }}
                                             >
-                                                <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
+                                                <Button size="default" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md px-4">
                                                    View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
                                                 </Button>
                                             </Link>
