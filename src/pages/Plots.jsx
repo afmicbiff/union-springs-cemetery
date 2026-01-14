@@ -1569,9 +1569,9 @@ export default function PlotsPage() {
 
             {/* Legend */}
             <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 sm:min-w-max">
+                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-2 sm:gap-4 sm:min-w-max justify-center lg:justify-start text-center lg:text-left">
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
-                        <Info size={14} className="mr-1" /> Status Legend
+                        <Info size={14} className="mr-1" /> Status
                     </span>
                     <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? 'All' : 'Available' }))} active={filters.status === 'Available'} />
                     <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? 'All' : 'Reserved' }))} active={filters.status === 'Reserved'} />
