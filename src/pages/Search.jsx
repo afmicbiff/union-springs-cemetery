@@ -201,6 +201,24 @@ export default function SearchPage() {
 
   const totalResults = data?.pages?.[0]?.pagination?.total || 0;
 
+  // Deduplicate results by full name (first + last), case-insensitive
+  const dedupedResults = React.useMemo(() => {
+    const seen = new Set();
+    const out = [];
+    if (!data?.pages) return out;
+    for (const page of data.pages) {
+      for (const person of (page.results || [])) {
+        const key = `${(person.first_name || '').trim().toLowerCase()}|${(person.last_name || '').trim().toLowerCase()}`;
+        if (!key.trim()) continue;
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push(person);
+        }
+      }
+    }
+    return out;
+  }, [data]);
+
   const handleClearFilters = () => {
       setSection('all');
       setFamilyName('');
