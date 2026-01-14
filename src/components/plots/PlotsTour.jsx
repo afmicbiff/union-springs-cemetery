@@ -113,7 +113,7 @@ export default function PlotsTour({ open, onClose }) {
         />
       ) : (
         !isLast ? <div className="fixed inset-0 bg-black/55" /> : null
-      )
+      )}
 
       {/* Card */}
       <div
