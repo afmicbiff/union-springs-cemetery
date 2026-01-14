@@ -744,6 +744,7 @@ export default function PlotsPage() {
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [tourSession, setTourSession] = useState(0);
+  const [tourSession, setTourSession] = useState(0);
 
         // Collapse non-target sections on direct deep link to speed up initial render
         useEffect(() => {
