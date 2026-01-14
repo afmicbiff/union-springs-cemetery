@@ -399,7 +399,7 @@ export default function SearchPage() {
                   <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
                 </div>
               ) : (dedupedResults.length > 0) ? (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch auto-rows-fr">
                    {[{ results: dedupedResults }].map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
                            {page.results.map((person, index) => {
@@ -442,8 +442,8 @@ export default function SearchPage() {
                                              Section {person.plot_location?.split('-')[0] || 'Main'}
                                            </Badge>
                                          </div>
-                                         <div className="space-y-3">
-                                           <div className="flex items-center text-stone-600">
+                                         <div className="space-y-3 min-w-0">
+                                           <div className="flex items-center text-stone-600 min-w-0">
                                              <MapPin className="w-4 h-4 mr-2 text-red-600" />
                                              <span>Plot Location: {person.plot_location}</span>
                                            </div>
@@ -453,7 +453,7 @@ export default function SearchPage() {
                                              </p>
                                            )}
                                            {person.obituary && (
-                                             <p className="text-stone-600 text-sm line-clamp-2 italic">
+                                             <p className="text-stone-600 text-sm line-clamp-2 italic break-words">
                                                 {person.obituary}
                                              </p>
                                            )}
