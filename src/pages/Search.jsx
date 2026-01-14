@@ -399,19 +399,19 @@ export default function SearchPage() {
                   <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
                 </div>
               ) : (dedupedResults.length > 0) ? (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
                    {[{ results: dedupedResults }].map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
                            {page.results.map((person, index) => {
                                const isLastElement = index === dedupedResults.length - 1;
                                return (
                                  <div key={person.id} ref={isLastElement ? lastElementRef : null}>
-                                   <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-slate-50 max-w-[380px] mx-auto">
+                                   <Card className="h-full min-h-[320px] overflow-hidden rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
                                      <div className="flex flex-col">
 
 
                                        {/* Content Section */}
-                                       <CardContent className="p-6 flex-grow flex flex-col justify-between">
+                                       <CardContent className="p-5 flex-1 flex flex-col">
                                          <div className="flex justify-between items-start">
                                             <div>
                                               <div className="flex items-center gap-2 mb-1">
@@ -466,22 +466,20 @@ export default function SearchPage() {
                                            )}
                                          </div>
 
-                                         <div className="mt-2 flex justify-end">
+                                         <div className="mt-auto flex justify-end gap-2">
                                             <Link 
                                               to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
                                               state={{ search: location.search }}
                                             >
-                                              <Button variant="outline" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50" title="View only this plot on the map">
+                                              <Button variant="outline" size="sm" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50" title="View only this plot on the map">
                                                 View on Map
                                               </Button>
                                             </Link>
-                                         </div>
-                                         <div className="mt-3 flex justify-end">
                                             <Link 
                                               to={`${createPageUrl('Memorial')}?id=${person.id}`}
                                               state={{ search: location.search }}
                                             >
-                                                <Button className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
+                                                <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md">
                                                    View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
                                                 </Button>
                                             </Link>
