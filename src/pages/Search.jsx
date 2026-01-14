@@ -406,7 +406,7 @@ export default function SearchPage() {
                                const isLastElement = pageIndex === data.pages.length - 1 && index === page.results.length - 1;
                                return (
                                  <div key={person.id} ref={isLastElement ? lastElementRef : null}>
-                                   <Card className="overflow-hidden border-none shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-slate-50">
+                                   <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-slate-50 max-w-[380px] mx-auto">
                                      <div className="flex flex-col md:flex-row">
 
 
