@@ -306,14 +306,20 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   );
 });
 
-const LegendItem = React.memo(({ label, colorClass }) => {
+const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
     const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
     return (
-            <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap" data-legend={label}>
-                <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
-                <span className="text-xs font-semibold text-gray-600">{label}</span>
-            </div>
-        );
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={!!active}
+        className={`flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''}`}
+        data-legend={label}
+      >
+        <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
+        <span className="text-xs font-semibold text-gray-600">{label}</span>
+      </button>
+    );
 });
 
 const PlotTableRow = React.memo(({ 
@@ -1567,11 +1573,11 @@ export default function PlotsPage() {
                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
                         <Info size={14} className="mr-1" /> Status Legend
                     </span>
-                    <LegendItem label="Available" colorClass={STATUS_COLORS.Available} />
-                    <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} />
-                    <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} />
-                    <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} />
-                    <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} />
+                    <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? 'All' : 'Available' }))} active={filters.status === 'Available'} />
+                    <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? 'All' : 'Reserved' }))} active={filters.status === 'Reserved'} />
+                    <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? 'All' : 'Occupied' }))} active={filters.status === 'Occupied'} />
+                    <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Veteran' ? 'All' : 'Veteran' }))} active={filters.status === 'Veteran'} />
+                    <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Unavailable' ? 'All' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
 
                 </div>
             </div>
