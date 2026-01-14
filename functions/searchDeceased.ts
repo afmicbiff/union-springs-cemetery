@@ -209,8 +209,8 @@ export default Deno.serve(async (req) => {
                     (r.last_name && r.last_name.toLowerCase().includes(q)) ||
                     (r.family_name && r.family_name.toLowerCase().includes(q)) ||
                     (r.plot_location && r.plot_location.toLowerCase().includes(q)) ||
-                    (r.obituary && r.obituary.toLowerCase().includes(q)) ||
-                    (r.notes && String(r.notes).toLowerCase().includes(q))
+                    ((r.obituary && r.obituary.toLowerCase().includes(q)) && (family_name || section || veteran_status === 'true')) ||
+                    ((r.notes && String(r.notes).toLowerCase().includes(q)) && (family_name || section || veteran_status === 'true'))
                 ));
             }
         }
