@@ -1468,11 +1468,19 @@ export default function PlotsPage() {
                     match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
                   }
                   if (match && match.sectionKey && match.plotNum) {
-                    const el = findPlotElement(match.sectionKey, match.plotNum);
-                    if (el) {
-                      centerElement(el);
-                      
-                    }
+                    // Ensure the section containing the plot is expanded so the element exists in the DOM
+                    setCollapsedSections(prev => ({
+                      ...prev,
+                      [match.sectionKey]: false,
+                    }));
+
+                    // Allow the section expansion to render, then locate and center the plot
+                    setTimeout(() => {
+                      const el = findPlotElement(match.sectionKey, match.plotNum);
+                      if (el) {
+                        centerElement(el);
+                      }
+                    }, 80);
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement]);
 
