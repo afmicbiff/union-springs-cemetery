@@ -390,6 +390,7 @@ export default function SearchPage() {
           ) : (
             <>
               <div className="flex justify-between items-center text-sm text-stone-500 px-2">
+  <style>{`.auto-rows-fr{grid-auto-rows:1fr}`}</style>
                 <span>Found {dedupedResults.length} results</span>
                 {error && <span className="text-red-500">Error loading data</span>}
               </div>
