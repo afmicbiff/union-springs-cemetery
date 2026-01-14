@@ -390,7 +390,7 @@ export default function SearchPage() {
           ) : (
             <>
               <div className="flex justify-between items-center text-sm text-stone-500 px-2">
-                <span>Found {totalResults} results</span>
+                <span>Found {dedupedResults.length} results</span>
                 {error && <span className="text-red-500">Error loading data</span>}
               </div>
 
@@ -403,7 +403,7 @@ export default function SearchPage() {
                    {[{ results: dedupedResults }].map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
                            {page.results.map((person, index) => {
-                               const isLastElement = pageIndex === data.pages.length - 1 && index === page.results.length - 1;
+                               const isLastElement = index === dedupedResults.length - 1;
                                return (
                                  <div key={person.id} ref={isLastElement ? lastElementRef : null}>
                                    <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow duration-300 bg-slate-50 max-w-[380px] mx-auto">
