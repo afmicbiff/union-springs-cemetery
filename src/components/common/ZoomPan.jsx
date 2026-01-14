@@ -217,7 +217,7 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       {/* Controls */}
       <div
         className="fixed right-3 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
-        style={{ top: controlsTop != null ? controlsTop : 112, transform: controlsTop != null ? 'translateY(-50%)' : undefined }}
+        style={{ top: controlsTop != null ? controlsTop : '50%', transform: 'translateY(-50%)' }}
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
