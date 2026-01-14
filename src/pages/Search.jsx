@@ -399,7 +399,7 @@ export default function SearchPage() {
                   <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
                 </div>
               ) : (dedupedResults.length > 0) ? (
-                <div className="grid gap-6">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                    {[{ results: dedupedResults }].map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
                            {page.results.map((person, index) => {
