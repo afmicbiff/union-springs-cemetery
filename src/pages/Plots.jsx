@@ -1099,11 +1099,7 @@ export default function PlotsPage() {
     return () => { if (debouncedSetSearchQuery.cancel) debouncedSetSearchQuery.cancel(); };
   }, [filters.search, debouncedSetSearchQuery]);
 
-  // Auto-center on search input when possible
-  useEffect(() => {
-    if (!deferredSearch) return;
-    doQuickSearch(deferredSearch);
-  }, [deferredSearch, doQuickSearch]);
+
 
   // Grouped and Sorted Data for Table View
   const processedTableData = useMemo(() => {
@@ -1522,6 +1518,12 @@ export default function PlotsPage() {
                     requestAnimationFrame(tryFind);
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement]);
+
+  // Auto-center on search input when possible (moved below doQuickSearch to avoid TDZ)
+  useEffect(() => {
+    if (!deferredSearch) return;
+    doQuickSearch(deferredSearch);
+  }, [deferredSearch, doQuickSearch]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
