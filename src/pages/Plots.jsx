@@ -46,9 +46,8 @@ class ErrorBoundary extends React.Component {
             <button className="px-3 py-1.5 bg-red-600 text-white rounded" onClick={() => window.location.reload()}>Reload</button>
           </div>
         </div>
-        
-        );
-        }
+      );
+    }
     return this.props.children;
   }
 }
