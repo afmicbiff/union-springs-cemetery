@@ -1572,6 +1572,9 @@ export default function PlotsPage() {
                     <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} />
                     <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} />
                     <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} />
+                    <Button size="sm" className="bg-green-800 hover:bg-green-900 text-white shadow-sm" onClick={() => { setTourSession(s => s + 1); setIsTourOpen(true); }}>
+                      <Info className="w-4 h-4 mr-1" /> Tour
+                    </Button>
                 </div>
             </div>
 
@@ -1579,17 +1582,6 @@ export default function PlotsPage() {
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
-                    {/* Floating Tour Button (left side) */}
-                    <div
-                      className="fixed left-3 z-50"
-                      style={{ top: controlsTop ?? '50%', transform: 'translateY(-50%)' }}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      onWheel={(e) => e.stopPropagation()}
-                    >
-                      <Button variant="outline" size="sm" className="bg-white/90 backdrop-blur border-gray-200 shadow-md" onClick={() => { setTourSession(s => s + 1); setIsTourOpen(true); }}>
-                        <Info className="w-4 h-4 mr-1" /> Tour
-                      </Button>
-                    </div>
 
                     <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9} controlsTop={controlsTop}>
                       <div className="p-4 inline-block min-w-max space-y-10">
