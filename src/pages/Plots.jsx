@@ -1572,9 +1572,7 @@ export default function PlotsPage() {
                     <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} />
                     <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} />
                     <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} />
-                    <Button size="sm" className="bg-green-800 hover:bg-green-900 text-white shadow-sm" onClick={() => { setTourSession(s => s + 1); setIsTourOpen(true); }}>
-                      <Info className="w-4 h-4 mr-1" /> Tour
-                    </Button>
+
                 </div>
             </div>
 
