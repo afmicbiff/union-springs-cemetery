@@ -259,8 +259,7 @@ const inertiaRef = React.useRef({ animId: 0 });
 
       {/* Controls */}
       <div
-        className="hidden lg:flex fixed right-3 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 lg:flex-col gap-1"
-        style={{ top: controlsTop != null ? controlsTop : '50%', transform: 'translateY(-50%)' }}
+        className="hidden lg:flex fixed right-4 bottom-6 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 lg:flex-col gap-1"
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}

@@ -313,7 +313,7 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
         type="button"
         onClick={onClick}
         aria-pressed={!!active}
-        className={`flex items-center space-x-2 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''}`}
+        className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} w-24 sm:w-auto text-center`}
         data-legend={label}
       >
         <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
