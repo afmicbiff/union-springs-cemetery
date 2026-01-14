@@ -743,6 +743,7 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [tourSession, setTourSession] = useState(0);
 
         // Collapse non-target sections on direct deep link to speed up initial render
         useEffect(() => {
@@ -1586,7 +1587,7 @@ export default function PlotsPage() {
                       onPointerDown={(e) => e.stopPropagation()}
                       onWheel={(e) => e.stopPropagation()}
                     >
-                      <Button variant="outline" size="sm" className="bg-white/90 backdrop-blur border-gray-200 shadow-md" onClick={() => setIsTourOpen(true)}>
+                      <Button variant="outline" size="sm" className="bg-white/90 backdrop-blur border-gray-200 shadow-md" onClick={() => { setTourSession(s => s + 1); setIsTourOpen(true); }}>
                         <Info className="w-4 h-4 mr-1" /> Tour
                       </Button>
                     </div>

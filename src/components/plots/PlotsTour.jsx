@@ -55,7 +55,7 @@ export default function PlotsTour({ open, onClose }) {
   const isLast = index === steps.length - 1;
   const rect = useRectForSelector(open ? step.selector : null);
 
-  React.useEffect(() => { if (!open) setIndex(0); }, [open]);
+  React.useEffect(() => { if (open) setIndex(0); }, [open]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -144,7 +144,7 @@ export default function PlotsTour({ open, onClose }) {
                 Next <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
-              <Button size="sm" onClick={onClose}>Finish</Button>
+              <Button size="sm" onClick={() => { setIndex(0); onClose?.(); }}>Finish</Button>
             )}
           </div>
         </div>
