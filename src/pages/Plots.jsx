@@ -738,7 +738,7 @@ export default function PlotsPage() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('map'); 
-  const [controlsTop, setControlsTop] = useState(null);
+  const [controlsTop, setControlsTop] = useState('50%');
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
 
