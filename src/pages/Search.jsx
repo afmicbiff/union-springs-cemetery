@@ -418,36 +418,29 @@ export default function SearchPage() {
                                                   <h3 className="text-2xl font-serif font-bold text-stone-900">
                                                       {person.first_name} {person.last_name}
                                                   </h3>
-                                                  {person.family_name && (
-                                                                                                              <Badge variant="outline" className="hidden md:inline-flex ml-2 text-stone-500 border-stone-300">
-                                                                                                                  {person.family_name} Family
-                                                                                                              </Badge>
-                                                                                                          )}
-                                                  {person.veteran_status && (
-                                                      <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200 rounded-sm">Veteran</Badge>
-                                                  )}
                                               </div>
-                                              <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-4">
+                                              <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-2">
                                                   {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
                                                   {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
                                                   {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
                                               </p>
+                                              {person.family_name && (
+                                                <p className="text-stone-700 text-sm mb-1">Family: <span className="font-medium">{person.family_name}</span></p>
+                                              )}
+                                              {person.veteran_status && (
+                                                <p className="text-red-700 text-xs font-semibold uppercase tracking-wide mb-2">Veteran</p>
+                                              )}
                                             </div>
                                             <Badge variant="outline" className="hidden md:inline-flex border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
                                                                                                  Section {person.plot_location?.split('-')[0] || 'Main'}
                                                                                               </Badge>
                                          </div>
 
-                                         {/* Mobile-centered section and family badges */}
+                                         {/* Mobile-centered section badge */}
                                          <div className="md:hidden flex flex-col items-center gap-2 mt-2">
                                            <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
                                              Section {person.plot_location?.split('-')[0] || 'Main'}
                                            </Badge>
-                                           {person.family_name && (
-                                             <Badge variant="outline" className="text-stone-600 border-stone-300">
-                                               {person.family_name} Family
-                                             </Badge>
-                                           )}
                                          </div>
                                          <div className="space-y-3">
                                            <div className="flex items-center text-stone-600">
