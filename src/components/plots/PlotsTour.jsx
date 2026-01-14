@@ -143,6 +143,10 @@ export default function PlotsTour({ open, onClose }) {
         cardTop = above;
         cardLeft = Math.max(16 + window.scrollX, Math.min(right, left));
       }
+      // Move step 3 (plots) card two inches down to avoid overlap with floating zoom bar
+      if (step.id === 'plots') {
+        cardTop = Math.min(cardTop + 192, window.scrollY + vpH - cardH - 16);
+      }
     }
   }
 
