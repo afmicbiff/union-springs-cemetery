@@ -406,9 +406,9 @@ export default function SearchPage() {
                            {page.results.map((person, index) => {
                                const isLastElement = index === dedupedResults.length - 1;
                                return (
-                                 <div key={person.id} ref={isLastElement ? lastElementRef : null}>
+                                 <div key={person.id} ref={isLastElement ? lastElementRef : null} className="h-full">
                                    <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                     <div className="flex flex-col">
+                                     <div className="flex flex-col h-full">
 
 
                                        {/* Content Section */}
