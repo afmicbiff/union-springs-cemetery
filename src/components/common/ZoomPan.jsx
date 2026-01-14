@@ -8,6 +8,7 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   const [tx, setTx] = React.useState(0);
   const [ty, setTy] = React.useState(0);
   const [forcePan, setForcePan] = React.useState(false);
+const inertiaRef = React.useRef({ animId: 0 });
 
   // Controls visibility on small screens
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -41,58 +42,100 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   }, [scale]);
 
   // Drag/Pan (mouse and single-finger touch)
-  const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0, allowClickThrough: false, downTarget: null, moved: false });
+  const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0, allowClickThrough: false, downTarget: null, moved: false, lastX: 0, lastY: 0, lastTime: 0, vx: 0, vy: 0 });
 
   const onPointerDown = (e) => {
-    if (!containerRef.current) return;
-    const target = e.target;
-    const plotEl = target && typeof target.closest === 'function' ? target.closest('.plot-element') : null;
-    const shouldPan = forcePan || e.button === 1 || e.button === 2 || e.altKey || e.metaKey || e.ctrlKey;
-    if (plotEl && !shouldPan) {
-      return; // let plot elements handle simple left-clicks
-    }
-    if (e.button === 2) { // right click pan
-      e.preventDefault();
-    }
-    containerRef.current.setPointerCapture(e.pointerId);
-    stateRef.current.dragging = true;
-    stateRef.current.startX = e.clientX;
-    stateRef.current.startY = e.clientY;
-    stateRef.current.startTx = tx;
-    stateRef.current.startTy = ty;
-    stateRef.current.allowClickThrough = !!plotEl;
-    stateRef.current.downTarget = plotEl || target;
-    stateRef.current.moved = false;
-  };
+            if (!containerRef.current) return;
+            const target = e.target;
+            const plotEl = target && typeof target.closest === 'function' ? target.closest('.plot-element') : null;
+            const isTouch = e.pointerType === 'touch';
+            const shouldPan = isTouch || forcePan || e.button === 1 || e.button === 2 || e.altKey || e.metaKey || e.ctrlKey;
+            if (plotEl && !shouldPan) {
+              return; // let plot elements handle simple left-clicks (desktop)
+            }
+            if (inertiaRef.current.animId) { try { cancelAnimationFrame(inertiaRef.current.animId); } catch {} inertiaRef.current.animId = 0; }
+            if (e.button === 2) { // right click pan
+              e.preventDefault();
+            }
+            containerRef.current.setPointerCapture(e.pointerId);
+            stateRef.current.dragging = true;
+            stateRef.current.startX = e.clientX;
+            stateRef.current.startY = e.clientY;
+            stateRef.current.startTx = tx;
+            stateRef.current.startTy = ty;
+            stateRef.current.allowClickThrough = !!plotEl;
+            stateRef.current.downTarget = plotEl || target;
+            stateRef.current.moved = false;
+            stateRef.current.lastX = e.clientX;
+            stateRef.current.lastY = e.clientY;
+            stateRef.current.lastTime = performance.now();
+            stateRef.current.vx = 0;
+            stateRef.current.vy = 0;
+          };
   const onPointerMove = (e) => {
-    const st = stateRef.current;
-    if (!st.dragging) return;
-    const dx = e.clientX - st.startX;
-    const dy = e.clientY - st.startY;
-    if (!st.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
-      st.moved = true;
-    }
-    const clamped = clampTranslate(st.startTx + dx, st.startTy + dy);
-    setTx(clamped.x);
-    setTy(clamped.y);
-  };
+            const st = stateRef.current;
+            if (!st.dragging) return;
+            const dx = e.clientX - st.startX;
+            const dy = e.clientY - st.startY;
+            if (!st.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+              st.moved = true;
+            }
+            const now = performance.now();
+            const dt = st.lastTime ? now - st.lastTime : 0;
+            if (dt > 0) {
+              st.vx = (e.clientX - st.lastX) / dt;
+              st.vy = (e.clientY - st.lastY) / dt;
+            }
+            st.lastX = e.clientX;
+            st.lastY = e.clientY;
+            st.lastTime = now;
+            const clamped = clampTranslate(st.startTx + dx, st.startTy + dy);
+            setTx(clamped.x);
+            setTy(clamped.y);
+          };
   const onPointerUp = (e) => {
-    if (!containerRef.current) return;
-    try { containerRef.current.releasePointerCapture(e.pointerId); } catch {}
-    const st = stateRef.current;
-    const wasDragging = st.dragging;
-    st.dragging = false;
+            if (!containerRef.current) return;
+            try { containerRef.current.releasePointerCapture(e.pointerId); } catch {}
+            const st = stateRef.current;
+            const wasDragging = st.dragging;
+            st.dragging = false;
 
-    // If we started on a plot element, and didn't really move, forward a click to it
-    if (wasDragging && st.allowClickThrough && !st.moved && st.downTarget) {
-      // Defer to ensure pointerup settles before dispatch
-      setTimeout(() => {
-        try {
-          st.downTarget.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-        } catch {}
-      }, 0);
-    }
-  };
+            // If we started on a plot element, and didn't really move, forward a click to it
+            if (wasDragging && st.allowClickThrough && !st.moved && st.downTarget) {
+              // Defer to ensure pointerup settles before dispatch
+              setTimeout(() => {
+                try {
+                  st.downTarget.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+                } catch {}
+              }, 0);
+            }
+
+            // Inertial scrolling after swipe (mobile-friendly)
+            if (wasDragging && st.moved && !pinchRef.current.active) {
+              let vx = st.vx || 0;
+              let vy = st.vy || 0;
+              if (inertiaRef.current.animId) { try { cancelAnimationFrame(inertiaRef.current.animId); } catch {} inertiaRef.current.animId = 0; }
+              let x = tx;
+              let y = ty;
+              let lastT = performance.now();
+              const step = (t) => {
+                const dt = t - lastT;
+                lastT = t;
+                const decay = Math.pow(0.95, dt / 16);
+                vx *= decay;
+                vy *= decay;
+                x += vx * dt;
+                y += vy * dt;
+                const cl = clampTranslate(x, y);
+                x = cl.x; y = cl.y;
+                setTx(x);
+                setTy(y);
+                if (Math.hypot(vx, vy) < 0.01) { inertiaRef.current.animId = 0; return; }
+                inertiaRef.current.animId = requestAnimationFrame(step);
+              };
+              inertiaRef.current.animId = requestAnimationFrame(step);
+            }
+          };
 
   // Wheel: pan by default; hold Ctrl/Cmd to zoom around cursor
   const onWheel = (e) => {
