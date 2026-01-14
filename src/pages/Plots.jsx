@@ -313,7 +313,7 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
         type="button"
         onClick={onClick}
         aria-pressed={!!active}
-        className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} w-24 sm:w-auto text-center`}
+        className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-white h-12 px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} w-24 sm:w-auto text-center`}
         data-legend={label}
       >
         <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
@@ -1587,7 +1587,7 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9} controlsTop={controlsTop}>
+                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9}>
                       <div className="p-4 inline-block min-w-max space-y-10">
                         {singlePlotMode && selectedSectionKeyForPlot ? (
                           (() => {
