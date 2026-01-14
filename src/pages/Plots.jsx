@@ -25,6 +25,34 @@ import {
 import { toast } from "sonner";
 import debounce from 'lodash/debounce';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    try { console.error('Plots page runtime error:', error, info); } catch {}
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-red-50 text-red-800 p-6">
+          <div className="max-w-3xl mx-auto bg-white border border-red-200 rounded-md p-4">
+            <h2 className="text-lg font-semibold mb-2">There was a problem loading the Plots map</h2>
+            <p className="text-sm mb-3">{String(this.state.error?.message || 'Unknown error')}</p>
+            <button className="px-3 py-1.5 bg-red-600 text-white rounded" onClick={() => window.location.reload()}>Reload</button>
+          </div>
+        </div>
+        </ErrorBoundary>
+        );
+        }
+    return this.props.children;
+  }
+}
+
 // --- CONFIGURATION ---
 
 const STATUS_COLORS = {
@@ -1512,6 +1540,7 @@ export default function PlotsPage() {
         
 
   return (
+    <ErrorBoundary>
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
           
        
