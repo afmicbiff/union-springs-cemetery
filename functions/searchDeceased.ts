@@ -190,15 +190,15 @@ export default Deno.serve(async (req) => {
             if (filtered.length <= 5000) {
                 const fuse = new Fuse(filtered, {
                     keys: [
-                        { name: 'first_name', weight: 0.3 },
-                        { name: 'last_name', weight: 0.4 },
-                        { name: 'family_name', weight: 0.2 },
-                        { name: 'plot_location', weight: 0.3 },
-                        { name: 'obituary', weight: 0.1 },
-                        { name: 'notes', weight: 0.1 }
+                        { name: 'first_name', weight: 0.5 },
+                        { name: 'last_name', weight: 0.5 },
+                        { name: 'family_name', weight: 0.3 },
+                        { name: 'plot_location', weight: 0.2 }
                     ],
-                    threshold: 0.4,
+                    threshold: 0.2,
                     distance: 100,
+                    ignoreLocation: true,
+                    minMatchCharLength: 2,
                     includeScore: false
                 });
                 filtered = fuse.search(String(query)).map(r => r.item);
