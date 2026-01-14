@@ -400,7 +400,7 @@ export default function SearchPage() {
                 </div>
               ) : (dedupedResults.length > 0) ? (
                 <div className="grid gap-6">
-                   {data?.pages?.map((page, pageIndex) => (
+                   {[{ results: dedupedResults }].map((page, pageIndex) => (
                        <React.Fragment key={pageIndex}>
                            {page.results.map((person, index) => {
                                const isLastElement = pageIndex === data.pages.length - 1 && index === page.results.length - 1;
