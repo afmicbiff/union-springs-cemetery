@@ -28,7 +28,7 @@ export default function PlotsTour({ open, onClose }) {
       id: 'filters',
       selector: '#plots-filters',
       title: 'Filter the map',
-      description: 'Use these filters to quickly narrow plots by status, section, family name, and years. Results update immediately.'
+      description: 'Filters show only what you ask for: combine status, section, family name, and year ranges. “All Status” shows everything. You can also save and reuse searches.'
     },
     {
       id: 'zoom',
@@ -88,7 +88,7 @@ export default function PlotsTour({ open, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[9999]">
+    <div className="fixed inset-0 z-[9999] pointer-events-none">
       {/* Spotlight mask */}
       {rect ? (
         <div
@@ -110,7 +110,7 @@ export default function PlotsTour({ open, onClose }) {
 
       {/* Card */}
       <div
-        className="absolute bg-white rounded-lg shadow-xl border border-stone-200 w-[340px]"
+        className="absolute bg-white rounded-lg shadow-xl border border-stone-200 w-[340px] pointer-events-auto"
         style={{ left: cardLeft, top: cardTop }}
         role="dialog" aria-modal="true" aria-label="Plots guided tour"
       >
