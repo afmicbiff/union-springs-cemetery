@@ -152,7 +152,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                     >
                       {/* Use the existing GravePlot from the page via window.__B44_GravePlot if exposed, else fallback simple */}
                       <div
-                                                    className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90`}
+                                                    className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between cursor-move bg-opacity-90 plot-element`
 
                                                     onMouseEnter={(e) => onHover && onHover(e, item)}
                                                     onMouseLeave={() => onHover && onHover(null, null)}
@@ -171,7 +171,7 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
                 </Draggable>
               ) : (
                 <div
-                                        className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90`}
+                                        className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element`
 
                                         onMouseEnter={(e) => onHover && onHover(e, item)}
                                         onMouseLeave={() => onHover && onHover(null, null)}
