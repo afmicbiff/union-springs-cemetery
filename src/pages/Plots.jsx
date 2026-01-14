@@ -1595,7 +1595,7 @@ export default function PlotsPage() {
                               isExpanded={true}
                               onExpand={() => {}}
                               isAdmin={isAdmin}
-                              onEdit={handleEditClick}
+                              onEdit={isAdmin ? handleEditClick : undefined}
                               onHover={handleHover}
                               />
                             );
@@ -1619,7 +1619,7 @@ export default function PlotsPage() {
                                 isExpanded={expandedSections[sectionKey]}
                                 onExpand={() => handleExpandSection(sectionKey)}
                                 isAdmin={isAdmin}
-                                onEdit={handleEditClick}
+                                onEdit={isAdmin ? handleEditClick : undefined}
                                 onHover={handleHover}
                               />
                             );
