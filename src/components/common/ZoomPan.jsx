@@ -26,10 +26,17 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
     const ch = containerRef.current.clientHeight;
     const contentW = contentRef.current.scrollWidth * s;
     const contentH = contentRef.current.scrollHeight * s;
-    const minX = Math.min(0, cw - contentW);
-    const minY = Math.min(0, ch - contentH);
-    const maxX = 0;
-    const maxY = 0;
+
+    const deltaX = cw - contentW;
+    const deltaY = ch - contentH;
+
+    // Allow panning even when content is smaller than the viewport by providing
+    // symmetric bounds around 0; when content is larger, clamp to [delta, 0].
+    const minX = deltaX > 0 ? -deltaX : deltaX;
+    const maxX = deltaX > 0 ?  deltaX : 0;
+    const minY = deltaY > 0 ? -deltaY : deltaY;
+    const maxY = deltaY > 0 ?  deltaY : 0;
+
     return { x: clamp(nx, minX, maxX), y: clamp(ny, minY, maxY) };
   }, [scale]);
 
