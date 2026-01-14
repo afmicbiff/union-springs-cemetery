@@ -416,7 +416,7 @@ export default function SearchPage() {
                                          <div className="flex justify-between items-start">
                                             <div>
                                               <div className="flex items-center gap-2 mb-1">
-                                                  <h3 className="text-2xl font-serif font-bold text-stone-900">
+                                                  <h3 className="text-2xl font-serif font-bold text-stone-900 leading-tight break-words">
                                                       {person.first_name} {person.last_name}
                                                   </h3>
                                               </div>
@@ -449,7 +449,7 @@ export default function SearchPage() {
                                              <span>Plot Location: {person.plot_location}</span>
                                            </div>
                                            {person.notes && (
-                                             <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100">
+                                             <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100 break-words">
                                                 Note: {person.notes}
                                              </p>
                                            )}
