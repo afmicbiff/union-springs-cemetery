@@ -764,7 +764,7 @@ export default function PlotsPage() {
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (activeTab !== 'map') return;
     const update = () => {
       const el = document.querySelector('[data-legend="Unavailable"]');
@@ -772,11 +772,12 @@ export default function PlotsPage() {
       const rect = el.getBoundingClientRect();
       setControlsTop(rect.top + rect.height / 2);
     };
-    const id = setTimeout(update, 0);
-    window.addEventListener('resize', update);
+    const raf1 = requestAnimationFrame(update);
+    const onResize = () => requestAnimationFrame(update);
+    window.addEventListener('resize', onResize);
     return () => {
-      clearTimeout(id);
-      window.removeEventListener('resize', update);
+      cancelAnimationFrame(raf1);
+      window.removeEventListener('resize', onResize);
     };
   }, [activeTab]);
   

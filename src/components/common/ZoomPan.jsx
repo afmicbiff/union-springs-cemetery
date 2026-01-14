@@ -7,6 +7,7 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
   const [scale, setScale] = React.useState(initialScale);
   const [tx, setTx] = React.useState(0);
   const [ty, setTy] = React.useState(0);
+  const [forcePan, setForcePan] = React.useState(false);
 
   // Controls visibility on small screens
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -37,10 +38,14 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
 
   const onPointerDown = (e) => {
     if (!containerRef.current) return;
-    // Allow clicks on interactive children (e.g., plot elements) to reach their onClick handlers
     const target = e.target;
-    if (target && typeof target.closest === 'function' && target.closest('.plot-element')) {
-      return; // do not start panning or capture pointer; let child handle click
+    const isPlotEl = target && typeof target.closest === 'function' && target.closest('.plot-element');
+    const shouldPan = forcePan || e.button === 1 || e.button === 2 || e.altKey || e.metaKey || e.ctrlKey;
+    if (isPlotEl && !shouldPan) {
+      return; // let plot elements handle simple left-clicks
+    }
+    if (e.button === 2) { // right click pan
+      e.preventDefault();
     }
     containerRef.current.setPointerCapture(e.pointerId);
     stateRef.current.dragging = true;
@@ -176,6 +181,7 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       onPointerUp={onPinchPointerUp}
       onPointerCancel={onPinchPointerUp}
       onWheel={onWheel}
+      onContextMenu={(e) => e.preventDefault()}
     >
       <div ref={contentRef} className="origin-top-left will-change-transform block">
         {children}
@@ -184,14 +190,20 @@ export default function ZoomPan({ children, className = "", minScale = 0.4, maxS
       {/* Controls */}
       <div
         className="fixed right-3 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex flex-col gap-1"
-        style={{ top: typeof controlsTop === 'number' ? `${controlsTop}px` : (controlsTop || '7rem') }}
+        style={{ top: controlsTop != null ? `${controlsTop}px` : '7rem' }}
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
       >
         <button aria-label="Zoom in" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1.15)}>+</button>
         <button aria-label="Zoom out" className="px-2 py-1 text-sm hover:bg-gray-100 rounded" onClick={() => zoomBy(1/1.15)}>-</button>
-        <div className="px-2 pt-1 text-[10px] text-gray-500 text-center select-none">Left Click to Pan</div>
+        <button
+          aria-label="Toggle pan mode"
+          className={`px-2 py-1 text-xs rounded ${forcePan ? 'bg-gray-800 text-white' : 'hover:bg-gray-100'}`}
+          onClick={() => setForcePan(v => !v)}
+        >
+          {forcePan ? 'Pan: On' : 'Pan: Off'}
+        </button>
         <button aria-label="Reset view" className="px-2 py-1 text-xs hover:bg-gray-100 rounded" onClick={reset}>Reset</button>
       </div>
     </div>
