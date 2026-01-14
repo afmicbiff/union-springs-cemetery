@@ -110,26 +110,10 @@ export default function PlotsTour({ open, onClose }) {
   if (rect) {
     // Special placement for the zoom controls step so the card doesn’t sit under the floating toolbar
     if (step.id === 'zoom') {
-      const sideLeft = rect.left - cardW - 12;
-      if (sideLeft >= 16 + window.scrollX) {
-        // Place to the left of the controls, vertically centered and clamped to viewport
-        cardLeft = sideLeft;
-        const desiredTop = rect.top + (rect.height - cardH) / 2;
-        cardTop = Math.max(window.scrollY + 16, Math.min(desiredTop, window.scrollY + vpH - cardH - 16));
-      } else {
-        // Fallback to below/above logic but bias to the left to avoid overlap
-        const below = rect.top + rect.height + 12;
-        const above = rect.top - cardH - 12;
-        const right = Math.min(vpW - cardW - 16 + window.scrollX, rect.left + rect.width - cardW - 24);
-        const left = Math.max(16 + window.scrollX, rect.left - 24);
-        if (below + cardH <= window.scrollY + vpH) {
-          cardTop = below;
-          cardLeft = Math.max(16 + window.scrollX, Math.min(right, left));
-        } else if (above >= window.scrollY) {
-          cardTop = above;
-          cardLeft = Math.max(16 + window.scrollX, Math.min(right, left));
-        }
-      }
+      // Position the card 98px from the left edge of the viewport
+      cardLeft = window.scrollX + 98;
+      const desiredTop = rect ? rect.top + (rect.height - cardH) / 2 : (window.scrollY + (vpH - cardH) / 2);
+      cardTop = Math.max(window.scrollY + 16, Math.min(desiredTop, window.scrollY + vpH - cardH - 16));
     } else {
       const below = rect.top + rect.height + 12;
       const above = rect.top - cardH - 12;
