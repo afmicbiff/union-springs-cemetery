@@ -78,20 +78,20 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     if (!containerRef.current || !contentRef.current || !element) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
+    const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    const elCenterScreenX = elementRect.left + elementRect.width / 2;
-    const elCenterScreenY = elementRect.top + elementRect.height / 2;
+    // Calculate element center relative to the content (not the screen)
+    const elCenterInContentX = (elementRect.left + elementRect.width / 2 - contentRect.left) / scale;
+    const elCenterInContentY = (elementRect.top + elementRect.height / 2 - contentRect.top) / scale;
 
-    const containerCenterScreenX = containerRect.left + containerRect.width / 2;
-    const containerCenterScreenY = containerRect.top + containerRect.height / 2;
+    // Calculate target translation to center the element in the container
+    const targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
+    const targetTy = (containerRect.height / 2) - (elCenterInContentY * scale);
 
-    const deltaX = containerCenterScreenX - elCenterScreenX;
-    const deltaY = containerCenterScreenY - elCenterScreenY;
-
-    setTx((prev) => prev + deltaX);
-    setTy((prev) => prev + deltaY);
-  }, []);
+    setTx(targetTx);
+    setTy(targetTy);
+  }, [scale]);
 
   const zoomBy = (factor) =>
     setScale((s) => clamp(s * factor, minScale, maxScale));
