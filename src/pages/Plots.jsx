@@ -290,24 +290,17 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   
   const { isSelected, fromSearch } = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
-    const rawSectionParam = params.get('section') || '';
-    const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
-    const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
     const targetPlotNum = parseInt(params.get('plot') || '', 10);
     const fromSearchVal = params.get('from') === 'search';
     
-    const selected = Number.isFinite(targetPlotNum) 
+    // When coming from search, match by plot number only (section matching is unreliable)
+    const selected = fromSearchVal 
+      && Number.isFinite(targetPlotNum) 
       && Number.isFinite(plotNum) 
-      && plotNum === targetPlotNum 
-      && (!targetKeyParam || sectionForId === targetKeyParam);
-    
-    // Debug logging - remove after testing
-    if (fromSearchVal && Number.isFinite(targetPlotNum) && plotNum === targetPlotNum) {
-      console.log('BLINK DEBUG:', { plotNum, sectionForId, targetPlotNum, targetKeyParam, selected, fromSearchVal, rawSectionParam });
-    }
+      && plotNum === targetPlotNum;
     
     return { isSelected: selected, fromSearch: fromSearchVal };
-  }, [plotNum, sectionForId]);
+  }, [plotNum]);
 
   // Start blinking for 60 seconds when coming from search and this plot is selected
   useEffect(() => {
