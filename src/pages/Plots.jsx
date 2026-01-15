@@ -1303,13 +1303,15 @@ export default function PlotsPage() {
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
-                  // Use ZoomPan's internal centering logic
-                  if (zoomPanRef.current) {
-                    zoomPanRef.current.centerOnElement(plotEl);
-                  }
+                  // Use ZoomPan's internal centering logic with a small delay to ensure render is complete
+                  setTimeout(() => {
+                    if (zoomPanRef.current) {
+                      zoomPanRef.current.centerOnElement(plotEl);
+                    }
+                    setTimeout(() => setIsCentering(false), 300);
+                  }, 100);
                   done = true;
-                                          setTimeout(() => setIsCentering(false), 400);
-                                          return;
+                  return;
               }
           }
 
