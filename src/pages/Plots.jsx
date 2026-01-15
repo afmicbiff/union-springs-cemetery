@@ -1636,32 +1636,8 @@ export default function PlotsPage() {
 
                     <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9}>
                       <div className="p-4 inline-block min-w-max space-y-10">
-                        {singlePlotMode && selectedSectionKeyForPlot ? (
-                          (() => {
-                            const sectionKey = selectedSectionKeyForPlot;
-                            const palette = getSectionPalette(sectionKey);
-                            const items = (sections[sectionKey] || []).filter(it => {
-                              const n = parseInt(String(it.Grave).replace(/\D/g, '')) || 0;
-                              return selectedPlotNum != null && n === selectedPlotNum;
-                            });
-                            return (
-                              <SectionRenderer
-                              key={sectionKey}
-                              sectionKey={sectionKey}
-                              plots={items}
-                              palette={palette}
-                              isCollapsed={false}
-                              onToggle={() => {}}
-                              isExpanded={true}
-                              onExpand={() => {}}
-                              isAdmin={isAdmin}
-                              onEdit={isAdmin ? handleEditClick : undefined}
-                              onHover={handleHover}
-                              />
-                            );
-                          })()
-                        ) : (
-                          Object.keys(sections).sort((a, b) => {
+                        {/* Always show all plots, scroll/center to target if from search */}
+                        {Object.keys(sections).sort((a, b) => {
                             const numA = parseInt(a);
                             const numB = parseInt(b);
                             if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
