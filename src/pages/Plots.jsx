@@ -1271,13 +1271,13 @@ export default function PlotsPage() {
       const params = new URLSearchParams(window.location.search);
       const rawSection = params.get('section') || '';
       const rawPlot = params.get('plot') || '';
+      const fromSearch = params.get('from') === 'search';
       if (!rawSection && !rawPlot) return;
 
       if (isLoading) return;
 
       setActiveTab('map');
-                  
-                  setIsCentering(true);
+      setIsCentering(true);
 
       const rawNorm = rawSection.replace(/Section\s/i, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
@@ -1288,7 +1288,6 @@ export default function PlotsPage() {
       const plotNum = parseInt(rawPlot, 10);
 
       let attempts = 0;
-      // Reduce attempts to shorten time-to-center and avoid long rAF loops
       const maxAttempts = 240;
       let done = false;
       let sectionScrolled = false;
@@ -1303,13 +1302,21 @@ export default function PlotsPage() {
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
-                  // Use ZoomPan's internal centering logic with a small delay to ensure render is complete
+                  // Step 1: Center the plot
                   setTimeout(() => {
                     if (zoomPanRef.current) {
                       zoomPanRef.current.centerOnElement(plotEl);
                     }
-                    setTimeout(() => setIsCentering(false), 300);
-                  }, 100);
+                    // Step 2: After centering, dispatch event to start blinking
+                    setTimeout(() => {
+                      setIsCentering(false);
+                      if (fromSearch) {
+                        window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                          detail: { targetPlotNum: plotNum, targetSection: sectionNorm }
+                        }));
+                      }
+                    }, 400);
+                  }, 150);
                   done = true;
                   return;
               }
