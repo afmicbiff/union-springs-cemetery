@@ -302,7 +302,7 @@ export default function SearchPage() {
               <div className="space-y-2">
                 <Label className="text-stone-600">Plot Section</Label>
                 <Select value={section} onValueChange={setSection}>
-                  <SelectTrigger className="bg-stone-50 border-stone-300">
+                  <SelectTrigger aria-label="Select Plot Section" className="bg-stone-50 border-stone-300">
                     <SelectValue placeholder="Select Section" />
                   </SelectTrigger>
                   <SelectContent>
@@ -329,7 +329,7 @@ export default function SearchPage() {
               <div className="space-y-2">
                 <Label className="text-stone-600">Veteran Status</Label>
                 <Select value={veteranStatus} onValueChange={setVeteranStatus}>
-                  <SelectTrigger className="bg-stone-50 border-stone-300">
+                  <SelectTrigger aria-label="Select Veteran Status" className="bg-stone-50 border-stone-300">
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
