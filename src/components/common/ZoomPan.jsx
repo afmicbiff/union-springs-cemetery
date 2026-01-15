@@ -151,25 +151,56 @@ const inertiaRef = React.useRef({ animId: 0 });
             if (wasDragging && st.moved && !pinchRef.current.active) {
               let vx = st.vx || 0;
               let vy = st.vy || 0;
-              if (inertiaRef.current.animId) { try { cancelAnimationFrame(inertiaRef.current.animId); } catch {} inertiaRef.current.animId = 0; }
+
+              // Clamp max velocity to prevent "teleporting"
+              const MAX_VELOCITY = 2.5; // px/ms
+              vx = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, vx));
+              vy = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, vy));
+
+              // Ignore tiny flicks
+              if (Math.hypot(vx, vy) < 0.05) return;
+
+              if (inertiaRef.current.animId) {
+                try { cancelAnimationFrame(inertiaRef.current.animId); } catch {}
+                inertiaRef.current.animId = 0;
+              }
+
               let x = tx;
               let y = ty;
+
+              // Exponential decay tuned to feel natural
+              const DECAY = 0.0025; // lower = longer coast
               let lastT = performance.now();
+
               const step = (t) => {
                 const dt = t - lastT;
                 lastT = t;
-                const decay = Math.pow(0.95, dt / 16);
-                vx *= decay;
-                vy *= decay;
+
+                // Exponential decay based on time
+                const decayFactor = Math.exp(-DECAY * dt);
+                vx *= decayFactor;
+                vy *= decayFactor;
+
+                // Apply velocity scaled by dt
                 x += vx * dt;
                 y += vy * dt;
+
                 const cl = clampTranslate(x, y);
-                x = cl.x; y = cl.y;
+                x = cl.x;
+                y = cl.y;
+
                 setTx(x);
                 setTy(y);
-                if (Math.hypot(vx, vy) < 0.01) { inertiaRef.current.animId = 0; return; }
+
+                // Stop when velocity is nearly zero
+                if (Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01) {
+                  inertiaRef.current.animId = 0;
+                  return;
+                }
+
                 inertiaRef.current.animId = requestAnimationFrame(step);
               };
+
               inertiaRef.current.animId = requestAnimationFrame(step);
             }
           };
