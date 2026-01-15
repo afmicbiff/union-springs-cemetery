@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
+import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 import SmartImage from "@/components/perf/SmartImage";
 import ZoomPan from "@/components/common/ZoomPan";
 import PlotsTour from "@/components/plots/PlotsTour";
@@ -291,16 +292,22 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const { isSelected, fromSearch } = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const targetPlotNum = parseInt(params.get('plot') || '', 10);
+    const targetSectionParam = params.get('section') || '';
     const fromSearchVal = params.get('from') === 'search';
     
-    // When coming from search, match by plot number only (section matching is unreliable)
+    // Normalize both the URL section and the plot's section
+    const normalizedTarget = normalizeSectionKey(targetSectionParam);
+    const normalizedPlot = normalizeSectionKey(sectionForId);
+    
+    // Match by plot number AND normalized section
     const selected = fromSearchVal 
       && Number.isFinite(targetPlotNum) 
       && Number.isFinite(plotNum) 
-      && plotNum === targetPlotNum;
+      && plotNum === targetPlotNum
+      && (!normalizedTarget || normalizedPlot === normalizedTarget);
     
     return { isSelected: selected, fromSearch: fromSearchVal };
-  }, [plotNum]);
+  }, [plotNum, sectionForId]);
 
   // Start blinking for 60 seconds when coming from search and this plot is selected
   useEffect(() => {

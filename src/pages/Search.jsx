@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Filter, X } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 
 
 
@@ -462,7 +463,7 @@ export default function SearchPage() {
 
                                          <div className="mt-auto pt-4 border-t border-stone-200 flex flex-wrap items-center gap-3 sm:justify-between justify-start">
                                             <Link 
-                                              to={`${createPageUrl('Plots')}?section=${encodeURIComponent(person.plot_location?.split('-')[0] || '')}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
+                                              to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizeSectionKey(person.plot_location?.split('-')[0] || ''))}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
                                               state={{ search: location.search }}
                                             >
                                               <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4 w-full sm:w-auto" title="View only this plot on the map">
