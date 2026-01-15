@@ -276,6 +276,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
   const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
+  const fromSearch = params.get('from') === 'search';
   const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
   const sectionNorm = String(data.Section || '').replace(/Section\s/i, '').trim();
   const sectionForId = String(computedSectionKey || sectionNorm || '');
@@ -283,6 +284,16 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
     && Number.isFinite(plotNum) 
     && plotNum === targetPlotNum 
     && (!targetKeyParam || sectionForId === targetKeyParam);
+  
+  // Blinking state for 60 seconds when coming from search
+  const [isBlinking, setIsBlinking] = useState(isSelected && fromSearch);
+  useEffect(() => {
+    if (isSelected && fromSearch) {
+      setIsBlinking(true);
+      const timer = setTimeout(() => setIsBlinking(false), 60000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSelected, fromSearch]);
 
 
 
