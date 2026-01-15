@@ -175,7 +175,7 @@ const inertiaRef = React.useRef({ animId: 0 });
           };
 
   // Wheel: pan by default; hold Ctrl/Cmd to zoom around cursor
-  const onWheel = (e) => {
+  const onWheel = React.useCallback((e) => {
     if (!contentRef.current) return;
     e.preventDefault();
 
