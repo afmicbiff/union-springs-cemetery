@@ -262,49 +262,42 @@ const Tooltip = React.memo(({ data, position, visible }) => {
       );
 });
 
+// Inject CSS for blinking animation once at module level
+if (typeof document !== 'undefined' && !document.getElementById('plot-blink-style')) {
+  const style = document.createElement('style');
+  style.id = 'plot-blink-style';
+  style.textContent = `
+    @keyframes plotBlink {
+      0%, 100% { background-color: #22c55e; border-color: #15803d; box-shadow: 0 0 20px 8px rgba(34, 197, 94, 0.7); }
+      50% { background-color: #86efac; border-color: #22c55e; box-shadow: 0 0 30px 12px rgba(134, 239, 172, 0.9); }
+    }
+    .animate-plot-blink {
+      animation: plotBlink 0.8s ease-in-out infinite;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isBlinking, setIsBlinking] = useState(false);
 
-  // Add CSS for blinking animation
-  useEffect(() => {
-    if (!document.getElementById('plot-blink-style')) {
-      const style = document.createElement('style');
-      style.id = 'plot-blink-style';
-      style.textContent = `
-        @keyframes plotBlink {
-          0%, 50% { background-color: #22c55e; border-color: #15803d; }
-          25%, 75% { background-color: #86efac; border-color: #22c55e; }
-        }
-        .animate-plot-blink {
-          animation: plotBlink 1s ease-in-out infinite;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }, []);
-
-  if (data.isSpacer) {
-      return (
-          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
-      );
-  }
-
-  const params = new URLSearchParams(window.location.search);
+  // Calculate selection state
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const rawSectionParam = params.get('section') || '';
   const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
   const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
   const targetPlotNum = parseInt(params.get('plot') || '', 10);
   const fromSearch = params.get('from') === 'search';
-  const plotNum = parseInt(String(data.Grave).replace(/\D/g, '')) || null;
-  const sectionNorm = String(data.Section || '').replace(/Section\s/i, '').trim();
+  const plotNum = parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null;
+  const sectionNorm = String(data?.Section || '').replace(/Section\s/i, '').trim();
   const sectionForId = String(computedSectionKey || sectionNorm || '');
   const isSelected = Number.isFinite(targetPlotNum) 
     && Number.isFinite(plotNum) 
     && plotNum === targetPlotNum 
     && (!targetKeyParam || sectionForId === targetKeyParam);
-  
-  // Blinking state for 60 seconds when coming from search
-  const [isBlinking, setIsBlinking] = useState(isSelected && fromSearch);
+
+  // Start blinking for 60 seconds when coming from search and this plot is selected
   useEffect(() => {
     if (isSelected && fromSearch) {
       setIsBlinking(true);
@@ -312,6 +305,12 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
       return () => clearTimeout(timer);
     }
   }, [isSelected, fromSearch]);
+
+  if (data?.isSpacer) {
+      return (
+          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
+      );
+  }
 
 
 
