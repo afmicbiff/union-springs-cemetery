@@ -588,6 +588,7 @@ export default function AdminDashboard() {
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button
+                                  type="button"
                                   className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isEmployeesGroupActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
                                   aria-label="Employees options"
                                 >
@@ -623,6 +624,7 @@ export default function AdminDashboard() {
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <button
+                                    type="button"
                                     className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
                                     aria-label="Communications options"
                                   >
@@ -683,6 +685,7 @@ export default function AdminDashboard() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
+                            type="button"
                             className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
                             aria-label="Notifications options"
                           >
@@ -711,6 +714,7 @@ export default function AdminDashboard() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
+                            type="button"
                             className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
                             aria-label="Email tool options"
                           >
