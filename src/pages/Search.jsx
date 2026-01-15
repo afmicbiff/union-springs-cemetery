@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Filter, X } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
+import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
 
 
 
