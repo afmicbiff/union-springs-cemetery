@@ -777,16 +777,24 @@ export default function PlotsPage() {
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [tourSession, setTourSession] = useState(0);
-  // Collapse non-target sections on direct deep link to speed up initial render
+  // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
           const params = new URLSearchParams(window.location.search);
           const rawSection = params.get('section') || '';
           const rawPlot = params.get('plot') || '';
+          const fromSearch = params.get('from') === 'search';
           if (!rawSection && !rawPlot) return;
-          const rawNorm = rawSection.replace(/Section\s/i, '').trim();
-          const targetKey = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : (rawNorm || '');
-          if (targetKey && ['1','2','3','4','5'].includes(targetKey)) {
-            setCollapsedSections({ '1': true, '2': true, '3': true, '4': true, '5': true, [targetKey]: false });
+          
+          // If coming from search, expand all sections so all plots are visible
+          if (fromSearch) {
+            setCollapsedSections({ '1': false, '2': false, '3': false, '4': false, '5': false });
+          } else {
+            // Direct deep link - collapse other sections
+            const rawNorm = rawSection.replace(/Section\s/i, '').trim();
+            const targetKey = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : (rawNorm || '');
+            if (targetKey && ['1','2','3','4','5'].includes(targetKey)) {
+              setCollapsedSections({ '1': true, '2': true, '3': true, '4': true, '5': true, [targetKey]: false });
+            }
           }
         }, []);
   const openSections = useMemo(() => Object.keys(collapsedSections).filter((k) => !collapsedSections[k]), [collapsedSections]);
