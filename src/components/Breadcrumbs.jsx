@@ -10,18 +10,20 @@ export default function Breadcrumbs({ items, className = "" }) {
         <Home className="w-4 h-4 mr-1" />
         Home
       </Link>
-      {items.map((item, index) => (
-        <React.Fragment key={index}>
-          <ChevronRight className="w-4 h-4 mx-2 text-stone-400" />
-          {item.path ? (
-             <Link to={createPageUrl(item.path)} className="hover:text-teal-700 transition-colors">
-               {item.label}
-             </Link>
-          ) : (
-             <span className="font-medium opacity-90">{item.label}</span>
-          )}
-        </React.Fragment>
-      ))}
+      {items.map((item, index) => {
+        return (
+          <span key={index} className="contents">
+            <ChevronRight className="w-4 h-4 mx-2 text-stone-400" />
+            {item.path ? (
+               <Link to={createPageUrl(item.path)} className="hover:text-teal-700 transition-colors">
+                 {item.label}
+               </Link>
+            ) : (
+               <span className="font-medium opacity-90">{item.label}</span>
+            )}
+          </span>
+        );
+      })}
     </nav>
   );
 }
