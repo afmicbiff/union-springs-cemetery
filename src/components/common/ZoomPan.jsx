@@ -270,16 +270,37 @@ const inertiaRef = React.useRef({ animId: 0 });
     onPointerUp(e);
   };
 
+  // ⭐ FIX: Attach non-passive listeners manually to allow preventDefault()
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Non-passive wheel listener
+    const wheelHandler = (e) => onWheel(e);
+    el.addEventListener("wheel", wheelHandler, { passive: false });
+
+    // Non-passive pointerdown listener
+    const pointerDownHandler = (e) => {
+      onPointerDown(e);
+      onPinchPointerDown(e);
+    };
+    el.addEventListener("pointerdown", pointerDownHandler, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", wheelHandler);
+      el.removeEventListener("pointerdown", pointerDownHandler);
+    };
+  }, [onWheel, onPointerDown]);
+
   return (
     <div
       ref={containerRef}
       className={`relative overflow-hidden touch-none select-none ${className}`}
       style={{ touchAction: "none" }}
-      onPointerDown={(e) => { onPointerDown(e); onPinchPointerDown(e); }}
+      // Removed onWheel and onPointerDown - now attached as non-passive listeners
       onPointerMove={onPinchPointerMove}
       onPointerUp={onPinchPointerUp}
       onPointerCancel={onPinchPointerUp}
-      onWheel={onWheel}
       onContextMenu={(e) => e.preventDefault()}
     >
       <div ref={contentRef} className="origin-top-left will-change-transform block">
