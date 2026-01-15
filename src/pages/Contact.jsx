@@ -80,21 +80,6 @@ export default function ContactPage() {
 
                             <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
                                 <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
-                                    <div className="bg-red-100 p-2 sm:p-3 rounded-full">
-                                        <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-red-700" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Email</h3>
-                                        <p className="text-stone-600 text-sm sm:text-base mb-1">For general inquiries</p>
-                                        <a href="mailto:office@unionsprings.com" className="text-red-700 font-semibold hover:underline text-lg">
-                                            office@unionsprings.com
-                                        </a>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
                                     <div className="bg-stone-200 p-2 sm:p-3 rounded-full">
                                         <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-stone-700" />
                                     </div>
