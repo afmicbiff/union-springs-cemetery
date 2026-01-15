@@ -15,6 +15,7 @@ import SmartImage from "@/components/perf/SmartImage";
 import ZoomPan from "@/components/common/ZoomPan";
 import PlotsTour from "@/components/plots/PlotsTour";
 import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
+import PlotFocusPopup from "@/components/plots/PlotFocusPopup";
 
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
@@ -1793,6 +1794,9 @@ export default function PlotsPage() {
 
       {/* Tooltip Portal */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
+
+      {/* Plot Focus Popup - shows when coming from search */}
+      <PlotFocusPopup zoomPanRef={zoomPanRef} />
 
       {/* Guided Tour */}
       <PlotsTour key={tourSession} open={isTourOpen} onClose={() => setIsTourOpen(false)} />
