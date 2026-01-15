@@ -1607,9 +1607,7 @@ export default function PlotsPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 max-w-2xl">
-            <QuickSearchDropdown initialValue="" />
-          </div>
+
           
           <div className="flex items-center space-x-3">
             <div className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg mr-4">
