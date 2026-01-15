@@ -307,8 +307,9 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
   const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl'; // static highlight; blinking handled runtime until user clicks
-  const activeClass = isSelected ? selectedClass : (isHovered ? hoverClass : baseClass);
+  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl';
+  const blinkingClass = 'ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-plot-blink';
+  const activeClass = isBlinking ? blinkingClass : (isSelected ? selectedClass : (isHovered ? hoverClass : baseClass));
 
   return (
   <div
