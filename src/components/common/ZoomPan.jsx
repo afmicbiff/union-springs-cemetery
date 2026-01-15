@@ -210,7 +210,7 @@ const inertiaRef = React.useRef({ animId: 0 });
       setTy(cl.y);
       return next;
     });
-  };
+  }, [tx, ty, scale, minScale, maxScale, clampTranslate]);
 
   // Pinch zoom (two pointers)
   const pinchRef = React.useRef({ active: false, startDist: 0, startScale: initialScale, centerX: 0, centerY: 0, startTx: 0, startTy: 0, pointers: new Map() });
