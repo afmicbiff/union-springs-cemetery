@@ -199,6 +199,16 @@ export default function Layout({ children }) {
         .app-font-scope h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); line-height: 1.25; }
         .app-font-scope h3 { font-size: clamp(1.125rem, 1.5vw, 1.375rem); line-height: 1.3; }
         .app-font-scope :where(p, li) { line-height: 1.6; }
+        /* Hide number input spinners cross-browser */
+        input[type='number'] {
+          -moz-appearance: textfield;
+          appearance: textfield;
+        }
+        input[type='number']::-webkit-outer-spin-button,
+        input[type='number']::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
       `}</style>
       {/* Header */}
       <header className="bg-stone-900 text-stone-100 shadow-md sticky top-0 z-50 border-b-4 border-teal-700">
