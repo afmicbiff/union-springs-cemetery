@@ -257,6 +257,16 @@ export default function SearchPage() {
           </p>
         </div>
 
+        {/* Quick Search with Dropdown - Click to navigate directly to map */}
+        <div className="bg-teal-50 border border-teal-200 p-4 rounded-sm shadow-md mb-4">
+          <p className="text-sm text-teal-800 font-medium mb-2">
+            Quick Locate: Type a name and click a result to view the plot on the map
+          </p>
+          <QuickSearchDropdown 
+            initialValue=""
+          />
+        </div>
+
         {/* Search Bar & Filters */}
         <div className="bg-white p-6 rounded-sm shadow-xl space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
