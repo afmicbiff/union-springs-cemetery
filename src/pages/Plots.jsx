@@ -265,6 +265,24 @@ const Tooltip = React.memo(({ data, position, visible }) => {
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Add CSS for blinking animation
+  useEffect(() => {
+    if (!document.getElementById('plot-blink-style')) {
+      const style = document.createElement('style');
+      style.id = 'plot-blink-style';
+      style.textContent = `
+        @keyframes plotBlink {
+          0%, 50% { background-color: #22c55e; border-color: #15803d; }
+          25%, 75% { background-color: #86efac; border-color: #22c55e; }
+        }
+        .animate-plot-blink {
+          animation: plotBlink 1s ease-in-out infinite;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   if (data.isSpacer) {
       return (
           <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
