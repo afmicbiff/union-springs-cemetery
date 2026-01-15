@@ -9,9 +9,15 @@ const ZoomPan = React.forwardRef(function ZoomPan({ children, className = "", mi
   const [ty, setTy] = React.useState(0);
   const [forcePan, setForcePan] = React.useState(false);
 const inertiaRef = React.useRef({ animId: 0 });
+  const smoothScaleRef = React.useRef(scale);
 
   // Controls visibility on small screens
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  // Smoothing function for buttery pinch-zoom
+  const smoothDamp = (current, target, smoothing = 0.15) => {
+    return current + (target - current) * smoothing;
+  };
 
   // Apply transform efficiently
   const applyTransform = React.useCallback(() => {
@@ -274,20 +280,27 @@ const inertiaRef = React.useRef({ animId: 0 });
       const dy = pts[0].y - pts[1].y;
       const dist = Math.hypot(dx, dy);
       if (!dist || !pr.startDist) return;
-      let next = clamp(pr.startScale * (dist / pr.startDist), minScale, maxScale);
+      // Compute raw next scale
+      let rawNext = clamp(pr.startScale * (dist / pr.startDist), minScale, maxScale);
+
+      // Smooth the scale for buttery feel
+      smoothScaleRef.current = smoothDamp(smoothScaleRef.current, rawNext, 0.18);
+      let next = smoothScaleRef.current;
 
       // Convert gesture center into content-local coords
       const rect = contentRef.current.getBoundingClientRect();
       const cx = pr.centerX - rect.left;
       const cy = pr.centerY - rect.top;
-      const nx = cx / scale; // using current scale provides smoother continuity
+      const nx = cx / scale;
       const ny = cy / scale;
 
+      // Compute new translation
       const txNew = pr.startTx - (nx * (next - pr.startScale));
       const tyNew = pr.startTy - (ny * (next - pr.startScale));
 
       const cl = clampTranslate(txNew, tyNew, next);
 
+      // Apply smoothed transform
       setScale(next);
       setTx(cl.x);
       setTy(cl.y);
