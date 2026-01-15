@@ -847,6 +847,7 @@ export default function PlotsPage() {
   const deferredSearch = useDeferredValue(searchQuery);
   const [isCentering, setIsCentering] = useState(false);
   const location = useLocation();
+  const zoomPanRef = useRef(null);
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
 
@@ -1302,14 +1303,9 @@ export default function PlotsPage() {
                   plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
-                  // Scroll into view vertically and horizontally
-                  plotEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                  const hContainer = plotEl.closest('[class*="overflow-x-auto"]');
-                  if (hContainer) {
-                    const elRect = plotEl.getBoundingClientRect();
-                    const cRect = hContainer.getBoundingClientRect();
-                    const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
-                    hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+                  // Use ZoomPan's internal centering logic
+                  if (zoomPanRef.current) {
+                    zoomPanRef.current.centerOnElement(plotEl);
                   }
                   done = true;
                                           setTimeout(() => setIsCentering(false), 400);
@@ -1514,13 +1510,18 @@ export default function PlotsPage() {
   const centerElement = useCallback((el) => {
     if (!el) return;
     try {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      const hContainer = el.closest('[class*="overflow-x-auto"]');
-      if (hContainer) {
-        const elRect = el.getBoundingClientRect();
-        const cRect = hContainer.getBoundingClientRect();
-        const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
-        hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+      if (zoomPanRef.current) {
+        zoomPanRef.current.centerOnElement(el);
+      } else {
+        // Fallback to native scroll if ZoomPan ref not available
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        const hContainer = el.closest('[class*="overflow-x-auto"]');
+        if (hContainer) {
+          const elRect = el.getBoundingClientRect();
+          const cRect = hContainer.getBoundingClientRect();
+          const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
+          hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+        }
       }
     } catch {}
   }, []);
@@ -1685,7 +1686,7 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9}>
+                    <ZoomPan ref={zoomPanRef} className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9}>
                       <div className="p-4 inline-block min-w-max space-y-10">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).sort((a, b) => {

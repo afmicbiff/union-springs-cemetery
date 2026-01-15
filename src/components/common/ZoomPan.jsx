@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ZoomPan({ children, className = "", minScale = 0.4, maxScale = 2.5, initialScale = 1, controlsTop }) {
+const ZoomPan = React.forwardRef(function ZoomPan({ children, className = "", minScale = 0.4, maxScale = 2.5, initialScale = 1, controlsTop }, ref) {
   const containerRef = React.useRef(null);
   const contentRef = React.useRef(null);
 
@@ -40,6 +40,47 @@ const inertiaRef = React.useRef({ animId: 0 });
 
     return { x: clamp(nx, minX, maxX), y: clamp(ny, minY, maxY) };
   }, [scale]);
+
+  const centerOnElement = React.useCallback((element) => {
+    if (!containerRef.current || !contentRef.current || !element) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+
+    // Calculate current center of element
+    const currentElCenterX = (elementRect.left + elementRect.right) / 2;
+    const currentElCenterY = (elementRect.top + elementRect.bottom) / 2;
+
+    // Desired center (center of container)
+    const desiredCenterX = containerRect.left + containerRect.width / 2;
+    const desiredCenterY = containerRect.top + containerRect.height / 2;
+
+    // Calculate the offset needed
+    const offsetX = desiredCenterX - currentElCenterX;
+    const offsetY = desiredCenterY - currentElCenterY;
+
+    // Apply offset to current translation
+    const nextTx = tx + offsetX;
+    const nextTy = ty + offsetY;
+
+    const clamped = clampTranslate(nextTx, nextTy);
+    setTx(clamped.x);
+    setTy(clamped.y);
+  }, [tx, ty, clampTranslate]);
+
+  const zoomBy = (factor) => setScale((s) => clamp(s * factor, minScale, maxScale));
+  const reset = () => {
+    setScale(initialScale);
+    const cl = clampTranslate(0, 0, initialScale);
+    setTx(cl.x);
+    setTy(cl.y);
+  };
+
+  React.useImperativeHandle(ref, () => ({
+    centerOnElement,
+    zoomBy,
+    reset
+  }));
 
   // Drag/Pan (mouse and single-finger touch)
   const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0, allowClickThrough: false, downTarget: null, moved: false, lastX: 0, lastY: 0, lastTime: 0, vx: 0, vy: 0 });
@@ -233,14 +274,6 @@ const inertiaRef = React.useRef({ animId: 0 });
     onPointerUp(e);
   };
 
-  const zoomBy = (factor) => setScale((s) => clamp(s * factor, minScale, maxScale));
-  const reset = () => {
-    setScale(initialScale);
-    const cl = clampTranslate(0, 0, initialScale);
-    setTx(cl.x);
-    setTy(cl.y);
-  };
-
   return (
     <div
       ref={containerRef}
@@ -279,4 +312,6 @@ const inertiaRef = React.useRef({ animId: 0 });
 
     </div>
   );
-}
+});
+
+export default ZoomPan;
