@@ -846,7 +846,7 @@ export default function PlotsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
   const deferredSearch = useDeferredValue(searchQuery);
-  const [isCentering, setIsCentering] = useState(false);
+
   const location = useLocation();
   const zoomPanRef = useRef(null);
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
@@ -1267,82 +1267,21 @@ export default function PlotsPage() {
     return null;
   }, [selectedPlotNum, sections]);
 
-  // Robustly scroll into view for a target section/plot (?section=...&plot=...)
+  // Expand target section when coming from search
   useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const rawSection = params.get('section') || '';
       const rawPlot = params.get('plot') || '';
-      const fromSearch = params.get('from') === 'search';
       if (!rawSection && !rawPlot) return;
 
-      if (isLoading) return;
-
       setActiveTab('map');
-      setIsCentering(true);
 
       const rawNorm = rawSection.replace(/Section\s/i, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
-      // Ensure the target section is expanded before searching for the plot element
       if (sectionNorm) {
         setCollapsedSections(prev => ({ ...prev, [sectionNorm]: false }));
       }
-      const plotNum = parseInt(rawPlot, 10);
-
-      let attempts = 0;
-      const maxAttempts = 240;
-      let done = false;
-      let sectionScrolled = false;
-
-      const tryScroll = () => {
-          if (done) return;
-          attempts += 1;
-
-          if (!isNaN(plotNum) && sectionNorm && zoomPanRef.current) {
-              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
-              if (!plotEl) {
-                  plotEl = document.querySelector(`[data-section="${sectionNorm}"][data-plot-num="${plotNum}"]`);
-              }
-              if (!plotEl) {
-                  plotEl = document.querySelector(`[id^="plot-${sectionNorm}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
-              }
-              if (plotEl) {
-                  zoomPanRef.current.centerOnElement(plotEl, 'top-left');
-                  setIsCentering(false);
-                  if (fromSearch) {
-                      window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                          detail: { targetPlotNum: plotNum, targetSection: sectionNorm }
-                      }));
-                  }
-                  done = true;
-                  return;
-              }
-          }
-
-          if (!sectionScrolled && sectionNorm) {
-              const sectionEl = document.getElementById(`section-${sectionNorm}`) || document.getElementById(`section-${(rawSection.match(/\d+/) || [sectionNorm])[0]}`);
-              if (sectionEl) {
-                  sectionEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  sectionScrolled = true;
-              }
-          }
-
-          if (attempts < maxAttempts) {
-              requestAnimationFrame(tryScroll);
-          } else {
-              done = true;
-              setIsCentering(false);
-          }
-      };
-
-      requestAnimationFrame(tryScroll);
-  }, [sections, isLoading]);
-
-  useEffect(() => {
-    if (!isCentering) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, [isCentering]);
+  }, []);
 
   // CSV Parser
   const parseCSV = useCallback((text) => {
@@ -1850,14 +1789,7 @@ export default function PlotsPage() {
           </main>
       )}
 
-      {/* Centering Overlay */}
-      {isCentering && (
-        <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white rounded-full p-5 shadow-lg border border-stone-200">
-            <Loader2 className="w-7 h-7 animate-spin text-teal-700" />
-          </div>
-        </div>
-      )}
+
 
       {/* Tooltip Portal */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
