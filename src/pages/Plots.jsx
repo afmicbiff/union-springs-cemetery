@@ -1306,7 +1306,7 @@ export default function PlotsPage() {
                   plotEl = document.querySelector(`[id^="plot-${sectionNorm}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
-                  zoomPanRef.current.centerOnElement(plotEl);
+                  zoomPanRef.current.centerOnElement(plotEl, 'top-left');
                   setIsCentering(false);
                   if (fromSearch) {
                       window.dispatchEvent(new CustomEvent('plot-start-blink', {

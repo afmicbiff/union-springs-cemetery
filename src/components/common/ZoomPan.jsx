@@ -74,20 +74,31 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     [scale]
   );
 
-  const centerOnElement = React.useCallback((element) => {
+  const centerOnElement = React.useCallback((element, align = 'center') => {
     if (!containerRef.current || !contentRef.current || !element) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
     const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Calculate element center relative to the content (not the screen)
-    const elCenterInContentX = (elementRect.left + elementRect.width / 2 - contentRect.left) / scale;
-    const elCenterInContentY = (elementRect.top + elementRect.height / 2 - contentRect.top) / scale;
+    // Calculate element position relative to the content
+    const elLeftInContent = (elementRect.left - contentRect.left) / scale;
+    const elTopInContent = (elementRect.top - contentRect.top) / scale;
+    const elCenterInContentX = elLeftInContent + (elementRect.width / 2 / scale);
+    const elCenterInContentY = elTopInContent + (elementRect.height / 2 / scale);
 
-    // Calculate target translation to center the element in the container
-    const targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
-    const targetTy = (containerRect.height / 2) - (elCenterInContentY * scale);
+    let targetTx, targetTy;
+
+    if (align === 'top-left') {
+      // Position element near top-left with padding
+      const padding = 60;
+      targetTx = padding - (elLeftInContent * scale);
+      targetTy = padding - (elTopInContent * scale);
+    } else {
+      // Default: center the element
+      targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
+      targetTy = (containerRect.height / 2) - (elCenterInContentY * scale);
+    }
 
     setTx(targetTx);
     setTy(targetTy);
