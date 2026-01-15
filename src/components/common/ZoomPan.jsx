@@ -276,7 +276,11 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   const onWheel = React.useCallback(
     (e) => {
       if (!contentRef.current) return;
-      e.preventDefault();
+
+      // Only prevent default and handle panning/zooming when inside the ZoomPan container
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
 
       if (!(e.ctrlKey || e.metaKey)) {
         const nx = tx - (e.deltaX || 0);
