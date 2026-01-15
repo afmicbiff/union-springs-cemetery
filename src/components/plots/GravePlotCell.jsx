@@ -22,30 +22,29 @@ export default function GravePlotCell({ item, baseColorClass, statusColors, isAd
 
   const plotNum = parseNum(item?.Grave);
 
-  // Blinking logic
+  // Blinking logic - triggered by custom event after centering completes
   useEffect(() => {
-    if (hasInitializedBlink.current || !item) return;
+    if (!item) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const targetPlotNum = parseInt(params.get('plot') || '', 10);
-    const targetSection = params.get('section') || '';
-    const fromSearch = params.get('from') === 'search';
+    const handleStartBlink = (e) => {
+      const { targetPlotNum, targetSection } = e.detail || {};
+      const normalizedTarget = normalizeSectionKey(targetSection);
+      const normalizedPlot = normalizeSectionKey(sectionKey);
 
-    const normalizedTarget = normalizeSectionKey(targetSection);
-    const normalizedPlot = normalizeSectionKey(sectionKey);
+      const isMatch = Number.isFinite(targetPlotNum)
+        && Number.isFinite(plotNum)
+        && plotNum === targetPlotNum
+        && (!normalizedTarget || normalizedPlot === normalizedTarget);
 
-    const isSelected = fromSearch
-      && Number.isFinite(targetPlotNum)
-      && Number.isFinite(plotNum)
-      && plotNum === targetPlotNum
-      && (!normalizedTarget || normalizedPlot === normalizedTarget);
+      if (isMatch && !hasInitializedBlink.current) {
+        hasInitializedBlink.current = true;
+        setIsBlinking(true);
+        setTimeout(() => setIsBlinking(false), 60000);
+      }
+    };
 
-    if (isSelected) {
-      hasInitializedBlink.current = true;
-      setIsBlinking(true);
-      const timer = setTimeout(() => setIsBlinking(false), 60000);
-      return () => clearTimeout(timer);
-    }
+    window.addEventListener('plot-start-blink', handleStartBlink);
+    return () => window.removeEventListener('plot-start-blink', handleStartBlink);
   }, [plotNum, sectionKey, item]);
 
   if (!item) {
