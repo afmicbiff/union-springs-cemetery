@@ -81,7 +81,7 @@ const inertiaRef = React.useRef({ animId: 0 });
   // Drag/Pan (mouse and single-finger touch)
   const stateRef = React.useRef({ dragging: false, startX: 0, startY: 0, startTx: 0, startTy: 0, allowClickThrough: false, downTarget: null, moved: false, lastX: 0, lastY: 0, lastTime: 0, vx: 0, vy: 0 });
 
-  const onPointerDown = (e) => {
+  const onPointerDown = React.useCallback((e) => {
             if (!containerRef.current) return;
             const target = e.target;
             const plotEl = target && typeof target.closest === 'function' ? target.closest('.plot-element') : null;
