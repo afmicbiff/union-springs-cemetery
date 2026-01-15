@@ -281,31 +281,40 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
+  const hasInitializedBlink = useRef(false);
 
-  // Calculate selection state
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const rawSectionParam = params.get('section') || '';
-  const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
-  const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
-  const targetPlotNum = parseInt(params.get('plot') || '', 10);
-  const fromSearch = params.get('from') === 'search';
+  // Calculate selection state - always compute these regardless of spacer status
   const plotNum = parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null;
   const sectionNorm = String(data?.Section || '').replace(/Section\s/i, '').trim();
   const sectionForId = String(computedSectionKey || sectionNorm || '');
-  const isSelected = Number.isFinite(targetPlotNum) 
-    && Number.isFinite(plotNum) 
-    && plotNum === targetPlotNum 
-    && (!targetKeyParam || sectionForId === targetKeyParam);
+  
+  const { isSelected, fromSearch } = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rawSectionParam = params.get('section') || '';
+    const targetSectionNormParam = rawSectionParam.replace(/Section\s/i, '').trim();
+    const targetKeyParam = /^[A-D]$/i.test(targetSectionNormParam) ? '1' : targetSectionNormParam;
+    const targetPlotNum = parseInt(params.get('plot') || '', 10);
+    const fromSearchVal = params.get('from') === 'search';
+    
+    const selected = Number.isFinite(targetPlotNum) 
+      && Number.isFinite(plotNum) 
+      && plotNum === targetPlotNum 
+      && (!targetKeyParam || sectionForId === targetKeyParam);
+    
+    return { isSelected: selected, fromSearch: fromSearchVal };
+  }, [plotNum, sectionForId]);
 
   // Start blinking for 60 seconds when coming from search and this plot is selected
   useEffect(() => {
-    if (isSelected && fromSearch) {
+    if (isSelected && fromSearch && !hasInitializedBlink.current) {
+      hasInitializedBlink.current = true;
       setIsBlinking(true);
       const timer = setTimeout(() => setIsBlinking(false), 60000);
       return () => clearTimeout(timer);
     }
   }, [isSelected, fromSearch]);
 
+  // Early return for spacers AFTER all hooks
   if (data?.isSpacer) {
       return (
           <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
