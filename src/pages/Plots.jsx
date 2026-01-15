@@ -1192,20 +1192,18 @@ export default function PlotsPage() {
     return grouped;
   }, [filteredData]);
 
-  // Single-plot mode from Deceased Search (?from=search&plot=...)
+  // Target plot from Deceased Search (?from=search&plot=...)
   const selectedPlotNum = React.useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const p = parseInt(params.get('plot') || '', 10);
     return Number.isFinite(p) ? p : null;
   }, [location.search]);
 
-  const singlePlotMode = React.useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('from') === 'search' && selectedPlotNum != null;
-  }, [location.search, selectedPlotNum]);
+  // No longer use single plot mode - always show all plots
+  const singlePlotMode = false;
 
   const selectedSectionKeyForPlot = React.useMemo(() => {
-    if (!singlePlotMode || selectedPlotNum == null) return null;
+    if (selectedPlotNum == null) return null;
     for (const key of Object.keys(sections)) {
       const items = sections[key] || [];
       if (items.some(it => {
@@ -1214,7 +1212,7 @@ export default function PlotsPage() {
       })) return key;
     }
     return null;
-  }, [singlePlotMode, selectedPlotNum, sections]);
+  }, [selectedPlotNum, sections]);
 
   // Robustly scroll into view for a target section/plot (?section=...&plot=...)
   useEffect(() => {
