@@ -14,6 +14,7 @@ import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 import SmartImage from "@/components/perf/SmartImage";
 import ZoomPan from "@/components/common/ZoomPan";
 import PlotsTour from "@/components/plots/PlotsTour";
+import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
 
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
