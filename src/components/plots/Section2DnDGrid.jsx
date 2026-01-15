@@ -1,4 +1,5 @@
 import React from "react";
+import GravePlotCell from "./GravePlotCell";
 
 // Helper to extract the first integer from a string like "228-A"
 function parseNum(v) {
@@ -10,16 +11,6 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
   const perCol = 25;
   const reservedBottomRows = 0;
   const cols = 10;
-
-  const STATUS_TEXT = {
-    Available: 'text-green-700',
-    Reserved: 'text-yellow-700',
-    Occupied: 'text-red-700',
-    Veteran: 'text-blue-700',
-    Unavailable: 'text-gray-700',
-    Unknown: 'text-purple-700',
-    Default: 'text-gray-700',
-  };
 
   const cells = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
@@ -88,36 +79,23 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
       <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
-        {cells.map((item, idx) => {
-          const isVet = item && ((item.Status === 'Veteran') || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied'));
-          const statusKey = item ? (isVet ? 'Veteran' : ((statusColors && statusColors[item.Status]) ? item.Status : 'Default')) : 'Default';
-          const fullClass = (statusColors && statusColors[statusKey]) || '';
-          const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
-          const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
-
-          return (
-            <div key={idx} className={`relative transition-all duration-200 ease-in-out transform-gpu ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-              {item ? (
-                <div
-                  id={`plot-2-${parseNum(item.Grave)}`}
-                  className="flex flex-row items-center justify-between px-1.5 w-full h-full text-[8px] overflow-hidden select-none font-bold shadow-sm cursor-pointer plot-element"
-                  onMouseEnter={(e) => onHover && onHover(e, item)}
-                  onMouseLeave={() => onHover && onHover(null, null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
-                  }}
-                >
-                  <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
-                  <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
-                  <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
-                </div>
-              ) : (
-                <div className="w-full h-full" />
-              )}
-            </div>
-          );
-        })}
+        {cells.map((item, idx) => (
+          <div key={idx} className={`relative transition-all duration-200 ease-in-out transform-gpu ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+            {item ? (
+              <GravePlotCell
+                item={item}
+                baseColorClass=""
+                statusColors={statusColors}
+                isAdmin={isAdmin}
+                onHover={onHover}
+                onEdit={onEdit}
+                sectionKey="2"
+              />
+            ) : (
+              <div className="w-full h-full" />
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

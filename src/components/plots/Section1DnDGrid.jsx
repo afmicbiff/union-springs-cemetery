@@ -1,4 +1,5 @@
 import React from "react";
+import GravePlotCell from "./GravePlotCell";
 
 function parseNum(g) {
   const n = parseInt(String(g || "").replace(/\D/g, ""), 10);
@@ -17,17 +18,6 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
   const cols = 8;
   const perCol = Math.max(1, Math.ceil(maxNum / cols));
   const total = cols * perCol;
-
-  // Text colors to mimic legend semantics on numbers
-  const STATUS_TEXT = {
-    Available: 'text-green-700',
-    Reserved: 'text-yellow-700',
-    Occupied: 'text-red-700',
-    Veteran: 'text-blue-700',
-    Unavailable: 'text-gray-700',
-    Unknown: 'text-purple-700',
-    Default: 'text-gray-700',
-  };
 
   // Build cells layout
   const cells = React.useMemo(() => {
@@ -61,33 +51,17 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     const idx = c * perCol + r;
     const item = cells[idx];
 
-    const isVet = item && ((item.Status === 'Veteran') || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied'));
-    const statusKey = item ? (isVet ? 'Veteran' : ((statusColors && statusColors[item.Status]) ? item.Status : 'Default')) : 'Default';
-    const fullClass = (statusColors && statusColors[statusKey]) || '';
-    const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
-    const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
-
     return (
       <div key={`s1-c${c}-r${r}`} className="w-16 h-8 m-0.5 rounded-[1px] relative">
-        {item ? (
-          <div
-            className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-all`}
-            onMouseEnter={(e) => onHover && onHover(e, item)}
-            onMouseLeave={() => onHover && onHover(null, null)}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
-            }}
-            id={`plot-1-${parseNum(item.Grave)}`}
-            title={`Row: ${item.Row}, Grave: ${item.Grave}`}
-          >
-            <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
-            <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
-            <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
-          </div>
-        ) : (
-          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]" />
-        )}
+        <GravePlotCell
+          item={item}
+          baseColorClass={baseColorClass}
+          statusColors={statusColors}
+          isAdmin={isAdmin}
+          onHover={onHover}
+          onEdit={onEdit}
+          sectionKey="1"
+        />
       </div>
     );
   };
