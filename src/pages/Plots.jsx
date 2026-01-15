@@ -1667,8 +1667,7 @@ export default function PlotsPage() {
                                 onHover={handleHover}
                               />
                             );
-                          })
-                        )}
+                          })}
                       </div>
                     </ZoomPan>
 
