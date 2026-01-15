@@ -45,28 +45,24 @@ const inertiaRef = React.useRef({ animId: 0 });
     if (!containerRef.current || !contentRef.current || !element) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
-    const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Element center in screen coords
-    const elCenterX = (elementRect.left + elementRect.right) / 2;
-    const elCenterY = (elementRect.top + elementRect.bottom) / 2;
+    // Current element center in screen coordinates
+    const elCenterScreenX = elementRect.left + elementRect.width / 2;
+    const elCenterScreenY = elementRect.top + elementRect.height / 2;
 
-    // Element position relative to content origin (accounting for current transform)
-    const elRelX = (elCenterX - contentRect.left) / scale;
-    const elRelY = (elCenterY - contentRect.top) / scale;
+    // Container center in screen coordinates
+    const containerCenterScreenX = containerRect.left + containerRect.width / 2;
+    const containerCenterScreenY = containerRect.top + containerRect.height / 2;
 
-    // Container center
-    const containerCenterX = containerRect.width / 2;
-    const containerCenterY = containerRect.height / 2;
+    // How much we need to move the content so element center aligns with container center
+    const deltaX = containerCenterScreenX - elCenterScreenX;
+    const deltaY = containerCenterScreenY - elCenterScreenY;
 
-    // New translation to center the element
-    const newTx = containerCenterX - elRelX * scale;
-    const newTy = containerCenterY - elRelY * scale;
-
-    setTx(newTx);
-    setTy(newTy);
-  }, [scale]);
+    // Apply delta to current translation
+    setTx(prev => prev + deltaX);
+    setTy(prev => prev + deltaY);
+  }, []);
 
   const zoomBy = (factor) => setScale((s) => clamp(s * factor, minScale, maxScale));
   const reset = () => {
