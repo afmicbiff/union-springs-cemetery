@@ -1297,27 +1297,22 @@ export default function PlotsPage() {
           if (done) return;
           attempts += 1;
 
-          if (!isNaN(plotNum) && sectionNorm) {
-              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`) || document.querySelector(`[id^="plot-${sectionNorm}-"][id$="-${plotNum}"]`);
+          if (!isNaN(plotNum) && sectionNorm && zoomPanRef.current) {
+              let plotEl = document.getElementById(`plot-${sectionNorm}-${plotNum}`);
               if (!plotEl) {
-                  plotEl = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
+                  plotEl = document.querySelector(`[data-section="${sectionNorm}"][data-plot-num="${plotNum}"]`);
+              }
+              if (!plotEl) {
+                  plotEl = document.querySelector(`[id^="plot-${sectionNorm}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
               }
               if (plotEl) {
-                  // Step 1: Center the plot
-                  setTimeout(() => {
-                    if (zoomPanRef.current) {
-                      zoomPanRef.current.centerOnElement(plotEl);
-                    }
-                    // Step 2: After centering, dispatch event to start blinking
-                    setTimeout(() => {
-                      setIsCentering(false);
-                      if (fromSearch) {
-                        window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                  zoomPanRef.current.centerOnElement(plotEl);
+                  setIsCentering(false);
+                  if (fromSearch) {
+                      window.dispatchEvent(new CustomEvent('plot-start-blink', {
                           detail: { targetPlotNum: plotNum, targetSection: sectionNorm }
-                        }));
-                      }
-                    }, 400);
-                  }, 150);
+                      }));
+                  }
                   done = true;
                   return;
               }
