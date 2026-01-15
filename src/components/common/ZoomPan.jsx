@@ -108,7 +108,7 @@ const inertiaRef = React.useRef({ animId: 0 });
             stateRef.current.lastTime = performance.now();
             stateRef.current.vx = 0;
             stateRef.current.vy = 0;
-          };
+          }, [tx, ty, forcePan]);
   const onPointerMove = (e) => {
             const st = stateRef.current;
             if (!st.dragging) return;
