@@ -1,41 +1,8 @@
 import React from "react";
-import { normalizeSectionKey } from "./normalizeSectionKey";
 
 function parseNum(g) {
   const n = parseInt(String(g || "").replace(/\D/g, ""), 10);
   return Number.isFinite(n) ? n : null;
-}
-
-// Hook to check if a plot should blink
-function useBlinkingPlot(plotNum, sectionId) {
-  const [isBlinking, setIsBlinking] = React.useState(false);
-  const hasInitialized = React.useRef(false);
-
-  React.useEffect(() => {
-    if (hasInitialized.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const targetPlotNum = parseInt(params.get('plot') || '', 10);
-    const targetSection = params.get('section') || '';
-    const fromSearch = params.get('from') === 'search';
-
-    const normalizedTarget = normalizeSectionKey(targetSection);
-    const normalizedPlot = normalizeSectionKey(sectionId);
-
-    const isSelected = fromSearch 
-      && Number.isFinite(targetPlotNum) 
-      && Number.isFinite(plotNum) 
-      && plotNum === targetPlotNum
-      && (!normalizedTarget || normalizedPlot === normalizedTarget);
-
-    if (isSelected) {
-      hasInitialized.current = true;
-      setIsBlinking(true);
-      const timer = setTimeout(() => setIsBlinking(false), 60000);
-      return () => clearTimeout(timer);
-    }
-  }, [plotNum, sectionId]);
-
-  return isBlinking;
 }
 
 export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit, statusColors }) {
@@ -90,9 +57,9 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     return nextCells;
   }, [plots, cols, perCol, maxNum, total]);
 
-  const PlotCell = React.memo(({ item, baseColorClass, statusColors, STATUS_TEXT, isAdmin, onHover, onEdit }) => {
-    const plotNum = parseNum(item?.Grave);
-    const isBlinking = useBlinkingPlot(plotNum, '1');
+  const renderCell = (c, r) => {
+    const idx = c * perCol + r;
+    const item = cells[idx];
 
     const isVet = item && ((item.Status === 'Veteran') || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied'));
     const statusKey = item ? (isVet ? 'Veteran' : ((statusColors && statusColors[item.Status]) ? item.Status : 'Default')) : 'Default';
@@ -100,45 +67,24 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
     const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
     const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
 
-    const blinkingClass = 'ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-plot-blink';
-
-    return (
-      <div
-        className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-all ${isBlinking ? blinkingClass : ''}`}
-        onMouseEnter={(e) => onHover && onHover(e, item)}
-        onMouseLeave={() => onHover && onHover(null, null)}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
-        }}
-        id={`plot-1-${plotNum}`}
-        data-section="1"
-        data-plot-num={plotNum}
-        title={`Row: ${item.Row}, Grave: ${item.Grave}`}
-      >
-        <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
-        <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
-        <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
-      </div>
-    );
-  });
-
-  const renderCell = (c, r) => {
-    const idx = c * perCol + r;
-    const item = cells[idx];
-
     return (
       <div key={`s1-c${c}-r${r}`} className="w-16 h-8 m-0.5 rounded-[1px] relative">
         {item ? (
-          <PlotCell 
-            item={item} 
-            baseColorClass={baseColorClass} 
-            statusColors={statusColors} 
-            STATUS_TEXT={STATUS_TEXT} 
-            isAdmin={isAdmin} 
-            onHover={onHover} 
-            onEdit={onEdit} 
-          />
+          <div
+            className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-all`}
+            onMouseEnter={(e) => onHover && onHover(e, item)}
+            onMouseLeave={() => onHover && onHover(null, null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isAdmin && onEdit && item && item._entity === 'Plot') onEdit(item);
+            }}
+            id={`plot-1-${parseNum(item.Grave)}`}
+            title={`Row: ${item.Row}, Grave: ${item.Grave}`}
+          >
+            <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
+            <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{item.Row}</span>
+            <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
+          </div>
         ) : (
           <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]" />
         )}
