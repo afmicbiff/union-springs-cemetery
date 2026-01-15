@@ -184,6 +184,8 @@ export default function AdminSearch({ onNavigate }) {
                 />
                 {query && (
                     <button 
+                        type="button"
+                        aria-label="Clear search"
                         onClick={() => {
                             setQuery("");
                             inputRef.current?.focus();
@@ -206,6 +208,7 @@ export default function AdminSearch({ onNavigate }) {
                             </h4>
                             {recentSearches.map(term => (
                                 <button
+                                    type="button"
                                     key={term}
                                     onClick={() => setQuery(term)}
                                     className="w-full flex items-center justify-between px-3 py-2 text-sm text-stone-600 hover:bg-stone-50 rounded-md group text-left"
@@ -234,6 +237,7 @@ export default function AdminSearch({ onNavigate }) {
                                       const Icon = getIcon(item.type);
                                       return (
                                         <button
+                                          type="button"
                                           key={i}
                                           onClick={() => handleSelect(item)}
                                           className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-stone-50 rounded-md transition-colors text-left group"
@@ -257,6 +261,7 @@ export default function AdminSearch({ onNavigate }) {
                                   </div>
                                   <div className="flex items-center justify-between px-3 py-2 border-t bg-stone-50 text-xs text-stone-600">
                                     <button
+                                      type="button"
                                       className="px-2 py-1 rounded border bg-white hover:bg-stone-100 disabled:opacity-50"
                                       onClick={() => setPage(p => Math.max(1, p - 1))}
                                       disabled={page <= 1}
@@ -267,6 +272,7 @@ export default function AdminSearch({ onNavigate }) {
                                       Page {page} {results?.pagination?.totalPages ? `of ${results.pagination.totalPages}` : ''}
                                     </div>
                                     <button
+                                      type="button"
                                       className="px-2 py-1 rounded border bg-white hover:bg-stone-100 disabled:opacity-50"
                                       onClick={() => setPage(p => p + 1)}
                                       disabled={results?.pagination ? page >= (results.pagination.totalPages || 1) : (results?.items?.length < limit)}
