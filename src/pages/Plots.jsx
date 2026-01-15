@@ -301,6 +301,11 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
       && plotNum === targetPlotNum 
       && (!targetKeyParam || sectionForId === targetKeyParam);
     
+    // Debug logging - remove after testing
+    if (fromSearchVal && Number.isFinite(targetPlotNum) && plotNum === targetPlotNum) {
+      console.log('BLINK DEBUG:', { plotNum, sectionForId, targetPlotNum, targetKeyParam, selected, fromSearchVal, rawSectionParam });
+    }
+    
     return { isSelected: selected, fromSearch: fromSearchVal };
   }, [plotNum, sectionForId]);
 
