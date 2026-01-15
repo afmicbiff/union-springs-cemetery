@@ -403,96 +403,90 @@ export default function SearchPage() {
                 </div>
               ) : (dedupedResults.length > 0) ? (
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch auto-rows-fr">
-                   {[{ results: dedupedResults }].map((page, pageIndex) => (
-                       <React.Fragment key={pageIndex}>
-                           {page.results.map((person, index) => {
-                               const isLastElement = index === dedupedResults.length - 1;
-                               return (
-                                 <div key={person.id} ref={isLastElement ? lastElementRef : null} className="h-full">
-                                   <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
-                                     <div className="flex flex-col h-full">
-
-
-                                       {/* Content Section */}
-                                       <CardContent className="p-5 flex-1 flex flex-col min-w-0">
-                                         <div className="flex justify-between items-start">
-                                            <div>
-                                              <div className="flex items-center gap-2 mb-1">
-                                                  <h3 className="text-2xl font-serif font-bold text-stone-900 leading-tight break-words">
-                                                      {person.first_name} {person.last_name}
-                                                  </h3>
-                                              </div>
-                                              <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-2">
-                                                  {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
-                                                  {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
-                                                  {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
-                                              </p>
-                                              {person.family_name && (
-                                                <p className="text-stone-700 text-sm mb-1">Family: <span className="font-medium">{person.family_name}</span></p>
-                                              )}
-                                              {person.veteran_status && (
-                                                <p className="text-red-700 text-xs font-semibold uppercase tracking-wide mb-2">Veteran</p>
-                                              )}
-                                            </div>
-                                            <Badge variant="outline" className="hidden md:inline-flex border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
-                                                                                                 Section {person.plot_location?.split('-')[0] || 'Main'}
-                                                                                              </Badge>
-                                         </div>
-
-                                         {/* Mobile-centered section badge */}
-                                         <div className="md:hidden flex flex-col items-center gap-2 mt-2">
-                                           <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
-                                             Section {person.plot_location?.split('-')[0] || 'Main'}
-                                           </Badge>
-                                         </div>
-                                         <div className="space-y-3 min-w-0">
-                                           <div className="flex items-center text-stone-600 min-w-0">
-                                             <MapPin className="w-4 h-4 mr-2 text-red-600" />
-                                             <span>Plot Location: {person.plot_location}</span>
-                                           </div>
-                                           {person.notes && (
-                                             <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100 break-words">
-                                                Note: {person.notes}
-                                             </p>
-                                           )}
-                                           {person.obituary && (
-                                             <p className="text-stone-600 text-sm line-clamp-2 italic break-words">
-                                                {person.obituary}
-                                             </p>
-                                           )}
-                                         </div>
-
-                                         <div className="mt-auto pt-4 border-t border-stone-200 flex flex-wrap items-center gap-3 sm:justify-between justify-start">
-                                            <Link 
-                                              to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizeSectionKey(person.plot_location?.split('-')[0] || ''))}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
-                                              state={{ search: location.search }}
-                                            >
-                                              <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4 w-full sm:w-auto" title="View only this plot on the map">
-                                                View on Map
-                                              </Button>
-                                            </Link>
-                                            <Link 
-                                              to={`${createPageUrl('Memorial')}?id=${person.id}`}
-                                              state={{ search: location.search }}
-                                            >
-                                                <Button size="default" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md px-4 w-full sm:w-auto">
-                                                   View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
-                                                </Button>
-                                            </Link>
-                                         </div>
-                                       </CardContent>
-                                     </div>
-                                   </Card>
+                   {dedupedResults.map((person, index) => {
+                       const isLastElement = index === dedupedResults.length - 1;
+                       return (
+                         <div key={person.id} ref={isLastElement ? lastElementRef : null} className="h-full">
+                           <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
+                             <div className="flex flex-col h-full">
+                               {/* Content Section */}
+                               <CardContent className="p-5 flex-1 flex flex-col min-w-0">
+                                 <div className="flex justify-between items-start">
+                                    <div>
+                                      <div className="flex items-center gap-2 mb-1">
+                                          <h3 className="text-2xl font-serif font-bold text-stone-900 leading-tight break-words">
+                                              {person.first_name} {person.last_name}
+                                          </h3>
+                                      </div>
+                                      <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mb-2">
+                                          {person.date_of_birth && isValid(new Date(person.date_of_birth)) ? format(new Date(person.date_of_birth), 'yyyy') : ''}
+                                          {(person.date_of_birth && isValid(new Date(person.date_of_birth)) && person.date_of_death && isValid(new Date(person.date_of_death))) ? ' - ' : ''}
+                                          {person.date_of_death && isValid(new Date(person.date_of_death)) ? format(new Date(person.date_of_death), 'yyyy') : ''}
+                                      </p>
+                                      {person.family_name && (
+                                        <p className="text-stone-700 text-sm mb-1">Family: <span className="font-medium">{person.family_name}</span></p>
+                                      )}
+                                      {person.veteran_status && (
+                                        <p className="text-red-700 text-xs font-semibold uppercase tracking-wide mb-2">Veteran</p>
+                                      )}
+                                    </div>
+                                    <Badge variant="outline" className="hidden md:inline-flex border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
+                                      Section {person.plot_location?.split('-')[0] || 'Main'}
+                                    </Badge>
                                  </div>
-                               );
-                           })}
-                       </React.Fragment>
-                   ))}
-                   {isFetchingNextPage ? (
+
+                                 {/* Mobile-centered section badge */}
+                                 <div className="md:hidden flex flex-col items-center gap-2 mt-2">
+                                   <Badge variant="outline" className="border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-4 py-1 whitespace-nowrap">
+                                     Section {person.plot_location?.split('-')[0] || 'Main'}
+                                   </Badge>
+                                 </div>
+                                 <div className="space-y-3 min-w-0">
+                                   <div className="flex items-center text-stone-600 min-w-0">
+                                     <MapPin className="w-4 h-4 mr-2 text-red-600" />
+                                     <span>Plot Location: {person.plot_location}</span>
+                                   </div>
+                                   {person.notes && (
+                                     <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100 break-words">
+                                        Note: {person.notes}
+                                     </p>
+                                   )}
+                                   {person.obituary && (
+                                     <p className="text-stone-600 text-sm line-clamp-2 italic break-words">
+                                        {person.obituary}
+                                     </p>
+                                   )}
+                                 </div>
+
+                                 <div className="mt-auto pt-4 border-t border-stone-200 flex flex-wrap items-center gap-3 sm:justify-between justify-start">
+                                    <Link 
+                                      to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizeSectionKey(person.plot_location?.split('-')[0] || ''))}&plot=${encodeURIComponent((person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '')}&from=search`}
+                                      state={{ search: location.search }}
+                                    >
+                                      <Button variant="outline" size="default" className="bg-white text-teal-700 border-teal-600 hover:bg-teal-50 px-4 w-full sm:w-auto" title="View only this plot on the map">
+                                        View on Map
+                                      </Button>
+                                    </Link>
+                                    <Link 
+                                      to={`${createPageUrl('Memorial')}?id=${person.id}`}
+                                      state={{ search: location.search }}
+                                    >
+                                        <Button size="default" className="bg-teal-700 hover:bg-teal-800 text-white font-serif shadow-md px-4 w-full sm:w-auto">
+                                           View Full Memorial <ChevronRight className="w-4 h-4 ml-1" />
+                                        </Button>
+                                    </Link>
+                                 </div>
+                               </CardContent>
+                             </div>
+                           </Card>
+                         </div>
+                       );
+                   })}
+                   {isFetchingNextPage && (
                        <div className="flex justify-center py-6">
                            <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
                        </div>
-                   ) : null}
+                   )}
                 </div>
               ) : (
                 <div className="text-center py-12 bg-white rounded-sm border border-stone-200 space-y-4">
