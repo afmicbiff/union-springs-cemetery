@@ -78,31 +78,34 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     if (!containerRef.current || !contentRef.current || !element) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
-    const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Calculate element position relative to the content
-    const elLeftInContent = (elementRect.left - contentRect.left) / scale;
-    const elTopInContent = (elementRect.top - contentRect.top) / scale;
-    const elCenterInContentX = elLeftInContent + (elementRect.width / 2 / scale);
-    const elCenterInContentY = elTopInContent + (elementRect.height / 2 / scale);
+    // Get element's position in unscaled content coordinates
+    // Current screen position = (content origin position) + (element offset in content * scale) + tx/ty
+    // So element offset in content = (screen position - container position - tx/ty) / scale
+    const elLeftInContent = (elementRect.left - containerRect.left - tx) / scale;
+    const elTopInContent = (elementRect.top - containerRect.top - ty) / scale;
+    const elWidth = elementRect.width / scale;
+    const elHeight = elementRect.height / scale;
 
     let targetTx, targetTy;
 
     if (align === 'top-left') {
       // Position element near top-left with padding
-      const padding = 60;
+      const padding = 80;
       targetTx = padding - (elLeftInContent * scale);
       targetTy = padding - (elTopInContent * scale);
     } else {
       // Default: center the element
+      const elCenterInContentX = elLeftInContent + elWidth / 2;
+      const elCenterInContentY = elTopInContent + elHeight / 2;
       targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
       targetTy = (containerRect.height / 2) - (elCenterInContentY * scale);
     }
 
     setTx(targetTx);
     setTy(targetTy);
-  }, [scale]);
+  }, [scale, tx, ty]);
 
   const zoomBy = (factor) =>
     setScale((s) => clamp(s * factor, minScale, maxScale));
