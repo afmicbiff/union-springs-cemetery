@@ -45,28 +45,28 @@ const inertiaRef = React.useRef({ animId: 0 });
     if (!containerRef.current || !contentRef.current || !element) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
+    const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Calculate current center of element
-    const currentElCenterX = (elementRect.left + elementRect.right) / 2;
-    const currentElCenterY = (elementRect.top + elementRect.bottom) / 2;
+    // Element center in screen coords
+    const elCenterX = (elementRect.left + elementRect.right) / 2;
+    const elCenterY = (elementRect.top + elementRect.bottom) / 2;
 
-    // Desired center (center of container)
-    const desiredCenterX = containerRect.left + containerRect.width / 2;
-    const desiredCenterY = containerRect.top + containerRect.height / 2;
+    // Element position relative to content origin (accounting for current transform)
+    const elRelX = (elCenterX - contentRect.left) / scale;
+    const elRelY = (elCenterY - contentRect.top) / scale;
 
-    // Calculate the offset needed
-    const offsetX = desiredCenterX - currentElCenterX;
-    const offsetY = desiredCenterY - currentElCenterY;
+    // Container center
+    const containerCenterX = containerRect.width / 2;
+    const containerCenterY = containerRect.height / 2;
 
-    // Apply offset to current translation
-    const nextTx = tx + offsetX;
-    const nextTy = ty + offsetY;
+    // New translation to center the element
+    const newTx = containerCenterX - elRelX * scale;
+    const newTy = containerCenterY - elRelY * scale;
 
-    const clamped = clampTranslate(nextTx, nextTy);
-    setTx(clamped.x);
-    setTy(clamped.y);
-  }, [tx, ty, clampTranslate]);
+    setTx(newTx);
+    setTy(newTy);
+  }, [scale]);
 
   const zoomBy = (factor) => setScale((s) => clamp(s * factor, minScale, maxScale));
   const reset = () => {
