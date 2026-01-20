@@ -34,10 +34,10 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
       if (debouncedSetQuery.cancel) debouncedSetQuery.cancel();
     };
   }, [searchInput, debouncedSetQuery]);
+  // Fetch ALL NewPlot records regardless of batch
   const rowsQuery = useQuery({
-    queryKey: ["newPlots-map", batchId],
-    enabled: !!batchId,
-    queryFn: async () => base44.entities.NewPlot.filter({ batch_id: batchId }, "plot_number", 2000),
+    queryKey: ["newPlots-map-all"],
+    queryFn: async () => base44.entities.NewPlot.list("plot_number", 5000),
     initialData: [],
     staleTime: 30_000,
     gcTime: 5 * 60_000,
@@ -199,10 +199,8 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
         </div>
       )}
 
-      {/* If no batch or loading, show appropriate placeholder but keep layout stable */}
-      {!batchId ? (
-        noBatchContent
-      ) : rowsQuery.isLoading ? (
+      {/* Show loading or content */}
+      {rowsQuery.isLoading ? (
         loadingContent
       ) : (
         <>
