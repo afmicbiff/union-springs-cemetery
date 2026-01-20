@@ -165,33 +165,44 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
   const palette = ROW_PALETTES[rowLetter] || "bg-gray-100 border-gray-300 text-gray-900";
   const [bgColor, borderColor, textColor] = palette.split(" ");
 
-  // Group plots by the numeric part of Row (e.g., 101-108, 109-116, etc.)
+  // Define the 8 column ranges for each row letter
+  const columnRanges = [
+    { start: 101, end: 108, label: "101-108" },
+    { start: 109, end: 116, label: "109-116" },
+    { start: 117, end: 124, label: "117-124" },
+    { start: 125, end: 132, label: "125-132" },
+    { start: 201, end: 208, label: "201-208" },
+    { start: 209, end: 216, label: "209-216" },
+    { start: 217, end: 224, label: "217-224" },
+    { start: 225, end: 232, label: "225-232" },
+  ];
+
+  // Group plots by the numeric part of Row into 8 columns
   const groupedByRange = useMemo(() => {
     const groups = {};
+    columnRanges.forEach((range) => {
+      groups[range.label] = [];
+    });
+
     plots.forEach((plot) => {
       const rowNum = parseInt(String(plot.Row || "").replace(/\D/g, "")) || 0;
-      // Group by ranges of 8 (101-108, 109-116, etc.)
-      const rangeStart = Math.floor((rowNum - 101) / 8) * 8 + 101;
-      const rangeKey = `${rangeStart}-${rangeStart + 7}`;
-      if (!groups[rangeKey]) groups[rangeKey] = [];
-      groups[rangeKey].push(plot);
+      // Find which range this plot belongs to
+      const range = columnRanges.find((r) => rowNum >= r.start && rowNum <= r.end);
+      if (range) {
+        groups[range.label].push(plot);
+      }
     });
-    // Sort each group by grave number
+
+    // Sort each group by the row number (ascending so bottom is first in flex-col-reverse)
     Object.keys(groups).forEach((key) => {
       groups[key].sort((a, b) => {
-        const numA = parseInt(String(a.Grave).replace(/\D/g, "")) || 0;
-        const numB = parseInt(String(b.Grave).replace(/\D/g, "")) || 0;
+        const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
+        const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
         return numA - numB;
       });
     });
     return groups;
   }, [plots]);
-
-  const rangeKeys = Object.keys(groupedByRange).sort((a, b) => {
-    const numA = parseInt(a.split("-")[0]) || 0;
-    const numB = parseInt(b.split("-")[0]) || 0;
-    return numA - numB;
-  });
 
   return (
     <div id={`row-${rowLetter}`} className="relative">
@@ -218,13 +229,13 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
           className={`rounded-xl border-2 border-dashed p-6 transition-colors duration-500 ${borderColor} ${bgColor} bg-opacity-30 overflow-x-auto`}
         >
           <div className="flex gap-4 justify-start overflow-x-auto pb-4">
-            {rangeKeys.map((rangeKey) => (
+            {columnRanges.map((range) => (
               <div
-                key={rangeKey}
+                key={range.label}
                 className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-gray-300 last:border-0 pr-2"
               >
-                <div className="text-[9px] text-gray-400 font-mono mt-1">{rangeKey}</div>
-                {groupedByRange[rangeKey].map((plot) => (
+                <div className="text-[9px] text-gray-400 font-mono mt-1">{rowLetter}-{range.label}</div>
+                {groupedByRange[range.label].map((plot) => (
                   <GravePlot
                     key={plot.id}
                     data={plot}
