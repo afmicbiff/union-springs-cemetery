@@ -37,13 +37,49 @@ export default function ReservationWizard() {
     initialData: [],
   });
 
+  // Retrieve stored plot ID from localStorage or URL
+  const [storedId, setStoredId] = React.useState(null);
+  React.useEffect(() => {
+    const id = localStorage.getItem("selected_plot_id") || new URLSearchParams(window.location.search).get('plotId');
+    if (id) setStoredId(id);
+  }, []);
+
+  // Fetch the specific selected plot (bypassing status/limit filters)
+  const specificPlot = useQuery({
+    queryKey: ['specific-plot', storedId],
+    enabled: !!storedId,
+    queryFn: async () => {
+      // Try NewPlot first
+      let res = await base44.entities.NewPlot.filter({ id: storedId }, null, 1);
+      if (res && res.length > 0) return { ...res[0], _source: 'NewPlot' };
+
+      // Try NewPlotReservation1 (Map entity)
+      try {
+        res = await base44.entities.NewPlotReservation1.filter({ id: storedId }, null, 1);
+        if (res && res.length > 0) {
+          const p = res[0];
+          return {
+            id: p.id,
+            plot_number: p.Grave,
+            row_number: p.Row,
+            section: "Map Selection", // Default since it's missing in entity
+            status: p.Status,
+            _source: 'NewPlotReservation1'
+          };
+        }
+      } catch (err) {
+        console.warn("Could not fetch from NewPlotReservation1", err);
+      }
+      return null;
+    }
+  });
+
   // Set prefill for display separately, once from localStorage
   React.useEffect(() => {
     try {
       const detailsRaw = localStorage.getItem("selected_plot_details");
       if (detailsRaw && !prefill) {
         setPrefill(JSON.parse(detailsRaw));
-        // Clear local storage after setting prefill to avoid re-triggering unnecessarily
         localStorage.removeItem("selected_plot_details");
       }
     } catch (e) {
@@ -51,24 +87,21 @@ export default function ReservationWizard() {
     }
   }, [prefill]);
 
-  // Prefill 'selected' state from localStorage if a plot is available and nothing is selected yet
+  // Set 'selected' state when specific plot data is loaded
   React.useEffect(() => {
-    if (plots.data?.length && !selected) {
-      try {
-        const storedPlotId = localStorage.getItem("selected_plot_id");
-        if (storedPlotId) {
-          const match = plots.data.find((p) => p.id === storedPlotId);
-          if (match) {
-            setSelected(match);
-            // Clear localStorage items now that the plot is in state
-            localStorage.removeItem("selected_plot_id");
-          }
-        }
-      } catch (e) {
-        console.error("Error initializing selected plot from localStorage:", e);
+    if (specificPlot.data && !selected) {
+      setSelected(specificPlot.data);
+      // We found the plot, so we can clear the ID from storage
+      localStorage.removeItem("selected_plot_id");
+    } else if (plots.data?.length && !selected && storedId) {
+      // Fallback to checking the main list if specific fetch is pending or failed but it's in the list
+      const match = plots.data.find((p) => p.id === storedId);
+      if (match) {
+        setSelected(match);
+        localStorage.removeItem("selected_plot_id");
       }
     }
-  }, [plots.data, selected]);
+  }, [specificPlot.data, plots.data, selected, storedId]);
 
   // Auto-scroll and emphasize selected plot card in Step 1
   React.useEffect(() => {
