@@ -1,5 +1,6 @@
 import React from 'react';
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
+import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
 import PlotReservationsAdmin from "@/components/admin/PlotReservationsAdmin";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -76,7 +77,16 @@ export default function NewPlotReservations() {
             <PlotReservationsAdmin />
           </div>
         )}
-        <NewPlotsBrowser />
+        
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">New Plots Map</h2>
+          <NewPlotReservation1Map />
+        </div>
+
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Import Batches & Data</h2>
+          <NewPlotsBrowser />
+        </div>
       </main>
     </div>
   );
