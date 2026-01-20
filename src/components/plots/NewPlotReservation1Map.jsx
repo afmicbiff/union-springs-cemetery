@@ -165,12 +165,12 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
       type="button"
       onClick={onClick}
       aria-pressed={!!active}
-      className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-white h-12 px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${
+      className={`flex flex-row items-center justify-center gap-2 bg-white h-10 md:h-12 px-4 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${
         active ? "ring-2 ring-green-500" : ""
-      } w-24 sm:w-auto text-center`}
+      } min-w-[100px] w-auto text-center`}
     >
-      <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
-      <span className="text-xs font-semibold text-gray-600">{label}</span>
+      <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full border border-gray-300 ${bgClass} flex-shrink-0`}></div>
+      <span className="text-xs md:text-sm font-semibold text-gray-600 whitespace-nowrap">{label}</span>
     </button>
   );
 });
@@ -429,11 +429,13 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
       </div>
 
       {/* Legend */}
-      <div className="bg-white border-b border-gray-200 py-3 mb-4 overflow-x-auto no-scrollbar">
-        <div className="flex flex-nowrap md:flex-wrap items-center gap-2 min-w-max px-2">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center mr-2 sticky left-0 bg-white z-10 pl-1">
-            <Info size={14} className="mr-1" /> Status
-          </span>
+      <div className="bg-white border-b border-gray-200 py-3 mb-4">
+        <div className="flex flex-wrap justify-center items-center gap-2 px-2">
+          <div className="w-full text-center mb-1 md:w-auto md:mb-0 md:mr-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider inline-flex items-center">
+              <Info size={14} className="mr-1" /> Status
+            </span>
+          </div>
           <LegendItem
             label="Available"
             colorClass={STATUS_COLORS.Available}
