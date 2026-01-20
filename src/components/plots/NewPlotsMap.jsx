@@ -410,7 +410,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                           <h3 className="text-xl font-semibold text-gray-900">Section A</h3>
                           <span className="text-xs text-gray-500">{aRows.length} plots</span>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                        <div className="flex flex-wrap gap-0.5">
                           {aRows.map((r) => {
                             const key = r.id;
                             const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
@@ -570,7 +570,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
 
                               return (
                                 <div className="space-y-3">
-                                  <div className="grid grid-cols-4 gap-2">
+                                  <div className="grid grid-cols-4 gap-0.5">
                                     {rows.map((row, ri) => (
                                       <React.Fragment key={`a1-row-${ri}`}>
                                         {row.map((n, ci) => {
@@ -670,7 +670,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                       const visible = showAll ? items : items.slice(0, 96);
                       return (
                         <>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                          <div className="flex flex-wrap gap-0.5">
                             {visible.map((r) => {
                               const key = r.id;
                               const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
