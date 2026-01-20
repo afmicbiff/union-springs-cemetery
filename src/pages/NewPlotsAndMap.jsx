@@ -4,17 +4,18 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import NewPlotsImport from "../components/plots/NewPlotsImport";
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
+import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
 import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Map as MapIcon, FileText } from "lucide-react";
+import { Map as MapIcon, FileText, Grid3X3 } from "lucide-react";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
 
 
 export default function NewPlotsAndMap() {
   const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
   const isAdmin = user?.role === 'admin';
-  const [activeTab, setActiveTab] = React.useState("map");
+  const [activeTab, setActiveTab] = React.useState("reservation1");
   const [filters, setFilters] = React.useState({
     search: "",
     owner: "",
@@ -81,13 +82,19 @@ export default function NewPlotsAndMap() {
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Map/Data toggles aligned left of Import CSV */}
+              {/* Tab toggles */}
               <div className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg mr-2">
+                <button 
+                  onClick={() => setActiveTab('reservation1')}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'reservation1' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <Grid3X3 size={14} /> New Plots Map
+                </button>
                 <button 
                   onClick={() => setActiveTab('map')}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                  <MapIcon size={14} /> Map View
+                  <MapIcon size={14} /> Import Batches
                 </button>
                 <button 
                   onClick={() => setActiveTab('data')}
@@ -123,7 +130,12 @@ export default function NewPlotsAndMap() {
               Click on the plot to start the reservation process.
             </span>
           </div>
-          <NewPlotsBrowser activeTab={activeTab} onTabChange={setActiveTab} filters={filters} onPlotClick={handlePlotClick} />
+          
+          {activeTab === 'reservation1' ? (
+            <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
+          ) : (
+            <NewPlotsBrowser activeTab={activeTab === 'map' ? 'map' : 'data'} onTabChange={(tab) => setActiveTab(tab)} filters={filters} onPlotClick={handlePlotClick} />
+          )}
         </div>
       </main>
       <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
