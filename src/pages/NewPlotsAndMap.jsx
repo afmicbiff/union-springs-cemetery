@@ -117,12 +117,6 @@ export default function NewPlotsAndMap() {
 
       <main className="max-w-7xl mx-auto p-6">
         <div className="space-y-6">
-          <div className="flex items-center justify-center">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-700 text-white text-xs sm:text-sm shadow">
-              Click on the plot to start the reservation process.
-            </span>
-          </div>
-          
           {activeTab === 'reservation1' ? (
             <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
           ) : (

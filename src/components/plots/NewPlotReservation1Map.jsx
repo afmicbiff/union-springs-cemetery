@@ -412,20 +412,11 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
 
   return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 md:p-4">
-        {/* Search */}
-      <div className="mb-3">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search grave # or name"
-            className="pl-8"
-          />
-        </div>
-        {searchQuery && (
-          <div className="mt-2 text-xs text-gray-500">{filteredPlots.length} match(es)</div>
-        )}
+        {/* Instruction */}
+      <div className="mb-4 flex items-center justify-center">
+        <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-700 text-white text-xs sm:text-sm shadow font-medium">
+          Click on the plot to start the reservation process.
+        </span>
       </div>
 
       {/* Legend */}
