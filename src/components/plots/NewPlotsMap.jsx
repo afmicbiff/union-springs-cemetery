@@ -223,43 +223,28 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
             <div className="p-2 inline-block min-w-max space-y-8">
               {/* First Row: 1103 A-101 (bottom) to 1179 J-108 (top) */}
               {(() => {
-                // Generate first row plots: 1103-1179 mapping to A-101 through J-108
-                const firstRowData = [];
-                const rowLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                let plotNum = 1103;
-                for (const letter of rowLetters) {
-                  for (let i = 101; i <= 108; i++) {
-                    if (plotNum > 1179) break;
-                    firstRowData.push({
-                      id: `first-row-${plotNum}`,
-                      plot_number: String(plotNum),
-                      row_number: `${letter}-${i}`,
-                      status: 'Available',
-                      first_name: '',
-                      last_name: '',
-                      family_name: ''
-                    });
-                    plotNum++;
-                  }
-                  // Handle the 77 plots: 1103-1179 = 77 plots, but 10 letters x 8 = 80
-                  // Actually: J only goes up to J-108, total = 10*8 = 80, but we have 77
-                  // Let's check: 1179 - 1103 + 1 = 77. So J ends at J-105 (1177, 1178, 1179 = J-103, J-104, J-105)
-                  // Actually need to recalculate: A(8) + B(8) + C(8) + D(8) + E(8) + F(8) + G(8) + H(8) + I(8) = 72, then J gets 5 more (1175-1179 = J-101 to J-105)
-                }
-                
-                // Find matching data from rowsQuery if available
-                const dataMap = new Map();
-                (rowsQuery.data || []).forEach(r => {
-                  const pn = String(r.plot_number || '').trim();
-                  if (pn) dataMap.set(pn, r);
+                // Filter plots in range 1103-1179 from the actual data
+                const allData = rowsQuery.data || [];
+                const firstRowPlots = allData.filter(r => {
+                  const pn = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || 0;
+                  return pn >= 1103 && pn <= 1179;
                 });
 
                 // Apply filters
-                const filteredFirstRow = firstRowData.filter((r) => {
-                  const realData = dataMap.get(r.plot_number) || r;
-                  const statusOk = !filters || filters.status === 'All' || realData.status === filters.status;
-                  return statusOk;
-                }).map(r => dataMap.get(r.plot_number) || r);
+                const filteredFirstRow = firstRowPlots.filter((r) => {
+                  const statusOk = !filters || filters.status === 'All' || r.status === filters.status;
+                  const ownerOk = !filters?.owner || String(r.family_name || '').toLowerCase().includes(String(filters.owner).toLowerCase());
+                  const plotFilter = (filters?.plot || '').toString().trim();
+                  let plotOk = true;
+                  if (plotFilter) {
+                    const plotStr = String(r.plot_number || '').toLowerCase();
+                    const wanted = plotFilter.toLowerCase();
+                    const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
+                    const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
+                    plotOk = numWanted != null ? (numItem === numWanted) : plotStr.includes(wanted);
+                  }
+                  return statusOk && ownerOk && plotOk;
+                });
 
                 if (filteredFirstRow.length === 0) return null;
 
@@ -267,11 +252,13 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                 const byLetter = {};
                 filteredFirstRow.forEach(r => {
                   const letter = (r.row_number || '').charAt(0).toUpperCase();
-                  if (!byLetter[letter]) byLetter[letter] = [];
-                  byLetter[letter].push(r);
+                  if (letter >= 'A' && letter <= 'J') {
+                    if (!byLetter[letter]) byLetter[letter] = [];
+                    byLetter[letter].push(r);
+                  }
                 });
 
-                // Sort each letter's plots by the numeric part
+                // Sort each letter's plots by the numeric part of row_number
                 Object.keys(byLetter).forEach(letter => {
                   byLetter[letter].sort((a, b) => {
                     const na = parseInt(String(a.row_number || '').replace(/\D/g, '')) || 0;
