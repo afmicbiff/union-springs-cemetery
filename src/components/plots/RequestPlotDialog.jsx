@@ -52,7 +52,7 @@ export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white max-w-lg">
+      <DialogContent className="bg-white max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Reserve a Plot – Start Here</DialogTitle>
         </DialogHeader>
