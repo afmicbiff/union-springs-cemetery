@@ -241,9 +241,9 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
 
       {!isCollapsed && (
         <div
-          className={`rounded-xl border-2 border-dashed p-6 transition-colors duration-500 ${borderColor} ${bgColor} bg-opacity-30 overflow-x-auto`}
+          className={`rounded-xl border-2 border-dashed p-6 transition-colors duration-500 ${borderColor} ${bgColor} bg-opacity-30`}
         >
-          <div className="flex gap-4 justify-start overflow-x-auto pb-4">
+          <div className="flex gap-4 justify-start pb-4">
             {columnRanges.map((range) => (
               <div
                 key={range.label}
@@ -413,8 +413,8 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-      {/* Search */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 md:p-4">
+        {/* Search */}
       <div className="mb-3">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -431,9 +431,9 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
       </div>
 
       {/* Legend */}
-      <div className="bg-white border-b border-gray-200 py-3 mb-4 overflow-x-auto">
-        <div className="flex flex-wrap items-center gap-2 justify-center">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
+      <div className="bg-white border-b border-gray-200 py-3 mb-4 overflow-x-auto no-scrollbar">
+        <div className="flex flex-nowrap md:flex-wrap items-center gap-2 min-w-max px-2">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center mr-2 sticky left-0 bg-white z-10 pl-1">
             <Info size={14} className="mr-1" /> Status
           </span>
           <LegendItem

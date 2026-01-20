@@ -83,22 +83,22 @@ export default function NewPlotsAndMap() {
             </div>
             <div className="flex items-center gap-2">
               {/* Tab toggles */}
-              <div className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg mr-2">
+              <div className="flex overflow-x-auto space-x-1 bg-gray-100 p-1 rounded-lg mr-2 scrollbar-none max-w-[calc(100vw-140px)] md:max-w-none">
                 <button 
                   onClick={() => setActiveTab('reservation1')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'reservation1' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${activeTab === 'reservation1' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <Grid3X3 size={14} /> New Plots Map
                 </button>
                 <button 
                   onClick={() => setActiveTab('map')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${activeTab === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <MapIcon size={14} /> Import Batches
                 </button>
                 <button 
                   onClick={() => setActiveTab('data')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 ${activeTab === 'data' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center gap-1 whitespace-nowrap flex-shrink-0 ${activeTab === 'data' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <FileText size={14} /> Data List
                 </button>
