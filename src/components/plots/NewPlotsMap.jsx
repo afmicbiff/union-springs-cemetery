@@ -44,20 +44,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     refetchOnWindowFocus: false,
   });
 
-  // Query for First Row plots (1103-1179) - always fetch regardless of batch
+  // Query for First Row plots - disabled since we now show all plots by row letter
   const firstRowQuery = useQuery({
     queryKey: ["newPlots-firstRow"],
-    queryFn: async () => {
-      const all = await base44.entities.NewPlot.list("plot_number", 2000);
-      return all.filter(r => {
-        const pn = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || 0;
-        return pn >= 1103 && pn <= 1179;
-      });
-    },
+    queryFn: async () => [],
+    enabled: false,
     initialData: [],
-    staleTime: 60_000,
-    gcTime: 10 * 60_000,
-    refetchOnWindowFocus: false,
   });
 
   // Sync external search into local fuzzy query
@@ -122,16 +114,13 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
       return statusOk && sectionOk && ownerOk && plotOk;
     });
 
-    // Group filtered list
+    // Group filtered list by row letter (e.g., A, B, C... from row_number like "A-101", "B-102")
     const g2 = {};
     filtered.forEach((r) => {
       const rowStrRaw = String(r.row_number || '').toUpperCase();
-      const cleanedRow = rowStrRaw.replace(/^(ROW|SECTION)\s*:?\s*/i, '').trim();
-      let letterMatch = cleanedRow.match(/[A-Z]/);
-      const plotStr = String(r.plot_number || '').toUpperCase();
-      if (!letterMatch && plotStr) letterMatch = plotStr.match(/[A-Z]/);
-      const sectionKey = (r.section || 'Unassigned').replace(/Section\s*/i, '').trim() || 'Unassigned';
-      const key = letterMatch ? letterMatch[0].toUpperCase() : sectionKey;
+      // Extract first letter from row_number (e.g., "J-227" -> "J")
+      const letterMatch = rowStrRaw.match(/^([A-Z])/);
+      const key = letterMatch ? letterMatch[1] : 'Unassigned';
       if (!g2[key]) g2[key] = [];
       g2[key].push(r);
     });
@@ -237,98 +226,14 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
           {/* Sections with Zoom/Pan */}
           <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9}>
             <div className="p-2 inline-block min-w-max space-y-8">
-              {/* First Row: 1103 A-101 (bottom) to 1179 J-108 (top) */}
-              {(() => {
-                // Use dedicated first row query
-                const firstRowPlots = firstRowQuery.data || [];
-
-                // Apply filters
-                const filteredFirstRow = firstRowPlots.filter((r) => {
-                  const statusOk = !filters || filters.status === 'All' || r.status === filters.status;
-                  const ownerOk = !filters?.owner || String(r.family_name || '').toLowerCase().includes(String(filters.owner).toLowerCase());
-                  const plotFilter = (filters?.plot || '').toString().trim();
-                  let plotOk = true;
-                  if (plotFilter) {
-                    const plotStr = String(r.plot_number || '').toLowerCase();
-                    const wanted = plotFilter.toLowerCase();
-                    const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
-                    const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
-                    plotOk = numWanted != null ? (numItem === numWanted) : plotStr.includes(wanted);
-                  }
-                  return statusOk && ownerOk && plotOk;
-                });
-
-                if (filteredFirstRow.length === 0) return null;
-
-                // Group by row letter (A-J), reversed so J is at top, A at bottom
-                const byLetter = {};
-                filteredFirstRow.forEach(r => {
-                  const letter = (r.row_number || '').charAt(0).toUpperCase();
-                  if (letter >= 'A' && letter <= 'J') {
-                    if (!byLetter[letter]) byLetter[letter] = [];
-                    byLetter[letter].push(r);
-                  }
-                });
-
-                // Sort each letter's plots by the numeric part of row_number
-                Object.keys(byLetter).forEach(letter => {
-                  byLetter[letter].sort((a, b) => {
-                    const na = parseInt(String(a.row_number || '').replace(/\D/g, '')) || 0;
-                    const nb = parseInt(String(b.row_number || '').replace(/\D/g, '')) || 0;
-                    return na - nb;
-                  });
-                });
-
-                const letterOrder = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']; // top to bottom
-
-                return (
-                  <div className="mb-8">
-                    <div className="flex items-end gap-3 mb-3">
-                      <h3 className="text-xl font-semibold text-gray-900">First Row</h3>
-                      <span className="text-xs text-gray-500">{filteredFirstRow.length} plots (1103-1179)</span>
-                    </div>
-                    <div className="border-2 border-dashed border-blue-300 bg-blue-50/30 rounded-xl p-4">
-                      <div className="flex flex-col gap-1">
-                        {letterOrder.map(letter => {
-                          const plots = byLetter[letter] || [];
-                          if (plots.length === 0) return null;
-                          return (
-                            <div key={letter} className="flex items-center gap-1">
-                              <span className="w-6 text-xs font-bold text-gray-700">{letter}</span>
-                              <div className="flex gap-0.5">
-                                {plots.map((r) => {
-                                  const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
-                                  const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
-                                  return (
-                                    <div
-                                      key={r.id || r.plot_number}
-                                      className="relative w-24 h-10 m-0.5 border rounded bg-white border-gray-300 flex items-center justify-between px-2 hover:border-blue-400 hover:shadow-md hover:z-20 transition-all cursor-pointer plot-element"
-                                      onClick={() => handleClick(r)}
-                                      title={`Plot ${r.plot_number} • Row ${r.row_number} • ${r.status || 'Available'}`}
-                                    >
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
-                                        <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number}</span>
-                                      </div>
-                                      <div className={`w-3 h-3 rounded-full ${bg}`}></div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* Plots are now grouped by row letter in sections below */}
 
               {sectionKeys.length === 0 ? (
-                <div className="text-sm text-gray-500">No rows for this batch.</div>
+                <div className="text-sm text-gray-500">No plots found for this batch.</div>
               ) : (
                 sectionKeys.map((section) => {
-                if (section === 'A') {
+                // Skip the complex A-1/A-2 logic - just render all sections the same way
+                if (false && section === 'A') {
                   const aRows = grouped[section] || [];
                   const numFromPlot = (row) => {
                     const digits = String(row.plot_number || '').replace(/\D/g, '');
