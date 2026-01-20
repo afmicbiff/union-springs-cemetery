@@ -166,15 +166,16 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
   const [bgColor, borderColor, textColor] = palette.split(" ");
 
   // Define the 8 column ranges for each row letter
+  // Order: 225-232, 217-224, 209-216, 201-208, 125-132, 117-124, 109-116, 101-108 (right to left)
   const columnRanges = [
-    { start: 101, end: 108, label: "101-108" },
-    { start: 109, end: 116, label: "109-116" },
-    { start: 117, end: 124, label: "117-124" },
-    { start: 125, end: 132, label: "125-132" },
-    { start: 201, end: 208, label: "201-208" },
-    { start: 209, end: 216, label: "209-216" },
-    { start: 217, end: 224, label: "217-224" },
     { start: 225, end: 232, label: "225-232" },
+    { start: 217, end: 224, label: "217-224" },
+    { start: 209, end: 216, label: "209-216" },
+    { start: 201, end: 208, label: "201-208" },
+    { start: 125, end: 132, label: "125-132" },
+    { start: 117, end: 124, label: "117-124" },
+    { start: 109, end: 116, label: "109-116" },
+    { start: 101, end: 108, label: "101-108" },
   ];
 
   // Group plots by the numeric part of Row into 8 columns
