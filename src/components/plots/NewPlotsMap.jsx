@@ -491,7 +491,7 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                               ];
 
                               return (
-                                <div className="grid grid-cols-4 gap-2">
+                                <div className="grid grid-cols-4 gap-0.5">
                                   {rows.map((row, ri) => (
                                     <React.Fragment key={`a2-row-${ri}`}>
                                       {row.map((n, ci) => {
