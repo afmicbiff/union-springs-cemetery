@@ -365,7 +365,7 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
     return groups;
   }, [filteredPlots]);
 
-  const rowLetters = Object.keys(groupedByRow).sort().reverse(); // J to A
+  const rowLetters = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'].filter(r => groupedByRow[r]);
 
   const handleHover = useCallback((e, data) => {
     if (!data) {
@@ -478,7 +478,7 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
         maxScale={2.5}
         initialScale={0.9}
       >
-        <div className="p-4 inline-block min-w-max space-y-8">
+        <div className="p-4 pt-2 inline-block min-w-max space-y-8">
           {rowLetters.length === 0 ? (
             <div className="text-sm text-gray-500">No plots found.</div>
           ) : (
