@@ -37,20 +37,38 @@ export default function ReservationWizard() {
     initialData: [],
   });
 
-  // Prefill from RequestPlotDialog selection if present
+  // Set prefill for display separately, once from localStorage
   React.useEffect(() => {
     try {
       const detailsRaw = localStorage.getItem("selected_plot_details");
       if (detailsRaw && !prefill) {
         setPrefill(JSON.parse(detailsRaw));
+        // Clear local storage after setting prefill to avoid re-triggering unnecessarily
+        localStorage.removeItem("selected_plot_details");
       }
-      const id = localStorage.getItem("selected_plot_id");
-      if (id && plots.data?.length) {
-        const match = plots.data.find((p) => p.id === id);
-        if (match) setSelected(match);
+    } catch (e) {
+      console.error("Error setting prefill from localStorage:", e);
+    }
+  }, [prefill]);
+
+  // Prefill 'selected' state from localStorage if a plot is available and nothing is selected yet
+  React.useEffect(() => {
+    if (plots.data?.length && !selected) {
+      try {
+        const storedPlotId = localStorage.getItem("selected_plot_id");
+        if (storedPlotId) {
+          const match = plots.data.find((p) => p.id === storedPlotId);
+          if (match) {
+            setSelected(match);
+            // Clear localStorage items now that the plot is in state
+            localStorage.removeItem("selected_plot_id");
+          }
+        }
+      } catch (e) {
+        console.error("Error initializing selected plot from localStorage:", e);
       }
-    } catch (_) {}
-  }, [plots.data]);
+    }
+  }, [plots.data, selected]);
 
   // Auto-scroll and emphasize selected plot card in Step 1
   React.useEffect(() => {
