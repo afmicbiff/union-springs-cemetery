@@ -239,12 +239,8 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
             <div className="p-2 inline-block min-w-max space-y-8">
               {/* First Row: 1103 A-101 (bottom) to 1179 J-108 (top) */}
               {(() => {
-                // Filter plots in range 1103-1179 from the actual data
-                const allData = rowsQuery.data || [];
-                const firstRowPlots = allData.filter(r => {
-                  const pn = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || 0;
-                  return pn >= 1103 && pn <= 1179;
-                });
+                // Use dedicated first row query
+                const firstRowPlots = firstRowQuery.data || [];
 
                 // Apply filters
                 const filteredFirstRow = firstRowPlots.filter((r) => {
