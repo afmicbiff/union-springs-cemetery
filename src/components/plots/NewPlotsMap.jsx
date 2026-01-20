@@ -44,6 +44,22 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
     refetchOnWindowFocus: false,
   });
 
+  // Query for First Row plots (1103-1179) - always fetch regardless of batch
+  const firstRowQuery = useQuery({
+    queryKey: ["newPlots-firstRow"],
+    queryFn: async () => {
+      const all = await base44.entities.NewPlot.list("plot_number", 2000);
+      return all.filter(r => {
+        const pn = parseInt(String(r.plot_number || '').replace(/\D/g, '')) || 0;
+        return pn >= 1103 && pn <= 1179;
+      });
+    },
+    initialData: [],
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
   // Sync external search into local fuzzy query
   React.useEffect(() => {
     if (filters && Object.prototype.hasOwnProperty.call(filters, 'search')) {
