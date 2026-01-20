@@ -337,7 +337,10 @@ export default function Layout({ children }) {
             <h3 className="text-teal-500 text-xl md:text-2xl font-serif tracking-wider uppercase mb-4">Union Springs</h3>
             <p className="mb-4">Ideally located in a granite setting, providing a peaceful final resting place with dignity and respect.</p>
             <p>&copy; {new Date().getFullYear()} Union Springs Cemetery Association</p>
-          </div>
+            <p className="mt-4 text-xs opacity-70">
+              Regulated by the Louisiana Cemetery Board. Complaints may be directed to: 3445 N. Causeway Blvd, Suite 700, Metairie, LA 70002.
+            </p>
+            </div>
           <div>
             <h3 className="text-stone-100 font-serif text-lg mb-4">Contact</h3>
             <p>1311 Fire Tower Road</p>
