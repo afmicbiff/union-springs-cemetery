@@ -163,43 +163,42 @@ const Tooltip = React.memo(({ data, position, visible }) => {
 
   const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
   const isOccupied = data.Status === 'Occupied' || isVeteran;
-  
+
   const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
-  // Tooltip positioning helpers: anchor to plot, clamp within viewport (no center docking)
+  // Center tooltip on screen, clamped to viewport edges
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   React.useEffect(() => {
     if (!visible || !data) return;
-    const margin = 12;
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 0;
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 0;
+    const margin = 16;
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
     const width = 288; // Tailwind w-72
-    const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 180;
-    let left = position.x + 12;
-    let top = position.y + 12;
+    const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 220;
 
-    // Clamp to viewport edges to avoid overflow
-    if (left + width + margin > vw) left = vw - width - margin;
-    if (left < margin) left = margin;
-    if (top + height + margin > vh) top = vh - height - margin;
-    if (top < margin) top = margin;
+    // Center horizontally, clamp to edges
+    let left = (vw - width) / 2;
+    left = Math.max(margin, Math.min(left, vw - width - margin));
+
+    // Position vertically near center, adjust based on pointer position
+    let top = Math.min(Math.max(position.y - height / 2, margin), vh - height - margin);
 
     setCoords({ left, top });
   }, [position, visible, data]);
 
   return (
     <div 
-      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none transform translate-y-1"
+      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none"
       ref={tooltipRef}
       style={{ 
-        left: `${(coords.left || ((position?.x ?? 0) + 12))}px`, 
-        top: `${(coords.top || ((position?.y ?? 0) + 12))}px`,
+        left: `${coords.left}px`, 
+        top: `${coords.top}px`,
         opacity: visible ? 1 : 0,
-        transition: 'left 120ms ease-out, top 120ms ease-out, opacity 120ms ease-out, transform 120ms ease-out',
-        willChange: 'left, top, opacity, transform',
+        transition: 'left 150ms ease-out, top 150ms ease-out, opacity 150ms ease-out',
+        willChange: 'left, top, opacity',
       }}
     >
       <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
