@@ -38,14 +38,28 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(" ").find((c) => c.startsWith("bg-"));
 
+  // Center tooltip on screen, clamped to viewport edges
+  const tooltipWidth = 288; // w-72
+  const tooltipHeight = 220; // approximate height
+  const margin = 16;
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+
+  // Center horizontally, clamp to edges
+  let left = (vw - tooltipWidth) / 2;
+  left = Math.max(margin, Math.min(left, vw - tooltipWidth - margin));
+
+  // Position vertically near center, but adjust based on pointer position
+  let top = Math.min(Math.max(position.y - tooltipHeight / 2, margin), vh - tooltipHeight - margin);
+
   return (
     <div
       className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none"
       style={{
-        left: `${position.x + 12}px`,
-        top: `${position.y + 12}px`,
+        left: `${left}px`,
+        top: `${top}px`,
         opacity: visible ? 1 : 0,
-        transition: "opacity 120ms ease-out",
+        transition: "left 150ms ease-out, top 150ms ease-out, opacity 120ms ease-out",
       }}
     >
       <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
