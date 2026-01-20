@@ -235,8 +235,6 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
         </div>
         <h2 className={`text-2xl font-bold ${textColor}`}>Row {rowLetter}</h2>
-        <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
-        <span className="mb-1 text-xs font-mono text-gray-400 ml-2">{plots.length} Plots</span>
       </div>
 
       {!isCollapsed && (
