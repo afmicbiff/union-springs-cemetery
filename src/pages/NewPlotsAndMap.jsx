@@ -98,10 +98,7 @@ export default function NewPlotsAndMap() {
                   <FileText size={14} /> Data List
                 </button>
               </div>
-              {isAdmin && (<NewPlotsImport />)}
-              <Link to={createPageUrl('Plots')}>
-                <Button className="bg-teal-700 hover:bg-teal-800 text-white">Back to Plots & Map</Button>
-              </Link>
+
             </div>
           </div>
         </div>
