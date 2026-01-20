@@ -302,13 +302,15 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                                   return (
                                     <div
                                       key={r.id || r.plot_number}
-                                      className="relative w-16 h-8 m-0.5 border rounded-[1px] flex items-center justify-between px-1.5 bg-blue-100 border-blue-300 text-blue-900 opacity-90 hover:opacity-100 hover:scale-110 hover:z-20 hover:shadow-xl hover:ring-2 hover:ring-blue-400 transition-all cursor-pointer plot-element"
+                                      className="relative w-24 h-10 m-0.5 border rounded bg-white border-gray-300 flex items-center justify-between px-2 hover:border-blue-400 hover:shadow-md hover:z-20 transition-all cursor-pointer plot-element"
                                       onClick={() => handleClick(r)}
                                       title={`Plot ${r.plot_number} • Row ${r.row_number} • ${r.status || 'Available'}`}
                                     >
-                                      <span className="text-[10px] leading-none font-black text-gray-800">{r.plot_number}</span>
-                                      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{r.row_number}</span>
-                                      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bg}`}></div>
+                                      <div className="flex items-center gap-1">
+                                        <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
+                                        <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number}</span>
+                                      </div>
+                                      <div className={`w-3 h-3 rounded-full ${bg}`}></div>
                                     </div>
                                   );
                                 })}
@@ -414,13 +416,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                             const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
                             const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
                             return (
-                              <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
-                                <div className="flex items-center justify-between">
-                                  <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                  <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                              <div key={key} className="border border-gray-300 rounded bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer w-24 h-10 flex items-center justify-between px-2" onClick={() => handleClick(r) }>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
+                                  <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number || "-"}</span>
                                 </div>
-                                <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
-                                <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                                <span className={`w-3 h-3 rounded-full ${bg}`}></span>
                               </div>
                             );
                           })}
@@ -497,13 +498,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                                         const r = byNum[n];
                                         if (!r) {
                                           return (
-                                            <div key={`a2-placeholder-${n}`} className="border border-gray-200 rounded-md p-2 bg-gray-50 opacity-60">
-                                              <div className="flex items-center justify-between">
-                                                <div className="text-[11px] font-mono text-gray-400 font-semibold">{n}</div>
-                                                <span className="w-3 h-3 rounded-full bg-gray-300"></span>
+                                            <div key={`a2-placeholder-${n}`} className="border border-gray-300 rounded bg-white opacity-60 w-24 h-10 flex items-center justify-between px-2">
+                                              <div className="flex items-center gap-1">
+                                                <span className="text-sm font-bold text-gray-400">{n}</span>
+                                                <span className="text-[10px] text-gray-400 truncate max-w-[40px]">A-{n}</span>
                                               </div>
-                                              <div className="mt-1 text-[11px] text-gray-400 truncate">Row: A-{n}</div>
-                                              <div className="mt-0.5 text-[11px] text-gray-400 truncate">&nbsp;</div>
+                                              <span className="w-3 h-3 rounded-full bg-gray-300"></span>
                                             </div>
                                           );
                                         }
@@ -513,13 +513,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                                         const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
                                         const tip = `A-2 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
                                         return (
-                                          <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
-                                            <div className="flex items-center justify-between">
-                                              <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                              <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                          <div key={key} title={tip} className="border border-gray-300 rounded bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer w-24 h-10 flex items-center justify-between px-2" onClick={() => handleClick(r) }>
+                                            <div className="flex items-center gap-1">
+                                              <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
+                                              <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number || '-'}</span>
                                             </div>
-                                            <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || '-'}</div>
-                                            <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
+                                            <span className={`w-3 h-3 rounded-full ${bg}`}></span>
                                           </div>
                                         );
                                       })}
@@ -578,13 +577,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                                           const r = byNum[n];
                                           if (!r) {
                                             return (
-                                              <div key={`placeholder-${n}`} className="border border-gray-200 rounded-md p-2 bg-gray-50 opacity-60">
-                                                <div className="flex items-center justify-between">
-                                                  <div className="text-[11px] font-mono text-gray-400 font-semibold">{n}</div>
-                                                  <span className="w-3 h-3 rounded-full bg-gray-300"></span>
+                                              <div key={`placeholder-${n}`} className="border border-gray-300 rounded bg-white opacity-60 w-24 h-10 flex items-center justify-between px-2">
+                                                <div className="flex items-center gap-1">
+                                                  <span className="text-sm font-bold text-gray-400">{n}</span>
+                                                  <span className="text-[10px] text-gray-400 truncate max-w-[40px]">A-{n}</span>
                                                 </div>
-                                                <div className="mt-1 text-[11px] text-gray-400 truncate">Row: A-{n}</div>
-                                                <div className="mt-0.5 text-[11px] text-gray-400 truncate">&nbsp;</div>
+                                                <span className="w-3 h-3 rounded-full bg-gray-300"></span>
                                               </div>
                                             );
                                           }
@@ -594,13 +592,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                                           const occupant = [r.first_name, r.last_name].filter(Boolean).join(' ') || r.family_name || '';
                                           const tip = `A-1 • Plot ${r.plot_number} • Row ${r.row_number || '-' } • ${r.status || 'Unknown'}${occupant ? ' • ' + occupant : ''}`;
                                           return (
-                                            <div key={key} title={tip} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
-                                              <div className="flex items-center justify-between">
-                                                <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                                <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                            <div key={key} title={tip} className="border border-gray-300 rounded bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer w-24 h-10 flex items-center justify-between px-2" onClick={() => handleClick(r) }>
+                                              <div className="flex items-center gap-1">
+                                                <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
+                                                <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number || '-'}</span>
                                               </div>
-                                              <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || '-'}</div>
-                                              <div className="mt-0.5 text-[11px] text-gray-600 truncate">{occupant}</div>
+                                              <span className={`w-3 h-3 rounded-full ${bg}`}></span>
                                             </div>
                                           );
                                         })}
@@ -679,13 +676,12 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
                               const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
                               const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
                               return (
-                                <div key={key} className="border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onClick={() => handleClick(r) }>
-                                  <div className="flex items-center justify-between">
-                                    <div className="text-[11px] font-mono text-gray-800 font-semibold">{r.plot_number}</div>
-                                    <span className={`w-3 h-3 rounded-full ${bg}`}></span>
+                                <div key={key} className="border border-gray-300 rounded bg-white hover:border-blue-400 hover:shadow-md transition cursor-pointer w-24 h-10 flex items-center justify-between px-2" onClick={() => handleClick(r) }>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-sm font-bold text-gray-900">{r.plot_number}</span>
+                                    <span className="text-[10px] text-gray-500 truncate max-w-[40px]">{r.row_number || "-"}</span>
                                   </div>
-                                  <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {r.row_number || "-"}</div>
-                                  <div className="mt-0.5 text-[11px] text-gray-600 truncate">{[r.first_name, r.last_name].filter(Boolean).join(" ") || r.family_name || ""}</div>
+                                  <span className={`w-3 h-3 rounded-full ${bg}`}></span>
                                 </div>
                               );
                             })}
