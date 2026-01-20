@@ -221,6 +221,108 @@ export default function NewPlotsMap({ batchId, filters = { status: 'All', sectio
           {/* Sections with Zoom/Pan */}
           <ZoomPan className="w-full min-h-[70vh] md:min-h-[78vh] rounded-lg border border-gray-200 overflow-auto" minScale={0.35} maxScale={2.5} initialScale={0.9}>
             <div className="p-2 inline-block min-w-max space-y-8">
+              {/* First Row: 1103 A-101 (bottom) to 1179 J-108 (top) */}
+              {(() => {
+                // Generate first row plots: 1103-1179 mapping to A-101 through J-108
+                const firstRowData = [];
+                const rowLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+                let plotNum = 1103;
+                for (const letter of rowLetters) {
+                  for (let i = 101; i <= 108; i++) {
+                    if (plotNum > 1179) break;
+                    firstRowData.push({
+                      id: `first-row-${plotNum}`,
+                      plot_number: String(plotNum),
+                      row_number: `${letter}-${i}`,
+                      status: 'Available',
+                      first_name: '',
+                      last_name: '',
+                      family_name: ''
+                    });
+                    plotNum++;
+                  }
+                  // Handle the 77 plots: 1103-1179 = 77 plots, but 10 letters x 8 = 80
+                  // Actually: J only goes up to J-108, total = 10*8 = 80, but we have 77
+                  // Let's check: 1179 - 1103 + 1 = 77. So J ends at J-105 (1177, 1178, 1179 = J-103, J-104, J-105)
+                  // Actually need to recalculate: A(8) + B(8) + C(8) + D(8) + E(8) + F(8) + G(8) + H(8) + I(8) = 72, then J gets 5 more (1175-1179 = J-101 to J-105)
+                }
+                
+                // Find matching data from rowsQuery if available
+                const dataMap = new Map();
+                (rowsQuery.data || []).forEach(r => {
+                  const pn = String(r.plot_number || '').trim();
+                  if (pn) dataMap.set(pn, r);
+                });
+
+                // Apply filters
+                const filteredFirstRow = firstRowData.filter((r) => {
+                  const realData = dataMap.get(r.plot_number) || r;
+                  const statusOk = !filters || filters.status === 'All' || realData.status === filters.status;
+                  return statusOk;
+                }).map(r => dataMap.get(r.plot_number) || r);
+
+                if (filteredFirstRow.length === 0) return null;
+
+                // Group by row letter (A-J), reversed so J is at top, A at bottom
+                const byLetter = {};
+                filteredFirstRow.forEach(r => {
+                  const letter = (r.row_number || '').charAt(0).toUpperCase();
+                  if (!byLetter[letter]) byLetter[letter] = [];
+                  byLetter[letter].push(r);
+                });
+
+                // Sort each letter's plots by the numeric part
+                Object.keys(byLetter).forEach(letter => {
+                  byLetter[letter].sort((a, b) => {
+                    const na = parseInt(String(a.row_number || '').replace(/\D/g, '')) || 0;
+                    const nb = parseInt(String(b.row_number || '').replace(/\D/g, '')) || 0;
+                    return na - nb;
+                  });
+                });
+
+                const letterOrder = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A']; // top to bottom
+
+                return (
+                  <div className="mb-8">
+                    <div className="flex items-end gap-3 mb-3">
+                      <h3 className="text-xl font-semibold text-gray-900">First Row</h3>
+                      <span className="text-xs text-gray-500">{filteredFirstRow.length} plots (1103-1179)</span>
+                    </div>
+                    <div className="border-2 border-dashed border-blue-300 bg-blue-50/30 rounded-xl p-4">
+                      <div className="flex flex-col gap-1">
+                        {letterOrder.map(letter => {
+                          const plots = byLetter[letter] || [];
+                          if (plots.length === 0) return null;
+                          return (
+                            <div key={letter} className="flex items-center gap-1">
+                              <span className="w-6 text-xs font-bold text-gray-700">{letter}</span>
+                              <div className="flex gap-0.5">
+                                {plots.map((r) => {
+                                  const st = r.status && STATUS_COLORS[r.status] ? r.status : "Default";
+                                  const bg = STATUS_COLORS[st] || STATUS_COLORS.Default;
+                                  return (
+                                    <div
+                                      key={r.id || r.plot_number}
+                                      className="relative w-16 h-8 m-0.5 border rounded-[1px] flex items-center justify-between px-1.5 bg-blue-100 border-blue-300 text-blue-900 opacity-90 hover:opacity-100 hover:scale-110 hover:z-20 hover:shadow-xl hover:ring-2 hover:ring-blue-400 transition-all cursor-pointer plot-element"
+                                      onClick={() => handleClick(r)}
+                                      title={`Plot ${r.plot_number} • Row ${r.row_number} • ${r.status || 'Available'}`}
+                                    >
+                                      <span className="text-[10px] leading-none font-black text-gray-800">{r.plot_number}</span>
+                                      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">{r.row_number}</span>
+                                      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bg}`}></div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {sectionKeys.length === 0 ? (
                 <div className="text-sm text-gray-500">No rows for this batch.</div>
               ) : (
