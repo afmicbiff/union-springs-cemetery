@@ -21,22 +21,45 @@ const STATUS_OPTIONS = [
   'Unknown'
 ];
 
-export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
+export default function PlotEditDialog({ isOpen, onClose, plot, onSave, onCreate }) {
   const [formData, setFormData] = useState({});
+  const isNewPlot = plot?.isSpacer;
 
   useEffect(() => {
     if (plot) {
-      const mapContainer = (val) => (val === 'Liner' ? 'Concrete' : (val === 'Vault' ? 'Metal' : (val || 'None')));
-      const mapOptions = (arr) => (arr || []).map(mapContainer);
-      setFormData(() => {
-        const base = { ...plot };
-        base.container_type = mapContainer(base.container_type);
-        const opts = (base.liner_vault_options && base.liner_vault_options.length)
-          ? Array.from(new Set(mapOptions(base.liner_vault_options)))
-          : ['None','Concrete','Metal'];
-        base.liner_vault_options = opts;
-        return base;
-      });
+      if (plot.isSpacer) {
+        // Initialize empty form for new plot creation
+        setFormData({
+          Section: plot.suggestedSection ? `Section ${plot.suggestedSection}` : (plot.Section || ''),
+          Row: '',
+          Grave: '',
+          Status: 'Available',
+          'First Name': '',
+          'Last Name': '',
+          'Family Name': '',
+          Birth: '',
+          Death: '',
+          Notes: '',
+          burial_type: 'Casket',
+          burial_type_options: ['Casket', 'Urn'],
+          container_type: 'None',
+          liner_vault_options: ['None', 'Concrete', 'Metal'],
+          capacity: 1,
+          current_occupancy: 0
+        });
+      } else {
+        const mapContainer = (val) => (val === 'Liner' ? 'Concrete' : (val === 'Vault' ? 'Metal' : (val || 'None')));
+        const mapOptions = (arr) => (arr || []).map(mapContainer);
+        setFormData(() => {
+          const base = { ...plot };
+          base.container_type = mapContainer(base.container_type);
+          const opts = (base.liner_vault_options && base.liner_vault_options.length)
+            ? Array.from(new Set(mapOptions(base.liner_vault_options)))
+            : ['None','Concrete','Metal'];
+          base.liner_vault_options = opts;
+          return base;
+        });
+      }
     }
   }, [plot]);
 
@@ -53,7 +76,13 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    if (isNewPlot) {
+      if (onCreate) {
+        onCreate(formData);
+      }
+    } else {
+      onSave(formData);
+    }
     onClose();
   };
 
@@ -63,13 +92,13 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <DialogTitle>Edit Plot Details</DialogTitle>
+          <DialogTitle>{isNewPlot ? 'Create New Plot' : 'Edit Plot Details'}</DialogTitle>
         </DialogHeader>
         
         <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className={`grid w-full ${isNewPlot ? 'grid-cols-1' : 'grid-cols-2'}`}>
                 <TabsTrigger value="details">Details</TabsTrigger>
-                <TabsTrigger value="history">Audit History</TabsTrigger>
+                {!isNewPlot && <TabsTrigger value="history">Audit History</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="details">
@@ -275,7 +304,9 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave }) {
 
                   <DialogFooter className="gap-2">
                     <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">Save Changes</Button>
+                    <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">
+                      {isNewPlot ? 'Create Plot' : 'Save Changes'}
+                    </Button>
                   </DialogFooter>
                 </form>
             </TabsContent>
