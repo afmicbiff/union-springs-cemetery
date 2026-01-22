@@ -34,77 +34,113 @@ const ROW_PALETTES = {
 const Tooltip = React.memo(({ data, position, visible }) => {
   if (!visible || !data) return null;
 
-  const statusKey = STATUS_COLORS[data.Status] ? data.Status : "Default";
+  const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
+  const isOccupied = data.Status === 'Occupied' || isVeteran;
+
+  const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
   const statusColor = STATUS_COLORS[statusKey];
-  const bgClass = statusColor.split(" ").find((c) => c.startsWith("bg-"));
+  const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
-  // Center tooltip on screen, clamped to viewport edges
-  const tooltipWidth = 288; // w-72
-  const tooltipHeight = 220; // approximate height
-  const margin = 16;
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
-  const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+  // Status badge colors
+  const statusBadgeColors = {
+    'Available': 'bg-green-100 text-green-800 border-green-300',
+    'Pending Reservation': 'bg-amber-100 text-amber-800 border-amber-300',
+    'Reserved': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    'Occupied': 'bg-red-100 text-red-800 border-red-300',
+    'Veteran': 'bg-blue-100 text-blue-800 border-blue-300',
+    'Unavailable': 'bg-gray-100 text-gray-800 border-gray-300',
+    'Unknown': 'bg-purple-100 text-purple-800 border-purple-300',
+    'Not Usable': 'bg-gray-100 text-gray-600 border-gray-300',
+    'Default': 'bg-gray-100 text-gray-600 border-gray-300'
+  };
 
-  // Center horizontally, clamp to edges
-  let left = (vw - tooltipWidth) / 2;
-  left = Math.max(margin, Math.min(left, vw - tooltipWidth - margin));
-
-  // Position vertically near center, but adjust based on pointer position
-  let top = Math.min(Math.max(position.y - tooltipHeight / 2, margin), vh - tooltipHeight - margin);
+  const badgeClass = statusBadgeColors[statusKey] || statusBadgeColors.Default;
 
   return (
-    <div
-      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none"
-      style={{
-        left: `${left}px`,
-        top: `${top}px`,
-        opacity: visible ? 1 : 0,
-        transition: "left 150ms ease-out, top 150ms ease-out, opacity 120ms ease-out",
-      }}
+    <div 
+      className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none"
+      style={{ opacity: visible ? 1 : 0 }}
     >
-      <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
-        <div className="flex items-center space-x-2">
-          <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
-          <span className="font-bold text-gray-800 text-lg">Grave {data.Grave}</span>
+      <div 
+        className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-80 max-w-[90vw] pointer-events-none overflow-hidden"
+        style={{
+          transform: visible ? 'scale(1)' : 'scale(0.95)',
+          transition: 'transform 150ms ease-out, opacity 150ms ease-out',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+        }}
+      >
+        {/* Header */}
+        <div className={`px-5 py-4 ${bgClass} bg-opacity-20`}>
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`w-3 h-3 rounded-full ${bgClass} ring-2 ring-white shadow-sm`}></span>
+                <span className="font-bold text-gray-900 text-xl">Plot {data.Grave}</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">Row {data.Row}</span>
+            </div>
+            <span className={`px-3 py-1 text-xs font-bold rounded-full border ${badgeClass}`}>
+              {statusKey}
+            </span>
+          </div>
         </div>
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-          Row {data.Row}
-        </span>
-      </div>
-
-      {data.Status === "Occupied" || data.FirstName || data.lastname ? (
-        <div className="space-y-2">
-          <div className="bg-gray-50 p-2 rounded border border-gray-100">
-            <p className="text-xs text-gray-400 uppercase font-bold">Occupant</p>
-            <p className="font-bold text-gray-800 text-base">
-              {data.FirstName} {data.lastname}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="text-xs text-gray-400">Born</p>
-              <p className="font-medium text-gray-700">{data.Birth || "Unknown"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">Died</p>
-              <p className="font-medium text-gray-700">{data.Death || "Unknown"}</p>
-            </div>
-          </div>
-          {(data.Notes || data.FamilyName) && (
-            <div className="mt-2 pt-2 border-t border-gray-100">
-              <p className="text-xs text-gray-400">Details</p>
-              {data.FamilyName && (
-                <p className="text-xs text-gray-600">Family: {data.FamilyName}</p>
+        
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          {isOccupied || data.FirstName || data.lastname ? (
+            <>
+              {/* Occupant Info */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Occupant</p>
+                <p className="font-bold text-gray-900 text-lg leading-tight">
+                  {data.FirstName} {data.lastname}
+                </p>
+                {data.FamilyName && (
+                  <p className="text-sm text-gray-500 mt-1">Family: {data.FamilyName}</p>
+                )}
+              </div>
+              
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <p className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Born</p>
+                  <p className="font-semibold text-blue-900 text-sm">{data.Birth || '—'}</p>
+                </div>
+                <div className="bg-rose-50 p-3 rounded-lg border border-rose-100">
+                  <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">Died</p>
+                  <p className="font-semibold text-rose-900 text-sm">{data.Death || '—'}</p>
+                </div>
+              </div>
+              
+              {/* Notes */}
+              {data.Notes && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Notes</p>
+                  <p className="text-sm text-gray-600 italic leading-relaxed">{data.Notes}</p>
+                </div>
               )}
-              {data.Notes && <p className="text-xs text-gray-600 italic">{data.Notes}</p>}
+            </>
+          ) : (
+            <div className="text-center py-6">
+              <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${bgClass} bg-opacity-30 flex items-center justify-center`}>
+                <span className={`w-5 h-5 rounded-full ${bgClass}`}></span>
+              </div>
+              <p className="text-gray-700 font-medium">
+                {data.Status === 'Reserved' 
+                  ? `Reserved for ${data.FamilyName || data.Notes || 'Family'}` 
+                  : data.Status === 'Available' 
+                    ? 'This plot is available'
+                    : data.Status === 'Pending Reservation'
+                      ? 'Pending reservation approval'
+                      : `Status: ${data.Status}`}
+              </p>
+              {data.Notes && data.Status !== 'Reserved' && (
+                <p className="text-sm text-gray-500 mt-2 italic">{data.Notes}</p>
+              )}
             </div>
           )}
         </div>
-      ) : (
-        <div className="text-gray-500 py-2 italic text-center bg-gray-50 rounded">
-          Status: {data.Status}
-        </div>
-      )}
+      </div>
     </div>
   );
 });
