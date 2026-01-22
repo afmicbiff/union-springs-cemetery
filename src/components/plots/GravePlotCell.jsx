@@ -47,8 +47,23 @@ export default function GravePlotCell({ item, baseColorClass, statusColors, isAd
     return () => window.removeEventListener('plot-start-blink', handleStartBlink);
   }, [plotNum, sectionKey, item]);
 
-  if (!item) {
-    return <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]" />;
+  if (!item || item.isSpacer) {
+    const handleSpacerClick = (e) => {
+      e.stopPropagation();
+      if (isAdmin && onEdit) {
+        onEdit({ isSpacer: true, _id: item?._id, Section: item?.Section || sectionKey, suggestedSection: sectionKey });
+      }
+    };
+
+    return (
+      <div 
+        className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] transition-colors flex items-center justify-center plot-element ${isAdmin ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
+        onClick={handleSpacerClick}
+        title={isAdmin ? "Click to create a new plot here" : ""}
+      >
+        {isAdmin && <span className="text-[8px] text-gray-400 font-medium">+ New</span>}
+      </div>
+    );
   }
 
   const isVet = (item.Status === 'Veteran') || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied');
