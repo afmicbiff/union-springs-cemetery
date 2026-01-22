@@ -96,10 +96,10 @@ Deno.serve(async (req) => {
                 // 1. Welcome Email
                 if (action === 'create') {
                     try {
-                        await base44.integrations.Core.SendEmail({
+                        await base44.functions.invoke('sendEmail', {
                             to: email,
-                            subject: "Welcome to Union Springs Cemetery Community",
-                            body: `Dear ${result.first_name},\n\nWe are honored to welcome you to the Union Springs Cemetery community. Thank you for joining us.\n\nSincerely,\nThe Administration`
+                            template_key: 'member_welcome',
+                            variables: { first_name: result.first_name }
                         });
                         emailSent.push('welcome');
                     } catch (e) { console.error(e); }
