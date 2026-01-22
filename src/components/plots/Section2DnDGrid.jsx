@@ -10,17 +10,18 @@ function parseNum(v) {
 export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
   const reservedBottomRows = 0;
-  const cols = 10;
+  const dataCols = 10;
+  const totalCols = dataCols + 2; // Add leading and trailing spacer columns
 
   const cells = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     const idx186 = sorted.findIndex(p => parseNum(p.Grave) === 186);
     const pivoted = idx186 > -1 ? [...sorted.slice(idx186), ...sorted.slice(0, idx186)] : sorted;
 
-    const baseColumns = Array.from({ length: cols }, () => Array(perCol).fill(null));
+    const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
 
     let i = 0;
-    for (let c = 0; c < cols && i < pivoted.length; c++) {
+    for (let c = 0; c < dataCols && i < pivoted.length; c++) {
       for (let r = perCol - 1 - reservedBottomRows; r >= 0 && i < pivoted.length; r--) {
         baseColumns[c][r] = pivoted[i++];
       }
@@ -41,7 +42,7 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
     for (let n = seqStart; n <= seqEnd; n++) { if (byNum.has(n)) { hasAnySeq = true; break; } }
 
     if (hasAnySeq) {
-      for (let c = 0; c < cols; c++) {
+      for (let c = 0; c < dataCols; c++) {
         for (let r = 0; r < perCol; r++) {
           const cell = baseColumns[c][r];
           const n = parseNum(cell?.Grave);
@@ -60,40 +61,42 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
 
       let anchorIdx = baseColumns.findIndex((col) => col.some((cell) => parseNum(cell?.Grave) === anchorNum));
       if (anchorIdx < 0) anchorIdx = 0;
-      const targetIdx = Math.min(anchorIdx + 1, cols - 1);
+      const targetIdx = Math.min(anchorIdx + 1, dataCols - 1);
 
       for (let r = 0; r < perCol; r++) {
         if (seqCol[r]) baseColumns[targetIdx][r] = seqCol[r];
       }
     }
 
-    const out = Array(cols * perCol).fill(null);
-    for (let c = 0; c < cols; c++) {
+    // Build output with leading and trailing spacer columns
+    const out = Array(totalCols * perCol).fill(null);
+    
+    // Leading spacer column (index 0) - all nulls (spacers)
+    // Data columns (index 1 to dataCols)
+    for (let c = 0; c < dataCols; c++) {
       for (let r = 0; r < perCol; r++) {
-        out[c * perCol + r] = baseColumns[c][r];
+        out[(c + 1) * perCol + r] = baseColumns[c][r];
       }
     }
+    // Trailing spacer column (last) - all nulls (spacers)
+    
     return out;
-  }, [plots, cols, perCol, reservedBottomRows]);
+  }, [plots, dataCols, perCol, reservedBottomRows, totalCols]);
 
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
-      <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${cols}, max-content)`, gridAutoColumns: 'max-content' }}>
+      <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${totalCols}, max-content)`, gridAutoColumns: 'max-content' }}>
         {cells.map((item, idx) => (
           <div key={idx} className={`relative transition-all duration-200 ease-in-out transform-gpu ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-            {item ? (
-              <GravePlotCell
-                item={item}
-                baseColorClass=""
-                statusColors={statusColors}
-                isAdmin={isAdmin}
-                onHover={onHover}
-                onEdit={onEdit}
-                sectionKey="2"
-              />
-            ) : (
-              <div className="w-full h-full" />
-            )}
+            <GravePlotCell
+              item={item}
+              baseColorClass=""
+              statusColors={statusColors}
+              isAdmin={isAdmin}
+              onHover={onHover}
+              onEdit={onEdit}
+              sectionKey="2"
+            />
           </div>
         ))}
       </div>
