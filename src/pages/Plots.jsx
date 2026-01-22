@@ -168,26 +168,22 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
-  // Center tooltip on screen, clamped to viewport edges
+  // Center tooltip in the middle of the screen
   const tooltipRef = React.useRef(null);
   const [coords, setCoords] = React.useState({ left: 0, top: 0 });
   React.useEffect(() => {
     if (!visible || !data) return;
-    const margin = 16;
     const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
     const width = 288; // Tailwind w-72
     const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 220;
 
-    // Center horizontally, clamp to edges
-    let left = (vw - width) / 2;
-    left = Math.max(margin, Math.min(left, vw - width - margin));
-
-    // Position vertically near center, adjust based on pointer position
-    let top = Math.min(Math.max(position.y - height / 2, margin), vh - height - margin);
+    // Center horizontally and vertically
+    const left = (vw - width) / 2;
+    const top = (vh - height) / 2;
 
     setCoords({ left, top });
-  }, [position, visible, data]);
+  }, [visible, data]);
 
   return (
     <div 
