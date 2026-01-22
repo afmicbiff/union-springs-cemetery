@@ -11,6 +11,7 @@ import PlotEditDialog from "@/components/plots/PlotEditDialog";
 import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
+const DraggableSectionGrid = React.lazy(() => import("@/components/plots/DraggableSectionGrid"));
 import SmartImage from "@/components/perf/SmartImage";
 import ZoomPan from "@/components/common/ZoomPan";
 import PlotsTour from "@/components/plots/PlotsTour";
