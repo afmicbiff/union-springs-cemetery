@@ -656,7 +656,6 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 349, end: 378 }] },
                                     { ranges: [{ start: 431, end: 461 }], blanksEnd: 1 },
                                     { ranges: [{ start: 513, end: 542 }], blanksStart: 1 },
-                                    { ranges: [{ start: 543, end: 546 }], blanksStart: 27 },
                                     { ranges: [{ start: 548, end: 559 }, { start: 560, end: 562 }, { start: 564, end: 576 }], spacers: [{ target: 559, position: 'after' }, { target: 562, position: 'after' }] },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
@@ -746,8 +745,8 @@ const SectionRenderer = React.memo(({
                                 (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
                                 // Col 4: 462-465, 4 blanks, 1029-1042
                                 (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                // Col 5: 1043-1056 (543-546 moved to Section 4)
-                                (() => { const plots=[]; pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
+                                // Col 5: 543-546, 1043-1056
+                                (() => { const plots=[]; pushRange(plots,543,546); pushRange(plots,1043,1056); columns.push(plots); })();
                                 // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
                                 (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
                                 // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
