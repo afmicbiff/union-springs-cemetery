@@ -535,7 +535,8 @@ const SectionRenderer = React.memo(({
           onExpand, 
           isAdmin, 
           onEdit, 
-          onHover
+          onHover,
+          onMovePlot
       }) => {
     const [bgColor, borderColor, textColor] = palette.split(' ');
 
