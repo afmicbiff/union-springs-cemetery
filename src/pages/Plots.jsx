@@ -309,7 +309,6 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isBlinking, setIsBlinking] = useState(false);
-  const hasInitializedBlink = useRef(false);
 
   // Calculate selection state - always compute these regardless of spacer status
   const plotNum = parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null;
