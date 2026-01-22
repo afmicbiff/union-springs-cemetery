@@ -1883,6 +1883,7 @@ export default function PlotsPage() {
                                 isAdmin={isAdmin}
                                 onEdit={isAdmin ? handleEditClick : undefined}
                                 onHover={handleHover}
+                                onMovePlot={isAdmin ? handleMovePlot : undefined}
                               />
                             );
                           })}
