@@ -855,16 +855,16 @@ const SectionRenderer = React.memo(({
                                 // Col 12: Trailing empty column (far right border)
                                 (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c12-trail'); columns.push(plots); })();
 
-                                const mapped = columns.map((plots, idx) => (
+                                const mapped = columns.map((colPlots, idx) => (
                                     <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2">
-                                        {plots.map((plot, pIdx) => (
+                                        {colPlots.map((plot, pIdx) => (
                                             <GravePlot
                                                     key={plot._id || `s5-${idx}-${pIdx}`}
                                                     data={plot}
                                                     computedSectionKey={sectionKey}
                                                     baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                     onHover={onHover}
-                                                    onEdit={onEdit}
+                                                    onEdit={isAdmin ? onEdit : undefined}
                                                 />
                                         ))}
                                     </div>
