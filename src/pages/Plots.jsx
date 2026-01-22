@@ -715,6 +715,24 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
                                 ];
 
+                                const TARGET_HEIGHT = 35; // Target rows for uniform square border
+
+                                const pushBlanks = (arr, count, prefix) => { 
+                                  for(let i=0;i<count;i++){ 
+                                    arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '4' }); 
+                                  } 
+                                };
+
+                                // Leading spacer column
+                                const leadingCol = (
+                                  <div key="leading4" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-amber-200 pr-2">
+                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
+                                      <GravePlot key={`lead4-${i}`} data={{ isSpacer: true, _id: `lead4-${i}`, Section: '4' }}
+                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
+                                    ))}
+                                  </div>
+                                );
+
                                 const cols = columnsConfig.map((col, idx) => {
                                     let plotsArr = [];
                                     col.ranges.forEach(r => {
@@ -736,26 +754,30 @@ const SectionRenderer = React.memo(({
                                         const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                         const r1PartA = r1.filter(p => parseInt(p.Grave) <= 794);
                                         const r1PartB = r1.filter(p => parseInt(p.Grave) > 794);
-                                        const sixBlanks = Array(6).fill({ isSpacer: true });
+                                        const sixBlanks = Array(6).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-6b-${i}`, Section: '4' }));
                                         const r2WithSpacer = [];
-                                        r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720' }); });
+                                        r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720', Section: '4' }); });
                                         plotsArr = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
                                     } else if (col.spacers) {
                                         const withSpacers = [];
                                         plotsArr.forEach(p => {
                                             const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                            if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}` });
+                                            if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}`, Section: '4' });
                                             withSpacers.push(p);
-                                            if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}` });
+                                            if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}`, Section: '4' });
                                         });
                                         plotsArr = withSpacers;
                                     }
 
-                                    if (col.blanksStart) plotsArr = [...Array(col.blanksStart).fill({ isSpacer: true }), ...plotsArr];
-                                    if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill({ isSpacer: true })];
+                                    if (col.blanksStart) plotsArr = [...Array(col.blanksStart).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-start-${idx}-${i}`, Section: '4' })), ...plotsArr];
+                                    if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-end-${idx}-${i}`, Section: '4' }))];
+
+                                    // Add top padding to reach TARGET_HEIGHT
+                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsArr.length);
+                                    pushBlanks(plotsArr, topPadding, `c4-${idx}-top`);
 
                                     return (
-                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-cyan-200 last:border-0 pr-2">
+                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-amber-200 last:border-0 pr-2">
                                             {plotsArr.map((plot, pIdx) => (
                                                 <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot}
                                                 computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
@@ -766,14 +788,25 @@ const SectionRenderer = React.memo(({
 
                                 const { unplaced } = getUnplacedForSection('4', plots);
                                 const fallbackCol = (
-                                  <div key="fallback4" className="flex flex-col gap-1 justify-end min-w-[4rem] border-dashed border-cyan-200 pl-2">
+                                  <div key="fallback4" className="flex flex-col-reverse gap-1 justify-start min-w-[4rem] border-r border-dashed border-amber-200 pr-2">
                                     {unplaced.map((plot, pIdx) => (
                                         <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
                                     computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                     ))}
                                   </div>
                                 );
-                                return [...cols, fallbackCol];
+
+                                // Trailing spacer column
+                                const trailingCol = (
+                                  <div key="trailing4" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-amber-200 pl-2">
+                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
+                                      <GravePlot key={`trail4-${i}`} data={{ isSpacer: true, _id: `trail4-${i}`, Section: '4' }}
+                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
+                                    ))}
+                                  </div>
+                                );
+
+                                return [leadingCol, ...cols, fallbackCol, trailingCol];
                             })()}
                         </div>
                     ) : sectionKey === '5' ? (
