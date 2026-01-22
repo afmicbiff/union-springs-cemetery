@@ -194,67 +194,100 @@ const Tooltip = React.memo(({ data, position, visible }) => {
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
         }}
       >
-      <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
-        <div className="flex items-center space-x-2">
-            <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
-            <span className="font-bold text-gray-800 text-lg">Plot {data.Grave}</span>
+        {/* Header */}
+        <div className={`px-5 py-4 ${bgClass} bg-opacity-20`}>
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className={`w-3 h-3 rounded-full ${bgClass} ring-2 ring-white shadow-sm`}></span>
+                <span className="font-bold text-gray-900 text-xl">Plot {data.Grave}</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">Row {data.Row} • {data.Section || 'Section'}</span>
+            </div>
+            <span className={`px-3 py-1 text-xs font-bold rounded-full border ${badgeClass}`}>
+              {statusKey}
+            </span>
+          </div>
         </div>
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Row {data.Row}</span>
-      </div>
-      
-      {isOccupied ? (
-        <div className="space-y-2">
-          <div className="bg-gray-50 p-2 rounded border border-gray-100">
-            <p className="text-xs text-gray-400 uppercase font-bold">Occupant</p>
-            <p className="font-bold text-gray-800 text-base">{data['First Name']} {data['Last Name']}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-                <p className="text-xs text-gray-400">Born</p>
-                <p className="font-medium text-gray-700">{data.Birth || 'Unknown'}</p>
+        
+        {/* Body */}
+        <div className="p-5 space-y-4">
+          {isOccupied ? (
+            <>
+              {/* Occupant Info */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Occupant</p>
+                <p className="font-bold text-gray-900 text-lg leading-tight">
+                  {data['First Name']} {data['Last Name']}
+                </p>
+                {data['Family Name'] && (
+                  <p className="text-sm text-gray-500 mt-1">Family: {data['Family Name']}</p>
+                )}
+              </div>
+              
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                  <p className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Born</p>
+                  <p className="font-semibold text-blue-900 text-sm">{data.Birth || '—'}</p>
+                </div>
+                <div className="bg-rose-50 p-3 rounded-lg border border-rose-100">
+                  <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">Died</p>
+                  <p className="font-semibold text-rose-900 text-sm">{data.Death || '—'}</p>
+                </div>
+              </div>
+              
+              {/* Notes */}
+              {data.Notes && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Notes</p>
+                  <p className="text-sm text-gray-600 italic leading-relaxed">{data.Notes}</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-6">
+              <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${bgClass} bg-opacity-30 flex items-center justify-center`}>
+                <span className={`w-5 h-5 rounded-full ${bgClass}`}></span>
+              </div>
+              <p className="text-gray-700 font-medium">
+                {data.Status === 'Reserved' 
+                  ? `Reserved for ${data['Family Name'] || data.Notes || 'Family'}` 
+                  : data.Status === 'Available' 
+                    ? 'This plot is available'
+                    : `Status: ${data.Status}`}
+              </p>
+              {data.Notes && data.Status !== 'Reserved' && (
+                <p className="text-sm text-gray-500 mt-2 italic">{data.Notes}</p>
+              )}
             </div>
-            <div>
-                <p className="text-xs text-gray-400">Died</p>
-                <p className="font-medium text-gray-700">{data.Death || 'Unknown'}</p>
+          )}
+          
+          {/* Photo */}
+          {data.photo_url && (
+            <div className="pt-3 border-t border-gray-100">
+              <SmartImage
+                src={data.photo_url_small || data.photo_url}
+                alt={`Plot ${data.Grave}`}
+                width={320}
+                height={160}
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 640px) 80vw, 320px"
+                srcSetVariants={{
+                  small: data.photo_url_small,
+                  medium: data.photo_url_medium,
+                  large: data.photo_url_large,
+                  original: data.photo_url,
+                }}
+                className="w-full h-36 object-cover rounded-xl border border-gray-200 shadow-sm"
+              />
             </div>
-          </div>
-          {(data.Notes || data['Family Name']) && (
-             <div className="mt-2 pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-400">Details</p>
-                {data['Family Name'] && <p className="text-xs text-gray-600">Family: {data['Family Name']}</p>}
-                {data.Notes && <p className="text-xs text-gray-600 italic">{data.Notes}</p>}
-             </div>
           )}
         </div>
-      ) : (
-        <div className="text-gray-500 py-2 italic text-center bg-gray-50 rounded">
-          {data.Status === 'Reserved' 
-            ? `Reserved for: ${data['Family Name'] || data.Notes || 'Unknown Family'}` 
-            : `Status: ${data.Status}`}
-        </div>
-      )}
-      {data.photo_url && (
-        <div className="mt-3">
-          <SmartImage
-            src={data.photo_url_small || data.photo_url}
-            alt={`Plot ${data.Grave}`}
-            width={288}
-            height={128}
-            loading="lazy"
-            decoding="async"
-            sizes="(max-width: 640px) 80vw, 288px"
-            srcSetVariants={{
-              small: data.photo_url_small,
-              medium: data.photo_url_medium,
-              large: data.photo_url_large,
-              original: data.photo_url,
-            }}
-            className="w-full h-32 object-cover rounded border border-gray-200"
-          />
-        </div>
-      )}
       </div>
-      );
+    </div>
+  );
 });
 
 // Inject CSS for blinking animation once at module level
