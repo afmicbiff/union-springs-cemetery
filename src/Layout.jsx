@@ -357,13 +357,11 @@ export default function Layout({ children }) {
                 <p>Phone: (318) 846-2201</p>
                 <p>Email: <a href="mailto:royteutsch@yahoo.com" className="text-teal-400 hover:text-teal-300">royteutsch@yahoo.com</a></p>
               </div>
+              <div>
+                <p className="text-stone-200 font-medium">General Inquiries</p>
+                <p>Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="text-teal-400 hover:text-teal-300">office@unionsprings.com</Link></p>
+              </div>
             </div>
-            <p>
-              Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="text-teal-400 hover:text-teal-300 underline">office@unionsprings.com</Link>
-            </p>
-            <p>
-              Email: <a href="mailto:clencsm@yahoo.com" className="text-teal-400 hover:text-teal-300 underline">clencsm@yahoo.com</a>
-            </p>
           </div>
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-center mb-4">
