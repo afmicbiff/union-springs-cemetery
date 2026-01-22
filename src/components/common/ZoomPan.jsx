@@ -130,6 +130,15 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     (e) => {
       if (!containerRef.current) return;
       const target = e.target;
+      
+      // Skip if clicking on zoom controls
+      const zoomControls = target && typeof target.closest === "function"
+        ? target.closest("[data-zoom-controls]")
+        : null;
+      if (zoomControls) {
+        return;
+      }
+      
       const plotEl =
         target && typeof target.closest === "function"
           ? target.closest(".plot-element")
