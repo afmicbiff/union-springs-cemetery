@@ -86,6 +86,30 @@ export default function ServicesPage() {
                     The community Funeral Homes will assist you in the services of memorial planning.
                 </p>
             </div>
+
+            <div className="bg-slate-50 p-8 rounded-sm shadow-md md:col-span-2">
+                <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Contact for funeral home services</h3>
+                <ul className="space-y-3 text-stone-600 text-lg leading-relaxed">
+                    <li>
+                        <span className="font-semibold">Bailey Funeral Home:</span>{' '}
+                        <a href="https://www.baileyfuneralhome.net" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
+                            https://www.baileyfuneralhome.net
+                        </a>
+                    </li>
+                    <li>
+                        <span className="font-semibold">Smith Monument:</span>{' '}
+                        <a href="http://www.smithmonumentcompany.com/" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
+                            http://www.smithmonumentcompany.com/
+                        </a>
+                    </li>
+                    <li>
+                        <span className="font-semibold">Central Monument:</span>{' '}
+                        <a href="https://centralmonument.com/" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
+                            https://centralmonument.com/
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
 
       </div>
