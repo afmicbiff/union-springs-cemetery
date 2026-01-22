@@ -347,19 +347,19 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   // Early return for spacers AFTER all hooks - but make them clickable for admins
   if (data?.isSpacer) {
       const hasEditHandler = !!onEdit;
+
+      const handleSpacerClick = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (onEdit) {
+              onEdit({ isSpacer: true, _id: data._id, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey });
+          }
+      };
+
       return (
           <div 
-              className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] transition-colors flex items-center justify-center ${hasEditHandler ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
-              onPointerDown={(e) => {
-                  e.stopPropagation();
-              }}
-              onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (onEdit) {
-                      onEdit({ isSpacer: true, _id: data._id, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey });
-                  }
-              }}
+              className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] transition-colors flex items-center justify-center plot-element ${hasEditHandler ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
+              onClick={handleSpacerClick}
               title={hasEditHandler ? "Click to create a new plot here" : ""}
           >
               {hasEditHandler && <span className="text-[8px] text-gray-400 font-medium">+ New</span>}
