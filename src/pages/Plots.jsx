@@ -745,8 +745,8 @@ const SectionRenderer = React.memo(({
                                 (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
                                 // Col 4: 462-465, 4 blanks, 1029-1042
                                 (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                // Col 5: 543-546, 1043-1056 (no blanks - moved up 4)
-                                (() => { const plots=[]; pushRange(plots,543,546); pushRange(plots,1043,1056); columns.push(plots); })();
+                                // Col 5: 543-546, 4 blanks, 1043-1056
+                                (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
                                 // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
                                 (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
                                 // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
