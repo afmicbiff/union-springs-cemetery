@@ -344,10 +344,19 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
     }
   }, [isSelected, fromSearch]);
 
-  // Early return for spacers AFTER all hooks
+  // Early return for spacers AFTER all hooks - but make them clickable for admins
   if (data?.isSpacer) {
       return (
-          <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
+          <div 
+              className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] hover:bg-green-100 hover:border-green-400 cursor-pointer transition-colors flex items-center justify-center"
+              onClick={(e) => {
+                  e.stopPropagation();
+                  if (onEdit) onEdit({ isSpacer: true, _id: data._id, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey });
+              }}
+              title="Click to create a new plot here"
+          >
+              <span className="text-[8px] text-gray-400 font-medium">+ New</span>
+          </div>
       );
   }
 
