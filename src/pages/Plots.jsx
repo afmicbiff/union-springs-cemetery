@@ -1522,6 +1522,44 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
+  const handleMovePlot = useCallback(async ({ plotId, targetSection }) => {
+    if (!plotId || !targetSection) return;
+
+    try {
+      // Find the plot being moved
+      const plotToMove = parsedData.find(p => p._id === plotId);
+      if (!plotToMove) {
+        toast.error("Could not find plot to move");
+        return;
+      }
+
+      // Find the highest plot number in target section to assign next number
+      const sectionPlots = parsedData.filter(p => {
+        const sect = String(p.Section || '').replace(/Section\s/i, '').trim();
+        return sect === targetSection;
+      });
+
+      const maxPlotNum = sectionPlots.reduce((max, p) => {
+        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
+        return Math.max(max, num);
+      }, 0);
+
+      const newPlotNumber = String(maxPlotNum + 1);
+
+      await base44.entities.Plot.update(plotId, {
+        section: `Section ${targetSection}`,
+        plot_number: newPlotNumber
+      });
+
+      clearEntityCache('Plot');
+      queryClient.invalidateQueries({ queryKey: ['plots'] });
+      invalidatePlotsMap();
+      toast.success(`Moved plot to Section ${targetSection} as plot #${newPlotNumber}`);
+    } catch (err) {
+      toast.error(`Failed to move plot: ${err.message}`);
+    }
+  }, [parsedData, queryClient, invalidatePlotsMap]);
+
   const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
     setInlineEditData({ ...plot });
