@@ -20,7 +20,6 @@ import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
 
 const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
-const DraggableSectionGrid = React.lazy(() => import("@/components/plots/DraggableSectionGrid"));
 import {
   DropdownMenu,
   DropdownMenuContent,
