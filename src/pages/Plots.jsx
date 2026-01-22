@@ -1613,6 +1613,7 @@ export default function PlotsPage() {
             </div>
             )}
           </div>
+          </div>
         </div>
       </header>
 
