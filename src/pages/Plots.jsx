@@ -1543,6 +1543,47 @@ export default function PlotsPage() {
     doQuickSearch(deferredSearch);
   }, [deferredSearch, doQuickSearch]);
 
+  // Auto-center on target plot when coming from deceased search
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const targetPlot = params.get('plot');
+    const targetSection = params.get('section');
+    const fromSearch = params.get('from') === 'search';
+    
+    if (!fromSearch || !targetPlot) return;
+    
+    const normalizedSection = normalizeSectionKey(targetSection || '');
+    const plotNum = parseInt(targetPlot, 10);
+    
+    if (!Number.isFinite(plotNum)) return;
+    
+    // Wait for sections to expand and DOM to render, then center
+    let attempts = 0;
+    const maxAttempts = 300; // ~5 seconds at 60fps
+    
+    const tryCenter = () => {
+      attempts++;
+      const el = findPlotElement(normalizedSection, plotNum);
+      
+      if (el) {
+        // Small delay to ensure ZoomPan is fully initialized
+        setTimeout(() => {
+          centerElement(el);
+        }, 100);
+        return;
+      }
+      
+      if (attempts < maxAttempts) {
+        requestAnimationFrame(tryCenter);
+      }
+    };
+    
+    // Start trying after a short delay to let React render
+    setTimeout(() => {
+      requestAnimationFrame(tryCenter);
+    }, 200);
+  }, [findPlotElement, centerElement]);
+
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
     debouncedSearchRef.current = debounce((val) => doQuickSearch(val), 200);
