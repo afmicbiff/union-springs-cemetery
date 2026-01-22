@@ -336,13 +336,12 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
     return { isSelected: selected, fromSearch: fromSearchVal };
   }, [plotNum, sectionForId]);
 
-  // Start blinking for 60 seconds when coming from search and this plot is selected
+  // Keep blinking when coming from search and this plot is selected
   useEffect(() => {
-    if (isSelected && fromSearch && !hasInitializedBlink.current) {
-      hasInitializedBlink.current = true;
+    if (isSelected && fromSearch) {
       setIsBlinking(true);
-      const timer = setTimeout(() => setIsBlinking(false), 60000);
-      return () => clearTimeout(timer);
+    } else {
+      setIsBlinking(false);
     }
   }, [isSelected, fromSearch]);
 
