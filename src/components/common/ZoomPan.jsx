@@ -343,6 +343,15 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   );
 
   const onPinchPointerDown = (e) => {
+    // Skip if clicking on zoom controls
+    const target = e.target;
+    const zoomControls = target && typeof target.closest === "function"
+      ? target.closest("[data-zoom-controls]")
+      : null;
+    if (zoomControls) {
+      return;
+    }
+    
     pinchRef.current.pointers.set(e.pointerId, {
       x: e.clientX,
       y: e.clientY,
