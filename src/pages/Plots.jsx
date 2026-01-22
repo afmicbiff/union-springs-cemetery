@@ -812,85 +812,69 @@ const SectionRenderer = React.memo(({
                             })()}
                         </div>
                     ) : sectionKey === '5' ? (
-                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                            {(() => {
-                                const sectionPlots = plots;
-                                const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
-                                const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
-                                const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
-                                const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                                const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '5' }); } };
+                        <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
+                        {(() => {
+                            const sectionPlots = plots;
+                            const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
+                            const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
+                            const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
+                            const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
+                            const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '5' }); } };
 
-                                const TARGET_HEIGHT = 35; // Target row count for square border (increased)
-                                const columns = [];
+                            const TARGET_HEIGHT = 35;
+                            const columns = [];
 
-                                // Col 0: Leading empty column (far left border)
-                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c0-lead'); columns.push(plots); })();
+                            // Col 0: Leading empty column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c0-lead'); columns.push(col); })();
+                            // Col 1: 224-236 + top padding
+                            (() => { const col=[]; pushRange(col,224,236); pushBlanks(col, TARGET_HEIGHT - 13, 'c1-top'); columns.push(col); })();
+                            // Col 1.5: Full spacer column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c1half'); columns.push(col); })();
+                            // Col 2: 299-302, 4 blanks, 1001-1014
+                            (() => { const col=[]; pushRange(col,299,302); pushBlanks(col,4,'c2'); pushRange(col,1001,1014); pushBlanks(col, TARGET_HEIGHT - 22, 'c2-top'); columns.push(col); })();
+                            // Col 3: 379-382, 4 blanks, 1015-1026
+                            (() => { const col=[]; pushRange(col,379,382); pushBlanks(col,4,'c3'); pushRange(col,1015,1026); pushBlanks(col, TARGET_HEIGHT - 20, 'c3-top'); columns.push(col); })();
+                            // Col 4: 462-465, 4 blanks, 1029-1042
+                            (() => { const col=[]; pushRange(col,462,465); pushBlanks(col,4,'c4'); pushRange(col,1029,1042); pushBlanks(col, TARGET_HEIGHT - 22, 'c4-top'); columns.push(col); })();
+                            // Col 5: 543-546, 4 blanks, 1043-1056
+                            (() => { const col=[]; pushRange(col,543,546); pushBlanks(col,4,'c5'); pushRange(col,1043,1056); pushBlanks(col, TARGET_HEIGHT - 22, 'c5-top'); columns.push(col); })();
+                            // Col 6: 577-580, 4 blanks, 1057-1070, labels
+                            (() => { const col=[]; pushRange(col,577,580); pushBlanks(col,4,'c6'); pushRange(col,1057,1070); pushLabels(col,["1070-A U-7","1070-B U-7"]); pushBlanks(col, TARGET_HEIGHT - 22, 'c6-top'); columns.push(col); })();
+                            // Col 7: 659-664, 2 blanks, 1071-1084, labels
+                            (() => { const col=[]; pushRange(col,659,664); pushBlanks(col,2,'c7'); pushRange(col,1071,1084); pushLabels(col,["1084-A U-7","1084-B U-7"]); pushBlanks(col, TARGET_HEIGHT - 24, 'c7-top'); columns.push(col); })();
+                            // Col 8: 7 blanks, 1085-1102
+                            (() => { const col=[]; pushBlanks(col,7,'c8'); pushRange(col,1085,1102); pushBlanks(col, TARGET_HEIGHT - 25, 'c8-top'); columns.push(col); })();
+                            // Col 8.5: Full spacer column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8half'); columns.push(col); })();
+                            // Col 9: 738, 1 blank, 739-742, 20 blanks
+                            (() => { const col=[]; col.push(...byNum(738)); pushBlanks(col,1,'c9'); pushRange(col,739,742); pushBlanks(col,20,'c9e'); pushBlanks(col, TARGET_HEIGHT - 26, 'c9-top'); columns.push(col); })();
+                            // Col 10: 871-874, 11 blanks
+                            (() => { const col=[]; pushRange(col,871,874); pushBlanks(col,11,'c10'); pushBlanks(col, TARGET_HEIGHT - 15, 'c10-top'); columns.push(col); })();
+                            // Col 11: spacer column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c11'); columns.push(col); })();
+                            // Col 12: Trailing empty column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c12-trail'); columns.push(col); })();
 
-                                // Col 1: 224-236 (13 items) + top padding - needs more spacers at top
-                                (() => { const plots=[]; pushRange(plots,224,236); pushBlanks(plots, TARGET_HEIGHT - 13, 'c1-top'); columns.push(plots); })();
-                                // Col 1.5: Full spacer column (red box area - between 224-236 and 299-302)
-                                (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c1half'); columns.push(col); })();
-                                // Col 2: 299-302, 4 blanks, 1001-1014 (22 items) + top padding
-                                (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); pushBlanks(plots, TARGET_HEIGHT - 22, 'c2-top'); columns.push(plots); })();
-                                // Col 3: 379-382, 4 blanks, 1015-1026 (20 items) + top padding
-                                (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); pushBlanks(plots, TARGET_HEIGHT - 20, 'c3-top'); columns.push(plots); })();
-                                // Col 4: 462-465, 4 blanks, 1029-1042 (22 items) + top padding
-                                (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); pushBlanks(plots, TARGET_HEIGHT - 22, 'c4-top'); columns.push(plots); })();
-                                // Col 5: 543-546, 4 blanks, 1043-1056 (22 items) + top padding
-                                (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); pushBlanks(plots, TARGET_HEIGHT - 22, 'c5-top'); columns.push(plots); })();
-                                // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7 (22 items) + top padding
-                                (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); pushBlanks(plots, TARGET_HEIGHT - 22, 'c6-top'); columns.push(plots); })();
-                                // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7 (24 items) + top padding - needs more spacers
-                                (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); pushBlanks(plots, TARGET_HEIGHT - 24, 'c7-top'); columns.push(plots); })();
-                                // Col 8: 7 blanks, 1085-1102 (25 items) + top padding
-                                (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); pushBlanks(plots, TARGET_HEIGHT - 25, 'c8-top'); columns.push(plots); })();
-                                // Col 8.5: Full spacer column (red box area - between 1085-1102 and 738)
-                                (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8half'); columns.push(col); })();
-                                // Col 9: 738, 1 blank, 739-742, 20 blanks (26 items) + top padding
-                                (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); pushBlanks(plots, TARGET_HEIGHT - 26, 'c9-top'); columns.push(plots); })();
-                                // Col 10: 871-874, 11 blanks (15 items) + top padding - needs more spacers
-                                (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); pushBlanks(plots, TARGET_HEIGHT - 15, 'c10-top'); columns.push(plots); })();
-                                // Col 11: spacer column + top padding
-                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c11'); columns.push(plots); })();
+                            // Add unplaced plots as final column
+                            const { unplaced } = getUnplacedForSection('5', plots);
+                            if (unplaced.length > 0) {
+                                columns.push(unplaced);
+                            }
 
-                                // Col 12: Trailing empty column (far right border)
-                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c12-trail'); columns.push(plots); })();
-
-                                const mapped = columns.map((colPlots, idx) => (
-                                    <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2">
-                                        {colPlots.map((plot, pIdx) => (
-                                            <GravePlot
-                                                    key={plot._id || `s5-${idx}-${pIdx}`}
-                                                    data={plot}
-                                                    computedSectionKey={sectionKey}
-                                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                    onHover={onHover}
-                                                    onEdit={onEdit}
-                                                />
-                                        ))}
-                                    </div>
-                                ));
-
-                                const { unplaced } = getUnplacedForSection('5', plots);
-                                const fallbackCol = (
-                                    <div key="fallback5" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-purple-200 pl-2">
-                                        {unplaced.map((plot, pIdx) => (
-                                            <GravePlot
-                                                key={plot._id || `u5-${pIdx}`}
-                                                data={plot}
-                                                computedSectionKey={sectionKey}
-                                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                                onHover={onHover}
-                                                onEdit={onEdit}
-                                            />
-                                        ))}
-                                    </div>
-                                );
-
-                                return [...mapped, fallbackCol];
-                            })()}
-                        </div>
+                            return (
+                                <DraggableSectionGrid
+                                    sectionKey="5"
+                                    columns={columns}
+                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
+                                    statusColors={STATUS_COLORS}
+                                    isAdmin={isAdmin}
+                                    onHover={onHover}
+                                    onEdit={onEdit}
+                                    onMovePlot={onMovePlot}
+                                />
+                            );
+                        })()}
+                        </React.Suspense>
                     ) : (
                         <>
                             <div className="flex flex-col-reverse gap-2 content-center items-center">
