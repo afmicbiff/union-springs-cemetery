@@ -603,6 +603,24 @@ const SectionRenderer = React.memo(({
                                 ];
                                 const spacers = [507,709,773,786,633,840,841,930];
                                 const renderedKeys = new Set();
+                                const TARGET_HEIGHT = 35; // Target rows for uniform square border
+
+                                const pushBlanks = (arr, count, prefix) => { 
+                                  for(let i=0;i<count;i++){ 
+                                    arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '3' }); 
+                                  } 
+                                };
+
+                                // Leading spacer column
+                                const leadingCol = (
+                                  <div key="leading" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 pr-2">
+                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
+                                      <GravePlot key={`lead-${i}`} data={{ isSpacer: true, _id: `lead-${i}`, Section: '3' }}
+                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
+                                    ))}
+                                  </div>
+                                );
+
                                 const cols = ranges.map((range, idx) => {
                                     const colPlots = plots
                                       .filter(p => {
@@ -625,7 +643,7 @@ const SectionRenderer = React.memo(({
                                             seq.push(p);
                                             renderedKeys.add(`${n}|${p._id}`);
                                           } else {
-                                            seq.push({ isSpacer: true, _id: `sp-${n}` });
+                                            seq.push({ isSpacer: true, _id: `sp-${n}`, Section: '3' });
                                           }
                                         }
                                         return seq;
@@ -634,15 +652,21 @@ const SectionRenderer = React.memo(({
                                       const arr = [];
                                       colPlots.forEach(plot => {
                                         const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
-                                        if (spacers.includes(num)) arr.push({ isSpacer: true, _id: `sp-${num}` });
+                                        if (spacers.includes(num)) arr.push({ isSpacer: true, _id: `sp-${num}`, Section: '3' });
                                         arr.push(plot);
                                         renderedKeys.add(`${num}|${plot._id}`);
                                       });
                                       return arr;
                                     })();
+
+                                    // Add top padding to reach TARGET_HEIGHT
+                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsWithSpacers.length);
+                                    const paddedPlots = [...plotsWithSpacers];
+                                    pushBlanks(paddedPlots, topPadding, `c3-${idx}-top`);
+
                                     return (
                                       <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
-                                        {plotsWithSpacers.map((plot, pIdx) => (
+                                        {paddedPlots.map((plot, pIdx) => (
                                           <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
                                           computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                         ))}
@@ -651,7 +675,7 @@ const SectionRenderer = React.memo(({
                                 });
                                 const { unplaced } = getUnplacedForSection('3', plots);
                                 const fallbackCol = (
-                                  <div key="fallback" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-rose-200 pl-2">
+                                  <div key="fallback" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 pr-2">
                                     {unplaced
                                       .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0))
                                       .map((plot, pIdx) => (
@@ -660,7 +684,18 @@ const SectionRenderer = React.memo(({
                                       ))}
                                   </div>
                                 );
-                                return [...cols, fallbackCol];
+
+                                // Trailing spacer column
+                                const trailingCol = (
+                                  <div key="trailing" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-rose-200 pl-2">
+                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
+                                      <GravePlot key={`trail-${i}`} data={{ isSpacer: true, _id: `trail-${i}`, Section: '3' }}
+                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
+                                    ))}
+                                  </div>
+                                );
+
+                                return [leadingCol, ...cols, fallbackCol, trailingCol];
                             })()}
                         </div>
                     ) : sectionKey === '4' ? (
