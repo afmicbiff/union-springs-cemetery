@@ -827,6 +827,8 @@ const SectionRenderer = React.memo(({
 
                                 // Col 1: 224-236 (13 items) + top padding - needs more spacers at top
                                 (() => { const plots=[]; pushRange(plots,224,236); pushBlanks(plots, TARGET_HEIGHT - 13, 'c1-top'); columns.push(plots); })();
+                                // Col 1.5: Full spacer column (red box area)
+                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c1half'); columns.push(plots); })();
                                 // Col 2: 299-302, 4 blanks, 1001-1014 (22 items) + top padding
                                 (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); pushBlanks(plots, TARGET_HEIGHT - 22, 'c2-top'); columns.push(plots); })();
                                 // Col 3: 379-382, 4 blanks, 1015-1026 (20 items) + top padding
@@ -841,6 +843,8 @@ const SectionRenderer = React.memo(({
                                 (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); pushBlanks(plots, TARGET_HEIGHT - 24, 'c7-top'); columns.push(plots); })();
                                 // Col 8: 7 blanks, 1085-1102 (25 items) + top padding
                                 (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); pushBlanks(plots, TARGET_HEIGHT - 25, 'c8-top'); columns.push(plots); })();
+                                // Col 8.5: Full spacer column (red box area)
+                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c8half'); columns.push(plots); })();
                                 // Col 9: 738, 1 blank, 739-742, 20 blanks (26 items) + top padding
                                 (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); pushBlanks(plots, TARGET_HEIGHT - 26, 'c9-top'); columns.push(plots); })();
                                 // Col 10: 871-874, 11 blanks (15 items) + top padding - needs more spacers
