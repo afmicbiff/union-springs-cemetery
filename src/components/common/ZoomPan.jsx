@@ -438,38 +438,40 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         {children}
       </div>
 
+      {/* Zoom controls - positioned outside the transformed content */}
       <div
-        className="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex-col gap-1"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-2 flex flex-col gap-2"
+        style={{ pointerEvents: 'auto' }}
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
       >
         <button
           aria-label="Zoom in"
-          className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
           onClick={() => zoomBy(1.15)}
         >
           +
         </button>
         <button
           aria-label="Zoom out"
-          className="px-2 py-1 text-sm hover:bg-gray-100 rounded"
+          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
           onClick={() => zoomBy(1 / 1.15)}
         >
-          -
+          −
         </button>
         <button
           aria-label="Toggle pan mode"
-          className={`px-2 py-1 text-xs rounded ${
-            forcePan ? "bg-gray-800 text-white" : "hover:bg-gray-100"
+          className={`w-10 h-10 text-xs rounded-md border border-gray-200 ${
+            forcePan ? "bg-gray-800 text-white" : "hover:bg-gray-100 bg-white"
           }`}
           onClick={() => setForcePan((v) => !v)}
         >
-          {forcePan ? "Pan: On" : "Pan: Off"}
+          {forcePan ? "Pan" : "Pan"}
         </button>
         <button
           aria-label="Reset view"
-          className="px-2 py-1 text-xs hover:bg-gray-100 rounded"
+          className="w-10 h-10 text-xs hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
           onClick={reset}
         >
           Reset
