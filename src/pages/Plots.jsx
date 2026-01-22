@@ -864,7 +864,7 @@ const SectionRenderer = React.memo(({
                                                     computedSectionKey={sectionKey}
                                                     baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                                     onHover={onHover}
-                                                    onEdit={isAdmin ? onEdit : undefined}
+                                                    onEdit={onEdit}
                                                 />
                                         ))}
                                     </div>
