@@ -168,35 +168,32 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   const statusColor = STATUS_COLORS[statusKey];
   const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
 
-  // Center tooltip in the middle of the screen
-  const tooltipRef = React.useRef(null);
-  const [coords, setCoords] = React.useState({ left: 0, top: 0 });
-  React.useEffect(() => {
-    if (!visible || !data) return;
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
-    const width = 288; // Tailwind w-72
-    const height = tooltipRef.current ? tooltipRef.current.offsetHeight : 220;
+  // Status badge colors
+  const statusBadgeColors = {
+    'Available': 'bg-green-100 text-green-800 border-green-300',
+    'Reserved': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+    'Occupied': 'bg-red-100 text-red-800 border-red-300',
+    'Veteran': 'bg-blue-100 text-blue-800 border-blue-300',
+    'Unavailable': 'bg-gray-100 text-gray-800 border-gray-300',
+    'Unknown': 'bg-purple-100 text-purple-800 border-purple-300',
+    'Default': 'bg-gray-100 text-gray-600 border-gray-300'
+  };
 
-    // Center horizontally and vertically
-    const left = (vw - width) / 2;
-    const top = (vh - height) / 2;
-
-    setCoords({ left, top });
-  }, [visible, data]);
+  const badgeClass = statusBadgeColors[statusKey] || statusBadgeColors.Default;
 
   return (
     <div 
-      className="fixed z-50 bg-white p-4 rounded-lg shadow-2xl border border-gray-200 w-72 text-sm pointer-events-none"
-      ref={tooltipRef}
-      style={{ 
-        left: `${coords.left}px`, 
-        top: `${coords.top}px`,
-        opacity: visible ? 1 : 0,
-        transition: 'left 150ms ease-out, top 150ms ease-out, opacity 150ms ease-out',
-        willChange: 'left, top, opacity',
-      }}
+      className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none"
+      style={{ opacity: visible ? 1 : 0 }}
     >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-80 max-w-[90vw] pointer-events-none overflow-hidden"
+        style={{
+          transform: visible ? 'scale(1)' : 'scale(0.95)',
+          transition: 'transform 150ms ease-out, opacity 150ms ease-out',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+        }}
+      >
       <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
         <div className="flex items-center space-x-2">
             <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
