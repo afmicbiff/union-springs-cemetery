@@ -441,38 +441,48 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       {/* Zoom controls - positioned outside the transformed content */}
       <div
         className="absolute right-4 top-1/2 -translate-y-1/2 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-2 flex flex-col gap-2"
-        style={{ pointerEvents: 'auto' }}
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerUp={(e) => e.stopPropagation()}
+        onPointerMove={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           aria-label="Zoom in"
-          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
-          onClick={() => zoomBy(1.15)}
+          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); zoomBy(1.15); }}
         >
           +
         </button>
         <button
+          type="button"
           aria-label="Zoom out"
-          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
-          onClick={() => zoomBy(1 / 1.15)}
+          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); zoomBy(1 / 1.15); }}
         >
           −
         </button>
         <button
+          type="button"
           aria-label="Toggle pan mode"
-          className={`w-10 h-10 text-xs rounded-md border border-gray-200 ${
+          className={`w-10 h-10 text-xs rounded-md border border-gray-200 cursor-pointer ${
             forcePan ? "bg-gray-800 text-white" : "hover:bg-gray-100 bg-white"
           }`}
-          onClick={() => setForcePan((v) => !v)}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); setForcePan((v) => !v); }}
         >
           {forcePan ? "Pan" : "Pan"}
         </button>
         <button
+          type="button"
           aria-label="Reset view"
-          className="w-10 h-10 text-xs hover:bg-gray-100 rounded-md border border-gray-200 bg-white"
-          onClick={reset}
+          className="w-10 h-10 text-xs hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); reset(); }}
         >
           Reset
         </button>
