@@ -65,21 +65,6 @@ export default function ContactPage() {
                         <div className="grid gap-6">
                             <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
                                 <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
-                                    <div className="bg-teal-100 p-2 sm:p-3 rounded-full">
-                                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-teal-700" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Phone</h3>
-                                        <p className="text-stone-600 text-sm sm:text-base mb-1">Available Mon-Fri, 9am - 5pm</p>
-                                        <a href="tel:5551234567" className="text-teal-700 font-semibold hover:underline text-lg">
-                                            (555) 123-4567
-                                        </a>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
                                     <div className="bg-stone-200 p-2 sm:p-3 rounded-full">
                                         <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-stone-700" />
                                     </div>
@@ -92,25 +77,33 @@ export default function ContactPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </div>
 
-                        <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                            <CardContent className="p-4 sm:p-6">
-                                <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800 mb-2">Contact the Administrator of the Grounds</h3>
-                                <p className="text-stone-600 text-sm sm:text-base mb-4">Quick links to help you find what you need:</p>
-                                <div className="flex flex-wrap gap-2">
-                                    <Link to={createPageUrl('Plots')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
-                                        <Map className="w-4 h-4 text-teal-700" /> Old Cemetery Plots and Maps
-                                    </Link>
-                                    <Link to={createPageUrl('Search')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
-                                        <Search className="w-4 h-4 text-teal-700" /> Search Deceased Records
-                                    </Link>
-                                    <Link to={createPageUrl('NewPlotsAndMap')} className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-stone-100 hover:bg-stone-200 text-stone-800">
-                                        <Map className="w-4 h-4 text-teal-700" /> New Cemetery Plots and Maps
-                                    </Link>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
+                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
+                                    <div className="bg-teal-100 p-2 sm:p-3 rounded-full">
+                                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-teal-700" />
+                                    </div>
+                                    <div className="space-y-4 w-full">
+                                        <div>
+                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Darrell Clendennen</h3>
+                                            <p className="text-stone-600 text-sm sm:text-base">Phone: <a href="tel:5407608863" className="hover:text-teal-700 hover:underline">(540) 760-8863</a></p>
+                                            <p className="text-stone-600 text-sm sm:text-base">Email: <a href="mailto:clencsm@yahoo.com" className="hover:text-teal-700 hover:underline">clencsm@yahoo.com</a></p>
+                                        </div>
+                                        <div className="border-t border-stone-200" />
+                                        <div>
+                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">RD Teutsch</h3>
+                                            <p className="text-stone-600 text-sm sm:text-base">Phone: <a href="tel:3188462201" className="hover:text-teal-700 hover:underline">(318) 846-2201</a></p>
+                                            <p className="text-stone-600 text-sm sm:text-base">Email: <a href="mailto:royteutsch@yahoo.com" className="hover:text-teal-700 hover:underline">royteutsch@yahoo.com</a></p>
+                                        </div>
+                                        <div className="border-t border-stone-200" />
+                                        <div>
+                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">General Inquiries</h3>
+                                            <p className="text-stone-600 text-sm sm:text-base">Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="hover:text-teal-700 hover:underline">office@unionsprings.com</Link></p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
 
                     </div>
 
