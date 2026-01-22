@@ -749,32 +749,39 @@ const SectionRenderer = React.memo(({
                                 const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
                                 const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
                                 const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                                const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}` }); } };
+                                const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '5' }); } };
 
+                                const TARGET_HEIGHT = 30; // Target row count for square border
                                 const columns = [];
 
-                                // Col 1: 224-236
-                                (() => { const plots=[]; pushRange(plots,224,236); columns.push(plots); })();
-                                // Col 2: 299-302, 4 blanks, 1001-1014
-                                (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); columns.push(plots); })();
-                                // Col 3: 379-382, 4 blanks, 1015-1026
-                                (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); columns.push(plots); })();
-                                // Col 4: 462-465, 4 blanks, 1029-1042
-                                (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); columns.push(plots); })();
-                                // Col 5: 543-546, 4 blanks, 1043-1056
-                                (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); columns.push(plots); })();
-                                // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7
-                                (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); columns.push(plots); })();
-                                // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7
-                                (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); columns.push(plots); })();
-                                // Col 8: 7 blanks, 1085-1102
-                                (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); columns.push(plots); })();
-                                // Col 9: 738, 1 blank, 739-742, 20 blanks
-                                (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); columns.push(plots); })();
-                                // Col 10: 871-874, 11 blanks
-                                (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); columns.push(plots); })();
-                                // Col 11: 16 blanks
-                                (() => { const plots=[]; pushBlanks(plots,16,'c11'); columns.push(plots); })();
+                                // Col 0: Leading empty column (far left border)
+                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c0-lead'); columns.push(plots); })();
+
+                                // Col 1: 224-236 (13 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,224,236); pushBlanks(plots, TARGET_HEIGHT - 13, 'c1-top'); columns.push(plots); })();
+                                // Col 2: 299-302, 4 blanks, 1001-1014 (22 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,299,302); pushBlanks(plots,4,'c2'); pushRange(plots,1001,1014); pushBlanks(plots, TARGET_HEIGHT - 22, 'c2-top'); columns.push(plots); })();
+                                // Col 3: 379-382, 4 blanks, 1015-1026 (20 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,379,382); pushBlanks(plots,4,'c3'); pushRange(plots,1015,1026); pushBlanks(plots, TARGET_HEIGHT - 20, 'c3-top'); columns.push(plots); })();
+                                // Col 4: 462-465, 4 blanks, 1029-1042 (22 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,462,465); pushBlanks(plots,4,'c4'); pushRange(plots,1029,1042); pushBlanks(plots, TARGET_HEIGHT - 22, 'c4-top'); columns.push(plots); })();
+                                // Col 5: 543-546, 4 blanks, 1043-1056 (22 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,543,546); pushBlanks(plots,4,'c5'); pushRange(plots,1043,1056); pushBlanks(plots, TARGET_HEIGHT - 22, 'c5-top'); columns.push(plots); })();
+                                // Col 6: 577-580, 4 blanks, 1057-1070, 1070-A U-7, 1070-B U-7 (22 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,577,580); pushBlanks(plots,4,'c6'); pushRange(plots,1057,1070); pushLabels(plots,["1070-A U-7","1070-B U-7"]); pushBlanks(plots, TARGET_HEIGHT - 22, 'c6-top'); columns.push(plots); })();
+                                // Col 7: 659-664, 2 blanks, 1071-1084, 1084-A U-7, 1084-B U-7 (24 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,659,664); pushBlanks(plots,2,'c7'); pushRange(plots,1071,1084); pushLabels(plots,["1084-A U-7","1084-B U-7"]); pushBlanks(plots, TARGET_HEIGHT - 24, 'c7-top'); columns.push(plots); })();
+                                // Col 8: 7 blanks, 1085-1102 (25 items) + top padding
+                                (() => { const plots=[]; pushBlanks(plots,7,'c8'); pushRange(plots,1085,1102); pushBlanks(plots, TARGET_HEIGHT - 25, 'c8-top'); columns.push(plots); })();
+                                // Col 9: 738, 1 blank, 739-742, already has 20 blanks (26 items) + top padding
+                                (() => { const plots=[]; plots.push(...byNum(738)); pushBlanks(plots,1,'c9'); pushRange(plots,739,742); pushBlanks(plots,20,'c9e'); pushBlanks(plots, TARGET_HEIGHT - 26, 'c9-top'); columns.push(plots); })();
+                                // Col 10: 871-874, already has 11 blanks (15 items) + top padding
+                                (() => { const plots=[]; pushRange(plots,871,874); pushBlanks(plots,11,'c10'); pushBlanks(plots, TARGET_HEIGHT - 15, 'c10-top'); columns.push(plots); })();
+                                // Col 11: already has 16 blanks + top padding
+                                (() => { const plots=[]; pushBlanks(plots,16,'c11'); pushBlanks(plots, TARGET_HEIGHT - 16, 'c11-top'); columns.push(plots); })();
+
+                                // Col 12: Trailing empty column (far right border)
+                                (() => { const plots=[]; pushBlanks(plots, TARGET_HEIGHT, 'c12-trail'); columns.push(plots); })();
 
                                 const mapped = columns.map((plots, idx) => (
                                     <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2">
