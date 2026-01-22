@@ -361,6 +361,9 @@ export default function Layout({ children }) {
             <p>
               Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="text-teal-400 hover:text-teal-300 underline">office@unionsprings.com</Link>
             </p>
+            <p>
+              Email: <a href="mailto:clencsm@yahoo.com" className="text-teal-400 hover:text-teal-300 underline">clencsm@yahoo.com</a>
+            </p>
           </div>
           <div className="flex flex-col h-full">
             <div className="flex justify-between items-center mb-4">
