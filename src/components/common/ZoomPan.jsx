@@ -439,7 +439,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       </div>
 
       <div
-        className="hidden lg:flex fixed right-4 bottom-6 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 lg:flex-col gap-1"
+        className="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 z-50 bg-white/90 backdrop-blur rounded-md shadow-md border border-gray-200 p-1 flex-col gap-1"
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onWheel={(e) => e.stopPropagation()}
