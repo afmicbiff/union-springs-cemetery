@@ -345,7 +345,19 @@ export default function Layout({ children }) {
             <h3 className="text-stone-100 font-serif text-lg mb-4">Contact</h3>
             <p>1311 Fire Tower Road</p>
             <p>Shongaloo, Webster Parish, Louisiana, 71072</p>
-            <p className="mt-2">Phone: (555) 123-4567</p>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <p className="text-stone-200 font-medium">Darrell Clendennen</p>
+                <p>Phone: (540) 760-8863</p>
+                <p>Email: <a href="mailto:clencsm@yahoo.com" className="text-teal-400 hover:text-teal-300">clencsm@yahoo.com</a></p>
+              </div>
+              <div>
+                <p className="text-stone-200 font-medium">RD Teutsch</p>
+                <p>Phone: (318) 846-2201</p>
+                <p>Email: <a href="mailto:royteutsch@yahoo.com" className="text-teal-400 hover:text-teal-300">royteutsch@yahoo.com</a></p>
+              </div>
+            </div>
             <p>
               Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="text-teal-400 hover:text-teal-300 underline">office@unionsprings.com</Link>
             </p>
