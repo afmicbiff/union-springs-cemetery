@@ -346,12 +346,12 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   // Early return for spacers AFTER all hooks - but make them clickable for admins
   if (data?.isSpacer) {
-      const hasEditHandler = !!onEdit;
+      const hasEditHandler = typeof onEdit === 'function';
 
       const handleSpacerClick = (e) => {
           e.stopPropagation();
           e.preventDefault();
-          if (onEdit) {
+          if (hasEditHandler) {
               onEdit({ isSpacer: true, _id: data._id, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey });
           }
       };
@@ -362,7 +362,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
               onClick={handleSpacerClick}
               title={hasEditHandler ? "Click to create a new plot here" : ""}
           >
-              {hasEditHandler && <span className="text-[8px] text-gray-400 font-medium">+ New</span>}
+              {hasEditHandler && <span className="text-[8px] text-green-600 font-bold">+ New</span>}
           </div>
       );
   }
