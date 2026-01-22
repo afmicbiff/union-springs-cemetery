@@ -285,6 +285,7 @@ const Tooltip = React.memo(({ data, position, visible }) => {
             </div>
           )}
         </div>
+      </div>
     </div>
   );
 });
