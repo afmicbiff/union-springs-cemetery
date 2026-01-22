@@ -1405,6 +1405,36 @@ export default function PlotsPage() {
     setIsEditModalOpen(true);
   }, []);
 
+  const handleCreatePlot = useCallback(async (newPlotData) => {
+    const entityData = {
+      section: newPlotData.Section,
+      row_number: newPlotData.Row,
+      plot_number: newPlotData.Grave,
+      status: newPlotData.Status,
+      first_name: newPlotData['First Name'],
+      last_name: newPlotData['Last Name'],
+      family_name: newPlotData['Family Name'],
+      birth_date: newPlotData.Birth,
+      death_date: newPlotData.Death,
+      notes: newPlotData.Notes,
+      capacity: newPlotData.capacity,
+      current_occupancy: newPlotData.current_occupancy,
+      burial_type: newPlotData.burial_type,
+      burial_type_options: newPlotData.burial_type_options,
+      container_type: newPlotData.container_type,
+      liner_vault_options: newPlotData.liner_vault_options
+    };
+    try {
+      await base44.entities.Plot.create(entityData);
+      clearEntityCache('Plot');
+      queryClient.invalidateQueries({ queryKey: ['plots'] });
+      invalidatePlotsMap();
+      toast.success("Plot created successfully");
+    } catch (err) {
+      toast.error(`Failed to create plot: ${err.message}`);
+    }
+  }, [queryClient, invalidatePlotsMap]);
+
   const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
     setInlineEditData({ ...plot });
@@ -1895,6 +1925,7 @@ export default function PlotsPage() {
         onClose={() => setIsEditModalOpen(false)}
         plot={selectedPlotForModal}
         onSave={handleUpdatePlot}
+        onCreate={handleCreatePlot}
       />
     </div>
   );
