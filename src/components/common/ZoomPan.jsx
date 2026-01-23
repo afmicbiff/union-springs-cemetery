@@ -194,9 +194,6 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     reset,
   }));
 
-  const smoothDamp = (current, target, smoothing = 0.18) =>
-    current + (target - current) * smoothing;
-
   const onPointerDown = React.useCallback(
     (e) => {
       if (!containerRef.current) return;
