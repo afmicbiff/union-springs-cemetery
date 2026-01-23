@@ -537,7 +537,9 @@ const SectionRenderer = React.memo(({
           isAdmin, 
           onEdit, 
           onHover,
-          onMovePlot
+          onMovePlot,
+          onAddBlankAbove,
+          onDeleteAndShift
       }) => {
     const [bgColor, borderColor, textColor] = palette.split(' ');
 
@@ -1962,9 +1964,11 @@ export default function PlotsPage() {
                                 onEdit={isAdmin ? handleEditClick : undefined}
                                 onHover={handleHover}
                                 onMovePlot={isAdmin ? handleMovePlot : undefined}
-                              />
-                            );
-                          })}
+                                onAddBlankAbove={isAdmin ? handleAddBlankAbove : undefined}
+                                onDeleteAndShift={isAdmin ? handleDeleteAndShift : undefined}
+                                />
+                                );
+                                })}
                       </div>
                     </ZoomPan>
 
