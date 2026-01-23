@@ -214,19 +214,25 @@ export default function DraggableSectionGrid({
   }
 
   return (
-    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DragDropContext 
+      onDragStart={handleDragStart} 
+      onDragEnd={handleDragEnd}
+    >
       <div className="flex gap-4 justify-center overflow-x-auto pb-4">
         {columns.map((colPlots, colIdx) => (
           <Droppable 
-            key={`col-${sectionKey}-${colIdx}`} 
-            droppableId={`col-${sectionKey}-${colIdx}`}
+            key={columnKeys[colIdx]} 
+            droppableId={columnKeys[colIdx]}
             direction="vertical"
+            mode="standard"
           >
-            {(colProvided) => (
+            {(colProvided, colSnapshot) => (
               <div
                 ref={colProvided.innerRef}
                 {...colProvided.droppableProps}
-                className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
+                className={`flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2 ${
+                  colSnapshot.isDraggingOver ? 'bg-purple-50/30' : ''
+                }`}
               >
                 {colPlots.map((plot, rowIdx) => {
                   const isSpacer = !plot || plot.isSpacer;
@@ -240,6 +246,7 @@ export default function DraggableSectionGrid({
                         key={uniqueKey}
                         droppableId={`spacer-${sectionKey}-col${colIdx}-row${rowIdx}`}
                         direction="vertical"
+                        mode="standard"
                       >
                         {(spacerProvided, spacerSnapshot) => (
                           <SpacerCell
