@@ -1532,17 +1532,26 @@ export default function PlotsPage() {
 
       const plotNumber = plotToMove.Grave || plotToMove.plot_number;
       
+      console.log('handleMovePlot called:', plotId, 'to section:', targetSection);
+      
       // Only update section - plot keeps its original plot_number
       await base44.entities.Plot.update(plotId, {
         section: `Section ${targetSection}`
       });
 
+      console.log('Plot updated, invalidating caches...');
+      
       clearEntityCache('Plot');
-      queryClient.invalidateQueries({ queryKey: ['plots'] });
+      await queryClient.invalidateQueries({ queryKey: ['plots'] });
+      await queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
       invalidatePlotsMap();
+      
+      // Force refetch
+      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'] });
       
       toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
     } catch (err) {
+      console.error('Move plot error:', err);
       toast.error(`Failed to move plot: ${err.message}`);
     }
   }, [parsedData, queryClient, invalidatePlotsMap]);
