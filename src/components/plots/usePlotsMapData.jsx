@@ -52,8 +52,8 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   return useQuery({
           queryKey: ["plotsMap_v3_all", { tab: activeTab, sectionsKey }],
           enabled: activeTab === "map",
-          staleTime: 15 * 60_000,
-          gcTime: 30 * 60_000,
+          staleTime: 0, // Always consider stale after mutation
+          gcTime: 5 * 60_000,
           refetchOnWindowFocus: false,
           queryFn: async ({ signal }) => {
       const sectionFilter = buildSectionFilter(sectionsToLoad);
@@ -83,7 +83,7 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
             "photo_url_large"
           ],
           persist: false,
-          ttlMs: 15 * 60_000,
+          ttlMs: 0, // No caching for fresh data after move
         },
         { signal }
       );
