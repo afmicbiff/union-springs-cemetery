@@ -157,12 +157,21 @@ export default function DraggableSectionGrid({
   isAdmin, 
   onHover, 
   onEdit,
-  onMovePlot
+  onMovePlot,
+  onAddBlankAbove,
+  onDeleteAndShift
 }) {
   const [selectedPlot, setSelectedPlot] = useState(null);
+  const [contextMenuPlot, setContextMenuPlot] = useState(null);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const handleSelectPlot = useCallback((plot) => {
     setSelectedPlot(prev => prev?._id === plot._id ? null : plot);
+  }, []);
+
+  const handleCtrlClick = useCallback((plot) => {
+    setContextMenuPlot(plot);
+    setIsContextMenuOpen(true);
   }, []);
 
   const handleMovePlot = useCallback((moveData) => {
