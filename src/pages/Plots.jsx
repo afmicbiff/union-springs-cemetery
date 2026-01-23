@@ -1507,39 +1507,29 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
-  const handleMovePlot = useCallback(async ({ plotId, targetSection }) => {
+  const handleMovePlot = useCallback(async ({ plotId, targetSection, plot }) => {
     if (!plotId || !targetSection) return;
 
     try {
       // Find the plot being moved
-      const plotToMove = parsedData.find(p => p._id === plotId);
+      const plotToMove = plot || parsedData.find(p => p._id === plotId);
       if (!plotToMove) {
         toast.error("Could not find plot to move");
         return;
       }
 
-      // Find the highest plot number in target section to assign next number
-      const sectionPlots = parsedData.filter(p => {
-        const sect = String(p.Section || '').replace(/Section\s/i, '').trim();
-        return sect === targetSection;
-      });
-
-      const maxPlotNum = sectionPlots.reduce((max, p) => {
-        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-        return Math.max(max, num);
-      }, 0);
-
-      const newPlotNumber = String(maxPlotNum + 1);
+      // Keep the same plot number - just update the section
+      // The plot will appear in the "unplaced" / fallback column of the target section
+      const currentPlotNumber = plotToMove.Grave || plotToMove.plot_number;
 
       await base44.entities.Plot.update(plotId, {
-        section: `Section ${targetSection}`,
-        plot_number: newPlotNumber
+        section: `Section ${targetSection}`
       });
 
       clearEntityCache('Plot');
       queryClient.invalidateQueries({ queryKey: ['plots'] });
       invalidatePlotsMap();
-      toast.success(`Moved plot to Section ${targetSection} as plot #${newPlotNumber}`);
+      toast.success(`Moved plot #${currentPlotNumber} to Section ${targetSection}`);
     } catch (err) {
       toast.error(`Failed to move plot: ${err.message}`);
     }
