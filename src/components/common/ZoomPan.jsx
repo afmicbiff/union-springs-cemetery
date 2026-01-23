@@ -313,12 +313,12 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         }, 0);
       }
 
-      // inertia
+      // Smooth inertia scrolling
       if (wasDragging && st.moved && !pinchRef.current.active) {
         let vx = st.vx || 0;
         let vy = st.vy || 0;
 
-        const MAX_VELOCITY = 2.5; // px/ms
+        const MAX_VELOCITY = 2.5;
         vx = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, vx));
         vy = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, vy));
 
@@ -331,9 +331,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
           inertiaRef.current.animId = 0;
         }
 
-        let x = tx;
-        let y = ty;
-        const DECAY = 0.0025;
+        let x = transformRef.current.tx;
+        let y = transformRef.current.ty;
+        const DECAY = 0.003; // Slightly faster decay for snappier feel
         let lastT = performance.now();
 
         const step = (t) => {
@@ -351,8 +351,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
           x = cl.x;
           y = cl.y;
 
-          setTx(x);
-          setTy(y);
+          transformRef.current.tx = x;
+          transformRef.current.ty = y;
+          applyTransform();
 
           if (Math.abs(vx) < 0.01 && Math.abs(vy) < 0.01) {
             inertiaRef.current.animId = 0;
@@ -365,7 +366,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         inertiaRef.current.animId = requestAnimationFrame(step);
       }
     },
-    [clampTranslate, tx, ty]
+    [clampTranslate, applyTransform]
   );
 
   const onWheel = React.useCallback(
