@@ -171,15 +171,20 @@ export default function DraggableSectionGrid({
   const handleMoveToSpacer = useCallback(({ colIdx, rowIdx }) => {
     if (!selectedPlotForMove || !onMovePlot) return;
     
+    // Keep the plot data before clearing
+    const plotToMove = selectedPlotForMove;
+    
+    // Clear selection immediately
+    setSelectedPlotForMove(null);
+    
+    // Call the move handler - this should update the plot's section in DB
     onMovePlot({ 
-      plotId: selectedPlotForMove._id, 
+      plotId: plotToMove._id, 
       targetSection: sectionKey, 
       targetColIndex: colIdx, 
-      targetRowIndex: rowIdx 
+      targetRowIndex: rowIdx,
+      plot: plotToMove // Pass full plot data
     });
-    
-    // Clear selection after move
-    setSelectedPlotForMove(null);
   }, [selectedPlotForMove, onMovePlot, sectionKey]);
 
   // Cancel selection on Escape key
