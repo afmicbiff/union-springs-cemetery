@@ -378,12 +378,15 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         e.preventDefault();
       }
 
+      const { tx, ty, scale } = transformRef.current;
+
       if (!(e.ctrlKey || e.metaKey)) {
         const nx = tx - (e.deltaX || 0);
         const ny = ty - (e.deltaY || 0);
         const cl = clampTranslate(nx, ny);
-        setTx(cl.x);
-        setTy(cl.y);
+        transformRef.current.tx = cl.x;
+        transformRef.current.ty = cl.y;
+        applyTransform();
         return;
       }
 
@@ -391,28 +394,28 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
 
-      setScale((prevScale) => {
-        const next = clamp(
-          prevScale * (e.deltaY > 0 ? 0.9 : 1.1),
-          minScale,
-          maxScale
-        );
-        if (next === prevScale) return prevScale;
+      const prevScale = scale;
+      const next = clamp(
+        prevScale * (e.deltaY > 0 ? 0.9 : 1.1),
+        minScale,
+        maxScale
+      );
+      if (next === prevScale) return;
 
-        const nxLocal = cx / prevScale;
-        const nyLocal = cy / prevScale;
-        const delta = next - prevScale;
+      const nxLocal = cx / prevScale;
+      const nyLocal = cy / prevScale;
+      const delta = next - prevScale;
 
-        const newTx = tx - nxLocal * delta;
-        const newTy = ty - nyLocal * delta;
+      const newTx = tx - nxLocal * delta;
+      const newTy = ty - nyLocal * delta;
 
-        const cl = clampTranslate(newTx, newTy, next);
-        setTx(cl.x);
-        setTy(cl.y);
-        return next;
-      });
+      const cl = clampTranslate(newTx, newTy, next);
+      transformRef.current.scale = next;
+      transformRef.current.tx = cl.x;
+      transformRef.current.ty = cl.y;
+      applyTransform();
     },
-    [clampTranslate, maxScale, minScale, tx, ty]
+    [clampTranslate, maxScale, minScale, applyTransform]
   );
 
   const onPinchPointerDown = (e) => {
