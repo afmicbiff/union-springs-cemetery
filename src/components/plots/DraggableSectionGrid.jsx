@@ -220,6 +220,7 @@ export default function DraggableSectionGrid({
                     selectedPlot={selectedPlot}
                     onMovePlot={handleMovePlot}
                     onEdit={onEdit}
+                    hasSelection={!!selectedPlot}
                   />
                 );
               }
