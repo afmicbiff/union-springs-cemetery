@@ -270,6 +270,7 @@ export default function DraggableSectionGrid({
                   sectionKey={sectionKey}
                   isSelected={selectedPlot?._id === plot._id}
                   onSelect={handleSelectPlot}
+                  onCtrlClick={handleCtrlClick}
                 />
               );
             })}
