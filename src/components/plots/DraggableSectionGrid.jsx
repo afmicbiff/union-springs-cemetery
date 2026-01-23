@@ -1,21 +1,23 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-// Inject optimized CSS for drag animations
+// Inject optimized CSS for selection animations
 if (typeof document !== 'undefined' && !document.getElementById('dnd-perf-styles')) {
   const style = document.createElement('style');
   style.id = 'dnd-perf-styles';
   style.textContent = `
-    .plot-dragging { 
-      will-change: transform;
-      transform: translateZ(0);
-    }
     .plot-cell {
       will-change: auto;
       contain: layout style;
     }
     .plot-cell:hover {
       will-change: transform;
+    }
+    .plot-selected {
+      animation: plotPulse 1s ease-in-out infinite;
+    }
+    @keyframes plotPulse {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3); }
     }
   `;
   document.head.appendChild(style);
