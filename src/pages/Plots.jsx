@@ -1543,7 +1543,9 @@ export default function PlotsPage() {
         updateData.plot_number = String(targetPlotNumber);
       }
 
+      console.log('Moving plot:', plotId, 'Update data:', updateData);
       await base44.entities.Plot.update(plotId, updateData);
+      console.log('Plot updated successfully');
 
       clearEntityCache('Plot');
       queryClient.invalidateQueries({ queryKey: ['plots'] });
