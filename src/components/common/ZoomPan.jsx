@@ -106,12 +106,10 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   const centerOnElement = React.useCallback((element, align = 'center') => {
     if (!containerRef.current || !contentRef.current || !element) return;
 
+    const { scale, tx, ty } = transformRef.current;
     const containerRect = containerRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Get element's position in unscaled content coordinates
-    // Current screen position = (content origin position) + (element offset in content * scale) + tx/ty
-    // So element offset in content = (screen position - container position - tx/ty) / scale
     const elLeftInContent = (elementRect.left - containerRect.left - tx) / scale;
     const elTopInContent = (elementRect.top - containerRect.top - ty) / scale;
     const elWidth = elementRect.width / scale;
@@ -120,21 +118,39 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     let targetTx, targetTy;
 
     if (align === 'top-left') {
-      // Position element near top-left with padding
       const padding = 80;
       targetTx = padding - (elLeftInContent * scale);
       targetTy = padding - (elTopInContent * scale);
     } else {
-      // Default: center the element
       const elCenterInContentX = elLeftInContent + elWidth / 2;
       const elCenterInContentY = elTopInContent + elHeight / 2;
       targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
       targetTy = (containerRect.height / 2) - (elCenterInContentY * scale);
     }
 
-    setTx(targetTx);
-    setTy(targetTy);
-  }, [scale, tx, ty]);
+    // Smooth animation using requestAnimationFrame
+    const startTx = tx;
+    const startTy = ty;
+    const duration = 300;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      transformRef.current.tx = startTx + (targetTx - startTx) * eased;
+      transformRef.current.ty = startTy + (targetTy - startTy) * eased;
+      applyTransform();
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [applyTransform]);
 
   const zoomBy = (factor) =>
     setScale((s) => clamp(s * factor, minScale, maxScale));
