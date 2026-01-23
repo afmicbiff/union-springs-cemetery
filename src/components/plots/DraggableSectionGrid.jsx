@@ -271,18 +271,26 @@ export default function DraggableSectionGrid({
                 : `plot-${plot._id}`;
 
               if (isSpacer) {
-                return (
-                  <SpacerCell
-                    key={uniqueKey}
-                    isAdmin={isAdmin}
-                    onEdit={onEdit}
-                    sectionKey={sectionKey}
-                    colIdx={colIdx}
-                    rowIdx={rowIdx}
-                    selectedPlot={selectedPlotForMove}
-                    onMoveToSpacer={handleMoveToSpacer}
-                  />
-                );
+              // Try to determine expected plot number from position context
+              // Look at adjacent plots in this column to infer the expected number
+              let expectedPlotNumber = null;
+              if (plot && plot.expectedPlotNumber) {
+                expectedPlotNumber = plot.expectedPlotNumber;
+              }
+
+              return (
+                <SpacerCell
+                  key={uniqueKey}
+                  isAdmin={isAdmin}
+                  onEdit={onEdit}
+                  sectionKey={sectionKey}
+                  colIdx={colIdx}
+                  rowIdx={rowIdx}
+                  selectedPlot={selectedPlotForMove}
+                  onMoveToSpacer={handleMoveToSpacer}
+                  expectedPlotNumber={expectedPlotNumber}
+                />
+              );
               }
 
               return (
