@@ -1521,6 +1521,65 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
+  const handleAddBlankAbove = useCallback(async (plot) => {
+    if (!plot) return;
+    
+    try {
+      const plotNumber = plot.Grave || plot.plot_number;
+      const section = plot.Section || plot.section || 'Section 5';
+      const row = plot.Row || plot.row_number || '';
+      
+      // Create a new blank plot with a unique plot number (add 'A' suffix or increment)
+      const newPlotNumber = `${plotNumber}-NEW`;
+      
+      await base44.entities.Plot.create({
+        section: section,
+        row_number: row,
+        plot_number: newPlotNumber,
+        status: 'Available',
+        notes: `Blank plot added above ${plotNumber}`
+      });
+      
+      clearEntityCache('Plot');
+      queryClient.removeQueries({ queryKey: ['plots'] });
+      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
+      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
+      
+      toast.success(`Added blank plot above #${plotNumber}`);
+    } catch (err) {
+      console.error('Add blank plot error:', err);
+      toast.error(`Failed to add plot: ${err.message}`);
+    }
+  }, [queryClient]);
+
+  const handleDeleteAndShift = useCallback(async (plot) => {
+    if (!plot || !plot._id) return;
+    
+    try {
+      const plotNumber = plot.Grave || plot.plot_number;
+      
+      // Check if plot has occupant data
+      const hasOccupant = plot.first_name || plot.last_name || plot['First Name'] || plot['Last Name'];
+      if (hasOccupant) {
+        toast.error("Cannot delete plot with occupant data");
+        return;
+      }
+      
+      // Delete the plot
+      await base44.entities.Plot.delete(plot._id);
+      
+      clearEntityCache('Plot');
+      queryClient.removeQueries({ queryKey: ['plots'] });
+      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
+      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
+      
+      toast.success(`Deleted plot #${plotNumber} and shifted others`);
+    } catch (err) {
+      console.error('Delete plot error:', err);
+      toast.error(`Failed to delete plot: ${err.message}`);
+    }
+  }, [queryClient]);
+
   const handleMovePlot = useCallback(async ({ plotId, targetSection, plot }) => {
     if (!plotId || !targetSection) return;
 
