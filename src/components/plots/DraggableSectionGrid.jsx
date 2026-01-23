@@ -106,19 +106,19 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
   );
 }
 
-const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer }) => {
+const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer, expectedPlotNumber }) => {
   const handleMouseDown = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
     
     // If there's a selected plot, move it here (regular click or ctrl+click)
     if (isAdmin && selectedPlot && onMoveToSpacer) {
-      onMoveToSpacer({ colIdx, rowIdx });
+      onMoveToSpacer({ colIdx, rowIdx, expectedPlotNumber });
     } else if (isAdmin && onEdit) {
-      // No selected plot - open create dialog
-      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
+      // No selected plot - open create dialog with suggested plot number
+      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey, suggestedPlotNumber: expectedPlotNumber });
     }
-  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx]);
+  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx, expectedPlotNumber]);
 
   const hasSelectedPlot = !!selectedPlot;
 
@@ -133,12 +133,12 @@ const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, se
         ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onMouseDown={handleMouseDown}
-      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Click to create new plot" : "")}
+      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here${expectedPlotNumber ? ` (will become #${expectedPlotNumber})` : ''}` : (isAdmin ? (expectedPlotNumber ? `Click to create plot #${expectedPlotNumber}` : "Click to create new plot") : "")}
     >
       {hasSelectedPlot ? (
-        <span className="text-[8px] text-green-700 font-bold">+ Move</span>
+        <span className="text-[8px] text-green-700 font-bold">{expectedPlotNumber ? `#${expectedPlotNumber}` : '+ Move'}</span>
       ) : (
-        isAdmin && <span className="text-[8px] text-gray-400">New</span>
+        isAdmin && <span className="text-[8px] text-gray-400">{expectedPlotNumber || 'New'}</span>
       )}
     </div>
   );
