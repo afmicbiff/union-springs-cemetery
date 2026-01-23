@@ -91,6 +91,7 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
 
   const handleClick = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     console.log('EmptyCell handleClick:', { hasSelection, selectedPlot, onMovePlot: !!onMovePlot, sectionKey });
     if (hasSelection && onMovePlot && selectedPlot) {
       // Move the selected plot to this section (keep its plot_number)
@@ -111,16 +112,32 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
     }
   };
 
+  const handlePointerUp = (e) => {
+    // Use pointerup as backup since ZoomPan may intercept clicks
+    e.stopPropagation();
+    console.log('EmptyCell pointerUp:', { hasSelection, selectedPlot: selectedPlot?._id });
+    if (hasSelection && onMovePlot && selectedPlot) {
+      console.log('EmptyCell pointerUp calling onMovePlot');
+      onMovePlot({
+        plotId: selectedPlot._id,
+        targetSection: sectionKey,
+        gridIndex,
+        plot: selectedPlot
+      });
+    }
+  };
+
   return (
     <div
       className={`
-        w-16 h-8 m-0.5 border border-dashed rounded flex items-center justify-center
+        w-16 h-8 m-0.5 border border-dashed rounded flex items-center justify-center plot-element
         ${hasSelection 
           ? 'drop-target cursor-pointer border-2 animate-pulse' 
           : 'border-gray-300 bg-gray-50/50'}
         ${isAdmin && !hasSelection ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onClick={handleClick}
+      onPointerUp={hasSelection ? handlePointerUp : undefined}
       title={hasSelection ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? 'Click to create new plot' : '')}
     >
       {hasSelection ? (
