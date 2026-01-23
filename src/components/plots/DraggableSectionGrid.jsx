@@ -152,13 +152,15 @@ export default function DraggableSectionGrid({
   const [selectedPlotForMove, setSelectedPlotForMove] = useState(null);
 
   const handleCtrlClick = useCallback((plot) => {
-    if (selectedPlotForMove?._id === plot._id) {
-      // Clicking same plot deselects it
-      setSelectedPlotForMove(null);
-    } else {
-      setSelectedPlotForMove(plot);
-    }
-  }, [selectedPlotForMove]);
+    setSelectedPlotForMove(prev => {
+      if (prev?._id === plot._id) {
+        // Clicking same plot deselects it
+        return null;
+      } else {
+        return plot;
+      }
+    });
+  }, []);
 
   const handleMoveToSpacer = useCallback(({ colIdx, rowIdx }) => {
     if (!selectedPlotForMove || !onMovePlot) return;
