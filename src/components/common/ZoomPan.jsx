@@ -152,15 +152,41 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     requestAnimationFrame(animate);
   }, [applyTransform]);
 
-  const zoomBy = (factor) =>
-    setScale((s) => clamp(s * factor, minScale, maxScale));
+  const zoomBy = React.useCallback((factor) => {
+    const currentScale = transformRef.current.scale;
+    const newScale = clamp(currentScale * factor, minScale, maxScale);
+    transformRef.current.scale = newScale;
+    applyTransform();
+    forceUpdate();
+  }, [minScale, maxScale, applyTransform]);
 
-  const reset = () => {
-    setScale(initialScale);
-    const cl = clampTranslate(0, 0, initialScale);
-    setTx(cl.x);
-    setTy(cl.y);
-  };
+  const reset = React.useCallback(() => {
+    // Animate to reset position
+    const startScale = transformRef.current.scale;
+    const startTx = transformRef.current.tx;
+    const startTy = transformRef.current.ty;
+    const duration = 250;
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+
+      transformRef.current.scale = startScale + (initialScale - startScale) * eased;
+      transformRef.current.tx = startTx * (1 - eased);
+      transformRef.current.ty = startTy * (1 - eased);
+      applyTransform();
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        forceUpdate();
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [initialScale, applyTransform]);
 
   React.useImperativeHandle(ref, () => ({
     centerOnElement,
