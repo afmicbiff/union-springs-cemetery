@@ -138,12 +138,15 @@ export default function DraggableSectionGrid({
 }) {
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDragStart = useCallback(() => {
+  const handleDragStart = useCallback((start) => {
     setIsDragging(true);
+    // Reduce repaints during drag
+    document.body.style.cursor = 'grabbing';
   }, []);
 
   const handleDragEnd = useCallback((result) => {
     setIsDragging(false);
+    document.body.style.cursor = '';
     
     const { destination, draggableId } = result;
     
@@ -163,6 +166,12 @@ export default function DraggableSectionGrid({
       onMovePlot({ plotId, targetSection, targetColIndex: colIdx, targetRowIndex: rowIdx });
     }
   }, [onMovePlot]);
+
+  // Memoize column keys for stable rendering
+  const columnKeys = useMemo(() => 
+    columns.map((_, idx) => `col-${sectionKey}-${idx}`), 
+    [columns.length, sectionKey]
+  );
 
   if (!isAdmin) {
     // Non-admin: render without drag-and-drop
