@@ -1520,42 +1520,28 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
-  const handleMovePlot = useCallback(async ({ plotId, targetSection, targetColIndex, targetRowIndex, targetPlotNumber, plot }) => {
+  const handleMovePlot = useCallback(async ({ plotId, targetSection, plot }) => {
     if (!plotId || !targetSection) return;
 
     try {
-      // Find the plot being moved
       const plotToMove = plot || parsedData.find(p => p._id === plotId);
       if (!plotToMove) {
         toast.error("Could not find plot to move");
         return;
       }
 
-      const oldPlotNumber = plotToMove.Grave || plotToMove.plot_number;
+      const plotNumber = plotToMove.Grave || plotToMove.plot_number;
       
-      // Build update data - always update section, optionally update plot_number
-      const updateData = {
+      // Only update section - plot keeps its original plot_number
+      await base44.entities.Plot.update(plotId, {
         section: `Section ${targetSection}`
-      };
-      
-      // If a target plot number is specified (from the grid position), update the plot number too
-      if (targetPlotNumber) {
-        updateData.plot_number = String(targetPlotNumber);
-      }
-
-      console.log('Moving plot:', plotId, 'Update data:', updateData);
-      await base44.entities.Plot.update(plotId, updateData);
-      console.log('Plot updated successfully');
+      });
 
       clearEntityCache('Plot');
       queryClient.invalidateQueries({ queryKey: ['plots'] });
       invalidatePlotsMap();
       
-      if (targetPlotNumber && targetPlotNumber !== oldPlotNumber) {
-        toast.success(`Moved plot #${oldPlotNumber} → #${targetPlotNumber} in Section ${targetSection}`);
-      } else {
-        toast.success(`Moved plot #${oldPlotNumber} to Section ${targetSection}`);
-      }
+      toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
     } catch (err) {
       toast.error(`Failed to move plot: ${err.message}`);
     }

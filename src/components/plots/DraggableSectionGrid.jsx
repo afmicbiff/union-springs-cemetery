@@ -1,31 +1,26 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 
-// Inject optimized CSS for selection animations
+// Inject CSS for selection animations
 if (typeof document !== 'undefined' && !document.getElementById('dnd-perf-styles')) {
   const style = document.createElement('style');
   style.id = 'dnd-perf-styles';
   style.textContent = `
-    .plot-cell {
-      will-change: auto;
-      contain: layout style;
-    }
-    .plot-cell:hover {
-      will-change: transform;
-    }
+    .plot-cell { contain: layout style; }
     .plot-selected {
       animation: plotPulse 0.6s ease-in-out infinite !important;
       background-color: #fde047 !important;
       border-color: #ca8a04 !important;
+      z-index: 100 !important;
+      transform: scale(1.1) !important;
     }
     @keyframes plotPulse {
-      0%, 100% { 
-        box-shadow: 0 0 0 4px rgba(234, 179, 8, 1), 0 0 16px rgba(234, 179, 8, 0.8); 
-        transform: scale(1.1);
-      }
-      50% { 
-        box-shadow: 0 0 0 8px rgba(234, 179, 8, 0.6), 0 0 24px rgba(234, 179, 8, 0.5); 
-        transform: scale(1.15);
-      }
+      0%, 100% { box-shadow: 0 0 0 4px rgba(234, 179, 8, 1), 0 0 16px rgba(234, 179, 8, 0.8); }
+      50% { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0.6), 0 0 24px rgba(234, 179, 8, 0.5); }
+    }
+    .drop-target {
+      background-color: #bbf7d0 !important;
+      border-color: #22c55e !important;
+      border-style: solid !important;
     }
   `;
   document.head.appendChild(style);
@@ -42,138 +37,79 @@ const STATUS_COLORS_MAP = {
   'Default': 'bg-gray-300'
 };
 
-function parseNum(g) {
-  const n = parseInt(String(g || "").replace(/\D/g, ""), 10);
-  return Number.isFinite(n) ? n : null;
-}
-
-function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) {
-  if (!plot || plot.isSpacer) return null;
-  
-  const plotNum = parseNum(plot.Grave);
+// Simple Plot Cell - shows plot data
+const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onSelect }) => {
   const isVet = plot.Status === 'Veteran' || ((plot.Notes || '').toLowerCase().includes('vet') && plot.Status === 'Occupied');
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
-  const handleMouseDown = (e) => {
-    // Check for Ctrl+Click (or Cmd+Click on Mac)
-    if (isAdmin && (e.ctrlKey || e.metaKey) && onCtrlClick) {
-      e.stopPropagation();
-      e.preventDefault();
-      onCtrlClick(plot);
-    }
-  };
-
-  const handleContextMenu = (e) => {
-    e.preventDefault();
+  const handleClick = (e) => {
     e.stopPropagation();
-    if (isAdmin && onEdit) {
-      onEdit(plot);
+    if (isAdmin && onSelect) {
+      onSelect(plot);
     }
   };
 
   return (
     <div
-      id={`plot-${sectionKey}-${plotNum}`}
-      data-section={sectionKey}
-      data-plot-num={plotNum}
-      data-selected={isSelected ? 'true' : 'false'}
-      style={isSelected ? {
-        backgroundColor: '#fde047',
-        borderColor: '#ca8a04',
-        transform: 'scale(1.15)',
-        zIndex: 100,
-        boxShadow: '0 0 0 4px rgba(234, 179, 8, 1), 0 0 20px rgba(234, 179, 8, 0.8)'
-      } : undefined}
       className={`
-        ${isSelected ? 'ring-4 ring-yellow-400 plot-selected' : baseColorClass + ' hover:shadow-md hover:scale-[1.02]'}
-        border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
+        plot-cell cursor-pointer transition-all duration-150
+        border rounded w-16 h-8 px-1.5 m-0.5
         flex items-center justify-between text-[8px] font-bold
-        plot-cell cursor-pointer
-        plot-element
-        transition-all duration-150
+        ${isSelected ? 'plot-selected' : `${baseColorClass} hover:shadow-md hover:scale-105`}
       `}
+      onClick={handleClick}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      onMouseDown={handleMouseDown}
-      onContextMenu={handleContextMenu}
-      title={isAdmin ? `Ctrl+Click to move • Right-click to edit • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      title={isAdmin ? `Click to select, then click empty cell to move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
-      <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>{plot.Grave}</span>
-      <span className={`text-[8px] leading-none font-mono truncate ${isSelected ? 'text-yellow-800' : 'text-gray-500'}`}>{plot.Row}</span>
+      <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>
+        {plot.Grave}
+      </span>
+      <span className={`text-[8px] leading-none font-mono truncate ${isSelected ? 'text-yellow-800' : 'text-gray-500'}`}>
+        {plot.Row}
+      </span>
       <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
     </div>
   );
-}
+});
 
-const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer, expectedPlotNumber, columns }) => {
-  // Calculate expected plot number from adjacent plots if not provided
-  const calculatedPlotNumber = useMemo(() => {
-    if (expectedPlotNumber) return expectedPlotNumber;
-    if (!columns || !columns[colIdx]) return null;
-    
-    // Look at plots in same column to infer numbering
-    const colPlots = columns[colIdx];
-    const plotNumbers = colPlots
-      .filter(p => p && !p.isSpacer && p.Grave)
-      .map(p => parseInt(String(p.Grave).replace(/\D/g, ''), 10))
-      .filter(n => Number.isFinite(n))
-      .sort((a, b) => a - b);
-    
-    if (plotNumbers.length === 0) return null;
-    
-    // Find where this spacer is in the column and estimate its number
-    const minNum = plotNumbers[0];
-    const maxNum = plotNumbers[plotNumbers.length - 1];
-    
-    // Simple heuristic: if rowIdx is near bottom, use minNum - offset, else maxNum + offset
-    const totalRows = colPlots.length;
-    const position = rowIdx / totalRows;
-    
-    if (position < 0.5) {
-      // Near bottom of column (flex-col-reverse means low index = bottom)
-      return minNum > 1 ? minNum - (Math.floor((0.5 - position) * 10)) : null;
-    } else {
-      // Near top
-      return maxNum + Math.floor((position - 0.5) * 10);
-    }
-  }, [expectedPlotNumber, columns, colIdx, rowIdx]);
+// Empty Cell - drop target for moving plots
+const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, onMovePlot, onEdit }) => {
+  const hasSelection = !!selectedPlot;
 
-  const handleMouseDown = useCallback((e) => {
+  const handleClick = (e) => {
     e.stopPropagation();
-    e.preventDefault();
-    
-    const plotNumToUse = expectedPlotNumber || calculatedPlotNumber;
-    
-    // If there's a selected plot, move it here (regular click or ctrl+click)
-    if (isAdmin && selectedPlot && onMoveToSpacer) {
-      onMoveToSpacer({ colIdx, rowIdx, expectedPlotNumber: plotNumToUse });
+    if (hasSelection && onMovePlot) {
+      // Move the selected plot to this section (keep its plot_number)
+      onMovePlot({
+        plotId: selectedPlot._id,
+        targetSection: sectionKey,
+        gridIndex,
+        plot: selectedPlot
+      });
     } else if (isAdmin && onEdit) {
-      // No selected plot - open create dialog with suggested plot number
-      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey, suggestedPlotNumber: plotNumToUse });
+      // Create new plot
+      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
     }
-  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx, expectedPlotNumber, calculatedPlotNumber]);
-
-  const hasSelectedPlot = !!selectedPlot;
-  const displayNum = expectedPlotNumber || calculatedPlotNumber;
+  };
 
   return (
     <div
       className={`
-        w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
-        flex items-center justify-center plot-cell
-        ${hasSelectedPlot 
-          ? 'border-green-500 bg-green-100 hover:bg-green-300 hover:border-green-600 cursor-pointer border-2 animate-pulse' 
+        w-16 h-8 m-0.5 border border-dashed rounded flex items-center justify-center
+        ${hasSelection 
+          ? 'drop-target cursor-pointer border-2 animate-pulse' 
           : 'border-gray-300 bg-gray-50/50'}
-        ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
+        ${isAdmin && !hasSelection ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
-      onMouseDown={handleMouseDown}
-      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here${displayNum ? ` (will become #${displayNum})` : ''}` : (isAdmin ? (displayNum ? `Click to create plot #${displayNum}` : "Click to create new plot") : "")}
+      onClick={handleClick}
+      title={hasSelection ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? 'Click to create new plot' : '')}
     >
-      {hasSelectedPlot ? (
-        <span className="text-[8px] text-green-700 font-bold">{displayNum ? `#${displayNum}` : '+ Move'}</span>
+      {hasSelection ? (
+        <span className="text-[9px] text-green-700 font-bold">+ Move</span>
       ) : (
-        isAdmin && <span className="text-[8px] text-gray-400">{displayNum || 'New'}</span>
+        isAdmin && <span className="text-[8px] text-gray-400">+</span>
       )}
     </div>
   );
@@ -183,162 +119,101 @@ export default function DraggableSectionGrid({
   sectionKey,
   columns,
   baseColorClass, 
-  statusColors, 
   isAdmin, 
   onHover, 
   onEdit,
   onMovePlot
 }) {
-  // Track which plot is selected for moving (Ctrl+Click to select, then click spacer to move)
-  const [selectedPlotForMove, setSelectedPlotForMove] = useState(null);
+  const [selectedPlot, setSelectedPlot] = useState(null);
 
-  const handleCtrlClick = useCallback((plot) => {
-    setSelectedPlotForMove(prev => {
-      if (prev?._id === plot._id) {
-        // Clicking same plot deselects it
-        return null;
-      } else {
-        return plot;
-      }
-    });
+  const handleSelectPlot = useCallback((plot) => {
+    setSelectedPlot(prev => prev?._id === plot._id ? null : plot);
   }, []);
 
-  const handleMoveToSpacer = useCallback(({ colIdx, rowIdx, expectedPlotNumber }) => {
-    if (!selectedPlotForMove || !onMovePlot) return;
+  const handleMovePlot = useCallback((moveData) => {
+    if (!selectedPlot || !onMovePlot) return;
     
-    // Keep the plot data before clearing
-    const plotToMove = selectedPlotForMove;
+    // Clear selection first
+    setSelectedPlot(null);
     
-    // Clear selection immediately
-    setSelectedPlotForMove(null);
-    
-    // Call the move handler - this should update the plot's section AND plot_number in DB
-    onMovePlot({ 
-      plotId: plotToMove._id, 
-      targetSection: sectionKey, 
-      targetColIndex: colIdx, 
-      targetRowIndex: rowIdx,
-      targetPlotNumber: expectedPlotNumber, // New plot number for the target position
-      plot: plotToMove // Pass full plot data
+    // Move plot - only update section, keep plot_number the same
+    onMovePlot({
+      plotId: moveData.plotId,
+      targetSection: moveData.targetSection,
+      plot: moveData.plot
+      // Note: NOT passing targetPlotNumber - plot keeps its original number
     });
-  }, [selectedPlotForMove, onMovePlot, sectionKey]);
+  }, [selectedPlot, onMovePlot]);
 
-  // Cancel selection on Escape key
+  // Cancel selection on Escape
   React.useEffect(() => {
-    if (!selectedPlotForMove) return;
+    if (!selectedPlot) return;
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setSelectedPlotForMove(null);
-      }
+      if (e.key === 'Escape') setSelectedPlot(null);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedPlotForMove]);
+  }, [selectedPlot]);
 
-  if (!isAdmin) {
-    // Non-admin: render without move functionality
-    return (
-      <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-        {columns.map((colPlots, colIdx) => (
-          <div
-            key={`col-${colIdx}`}
-            className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
-          >
-            {colPlots.map((plot, rowIdx) => {
-              if (!plot || plot.isSpacer) {
-                return <div key={`spacer-${colIdx}-${rowIdx}`} className="w-16 h-8 m-0.5" />;
-              }
-              const plotNum = parseNum(plot.Grave);
-              const isVet = plot.Status === 'Veteran' || ((plot.Notes || '').toLowerCase().includes('vet') && plot.Status === 'Occupied');
-              const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
-              const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
-              
-              return (
-                <div
-                  key={plot._id || `plot-${colIdx}-${rowIdx}`}
-                  id={`plot-${sectionKey}-${plotNum}`}
-                  data-section={sectionKey}
-                  data-plot-num={plotNum}
-                  className={`${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 flex items-center justify-between text-[8px] font-bold cursor-pointer hover:shadow-md plot-element`}
-                  onMouseEnter={(e) => onHover?.(e, plot)}
-                  onMouseLeave={() => onHover?.(null, null)}
-                >
-                  <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
-                  <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
-                  <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    );
-  }
+  // Flatten columns into a simple grid
+  const maxRows = Math.max(...columns.map(col => col.length), 1);
 
   return (
     <div className="relative">
-      {/* Selection indicator banner */}
-      {selectedPlotForMove && (
+      {/* Selection indicator */}
+      {selectedPlot && (
         <div className="absolute -top-10 left-0 right-0 bg-blue-600 text-white text-sm px-4 py-2 rounded-t-lg flex items-center justify-between z-30 shadow-lg">
           <span className="flex items-center gap-2">
             <span className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></span>
-            <strong>Plot {selectedPlotForMove.Grave}</strong> selected — Click any <span className="bg-green-500 px-1 rounded text-xs">+ Move</span> slot to relocate
+            <strong>Plot {selectedPlot.Grave}</strong> selected — Click any green cell to move it there
           </span>
           <button 
-            onClick={() => setSelectedPlotForMove(null)}
+            onClick={() => setSelectedPlot(null)}
             className="ml-3 px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-xs font-bold"
           >
             ✕ Cancel (Esc)
           </button>
         </div>
       )}
-      
-      <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+
+      <div className="flex gap-2 justify-center overflow-x-auto pb-4">
         {columns.map((colPlots, colIdx) => (
           <div
             key={`col-${colIdx}`}
-            className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
+            className="flex flex-col-reverse gap-1 items-center min-w-[4rem] border-r border-dashed border-gray-200 last:border-0 pr-2"
           >
-            {colPlots.map((plot, rowIdx) => {
+            {Array.from({ length: maxRows }).map((_, rowIdx) => {
+              const plot = colPlots[rowIdx];
               const isSpacer = !plot || plot.isSpacer;
-              const uniqueKey = isSpacer 
-                ? `spacer-${sectionKey}-${colIdx}-${rowIdx}` 
-                : `plot-${plot._id}`;
+              const key = isSpacer 
+                ? `empty-${colIdx}-${rowIdx}` 
+                : `plot-${plot._id || `${colIdx}-${rowIdx}`}`;
 
               if (isSpacer) {
-                // Try to determine expected plot number from position context
-                let expectedPlotNumber = null;
-                if (plot && plot.expectedPlotNumber) {
-                  expectedPlotNumber = plot.expectedPlotNumber;
-                }
-
                 return (
-                  <SpacerCell
-                    key={uniqueKey}
+                  <EmptyCell
+                    key={key}
                     isAdmin={isAdmin}
-                    onEdit={onEdit}
                     sectionKey={sectionKey}
-                    colIdx={colIdx}
-                    rowIdx={rowIdx}
-                    selectedPlot={selectedPlotForMove}
-                    onMoveToSpacer={handleMoveToSpacer}
-                    expectedPlotNumber={expectedPlotNumber}
-                    columns={columns}
+                    gridIndex={colIdx * maxRows + rowIdx}
+                    selectedPlot={selectedPlot}
+                    onMovePlot={handleMovePlot}
+                    onEdit={onEdit}
                   />
                 );
               }
 
               return (
                 <PlotCell
-                  key={uniqueKey}
+                  key={key}
                   plot={plot}
                   isAdmin={isAdmin}
                   onHover={onHover}
                   onEdit={onEdit}
                   baseColorClass={baseColorClass}
                   sectionKey={sectionKey}
-                  isSelected={selectedPlotForMove?._id === plot._id}
-                  onCtrlClick={handleCtrlClick}
+                  isSelected={selectedPlot?._id === plot._id}
+                  onSelect={handleSelectPlot}
                 />
               );
             })}
