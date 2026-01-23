@@ -46,18 +46,19 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
 
   const handleClick = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     
     // Ctrl+Click or Cmd+Click opens context menu (do NOT open edit dialog)
     if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
       if (isAdmin && onCtrlClick) {
         onCtrlClick(plot);
       }
       return;
     }
     
-    // Regular click opens edit dialog (NOT selection)
-    if (onEdit) {
+    // Regular click opens edit dialog
+    if (onEdit && plot) {
+      console.log('PlotCell click - opening edit dialog for:', plot.Grave || plot._id);
       onEdit(plot);
     }
   };
