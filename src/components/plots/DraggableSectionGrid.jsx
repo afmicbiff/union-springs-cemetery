@@ -69,6 +69,7 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
         ${isSelected ? 'plot-selected' : `${baseColorClass} hover:shadow-md hover:scale-105`}
       `}
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
       title={isAdmin ? `Click to select, then click empty cell to move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
