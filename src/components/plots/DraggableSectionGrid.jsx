@@ -130,45 +130,46 @@ export default function DraggableSectionGrid({
   onEdit,
   onMovePlot
 }) {
-  const [isDragging, setIsDragging] = useState(false);
+  // Track which plot is selected for moving (Ctrl+Click to select, then click spacer to move)
+  const [selectedPlotForMove, setSelectedPlotForMove] = useState(null);
 
-  const handleDragStart = useCallback((start) => {
-    setIsDragging(true);
-    // Reduce repaints during drag
-    document.body.style.cursor = 'grabbing';
-  }, []);
-
-  const handleDragEnd = useCallback((result) => {
-    setIsDragging(false);
-    document.body.style.cursor = '';
-    
-    const { destination, draggableId } = result;
-    
-    if (!destination || !onMovePlot) return;
-    if (!draggableId.startsWith('plot-')) return;
-    
-    const plotId = draggableId.replace('plot-', '');
-    const destId = destination.droppableId;
-    
-    // Parse destination: "spacer-5-col3-row7" or "col-5-3"
-    if (destId.startsWith('spacer-')) {
-      const parts = destId.split('-');
-      const targetSection = parts[1];
-      const colIdx = parseInt(parts[2].replace('col', ''), 10);
-      const rowIdx = parseInt(parts[3].replace('row', ''), 10);
-      
-      onMovePlot({ plotId, targetSection, targetColIndex: colIdx, targetRowIndex: rowIdx });
+  const handleCtrlClick = useCallback((plot) => {
+    if (selectedPlotForMove?._id === plot._id) {
+      // Clicking same plot deselects it
+      setSelectedPlotForMove(null);
+    } else {
+      setSelectedPlotForMove(plot);
     }
-  }, [onMovePlot]);
+  }, [selectedPlotForMove]);
 
-  // Memoize column keys for stable rendering
-  const columnKeys = useMemo(() => 
-    columns.map((_, idx) => `col-${sectionKey}-${idx}`), 
-    [columns.length, sectionKey]
-  );
+  const handleMoveToSpacer = useCallback(({ colIdx, rowIdx }) => {
+    if (!selectedPlotForMove || !onMovePlot) return;
+    
+    onMovePlot({ 
+      plotId: selectedPlotForMove._id, 
+      targetSection: sectionKey, 
+      targetColIndex: colIdx, 
+      targetRowIndex: rowIdx 
+    });
+    
+    // Clear selection after move
+    setSelectedPlotForMove(null);
+  }, [selectedPlotForMove, onMovePlot, sectionKey]);
+
+  // Cancel selection on Escape key
+  React.useEffect(() => {
+    if (!selectedPlotForMove) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedPlotForMove(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedPlotForMove]);
 
   if (!isAdmin) {
-    // Non-admin: render without drag-and-drop
+    // Non-admin: render without move functionality
     return (
       <div className="flex gap-4 justify-center overflow-x-auto pb-4">
         {columns.map((colPlots, colIdx) => (
@@ -208,82 +209,66 @@ export default function DraggableSectionGrid({
   }
 
   return (
-    <DragDropContext 
-      onDragStart={handleDragStart} 
-      onDragEnd={handleDragEnd}
-    >
+    <div className="relative">
+      {/* Selection indicator banner */}
+      {selectedPlotForMove && (
+        <div className="absolute -top-8 left-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-t-lg flex items-center justify-between z-30">
+          <span>
+            <strong>Plot {selectedPlotForMove.Grave}</strong> selected — Click an empty slot to move it there
+          </span>
+          <button 
+            onClick={() => setSelectedPlotForMove(null)}
+            className="ml-2 px-2 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+          >
+            Cancel (Esc)
+          </button>
+        </div>
+      )}
+      
       <div className="flex gap-4 justify-center overflow-x-auto pb-4">
         {columns.map((colPlots, colIdx) => (
-          <Droppable 
-            key={columnKeys[colIdx]} 
-            droppableId={columnKeys[colIdx]}
-            direction="vertical"
-            mode="standard"
+          <div
+            key={`col-${colIdx}`}
+            className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
           >
-            {(colProvided, colSnapshot) => (
-              <div
-                ref={colProvided.innerRef}
-                {...colProvided.droppableProps}
-                className={`flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2 ${
-                  colSnapshot.isDraggingOver ? 'bg-purple-50/30' : ''
-                }`}
-              >
-                {colPlots.map((plot, rowIdx) => {
-                  const isSpacer = !plot || plot.isSpacer;
-                  const uniqueKey = isSpacer 
-                    ? `spacer-${sectionKey}-${colIdx}-${rowIdx}` 
-                    : `plot-${plot._id}`;
+            {colPlots.map((plot, rowIdx) => {
+              const isSpacer = !plot || plot.isSpacer;
+              const uniqueKey = isSpacer 
+                ? `spacer-${sectionKey}-${colIdx}-${rowIdx}` 
+                : `plot-${plot._id}`;
 
-                  if (isSpacer) {
-                    return (
-                      <Droppable
-                        key={uniqueKey}
-                        droppableId={`spacer-${sectionKey}-col${colIdx}-row${rowIdx}`}
-                        direction="vertical"
-                        mode="standard"
-                      >
-                        {(spacerProvided, spacerSnapshot) => (
-                          <SpacerCell
-                            provided={spacerProvided}
-                            snapshot={spacerSnapshot}
-                            isAdmin={isAdmin}
-                            onEdit={onEdit}
-                            sectionKey={sectionKey}
-                            colIdx={colIdx}
-                            rowIdx={rowIdx}
-                          />
-                        )}
-                      </Droppable>
-                    );
-                  }
+              if (isSpacer) {
+                return (
+                  <SpacerCell
+                    key={uniqueKey}
+                    isAdmin={isAdmin}
+                    onEdit={onEdit}
+                    sectionKey={sectionKey}
+                    colIdx={colIdx}
+                    rowIdx={rowIdx}
+                    selectedPlot={selectedPlotForMove}
+                    onMoveToSpacer={handleMoveToSpacer}
+                  />
+                );
+              }
 
-                  return (
-                    <Draggable 
-                      key={uniqueKey} 
-                      draggableId={uniqueKey} 
-                      index={rowIdx}
-                    >
-                      {(dragProvided, dragSnapshot) => (
-                        <PlotCell
-                          plot={plot}
-                          provided={dragProvided}
-                          snapshot={dragSnapshot}
-                          isAdmin={isAdmin}
-                          onHover={onHover}
-                          onEdit={onEdit}
-                          baseColorClass={baseColorClass}
-                          sectionKey={sectionKey}
-                        />
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {colProvided.placeholder}
-              </div>
-            )}
-          </Droppable>
+              return (
+                <PlotCell
+                  key={uniqueKey}
+                  plot={plot}
+                  isAdmin={isAdmin}
+                  onHover={onHover}
+                  onEdit={onEdit}
+                  baseColorClass={baseColorClass}
+                  sectionKey={sectionKey}
+                  isSelected={selectedPlotForMove?._id === plot._id}
+                  onCtrlClick={handleCtrlClick}
+                />
+              );
+            })}
+          </div>
         ))}
       </div>
-    </DragDropContext>
+    </div>
   );
 }
