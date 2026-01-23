@@ -1327,7 +1327,10 @@ export default function PlotsPage() {
             sectionKey = '4';
         }
 
-        if (!grouped[sectionKey]) {
+        // Handle plots with just numeric section (e.g., "5" instead of "Section 5")
+        if (!grouped[sectionKey] && /^\d+$/.test(sectionKey)) {
+            // Already a number, keep it
+        } else if (!grouped[sectionKey]) {
             if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
                 sectionKey = '1';
             }
