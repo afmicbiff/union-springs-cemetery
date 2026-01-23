@@ -152,6 +152,15 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
     }
   };
 
+  const handlePointerUpCreate = (e) => {
+    // Backup handler for creating new plot
+    if (!hasSelection && isAdmin && onEdit) {
+      e.stopPropagation();
+      console.log('EmptyCell pointerUp - opening create dialog');
+      onEdit({ isSpacer: true, Section: `Section ${sectionKey}`, suggestedSection: sectionKey });
+    }
+  };
+
   return (
     <div
       className={`
@@ -162,7 +171,7 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
         ${isAdmin && !hasSelection ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onClick={handleClick}
-      onPointerUp={hasSelection ? handlePointerUp : undefined}
+      onPointerUp={hasSelection ? handlePointerUp : handlePointerUpCreate}
       title={hasSelection ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? 'Click to create new plot' : '')}
     >
       {hasSelection ? (
