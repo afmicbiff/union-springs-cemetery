@@ -219,15 +219,16 @@ export default function DraggableSectionGrid({
     <div className="relative">
       {/* Selection indicator banner */}
       {selectedPlotForMove && (
-        <div className="absolute -top-8 left-0 right-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-t-lg flex items-center justify-between z-30">
-          <span>
-            <strong>Plot {selectedPlotForMove.Grave}</strong> selected — Click an empty slot to move it there
+        <div className="absolute -top-10 left-0 right-0 bg-blue-600 text-white text-sm px-4 py-2 rounded-t-lg flex items-center justify-between z-30 shadow-lg">
+          <span className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></span>
+            <strong>Plot {selectedPlotForMove.Grave}</strong> selected — Click any <span className="bg-green-500 px-1 rounded text-xs">+ Move</span> slot to relocate
           </span>
           <button 
             onClick={() => setSelectedPlotForMove(null)}
-            className="ml-2 px-2 py-0.5 bg-blue-600 hover:bg-blue-700 rounded text-xs"
+            className="ml-3 px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-xs font-bold"
           >
-            Cancel (Esc)
+            ✕ Cancel (Esc)
           </button>
         </div>
       )}
