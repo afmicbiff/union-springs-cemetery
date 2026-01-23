@@ -87,9 +87,10 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       `}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      title={isAdmin ? `Click to select • Ctrl+Click for actions • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      title={isAdmin ? `Click to select • Right-click or Ctrl+Click for actions • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
       <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>
         {plot.Grave}
