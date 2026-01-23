@@ -82,12 +82,13 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   }, [applyTransform]);
 
   const clampTranslate = React.useCallback(
-    (nx, ny, s = scale) => {
+    (nx, ny, s) => {
+      const scale = s ?? transformRef.current.scale;
       if (!containerRef.current || !contentRef.current) return { x: nx, y: ny };
       const cw = containerRef.current.clientWidth;
       const ch = containerRef.current.clientHeight;
-      const contentW = contentRef.current.scrollWidth * s;
-      const contentH = contentRef.current.scrollHeight * s;
+      const contentW = contentRef.current.scrollWidth * scale;
+      const contentH = contentRef.current.scrollHeight * scale;
 
       const deltaX = cw - contentW;
       const deltaY = ch - contentH;
@@ -99,7 +100,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
 
       return { x: clamp(nx, minX, maxX), y: clamp(ny, minY, maxY) };
     },
-    [scale]
+    []
   );
 
   const centerOnElement = React.useCallback((element, align = 'center') => {
