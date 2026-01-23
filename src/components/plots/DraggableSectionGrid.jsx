@@ -91,9 +91,14 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
 
   const handleClick = (e) => {
     e.stopPropagation();
+    console.log('EmptyCell handleClick:', { hasSelection, selectedPlot, onMovePlot: !!onMovePlot, sectionKey });
     if (hasSelection && onMovePlot && selectedPlot) {
       // Move the selected plot to this section (keep its plot_number)
-      console.log('EmptyCell clicked, moving plot:', selectedPlot._id, 'to section:', sectionKey);
+      console.log('EmptyCell calling onMovePlot with:', {
+        plotId: selectedPlot._id,
+        targetSection: sectionKey,
+        plot: selectedPlot
+      });
       onMovePlot({
         plotId: selectedPlot._id,
         targetSection: sectionKey,
