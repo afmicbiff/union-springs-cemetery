@@ -231,6 +231,16 @@ export default function DraggableSectionGrid({
         </div>
       )}
 
+      {/* Context Menu Dialog */}
+      <PlotContextMenu
+        isOpen={isContextMenuOpen}
+        onClose={() => setIsContextMenuOpen(false)}
+        plot={contextMenuPlot}
+        onAddBlankAbove={onAddBlankAbove}
+        onDeleteAndShift={onDeleteAndShift}
+        canDelete={isAdmin}
+      />
+
       <div className="flex gap-2 justify-center overflow-x-auto pb-4">
         {columns.map((colPlots, colIdx) => (
           <div
