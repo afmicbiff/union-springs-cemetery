@@ -83,17 +83,25 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
   return (
     <div
       className={`
-        plot-cell cursor-pointer transition-all duration-150
+        plot-cell plot-element cursor-pointer transition-all duration-150
         border rounded w-16 h-8 px-1.5 m-0.5
         flex items-center justify-between text-[8px] font-bold
         ${isSelected ? 'plot-selected' : `${baseColorClass} hover:shadow-md hover:scale-105`}
       `}
       onClick={handleClick}
+      onPointerUp={(e) => {
+        // Backup handler in case ZoomPan intercepts click
+        if (!e.ctrlKey && !e.metaKey && onEdit && plot) {
+          e.stopPropagation();
+          console.log('PlotCell pointerUp - opening edit dialog for:', plot.Grave || plot._id);
+          onEdit(plot);
+        }
+      }}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      title={isAdmin ? `Click to select • Right-click or Ctrl+Click for actions • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      title={isAdmin ? `Click to edit • Right-click for more actions • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
       <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>
         {plot.Grave}
