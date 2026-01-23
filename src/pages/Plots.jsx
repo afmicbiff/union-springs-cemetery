@@ -1511,7 +1511,7 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
-  const handleMovePlot = useCallback(async ({ plotId, targetSection, plot }) => {
+  const handleMovePlot = useCallback(async ({ plotId, targetSection, targetColIndex, targetRowIndex, plot }) => {
     if (!plotId || !targetSection) return;
 
     try {
@@ -1522,10 +1522,10 @@ export default function PlotsPage() {
         return;
       }
 
-      // Keep the same plot number - just update the section
-      // The plot will appear in the "unplaced" / fallback column of the target section
       const currentPlotNumber = plotToMove.Grave || plotToMove.plot_number;
 
+      // Update section - the plot will appear in the unplaced/fallback column
+      // since its plot number won't match the predefined grid ranges
       await base44.entities.Plot.update(plotId, {
         section: `Section ${targetSection}`
       });
