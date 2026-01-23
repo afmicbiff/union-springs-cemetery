@@ -47,31 +47,33 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
   const handleClick = (e) => {
     e.stopPropagation();
     
-    // Ctrl+Click or Cmd+Click opens context menu
-    if (isAdmin && (e.ctrlKey || e.metaKey) && onCtrlClick) {
+    // Ctrl+Click or Cmd+Click opens context menu (do NOT open edit dialog)
+    if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
-      onCtrlClick(plot);
+      if (isAdmin && onCtrlClick) {
+        onCtrlClick(plot);
+      }
       return;
     }
     
-    // Regular click selects for moving
-    if (isAdmin && onSelect) {
-      onSelect(plot);
+    // Regular click opens edit dialog (NOT selection)
+    if (onEdit) {
+      onEdit(plot);
     }
   };
 
   const handleContextMenu = (e) => {
-    // Right-click also opens context menu
+    // Right-click opens context menu
+    e.preventDefault();
+    e.stopPropagation();
     if (isAdmin && onCtrlClick) {
-      e.preventDefault();
-      e.stopPropagation();
       onCtrlClick(plot);
     }
   };
 
   const handleMouseDown = (e) => {
     // Ctrl+Click or Cmd+Click - prevent default selection behavior
-    if (isAdmin && (e.ctrlKey || e.metaKey)) {
+    if (e.ctrlKey || e.metaKey) {
       e.stopPropagation();
       e.preventDefault();
     }
