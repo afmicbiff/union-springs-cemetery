@@ -39,7 +39,7 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) => {
+const PlotCell = ({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) => {
   if (!plot || plot.isSpacer) return null;
   
   const plotNum = parseNum(plot.Grave);
@@ -69,10 +69,10 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       data-section={sectionKey}
       data-plot-num={plotNum}
       className={`
-        ${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
+        ${isSelected ? 'ring-4 ring-blue-500 bg-yellow-200 border-yellow-500 scale-110 z-20 plot-selected' : baseColorClass + ' hover:shadow-md hover:scale-[1.02]'} 
+        border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
         flex items-center justify-between text-[8px] font-bold
         plot-cell cursor-pointer
-        ${isSelected ? 'ring-4 ring-blue-500 bg-blue-100 scale-105 z-20 plot-selected' : 'hover:shadow-md hover:scale-[1.02]'}
         plot-element
       `}
       onMouseEnter={(e) => onHover?.(e, plot)}
@@ -86,11 +86,7 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
     </div>
   );
-}, (prev, next) => {
-  return prev.plot?._id === next.plot?._id 
-    && prev.isAdmin === next.isAdmin
-    && prev.isSelected === next.isSelected;
-});
+};
 
 const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer }) => {
   const handleClick = useCallback((e) => {
