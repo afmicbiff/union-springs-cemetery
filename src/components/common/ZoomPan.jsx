@@ -244,8 +244,8 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       st.dragging = true;
       st.startX = e.clientX;
       st.startY = e.clientY;
-      st.startTx = tx;
-      st.startTy = ty;
+      st.startTx = transformRef.current.tx;
+      st.startTy = transformRef.current.ty;
       st.allowClickThrough = !!plotEl;
       st.downTarget = plotEl || target;
       st.moved = false;
@@ -255,7 +255,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       st.vx = 0;
       st.vy = 0;
     },
-    [forcePan, tx, ty]
+    [forcePan]
   );
 
   const onPointerMove = React.useCallback(
