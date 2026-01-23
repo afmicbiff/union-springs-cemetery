@@ -148,12 +148,17 @@ export default function DraggableSectionGrid({
   }, []);
 
   const handleMovePlot = useCallback((moveData) => {
-    if (!onMovePlot) return;
+    console.log('DraggableSectionGrid handleMovePlot called:', moveData, 'onMovePlot exists:', !!onMovePlot);
+    if (!onMovePlot) {
+      console.error('onMovePlot is not defined!');
+      return;
+    }
     
     // Clear selection first
     setSelectedPlot(null);
     
     // Move plot - only update section, keep plot_number the same
+    console.log('Calling parent onMovePlot...');
     onMovePlot({
       plotId: moveData.plotId,
       targetSection: moveData.targetSection,
