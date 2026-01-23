@@ -447,10 +447,10 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   };
 
   const onPinchPointerMove = (e) => {
-    const smoothDamp = (current, target, smoothing = 0.18) =>
-      current + (target - current) * smoothing;
     const pr = pinchRef.current;
     if (pr.active) {
+      const smoothDamp = (current, target, smoothing = 0.18) =>
+        current + (target - current) * smoothing;
       pr.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       const pts = Array.from(pr.pointers.values());
       if (pts.length < 2) return;
