@@ -39,7 +39,7 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-const PlotCell = ({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) => {
+function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) {
   if (!plot || plot.isSpacer) return null;
   
   const plotNum = parseNum(plot.Grave);
@@ -47,33 +47,40 @@ const PlotCell = ({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
-  const handleClick = useCallback((e) => {
+  const handleClick = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     if (isAdmin && e.ctrlKey && onCtrlClick) {
       // Ctrl+click to select plot for moving
       onCtrlClick(plot);
     }
-  }, [isAdmin, onCtrlClick, plot]);
+  };
 
-  const handleContextMenu = useCallback((e) => {
+  const handleContextMenu = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isAdmin && onEdit) {
       onEdit(plot);
     }
-  }, [isAdmin, onEdit, plot]);
+  };
+
+  const selectedStyles = isSelected 
+    ? 'ring-4 ring-yellow-500 bg-yellow-300 border-yellow-600 scale-110 z-50 plot-selected shadow-2xl' 
+    : `${baseColorClass} hover:shadow-md hover:scale-[1.02]`;
 
   return (
     <div
       id={`plot-${sectionKey}-${plotNum}`}
       data-section={sectionKey}
       data-plot-num={plotNum}
+      data-selected={isSelected ? 'true' : 'false'}
       className={`
-        ${isSelected ? 'ring-4 ring-blue-500 bg-yellow-200 border-yellow-500 scale-110 z-20 plot-selected' : baseColorClass + ' hover:shadow-md hover:scale-[1.02]'} 
+        ${selectedStyles}
         border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
         flex items-center justify-between text-[8px] font-bold
         plot-cell cursor-pointer
         plot-element
+        transition-all duration-150
       `}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
@@ -81,12 +88,12 @@ const PlotCell = ({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
       onContextMenu={handleContextMenu}
       title={isAdmin ? `Ctrl+Click to move • Right-click to edit • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
-      <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
-      <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
+      <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>{plot.Grave}</span>
+      <span className={`text-[8px] leading-none font-mono truncate ${isSelected ? 'text-yellow-800' : 'text-gray-500'}`}>{plot.Row}</span>
       <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
     </div>
   );
-};
+}
 
 const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer }) => {
   const handleClick = useCallback((e) => {
