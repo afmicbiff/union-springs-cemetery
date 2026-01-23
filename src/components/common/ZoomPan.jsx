@@ -456,9 +456,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         {children}
       </div>
 
-      {/* Zoom controls - positioned outside the transformed content */}
+      {/* Zoom controls - positioned in bottom-right corner */}
       <div
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-2 flex flex-col gap-2"
+        className="fixed bottom-6 right-6 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-2 flex flex-col gap-2"
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
