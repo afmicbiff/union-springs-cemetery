@@ -820,7 +820,16 @@ const SectionRenderer = React.memo(({
                             const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
                             const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
                             const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                            const pushBlanks = (arr, count, prefix) => { for(let i=0;i<count;i++){ arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '5' }); } };
+                            const pushBlanks = (arr, count, prefix, startNum) => { 
+                              for(let i=0;i<count;i++){ 
+                                arr.push({ 
+                                  isSpacer: true, 
+                                  _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, 
+                                  Section: '5',
+                                  expectedPlotNumber: startNum ? startNum + i : null
+                                }); 
+                              } 
+                            };
 
                             const TARGET_HEIGHT = 35;
                             const columns = [];
