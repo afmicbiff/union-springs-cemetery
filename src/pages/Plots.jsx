@@ -1542,20 +1542,26 @@ export default function PlotsPage() {
 
       console.log('Plot updated, invalidating caches...');
       
+      // Clear all caches aggressively
       clearEntityCache('Plot');
+      
+      // Remove all plot-related queries from cache
+      queryClient.removeQueries({ queryKey: ['plots'] });
+      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
+      
+      // Invalidate and refetch
       await queryClient.invalidateQueries({ queryKey: ['plots'] });
       await queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
-      invalidatePlotsMap();
       
-      // Force refetch
-      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'] });
+      // Force immediate refetch
+      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
       
       toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
     } catch (err) {
       console.error('Move plot error:', err);
       toast.error(`Failed to move plot: ${err.message}`);
     }
-  }, [parsedData, queryClient, invalidatePlotsMap]);
+  }, [parsedData, queryClient]);
 
   const handleInlineEditStart = useCallback((plot) => {
     setEditingId(plot._id);
