@@ -39,7 +39,7 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdit, baseColorClass, sectionKey }) => {
+const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onCtrlClick }) => {
   if (!plot || plot.isSpacer) return null;
   
   const plotNum = parseNum(plot.Grave);
@@ -47,41 +47,32 @@ const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdi
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
-  // Optimize style computation
-  const style = useMemo(() => ({
-    ...provided.draggableProps.style,
-    // Use GPU-accelerated transforms
-    transform: provided.draggableProps.style?.transform 
-      ? `${provided.draggableProps.style.transform} translateZ(0)` 
-      : undefined,
-  }), [provided.draggableProps.style]);
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    if (isAdmin && e.ctrlKey && onCtrlClick) {
+      // Ctrl+click to select plot for moving
+      onCtrlClick(plot);
+    } else if (isAdmin && onEdit) {
+      onEdit(plot);
+    }
+  }, [isAdmin, onEdit, onCtrlClick, plot]);
 
   return (
     <div
-      ref={provided.innerRef}
-      {...provided.draggableProps}
-      {...provided.dragHandleProps}
       id={`plot-${sectionKey}-${plotNum}`}
       data-section={sectionKey}
       data-plot-num={plotNum}
       className={`
         ${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
         flex items-center justify-between text-[8px] font-bold
-        plot-cell
-        ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
-        ${snapshot.isDragging 
-          ? 'shadow-2xl scale-105 ring-2 ring-blue-500 z-50 bg-white plot-dragging' 
-          : 'hover:shadow-md hover:scale-[1.02]'}
+        plot-cell cursor-pointer
+        ${isSelected ? 'ring-4 ring-blue-500 bg-blue-100 scale-105 z-20 plot-selected' : 'hover:shadow-md hover:scale-[1.02]'}
         plot-element
       `}
-      style={style}
-      onMouseEnter={(e) => !snapshot.isDragging && onHover?.(e, plot)}
+      onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!snapshot.isDragging && isAdmin && onEdit) onEdit(plot);
-      }}
-      title={isAdmin ? `Drag to move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      onClick={handleClick}
+      title={isAdmin ? `Ctrl+Click to select for move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
       <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
       <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
@@ -89,44 +80,45 @@ const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdi
     </div>
   );
 }, (prev, next) => {
-  // Custom comparison for better memo performance
   return prev.plot?._id === next.plot?._id 
-    && prev.snapshot.isDragging === next.snapshot.isDragging
-    && prev.isAdmin === next.isAdmin;
+    && prev.isAdmin === next.isAdmin
+    && prev.isSelected === next.isSelected;
 });
 
-const SpacerCell = React.memo(({ provided, snapshot, isAdmin, onEdit, sectionKey, colIdx, rowIdx }) => {
+const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer }) => {
   const handleClick = useCallback((e) => {
     e.stopPropagation();
-    if (isAdmin && onEdit) {
+    if (isAdmin && selectedPlot && onMoveToSpacer) {
+      // Click on spacer to move selected plot here
+      onMoveToSpacer({ colIdx, rowIdx });
+    } else if (isAdmin && onEdit) {
       onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
     }
-  }, [isAdmin, onEdit, sectionKey]);
+  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx]);
+
+  const hasSelectedPlot = !!selectedPlot;
 
   return (
     <div
-      ref={provided.innerRef}
-      {...provided.droppableProps}
       className={`
         w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
         flex items-center justify-center plot-cell
-        ${snapshot.isDraggingOver 
-          ? 'border-green-500 bg-green-100 border-2 scale-105 shadow-lg' 
+        ${hasSelectedPlot 
+          ? 'border-green-500 bg-green-100 hover:bg-green-200 hover:border-green-600 cursor-pointer border-2' 
           : 'border-gray-300 bg-gray-50/50'}
-        ${isAdmin && !snapshot.isDraggingOver ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
+        ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onClick={handleClick}
-      title={isAdmin ? "Drop plot here or click to create new" : ""}
+      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Click to create new plot" : "")}
     >
-      {snapshot.isDraggingOver ? (
-        <span className="text-[9px] text-green-600 font-bold">Drop</span>
+      {hasSelectedPlot ? (
+        <span className="text-[9px] text-green-600 font-bold">Move Here</span>
       ) : (
         isAdmin && <span className="text-[8px] text-gray-400">+</span>
       )}
-      {provided.placeholder}
     </div>
   );
-}, (prev, next) => prev.snapshot.isDraggingOver === next.snapshot.isDraggingOver && prev.isAdmin === next.isAdmin);
+});
 
 export default function DraggableSectionGrid({ 
   sectionKey,
