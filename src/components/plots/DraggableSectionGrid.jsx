@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from "react";
 import PlotContextMenu from "./PlotContextMenu";
-import PlotContextMenu from "./PlotContextMenu";
 
 // Inject CSS for selection animations
 if (typeof document !== 'undefined' && !document.getElementById('dnd-perf-styles')) {
