@@ -871,6 +871,7 @@ const SectionRenderer = React.memo(({
                                 columns.push(unplaced);
                             }
 
+                            console.log('Rendering DraggableSectionGrid, onMovePlot exists:', !!onMovePlot, 'isAdmin:', isAdmin);
                             return (
                                 <DraggableSectionGrid
                                     sectionKey="5"
