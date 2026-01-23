@@ -883,8 +883,8 @@ const SectionRenderer = React.memo(({
                                     onHover={onHover}
                                     onEdit={onEdit}
                                     onMovePlot={onMovePlot}
-                                    onAddBlankAbove={handleAddBlankAbove}
-                                    onDeleteAndShift={handleDeleteAndShift}
+                                    onAddBlankAbove={onAddBlankAbove}
+                                    onDeleteAndShift={onDeleteAndShift}
                                 />
                             );
                         })()}
