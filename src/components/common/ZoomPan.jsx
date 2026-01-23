@@ -428,6 +428,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       return;
     }
     
+    const { scale, tx, ty } = transformRef.current;
     pinchRef.current.pointers.set(e.pointerId, {
       x: e.clientX,
       y: e.clientY,
@@ -447,6 +448,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       smoothScaleRef.current = scale;
     }
   };
+
+  const smoothDamp = (current, target, smoothing = 0.18) =>
+    current + (target - current) * smoothing;
 
   const onPinchPointerMove = (e) => {
     const pr = pinchRef.current;
@@ -473,6 +477,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       );
       let next = smoothScaleRef.current;
 
+      const { scale } = transformRef.current;
       const rect = contentRef.current.getBoundingClientRect();
       const cx = pr.centerX - rect.left;
       const cy = pr.centerY - rect.top;
@@ -484,9 +489,10 @@ const ZoomPan = React.forwardRef(function ZoomPan(
 
       const cl = clampTranslate(txNew, tyNew, next);
 
-      setScale(next);
-      setTx(cl.x);
-      setTy(cl.y);
+      transformRef.current.scale = next;
+      transformRef.current.tx = cl.x;
+      transformRef.current.ty = cl.y;
+      applyTransform();
     } else if (stateRef.current.dragging) {
       onPointerMove(e);
     }
