@@ -1,5 +1,25 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+// Inject optimized CSS for drag animations
+if (typeof document !== 'undefined' && !document.getElementById('dnd-perf-styles')) {
+  const style = document.createElement('style');
+  style.id = 'dnd-perf-styles';
+  style.textContent = `
+    .plot-dragging { 
+      will-change: transform;
+      transform: translateZ(0);
+    }
+    .plot-cell {
+      will-change: auto;
+      contain: layout style;
+    }
+    .plot-cell:hover {
+      will-change: transform;
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 const STATUS_COLORS_MAP = {
   'Available': 'bg-green-500',
@@ -25,6 +45,15 @@ const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdi
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
+  // Optimize style computation
+  const style = useMemo(() => ({
+    ...provided.draggableProps.style,
+    // Use GPU-accelerated transforms
+    transform: provided.draggableProps.style?.transform 
+      ? `${provided.draggableProps.style.transform} translateZ(0)` 
+      : undefined,
+  }), [provided.draggableProps.style]);
+
   return (
     <div
       ref={provided.innerRef}
@@ -36,19 +65,14 @@ const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdi
       className={`
         ${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
         flex items-center justify-between text-[8px] font-bold
-        transition-shadow duration-200 ease-out
+        plot-cell
         ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
         ${snapshot.isDragging 
-          ? 'shadow-2xl scale-105 ring-2 ring-blue-500 z-50 bg-white' 
+          ? 'shadow-2xl scale-105 ring-2 ring-blue-500 z-50 bg-white plot-dragging' 
           : 'hover:shadow-md hover:scale-[1.02]'}
         plot-element
       `}
-      style={{
-        ...provided.draggableProps.style,
-        transition: snapshot.isDragging 
-          ? provided.draggableProps.style?.transition 
-          : 'transform 0.2s ease, box-shadow 0.2s ease',
-      }}
+      style={style}
       onMouseEnter={(e) => !snapshot.isDragging && onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
       onClick={(e) => {
@@ -62,15 +86,20 @@ const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdi
       <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
     </div>
   );
+}, (prev, next) => {
+  // Custom comparison for better memo performance
+  return prev.plot?._id === next.plot?._id 
+    && prev.snapshot.isDragging === next.snapshot.isDragging
+    && prev.isAdmin === next.isAdmin;
 });
 
 const SpacerCell = React.memo(({ provided, snapshot, isAdmin, onEdit, sectionKey, colIdx, rowIdx }) => {
-  const handleClick = (e) => {
+  const handleClick = useCallback((e) => {
     e.stopPropagation();
     if (isAdmin && onEdit) {
       onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
     }
-  };
+  }, [isAdmin, onEdit, sectionKey]);
 
   return (
     <div
@@ -78,8 +107,7 @@ const SpacerCell = React.memo(({ provided, snapshot, isAdmin, onEdit, sectionKey
       {...provided.droppableProps}
       className={`
         w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
-        flex items-center justify-center
-        transition-all duration-200 ease-out
+        flex items-center justify-center plot-cell
         ${snapshot.isDraggingOver 
           ? 'border-green-500 bg-green-100 border-2 scale-105 shadow-lg' 
           : 'border-gray-300 bg-gray-50/50'}
@@ -89,14 +117,14 @@ const SpacerCell = React.memo(({ provided, snapshot, isAdmin, onEdit, sectionKey
       title={isAdmin ? "Drop plot here or click to create new" : ""}
     >
       {snapshot.isDraggingOver ? (
-        <span className="text-[9px] text-green-600 font-bold animate-pulse">Drop</span>
+        <span className="text-[9px] text-green-600 font-bold">Drop</span>
       ) : (
         isAdmin && <span className="text-[8px] text-gray-400">+</span>
       )}
       {provided.placeholder}
     </div>
   );
-});
+}, (prev, next) => prev.snapshot.isDraggingOver === next.snapshot.isDraggingOver && prev.isAdmin === next.isAdmin);
 
 export default function DraggableSectionGrid({ 
   sectionKey,
