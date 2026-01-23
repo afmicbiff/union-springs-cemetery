@@ -155,6 +155,7 @@ const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, se
   }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx, expectedPlotNumber, calculatedPlotNumber]);
 
   const hasSelectedPlot = !!selectedPlot;
+  const displayNum = expectedPlotNumber || calculatedPlotNumber;
 
   return (
     <div
@@ -167,12 +168,12 @@ const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, se
         ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onMouseDown={handleMouseDown}
-      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here${expectedPlotNumber ? ` (will become #${expectedPlotNumber})` : ''}` : (isAdmin ? (expectedPlotNumber ? `Click to create plot #${expectedPlotNumber}` : "Click to create new plot") : "")}
+      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here${displayNum ? ` (will become #${displayNum})` : ''}` : (isAdmin ? (displayNum ? `Click to create plot #${displayNum}` : "Click to create new plot") : "")}
     >
       {hasSelectedPlot ? (
-        <span className="text-[8px] text-green-700 font-bold">{expectedPlotNumber ? `#${expectedPlotNumber}` : '+ Move'}</span>
+        <span className="text-[8px] text-green-700 font-bold">{displayNum ? `#${displayNum}` : '+ Move'}</span>
       ) : (
-        isAdmin && <span className="text-[8px] text-gray-400">{expectedPlotNumber || 'New'}</span>
+        isAdmin && <span className="text-[8px] text-gray-400">{displayNum || 'New'}</span>
       )}
     </div>
   );
