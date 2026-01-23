@@ -39,25 +39,32 @@ const STATUS_COLORS_MAP = {
 };
 
 // Simple Plot Cell - shows plot data
-const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onSelect }) => {
+const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, isSelected, onSelect, onCtrlClick }) => {
   const isVet = plot.Status === 'Veteran' || ((plot.Notes || '').toLowerCase().includes('vet') && plot.Status === 'Occupied');
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
   const handleClick = (e) => {
     e.stopPropagation();
-    // Support both regular click and Ctrl+Click for selecting
+    
+    // Ctrl+Click or Cmd+Click opens context menu
+    if (isAdmin && (e.ctrlKey || e.metaKey) && onCtrlClick) {
+      e.preventDefault();
+      onCtrlClick(plot);
+      return;
+    }
+    
+    // Regular click selects for moving
     if (isAdmin && onSelect) {
       onSelect(plot);
     }
   };
 
   const handleMouseDown = (e) => {
-    // Ctrl+Click or Cmd+Click also selects
-    if (isAdmin && (e.ctrlKey || e.metaKey) && onSelect) {
+    // Ctrl+Click or Cmd+Click - prevent default selection behavior
+    if (isAdmin && (e.ctrlKey || e.metaKey)) {
       e.stopPropagation();
       e.preventDefault();
-      onSelect(plot);
     }
   };
 
@@ -73,7 +80,7 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       onMouseDown={handleMouseDown}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      title={isAdmin ? `Click to select, then click empty cell to move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      title={isAdmin ? `Click to select • Ctrl+Click for actions • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
       <span className={`text-[10px] leading-none font-black ${isSelected ? 'text-yellow-900' : 'text-gray-800'}`}>
         {plot.Grave}
