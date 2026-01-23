@@ -142,7 +142,7 @@ export default function DraggableSectionGrid({
   }, []);
 
   const handleMovePlot = useCallback((moveData) => {
-    if (!selectedPlot || !onMovePlot) return;
+    if (!onMovePlot) return;
     
     // Clear selection first
     setSelectedPlot(null);
@@ -152,9 +152,8 @@ export default function DraggableSectionGrid({
       plotId: moveData.plotId,
       targetSection: moveData.targetSection,
       plot: moveData.plot
-      // Note: NOT passing targetPlotNumber - plot keeps its original number
     });
-  }, [selectedPlot, onMovePlot]);
+  }, [onMovePlot]);
 
   // Cancel selection on Escape
   React.useEffect(() => {
