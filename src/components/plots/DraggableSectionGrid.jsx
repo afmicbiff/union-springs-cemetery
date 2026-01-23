@@ -111,17 +111,17 @@ const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, se
         w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
         flex items-center justify-center plot-cell
         ${hasSelectedPlot 
-          ? 'border-green-500 bg-green-100 hover:bg-green-200 hover:border-green-600 cursor-pointer border-2' 
+          ? 'border-green-500 bg-green-100 hover:bg-green-200 hover:border-green-600 cursor-pointer border-2 animate-pulse' 
           : 'border-gray-300 bg-gray-50/50'}
         ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
       onClick={handleClick}
-      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Click to create new plot" : "")}
+      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Right-click to create new plot" : "")}
     >
       {hasSelectedPlot ? (
-        <span className="text-[9px] text-green-600 font-bold">Move Here</span>
+        <span className="text-[8px] text-green-700 font-bold">+ Move</span>
       ) : (
-        isAdmin && <span className="text-[8px] text-gray-400">+</span>
+        isAdmin && <span className="text-[8px] text-gray-400">New</span>
       )}
     </div>
   );
