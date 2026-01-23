@@ -106,21 +106,16 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
   );
 });
 
-// Empty Cell - drop target for moving plots
+// Empty Cell - drop target for moving plots or create new plot
 const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, onMovePlot, onEdit }) => {
   const hasSelection = !!selectedPlot;
 
   const handleClick = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log('EmptyCell handleClick:', { hasSelection, selectedPlot, onMovePlot: !!onMovePlot, sectionKey });
+    
     if (hasSelection && onMovePlot && selectedPlot) {
       // Move the selected plot to this section (keep its plot_number)
-      console.log('EmptyCell calling onMovePlot with:', {
-        plotId: selectedPlot._id,
-        targetSection: sectionKey,
-        plot: selectedPlot
-      });
       onMovePlot({
         plotId: selectedPlot._id,
         targetSection: sectionKey,
@@ -128,8 +123,9 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
         plot: selectedPlot
       });
     } else if (isAdmin && onEdit) {
-      // Create new plot
-      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
+      // Create new plot - open edit dialog with spacer data
+      console.log('EmptyCell click - opening create dialog for section:', sectionKey);
+      onEdit({ isSpacer: true, Section: `Section ${sectionKey}`, suggestedSection: sectionKey });
     }
   };
 
