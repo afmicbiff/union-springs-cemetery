@@ -1,5 +1,102 @@
-import React from "react";
-import GravePlotCell from "./GravePlotCell";
+import React, { useState, useCallback } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+const STATUS_COLORS_MAP = {
+  'Available': 'bg-green-500',
+  'Reserved': 'bg-yellow-400',
+  'Occupied': 'bg-red-500',
+  'Veteran': 'bg-blue-600',
+  'Unavailable': 'bg-gray-600',
+  'Unknown': 'bg-purple-500',
+  'Not Usable': 'bg-gray-800',
+  'Default': 'bg-gray-300'
+};
+
+function parseNum(g) {
+  const n = parseInt(String(g || "").replace(/\D/g, ""), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+const PlotCell = React.memo(({ plot, provided, snapshot, isAdmin, onHover, onEdit, baseColorClass, sectionKey }) => {
+  if (!plot || plot.isSpacer) return null;
+  
+  const plotNum = parseNum(plot.Grave);
+  const isVet = plot.Status === 'Veteran' || ((plot.Notes || '').toLowerCase().includes('vet') && plot.Status === 'Occupied');
+  const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
+  const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
+
+  return (
+    <div
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      {...provided.dragHandleProps}
+      id={`plot-${sectionKey}-${plotNum}`}
+      data-section={sectionKey}
+      data-plot-num={plotNum}
+      className={`
+        ${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
+        flex items-center justify-between text-[8px] font-bold
+        transition-shadow duration-200 ease-out
+        ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
+        ${snapshot.isDragging 
+          ? 'shadow-2xl scale-105 ring-2 ring-blue-500 z-50 bg-white' 
+          : 'hover:shadow-md hover:scale-[1.02]'}
+        plot-element
+      `}
+      style={{
+        ...provided.draggableProps.style,
+        transition: snapshot.isDragging 
+          ? provided.draggableProps.style?.transition 
+          : 'transform 0.2s ease, box-shadow 0.2s ease',
+      }}
+      onMouseEnter={(e) => !snapshot.isDragging && onHover?.(e, plot)}
+      onMouseLeave={() => onHover?.(null, null)}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!snapshot.isDragging && isAdmin && onEdit) onEdit(plot);
+      }}
+      title={isAdmin ? `Drag to move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+    >
+      <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
+      <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
+      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
+    </div>
+  );
+});
+
+const SpacerCell = React.memo(({ provided, snapshot, isAdmin, onEdit, sectionKey, colIdx, rowIdx }) => {
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (isAdmin && onEdit) {
+      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
+    }
+  };
+
+  return (
+    <div
+      ref={provided.innerRef}
+      {...provided.droppableProps}
+      className={`
+        w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
+        flex items-center justify-center
+        transition-all duration-200 ease-out
+        ${snapshot.isDraggingOver 
+          ? 'border-green-500 bg-green-100 border-2 scale-105 shadow-lg' 
+          : 'border-gray-300 bg-gray-50/50'}
+        ${isAdmin && !snapshot.isDraggingOver ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
+      `}
+      onClick={handleClick}
+      title={isAdmin ? "Drop plot here or click to create new" : ""}
+    >
+      {snapshot.isDraggingOver ? (
+        <span className="text-[9px] text-green-600 font-bold animate-pulse">Drop</span>
+      ) : (
+        isAdmin && <span className="text-[8px] text-gray-400">+</span>
+      )}
+      {provided.placeholder}
+    </div>
+  );
+});
 
 export default function DraggableSectionGrid({ 
   sectionKey,
@@ -11,28 +108,144 @@ export default function DraggableSectionGrid({
   onEdit,
   onMovePlot
 }) {
-  // Simplified grid without drag-and-drop for now to fix stability issues
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
+
+  const handleDragEnd = useCallback((result) => {
+    setIsDragging(false);
+    
+    const { destination, draggableId } = result;
+    
+    if (!destination || !onMovePlot) return;
+    if (!draggableId.startsWith('plot-')) return;
+    
+    const plotId = draggableId.replace('plot-', '');
+    const destId = destination.droppableId;
+    
+    // Parse destination: "spacer-5-col3-row7" or "col-5-3"
+    if (destId.startsWith('spacer-')) {
+      const parts = destId.split('-');
+      const targetSection = parts[1];
+      const colIdx = parseInt(parts[2].replace('col', ''), 10);
+      const rowIdx = parseInt(parts[3].replace('row', ''), 10);
+      
+      onMovePlot({ plotId, targetSection, targetColIndex: colIdx, targetRowIndex: rowIdx });
+    }
+  }, [onMovePlot]);
+
+  if (!isAdmin) {
+    // Non-admin: render without drag-and-drop
+    return (
+      <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+        {columns.map((colPlots, colIdx) => (
+          <div
+            key={`col-${colIdx}`}
+            className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
+          >
+            {colPlots.map((plot, rowIdx) => {
+              if (!plot || plot.isSpacer) {
+                return <div key={`spacer-${colIdx}-${rowIdx}`} className="w-16 h-8 m-0.5" />;
+              }
+              const plotNum = parseNum(plot.Grave);
+              const isVet = plot.Status === 'Veteran' || ((plot.Notes || '').toLowerCase().includes('vet') && plot.Status === 'Occupied');
+              const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
+              const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
+              
+              return (
+                <div
+                  key={plot._id || `plot-${colIdx}-${rowIdx}`}
+                  id={`plot-${sectionKey}-${plotNum}`}
+                  data-section={sectionKey}
+                  data-plot-num={plotNum}
+                  className={`${baseColorClass} border rounded-[1px] w-16 h-8 px-1.5 m-0.5 flex items-center justify-between text-[8px] font-bold cursor-pointer hover:shadow-md plot-element`}
+                  onMouseEnter={(e) => onHover?.(e, plot)}
+                  onMouseLeave={() => onHover?.(null, null)}
+                >
+                  <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
+                  <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`} />
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-      {columns.map((colPlots, colIdx) => (
-        <div
-          key={`col-${colIdx}`}
-          className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
-        >
-          {colPlots.map((plot, rowIdx) => (
-            <GravePlotCell
-              key={plot?._id || `spacer-${colIdx}-${rowIdx}`}
-              item={plot}
-              baseColorClass={baseColorClass}
-              statusColors={statusColors}
-              isAdmin={isAdmin}
-              onHover={onHover}
-              onEdit={onEdit}
-              sectionKey={sectionKey}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="flex gap-4 justify-center overflow-x-auto pb-4">
+        {columns.map((colPlots, colIdx) => (
+          <Droppable 
+            key={`col-${sectionKey}-${colIdx}`} 
+            droppableId={`col-${sectionKey}-${colIdx}`}
+            direction="vertical"
+          >
+            {(colProvided) => (
+              <div
+                ref={colProvided.innerRef}
+                {...colProvided.droppableProps}
+                className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-purple-200 last:border-0 pr-2"
+              >
+                {colPlots.map((plot, rowIdx) => {
+                  const isSpacer = !plot || plot.isSpacer;
+                  const uniqueKey = isSpacer 
+                    ? `spacer-${sectionKey}-${colIdx}-${rowIdx}` 
+                    : `plot-${plot._id}`;
+
+                  if (isSpacer) {
+                    return (
+                      <Droppable
+                        key={uniqueKey}
+                        droppableId={`spacer-${sectionKey}-col${colIdx}-row${rowIdx}`}
+                        direction="vertical"
+                      >
+                        {(spacerProvided, spacerSnapshot) => (
+                          <SpacerCell
+                            provided={spacerProvided}
+                            snapshot={spacerSnapshot}
+                            isAdmin={isAdmin}
+                            onEdit={onEdit}
+                            sectionKey={sectionKey}
+                            colIdx={colIdx}
+                            rowIdx={rowIdx}
+                          />
+                        )}
+                      </Droppable>
+                    );
+                  }
+
+                  return (
+                    <Draggable 
+                      key={uniqueKey} 
+                      draggableId={uniqueKey} 
+                      index={rowIdx}
+                    >
+                      {(dragProvided, dragSnapshot) => (
+                        <PlotCell
+                          plot={plot}
+                          provided={dragProvided}
+                          snapshot={dragSnapshot}
+                          isAdmin={isAdmin}
+                          onHover={onHover}
+                          onEdit={onEdit}
+                          baseColorClass={baseColorClass}
+                          sectionKey={sectionKey}
+                        />
+                      )}
+                    </Draggable>
+                  );
+                })}
+                {colProvided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        ))}
+      </div>
+    </DragDropContext>
   );
 }
