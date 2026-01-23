@@ -13,11 +13,11 @@ if (typeof document !== 'undefined' && !document.getElementById('dnd-perf-styles
       will-change: transform;
     }
     .plot-selected {
-      animation: plotPulse 1s ease-in-out infinite;
+      animation: plotPulse 0.8s ease-in-out infinite;
     }
     @keyframes plotPulse {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); }
-      50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3); }
+      0%, 100% { box-shadow: 0 0 0 4px rgba(234, 179, 8, 0.8), 0 0 12px rgba(234, 179, 8, 0.6); }
+      50% { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0.4), 0 0 20px rgba(234, 179, 8, 0.3); }
     }
   `;
   document.head.appendChild(style);
