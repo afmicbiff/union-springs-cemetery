@@ -45,7 +45,17 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
 
   const handleClick = (e) => {
     e.stopPropagation();
+    // Support both regular click and Ctrl+Click for selecting
     if (isAdmin && onSelect) {
+      onSelect(plot);
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    // Ctrl+Click or Cmd+Click also selects
+    if (isAdmin && (e.ctrlKey || e.metaKey) && onSelect) {
+      e.stopPropagation();
+      e.preventDefault();
       onSelect(plot);
     }
   };
