@@ -60,6 +60,15 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
     }
   };
 
+  const handleContextMenu = (e) => {
+    // Right-click also opens context menu
+    if (isAdmin && onCtrlClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      onCtrlClick(plot);
+    }
+  };
+
   const handleMouseDown = (e) => {
     // Ctrl+Click or Cmd+Click - prevent default selection behavior
     if (isAdmin && (e.ctrlKey || e.metaKey)) {
