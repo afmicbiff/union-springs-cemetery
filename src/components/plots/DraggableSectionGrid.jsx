@@ -55,11 +55,11 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS_MAP[plot.Status] ? plot.Status : 'Default');
   const bgClass = STATUS_COLORS_MAP[statusKey] || STATUS_COLORS_MAP.Default;
 
-  const handleClick = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (isAdmin && e.ctrlKey && onCtrlClick) {
-      // Ctrl+click to select plot for moving
+  const handleMouseDown = (e) => {
+    // Check for Ctrl+Click (or Cmd+Click on Mac)
+    if (isAdmin && (e.ctrlKey || e.metaKey) && onCtrlClick) {
+      e.stopPropagation();
+      e.preventDefault();
       onCtrlClick(plot);
     }
   };
@@ -72,18 +72,21 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
     }
   };
 
-  const selectedStyles = isSelected 
-    ? 'ring-4 ring-yellow-500 bg-yellow-300 border-yellow-600 scale-110 z-50 plot-selected shadow-2xl' 
-    : `${baseColorClass} hover:shadow-md hover:scale-[1.02]`;
-
   return (
     <div
       id={`plot-${sectionKey}-${plotNum}`}
       data-section={sectionKey}
       data-plot-num={plotNum}
       data-selected={isSelected ? 'true' : 'false'}
+      style={isSelected ? {
+        backgroundColor: '#fde047',
+        borderColor: '#ca8a04',
+        transform: 'scale(1.15)',
+        zIndex: 100,
+        boxShadow: '0 0 0 4px rgba(234, 179, 8, 1), 0 0 20px rgba(234, 179, 8, 0.8)'
+      } : undefined}
       className={`
-        ${selectedStyles}
+        ${isSelected ? 'ring-4 ring-yellow-400 plot-selected' : baseColorClass + ' hover:shadow-md hover:scale-[1.02]'}
         border rounded-[1px] w-16 h-8 px-1.5 m-0.5 
         flex items-center justify-between text-[8px] font-bold
         plot-cell cursor-pointer
@@ -92,7 +95,7 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
       `}
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
-      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       title={isAdmin ? `Ctrl+Click to move • Right-click to edit • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
