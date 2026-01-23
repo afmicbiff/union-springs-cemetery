@@ -168,7 +168,7 @@ export default function DraggableSectionGrid({
     });
   }, []);
 
-  const handleMoveToSpacer = useCallback(({ colIdx, rowIdx }) => {
+  const handleMoveToSpacer = useCallback(({ colIdx, rowIdx, expectedPlotNumber }) => {
     if (!selectedPlotForMove || !onMovePlot) return;
     
     // Keep the plot data before clearing
@@ -177,12 +177,13 @@ export default function DraggableSectionGrid({
     // Clear selection immediately
     setSelectedPlotForMove(null);
     
-    // Call the move handler - this should update the plot's section in DB
+    // Call the move handler - this should update the plot's section AND plot_number in DB
     onMovePlot({ 
       plotId: plotToMove._id, 
       targetSection: sectionKey, 
       targetColIndex: colIdx, 
       targetRowIndex: rowIdx,
+      targetPlotNumber: expectedPlotNumber, // New plot number for the target position
       plot: plotToMove // Pass full plot data
     });
   }, [selectedPlotForMove, onMovePlot, sectionKey]);
