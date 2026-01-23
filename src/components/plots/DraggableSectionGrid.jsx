@@ -106,19 +106,53 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
   );
 }
 
-const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer, expectedPlotNumber }) => {
+const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer, expectedPlotNumber, columns }) => {
+  // Calculate expected plot number from adjacent plots if not provided
+  const calculatedPlotNumber = useMemo(() => {
+    if (expectedPlotNumber) return expectedPlotNumber;
+    if (!columns || !columns[colIdx]) return null;
+    
+    // Look at plots in same column to infer numbering
+    const colPlots = columns[colIdx];
+    const plotNumbers = colPlots
+      .filter(p => p && !p.isSpacer && p.Grave)
+      .map(p => parseInt(String(p.Grave).replace(/\D/g, ''), 10))
+      .filter(n => Number.isFinite(n))
+      .sort((a, b) => a - b);
+    
+    if (plotNumbers.length === 0) return null;
+    
+    // Find where this spacer is in the column and estimate its number
+    const minNum = plotNumbers[0];
+    const maxNum = plotNumbers[plotNumbers.length - 1];
+    
+    // Simple heuristic: if rowIdx is near bottom, use minNum - offset, else maxNum + offset
+    const totalRows = colPlots.length;
+    const position = rowIdx / totalRows;
+    
+    if (position < 0.5) {
+      // Near bottom of column (flex-col-reverse means low index = bottom)
+      return minNum > 1 ? minNum - (Math.floor((0.5 - position) * 10)) : null;
+    } else {
+      // Near top
+      return maxNum + Math.floor((position - 0.5) * 10);
+    }
+  }, [expectedPlotNumber, columns, colIdx, rowIdx]);
+
   const handleMouseDown = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
     
+    const plotNumToUse = expectedPlotNumber || calculatedPlotNumber;
+    
     // If there's a selected plot, move it here (regular click or ctrl+click)
     if (isAdmin && selectedPlot && onMoveToSpacer) {
-      onMoveToSpacer({ colIdx, rowIdx, expectedPlotNumber });
+      onMoveToSpacer({ colIdx, rowIdx, expectedPlotNumber: plotNumToUse });
     } else if (isAdmin && onEdit) {
       // No selected plot - open create dialog with suggested plot number
-      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey, suggestedPlotNumber: expectedPlotNumber });
+      onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey, suggestedPlotNumber: plotNumToUse });
     }
-  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx, expectedPlotNumber]);
+  }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx, expectedPlotNumber, calculatedPlotNumber]);
 
   const hasSelectedPlot = !!selectedPlot;
 
