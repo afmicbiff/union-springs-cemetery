@@ -52,10 +52,16 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
     if (isAdmin && e.ctrlKey && onCtrlClick) {
       // Ctrl+click to select plot for moving
       onCtrlClick(plot);
-    } else if (isAdmin && onEdit) {
+    }
+  }, [isAdmin, onCtrlClick, plot]);
+
+  const handleContextMenu = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isAdmin && onEdit) {
       onEdit(plot);
     }
-  }, [isAdmin, onEdit, onCtrlClick, plot]);
+  }, [isAdmin, onEdit, plot]);
 
   return (
     <div
@@ -72,7 +78,8 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       onMouseEnter={(e) => onHover?.(e, plot)}
       onMouseLeave={() => onHover?.(null, null)}
       onClick={handleClick}
-      title={isAdmin ? `Ctrl+Click to select for move • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
+      onContextMenu={handleContextMenu}
+      title={isAdmin ? `Ctrl+Click to move • Right-click to edit • Plot ${plot.Grave}` : `Plot ${plot.Grave}`}
     >
       <span className="text-[10px] leading-none font-black text-gray-800">{plot.Grave}</span>
       <span className="text-[8px] leading-none text-gray-500 font-mono truncate">{plot.Row}</span>
