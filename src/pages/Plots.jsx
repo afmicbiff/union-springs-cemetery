@@ -144,6 +144,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
                 [543,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
                 [738,738],[739,742],[871,874]
             ].forEach(([s,e]) => addRange(s,e));
+            // All other plots in Section 5 that don't match these ranges will go to unplaced/fallback
             break;
         default:
             plots.forEach(p => { const n = toNum(p.Grave); if (n) included.add(n); });
