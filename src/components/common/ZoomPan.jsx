@@ -7,9 +7,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
   const containerRef = React.useRef(null);
   const contentRef = React.useRef(null);
 
-  const [scale, setScale] = React.useState(initialScale);
-  const [tx, setTx] = React.useState(0);
-  const [ty, setTy] = React.useState(0);
+  // Use refs for transform state to avoid re-renders during animation
+  const transformRef = React.useRef({ scale: initialScale, tx: 0, ty: 0 });
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0);
   const [forcePan, setForcePan] = React.useState(false);
 
   const inertiaRef = React.useRef({ animId: 0 });
@@ -40,14 +40,42 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     pointers: new Map(),
   });
 
-  const smoothScaleRef = React.useRef(scale);
+  const smoothScaleRef = React.useRef(initialScale);
 
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
 
+  // Direct DOM manipulation for 60fps performance
   const applyTransform = React.useCallback(() => {
     if (!contentRef.current) return;
-    contentRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-  }, [tx, ty, scale]);
+    const { scale, tx, ty } = transformRef.current;
+    contentRef.current.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
+  }, []);
+
+  // Getters/setters that update ref and apply transform directly
+  const setScale = React.useCallback((valOrFn) => {
+    const prev = transformRef.current.scale;
+    const next = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+    transformRef.current.scale = next;
+    applyTransform();
+    return next;
+  }, [applyTransform]);
+
+  const setTx = React.useCallback((valOrFn) => {
+    const prev = transformRef.current.tx;
+    transformRef.current.tx = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+    applyTransform();
+  }, [applyTransform]);
+
+  const setTy = React.useCallback((valOrFn) => {
+    const prev = transformRef.current.ty;
+    transformRef.current.ty = typeof valOrFn === 'function' ? valOrFn(prev) : valOrFn;
+    applyTransform();
+  }, [applyTransform]);
+
+  // Convenience getters
+  const getScale = () => transformRef.current.scale;
+  const getTx = () => transformRef.current.tx;
+  const getTy = () => transformRef.current.ty;
 
   React.useEffect(() => {
     applyTransform();
