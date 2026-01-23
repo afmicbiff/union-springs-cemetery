@@ -107,12 +107,15 @@ function PlotCell({ plot, isAdmin, onHover, onEdit, baseColorClass, sectionKey, 
 }
 
 const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, selectedPlot, onMoveToSpacer }) => {
-  const handleClick = useCallback((e) => {
+  const handleMouseDown = useCallback((e) => {
     e.stopPropagation();
+    e.preventDefault();
+    
+    // If there's a selected plot, move it here (regular click or ctrl+click)
     if (isAdmin && selectedPlot && onMoveToSpacer) {
-      // Click on spacer to move selected plot here
       onMoveToSpacer({ colIdx, rowIdx });
     } else if (isAdmin && onEdit) {
+      // No selected plot - open create dialog
       onEdit({ isSpacer: true, Section: sectionKey, suggestedSection: sectionKey });
     }
   }, [isAdmin, onEdit, sectionKey, selectedPlot, onMoveToSpacer, colIdx, rowIdx]);
@@ -125,12 +128,12 @@ const SpacerCell = React.memo(({ isAdmin, onEdit, sectionKey, colIdx, rowIdx, se
         w-16 h-8 m-0.5 border border-dashed rounded-[1px] 
         flex items-center justify-center plot-cell
         ${hasSelectedPlot 
-          ? 'border-green-500 bg-green-100 hover:bg-green-200 hover:border-green-600 cursor-pointer border-2 animate-pulse' 
+          ? 'border-green-500 bg-green-100 hover:bg-green-300 hover:border-green-600 cursor-pointer border-2 animate-pulse' 
           : 'border-gray-300 bg-gray-50/50'}
         ${isAdmin && !hasSelectedPlot ? 'hover:bg-green-50 hover:border-green-300 cursor-pointer' : ''}
       `}
-      onClick={handleClick}
-      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Right-click to create new plot" : "")}
+      onMouseDown={handleMouseDown}
+      title={hasSelectedPlot ? `Click to move Plot ${selectedPlot.Grave} here` : (isAdmin ? "Click to create new plot" : "")}
     >
       {hasSelectedPlot ? (
         <span className="text-[8px] text-green-700 font-bold">+ Move</span>
