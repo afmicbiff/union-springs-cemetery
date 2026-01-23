@@ -281,10 +281,11 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       st.lastTime = now;
 
       const clamped = clampTranslate(st.startTx + dx, st.startTy + dy);
-      setTx(clamped.x);
-      setTy(clamped.y);
+      transformRef.current.tx = clamped.x;
+      transformRef.current.ty = clamped.y;
+      applyTransform();
     },
-    [clampTranslate]
+    [clampTranslate, applyTransform]
   );
 
   const onPointerUp = React.useCallback(
