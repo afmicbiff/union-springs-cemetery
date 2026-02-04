@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Download, FileJson, FileText, FileCode, ChevronDown } from 'lucide-react';
+import { Download, FileJson, FileText, FileCode, ChevronDown, Loader2 } from 'lucide-react';
 
 // CEF helpers
 const cefSeverity = (s) => ({ info:1, low:3, medium:5, high:8, critical:10 }[s] ?? 1);
@@ -19,16 +19,30 @@ const sdValueEscape = (v) => String(v ?? '').replace(/\\/g, '\\\\').replace(/\]/
 const syslogEscape = (v) => String(v ?? '').replace(/\n/g, ' ');
 
 function ExportDropdown({ events = [] }) {
+  const [exporting, setExporting] = React.useState(false);
+
   const downloadBlob = useCallback((content, filename, type) => {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    // Use requestIdleCallback for non-blocking export
+    const doDownload = () => {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Delay cleanup to ensure download starts
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExporting(false);
+    };
+    
+    setExporting(true);
+    if (typeof requestIdleCallback !== 'undefined') {
+      requestIdleCallback(doDownload, { timeout: 500 });
+    } else {
+      setTimeout(doDownload, 10);
+    }
   }, []);
 
   const exportJSON = useCallback(() => {
@@ -97,9 +111,13 @@ function ExportDropdown({ events = [] }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs gap-1">
-          <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-          <span className="hidden sm:inline">Export</span>
+        <Button variant="outline" size="sm" className="h-7 sm:h-8 text-[10px] sm:text-xs gap-1" disabled={exporting || events.length === 0}>
+          {exporting ? (
+            <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
+          ) : (
+            <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+          )}
+          <span className="hidden sm:inline">{exporting ? 'Exporting…' : 'Export'}</span>
           <ChevronDown className="w-3 h-3" />
         </Button>
       </DropdownMenuTrigger>

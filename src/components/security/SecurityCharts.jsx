@@ -1,6 +1,7 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const SEV_COLORS = { 
   info: '#94a3b8', 
@@ -106,6 +107,36 @@ const TopIPsBarChart = memo(function TopIPsBarChart({ events = [] }) {
 });
 
 function SecurityCharts({ events = [] }) {
+  // Defer rendering to allow main thread to breathe
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    const timer = requestIdleCallback ? 
+      requestIdleCallback(() => setIsReady(true), { timeout: 100 }) :
+      setTimeout(() => setIsReady(true), 50);
+    return () => {
+      if (requestIdleCallback && typeof timer === 'number') {
+        cancelIdleCallback(timer);
+      } else {
+        clearTimeout(timer);
+      }
+    };
+  }, []);
+
+  if (!isReady) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        {[1, 2, 3].map(i => (
+          <Card key={i} className="h-52 sm:h-56 lg:h-64">
+            <CardContent className="h-full flex items-center justify-center">
+              <Loader2 className="w-5 h-5 animate-spin text-stone-300" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
       <SeverityPieChart events={events} />

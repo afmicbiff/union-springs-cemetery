@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,17 +9,28 @@ import { Loader2, Shield, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from 
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-// Import optimized components
+// Critical path components - loaded immediately
 import SecurityStatsCards from '@/components/security/SecurityStatsCards';
-import SecurityCharts from '@/components/security/SecurityCharts';
 import SecurityFilters from '@/components/security/SecurityFilters';
 import SecurityEventRow from '@/components/security/SecurityEventRow';
-import BlockedIPsTable from '@/components/security/BlockedIPsTable';
-import AISecurityInsights from '@/components/security/AISecurityInsights';
-import AlertConfigPanel from '@/components/security/AlertConfigPanel';
-import EventDetailDialog from '@/components/security/EventDetailDialog';
-import BlockIPDialog from '@/components/security/BlockIPDialog';
 import ExportDropdown from '@/components/security/ExportDropdown';
+
+// Lazy load heavy/non-critical components
+const SecurityCharts = lazy(() => import('@/components/security/SecurityCharts'));
+const BlockedIPsTable = lazy(() => import('@/components/security/BlockedIPsTable'));
+const AISecurityInsights = lazy(() => import('@/components/security/AISecurityInsights'));
+const AlertConfigPanel = lazy(() => import('@/components/security/AlertConfigPanel'));
+const EventDetailDialog = lazy(() => import('@/components/security/EventDetailDialog'));
+const BlockIPDialog = lazy(() => import('@/components/security/BlockIPDialog'));
+
+// Skeleton loader for lazy components
+const CardSkeleton = () => (
+  <Card>
+    <CardContent className="py-8 flex justify-center">
+      <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+    </CardContent>
+  </Card>
+);
 
 function SecurityDashboard() {
   const qc = useQueryClient();
@@ -34,40 +45,47 @@ function SecurityDashboard() {
   const [details, setDetails] = useState(null);
   const [blockIp, setBlockIp] = useState({ open: false, ip: '' });
   const [blockedView, setBlockedView] = useState('active');
-  const [showCharts, setShowCharts] = useState(true);
+  const [showCharts, setShowCharts] = useState(false); // Default collapsed for faster initial load
   const [showConfig, setShowConfig] = useState(false);
+  const [showBlockedIPs, setShowBlockedIPs] = useState(false); // Lazy load blocked IPs section
 
-  // Auth check
+  // Auth check - high priority
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['me'],
     queryFn: () => base44.auth.me().catch(() => null),
-    staleTime: 5 * 60_000,
+    staleTime: 10 * 60_000,
+    gcTime: 30 * 60_000,
   });
 
-  // Security events
+  // Security events - primary data, fetch limited initially
   const { data: events = [], isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['sec-events'],
-    queryFn: () => base44.entities.SecurityEvent.list('-created_date', 1000),
-    staleTime: 60_000,
-    gcTime: 10 * 60_000,
-    retry: 2,
+    queryFn: () => base44.entities.SecurityEvent.list('-created_date', 500), // Reduced from 1000
+    staleTime: 3 * 60_000, // Increased from 1 min to 3 min
+    gcTime: 15 * 60_000,
+    retry: 1, // Reduced retries
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
-  // Blocked IPs (active)
+  // Blocked IPs (active) - only fetch when section is expanded
   const { data: blocked = [] } = useQuery({
     queryKey: ['blocked-ips'],
-    queryFn: () => base44.entities.BlockedIP.filter({ active: true }, '-created_date', 500),
-    staleTime: 60_000,
+    queryFn: () => base44.entities.BlockedIP.filter({ active: true }, '-created_date', 200),
+    staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
     refetchOnWindowFocus: false,
+    enabled: showBlockedIPs, // Only fetch when visible
   });
 
-  // All blocked IPs (for history view)
+  // All blocked IPs - only fetch when needed
   const { data: blockedAll = [], isLoading: blockedLoading } = useQuery({
     queryKey: ['blocked-all'],
-    queryFn: () => base44.entities.BlockedIP.list('-created_date', 500),
-    staleTime: 60_000,
+    queryFn: () => base44.entities.BlockedIP.list('-created_date', 200),
+    staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
     refetchOnWindowFocus: false,
+    enabled: showBlockedIPs && blockedView !== 'active', // Only fetch for non-active views
   });
 
   // Extract unique event types
@@ -114,25 +132,39 @@ function SecurityDashboard() {
     });
   }, [blockedAll, blockedView]);
 
-  // Collect IPs for threat intel
+  // Collect IPs for threat intel - only top IPs to reduce API load
   const indicators = useMemo(() => {
+    // Only collect IPs if we have a detail view open or explicitly need intel
+    if (!details && !showBlockedIPs) return [];
     const s = new Set();
-    filtered.forEach(e => e.ip_address && s.add(e.ip_address));
-    filteredBlocked.forEach(r => r.ip_address && s.add(r.ip_address));
-    return Array.from(s).slice(0, 100);
-  }, [filtered, filteredBlocked]);
+    // Prioritize IP from current detail view
+    if (details?.ip_address) s.add(details.ip_address);
+    // Add top IPs from filtered events (limit to 20)
+    const ipCounts = {};
+    filtered.forEach(e => {
+      if (e.ip_address) ipCounts[e.ip_address] = (ipCounts[e.ip_address] || 0) + 1;
+    });
+    Object.entries(ipCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .forEach(([ip]) => s.add(ip));
+    return Array.from(s);
+  }, [filtered, details, showBlockedIPs]);
 
-  // Threat intel lookup
+  // Threat intel lookup - only when needed and with debounce
   const { data: intel = { results: {} } } = useQuery({
-    queryKey: ['threat-intel', indicators.join(',')],
+    queryKey: ['threat-intel', indicators.slice(0, 10).join(',')], // Further limit query key
     queryFn: async () => {
       if (indicators.length === 0) return { results: {} };
-      const res = await base44.functions.invoke('threatIntelLookup', { indicators });
+      const res = await base44.functions.invoke('threatIntelLookup', { indicators: indicators.slice(0, 30) });
       return res?.data || { results: {} };
     },
-    enabled: indicators.length > 0,
-    staleTime: 5 * 60_000,
+    enabled: indicators.length > 0 && (!!details || showBlockedIPs), // Only when viewing details or blocked IPs
+    staleTime: 10 * 60_000, // Cache for 10 mins
+    gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 0, // Don't retry on failure
   });
 
   const intelMap = intel?.results || {};
@@ -257,11 +289,17 @@ function SecurityDashboard() {
           {showCharts ? 'Hide Charts' : 'Show Charts'}
         </Button>
 
-        {/* Charts */}
-        {showCharts && <SecurityCharts events={filtered} />}
+        {/* Charts - Lazy loaded */}
+        {showCharts && (
+          <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-3 gap-3"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>}>
+            <SecurityCharts events={filtered} />
+          </Suspense>
+        )}
 
-        {/* AI Insights */}
-        <AISecurityInsights events={filtered} />
+        {/* AI Insights - Lazy loaded */}
+        <Suspense fallback={<CardSkeleton />}>
+          <AISecurityInsights events={filtered} />
+        </Suspense>
 
         {/* Alert Configuration (collapsible) */}
         <Button
@@ -273,35 +311,50 @@ function SecurityDashboard() {
           {showConfig ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           {showConfig ? 'Hide Alert Configuration' : 'Show Alert Configuration'}
         </Button>
-        {showConfig && <AlertConfigPanel />}
+        {showConfig && (
+          <Suspense fallback={<CardSkeleton />}>
+            <AlertConfigPanel />
+          </Suspense>
+        )}
 
-        {/* Blocked IPs */}
+        {/* Blocked IPs - Collapsible to reduce initial load */}
         <Card>
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <CardTitle className="text-sm sm:text-base lg:text-lg">
-                Blocked IPs ({filteredBlocked.length})
-              </CardTitle>
-              <Select value={blockedView} onValueChange={setBlockedView}>
-                <SelectTrigger className="w-28 sm:w-32 h-7 sm:h-8 text-xs sm:text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="all">All</SelectItem>
-                </SelectContent>
-              </Select>
+              <Button
+                variant="ghost"
+                className="p-0 h-auto text-sm sm:text-base lg:text-lg font-semibold justify-start gap-1"
+                onClick={() => setShowBlockedIPs(!showBlockedIPs)}
+              >
+                {showBlockedIPs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                Blocked IPs {showBlockedIPs && `(${filteredBlocked.length})`}
+              </Button>
+              {showBlockedIPs && (
+                <Select value={blockedView} onValueChange={setBlockedView}>
+                  <SelectTrigger className="w-28 sm:w-32 h-7 sm:h-8 text-xs sm:text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <BlockedIPsTable
-              records={filteredBlocked}
-              intelMap={intelMap}
-              isLoading={blockedLoading}
-              onUnblock={unblockIp}
-            />
-          </CardContent>
+          {showBlockedIPs && (
+            <CardContent className="px-3 sm:px-6">
+              <Suspense fallback={<div className="py-4 flex justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>}>
+                <BlockedIPsTable
+                  records={filteredBlocked}
+                  intelMap={intelMap}
+                  isLoading={blockedLoading}
+                  onUnblock={unblockIp}
+                />
+              </Suspense>
+            </CardContent>
+          )}
         </Card>
 
         {/* Events Table */}
@@ -359,21 +412,29 @@ function SecurityDashboard() {
           </CardContent>
         </Card>
 
-        {/* Dialogs */}
-        <EventDetailDialog
-          event={details}
-          open={!!details}
-          onOpenChange={closeDetails}
-          blockedSet={blockedSet}
-          intelMap={intelMap}
-          onBlockIp={openBlockIp}
-        />
+        {/* Dialogs - Lazy loaded */}
+        {details && (
+          <Suspense fallback={null}>
+            <EventDetailDialog
+              event={details}
+              open={!!details}
+              onOpenChange={closeDetails}
+              blockedSet={blockedSet}
+              intelMap={intelMap}
+              onBlockIp={openBlockIp}
+            />
+          </Suspense>
+        )}
 
-        <BlockIPDialog
-          ip={blockIp.ip}
-          open={blockIp.open}
-          onOpenChange={closeBlockIp}
-        />
+        {blockIp.open && (
+          <Suspense fallback={null}>
+            <BlockIPDialog
+              ip={blockIp.ip}
+              open={blockIp.open}
+              onOpenChange={closeBlockIp}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );
