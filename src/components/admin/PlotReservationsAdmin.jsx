@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Eye, Trash2, CheckCircle2, XCircle, Mail, DollarSign, ExternalLink, FileText, Edit3 } from "lucide-react";
+import { Trash2, CheckCircle2, XCircle, Mail, ExternalLink, FileText, Edit3, Loader2 } from "lucide-react";
 
-function StatusBadge({ status }) {
+const StatusBadge = memo(function StatusBadge({ status }) {
   const map = {
     "Pending": "bg-amber-100 text-amber-800",
     "Pending Review": "bg-amber-100 text-amber-800",
@@ -16,15 +16,18 @@ function StatusBadge({ status }) {
     "Rejected": "bg-red-100 text-red-800",
   };
   return <Badge className={map[status] || "bg-gray-100 text-gray-800"}>{status}</Badge>;
-}
+});
 
 export default function PlotReservationsAdmin() {
   const qc = useQueryClient();
 
   const reservations = useQuery({
     queryKey: ["all-new-plot-reservations"],
-    queryFn: async () => await base44.entities.NewPlotReservation.filter({}, "-created_date", 500),
+    queryFn: async () => await base44.entities.NewPlotReservation.filter({}, "-created_date", 100),
     initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 15 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
   const approveMutation = useMutation({
@@ -84,12 +87,12 @@ export default function PlotReservationsAdmin() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["all-new-plot-reservations"] }),
   });
 
-  const sendReminder = async (r) => {
+  const sendReminder = useCallback(async (r) => {
     await base44.functions.invoke("notifyReservationEvent", {
       event: "payment_reminder",
       reservationId: r.id,
     });
-  };
+  }, []);
 
   return (
     <Card>
@@ -122,45 +125,43 @@ export default function PlotReservationsAdmin() {
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" variant="outline" onClick={() => approveMutation.mutate(r)} disabled={r.status === "Confirmed"} className="gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Approve
+                  <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+                    <Button size="sm" variant="outline" onClick={() => approveMutation.mutate(r)} disabled={r.status === "Confirmed" || approveMutation.isPending} className="gap-1 text-xs sm:text-sm">
+                      {approveMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4" />} <span className="hidden sm:inline">Approve</span>
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => {
                       const reason = window.prompt("Reason for rejection (optional)") || "";
                       rejectMutation.mutate({ r, reason });
-                    }} disabled={r.status === "Rejected"} className="gap-1">
-                      <XCircle className="w-4 h-4" /> Reject
+                    }} disabled={r.status === "Rejected" || rejectMutation.isPending} className="gap-1 text-xs sm:text-sm">
+                      {rejectMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3 sm:w-4 sm:h-4" />} <span className="hidden sm:inline">Reject</span>
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => sendReminder(r)} className="gap-1">
-                      <Mail className="w-4 h-4" /> Payment Reminder
+                    <Button size="sm" variant="outline" onClick={() => sendReminder(r)} className="gap-1 text-xs sm:text-sm hidden md:flex">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden lg:inline">Reminder</span>
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
                       await base44.functions.invoke('notifyReservationEvent', { event: 'signature_request', reservationId: r.id });
-                    }} className="gap-1">
-                      <Mail className="w-4 h-4" /> Request Signature
+                    }} className="gap-1 text-xs sm:text-sm hidden md:flex">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden lg:inline">Sig Request</span>
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
-                      // Generate unsigned certificate
                       await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: false });
-                    }} className="gap-1">
-                      <FileText className="w-4 h-4" /> Gen Certificate
+                    }} className="gap-1 text-xs sm:text-sm hidden lg:flex">
+                      <FileText className="w-3 h-3 sm:w-4 sm:h-4" /> Certificate
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
-                      // Generate and sign as admin
                       await base44.functions.invoke('generateIntermentCertificate', { reservationId: r.id, signAsAdmin: true });
-                    }} className="gap-1">
-                      <Edit3 className="w-4 h-4" /> Sign as Admin
+                    }} className="gap-1 text-xs sm:text-sm hidden lg:flex">
+                      <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" /> Sign
                     </Button>
                   </div>
                 </div>
 
                 {/* Payment controls */}
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-end">
                   <div>
                     <label className="text-xs text-gray-600">Payment Status</label>
                     <Select defaultValue={r.payment_status || "Pending"} onValueChange={(v) => paymentMutation.mutate({ r, payment_status: v, payment_reference: r.payment_reference })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Pending">Pending</SelectItem>
                         <SelectItem value="Paid">Paid</SelectItem>
@@ -168,14 +169,14 @@ export default function PlotReservationsAdmin() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
+                  <div className="sm:col-span-1 lg:col-span-2">
                     <label className="text-xs text-gray-600">Payment Reference</label>
                     <div className="flex gap-2">
-                      <Input defaultValue={r.payment_reference || ""} placeholder="e.g. check #, txn id" id={`ref-${r.id}`} />
-                      <Button size="sm" onClick={() => {
+                      <Input defaultValue={r.payment_reference || ""} placeholder="check #, txn id" id={`ref-${r.id}`} className="h-9 text-sm" />
+                      <Button size="sm" className="h-9" disabled={paymentMutation.isPending} onClick={() => {
                         const el = document.getElementById(`ref-${r.id}`);
                         paymentMutation.mutate({ r, payment_status: r.payment_status || "Pending", payment_reference: el?.value || "" });
-                      }}>Save</Button>
+                      }}>{paymentMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}</Button>
                     </div>
                   </div>
                 </div>
