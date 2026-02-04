@@ -530,7 +530,16 @@ function ImageManager() {
             )}
           </CardContent>
         </Card>
+
+        <ImageDetailDialog 
+          image={selectedImage} 
+          open={detailOpen} 
+          onOpenChange={setDetailOpen} 
+          onOptimized={() => qc.invalidateQueries({ queryKey: ['images'] })} 
+        />
       </div>
     </div>
   );
 }
+
+export default memo(ImageManager);
