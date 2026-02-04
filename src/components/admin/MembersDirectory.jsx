@@ -575,13 +575,13 @@ function MembersDirectory({ openMemberId }) {
                                 <th className="p-4 w-[40px]">
                                     <Checkbox 
                                         checked={filteredMembers.length > 0 && selectedMemberIds.length === filteredMembers.length}
-                                        onCheckedChange={useCallback((checked) => {
+                                        onCheckedChange={(checked) => {
                                             if (checked) {
                                                 setSelectedMemberIds(filteredMembers.map(m => m.id));
                                             } else {
                                                 setSelectedMemberIds([]);
                                             }
-                                        }, [filteredMembers])}
+                                        }}
                                     />
                                 </th>
                                 <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('last_name')}>
