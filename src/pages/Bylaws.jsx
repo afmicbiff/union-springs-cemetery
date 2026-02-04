@@ -124,60 +124,44 @@ function Bylaws() {
   }, [handleSearch]);
 
   return (
-    <div className="min-h-screen bg-stone-200 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-stone-200 py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-8">
         <Breadcrumbs items={[{ label: 'Bylaws' }]} />
 
         <div className="flex justify-start">
-          <Link to={createPageUrl('Admin')} className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-stone-300 text-stone-700 hover:bg-stone-50">
-            <ArrowLeft className="w-4 h-4" /> Back to Admin
+          <Link to={createPageUrl('Admin')} className="inline-flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-md border border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100">
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Back to Admin
           </Link>
         </div>
 
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Union Springs Association By-Laws</h1>
-          <p className="text-stone-600 max-w-2xl mx-auto text-lg">
+        <div className="text-center space-y-2 sm:space-y-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-serif text-stone-900">Union Springs Association By-Laws</h1>
+          <p className="text-stone-600 max-w-2xl mx-auto text-sm sm:text-lg px-2">
             Official rules and regulations governing the Union Springs Cemetery Association.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-sm shadow-md space-y-4 sticky top-20 z-10 border border-stone-200">
+        <div className="bg-white p-3 sm:p-6 rounded-sm shadow-md space-y-3 sm:space-y-4 sticky top-[72px] sm:top-20 z-10 border border-stone-200">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 w-5 h-5" />
+            <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-stone-400 w-4 h-4 sm:w-5 sm:h-5" />
             <Input
               type="text"
-              placeholder="Search bylaws (e.g., 'burial', 'meeting', 'membership')..."
+              placeholder="Search bylaws..."
               value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 pr-10 h-12 text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
+              onChange={handleInputChange}
+              className="pl-8 sm:pl-10 pr-8 sm:pr-10 h-10 sm:h-12 text-sm sm:text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
             />
             {searchTerm && (
               <button
                 onClick={clearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1"
                 aria-label="Clear search"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
           </div>
-
-          {recentSearches.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-stone-500 flex items-center gap-1">
-                <History className="w-3.5 h-3.5" /> Recent:
-              </span>
-              {recentSearches.map((term, i) => (
-                <button
-                  key={`${term}-${i}`}
-                  onClick={() => handleSearch(term)}
-                  className="bg-stone-100 hover:bg-stone-200 text-stone-600 px-3 py-1 rounded-full transition-colors"
-                >
-                  {term}
-                </button>
-              ))}
-            </div>
-          )}
+          <RecentSearches searches={recentSearches} onSelect={handleSearch} />
         </div>
 
         <Card className="bg-white shadow-lg border-none">
