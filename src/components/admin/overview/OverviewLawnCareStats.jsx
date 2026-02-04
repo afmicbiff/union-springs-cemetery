@@ -1,17 +1,34 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import LawnCareStats from "@/components/admin/lawncare/LawnCareStats";
+import { Card, CardContent } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+
+const LawnCareStats = React.lazy(() => import("@/components/admin/lawncare/LawnCareStats"));
 
 export default function OverviewLawnCareStats() {
-  const { data: schedules = [] } = useQuery({
+  const { data: schedules = [], isLoading } = useQuery({
     queryKey: ["lawncare-schedules-overview"],
-    queryFn: () => base44.entities.LawnCareSchedule.list("-created_date", 500),
+    queryFn: () => base44.entities.LawnCareSchedule.list("-created_date", 100),
     initialData: [],
-    staleTime: 5 * 60_000,
-    gcTime: 10 * 60_000,
+    staleTime: 10 * 60_000, // Lawn care data changes infrequently
+    gcTime: 15 * 60_000,
     refetchOnWindowFocus: false,
   });
 
-  return <LawnCareStats schedules={schedules} />;
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6 flex items-center justify-center h-32">
+          <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Suspense fallback={<Card><CardContent className="p-6 flex items-center justify-center h-32"><Loader2 className="w-5 h-5 animate-spin text-stone-400" /></CardContent></Card>}>
+      <LawnCareStats schedules={schedules} />
+    </Suspense>
+  );
 }
