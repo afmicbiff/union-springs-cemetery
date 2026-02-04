@@ -24,6 +24,7 @@ const EventDetailDialog = lazy(() => import('@/components/security/EventDetailDi
 const BlockIPDialog = lazy(() => import('@/components/security/BlockIPDialog'));
 const AutoResponseManager = lazy(() => import('@/components/security/AutoResponseManager'));
 const IncidentTriageManager = lazy(() => import('@/components/security/IncidentTriageManager'));
+const ThreatIntelPanel = lazy(() => import('@/components/security/ThreatIntelPanel'));
 
 // Skeleton loader for lazy components
 const CardSkeleton = () => (
