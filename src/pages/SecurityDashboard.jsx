@@ -23,6 +23,7 @@ const AlertConfigPanel = lazy(() => import('@/components/security/AlertConfigPan
 const EventDetailDialog = lazy(() => import('@/components/security/EventDetailDialog'));
 const BlockIPDialog = lazy(() => import('@/components/security/BlockIPDialog'));
 const AutoResponseManager = lazy(() => import('@/components/security/AutoResponseManager'));
+const IncidentTriageManager = lazy(() => import('@/components/security/IncidentTriageManager'));
 
 // Skeleton loader for lazy components
 const CardSkeleton = () => (
@@ -300,6 +301,11 @@ function SecurityDashboard() {
         {/* AI Insights - Lazy loaded */}
         <Suspense fallback={<CardSkeleton />}>
           <AISecurityInsights events={filtered} />
+        </Suspense>
+
+        {/* Incident Triage */}
+        <Suspense fallback={<CardSkeleton />}>
+          <IncidentTriageManager events={filtered} />
         </Suspense>
 
         {/* Auto-Response Rules */}
