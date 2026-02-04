@@ -10,6 +10,7 @@ const OverviewNotificationsCard = React.lazy(() => import("@/components/admin/ov
 const OverviewSalesCard = React.lazy(() => import("@/components/admin/overview/OverviewSalesCard"));
 const OverviewPlotsCard = React.lazy(() => import("@/components/admin/overview/OverviewPlotsCard"));
 const OverviewLawnCareStats = React.lazy(() => import("@/components/admin/overview/OverviewLawnCareStats"));
+const OverviewRedlinesCard = React.lazy(() => import("@/components/admin/overview/OverviewRedlinesCard"));
 const QualityAdvisor = React.lazy(() => import("@/components/gov/QualityAdvisor"));
 
 // Loading fallback for cards
@@ -52,6 +53,7 @@ export default function AdminOverview() {
                 <CardErrorBoundary><Suspense fallback={<CardSkeleton />}><OverviewSalesCard /></Suspense></CardErrorBoundary>
                 <CardErrorBoundary><Suspense fallback={<CardSkeleton />}><OverviewPlotsCard /></Suspense></CardErrorBoundary>
                 <CardErrorBoundary><Suspense fallback={<CardSkeleton />}><OverviewLawnCareStats /></Suspense></CardErrorBoundary>
+                <CardErrorBoundary><Suspense fallback={<CardSkeleton />}><OverviewRedlinesCard /></Suspense></CardErrorBoundary>
             </div>
 
             {/* Quality Advisor - Full Width for table readability */}
