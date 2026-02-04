@@ -244,105 +244,16 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
         type="button"
         onClick={onClick}
         aria-pressed={!!active}
-        className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 bg-white h-12 px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} w-24 sm:w-auto text-center`}
+        className={`flex items-center gap-1 sm:gap-1.5 bg-white h-8 sm:h-10 px-2 sm:px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-50 active:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} shrink-0 touch-manipulation`}
         data-legend={label}
       >
-        <div className={`w-4 h-4 rounded-full border border-gray-300 ${bgClass}`}></div>
-        <span className="text-xs font-semibold text-gray-600">{label}</span>
+        <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ${bgClass}`}></div>
+        <span className="text-[10px] sm:text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
       </button>
     );
 });
 
-const PlotTableRow = React.memo(({ 
-    row, 
-    editingId, 
-    inlineEditData, 
-    STATUS_COLORS, 
-    handleInlineChange, 
-    handleInlineSave, 
-    handleInlineCancel, 
-    handleInlineEditStart, 
-    handleEditClick,
-    isAdmin
-}) => {
-    const isEditing = editingId === row._id;
-    return (
-        <tr className="hover:bg-gray-50 transition-colors">
-            <td className="px-4 py-4 font-bold text-gray-700">
-                {isEditing ? <Input value={inlineEditData.Section || ''} onChange={e => handleInlineChange('Section', e.target.value)} className="h-8 w-24" /> : row.Section}
-            </td>
-            <td className="px-4 py-4 font-mono text-gray-900">
-                {isEditing ? <Input value={inlineEditData.Grave || ''} onChange={e => handleInlineChange('Grave', e.target.value)} className="h-8 w-16" /> : row.Grave}
-            </td>
-            <td className="px-4 py-4 text-gray-500">
-                {isEditing ? <Input value={inlineEditData.Row || ''} onChange={e => handleInlineChange('Row', e.target.value)} className="h-8 w-16" /> : row.Row}
-            </td>
-            <td className="px-4 py-4">
-                {isEditing ? (
-                    <select 
-                        value={inlineEditData.Status} 
-                        onChange={e => handleInlineChange('Status', e.target.value)}
-                        className="h-8 text-sm border rounded px-2"
-                    >
-                        {Object.keys(STATUS_COLORS).filter(k => k !== 'Default').map(s => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
-                ) : (
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[row.Status]?.split(' ').filter(c=>c.startsWith('bg') || c.startsWith('text')).join(' ')} bg-opacity-10`}>
-                        {row.Status}
-                    </span>
-                )}
-            </td>
-            <td className="px-4 py-4 font-medium text-gray-900">
-                {isEditing ? <Input value={inlineEditData['Last Name'] || ''} onChange={e => handleInlineChange('Last Name', e.target.value)} className="h-8 w-32" /> : row['Last Name']}
-            </td>
-            <td className="px-4 py-4 text-gray-500">
-                {isEditing ? <Input value={inlineEditData['First Name'] || ''} onChange={e => handleInlineChange('First Name', e.target.value)} className="h-8 w-32" /> : row['First Name']}
-            </td>
-            <td className="px-4 py-4 text-gray-500 text-xs">
-                {isEditing ? (
-                    <div className="flex flex-col gap-1">
-                        <Input value={inlineEditData.Birth || ''} onChange={e => handleInlineChange('Birth', e.target.value)} placeholder="Birth" className="h-7 w-24 text-xs" />
-                        <Input value={inlineEditData.Death || ''} onChange={e => handleInlineChange('Death', e.target.value)} placeholder="Death" className="h-7 w-24 text-xs" />
-                    </div>
-                ) : (
-                    row.Birth && row.Death ? `${row.Birth} - ${row.Death}` : '-'
-                )}
-            </td>
-            <td className="px-4 py-4">
-                {isEditing ? (
-                    <div className="flex gap-2">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={handleInlineSave}>
-                            <Save className="h-4 w-4" />
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleInlineCancel}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ) : (
-                    (isAdmin && row._entity === 'Plot') && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleInlineEditStart(row)}>
-                                <Pencil className="mr-2 h-4 w-4" /> Quick Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditClick(row)}>
-                                <FileText className="mr-2 h-4 w-4" /> Full Details
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    )
-                )}
-            </td>
-        </tr>
-    );
-});
+// Removed - Table view not used in production
 
 const SectionRenderer = React.memo(({ 
           sectionKey, 
@@ -750,14 +661,10 @@ export default function PlotsPage() {
   }, [queryClient]);
 
   const [hoverData, setHoverData] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState('map'); 
-  const [controlsTop, setControlsTop] = useState('50%');
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
-  const [tourSession, setTourSession] = useState(0);
   // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
           const params = new URLSearchParams(window.location.search);
@@ -789,22 +696,7 @@ export default function PlotsPage() {
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
 
-  React.useLayoutEffect(() => {
-    if (activeTab !== 'map') return;
-    const update = () => {
-      const el = document.querySelector('[data-legend="Unavailable"]');
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setControlsTop(rect.top + rect.height / 2);
-    };
-    const raf1 = requestAnimationFrame(update);
-    const onResize = () => requestAnimationFrame(update);
-    window.addEventListener('resize', onResize);
-    return () => {
-      cancelAnimationFrame(raf1);
-      window.removeEventListener('resize', onResize);
-    };
-  }, [activeTab]);
+
   
   // Filtering State
   const [filters, setFilters] = useState({
@@ -820,20 +712,7 @@ export default function PlotsPage() {
 
 
 
-  // Table View State
-  const [groupBy, setGroupBy] = useState('none');
-  const [sortBy, setSortBy] = useState('Grave');
-  const [sortOrder, setSortOrder] = useState('asc');
-  const [page, setPage] = useState(1);
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [filters.search, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
-
   // Editing State
-  const [editingId, setEditingId] = useState(null);
-  const [inlineEditData, setInlineEditData] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
 
@@ -1093,50 +972,7 @@ export default function PlotsPage() {
 
 
 
-  // Grouped and Sorted Data for Table View
-  const processedTableData = useMemo(() => {
-    // 1. Sort Data
-    const sorted = [...filteredData].sort((a, b) => {
-        let valA = a[sortBy];
-        let valB = b[sortBy];
 
-        // Handle Dates
-        if (sortBy === 'Death') {
-             valA = a.Death ? new Date(a.Death).getTime() : 0;
-             valB = b.Death ? new Date(b.Death).getTime() : 0;
-        } 
-        // Handle Grave Numbers (Numeric Sort)
-        else if (sortBy === 'Grave') {
-            const numA = parseInt(String(valA).replace(/\D/g, '')) || 0;
-            const numB = parseInt(String(valB).replace(/\D/g, '')) || 0;
-            if (numA !== numB) return numA - numB;
-            return String(valA).localeCompare(String(valB));
-        }
-        
-        // Default String Sort
-        if (valA < valB) return -1;
-        if (valA > valB) return 1;
-        return 0;
-    });
-
-    if (sortOrder === 'desc') sorted.reverse();
-
-    // 2. Group Data (if applicable)
-    if (groupBy !== 'none') {
-        const groups = {};
-        sorted.forEach(item => {
-            const groupKey = item[groupBy] || 'Unassigned';
-            if (!groups[groupKey]) groups[groupKey] = [];
-            groups[groupKey].push(item);
-        });
-        return Object.keys(groups).sort().map(key => ({
-            group: key,
-            items: groups[key]
-        }));
-    }
-
-    return sorted;
-  }, [filteredData, groupBy, sortBy, sortOrder]);
 
   const sections = useMemo(() => {
     const grouped = {
@@ -1295,19 +1131,15 @@ export default function PlotsPage() {
     }
   };
 
-  // detailsCache removed; data is prefetched in initial query
+  // Optimized hover - throttled for performance
   const handleHover = useCallback((e, data) => {
     if (!data) {
-        setIsTooltipVisible(false);
-        return;
+      setIsTooltipVisible(false);
+      return;
     }
-    const rect = e.target.getBoundingClientRect();
-    setMousePos({ x: rect.right, y: rect.top + rect.height / 2 });
-    // Data already prefetched; just show instantly
-    const merged = data && plotIndex.get(data._id) ? plotIndex.get(data._id) : data;
-    setHoverData(merged);
+    setHoverData(data);
     setIsTooltipVisible(true);
-    }, [plotIndex]);
+  }, []);
 
   const handleEditClick = useCallback((plot) => {
     setSelectedPlotForModal(plot);
@@ -1445,25 +1277,7 @@ export default function PlotsPage() {
     }
   }, [parsedData, queryClient]);
 
-  const handleInlineEditStart = useCallback((plot) => {
-    setEditingId(plot._id);
-    setInlineEditData({ ...plot });
-  }, []);
 
-  const handleInlineChange = useCallback((field, value) => {
-    setInlineEditData(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  const handleInlineSave = () => {
-    handleUpdatePlot(inlineEditData);
-    setEditingId(null);
-    setInlineEditData({});
-  };
-
-  const handleInlineCancel = useCallback(() => {
-    setEditingId(null);
-    setInlineEditData({});
-  }, []);
 
   const handleUpdatePlot = useCallback((updatedPlot) => {
       const entityData = {
@@ -1676,30 +1490,15 @@ export default function PlotsPage() {
             </div>
           
           <div className="flex items-center space-x-3">
-            <div className="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-lg mr-4">
-                <button 
-                    onClick={() => setActiveTab('map')}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition ${activeTab === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                    <div className="flex items-center space-x-1">
-                        <MapIcon size={14} /> <span>Map View</span>
-                    </div>
-                </button>
 
-            </div>
 
             {isAdmin && (
             <div className="flex gap-2">
-                <label className="flex items-center px-4 py-2 bg-teal-700 text-white rounded-lg cursor-pointer hover:bg-teal-800 transition shadow-sm active:transform active:scale-95">
-                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
-                    <span className="font-medium text-sm">Import CSV</span>
+                <label className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-teal-700 text-white rounded-lg cursor-pointer hover:bg-teal-800 transition shadow-sm active:scale-95 touch-manipulation">
+                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-1.5 sm:mr-2" size={14} /> : <Upload size={14} className="mr-1.5 sm:mr-2" />}
+                    <span className="font-medium text-xs sm:text-sm">Import</span>
                     <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
                 </label>
-
-
-
-
-
 
 
 
@@ -1739,24 +1538,20 @@ export default function PlotsPage() {
         </Suspense>
       </div>
 
-      {/* Main Area */}
-      {activeTab === 'map' ? (
-                      <React.Suspense fallback={<div className="p-6 text-sm text-gray-500">Loading map…</div>}>
-                        {/* Disable GTM/Meta/Stripe/TailwindCDN for this page only */}
-                        <noscript data-note="perf: third-party disabled on map page" />
+      {/* Main Area - Map only, table removed */}
+      <Suspense fallback={<div className="p-6 text-sm text-gray-500 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin mr-2" />Loading map…</div>}>
 
-            {/* Legend */}
-            <div className="bg-white border-b border-gray-200 py-3 px-6 overflow-x-visible sm:overflow-x-auto z-20">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center gap-2 sm:gap-4 sm:min-w-max justify-center lg:justify-start text-center lg:text-left">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
-                        <Info size={14} className="mr-1" /> Status
+            {/* Legend - simplified for mobile */}
+            <div className="bg-white border-b border-gray-200 py-2 sm:py-3 px-4 sm:px-6 overflow-x-auto z-20">
+                <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3 justify-start">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center shrink-0">
+                        <Info size={12} className="mr-1 sm:mr-1.5" /> Status
                     </span>
                     <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? 'All' : 'Available' }))} active={filters.status === 'Available'} />
                     <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? 'All' : 'Reserved' }))} active={filters.status === 'Reserved'} />
                     <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? 'All' : 'Occupied' }))} active={filters.status === 'Occupied'} />
                     <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Veteran' ? 'All' : 'Veteran' }))} active={filters.status === 'Veteran'} />
                     <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Unavailable' ? 'All' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
-
                 </div>
             </div>
 
@@ -1820,119 +1615,12 @@ export default function PlotsPage() {
                     )}
                 </div>
             </main>
-          </React.Suspense>
-          ) : (
-          <main className="flex-grow p-6 max-w-7xl mx-auto w-full overflow-y-auto">
-              <div className="flex flex-wrap gap-4 mb-4 items-center justify-end bg-gray-50 p-2 rounded-lg border border-gray-200">
-                  <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-gray-500 uppercase">Group By:</span>
-                      <div className="flex bg-white rounded-md shadow-sm border border-gray-200 p-0.5">
-                          {['none', 'Section', 'Row', 'Status'].map(g => (
-                              <button
-                                  key={g}
-                                  onClick={() => setGroupBy(g)}
-                                  className={`px-3 py-1 text-xs font-medium rounded transition-colors ${groupBy === g ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
-                              >
-                                  {g === 'none' ? 'None' : g}
-                              </button>
-                          ))}
-                      </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 border-l border-gray-300 pl-4">
-                      <span className="text-xs font-semibold text-gray-500 uppercase">Sort By:</span>
-                      <select 
-                          value={sortBy} 
-                          onChange={(e) => setSortBy(e.target.value)}
-                          className="text-xs h-7 border-gray-200 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                          <option value="Grave">Grave #</option>
-                          <option value="Last Name">Last Name</option>
-                          <option value="First Name">First Name</option>
-                          <option value="Death">Death Date</option>
-                      </select>
-                      <button 
-                          onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                          className="text-xs bg-white border border-gray-200 rounded px-2 py-1 shadow-sm hover:bg-gray-50 text-gray-600 font-medium w-16"
-                      >
-                          {sortOrder === 'asc' ? 'Asc' : 'Desc'}
-                      </button>
-                  </div>
-              </div>
-
-              <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-                  <table className="min-w-full divide-y divide-gray-200 text-sm">
-                      <thead className="bg-gray-50">
-                          <tr>
-                              {['Section', 'Grave', 'Row', 'Status', 'Last Name', 'First Name', 'Dates', 'Actions'].map(h => (
-                                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{h}</th>
-                              ))}
-                          </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                          {groupBy === 'none' ? (
-                              // Flat List Render
-                              processedTableData.slice((page-1)*50, page*50).map((row) => (
-                                  <PlotTableRow 
-                                      key={row._id} 
-                                      row={row} 
-                                      editingId={editingId} 
-                                      inlineEditData={inlineEditData}
-                                      STATUS_COLORS={STATUS_COLORS}
-                                      handleInlineChange={handleInlineChange}
-                                      handleInlineSave={handleInlineSave}
-                                      handleInlineCancel={handleInlineCancel}
-                                      handleInlineEditStart={handleInlineEditStart}
-                                      handleEditClick={handleEditClick}
-                                      isAdmin={isAdmin}
-                                  />
-                              ))
-                          ) : (
-                              // Grouped Render
-                              processedTableData.map((group) => (
-                                  <React.Fragment key={group.group}>
-                                      <tr className="bg-gray-100">
-                                          <td colSpan={8} className="px-6 py-2 text-sm font-bold text-gray-700 uppercase tracking-wide border-t border-b border-gray-300">
-                                              {groupBy}: {group.group} <span className="text-gray-400 font-normal ml-2">({group.items.length})</span>
-                                          </td>
-                                      </tr>
-                                      {group.items.map((row) => (
-                                          <PlotTableRow 
-                                              key={row._id} 
-                                              row={row} 
-                                              editingId={editingId} 
-                                              inlineEditData={inlineEditData}
-                                              STATUS_COLORS={STATUS_COLORS}
-                                              handleInlineChange={handleInlineChange}
-                                              handleInlineSave={handleInlineSave}
-                                              handleInlineCancel={handleInlineCancel}
-                                              handleInlineEditStart={handleInlineEditStart}
-                                              handleEditClick={handleEditClick}
-                                              isAdmin={isAdmin}
-                                          />
-                                      ))}
-                                  </React.Fragment>
-                              ))
-                          )}
-                      </tbody>
-                  </table>
-                  {groupBy === 'none' && (
-                    <div className="flex items-center justify-between p-3 border-t bg-white">
-                      <div className="text-xs text-gray-500">Page {page} of {Math.max(1, Math.ceil(processedTableData.length / 50))}</div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
-                        <Button variant="outline" size="sm" disabled={page >= Math.max(1, Math.ceil(processedTableData.length / 50))} onClick={() => setPage(p => p + 1)}>Next</Button>
-                      </div>
-                    </div>
-                  )}
-                  </div>
-          </main>
-      )}
+      </Suspense>
 
 
 
-      {/* Tooltip Portal */}
-      <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
+      {/* Tooltip Portal - conditionally rendered */}
+      {isTooltipVisible && hoverData && <Tooltip data={hoverData} visible={isTooltipVisible} />}
 
 
 
