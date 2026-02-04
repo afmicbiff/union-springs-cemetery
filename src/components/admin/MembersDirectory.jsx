@@ -609,8 +609,11 @@ function MembersDirectory({ openMemberId }) {
                             <tbody className="divide-y divide-stone-100 bg-white">
                                 {isError ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center text-red-500">
-                                            Error loading members. Please ensure you are logged in.
+                                        <td colSpan="11" className="p-8 text-center">
+                                            <div className="text-red-500 mb-2">Error loading members. Please ensure you are logged in.</div>
+                                            <Button variant="outline" size="sm" onClick={() => refetch()}>
+                                                Try Again
+                                            </Button>
                                         </td>
                                     </tr>
                                 ) : isLoading ? (
