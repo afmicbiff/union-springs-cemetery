@@ -542,4 +542,4 @@ function ImageManager() {
   );
 }
 
-export default memo(ImageManager);
+export default ImageManager;
