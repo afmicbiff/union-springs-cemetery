@@ -154,20 +154,23 @@ function SecurityDashboard() {
     return Array.from(s);
   }, [filtered, details, showBlockedIPs]);
 
-  // Threat intel lookup - only when needed and with debounce
+  // Threat intel lookup - deep lookup for richer data
   const { data: intel = { results: {} } } = useQuery({
-    queryKey: ['threat-intel', indicators.slice(0, 10).join(',')], // Further limit query key
+    queryKey: ['threat-intel-deep', indicators.slice(0, 10).join(',')],
     queryFn: async () => {
       if (indicators.length === 0) return { results: {} };
-      const res = await base44.functions.invoke('threatIntelLookup', { indicators: indicators.slice(0, 30) });
+      const res = await base44.functions.invoke('threatIntelLookup', { 
+        indicators: indicators.slice(0, 20),
+        deep_lookup: true // Enable rich threat intel with mitigations and MITRE mapping
+      });
       return res?.data || { results: {} };
     },
-    enabled: indicators.length > 0 && (!!details || showBlockedIPs), // Only when viewing details or blocked IPs
-    staleTime: 10 * 60_000, // Cache for 10 mins
+    enabled: indicators.length > 0 && (!!details || showBlockedIPs),
+    staleTime: 10 * 60_000,
     gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    retry: 0, // Don't retry on failure
+    retry: 0,
   });
 
   const intelMap = intel?.results || {};
@@ -302,6 +305,14 @@ function SecurityDashboard() {
         {/* AI Insights - Lazy loaded */}
         <Suspense fallback={<CardSkeleton />}>
           <AISecurityInsights events={filtered} />
+        </Suspense>
+
+        {/* Threat Intelligence Panel */}
+        <Suspense fallback={<CardSkeleton />}>
+          <ThreatIntelPanel 
+            initialIndicators={indicators.slice(0, 10)} 
+            onBlockIp={openBlockIp} 
+          />
         </Suspense>
 
         {/* Incident Triage */}

@@ -339,7 +339,7 @@ function IncidentDetailDialog({ incident, open, onOpenChange, onUpdateStatus }) 
                   <div className="flex flex-wrap gap-1 mt-1">
                     <span className="font-medium">MITRE ATT&CK:</span>
                     {ai.related_mitre_techniques.map((t, i) => (
-                      <a key={i} href={`https://attack.mitre.org/techniques/${t.replace('.', '/')}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-0.5">
+                      <a key={i} href={`https://attack.mitre.org/techniques/${String(t).replace('.', '/')}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-0.5">
                         {t} <ExternalLink className="w-2.5 h-2.5" />
                       </a>
                     ))}
