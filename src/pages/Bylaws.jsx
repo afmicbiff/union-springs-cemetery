@@ -1,71 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Search, History, ArrowLeft } from 'lucide-react';
+import { X, Search, History, ArrowLeft, ChevronUp } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { Button } from "@/components/ui/button";
 
-export default function Bylaws() {
+// Memoized HighlightedText component
+const HighlightedText = memo(({ text, searchTerm }) => {
+  if (!searchTerm?.trim()) return <span>{text}</span>;
+  try {
+    const pattern = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(pattern);
+    return (
+      <span>
+        {parts.map((part, i) =>
+          pattern.test(part) ? (
+            <mark key={i} className="bg-yellow-300 text-stone-900 rounded-sm px-0.5">{part}</mark>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </span>
+    );
+  } catch {
+    return <span>{text}</span>;
+  }
+});
+HighlightedText.displayName = 'HighlightedText';
+
+// Memoized Section component
+const Section = memo(({ title, children, searchTerm }) => (
+  <section className="mb-6 sm:mb-8 scroll-mt-28">
+    <h2 className="text-lg sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4 border-b border-stone-200 pb-2">
+      <HighlightedText text={title} searchTerm={searchTerm} />
+    </h2>
+    <div className="text-sm sm:text-base text-stone-700 leading-relaxed space-y-3 sm:space-y-4">{children}</div>
+  </section>
+));
+Section.displayName = 'Section';
+
+// Memoized ListItem component
+const ListItem = memo(({ children }) => (
+  <li className="ml-3 sm:ml-4 pl-1.5 sm:pl-2 list-decimal marker:text-stone-500 marker:font-medium">
+    <div className="pl-0.5 sm:pl-1">{children}</div>
+  </li>
+));
+ListItem.displayName = 'ListItem';
+
+// Memoized SubListItem component
+const SubListItem = memo(({ children }) => (
+  <li className="ml-3 sm:ml-4 pl-1.5 sm:pl-2 list-disc marker:text-stone-400">
+    <div className="pl-0.5 sm:pl-1">{children}</div>
+  </li>
+));
+SubListItem.displayName = 'SubListItem';
+
+// Memoized RecentSearches component
+const RecentSearches = memo(({ searches, onSelect }) => {
+  if (!searches.length) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+      <span className="text-stone-500 flex items-center gap-1">
+        <History className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> Recent:
+      </span>
+      {searches.map((term, i) => (
+        <button
+          key={`${term}-${i}`}
+          onClick={() => onSelect(term)}
+          className="bg-stone-100 hover:bg-stone-200 text-stone-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full transition-colors text-xs sm:text-sm"
+        >
+          {term}
+        </button>
+      ))}
+    </div>
+  );
+});
+RecentSearches.displayName = 'RecentSearches';
+
+function Bylaws() {
   const [searchTerm, setSearchTerm] = useState("");
   const [recentSearches, setRecentSearches] = useState([]);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // Load recent searches from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('bylaws_recent_searches');
-    if (saved) setRecentSearches(JSON.parse(saved));
+    try {
+      const saved = localStorage.getItem('bylaws_recent_searches');
+      if (saved) setRecentSearches(JSON.parse(saved));
+    } catch {}
   }, []);
 
-  const handleSearch = (term) => {
+  // Track scroll for back-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleSearch = useCallback((term) => {
     setSearchTerm(term);
     if (!term.trim()) return;
-    const next = [term, ...recentSearches.filter(s => s !== term)].slice(0, 6);
-    setRecentSearches(next);
-    localStorage.setItem('bylaws_recent_searches', JSON.stringify(next));
-  };
+    setRecentSearches(prev => {
+      const next = [term, ...prev.filter(s => s !== term)].slice(0, 6);
+      try {
+        localStorage.setItem('bylaws_recent_searches', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
-  const clearSearch = () => setSearchTerm("");
+  const clearSearch = useCallback(() => setSearchTerm(""), []);
 
-  const HighlightedText = ({ text }) => {
-    if (!searchTerm.trim()) return <span>{text}</span>;
-    try {
-      const pattern = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-      const parts = text.split(pattern);
-      return (
-        <span>
-          {parts.map((part, i) =>
-            pattern.test(part) ? (
-              <mark key={i} className="bg-yellow-300 text-stone-900 rounded-sm px-0.5">{part}</mark>
-            ) : (
-              <span key={i}>{part}</span>
-            )
-          )}
-        </span>
-      );
-    } catch {
-      return <span>{text}</span>;
-    }
-  };
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
-  const Section = ({ title, children }) => (
-    <section className="mb-8 scroll-mt-24">
-      <h2 className="text-2xl font-serif font-bold text-stone-800 mb-4 border-b border-stone-200 pb-2">
-        <HighlightedText text={title} />
-      </h2>
-      <div className="text-stone-700 leading-relaxed space-y-4">{children}</div>
-    </section>
-  );
-
-  const ListItem = ({ children }) => (
-    <li className="ml-4 pl-2 list-decimal marker:text-stone-500 marker:font-medium">
-      <div className="pl-1">{children}</div>
-    </li>
-  );
-
-  const SubListItem = ({ children }) => (
-    <li className="ml-4 pl-2 list-disc marker:text-stone-400">
-      <div className="pl-1">{children}</div>
-    </li>
-  );
+  const handleInputChange = useCallback((e) => {
+    handleSearch(e.target.value);
+  }, [handleSearch]);
 
   return (
     <div className="min-h-screen bg-stone-200 py-10 px-4 sm:px-6 lg:px-8">
