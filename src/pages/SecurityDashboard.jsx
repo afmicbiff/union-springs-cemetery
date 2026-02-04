@@ -26,6 +26,7 @@ const AutoResponseManager = lazy(() => import('@/components/security/AutoRespons
 const IncidentTriageManager = lazy(() => import('@/components/security/IncidentTriageManager'));
 const ThreatIntelPanel = lazy(() => import('@/components/security/ThreatIntelPanel'));
 const ThreatHuntingDashboard = lazy(() => import('@/components/security/ThreatHuntingDashboard'));
+const SIEMCorrelationEngine = lazy(() => import('@/components/security/SIEMCorrelationEngine'));
 
 // Skeleton loader for lazy components
 const CardSkeleton = () => (
@@ -306,6 +307,11 @@ function SecurityDashboard() {
         {/* AI Insights - Lazy loaded */}
         <Suspense fallback={<CardSkeleton />}>
           <AISecurityInsights events={filtered} />
+        </Suspense>
+
+        {/* SIEM Correlation Engine */}
+        <Suspense fallback={<CardSkeleton />}>
+          <SIEMCorrelationEngine />
         </Suspense>
 
         {/* Threat Hunting Dashboard */}
