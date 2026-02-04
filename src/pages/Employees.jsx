@@ -33,10 +33,11 @@ export default function EmployeesPage() {
         queryKey: ['my-employee-profile-page', user?.email],
         queryFn: async () => {
             if (!user?.email) return null;
-            const res = await base44.entities.Employee.list({ limit: 1000 });
-            return res.find(e => e.email === user.email);
+            const res = await base44.entities.Employee.filter({ email: user.email }, '-created_date', 1);
+            return res[0] || null;
         },
-        enabled: !!user?.email
+        enabled: !!user?.email,
+        staleTime: 5 * 60_000,
     });
 
     // Check if employee is inactive and redirect
@@ -47,10 +48,10 @@ export default function EmployeesPage() {
         }
     }, [employeeProfile]);
     
-    const { data: announcements } = useQuery({
+    const { data: announcements = [] } = useQuery({
         queryKey: ['announcements-public'],
-        queryFn: () => base44.entities.Announcement.list('-date', 20),
-        initialData: []
+        queryFn: () => base44.entities.Announcement.list('-date', 10),
+        staleTime: 10 * 60_000,
     });
 
     const activeAnnouncements = announcements.filter(a => a.is_active !== false);

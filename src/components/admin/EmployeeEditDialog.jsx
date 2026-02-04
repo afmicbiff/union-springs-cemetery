@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,13 +53,13 @@ const employeeSchema = z.object({
     }
 });
 
-export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
+const EmployeeEditDialog = memo(function EmployeeEditDialog({ employee, open, onOpenChange }) {
     const queryClient = useQueryClient();
     
     const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         resolver: zodResolver(employeeSchema),
         defaultValues: employee || {},
-        mode: "onChange"
+        mode: "onBlur" // Better mobile performance
     });
 
     const maritalStatus = watch("marital_status");
@@ -67,38 +67,27 @@ export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
     const updateMutation = useMutation({
         mutationFn: async (data) => {
             await base44.entities.Employee.update(employee.id, data);
-            
-            // Audit Log
             try {
                 const user = await base44.auth.me();
                 await base44.entities.AuditLog.create({
-                    action: 'update',
-                    entity_type: 'Employee',
-                    entity_id: employee.id,
+                    action: 'update', entity_type: 'Employee', entity_id: employee.id,
                     details: `Employee ${employee.first_name} ${employee.last_name} updated.`,
-                    metadata: data,
-                    performed_by: user.email,
-                    timestamp: new Date().toISOString()
+                    metadata: data, performed_by: user.email, timestamp: new Date().toISOString()
                 });
-            } catch (e) { console.error("Audit log failed", e); }
+            } catch {}
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['employees'] });
             queryClient.invalidateQueries({ queryKey: ['employee', employee.id] });
-            toast.success("Employee details updated successfully");
+            toast.success("Updated");
             onOpenChange(false);
         },
-        onError: (err) => toast.error("Update failed: " + err.message)
+        onError: (err) => toast.error("Failed: " + err.message)
     });
 
-    const onSubmit = (data) => {
-        updateMutation.mutate(data);
-    };
+    const onSubmit = useCallback((data) => updateMutation.mutate(data), [updateMutation]);
 
-    const getInputClass = (fieldName) => cn(
-        "transition-all duration-200",
-        errors[fieldName] ? "border-red-500 focus-visible:ring-red-500 bg-red-50" : ""
-    );
+    const getInputClass = useCallback((fieldName) => cn("h-8 text-sm", errors[fieldName] && "border-red-500 bg-red-50"), [errors]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -283,15 +272,16 @@ export default function EmployeeEditDialog({ employee, open, onOpenChange }) {
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800" disabled={updateMutation.isPending}>
-                            {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
+                    <DialogFooter className="gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+                        <Button type="submit" size="sm" className="bg-teal-700 hover:bg-teal-800" disabled={updateMutation.isPending}>
+                            {updateMutation.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin"/>}Save
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
     );
-}
+});
+
+export default EmployeeEditDialog;
