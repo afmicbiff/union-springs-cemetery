@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { 
     Phone, Mail, MapPin, DollarSign, Edit, MessageSquare, 
     User, CheckSquare, X, ExternalLink, Sparkles, Send, Copy,
-    UserCircle
+    UserCircle, Loader2
 } from 'lucide-react';
 import { toast } from "sonner";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -25,7 +25,16 @@ import MoveDocumentDialog from './MoveDocumentDialog';
 import MemberInvoicesAdmin from './MemberInvoicesAdmin';
 import SecureFileLink from "@/components/documents/SecureFileLink";
 
-export default function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
+// Safe date formatter
+function safeFormatDate(dateStr, formatStr = 'PPP') {
+    if (!dateStr) return '—';
+    try {
+        const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+        return isValid(d) ? format(d, formatStr) : '—';
+    } catch { return '—'; }
+}
+
+function MemberProfileDetail({ member, onEdit, onClose, isDialog = false }) {
     const [noteType, setNoteType] = useState("note");
     const [moveDoc, setMoveDoc] = useState(null);
 
@@ -51,16 +60,26 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
         queryKey: ['employees-profile-detail'],
         queryFn: async () => {
             if (!(await base44.auth.isAuthenticated())) return [];
-            return base44.entities.Employee.list();
+            return base44.entities.Employee.list('-updated_date', 200);
         },
-        initialData: []
+        initialData: [],
+        staleTime: 10 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
     });
 
-    const getAssigneeName = (id) => {
-        if (!id || !employees) return null;
-        const emp = employees.find(e => e.id === id);
-        return emp ? `${emp.first_name} ${emp.last_name}` : null;
-    };
+    // Memoized employee lookup map for O(1) access
+    const employeeMap = useMemo(() => {
+        const map = new Map();
+        (employees || []).forEach(emp => {
+            map.set(emp.id, `${emp.first_name} ${emp.last_name}`);
+        });
+        return map;
+    }, [employees]);
+
+    const getAssigneeName = useCallback((id) => {
+        if (!id) return null;
+        return employeeMap.get(id) || null;
+    }, [employeeMap]);
     const [isEmailDraftOpen, setIsEmailDraftOpen] = useState(false);
     const [draftEmail, setDraftEmail] = useState({ subject: "", body: "" });
     const queryClient = useQueryClient();
@@ -187,7 +206,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                 <div>
                                     <span className="block text-stone-400 text-xs">Last Donation</span>
                                     <span className="font-medium text-stone-800">
-                                        {member.last_donation_date ? format(new Date(member.last_donation_date), 'PPP') : '—'}
+                                        {safeFormatDate(member.last_donation_date)}
                                     </span>
                                 </div>
                                 <div className="col-span-2">
@@ -207,9 +226,9 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                             {member.follow_up_date && member.follow_up_status !== 'completed' && member.follow_up_status !== 'cancelled' ? (
                                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                                     <div className="flex items-start gap-3">
-                                        <CheckSquare className="w-5 h-5 text-amber-600 mt-0.5" />
-                                        <div>
-                                            <h4 className="font-medium text-amber-900">Follow-up Due: {format(new Date(member.follow_up_date), 'PPP')}</h4>
+                                        <CheckSquare className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+                                        <div className="min-w-0">
+                                            <h4 className="font-medium text-amber-900">Follow-up Due: {safeFormatDate(member.follow_up_date)}</h4>
                                             <p className="text-sm text-amber-800 mt-1">{member.follow_up_notes || 'No specific notes'}</p>
                                             <div className="flex gap-2 items-center mt-2">
                                                 <Badge className="bg-amber-200 text-amber-900 hover:bg-amber-300 border-none">Pending</Badge>
@@ -250,7 +269,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                                     </div>
                                                     {doc.expiration_date && (
                                                         <div className={`text-xs mt-0.5 ${new Date(doc.expiration_date) < new Date() ? 'text-red-600 font-medium' : 'text-stone-400'}`}>
-                                                            Exp: {format(new Date(doc.expiration_date), 'MMM d, yyyy')}
+                                                            Exp: {safeFormatDate(doc.expiration_date, 'MMM d, yyyy')}
                                                             {new Date(doc.expiration_date) < new Date() && " (Expired)"}
                                                         </div>
                                                     )}
@@ -292,7 +311,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                 </ScrollArea>
 
                 {/* Right Column: Activity Log */}
-                <div className="w-full md:w-[400px] bg-stone-50/50 flex flex-col border-l border-stone-200 shrink-0 h-1/2 md:h-auto">
+                <div className="w-full md:w-[360px] lg:w-[400px] bg-stone-50/50 flex flex-col md:border-l border-t md:border-t-0 border-stone-200 shrink-0 min-h-[300px] md:min-h-0 md:h-auto">
                     <div className="p-4 border-b border-stone-200 bg-white">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-semibold text-stone-900 flex items-center gap-2">
@@ -356,9 +375,11 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                     size="sm" 
                                     disabled={!noteContent || addLogMutation.isPending}
                                     onClick={() => addLogMutation.mutate()}
-                                    className="bg-stone-800 text-white"
+                                    className="bg-stone-800 text-white min-w-[100px]"
                                 >
-                                    {addLogMutation.isPending ? 'Saving...' : 'Log Activity'}
+                                    {addLogMutation.isPending ? (
+                                        <><Loader2 className="w-3 h-3 animate-spin mr-1" /> Saving</>
+                                    ) : 'Log Activity'}
                                 </Button>
                             </div>
                         </div>
@@ -384,7 +405,7 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
                                             <div className="flex justify-between items-start">
                                                 <span className="font-medium text-stone-900 capitalize">{log.type}</span>
                                                 <span className="text-xs text-stone-400 whitespace-nowrap">
-                                                    {format(new Date(log.timestamp), 'MMM d, h:mm a')}
+                                                    {safeFormatDate(log.timestamp, 'MMM d, h:mm a')}
                                                 </span>
                                             </div>
                                             <p className="text-stone-600 leading-relaxed">{log.note}</p>
@@ -487,3 +508,5 @@ export default function MemberProfileDetail({ member, onEdit, onClose, isDialog 
         </div>
     );
 }
+
+export default React.memo(MemberProfileDetail);
