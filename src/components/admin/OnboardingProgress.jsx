@@ -1,59 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Send, CheckCircle2, AlertCircle, Clock, Loader2 } from 'lucide-react';
+import { Send, CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
-import { format } from 'date-fns';
 
-export default function OnboardingProgress() {
+// Memoized employee card
+const EmployeeProgressCard = memo(({ emp, progress, missing }) => (
+    <div className="border rounded-lg p-3 bg-white">
+        <div className="flex justify-between items-start mb-2">
+            <div className="min-w-0 flex-1">
+                <h4 className="font-semibold text-sm text-stone-900 truncate">{emp.first_name} {emp.last_name}</h4>
+                <p className="text-[10px] text-stone-500 truncate">{emp.email}</p>
+            </div>
+            <Badge variant={progress < 50 ? "destructive" : "secondary"} className="text-[10px] ml-2 shrink-0">
+                {progress}%
+            </Badge>
+        </div>
+        <Progress value={progress} className="h-1.5 mb-2" />
+        <div className="flex flex-wrap gap-1">
+            {missing.slice(0, 3).map(item => (
+                <Badge key={item} variant="outline" className="text-[9px] px-1.5 py-0 border-red-200 bg-red-50 text-red-700">
+                    {item.replace('Form ', '')}
+                </Badge>
+            ))}
+            {missing.length > 3 && <Badge variant="outline" className="text-[9px] px-1.5 py-0">+{missing.length - 3}</Badge>}
+        </div>
+    </div>
+));
+
+const OnboardingProgress = memo(function OnboardingProgress() {
     const [isRunning, setIsRunning] = useState(false);
 
-    const { data: employees, refetch } = useQuery({
+    const { data: employees = [], refetch } = useQuery({
         queryKey: ['employees-progress'],
-        queryFn: () => base44.entities.Employee.list({ limit: 100 }),
+        queryFn: () => base44.entities.Employee.list({ limit: 50 }),
+        staleTime: 5 * 60_000,
+        gcTime: 15 * 60_000,
         initialData: [],
     });
 
-    const checklistMandatory = [
-        "Form I-9", 
-        "Form W-4", 
-        "Form L-4", 
-        "Offer Letter", 
-        "New Hire Reporting"
-    ];
+    const checklistMandatory = useMemo(() => ["Form I-9", "Form W-4", "Form L-4", "Offer Letter", "New Hire Reporting"], []);
 
-    const getProgress = (emp) => {
+    const getProgress = useCallback((emp) => {
         const checklist = emp.checklist || {};
         const completed = checklistMandatory.filter(item => checklist[item]).length;
         return Math.round((completed / checklistMandatory.length) * 100);
-    };
+    }, [checklistMandatory]);
 
-    const getMissingItems = (emp) => {
+    const getMissingItems = useCallback((emp) => {
         const checklist = emp.checklist || {};
         return checklistMandatory.filter(item => !checklist[item]);
-    };
+    }, [checklistMandatory]);
 
-    const handleRunReminders = async () => {
+    const handleRunReminders = useCallback(async () => {
         setIsRunning(true);
         try {
             const { data } = await base44.functions.invoke('runAutoReminders');
             if (data.error) throw new Error(data.error);
-            
-            toast.success(`Sent ${data.reminders_sent} reminders successfully.`);
-            refetch(); // Refresh list to show updated 'Last Reminder' times
+            toast.success(`Sent ${data.reminders_sent} reminders.`);
+            refetch();
         } catch (err) {
-            toast.error("Failed to run reminders: " + err.message);
+            toast.error("Failed: " + err.message);
         } finally {
             setIsRunning(false);
         }
-    };
+    }, [refetch]);
 
-    // Filter only active employees with incomplete items or recently completed
-    const incompleteEmployees = employees.filter(emp => getProgress(emp) < 100);
+    const incompleteEmployees = useMemo(() => 
+        employees.filter(emp => getProgress(emp) < 100).slice(0, 10),
+        [employees, getProgress]
+    );
 
     return (
         <Card>
