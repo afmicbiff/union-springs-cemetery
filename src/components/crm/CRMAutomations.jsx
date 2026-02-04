@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, memo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,26 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Play, Save, Trash2 } from "lucide-react";
+import { Plus, Play, Trash2 } from "lucide-react";
 
 export default function CRMAutomations() {
   const qc = useQueryClient();
 
   const { data: rules = [] } = useQuery({
     queryKey: ["crm-rules"],
-    queryFn: () => base44.entities.CRMAutomationRule.list("-created_date", 100),
+    queryFn: () => base44.entities.CRMAutomationRule.list("-created_date", 20),
+    staleTime: 5 * 60_000,
     initialData: []
   });
 
   const { data: templates = [] } = useQuery({
     queryKey: ["email-templates"],
-    queryFn: () => base44.entities.EmailTemplate.list("-created_date", 100),
+    queryFn: () => base44.entities.EmailTemplate.list("-created_date", 50),
+    staleTime: 10 * 60_000,
     initialData: []
   });
 
   const { data: employees = [] } = useQuery({
     queryKey: ["employees"],
-    queryFn: () => base44.entities.Employee.list({ limit: 1000 }),
+    queryFn: () => base44.entities.Employee.list({ limit: 50 }),
+    staleTime: 10 * 60_000,
     initialData: []
   });
 
@@ -60,31 +63,28 @@ export default function CRMAutomations() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle>Automations</CardTitle>
+      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-3 sm:px-6">
+        <CardTitle className="text-lg">Automations</CardTitle>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={runNow} className="gap-2"><Play className="w-4 h-4" /> Run Now</Button>
-          <Button onClick={addRule} className="gap-2"><Plus className="w-4 h-4" /> New Rule</Button>
+          <Button variant="outline" size="sm" onClick={runNow} className="gap-1 h-8"><Play className="w-3.5 h-3.5" /><span className="hidden sm:inline">Run</span></Button>
+          <Button size="sm" onClick={addRule} className="gap-1 h-8"><Plus className="w-3.5 h-3.5" /><span className="hidden sm:inline">New</span></Button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-3 sm:px-6">
         {rules.length === 0 ? (
-          <div className="text-sm text-stone-500">No automations yet. Click New Rule to create one.</div>
+          <div className="text-sm text-stone-500">No automations yet.</div>
         ) : (
-          rules.map((r) => (
-            <div key={r.id} className="border rounded-lg p-3 space-y-3 bg-white">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div className="flex items-center gap-3">
+          rules.slice(0, 10).map((r) => (
+            <div key={r.id} className="border rounded-lg p-2 sm:p-3 space-y-2 bg-white">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                   <Switch checked={r.is_active} onCheckedChange={(v) => updateMutation.mutate({ id: r.id, data: { is_active: v } })} />
-                  <Input value={r.name || ''} onChange={(e) => updateMutation.mutate({ id: r.id, data: { name: e.target.value } })} className="w-64" />
+                  <Input value={r.name || ''} onChange={(e) => updateMutation.mutate({ id: r.id, data: { name: e.target.value } })} className="h-8 text-sm flex-1" />
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="gap-2" onClick={() => updateMutation.mutate({ id: r.id, data: r })}><Save className="w-4 h-4"/> Save</Button>
-                  <Button variant="outline" className="gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => deleteMutation.mutate(r.id)}><Trash2 className="w-4 h-4"/> Delete</Button>
-                </div>
+                <Button variant="outline" size="sm" className="h-7 px-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => deleteMutation.mutate(r.id)}><Trash2 className="w-3.5 h-3.5"/></Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs">
                 <div className="space-y-2">
                   <label className="text-xs text-stone-500">Trigger Type</label>
                   <Select value={r.trigger_type} onValueChange={(v) => updateMutation.mutate({ id: r.id, data: { trigger_type: v } })}>
