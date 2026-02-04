@@ -534,9 +534,9 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         {children}
       </div>
 
-      {/* Zoom controls - positioned in bottom-right corner */}
+      {/* Zoom controls - responsive positioning */}
       <div
-        className="fixed bottom-6 right-6 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-2 flex flex-col gap-2"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-1.5 sm:p-2 flex flex-row sm:flex-col gap-1.5 sm:gap-2"
         data-zoom-controls="true"
         onPointerDown={(e) => e.stopPropagation()}
         onPointerUp={(e) => e.stopPropagation()}
@@ -547,7 +547,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         <button
           type="button"
           aria-label="Zoom in"
-          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 text-lg font-bold hover:bg-gray-100 active:bg-gray-200 rounded-md border border-gray-200 bg-white cursor-pointer touch-manipulation"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); zoomBy(1.15); }}
         >
@@ -556,7 +556,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         <button
           type="button"
           aria-label="Zoom out"
-          className="w-10 h-10 text-lg font-bold hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 text-lg font-bold hover:bg-gray-100 active:bg-gray-200 rounded-md border border-gray-200 bg-white cursor-pointer touch-manipulation"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); zoomBy(1 / 1.15); }}
         >
@@ -564,19 +564,8 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         </button>
         <button
           type="button"
-          aria-label="Toggle pan mode"
-          className={`w-10 h-10 text-xs rounded-md border border-gray-200 cursor-pointer ${
-            forcePan ? "bg-gray-800 text-white" : "hover:bg-gray-100 bg-white"
-          }`}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => { e.stopPropagation(); setForcePan((v) => !v); }}
-        >
-          {forcePan ? "Pan" : "Pan"}
-        </button>
-        <button
-          type="button"
           aria-label="Reset view"
-          className="w-10 h-10 text-xs hover:bg-gray-100 rounded-md border border-gray-200 bg-white cursor-pointer"
+          className="w-9 h-9 sm:w-10 sm:h-10 text-[10px] sm:text-xs hover:bg-gray-100 active:bg-gray-200 rounded-md border border-gray-200 bg-white cursor-pointer touch-manipulation"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); reset(); }}
         >

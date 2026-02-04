@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import GravePlotCell from "./GravePlotCell";
 
 function parseNum(g) {
@@ -6,7 +6,7 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit, statusColors }) {
+const Section1DnDGrid = memo(function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit, statusColors }) {
   const TARGET_HEIGHT = 12; // Target rows for uniform square border
   
   // Build grid dimensions from numeric graves
@@ -91,4 +91,6 @@ export default function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHove
       })}
     </div>
   );
-}
+});
+
+export default Section1DnDGrid;

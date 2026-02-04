@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useMemo } from "react";
 import GravePlotCell from "./GravePlotCell";
 
 // Helper to extract the first integer from a string like "228-A"
@@ -7,7 +7,7 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
-export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
+const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
   const reservedBottomRows = 0;
   const dataCols = 10;
@@ -85,9 +85,9 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
 
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
-      <div className="grid grid-flow-col gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${totalCols}, max-content)`, gridAutoColumns: 'max-content' }}>
+      <div className="grid grid-flow-col gap-2 sm:gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${totalCols}, max-content)`, gridAutoColumns: 'max-content' }}>
         {cells.map((item, idx) => (
-          <div key={idx} className={`relative transition-all duration-200 ease-in-out transform-gpu ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+          <div key={idx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
             <GravePlotCell
               item={item}
               baseColorClass=""
@@ -102,4 +102,6 @@ export default function Section2DnDGrid({ plots = [], baseColorClass = "", isAdm
       </div>
     </div>
   );
-}
+});
+
+export default Section2DnDGrid;

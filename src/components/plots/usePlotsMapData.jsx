@@ -52,19 +52,20 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   return useQuery({
           queryKey: ["plotsMap_v3_all", { tab: activeTab, sectionsKey }],
           enabled: activeTab === "map",
-          staleTime: 0, // Always consider stale after mutation
-          gcTime: 5 * 60_000,
+          staleTime: 2 * 60_000, // 2 min stale time for better caching
+          gcTime: 10 * 60_000,
           refetchOnWindowFocus: false,
+          refetchOnMount: false,
           queryFn: async ({ signal }) => {
       const sectionFilter = buildSectionFilter(sectionsToLoad);
 
-      // 1 call total (Plot only)
+      // 1 call total (Plot only) - reduced payload for mobile
       const plots = await filterEntity(
         "Plot",
         sectionFilter,
         {
           sort: "-updated_date",
-          limit: 10_000,
+          limit: 3000, // Reduced from 10K for mobile performance
           select: [
             "id",
             "section",
@@ -77,13 +78,10 @@ export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
             "family_name",
             "birth_date",
             "death_date",
-            "photo_url",
-            "photo_url_small",
-            "photo_url_medium",
-            "photo_url_large"
+            "photo_url_small" // Only small thumbnail for tooltips
           ],
           persist: false,
-          ttlMs: 0, // No caching for fresh data after move
+          ttlMs: 60_000, // 1 min cache
         },
         { signal }
       );

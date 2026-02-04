@@ -1,17 +1,18 @@
-import React from 'react';
-import { Search, Filter, Calendar } from 'lucide-react';
+import React, { memo, useCallback, lazy, Suspense } from 'react';
+import { Search, Calendar } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import SavedSearchManager from "@/components/common/SavedSearchManager";
 
-export default function PlotFilters({ filters, onFilterChange, statusOptions }) {
+const SavedSearchManager = lazy(() => import("@/components/common/SavedSearchManager"));
+
+const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions }) {
     
-    const handleChange = (key, value) => {
-        onFilterChange({ ...filters, [key]: value });
-    };
+    const handleChange = useCallback((key, value) => {
+        onFilterChange(prev => ({ ...prev, [key]: value }));
+    }, [onFilterChange]);
 
     const handleClear = () => {
         onFilterChange({
@@ -146,20 +147,26 @@ export default function PlotFilters({ filters, onFilterChange, statusOptions }) 
                     </PopoverContent>
                 </Popover>
 
-                {/* Saved Searches */}
-                <SavedSearchManager 
-                    type="plot" 
-                    currentFilters={filters}
-                    onApplySearch={(saved) => onFilterChange({ ...filters, ...saved })}
-                />
+                {/* Saved Searches - hidden on mobile */}
+                <div className="hidden lg:block">
+                    <Suspense fallback={null}>
+                        <SavedSearchManager 
+                            type="plot" 
+                            currentFilters={filters}
+                            onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
+                        />
+                    </Suspense>
+                </div>
 
                 {/* Clear Filters */}
                 {(filters.search || filters.status !== 'All' || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
                     <Button variant="ghost" onClick={handleClear} className="text-sm text-gray-500 hover:text-red-600">
-                        Clear Filters
+                        Clear
                     </Button>
                 )}
             </div>
         </div>
     );
-}
+});
+
+export default PlotFilters;

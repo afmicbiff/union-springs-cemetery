@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, memo, useCallback } from "react";
 import { normalizeSectionKey } from "./normalizeSectionKey";
 
 function parseNum(g) {
@@ -16,7 +16,7 @@ const STATUS_TEXT = {
   Default: 'text-gray-700',
 };
 
-export default function GravePlotCell({ item, baseColorClass, statusColors, isAdmin, onHover, onEdit, sectionKey }) {
+const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, statusColors, isAdmin, onHover, onEdit, sectionKey }) {
   const [isBlinking, setIsBlinking] = useState(false);
   const hasInitializedBlink = useRef(false);
 
@@ -46,6 +46,19 @@ export default function GravePlotCell({ item, baseColorClass, statusColors, isAd
     window.addEventListener('plot-start-blink', handleStartBlink);
     return () => window.removeEventListener('plot-start-blink', handleStartBlink);
   }, [plotNum, sectionKey, item]);
+
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    if (isAdmin && onEdit && item?._entity === 'Plot') onEdit(item);
+  }, [isAdmin, onEdit, item]);
+
+  const handleMouseEnter = useCallback((e) => {
+    if (onHover) onHover(e, item);
+  }, [onHover, item]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (onHover) onHover(null, null);
+  }, [onHover]);
 
   if (!item || item.isSpacer) {
     const handleSpacerClick = (e) => {
@@ -79,13 +92,10 @@ export default function GravePlotCell({ item, baseColorClass, statusColors, isAd
       id={`plot-${sectionKey}-${plotNum}`}
       data-section={sectionKey}
       data-plot-num={plotNum}
-      className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-all ${isBlinking ? blinkingClass : ''}`}
-      onMouseEnter={(e) => onHover && onHover(e, item)}
-      onMouseLeave={() => onHover && onHover(null, null)}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (isAdmin && onEdit && item._entity === 'Plot') onEdit(item);
-      }}
+      className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-opacity ${isBlinking ? blinkingClass : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
       title={`Row: ${item.Row}, Grave: ${item.Grave}`}
     >
       <span className={`text-[10px] leading-none font-black ${textClass}`}>{item.Grave}</span>
@@ -93,4 +103,6 @@ export default function GravePlotCell({ item, baseColorClass, statusColors, isAd
       <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${bgClass}`}></div>
     </div>
   );
-}
+});
+
+export default GravePlotCell;
