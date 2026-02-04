@@ -1,11 +1,11 @@
-import React from "react";
+import React, { memo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Map, Loader2 } from "lucide-react";
 
-export default function OverviewPlotsCard() {
+const OverviewPlotsCard = memo(function OverviewPlotsCard() {
   // Fetch only necessary fields to reduce payload size
   const { data: plots = [], isLoading } = useQuery({
     queryKey: ["overview-plots-counts"],
@@ -56,4 +56,6 @@ export default function OverviewPlotsCard() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default OverviewPlotsCard;

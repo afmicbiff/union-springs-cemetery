@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo, useState, useCallback, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -18,15 +18,15 @@ const SevDot = ({ sev }) => {
   return <span className={`inline-block w-2.5 h-2.5 rounded-full ${map[sev] || 'bg-gray-400'}`} />;
 };
 
-export default function QualityAdvisor() {
-  const [items, setItems] = React.useState([]);
-  const [open, setOpen] = React.useState(false);
-  const [ack, setAck] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [reRunning, setReRunning] = React.useState(false);
-  const [lastRunAt, setLastRunAt] = React.useState(null);
+const QualityAdvisor = memo(function QualityAdvisor() {
+  const [items, setItems] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [ack, setAck] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [reRunning, setReRunning] = useState(false);
+  const [lastRunAt, setLastRunAt] = useState(null);
 
-  const rerun = React.useCallback(() => {
+  const rerun = useCallback(() => {
     setReRunning(true);
     requestAnimationFrame(() => {
       const results = runAllChecks();
@@ -36,7 +36,7 @@ export default function QualityAdvisor() {
     });
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     rerun();
     const t = setTimeout(rerun, 500); // after initial paint
     return () => clearTimeout(t);
@@ -145,4 +145,6 @@ export default function QualityAdvisor() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default QualityAdvisor;

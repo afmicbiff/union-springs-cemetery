@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Loader2 } from "lucide-react";
 import { format, parseISO, isAfter } from "date-fns";
 
-export default function OverviewCalendarCard() {
+const OverviewCalendarCard = memo(function OverviewCalendarCard() {
   const { data: events = [], isLoading } = useQuery({
     queryKey: ["overview-events"],
     queryFn: () => base44.entities.Event.list("-start_time", 50),
@@ -50,4 +50,6 @@ export default function OverviewCalendarCard() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default OverviewCalendarCard;

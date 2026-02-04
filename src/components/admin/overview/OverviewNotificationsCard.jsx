@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function OverviewNotificationsCard() {
+const OverviewNotificationsCard = memo(function OverviewNotificationsCard() {
   const { data: unread = [], isLoading } = useQuery({
     queryKey: ["overview-notifications"],
     queryFn: () => base44.entities.Notification.filter({ is_read: false }, "-created_at", 10),
@@ -47,4 +47,6 @@ export default function OverviewNotificationsCard() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default OverviewNotificationsCard;

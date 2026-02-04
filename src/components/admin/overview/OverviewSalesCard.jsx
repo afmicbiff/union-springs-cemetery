@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function OverviewSalesCard() { 
+const OverviewSalesCard = memo(function OverviewSalesCard() {
   const { data: reservations = [], isLoading } = useQuery({
     queryKey: ["overview-reservations"],
     queryFn: () => base44.entities.NewPlotReservation.list("-requested_date", 50),
@@ -47,4 +47,6 @@ export default function OverviewSalesCard() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default OverviewSalesCard;

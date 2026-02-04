@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 const LawnCareStats = React.lazy(() => import("@/components/admin/lawncare/LawnCareStats"));
 
-export default function OverviewLawnCareStats() {
+const OverviewLawnCareStats = memo(function OverviewLawnCareStats() {
   const { data: schedules = [], isLoading } = useQuery({
     queryKey: ["lawncare-schedules-overview"],
     queryFn: () => base44.entities.LawnCareSchedule.list("-created_date", 100),
@@ -31,4 +31,6 @@ export default function OverviewLawnCareStats() {
       <LawnCareStats schedules={schedules} />
     </Suspense>
   );
-}
+});
+
+export default OverviewLawnCareStats;

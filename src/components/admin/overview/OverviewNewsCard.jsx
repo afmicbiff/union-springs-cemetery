@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Megaphone, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function OverviewNewsCard() {
+const OverviewNewsCard = memo(function OverviewNewsCard() {
   const { data: announcements = [], isLoading } = useQuery({
     queryKey: ["overview-announcements"],
     queryFn: () => base44.entities.Announcement.list("-date", 10),
@@ -47,4 +47,6 @@ export default function OverviewNewsCard() {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default OverviewNewsCard;
