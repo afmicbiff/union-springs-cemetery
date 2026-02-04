@@ -101,11 +101,15 @@ function AuditLogViewer() {
 
     const queryClient = useQueryClient();
 
-    // Fetch Logs
-    const { data: logs, isLoading } = useQuery({
+    // Fetch Logs with caching and error handling
+    const { data: logs, isLoading, isError, refetch, isFetching } = useQuery({
         queryKey: ['audit-logs'],
-        queryFn: () => base44.entities.AuditLog.list('-timestamp', 2000), // Increased limit for archives
-        initialData: []
+        queryFn: () => base44.entities.AuditLog.list('-timestamp', 2000),
+        initialData: [],
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
+        retry: 2,
     });
 
     // Delete Log Mutation
