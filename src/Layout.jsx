@@ -163,7 +163,7 @@ export default function Layout({ children }) {
     { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
     { label: 'Board Members & Employees', path: '/Employees', icon: Users },
     { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
-    { label: 'Performance Dashboard', path: '/PerformanceDashboard', icon: Activity },
+    
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
     { label: 'Security Dashboard', path: '/SecurityDashboard', icon: Activity },
 

@@ -62,7 +62,6 @@ import NewPlotDetails from './pages/NewPlotDetails';
 import NewPlotReservations from './pages/NewPlotReservations';
 import NewPlotsAndMap from './pages/NewPlotsAndMap';
 import NotificationSettings from './pages/NotificationSettings';
-import PerformanceDashboard from './pages/PerformanceDashboard';
 import Plots from './pages/Plots';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
@@ -92,7 +91,6 @@ export const PAGES = {
     "NewPlotReservations": NewPlotReservations,
     "NewPlotsAndMap": NewPlotsAndMap,
     "NotificationSettings": NotificationSettings,
-    "PerformanceDashboard": PerformanceDashboard,
     "Plots": Plots,
     "Profile": Profile,
     "Reports": Reports,
