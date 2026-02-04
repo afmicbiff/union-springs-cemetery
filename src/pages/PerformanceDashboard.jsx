@@ -1,34 +1,15 @@
 import React from "react";
+import { getCurrentMetrics, subscribeMetrics } from "@/components/gov/metrics";
 import { base44 } from "@/api/base44Client";
+import { filterEntity } from "@/components/gov/dataClient";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Code, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-// Safe dynamic imports with error boundaries
-const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel").catch(() => ({ default: () => null })));
-const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts").catch(() => ({ default: () => null })));
-
-// Safe metrics import - avoid crashes if module fails
-let getCurrentMetrics = () => ({});
-let subscribeMetrics = () => () => {};
-try {
-  const metricsModule = require("@/components/gov/metrics");
-  getCurrentMetrics = metricsModule.getCurrentMetrics || getCurrentMetrics;
-  subscribeMetrics = metricsModule.subscribeMetrics || subscribeMetrics;
-} catch {
-  // Fallback already set
-}
-
-// Safe filterEntity import
-let filterEntity = async () => [];
-try {
-  const dataClient = require("@/components/gov/dataClient");
-  filterEntity = dataClient.filterEntity || filterEntity;
-} catch {
-  // Fallback already set
-}
+const AiAnalyticsPanel = React.lazy(() => import("@/components/gov/AiAnalyticsPanel"));
+const PerformanceCharts = React.lazy(() => import("@/components/gov/PerformanceCharts"));
 
 export default function PerformanceDashboard() {
         const queryClient = useQueryClient();
