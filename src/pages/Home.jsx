@@ -73,26 +73,7 @@ const Home = memo(function Home() {
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden">
-      {activeNotification && (
-        <div className="bg-teal-700 text-white px-4 py-3 relative animate-in slide-in-from-top duration-500">
-          <div className="max-w-[1240px] mx-auto flex items-start md:items-center justify-between gap-4 pr-8">
-            <div className="flex gap-3">
-              <Megaphone className="w-5 h-5 shrink-0 mt-0.5 md:mt-0 text-teal-300" />
-              <p className="font-medium text-sm md:text-base leading-snug">
-                {activeNotification.message}
-              </p>
-            </div>
-            <button 
-              onClick={() => handleDismiss(activeNotification.id)}
-              className="absolute top-2 right-2 md:relative md:top-auto md:right-auto p-1.5 hover:bg-teal-600 rounded-full transition-colors shrink-0"
-              title="Do not show communication anymore"
-            >
-              <X className="w-5 h-5" />
-              <span className="sr-only">Do not show communication anymore</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <NotificationBanner notification={activeNotification} onDismiss={handleDismiss} />
       <HeroSection />
       <QuickAccessGrid />
       <InfoSection />
