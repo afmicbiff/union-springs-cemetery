@@ -1,56 +1,73 @@
-import React from "react";
+import React, { useState, useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { format, subMonths, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
+
+// Lazy load recharts for bundle optimization
+const LazyChart = React.lazy(() => import("recharts").then(m => ({
+  default: ({ data, activeAreas, selectedArea, COLORS }) => (
+    <m.ResponsiveContainer width="100%" height="100%">
+      <m.BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+        <m.CartesianGrid strokeDasharray="3 3" />
+        <m.XAxis dataKey="name" />
+        <m.YAxis allowDecimals={false} />
+        <m.Tooltip />
+        <m.Legend />
+        {activeAreas.map((area, idx) => (
+          <m.Bar key={area} dataKey={area} stackId={selectedArea === "top" ? "a" : undefined} fill={COLORS[idx % COLORS.length]} />
+        ))}
+      </m.BarChart>
+    </m.ResponsiveContainer>
+  )
+})));
 
 function toDateSafe(d) {
   if (!d) return null;
   return typeof d === "string" ? parseISO(d) : d;
 }
 
-const COLORS = ["#0f766e", "#16a34a", "#2563eb", "#d97706", "#dc2626", "#7c3aed", "#0891b2"]; // teal/green/blue/orange/red/purple/cyan
+const COLORS = ["#0f766e", "#16a34a", "#2563eb", "#d97706", "#dc2626", "#7c3aed", "#0891b2"];
 
-export default function LawnCareHistoryChart({ schedules = [] }) {
-  const [monthsBack, setMonthsBack] = React.useState("6");
-  const [selectedArea, setSelectedArea] = React.useState("top"); // "top" or a specific area
+const LawnCareHistoryChart = memo(function LawnCareHistoryChart({ schedules = [] }) {
+  const [monthsBack, setMonthsBack] = useState("6");
+  const [selectedArea, setSelectedArea] = useState("top");
 
-  const months = parseInt(monthsBack, 10);
-  const now = new Date();
-  const monthsArr = Array.from({ length: months }).map((_, idx) => {
-    const d = subMonths(now, months - 1 - idx);
-    return { key: format(d, "yyyy-MM"), label: format(d, "MMM yyyy"), start: startOfMonth(d), end: endOfMonth(d) };
-  });
-
-  // Gather completion records by area and month using last_completed_date
-  const completions = schedules
-    .filter((s) => s.last_completed_date)
-    .map((s) => ({ area: s.area || "(Unassigned)", date: toDateSafe(s.last_completed_date) }))
-    .filter((r) => r.date);
-
-  // Determine top areas if "top" selected
-  const areaCounts = completions.reduce((acc, r) => {
-    acc[r.area] = (acc[r.area] || 0) + 1;
-    return acc;
-  }, {});
-
-  const sortedAreas = Object.keys(areaCounts).sort((a, b) => areaCounts[b] - areaCounts[a]);
-  const topAreas = sortedAreas.slice(0, 5);
-  const allAreas = Array.from(new Set((schedules || []).map((s) => s.area || "(Unassigned)"))).sort();
-
-  const activeAreas = selectedArea === "top" ? topAreas : [selectedArea];
-
-  // Build chart data
-  const data = monthsArr.map((m) => {
-    const row = { name: m.label };
-    activeAreas.forEach((area) => {
-      const count = completions.filter(
-        (r) => r.area === area && isWithinInterval(r.date, { start: m.start, end: m.end })
-      ).length;
-      row[area] = count;
+  const { data, activeAreas, allAreas } = useMemo(() => {
+    const months = parseInt(monthsBack, 10);
+    const now = new Date();
+    const monthsArr = Array.from({ length: months }).map((_, idx) => {
+      const d = subMonths(now, months - 1 - idx);
+      return { key: format(d, "yyyy-MM"), label: format(d, "MMM yyyy"), start: startOfMonth(d), end: endOfMonth(d) };
     });
-    return row;
-  });
+
+    const completions = schedules
+      .filter((s) => s.last_completed_date)
+      .map((s) => ({ area: s.area || "(Unassigned)", date: toDateSafe(s.last_completed_date) }))
+      .filter((r) => r.date);
+
+    const areaCounts = completions.reduce((acc, r) => {
+      acc[r.area] = (acc[r.area] || 0) + 1;
+      return acc;
+    }, {});
+
+    const sortedAreas = Object.keys(areaCounts).sort((a, b) => areaCounts[b] - areaCounts[a]);
+    const topAreas = sortedAreas.slice(0, 5);
+    const allAreasArr = Array.from(new Set((schedules || []).map((s) => s.area || "(Unassigned)"))).sort();
+    const active = selectedArea === "top" ? topAreas : [selectedArea];
+
+    const chartData = monthsArr.map((m) => {
+      const row = { name: m.label };
+      active.forEach((area) => {
+        const count = completions.filter(
+          (r) => r.area === area && isWithinInterval(r.date, { start: m.start, end: m.end })
+        ).length;
+        row[area] = count;
+      });
+      return row;
+    });
+
+    return { data: chartData, activeAreas: active, allAreas: allAreasArr };
+  }, [schedules, monthsBack, selectedArea]);
 
   return (
     <Card>
@@ -87,21 +104,14 @@ export default function LawnCareHistoryChart({ schedules = [] }) {
           </div>
         </div>
 
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis allowDecimals={false} />
-              <Tooltip />
-              <Legend />
-              {activeAreas.map((area, idx) => (
-                <Bar key={area} dataKey={area} stackId={selectedArea === "top" ? "a" : undefined} fill={COLORS[idx % COLORS.length]} />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="h-64 sm:h-72">
+          <React.Suspense fallback={<div className="w-full h-full bg-gray-50 rounded animate-pulse flex items-center justify-center text-sm text-gray-400">Loading chart...</div>}>
+            <LazyChart data={data} activeAreas={activeAreas} selectedArea={selectedArea} COLORS={COLORS} />
+          </React.Suspense>
         </div>
       </CardContent>
     </Card>
   );
-}
+});
+
+export default LawnCareHistoryChart;

@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useMemo, memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle2, CalendarDays } from "lucide-react";
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, isBefore, isAfter } from "date-fns";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, isBefore } from "date-fns";
 
 function toDateSafe(d) {
   if (!d) return null;
@@ -40,10 +39,14 @@ function countByPeriod(schedules, period, today = new Date()) {
   return { upcoming, overdue, completed };
 }
 
-export default function LawnCareStats({ schedules = [] }) {
-  const today = new Date();
-  const weekStats = countByPeriod(schedules, "week", today);
-  const monthStats = countByPeriod(schedules, "month", today);
+const LawnCareStats = memo(function LawnCareStats({ schedules = [] }) {
+  const { weekStats, monthStats } = useMemo(() => {
+    const today = new Date();
+    return {
+      weekStats: countByPeriod(schedules, "week", today),
+      monthStats: countByPeriod(schedules, "month", today)
+    };
+  }, [schedules]);
 
   return (
     <Card>
@@ -106,4 +109,6 @@ export default function LawnCareStats({ schedules = [] }) {
       </CardContent>
     </Card>
   );
-}
+});
+
+export default LawnCareStats;

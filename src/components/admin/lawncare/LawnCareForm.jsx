@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState, useCallback, memo } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function LawnCareForm({ initial, employees = [], onSave, onCancel }) {
-  const [form, setForm] = React.useState(() => ({
+const LawnCareForm = memo(function LawnCareForm({ initial, employees = [], onSave, onCancel }) {
+  const [form, setForm] = useState(() => ({
     area: initial?.area || "",
     frequency: initial?.frequency || "weekly",
     start_date: initial?.start_date || new Date().toISOString().slice(0, 10),
@@ -17,24 +17,26 @@ export default function LawnCareForm({ initial, employees = [], onSave, onCancel
     notes: initial?.notes || "",
   }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     onSave({ ...form });
-  };
+  }, [form, onSave]);
+
+  const handleChange = useCallback((field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
           <Label className="text-xs">Area</Label>
-          <Input value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} placeholder="e.g., Section A, Historic Row" required />
+          <Input value={form.area} onChange={(e) => handleChange('area', e.target.value)} placeholder="e.g., Section A" required />
         </div>
         <div>
           <Label className="text-xs">Frequency</Label>
-          <Select value={form.frequency} onValueChange={(v) => setForm({ ...form, frequency: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select frequency" />
-            </SelectTrigger>
+          <Select value={form.frequency} onValueChange={(v) => handleChange('frequency', v)}>
+            <SelectTrigger><SelectValue placeholder="Frequency" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="daily">Daily</SelectItem>
               <SelectItem value="weekly">Weekly</SelectItem>
@@ -47,21 +49,19 @@ export default function LawnCareForm({ initial, employees = [], onSave, onCancel
         </div>
         <div>
           <Label className="text-xs">Start Date</Label>
-          <Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} required />
+          <Input type="date" value={form.start_date} onChange={(e) => handleChange('start_date', e.target.value)} required />
         </div>
         <div>
-          <Label className="text-xs">Next Due Date</Label>
-          <Input type="date" value={form.next_due_date || ""} onChange={(e) => setForm({ ...form, next_due_date: e.target.value })} />
+          <Label className="text-xs">Next Due</Label>
+          <Input type="date" value={form.next_due_date || ""} onChange={(e) => handleChange('next_due_date', e.target.value)} />
         </div>
         <div>
-          <Label className="text-xs">Assigned Employee</Label>
-          <Select value={form.assigned_employee_id || ""} onValueChange={(v) => setForm({ ...form, assigned_employee_id: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select employee" />
-            </SelectTrigger>
+          <Label className="text-xs">Assigned</Label>
+          <Select value={form.assigned_employee_id || ""} onValueChange={(v) => handleChange('assigned_employee_id', v)}>
+            <SelectTrigger><SelectValue placeholder="Employee" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={null}>Unassigned</SelectItem>
-              {employees.map((e) => (
+              {employees.slice(0, 50).map((e) => (
                 <SelectItem key={e.id} value={e.id}>{e.first_name} {e.last_name}</SelectItem>
               ))}
             </SelectContent>
@@ -69,10 +69,8 @@ export default function LawnCareForm({ initial, employees = [], onSave, onCancel
         </div>
         <div>
           <Label className="text-xs">Status</Label>
-          <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select status" />
-            </SelectTrigger>
+          <Select value={form.status} onValueChange={(v) => handleChange('status', v)}>
+            <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="scheduled">Scheduled</SelectItem>
               <SelectItem value="in_progress">In Progress</SelectItem>
@@ -85,13 +83,15 @@ export default function LawnCareForm({ initial, employees = [], onSave, onCancel
 
       <div>
         <Label className="text-xs">Notes</Label>
-        <Textarea rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Instructions, materials, constraints, etc." />
+        <Textarea rows={3} value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} placeholder="Instructions..." />
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" className="bg-teal-700 hover:bg-teal-800 text-white">Save</Button>
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" size="sm" className="bg-teal-700 hover:bg-teal-800 text-white">Save</Button>
       </div>
     </form>
   );
-}
+});
+
+export default LawnCareForm;
