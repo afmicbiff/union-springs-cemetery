@@ -1,12 +1,15 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, lazy, Suspense } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
-import { Copy, Shield, AlertTriangle, Loader2 } from 'lucide-react';
+import { Copy, Shield, AlertTriangle, Loader2, Monitor } from 'lucide-react';
 import { format } from 'date-fns';
+
+// Lazy load the heavy EndpointIntelligence component
+const EndpointIntelligence = lazy(() => import('./EndpointIntelligence'));
 
 const SEV_BADGE = {
   info: 'bg-slate-100 text-slate-700',
@@ -43,12 +46,13 @@ function EventDetailDialog({ event, open, onOpenChange, blockedSet, intelMap, on
 
   const selectedEndpoint = matchedEndpoints[0] || null;
 
-  // Endpoint logs
+  // Endpoint logs - fetch more for correlation
   const { data: endpointLogs = [], isLoading: logsLoading } = useQuery({
     queryKey: ['endpoint-logs', selectedEndpoint?.id],
-    queryFn: () => base44.entities.EndpointEvent.filter({ endpoint_id: selectedEndpoint.id }, '-timestamp', 20),
+    queryFn: () => base44.entities.EndpointEvent.filter({ endpoint_id: selectedEndpoint.id }, '-timestamp', 50),
     enabled: !!selectedEndpoint && open,
-    staleTime: 60_000,
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
   });
 
   const handleCopyIp = useCallback(() => {
@@ -174,54 +178,30 @@ function EventDetailDialog({ event, open, onOpenChange, blockedSet, intelMap, on
             </div>
           )}
 
-          {/* Endpoint Intelligence */}
+          {/* Endpoint Intelligence - Enhanced */}
           <div className="border-t pt-3">
-            <h4 className="text-xs sm:text-sm font-medium mb-2">Endpoint Intelligence</h4>
+            <h4 className="text-xs sm:text-sm font-medium mb-2 flex items-center gap-1.5">
+              <Monitor className="w-3.5 h-3.5 text-blue-500" /> Endpoint Intelligence
+            </h4>
             {endpointsLoading ? (
               <div className="flex items-center gap-2 text-[10px] sm:text-xs text-stone-500">
-                <Loader2 className="w-3 h-3 animate-spin" /> Loading…
+                <Loader2 className="w-3 h-3 animate-spin" /> Loading endpoint data…
               </div>
             ) : selectedEndpoint ? (
-              <div className="space-y-2">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2 text-[10px] sm:text-xs">
-                  <div><span className="font-medium">Hostname:</span> {selectedEndpoint.hostname || '-'}</div>
-                  <div><span className="font-medium">Device ID:</span> {selectedEndpoint.device_id || '-'}</div>
-                  <div><span className="font-medium">Owner:</span> {selectedEndpoint.owner_email || '-'}</div>
-                  <div><span className="font-medium">OS:</span> {selectedEndpoint.os || '-'}</div>
-                  <div><span className="font-medium">Status:</span> {selectedEndpoint.status || '-'}</div>
-                  <div><span className="font-medium">Posture:</span> {selectedEndpoint.security_posture || '-'}</div>
+              <Suspense fallback={
+                <div className="flex items-center gap-2 text-[10px] text-stone-500 py-4">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Loading endpoint intelligence…
                 </div>
-                
-                {logsLoading ? (
-                  <div className="text-[10px] text-stone-500">Loading logs…</div>
-                ) : endpointLogs.length > 0 && (
-                  <div className="mt-2">
-                    <h5 className="text-[10px] sm:text-xs font-medium mb-1">Recent Logs</h5>
-                    <div className="overflow-x-auto max-h-32 border rounded">
-                      <table className="w-full text-[9px] sm:text-[10px]">
-                        <thead className="bg-stone-100 sticky top-0">
-                          <tr>
-                            <th className="p-1 text-left">Time</th>
-                            <th className="p-1 text-left">Type</th>
-                            <th className="p-1 text-left">Details</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {endpointLogs.slice(0, 10).map(log => (
-                            <tr key={log.id}>
-                              <td className="p-1 whitespace-nowrap">{log.timestamp ? format(new Date(log.timestamp), 'HH:mm:ss') : '-'}</td>
-                              <td className="p-1">{log.type}</td>
-                              <td className="p-1 max-w-[150px] truncate">{log.process_name || log.file_path || log.description || '-'}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              </div>
+              }>
+                <EndpointIntelligence 
+                  endpoint={selectedEndpoint}
+                  endpointEvents={endpointLogs}
+                  eventsLoading={logsLoading}
+                  securityEvent={event}
+                />
+              </Suspense>
             ) : (
-              <p className="text-[10px] sm:text-xs text-stone-500">No associated endpoint found</p>
+              <p className="text-[10px] sm:text-xs text-stone-500">No associated endpoint found for this IP/user</p>
             )}
           </div>
 
