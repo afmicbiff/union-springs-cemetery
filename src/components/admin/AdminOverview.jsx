@@ -11,7 +11,7 @@ const OverviewSalesCard = React.lazy(() => import("@/components/admin/overview/O
 const OverviewPlotsCard = React.lazy(() => import("@/components/admin/overview/OverviewPlotsCard"));
 const OverviewLawnCareStats = React.lazy(() => import("@/components/admin/overview/OverviewLawnCareStats"));
 const OverviewRedlinesCard = React.lazy(() => import("@/components/admin/overview/OverviewRedlinesCard"));
-const ProductionReport = React.lazy(() => import("@/components/admin/overview/ProductionReport"));
+const ProductionReport = React.lazy(() => import("@/components/admin/overview/ProductionReport.jsx"));
 const QualityAdvisor = React.lazy(() => import("@/components/gov/QualityAdvisor"));
 
 // Loading fallback for cards
