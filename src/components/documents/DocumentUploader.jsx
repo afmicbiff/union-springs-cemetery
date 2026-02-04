@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Upload, FileUp, Calendar as CalendarIcon } from 'lucide-react';
+import { Loader2, Upload, FileUp, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,7 +11,34 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-export default function DocumentUploader({ onUploadComplete, versionContext = null }) {
+// Max file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+const docTypes = [
+    "Resume",
+    "Offer Letter",
+    "Form I-9",
+    "Form W-4",
+    "Form L-4",
+    "Minor Cert",
+    "Performance Review",
+    "Disciplinary Action",
+    "Medical",
+    "Certification/License",
+    "Signed Agreement",
+    "Other"
+];
+
+const categories = [
+    "Contracts",
+    "Certifications",
+    "HR Forms",
+    "Legal",
+    "Other"
+];
+
+function DocumentUploader({ onUploadComplete, versionContext = null }) {
     const [file, setFile] = useState(null);
     const [type, setType] = useState("Other");
     const [category, setCategory] = useState("Other");
@@ -26,12 +53,14 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
             setCategory(versionContext.category || "Other");
             setNotes(versionContext.notes || "");
             if (versionContext.expiration_date) {
-                setExpirationDate(new Date(versionContext.expiration_date));
+                try {
+                    setExpirationDate(new Date(versionContext.expiration_date));
+                } catch { /* ignore invalid date */ }
             }
         }
     }, [versionContext]);
 
-    const docTypes = [
+    // Removed duplicate docTypes - now at module level
         "Resume",
         "Offer Letter",
         "Form I-9",
@@ -54,9 +83,21 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
         "Other"
     ];
 
-    const handleUpload = async () => {
+    const handleUpload = useCallback(async () => {
         if (!file) {
             toast.error("Please select a file.");
+            return;
+        }
+
+        // Validate file size
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error("File too large. Maximum size is 10MB.");
+            return;
+        }
+
+        // Validate file type
+        if (!ALLOWED_TYPES.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|jpg|jpeg|png|gif)$/i)) {
+            toast.error("Invalid file type. Please upload PDF, Word, or image files.");
             return;
         }
 
@@ -104,7 +145,18 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
         } finally {
             setUploading(false);
         }
-    };
+    }, [file, type, category, notes, expirationDate, versionContext, onUploadComplete]);
+
+    const handleFileChange = useCallback((e) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+            if (selectedFile.size > MAX_FILE_SIZE) {
+                toast.error("File too large. Maximum size is 10MB.");
+                return;
+            }
+            setFile(selectedFile);
+        }
+    }, []);
 
     return (
         <div className={cn("bg-stone-50 p-4 rounded-md border border-stone-200 space-y-4", versionContext && "border-none shadow-none bg-transparent p-0")}>
@@ -144,10 +196,12 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
                     <Input 
                         id="doc-upload-input"
                         type="file" 
-                        onChange={(e) => setFile(e.target.files[0])}
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                        onChange={handleFileChange}
                         disabled={uploading}
-                        className="bg-white"
+                        className="bg-white h-10"
                     />
+                    <p className="text-xs text-stone-500">Max 10MB. Allowed: PDF, Word, Images</p>
                 </div>
 
                 <div className="space-y-2">
@@ -190,7 +244,7 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
             <Button 
                 onClick={handleUpload} 
                 disabled={uploading || !file}
-                className="w-full bg-teal-700 hover:bg-teal-800"
+                className="w-full bg-teal-700 hover:bg-teal-800 h-10"
             >
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
                 {versionContext ? `Upload New Version (v${(versionContext.version || 1) + 1})` : "Upload Securely"}
@@ -198,3 +252,5 @@ export default function DocumentUploader({ onUploadComplete, versionContext = nu
         </div>
     );
 }
+
+export default memo(DocumentUploader);
