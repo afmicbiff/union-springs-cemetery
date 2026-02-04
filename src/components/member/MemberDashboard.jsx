@@ -90,25 +90,41 @@ function MemberDashboard({ user, setActiveTab }) {
     const confirmedReservations = useMemo(() => (reservations || []).filter(r => r.status === 'Confirmed'), [reservations]);
 
     // Calculate Outstanding Tasks
-    const tasks = [];
-    if (pendingReservations.length > 0) {
-        tasks.push({
-            id: 'pending-res',
-            title: 'Pending Reservations',
-            description: `You have ${pendingReservations.length} reservation(s) awaiting approval or payment.`,
-            type: 'alert',
-            action: () => setActiveTab('messages') // Direct to messages to inquire
-        });
-    }
-    if (!memberData?.phone_primary || !memberData?.address) {
-        tasks.push({
-            id: 'profile-incomplete',
-            title: 'Complete Your Profile',
-            description: 'Please update your contact information to help us reach you.',
-            type: 'info',
-            action: () => setActiveTab('profile')
-        });
-    }
+    const tasks = useMemo(() => {
+        const items = [];
+        if (pendingReservations.length > 0) {
+            items.push({
+                id: 'pending-res',
+                title: 'Pending Reservations',
+                description: `You have ${pendingReservations.length} reservation(s) awaiting approval or payment.`,
+                type: 'alert',
+                action: () => setActiveTab('messages')
+            });
+        }
+        if (!memberData?.phone_primary || !memberData?.address) {
+            items.push({
+                id: 'profile-incomplete',
+                title: 'Complete Your Profile',
+                description: 'Please update your contact information to help us reach you.',
+                type: 'info',
+                action: () => setActiveTab('profile')
+            });
+        }
+        if (notifications.length > 0) {
+            items.push({
+                id: 'unread-notifications',
+                title: 'Unread Notifications',
+                description: `You have ${notifications.length} unread notification(s).`,
+                type: 'info',
+                action: () => setActiveTab('messages')
+            });
+        }
+        return items;
+    }, [pendingReservations.length, memberData, notifications.length, setActiveTab]);
+
+    const handleRefresh = useCallback(() => {
+        refetchReservations();
+    }, [refetchReservations]);
 
     return (
         <div className="space-y-6">
