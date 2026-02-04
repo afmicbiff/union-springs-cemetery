@@ -51,7 +51,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
             }
         },
         onSuccess: () => {
-            queryClient.invalidateQueries(['deceased-admin-list']);
+            queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
             toast.success(mode === 'create' ? "Record created" : "Record updated");
             onClose();
         },
@@ -106,13 +106,13 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                 <DialogHeader>
                     <DialogTitle>{mode === 'create' ? 'Add Deceased Record' : 'Edit Deceased Record'}</DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-6 py-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 py-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="first_name">First Name *</Label>
                             <Input 
@@ -141,7 +141,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="date_of_birth">Date of Birth</Label>
                             <Input 
@@ -171,7 +171,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="plot_location">Plot Location</Label>
                             <Input 
@@ -191,7 +191,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                          <div className="space-y-2">
                             <Label>Burial Type</Label>
                             <Select 

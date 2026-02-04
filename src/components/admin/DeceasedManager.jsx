@@ -123,69 +123,63 @@ export default function DeceasedManager() {
                     <CardTitle>Deceased Records</CardTitle>
                     <CardDescription>
                         Manage deceased individuals, obituaries, and burial details.
-                        <div className="flex gap-2 mt-2 flex-wrap">
+                        <div className="flex gap-1.5 sm:gap-2 mt-2 flex-wrap">
                             <Badge 
                                 variant={statusFilter === 'Deceased' ? "default" : "outline"} 
-                                className={`cursor-pointer transition-all ${statusFilter === 'Deceased' ? 'bg-teal-700 hover:bg-teal-800' : 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Deceased' ? 'bg-teal-700 hover:bg-teal-800' : 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100'}`}
                                 onClick={() => { setStatusFilter('Deceased'); setPage(1); }}
                             >
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Deceased
+                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} </span>Deceased
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'All' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'All' ? 'bg-stone-700 hover:bg-stone-800' : 'text-stone-600 border-stone-200 bg-stone-50 hover:bg-stone-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'All' ? 'bg-stone-700 hover:bg-stone-800' : 'text-stone-600 border-stone-200 bg-stone-50 hover:bg-stone-100'}`}
                                 onClick={() => { setStatusFilter('All'); setPage(1); }}
                             >
-                                {isLoading && !searchResults ? '...' : (
-                                    (searchResults?.stats?.total_records || 0) +
-                                    (searchResults?.stats?.total_reserved || 0) +
-                                    (searchResults?.stats?.total_available || 0) +
-                                    (searchResults?.stats?.total_not_usable || 0) +
-                                    (searchResults?.stats?.total_unknown || 0)
-                                )} All Records
+                                All
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Reserved' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'Reserved' ? 'bg-amber-700 hover:bg-amber-800' : 'text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Reserved' ? 'bg-amber-700 hover:bg-amber-800' : 'text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100'}`}
                                 onClick={() => { setStatusFilter('Reserved'); setPage(1); }}
                             >
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} Reserved Plots
+                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} </span>Reserved
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Available' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'Available' ? 'bg-emerald-700 hover:bg-emerald-800' : 'text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Available' ? 'bg-emerald-700 hover:bg-emerald-800' : 'text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100'}`}
                                 onClick={() => { setStatusFilter('Available'); setPage(1); }}
                             >
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} Available Plots
+                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} </span>Available
+                            </Badge>
+                            <Badge 
+                                variant={statusFilter === 'Veteran' ? "default" : "outline"}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Veteran' ? 'bg-blue-700 hover:bg-blue-800' : 'text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100'}`}
+                                onClick={() => { setStatusFilter('Veteran'); setPage(1); }}
+                            >
+                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} </span>Veterans
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Not Usable' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'Not Usable' ? 'bg-gray-700 hover:bg-gray-800' : 'text-gray-700 border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 hidden sm:inline-flex ${statusFilter === 'Not Usable' ? 'bg-gray-700 hover:bg-gray-800' : 'text-gray-700 border-gray-200 bg-gray-50 hover:bg-gray-100'}`}
                                 onClick={() => { setStatusFilter('Not Usable'); setPage(1); }}
                             >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_not_usable || 0)} Not Usable
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Unknown' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'Unknown' ? 'bg-purple-700 hover:bg-purple-800' : 'text-purple-700 border-purple-200 bg-purple-50 hover:bg-purple-100'}`}
+                                className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 hidden sm:inline-flex ${statusFilter === 'Unknown' ? 'bg-purple-700 hover:bg-purple-800' : 'text-purple-700 border-purple-200 bg-purple-50 hover:bg-purple-100'}`}
                                 onClick={() => { setStatusFilter('Unknown'); setPage(1); }}
                             >
                                 {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_unknown || 0)} Unknown
-                            </Badge>
-                            <Badge 
-                                variant={statusFilter === 'Veteran' ? "default" : "outline"}
-                                className={`cursor-pointer transition-all ${statusFilter === 'Veteran' ? 'bg-blue-700 hover:bg-blue-800' : 'text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100'}`}
-                                onClick={() => { setStatusFilter('Veteran'); setPage(1); }}
-                            >
-                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} Veterans
                             </Badge>
                         </div>
                     </CardDescription>
                 </div>
                 </CardHeader>
             <CardContent>
-                <div className="flex items-center justify-between mb-6">
-                    <div className="relative w-full max-w-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                    <div className="relative w-full sm:max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
                         <Input
                             placeholder="Search by name or plot..."
@@ -206,6 +200,7 @@ export default function DeceasedManager() {
                         />
                         <Button 
                             variant="outline"
+                            size="sm"
                             onClick={() => { setSearch(''); setStatusFilter('All'); setDateFilters({}); setPage(1); }}
                             className="text-stone-600 border-stone-200 hover:bg-stone-50"
                         >
@@ -213,7 +208,8 @@ export default function DeceasedManager() {
                         </Button>
                         <Button 
                             variant="outline" 
-                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            size="sm"
+                            className="text-red-600 border-red-200 hover:bg-red-50 hidden md:flex"
                             onClick={async () => {
                                 if (confirm("Are you sure you want to delete duplicate deceased records? This will keep the most complete record for each person and delete duplicates. This action cannot be undone.")) {
                                     setIsCleaning(true);
@@ -232,11 +228,11 @@ export default function DeceasedManager() {
                             }}
                             disabled={isCleaning}
                         >
-                            {isCleaning ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                            Cleanup Duplicates
+                            {isCleaning ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Trash2 className="w-4 h-4 mr-1" />}
+                            <span className="hidden lg:inline">Cleanup</span>
                         </Button>
-                        <Button onClick={handleCreate} className="bg-teal-600 hover:bg-teal-700 text-white">
-                            <Plus className="w-4 h-4 mr-2" /> Add Record
+                        <Button onClick={handleCreate} size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                            <Plus className="w-4 h-4 sm:mr-1" /> <span className="hidden sm:inline">Add Record</span>
                         </Button>
                     </div>
                 </div>
@@ -343,13 +339,15 @@ export default function DeceasedManager() {
                         )}
                         </CardContent>
 
-            <React.Suspense fallback={null}>
-                <DeceasedEditDialog 
-                    isOpen={isEditOpen} 
-                    onClose={() => setIsEditOpen(false)} 
-                    deceased={selectedDeceased} 
-                    mode={mode} 
-                />
+            <React.Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"><Loader2 className="w-8 h-8 animate-spin text-white" /></div>}>
+                {isEditOpen && (
+                    <DeceasedEditDialog 
+                        isOpen={isEditOpen} 
+                        onClose={() => setIsEditOpen(false)} 
+                        deceased={selectedDeceased} 
+                        mode={mode} 
+                    />
+                )}
             </React.Suspense>
         </Card>
     );
