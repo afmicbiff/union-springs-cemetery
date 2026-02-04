@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-export default function SegmentBuilder({ criteria, onChange, onSave, savedSegments, onLoadSegment }) {
+function SegmentBuilder({ criteria, onChange, onSave, savedSegments, onLoadSegment }) {
     const fields = [
         { value: 'state', label: 'State', type: 'text' },
         { value: 'city', label: 'City', type: 'text' },
@@ -45,20 +45,20 @@ export default function SegmentBuilder({ criteria, onChange, onSave, savedSegmen
         ]
     };
 
-    const addRule = () => {
+    const addRule = useCallback(() => {
         onChange({
             ...criteria,
             rules: [...criteria.rules, { field: 'city', operator: 'contains', value: '' }]
         });
-    };
+    }, [criteria, onChange]);
 
-    const removeRule = (index) => {
+    const removeRule = useCallback((index) => {
         const newRules = [...criteria.rules];
         newRules.splice(index, 1);
         onChange({ ...criteria, rules: newRules });
-    };
+    }, [criteria, onChange]);
 
-    const updateRule = (index, key, value) => {
+    const updateRule = useCallback((index, key, value) => {
         const newRules = [...criteria.rules];
         newRules[index] = { ...newRules[index], [key]: value };
         
@@ -71,7 +71,7 @@ export default function SegmentBuilder({ criteria, onChange, onSave, savedSegmen
         }
 
         onChange({ ...criteria, rules: newRules });
-    };
+    }, [criteria, onChange, fields, operators]);
 
     const [segmentName, setSegmentName] = useState("");
 
@@ -204,3 +204,5 @@ export default function SegmentBuilder({ criteria, onChange, onSave, savedSegmen
         </div>
     );
 }
+
+export default React.memo(SegmentBuilder);

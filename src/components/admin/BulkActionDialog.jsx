@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import AIEmailAssistant from './AIEmailAssistant';
 
-export default function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm, type = 'member' }) {
+function BulkActionDialog({ isOpen, onClose, selectedCount, onConfirm, type = 'member' }) {
     const [actionType, setActionType] = useState(
         type === 'employee' ? "change_role" : 
         type === 'archived_employee' ? "reactivate" :
@@ -31,16 +31,34 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
     }, [type]);
 
     // Fetch employees for task assignment
-    const { data: employees } = useQuery({
+    const { data: employees, isLoading: employeesLoading } = useQuery({
         queryKey: ['employees-bulk'],
-        queryFn: () => base44.entities.Employee.list(null, 100),
-        initialData: []
+        queryFn: () => base44.entities.Employee.list('-updated_date', 100),
+        initialData: [],
+        staleTime: 10 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        enabled: isOpen && actionType === 'create_task',
     });
 
-    const handleConfirm = () => {
-        onConfirm(actionType, config);
-        onClose();
-    };
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleConfirm = useCallback(async () => {
+        setIsSubmitting(true);
+        try {
+            await onConfirm(actionType, config);
+            onClose();
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [actionType, config, onConfirm, onClose]);
+
+    // Validation
+    const isValid = useMemo(() => {
+        if (actionType === 'send_email') return !!(config.subject?.trim() && config.body?.trim());
+        if (actionType === 'create_task') return !!config.title?.trim();
+        if (actionType === 'change_role') return !!config.employment_type;
+        return true;
+    }, [actionType, config]);
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -235,21 +253,21 @@ export default function BulkActionDialog({ isOpen, onClose, selectedCount, onCon
                     )}
                 </div>
 
-                <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button variant="outline" onClick={onClose} className="w-full sm:w-auto" disabled={isSubmitting}>Cancel</Button>
                     <Button 
-                        className="bg-teal-700 hover:bg-teal-800"
+                        className="bg-teal-700 hover:bg-teal-800 w-full sm:w-auto min-w-[140px]"
                         onClick={handleConfirm}
-                        disabled={
-                            (actionType === 'send_email' && (!config.subject || !config.body)) ||
-                            (actionType === 'create_task' && (!config.title)) ||
-                            (actionType === 'change_role' && !config.employment_type)
-                        }
+                        disabled={!isValid || isSubmitting}
                     >
-                        Execute Action
+                        {isSubmitting ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
+                        ) : 'Execute Action'}
                     </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
+
+export default React.memo(BulkActionDialog);
