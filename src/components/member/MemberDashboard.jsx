@@ -54,29 +54,40 @@ const ReservationCard = memo(function ReservationCard({ reservation, status }) {
 function MemberDashboard({ user, setActiveTab }) {
     // Fetch Member Record
     const { data: memberData } = useQuery({
-        queryKey: ['member-profile', user.email],
+        queryKey: ['member-profile', user?.email],
         queryFn: async () => {
             const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
             return res?.[0] || null;
         },
-        enabled: !!user.email,
-        initialData: null
+        enabled: !!user?.email,
+        initialData: null,
+        staleTime: 5 * 60_000,
+        retry: 2,
     });
 
     // Fetch Reservations (Plots)
-    const { data: reservations, isLoading: loadingReservations } = useQuery({
-        queryKey: ['member-reservations', user.email],
+    const { data: reservations, isLoading: loadingReservations, isError: reservationsError, refetch: refetchReservations, isFetching } = useQuery({
+        queryKey: ['member-reservations', user?.email],
         queryFn: async () => {
-            // Fetch reservations where owner_email matches
             const res = await base44.entities.Reservation.list(null, 100); 
-            // Client-side filter because .list filter might be limited or for safety
-            return res.filter(r => r.owner_email === user.email);
+            return (res || []).filter(r => r.owner_email === user.email);
         },
-        enabled: !!user.email
+        enabled: !!user?.email,
+        staleTime: 2 * 60_000,
+        retry: 2,
     });
 
-    const pendingReservations = reservations?.filter(r => r.status === 'Pending') || [];
-    const confirmedReservations = reservations?.filter(r => r.status === 'Confirmed') || [];
+    // Fetch user notifications
+    const { data: notifications = [] } = useQuery({
+        queryKey: ['member-notifications', user?.email],
+        queryFn: () => base44.entities.Notification.filter({ user_email: user.email, is_read: false }, '-created_at', 5),
+        enabled: !!user?.email,
+        staleTime: 60_000,
+        retry: 1,
+    });
+
+    const pendingReservations = useMemo(() => (reservations || []).filter(r => r.status === 'Pending'), [reservations]);
+    const confirmedReservations = useMemo(() => (reservations || []).filter(r => r.status === 'Confirmed'), [reservations]);
 
     // Calculate Outstanding Tasks
     const tasks = [];
