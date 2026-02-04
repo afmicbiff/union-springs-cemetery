@@ -335,4 +335,4 @@ function Bylaws() {
   );
 }
 
-export default memo(Bylaws);
+export default Bylaws;
