@@ -14,10 +14,7 @@ import {
 
 import GovernanceProvider from '@/components/gov/GovernanceProvider';
 import ImageContextMenu from '@/components/common/ImageContextMenu';
-import { initPerf } from "./components/perf/initPerf";
 import { base44 } from '@/api/base44Client';
-
-initPerf();
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const location = useLocation();
