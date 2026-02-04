@@ -229,4 +229,4 @@ function MemberDashboard({ user, setActiveTab }) {
     );
 }
 
-export default memo(MemberDashboard);
+export default MemberDashboard;
