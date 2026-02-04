@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Search, MapPin } from 'lucide-react';
 
-const QuickAccessCard = ({ icon: Icon, title, description, linkText, linkUrl, colorClass, hoverColorClass }) => (
+const QuickAccessCard = memo(({ icon: Icon, title, description, linkText, linkUrl, colorClass, hoverColorClass }) => (
   <div className="bg-white p-8 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.5)] hover:shadow-[0_-20px_45px_rgba(0,0,0,0.6)] hover:-translate-y-1 transition-all duration-300 group flex flex-col items-center text-center h-full border-b-4 border-transparent hover:border-teal-600">
     <div className={`w-14 h-14 ${colorClass} rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
       <Icon className={`w-7 h-7 ${hoverColorClass}`} />
@@ -22,9 +22,9 @@ const QuickAccessCard = ({ icon: Icon, title, description, linkText, linkUrl, co
       </span>
     )}
   </div>
-);
+));
 
-export default function QuickAccessGrid() {
+const QuickAccessGrid = memo(function QuickAccessGrid() {
   return (
     <section className="py-12 md:py-20 px-4 md:px-8 bg-stone-100 relative z-20">
       <div className="max-w-4xl mx-auto mt-0 md:-mt-24 lg:-mt-32 grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -54,4 +54,6 @@ export default function QuickAccessGrid() {
       </div>
     </section>
   );
-}
+});
+
+export default QuickAccessGrid;
