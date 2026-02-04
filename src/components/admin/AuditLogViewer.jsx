@@ -124,12 +124,13 @@ function AuditLogViewer() {
         onError: (err) => toast.error("Failed to delete log: " + err.message)
     });
 
-    // --- filtering logic ---
+    // --- filtering logic with safe date parsing ---
     const filteredLogs = useMemo(() => {
-        if (!logs) return [];
+        if (!logs || !Array.isArray(logs)) return [];
 
         return logs.filter(log => {
-            const logDate = parseISO(log.timestamp);
+            const logDate = safeParseISO(log.timestamp);
+            if (!logDate) return false; // Skip invalid dates
             
             // 1. Year Filter
             if (selectedYear !== "all") {
@@ -148,18 +149,18 @@ function AuditLogViewer() {
 
             // 4. Day Filter
             if (selectedDay !== "all") {
-                // selectedDay is ISO string from dropdown value
-                if (!isSameDay(logDate, parseISO(selectedDay))) return false;
+                const dayDate = safeParseISO(selectedDay);
+                if (!dayDate || !isSameDay(logDate, dayDate)) return false;
             }
 
             // 5. Search
             if (searchTerm) {
                 const term = searchTerm.toLowerCase();
                 const searchString = `
-                    ${log.action} 
-                    ${log.entity_type} 
-                    ${log.details} 
-                    ${log.performed_by}
+                    ${log.action || ''} 
+                    ${log.entity_type || ''} 
+                    ${log.details || ''} 
+                    ${log.performed_by || ''}
                     ${log.entity_id || ''}
                 `.toLowerCase();
                 
