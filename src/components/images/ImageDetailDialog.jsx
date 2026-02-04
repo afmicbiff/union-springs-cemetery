@@ -22,23 +22,27 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
   const [quality, setQuality] = useState(80);
   const [loading, setLoading] = useState(false);
 
+  // Reset state when dialog opens with new image
   useEffect(() => {
     if (open && image) {
       setQuality(80);
       setLoading(false);
     }
-  }, [open, image]);
+  }, [open, image?.id]);
 
-  if (!image) return null;
-
-  const filename = React.useMemo(() => {
+  // Memoize filename extraction
+  const filename = useMemo(() => {
+    if (!image?.original_url) return 'image';
     try {
       const url = new URL(image.original_url);
       return decodeURIComponent(url.pathname.split('/').pop() || 'image');
     } catch {
       return 'image';
     }
-  }, [image.original_url]);
+  }, [image?.original_url]);
+
+  // Early return after hooks
+  if (!image) return null;
 
   const logUsage = useCallback(async (action) => {
     base44.entities.ImageUsage.create({
@@ -118,6 +122,9 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
     }
   }, [image, quality, onOptimized]);
 
+  // Memoize quality change handler
+  const handleQualityChange = useCallback((v) => setQuality(v[0]), []);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto p-3 sm:p-6">
@@ -131,9 +138,12 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
               <source srcSet={image.webp_url} type="image/webp" />
               <img 
                 src={image.jpeg_url} 
-                alt={image.alt_text || ''} 
+                alt={image.alt_text || 'Image preview'} 
                 className="w-full h-40 sm:h-52 lg:h-64 object-contain"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
+                width={image.width || undefined}
+                height={image.height || undefined}
               />
             </picture>
           </div>
@@ -167,8 +177,14 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
             <div>
               <Label className="text-[10px] sm:text-xs text-stone-500">Compression quality</Label>
               <div className="flex items-center gap-2 sm:gap-3 mt-1">
-                <Slider value={[quality]} onValueChange={(v) => setQuality(v[0])} min={1} max={100} step={1} className="w-24 sm:w-32 lg:w-40" />
-                <span className="text-[10px] sm:text-xs text-stone-600 w-6">{quality}</span>
+                <Slider 
+                  value={[quality]} 
+                  onValueChange={handleQualityChange} 
+                  min={1} max={100} step={1} 
+                  className="w-24 sm:w-32 lg:w-40 touch-pan-x" 
+                  aria-label="Compression quality"
+                />
+                <span className="text-[10px] sm:text-xs text-stone-600 w-6 tabular-nums">{quality}</span>
               </div>
               <div className="flex gap-1.5 sm:gap-2 mt-2 sm:mt-3">
                 <Button size="sm" disabled={loading} onClick={() => reOptimize('overwrite')} className="h-7 sm:h-8 text-[10px] sm:text-xs">

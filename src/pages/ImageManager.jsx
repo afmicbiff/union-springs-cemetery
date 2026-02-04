@@ -24,23 +24,40 @@ const formatBytes = (bytes) => {
   return `${val.toFixed(val >= 10 ? 0 : 1)} ${sizes[i]}`;
 };
 
-// Memoized Image Card
+// Memoized Image Card - optimized for mobile performance
 const ImageCard = memo(function ImageCard({ 
   img, altEdit, onAltChange, onSaveAlt, quality, onQualityChange, 
   reoptLoading, onReOptimize, onDownload, onCopy, onDelete, onOpenDetails 
 }) {
+  // Memoize handlers to prevent re-renders
+  const handleAltChange = useCallback((e) => onAltChange(img.id, e.target.value), [img.id, onAltChange]);
+  const handleSaveAlt = useCallback(() => onSaveAlt(img.id, altEdit), [img.id, altEdit, onSaveAlt]);
+  const handleQualityChange = useCallback((v) => onQualityChange(img.id, v[0]), [img.id, onQualityChange]);
+  const handleReOptimize = useCallback(() => onReOptimize(img, 'overwrite'), [img, onReOptimize]);
+  const handleOpenDetails = useCallback(() => onOpenDetails(img), [img, onOpenDetails]);
+  const handleDownload = useCallback(() => onDownload(img.webp_url, `image-${img.id}.webp`), [img.webp_url, img.id, onDownload]);
+  const handleCopyUrl = useCallback(() => onCopy(img.webp_url, img.id), [img.webp_url, img.id, onCopy]);
+  const handleDelete = useCallback(() => onDelete(img.id), [img.id, onDelete]);
+
+  // Compute aspect ratio for CLS prevention
+  const aspectRatio = (img.width > 0 && img.height > 0) 
+    ? `${img.width} / ${img.height}` 
+    : '4 / 3';
+
   return (
-    <div className="border rounded-md bg-white overflow-hidden">
+    <div className="border rounded-md bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       <div className="bg-stone-50 p-1.5 sm:p-2">
         <picture>
           <source srcSet={img.webp_url} type="image/webp" />
           <img 
             src={img.jpeg_url} 
-            alt={img.alt_text || ''} 
+            alt={img.alt_text || 'Image'} 
             className="w-full h-32 sm:h-40 lg:h-48 object-cover rounded" 
             loading="lazy"
-            width={img.width || undefined}
-            height={img.height || undefined}
+            decoding="async"
+            width={img.width || 320}
+            height={img.height || 240}
+            style={{ aspectRatio, contentVisibility: 'auto' }}
           />
         </picture>
       </div>
@@ -48,12 +65,13 @@ const ImageCard = memo(function ImageCard({
         <div className="flex items-center gap-1.5 sm:gap-2">
           <Input 
             value={altEdit} 
-            onChange={(e) => onAltChange(img.id, e.target.value)} 
+            onChange={handleAltChange} 
             placeholder="Alt text" 
             className="h-7 sm:h-8 text-xs sm:text-sm flex-1" 
             maxLength={200}
+            aria-label="Image alt text"
           />
-          <Button size="sm" variant="secondary" className="h-7 sm:h-8 px-2 text-xs" onClick={() => onSaveAlt(img.id, altEdit)}>Save</Button>
+          <Button size="sm" variant="secondary" className="h-7 sm:h-8 px-2 text-xs" onClick={handleSaveAlt}>Save</Button>
         </div>
         {(img.width > 0 && img.height > 0) && (
           <div className="text-stone-500 text-[10px] sm:text-xs">{img.width}×{img.height}px</div>
@@ -68,30 +86,31 @@ const ImageCard = memo(function ImageCard({
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Slider 
               value={[quality]} 
-              onValueChange={(v) => onQualityChange(img.id, v[0])} 
+              onValueChange={handleQualityChange} 
               min={1} max={100} step={1} 
-              className="w-20 sm:w-32 lg:w-40" 
+              className="w-20 sm:w-32 lg:w-40 touch-pan-x" 
+              aria-label="Compression quality"
             />
-            <span className="text-[10px] sm:text-xs text-stone-600 w-6">{quality}</span>
+            <span className="text-[10px] sm:text-xs text-stone-600 w-6 tabular-nums">{quality}</span>
             <Button 
               size="sm" 
-              className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs" 
+              className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs min-w-[52px]" 
               disabled={reoptLoading} 
-              onClick={() => onReOptimize(img, 'overwrite')}
+              onClick={handleReOptimize}
             >
               {reoptLoading ? <Loader2 className="w-3 h-3 animate-spin"/> : 'Re-opt'}
             </Button>
           </div>
         </div>
         <div className="flex flex-wrap gap-1 sm:gap-1.5 pt-1 sm:pt-2">
-          <Button variant="outline" size="sm" onClick={() => onOpenDetails(img)} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">Details</Button>
-          <Button variant="outline" size="sm" onClick={() => onDownload(img.webp_url, `image-${img.id}.webp`)} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
+          <Button variant="outline" size="sm" onClick={handleOpenDetails} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">Details</Button>
+          <Button variant="outline" size="sm" onClick={handleDownload} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
             <Download className="w-3 h-3 mr-0.5"/> WebP
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onCopy(img.webp_url, img.id)} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
+          <Button variant="outline" size="sm" onClick={handleCopyUrl} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
             <Copy className="w-3 h-3 mr-0.5"/> URL
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => onDelete(img.id)} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
+          <Button variant="destructive" size="sm" onClick={handleDelete} className="h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs">
             <Trash2 className="w-3 h-3"/>
           </Button>
         </div>
@@ -112,8 +131,10 @@ function ImageManager() {
   const { data: images = [], isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['images'],
     queryFn: () => base44.entities.Image.list('-updated_date', 200),
-    staleTime: 60_000,
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
     retry: 2,
+    refetchOnWindowFocus: false,
   });
 
   const [file, setFile] = useState(null);
@@ -501,7 +522,10 @@ function ImageManager() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <div 
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
+                  style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
+                >
                   {displayed.map(img => (
                     <ImageCard
                       key={img.id}
