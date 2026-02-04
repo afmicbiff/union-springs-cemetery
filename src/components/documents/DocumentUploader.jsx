@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Upload, FileUp, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { Loader2, Upload, FileUp, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -55,7 +55,7 @@ function DocumentUploader({ onUploadComplete, versionContext = null }) {
             if (versionContext.expiration_date) {
                 try {
                     setExpirationDate(new Date(versionContext.expiration_date));
-                } catch { /* ignore invalid date */ }
+                } catch (e) { /* ignore invalid date */ }
             }
         }
     }, [versionContext]);
@@ -186,7 +186,7 @@ function DocumentUploader({ onUploadComplete, versionContext = null }) {
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
-                                variant={"outline"}
+                                variant="outline"
                                 className={cn(
                                     "w-full justify-start text-left font-normal bg-white",
                                     !expirationDate && "text-muted-foreground"
