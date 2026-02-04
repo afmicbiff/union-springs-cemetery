@@ -372,6 +372,50 @@ function MembersDirectory({ openMemberId }) {
         });
     }, [members, debouncedSearch, stateFilter, donationFilter, followUpFilter, segmentCriteria, sortConfig]);
 
+    const exportToCSV = useCallback(() => {
+        if (!filteredMembers || filteredMembers.length === 0) {
+            toast.error("No members to export");
+            return;
+        }
+        
+        // Escape CSV values properly
+        const escapeCSV = (val) => {
+            const str = String(val || '').replace(/"/g, '""');
+            return `"${str}"`;
+        };
+        
+        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments", "Last Donation", "Last Contact", "Follow-up"];
+        const csvContent = [
+            headers.join(","),
+            ...filteredMembers.map(m => [
+                escapeCSV(m.last_name),
+                escapeCSV(m.first_name),
+                escapeCSV(m.address),
+                escapeCSV(m.city),
+                escapeCSV(m.state),
+                escapeCSV(m.zip),
+                escapeCSV(m.phone_primary),
+                escapeCSV(m.phone_secondary),
+                escapeCSV(m.email_primary),
+                escapeCSV(m.email_secondary),
+                escapeCSV(m.donation),
+                escapeCSV(m.comments),
+                escapeCSV(m.last_donation_date),
+                escapeCSV(m.last_contact_date),
+                escapeCSV(m.follow_up_date)
+            ].join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `members_directory_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${filteredMembers.length} members`);
+    }, [filteredMembers]);
+
     const handleSave = useCallback((e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
