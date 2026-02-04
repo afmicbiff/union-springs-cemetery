@@ -1,5 +1,3 @@
-import { getCurrentMetrics } from "./metrics";
-
 // Utility to create a warning item
 function warn({ category, target, severity = "medium", message, fix }) {
   return { category, target, severity, message, fix };
@@ -11,7 +9,7 @@ function passItem({ category, target, message }) {
 
 // PERFORMANCE CHECKS
 export function runPerformanceChecks(pathname = window.location.pathname) {
-  const m = getCurrentMetrics() || {};
+  const m = {};
   const res = [];
 
   // Metrics thresholds
