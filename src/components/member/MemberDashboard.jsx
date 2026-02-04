@@ -127,32 +127,31 @@ function MemberDashboard({ user, setActiveTab }) {
     }, [refetchReservations]);
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Outstanding Tasks / Action Items */}
                 <Card className="md:col-span-2 bg-stone-50 border-stone-200">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <AlertCircle className="w-5 h-5 text-amber-600" /> 
-                            Action Items
-                        </CardTitle>
+                    <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" /> 
+                                Action Items
+                            </CardTitle>
+                            <Button variant="ghost" size="icon" onClick={handleRefresh} disabled={isFetching} className="h-7 w-7 sm:h-8 sm:w-8">
+                                <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isFetching ? 'animate-spin' : ''}`} />
+                            </Button>
+                        </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="px-3 sm:px-6">
                         {tasks.length === 0 ? (
-                            <div className="flex items-center gap-2 text-green-700">
-                                <CheckCircle2 className="w-5 h-5" />
-                                <span className="font-medium">You're all caught up! No outstanding tasks.</span>
+                            <div className="flex items-center gap-2 text-green-700 py-2">
+                                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                                <span className="font-medium text-sm sm:text-base">You're all caught up! No outstanding tasks.</span>
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 {tasks.map(task => (
-                                    <div key={task.id} className="flex justify-between items-center bg-white p-3 rounded-md border border-stone-200 shadow-sm">
-                                        <div>
-                                            <h4 className="font-semibold text-stone-800">{task.title}</h4>
-                                            <p className="text-sm text-stone-600">{task.description}</p>
-                                        </div>
-                                        <Button size="sm" variant="outline" onClick={task.action}>View</Button>
-                                    </div>
+                                    <TaskItem key={task.id} task={task} />
                                 ))}
                             </div>
                         )}
@@ -161,27 +160,32 @@ function MemberDashboard({ user, setActiveTab }) {
 
                 {/* My Plots / Reservations */}
                 <Card className="h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <MapPin className="w-5 h-5" /> My Plots
+                    <CardHeader className="px-3 sm:px-6 pb-2 sm:pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" /> My Plots
                         </CardTitle>
-                        <CardDescription>Your reserved and owned locations</CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">Your reserved and owned locations</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        {loadingReservations ? (
-                            <Loader2 className="animate-spin w-6 h-6 text-stone-400" />
+                    <CardContent className="px-3 sm:px-6">
+                        {reservationsError ? (
+                            <div className="text-center py-4">
+                                <AlertCircle className="w-6 h-6 text-red-400 mx-auto mb-2" />
+                                <p className="text-xs text-stone-500">Failed to load plots</p>
+                                <Button variant="outline" size="sm" onClick={handleRefresh} className="mt-2 h-7 text-xs">Try Again</Button>
+                            </div>
+                        ) : loadingReservations ? (
+                            <div className="flex justify-center py-4">
+                                <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6 text-stone-400" />
+                            </div>
                         ) : confirmedReservations.length === 0 ? (
-                            <p className="text-stone-500 italic">No confirmed plots found.</p>
+                            <div className="text-center py-4">
+                                <MapPin className="w-6 h-6 mx-auto mb-2 text-stone-200" />
+                                <p className="text-stone-500 italic text-sm">No confirmed plots found.</p>
+                            </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 {confirmedReservations.map(res => (
-                                    <div key={res.id} className="p-3 bg-stone-50 rounded-md border flex justify-between items-center">
-                                        <div>
-                                            <div className="font-medium text-teal-900">Plot {res.plot_id}</div>
-                                            <div className="text-xs text-stone-500">Reserved: {res.date ? format(new Date(res.date), 'MMM d, yyyy') : 'N/A'}</div>
-                                        </div>
-                                        <Badge className="bg-teal-600">Owned</Badge>
-                                    </div>
+                                    <ReservationCard key={res.id} reservation={res} status="confirmed" />
                                 ))}
                             </div>
                         )}
@@ -190,27 +194,31 @@ function MemberDashboard({ user, setActiveTab }) {
 
                 {/* Recent Activity / Pending */}
                 <Card className="h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Calendar className="w-5 h-5" /> Recent Requests
+                    <CardHeader className="px-3 sm:px-6 pb-2 sm:pb-3">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                            <Calendar className="w-4 h-4 sm:w-5 sm:h-5" /> Recent Requests
                         </CardTitle>
-                        <CardDescription>Status of your recent applications</CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">Status of your recent applications</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        {loadingReservations ? (
-                            <Loader2 className="animate-spin w-6 h-6 text-stone-400" />
+                    <CardContent className="px-3 sm:px-6">
+                        {reservationsError ? (
+                            <div className="text-center py-4">
+                                <AlertCircle className="w-6 h-6 text-red-400 mx-auto mb-2" />
+                                <p className="text-xs text-stone-500">Failed to load requests</p>
+                            </div>
+                        ) : loadingReservations ? (
+                            <div className="flex justify-center py-4">
+                                <Loader2 className="animate-spin w-5 h-5 sm:w-6 sm:h-6 text-stone-400" />
+                            </div>
                         ) : pendingReservations.length === 0 ? (
-                            <p className="text-stone-500 italic">No pending requests.</p>
+                            <div className="text-center py-4">
+                                <Calendar className="w-6 h-6 mx-auto mb-2 text-stone-200" />
+                                <p className="text-stone-500 italic text-sm">No pending requests.</p>
+                            </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                                 {pendingReservations.map(res => (
-                                    <div key={res.id} className="p-3 bg-white border rounded-md shadow-sm">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <span className="font-medium">Plot Reservation: {res.plot_id}</span>
-                                            <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">Pending</Badge>
-                                        </div>
-                                        <div className="text-xs text-stone-500">Submitted: {res.date ? format(new Date(res.date), 'MMM d, yyyy') : 'N/A'}</div>
-                                    </div>
+                                    <ReservationCard key={res.id} reservation={res} status="pending" />
                                 ))}
                             </div>
                         )}
@@ -220,3 +228,5 @@ function MemberDashboard({ user, setActiveTab }) {
         </div>
     );
 }
+
+export default memo(MemberDashboard);
