@@ -265,8 +265,6 @@ function MembersDirectory({ openMemberId }) {
         }));
     }, []);
 
-    // Moved after filteredMembers definition - see exportToCSV below
-
     // Advanced Filtering Logic
     const evaluateRule = (member, rule) => {
         let val = member[rule.field];
