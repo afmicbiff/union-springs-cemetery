@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,18 +8,89 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { 
-    format, isSameDay, isSameMonth, isSameYear, parseISO, 
+    format, isSameDay, isSameMonth, parseISO, isValid,
     startOfWeek, endOfWeek, getYear, getMonth, getWeek, 
-    startOfMonth, endOfMonth, startOfYear, endOfYear,
-    eachDayOfInterval, eachWeekOfInterval, startOfDay, endOfDay
+    startOfMonth, endOfMonth,
+    eachDayOfInterval, eachWeekOfInterval
 } from 'date-fns';
-import { Search, Trash2, Filter, FileClock, Loader2, Calendar as CalendarIcon, X, Download, FileDown, ChevronRight, Archive } from 'lucide-react';
+import { Search, Trash2, Loader2, FileDown, Archive, AlertCircle, RefreshCw } from 'lucide-react';
 import { toast } from "sonner";
 import { jsPDF } from 'jspdf';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 
-export default function AuditLogViewer() {
+// Safe date formatter with error handling
+const safeParseISO = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+        const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+        return isValid(d) ? d : null;
+    } catch {
+        return null;
+    }
+};
+
+const safeFormatDate = (dateStr, formatStr = 'yyyy-MM-dd HH:mm:ss') => {
+    const d = safeParseISO(dateStr);
+    if (!d) return 'N/A';
+    try {
+        return format(d, formatStr);
+    } catch {
+        return 'N/A';
+    }
+};
+
+// Memoized log row component
+const LogRow = memo(function LogRow({ log, onDelete, getActionColor }) {
+    const handleDelete = useCallback(() => {
+        if (confirm("Are you sure you want to delete this log entry?")) {
+            onDelete(log.id);
+        }
+    }, [log.id, onDelete]);
+
+    return (
+        <TableRow className="group hover:bg-stone-50 transition-colors">
+            <TableCell className="text-[10px] sm:text-xs text-stone-500 font-mono whitespace-nowrap">
+                {safeFormatDate(log.timestamp, 'MM/dd HH:mm')}
+                <span className="hidden md:inline">{safeFormatDate(log.timestamp, ':ss')}</span>
+            </TableCell>
+            <TableCell className="text-xs sm:text-sm font-medium text-stone-700">
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                    <div className="w-1.5 h-1.5 rounded-full bg-stone-300 shrink-0"></div>
+                    <span className="truncate max-w-[60px] sm:max-w-[100px] md:max-w-none" title={log.performed_by}>
+                        {log.performed_by?.split('@')[0] || 'Unknown'}
+                    </span>
+                </div>
+            </TableCell>
+            <TableCell>
+                <Badge variant="outline" className={`text-[10px] sm:text-xs font-normal capitalize ${getActionColor(log.action)}`}>
+                    {log.action}
+                </Badge>
+            </TableCell>
+            <TableCell className="text-xs sm:text-sm text-stone-600 hidden sm:table-cell">
+                {log.entity_type}
+                {log.entity_id && (
+                    <span className="text-[9px] text-stone-400 block truncate font-mono max-w-[80px]">
+                        {log.entity_id}
+                    </span>
+                )}
+            </TableCell>
+            <TableCell className="text-xs sm:text-sm text-stone-600 max-w-[100px] sm:max-w-[200px] md:max-w-[300px]">
+                <p className="truncate" title={log.details}>{log.details || '-'}</p>
+            </TableCell>
+            <TableCell>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 sm:h-8 sm:w-8 text-stone-400 opacity-0 group-hover:opacity-100 hover:text-red-600 hover:bg-red-50 transition-all touch-manipulation"
+                    onClick={handleDelete}
+                >
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </Button>
+            </TableCell>
+        </TableRow>
+    );
+});
+
+function AuditLogViewer() {
     const [searchTerm, setSearchTerm] = useState("");
     
     // Drill-down State
