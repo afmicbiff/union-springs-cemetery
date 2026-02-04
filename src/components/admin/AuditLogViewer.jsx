@@ -289,44 +289,66 @@ function AuditLogViewer() {
         setSearchTerm(e.target.value);
     }, []);
 
-    const getActionColor = (action) => {
+    const getActionColor = useCallback((action) => {
         switch (action?.toLowerCase()) {
             case 'create': return 'bg-green-100 text-green-800 border-green-200';
             case 'update': return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'delete': return 'bg-red-100 text-red-800 border-red-200';
             case 'login': return 'bg-purple-100 text-purple-800 border-purple-200';
             case 'export': return 'bg-amber-100 text-amber-800 border-amber-200';
+            case 'archive': return 'bg-orange-100 text-orange-800 border-orange-200';
+            case 'dismiss': return 'bg-slate-100 text-slate-800 border-slate-200';
             default: return 'bg-stone-100 text-stone-800 border-stone-200';
         }
-    };
+    }, []);
+
+    // Error state
+    if (isError) {
+        return (
+            <Card className="h-full border-stone-200 shadow-sm">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                    <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
+                    <p className="text-stone-600 mb-4 text-center">Failed to load system logs</p>
+                    <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+                        {isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                        Try Again
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <Card className="h-full border-stone-200 shadow-sm">
-            <CardHeader className="pb-4">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <CardHeader className="pb-3 px-3 sm:px-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-4">
                     <div>
-                        <CardTitle className="flex items-center gap-2 text-xl font-serif">
-                            <Archive className="w-5 h-5 text-teal-700" />
-                            Archived Logs Viewer
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-xl font-serif">
+                            <Archive className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
+                            System Logs
                         </CardTitle>
-                        <CardDescription>
-                            Drill down into historical system logs with advanced filtering and export.
+                        <CardDescription className="text-xs sm:text-sm">
+                            Drill down into historical system logs with filtering and export.
                         </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching} className="h-8 text-xs">
+                            {isFetching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                            <span className="hidden sm:inline ml-1">Refresh</span>
+                        </Button>
                         {selectedMonth !== 'all' && (
-                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('month')}>
-                                <FileDown className="w-4 h-4 mr-2" /> Month PDF
+                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('month')} className="h-8 text-xs">
+                                <FileDown className="w-3.5 h-3.5 sm:mr-1" /> <span className="hidden sm:inline">Month</span>
                             </Button>
                         )}
                         {selectedWeek !== 'all' && (
-                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('week')}>
-                                <FileDown className="w-4 h-4 mr-2" /> Week PDF
+                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('week')} className="h-8 text-xs">
+                                <FileDown className="w-3.5 h-3.5 sm:mr-1" /> <span className="hidden sm:inline">Week</span>
                             </Button>
                         )}
                         {selectedDay !== 'all' && (
-                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('day')}>
-                                <FileDown className="w-4 h-4 mr-2" /> Day PDF
+                            <Button variant="outline" size="sm" onClick={() => handleExportPDF('day')} className="h-8 text-xs">
+                                <FileDown className="w-3.5 h-3.5 sm:mr-1" /> <span className="hidden sm:inline">Day</span>
                             </Button>
                         )}
                     </div>
