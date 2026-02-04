@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-export default function InfoSection() {
+const InfoSection = memo(function InfoSection() {
   return (
     <section className="py-16 md:py-24 px-4 md:px-8 bg-white relative z-10 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)]">
       <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -25,4 +25,6 @@ export default function InfoSection() {
       </div>
     </section>
   );
-}
+});
+
+export default InfoSection;
