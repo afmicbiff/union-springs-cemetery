@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { UserPlus, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
+
+// Memoized form field component
+const FormField = memo(({ label, error, required, children }) => (
+  <div className="space-y-1.5">
+    <Label className={cn("text-xs sm:text-sm", error && "text-red-500")}>{label}{required && " *"}</Label>
+    {children}
+    {error && <p className="text-[10px] sm:text-xs text-red-500">{error.message}</p>}
+  </div>
+));
 
 // Define validation schema
 const employeeSchema = z.object({
@@ -55,7 +64,7 @@ const employeeSchema = z.object({
     }
 });
 
-export default function OnboardingForm() {
+const OnboardingForm = memo(function OnboardingForm() {
     const queryClient = useQueryClient();
     
     const { 
@@ -67,7 +76,7 @@ export default function OnboardingForm() {
         formState: { errors, touchedFields, isValid } 
     } = useForm({
         resolver: zodResolver(employeeSchema),
-        mode: "onChange"
+        mode: "onBlur" // Changed from onChange for better mobile performance
     });
 
     const maritalStatus = watch("marital_status");
@@ -123,128 +132,96 @@ export default function OnboardingForm() {
         toast.error("Please check all required fields marked in red");
     };
 
-    // Helper to get input class based on state
-    const getInputClass = (fieldName) => {
+    // Memoized input class helper
+    const getInputClass = useCallback((fieldName) => {
         const hasError = !!errors[fieldName];
         const isTouched = !!touchedFields[fieldName];
-        const isSuccess = isTouched && !hasError;
-
         return cn(
-            "transition-all duration-200",
-            hasError && "border-red-500 focus-visible:ring-red-500 bg-red-50",
-            isSuccess && "border-green-500 focus-visible:ring-green-500 bg-green-50"
+            "h-9 text-sm",
+            hasError && "border-red-500 bg-red-50",
+            isTouched && !hasError && "border-green-500"
         );
-    };
+    }, [errors, touchedFields]);
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-teal-600"/> New Employee Onboarding
+            <CardHeader className="px-4 sm:px-6 py-4">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                    <UserPlus className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600"/> Employee Onboarding
                 </CardTitle>
-                <CardDescription>
-                    Enter mandatory employee details. Fields turn green when valid.
-                </CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Enter employee details below.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
+            <CardContent className="px-4 sm:px-6">
+                <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4 sm:space-y-6">
                     {/* Personal Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="employment_type" className={errors.employment_type ? "text-red-500" : ""}>Employment Role *</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <FormField label="Role" error={errors.employment_type} required>
                             <Select onValueChange={(value) => setValue("employment_type", value)}>
-                                <SelectTrigger className={getInputClass("employment_type")}>
-                                    <SelectValue placeholder="Select Role" />
-                                </SelectTrigger>
+                                <SelectTrigger className={getInputClass("employment_type")}><SelectValue placeholder="Select" /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Administrator">Administrator</SelectItem>
                                     <SelectItem value="Paid Employee">Paid Employee</SelectItem>
                                     <SelectItem value="Volunteer">Volunteer</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {errors.employment_type && <p className="text-xs text-red-500">{errors.employment_type.message}</p>}
-                        </div>
-                        <div className="hidden md:block"></div>
+                        </FormField>
+                        <div className="hidden sm:block" />
 
-                        <div className="space-y-2">
-                            <Label htmlFor="first_name" className={errors.first_name ? "text-red-500" : ""}>First Name *</Label>
-                            <Input id="first_name" {...register("first_name")} className={getInputClass("first_name")} />
-                            {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="last_name" className={errors.last_name ? "text-red-500" : ""}>Last Name *</Label>
-                            <Input id="last_name" {...register("last_name")} className={getInputClass("last_name")} />
-                            {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
-                        </div>
+                        <FormField label="First Name" error={errors.first_name} required>
+                            <Input {...register("first_name")} className={getInputClass("first_name")} />
+                        </FormField>
+                        <FormField label="Last Name" error={errors.last_name} required>
+                            <Input {...register("last_name")} className={getInputClass("last_name")} />
+                        </FormField>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="date_of_birth" className={errors.date_of_birth ? "text-red-500" : ""}>Date of Birth *</Label>
-                            <Input id="date_of_birth" type="date" {...register("date_of_birth")} className={getInputClass("date_of_birth")} />
-                            {errors.date_of_birth && <p className="text-xs text-red-500">{errors.date_of_birth.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="ssn" className={errors.ssn ? "text-red-500" : ""}>SSN *</Label>
-                            <Input id="ssn" placeholder="XXX-XX-XXXX" {...register("ssn")} className={getInputClass("ssn")} />
-                            {errors.ssn && <p className="text-xs text-red-500">{errors.ssn.message}</p>}
-                        </div>
+                        <FormField label="Date of Birth" error={errors.date_of_birth} required>
+                            <Input type="date" {...register("date_of_birth")} className={getInputClass("date_of_birth")} />
+                        </FormField>
+                        <FormField label="SSN" error={errors.ssn} required>
+                            <Input placeholder="XXX-XX-XXXX" {...register("ssn")} className={getInputClass("ssn")} />
+                        </FormField>
                     </div>
 
                     {/* Contact Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="email" className={errors.email ? "text-red-500" : ""}>Email (Primary) *</Label>
-                            <Input id="email" type="email" {...register("email")} className={getInputClass("email")} />
-                            {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="secondary_email" className={errors.secondary_email ? "text-red-500" : ""}>Email (Secondary)</Label>
-                            <Input id="secondary_email" type="email" {...register("secondary_email")} className={getInputClass("secondary_email")} />
-                            {errors.secondary_email && <p className="text-xs text-red-500">{errors.secondary_email.message}</p>}
-                        </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <FormField label="Email" error={errors.email} required>
+                            <Input type="email" {...register("email")} className={getInputClass("email")} />
+                        </FormField>
+                        <FormField label="Secondary Email" error={errors.secondary_email}>
+                            <Input type="email" {...register("secondary_email")} className={getInputClass("secondary_email")} />
+                        </FormField>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="phone_primary" className={errors.phone_primary ? "text-red-500" : ""}>Phone (Primary) *</Label>
-                            <Input id="phone_primary" type="tel" {...register("phone_primary")} className={getInputClass("phone_primary")} />
-                            {errors.phone_primary && <p className="text-xs text-red-500">{errors.phone_primary.message}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="phone_secondary" className={errors.phone_secondary ? "text-red-500" : ""}>Phone (Secondary)</Label>
-                            <Input id="phone_secondary" type="tel" {...register("phone_secondary")} className={getInputClass("phone_secondary")} />
-                        </div>
+                        <FormField label="Phone" error={errors.phone_primary} required>
+                            <Input type="tel" {...register("phone_primary")} className={getInputClass("phone_primary")} />
+                        </FormField>
+                        <FormField label="Secondary Phone" error={errors.phone_secondary}>
+                            <Input type="tel" {...register("phone_secondary")} className={getInputClass("phone_secondary")} />
+                        </FormField>
                     </div>
 
                     {/* Address */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-sm font-medium text-stone-900">Address</h4>
-                        <div className="space-y-2">
-                            <Label htmlFor="address_street" className={errors.address_street ? "text-red-500" : ""}>Street Address *</Label>
-                            <Input id="address_street" {...register("address_street")} className={getInputClass("address_street")} />
-                            {errors.address_street && <p className="text-xs text-red-500">{errors.address_street.message}</p>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="address_state" className={errors.address_state ? "text-red-500" : ""}>State *</Label>
-                                <Input id="address_state" {...register("address_state")} className={getInputClass("address_state")} />
-                                {errors.address_state && <p className="text-xs text-red-500">{errors.address_state.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="address_zip" className={errors.address_zip ? "text-red-500" : ""}>Zip Code *</Label>
-                                <Input id="address_zip" {...register("address_zip")} className={getInputClass("address_zip")} />
-                                {errors.address_zip && <p className="text-xs text-red-500">{errors.address_zip.message}</p>}
-                            </div>
+                    <div className="space-y-3 border-t pt-4">
+                        <h4 className="text-xs sm:text-sm font-medium text-stone-900">Address</h4>
+                        <FormField label="Street" error={errors.address_street} required>
+                            <Input {...register("address_street")} className={getInputClass("address_street")} />
+                        </FormField>
+                        <div className="grid grid-cols-2 gap-3">
+                            <FormField label="State" error={errors.address_state} required>
+                                <Input {...register("address_state")} className={getInputClass("address_state")} placeholder="LA" />
+                            </FormField>
+                            <FormField label="ZIP" error={errors.address_zip} required>
+                                <Input {...register("address_zip")} className={getInputClass("address_zip")} />
+                            </FormField>
                         </div>
                     </div>
 
                     {/* Family & Status */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-sm font-medium text-stone-900">Family & Status</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                                <Label htmlFor="marital_status" className={errors.marital_status ? "text-red-500" : ""}>Marital Status *</Label>
+                    <div className="space-y-3 border-t pt-4">
+                        <h4 className="text-xs sm:text-sm font-medium text-stone-900">Family</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <FormField label="Marital Status" error={errors.marital_status} required>
                                 <Select onValueChange={(value) => setValue("marital_status", value)}>
-                                    <SelectTrigger className={getInputClass("marital_status")}>
-                                        <SelectValue placeholder="Select Status" />
-                                    </SelectTrigger>
+                                    <SelectTrigger className={getInputClass("marital_status")}><SelectValue placeholder="Select" /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="Single">Single</SelectItem>
                                         <SelectItem value="Married">Married</SelectItem>
@@ -253,93 +230,56 @@ export default function OnboardingForm() {
                                         <SelectItem value="Separated">Separated</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                {errors.marital_status && <p className="text-xs text-red-500">{errors.marital_status.message}</p>}
-                            </div>
+                            </FormField>
                             
-                            <div className="space-y-2">
-                                <Label htmlFor="spouse_name" className={errors.spouse_name ? "text-red-500" : ""}>Spouse Name {["Married", "Separated"].includes(maritalStatus) ? "*" : ""}</Label>
-                                <Input 
-                                    id="spouse_name" 
-                                    {...register("spouse_name")} 
-                                    disabled={!["Married", "Separated"].includes(maritalStatus)}
-                                    placeholder={!["Married", "Separated"].includes(maritalStatus) ? "N/A" : ""}
-                                    className={getInputClass("spouse_name")}
-                                />
-                                {errors.spouse_name && <p className="text-xs text-red-500">{errors.spouse_name.message}</p>}
-                            </div>
+                            <FormField label={`Spouse${["Married","Separated"].includes(maritalStatus) ? " *" : ""}`} error={errors.spouse_name}>
+                                <Input {...register("spouse_name")} disabled={!["Married","Separated"].includes(maritalStatus)} className={getInputClass("spouse_name")} />
+                            </FormField>
                             
-                            <div className="space-y-2">
-                                <Label htmlFor="spouse_phone" className={errors.spouse_phone ? "text-red-500" : ""}>Spouse Phone {["Married", "Separated"].includes(maritalStatus) ? "*" : ""}</Label>
-                                <Input 
-                                    id="spouse_phone" 
-                                    {...register("spouse_phone")} 
-                                    disabled={!["Married", "Separated"].includes(maritalStatus)}
-                                    placeholder={!["Married", "Separated"].includes(maritalStatus) ? "N/A" : "e.g. 555-0199"}
-                                    className={getInputClass("spouse_phone")}
-                                />
-                                {errors.spouse_phone && <p className="text-xs text-red-500">{errors.spouse_phone.message}</p>}
-                            </div>
+                            <FormField label="Spouse Phone" error={errors.spouse_phone}>
+                                <Input {...register("spouse_phone")} disabled={!["Married","Separated"].includes(maritalStatus)} className={getInputClass("spouse_phone")} />
+                            </FormField>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="children_details">Children (Names & Ages)</Label>
-                            <Textarea 
-                                id="children_details" 
-                                {...register("children_details")} 
-                                placeholder="List any children you care for..."
-                                className="h-20"
-                            />
-                        </div>
+                        <FormField label="Children">
+                            <Textarea {...register("children_details")} placeholder="Names & ages..." className="h-16 text-sm" />
+                        </FormField>
                     </div>
 
                     {/* Emergency Contact */}
-                    <div className="space-y-4 border-t pt-4">
-                        <h4 className="text-sm font-medium text-stone-900">Emergency Contact</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="emergency_contact_first_name" className={errors.emergency_contact_first_name ? "text-red-500" : ""}>Contact First Name *</Label>
-                                <Input id="emergency_contact_first_name" {...register("emergency_contact_first_name")} className={getInputClass("emergency_contact_first_name")} />
-                                {errors.emergency_contact_first_name && <p className="text-xs text-red-500">{errors.emergency_contact_first_name.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="emergency_contact_last_name" className={errors.emergency_contact_last_name ? "text-red-500" : ""}>Contact Last Name *</Label>
-                                <Input id="emergency_contact_last_name" {...register("emergency_contact_last_name")} className={getInputClass("emergency_contact_last_name")} />
-                                {errors.emergency_contact_last_name && <p className="text-xs text-red-500">{errors.emergency_contact_last_name.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="emergency_contact_phone" className={errors.emergency_contact_phone ? "text-red-500" : ""}>Contact Phone *</Label>
-                                <Input id="emergency_contact_phone" type="tel" {...register("emergency_contact_phone")} className={getInputClass("emergency_contact_phone")} />
-                                {errors.emergency_contact_phone && <p className="text-xs text-red-500">{errors.emergency_contact_phone.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="emergency_contact_relationship" className={errors.emergency_contact_relationship ? "text-red-500" : ""}>Relationship *</Label>
-                                <Input id="emergency_contact_relationship" {...register("emergency_contact_relationship")} className={getInputClass("emergency_contact_relationship")} placeholder="e.g. Spouse, Parent, Sibling" />
-                                {errors.emergency_contact_relationship && <p className="text-xs text-red-500">{errors.emergency_contact_relationship.message}</p>}
-                            </div>
+                    <div className="space-y-3 border-t pt-4">
+                        <h4 className="text-xs sm:text-sm font-medium text-stone-900">Emergency Contact</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <FormField label="First Name" error={errors.emergency_contact_first_name} required>
+                                <Input {...register("emergency_contact_first_name")} className={getInputClass("emergency_contact_first_name")} />
+                            </FormField>
+                            <FormField label="Last Name" error={errors.emergency_contact_last_name} required>
+                                <Input {...register("emergency_contact_last_name")} className={getInputClass("emergency_contact_last_name")} />
+                            </FormField>
+                            <FormField label="Phone" error={errors.emergency_contact_phone} required>
+                                <Input type="tel" {...register("emergency_contact_phone")} className={getInputClass("emergency_contact_phone")} />
+                            </FormField>
+                            <FormField label="Relationship" error={errors.emergency_contact_relationship} required>
+                                <Input {...register("emergency_contact_relationship")} placeholder="e.g. Spouse" className={getInputClass("emergency_contact_relationship")} />
+                            </FormField>
                         </div>
                     </div>
 
-                    <div className="flex justify-end pt-4 items-center gap-4">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end pt-4 items-center gap-3">
                         {!isValid && Object.keys(touchedFields).length > 0 && (
-                            <div className="flex items-center text-red-500 text-sm animate-pulse">
-                                <AlertCircle className="w-4 h-4 mr-1"/> Please fix invalid fields
-                            </div>
+                            <div className="flex items-center text-red-500 text-xs"><AlertCircle className="w-3.5 h-3.5 mr-1"/>Fix errors</div>
                         )}
                         {isValid && (
-                             <div className="flex items-center text-green-600 text-sm animate-in fade-in slide-in-from-left-4">
-                                <CheckCircle2 className="w-4 h-4 mr-1"/> Ready to submit
-                            </div>
+                            <div className="flex items-center text-green-600 text-xs"><CheckCircle2 className="w-3.5 h-3.5 mr-1"/>Ready</div>
                         )}
-                        <Button 
-                            type="submit" 
-                            className="min-w-[150px] transition-all duration-300 bg-teal-700 hover:bg-teal-800"
-                            disabled={createEmployeeMutation.isPending}
-                        >
-                            {createEmployeeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : null}
-                            Register Employee
+                        <Button type="submit" size="sm" className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800" disabled={createEmployeeMutation.isPending}>
+                            {createEmployeeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1"/> : null}
+                            Register
                         </Button>
                     </div>
                 </form>
             </CardContent>
         </Card>
     );
-}
+});
+
+export default OnboardingForm;
