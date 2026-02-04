@@ -1,4 +1,4 @@
-import React, { memo, useCallback, lazy, Suspense } from 'react';
+import React, { memo, useCallback, useState, lazy, Suspense } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -79,17 +79,33 @@ function EventDetailDialog({ event, open, onOpenChange, blockedSet, intelMap, on
     qc.invalidateQueries({ queryKey: ['sec-events'] });
   }, [event, intelMap, qc]);
 
+  const [autoResponding, setAutoResponding] = useState(false);
+
   const autoRespond = useCallback(async () => {
-    if (!event?.id) return;
-    const res = await base44.functions.invoke('autoRespondToEvent', { event_id: event.id });
-    if (res?.data?.error) {
-      toast.error(res.data.error);
-      return;
+    if (!event?.id || autoResponding) return;
+    setAutoResponding(true);
+    try {
+      const res = await base44.functions.invoke('executeAutoResponse', { event_id: event.id, manual: true });
+      if (res?.data?.error) {
+        toast.error(res.data.error);
+        return;
+      }
+      const results = res?.data?.results || [];
+      const triggered = results.filter(r => r.triggered);
+      if (triggered.length > 0) {
+        toast.success(`${triggered.length} auto-response rule(s) executed`);
+      } else {
+        toast.info('No matching auto-response rules found');
+      }
+      qc.invalidateQueries({ queryKey: ['blocked-ips'] });
+      qc.invalidateQueries({ queryKey: ['blocked-all'] });
+      qc.invalidateQueries({ queryKey: ['auto-response-logs'] });
+    } catch (e) {
+      toast.error('Auto-response failed');
+    } finally {
+      setAutoResponding(false);
     }
-    toast.success('Auto-response executed');
-    qc.invalidateQueries({ queryKey: ['blocked-ips'] });
-    qc.invalidateQueries({ queryKey: ['blocked-all'] });
-  }, [event, qc]);
+  }, [event, qc, autoResponding]);
 
   if (!event) return null;
 
@@ -167,8 +183,8 @@ function EventDetailDialog({ event, open, onOpenChange, blockedSet, intelMap, on
                     <Button size="sm" onClick={raiseAlert} className="h-6 sm:h-7 text-[10px] sm:text-xs">
                       Raise Critical Alert
                     </Button>
-                    <Button size="sm" variant="outline" onClick={autoRespond} className="h-6 sm:h-7 text-[10px] sm:text-xs">
-                      Auto-Respond (Block + Notify)
+                    <Button size="sm" variant="outline" onClick={autoRespond} disabled={autoResponding} className="h-6 sm:h-7 text-[10px] sm:text-xs">
+                      {autoResponding ? <><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Running…</> : 'Run Auto-Response'}
                     </Button>
                   </div>
                 </div>
