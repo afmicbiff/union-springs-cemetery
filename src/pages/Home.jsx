@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useMemo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { X, Megaphone } from 'lucide-react';
@@ -9,7 +9,7 @@ import ServicesSection from '@/components/home/ServicesSection';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-export default function Home() {
+const Home = memo(function Home() {
   const [dismissedIds, setDismissedIds] = useState([]);
 
   useEffect(() => {
@@ -20,10 +20,16 @@ export default function Home() {
   const { data: notifications = [] } = useQuery({
     queryKey: ['active-home-notifications'],
     queryFn: () => base44.entities.HomeNotification.list('-created_at', 5),
-    initialData: []
+    initialData: [],
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
   });
 
-  const activeNotification = (notifications || []).find(n => n.is_active && !dismissedIds.includes(n.id));
+  const activeNotification = useMemo(() => 
+    (notifications || []).find(n => n.is_active && !dismissedIds.includes(n.id)),
+    [notifications, dismissedIds]
+  );
 
   const handleDismiss = (id) => {
     const newDismissed = [...dismissedIds, id];
@@ -59,4 +65,6 @@ export default function Home() {
       <ServicesSection />
     </div>
   );
-}
+});
+
+export default Home;
