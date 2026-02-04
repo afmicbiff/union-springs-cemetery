@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
-export default function OverviewSalesCard() {
+export default function OverviewSalesCard() { 
   const { data: reservations = [], isLoading } = useQuery({
     queryKey: ["overview-reservations"],
     queryFn: () => base44.entities.NewPlotReservation.list("-requested_date", 50),
