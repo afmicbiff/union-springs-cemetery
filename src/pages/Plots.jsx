@@ -1,33 +1,26 @@
-import React, { useState, useEffect, useMemo, useDeferredValue, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useDeferredValue, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, FileText, Pencil, Save, X, MoreHorizontal, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, Plus, Search } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import PlotEditDialog from "@/components/plots/PlotEditDialog";
-import PlotFilters from "@/components/plots/PlotFilters";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
-import SmartImage from "@/components/perf/SmartImage";
-import ZoomPan from "@/components/common/ZoomPan";
-import PlotsTour from "@/components/plots/PlotsTour";
-import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
-
-
-const Section1DnDGrid = React.lazy(() => import("@/components/plots/Section1DnDGrid"));
-const Section2DnDGrid = React.lazy(() => import("@/components/plots/Section2DnDGrid"));
-const DraggableSectionGrid = React.lazy(() => import("@/components/plots/DraggableSectionGrid"));
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 import debounce from 'lodash/debounce';
+
+// Lazy load heavy components
+const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
+const PlotFilters = lazy(() => import("@/components/plots/PlotFilters"));
+const ZoomPan = lazy(() => import("@/components/common/ZoomPan"));
+const PlotsTour = lazy(() => import("@/components/plots/PlotsTour"));
+
+
+const Section1DnDGrid = lazy(() => import("@/components/plots/Section1DnDGrid"));
+const Section2DnDGrid = lazy(() => import("@/components/plots/Section2DnDGrid"));
+const DraggableSectionGrid = lazy(() => import("@/components/plots/DraggableSectionGrid"));
+import { toast } from "sonner";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -160,133 +153,29 @@ const getUnplacedForSection = (sectionKey, plots) => {
 
 // --- COMPONENTS ---
 
-const Tooltip = React.memo(({ data, position, visible }) => {
+// Simplified tooltip - removed SmartImage for performance
+const Tooltip = React.memo(({ data, visible }) => {
   if (!visible || !data) return null;
 
   const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
-  const isOccupied = data.Status === 'Occupied' || isVeteran;
-
   const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
-  const statusColor = STATUS_COLORS[statusKey];
-  const bgClass = statusColor.split(' ').find(c => c.startsWith('bg-'));
-
-  // Status badge colors
-  const statusBadgeColors = {
-    'Available': 'bg-green-100 text-green-800 border-green-300',
-    'Reserved': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-    'Occupied': 'bg-red-100 text-red-800 border-red-300',
-    'Veteran': 'bg-blue-100 text-blue-800 border-blue-300',
-    'Unavailable': 'bg-gray-100 text-gray-800 border-gray-300',
-    'Unknown': 'bg-purple-100 text-purple-800 border-purple-300',
-    'Default': 'bg-gray-100 text-gray-600 border-gray-300'
-  };
-
-  const badgeClass = statusBadgeColors[statusKey] || statusBadgeColors.Default;
+  const bgClass = STATUS_COLORS[statusKey]?.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400';
 
   return (
-    <div 
-      className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      <div 
-        className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-80 max-w-[90vw] pointer-events-none overflow-hidden"
-        style={{
-          transform: visible ? 'scale(1)' : 'scale(0.95)',
-          transition: 'transform 150ms ease-out, opacity 150ms ease-out',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)'
-        }}
-      >
-        {/* Header */}
-        <div className={`px-5 py-4 ${bgClass} bg-opacity-20`}>
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`w-3 h-3 rounded-full ${bgClass} ring-2 ring-white shadow-sm`}></span>
-                <span className="font-bold text-gray-900 text-xl">Plot {data.Grave}</span>
-              </div>
-              <span className="text-sm text-gray-500 font-medium">Row {data.Row} • {data.Section || 'Section'}</span>
-            </div>
-            <span className={`px-3 py-1 text-xs font-bold rounded-full border ${badgeClass}`}>
-              {statusKey}
-            </span>
-          </div>
+    <div className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none">
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-72 max-w-[85vw] pointer-events-none p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
+          <span className="font-bold text-gray-900">Plot {data.Grave}</span>
+          <span className="text-xs text-gray-500 ml-auto">{statusKey}</span>
         </div>
-        
-        {/* Body */}
-        <div className="p-5 space-y-4">
-          {isOccupied ? (
-            <>
-              {/* Occupant Info */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Occupant</p>
-                <p className="font-bold text-gray-900 text-lg leading-tight">
-                  {data['First Name']} {data['Last Name']}
-                </p>
-                {data['Family Name'] && (
-                  <p className="text-sm text-gray-500 mt-1">Family: {data['Family Name']}</p>
-                )}
-              </div>
-              
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                  <p className="text-[10px] text-blue-400 uppercase font-bold tracking-wider">Born</p>
-                  <p className="font-semibold text-blue-900 text-sm">{data.Birth || '—'}</p>
-                </div>
-                <div className="bg-rose-50 p-3 rounded-lg border border-rose-100">
-                  <p className="text-[10px] text-rose-400 uppercase font-bold tracking-wider">Died</p>
-                  <p className="font-semibold text-rose-900 text-sm">{data.Death || '—'}</p>
-                </div>
-              </div>
-              
-              {/* Notes */}
-              {data.Notes && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Notes</p>
-                  <p className="text-sm text-gray-600 italic leading-relaxed">{data.Notes}</p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-6">
-              <div className={`w-12 h-12 mx-auto mb-3 rounded-full ${bgClass} bg-opacity-30 flex items-center justify-center`}>
-                <span className={`w-5 h-5 rounded-full ${bgClass}`}></span>
-              </div>
-              <p className="text-gray-700 font-medium">
-                {data.Status === 'Reserved' 
-                  ? `Reserved for ${data['Family Name'] || data.Notes || 'Family'}` 
-                  : data.Status === 'Available' 
-                    ? 'This plot is available'
-                    : `Status: ${data.Status}`}
-              </p>
-              {data.Notes && data.Status !== 'Reserved' && (
-                <p className="text-sm text-gray-500 mt-2 italic">{data.Notes}</p>
-              )}
-            </div>
-          )}
-          
-          {/* Photo */}
-          {data.photo_url && (
-            <div className="pt-3 border-t border-gray-100">
-              <SmartImage
-                src={data.photo_url_small || data.photo_url}
-                alt={`Plot ${data.Grave}`}
-                width={320}
-                height={160}
-                loading="lazy"
-                decoding="async"
-                sizes="(max-width: 640px) 80vw, 320px"
-                srcSetVariants={{
-                  small: data.photo_url_small,
-                  medium: data.photo_url_medium,
-                  large: data.photo_url_large,
-                  original: data.photo_url,
-                }}
-                className="w-full h-36 object-cover rounded-xl border border-gray-200 shadow-sm"
-              />
-            </div>
-          )}
-        </div>
+        <p className="text-sm text-gray-600">Row {data.Row} • {data.Section || 'Section'}</p>
+        {(data['First Name'] || data['Last Name']) && (
+          <p className="text-sm font-medium mt-2">{data['First Name']} {data['Last Name']}</p>
+        )}
+        {data.Birth && data.Death && (
+          <p className="text-xs text-gray-500">{data.Birth} - {data.Death}</p>
+        )}
       </div>
     </div>
   );
@@ -308,114 +197,43 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
   document.head.appendChild(style);
 }
 
+// Simplified GravePlot - removed useState for hover, simplified classes
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
+  const plotNum = useMemo(() => parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null, [data?.Grave]);
+  const sectionForId = computedSectionKey || String(data?.Section || '').replace(/Section\s/i, '').trim();
 
-  // Calculate selection state - always compute these regardless of spacer status
-  const plotNum = parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null;
-  const sectionNorm = String(data?.Section || '').replace(/Section\s/i, '').trim();
-  const sectionForId = String(computedSectionKey || sectionNorm || '');
-  
-  const { isSelected, fromSearch } = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const targetPlotNum = parseInt(params.get('plot') || '', 10);
-    const targetSectionParam = params.get('section') || '';
-    const fromSearchVal = params.get('from') === 'search';
-    
-    // Normalize both the URL section and the plot's section
-    const normalizedTarget = normalizeSectionKey(targetSectionParam);
-    const normalizedPlot = normalizeSectionKey(sectionForId);
-    
-    // Match by plot number AND normalized section
-    const selected = fromSearchVal 
-      && Number.isFinite(targetPlotNum) 
-      && Number.isFinite(plotNum) 
-      && plotNum === targetPlotNum
-      && (!normalizedTarget || normalizedPlot === normalizedTarget);
-    
-    return { isSelected: selected, fromSearch: fromSearchVal };
-  }, [plotNum, sectionForId]);
-
-  // Keep blinking when coming from search and this plot is selected
-  useEffect(() => {
-    if (isSelected && fromSearch) {
-      setIsBlinking(true);
-    } else {
-      setIsBlinking(false);
-    }
-  }, [isSelected, fromSearch]);
-
-  // Early return for spacers AFTER all hooks - but make them clickable for admins
+  // Early return for spacers
   if (data?.isSpacer) {
-      const hasEditHandler = typeof onEdit === 'function';
-
-      const handleSpacerClick = (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          if (hasEditHandler) {
-              onEdit({ isSpacer: true, _id: data._id, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey });
-          }
-      };
-
-      return (
-          <div 
-              className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] transition-colors flex items-center justify-center plot-element ${hasEditHandler ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
-              onClick={handleSpacerClick}
-              title={hasEditHandler ? "Click to create a new plot here" : ""}
-          >
-              {hasEditHandler && <span className="text-[8px] text-green-600 font-bold">+ New</span>}
-          </div>
-      );
+    const hasEditHandler = typeof onEdit === 'function';
+    return (
+      <div 
+        className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] flex items-center justify-center plot-element ${hasEditHandler ? 'hover:bg-green-100 cursor-pointer' : ''}`}
+        onClick={hasEditHandler ? (e) => { e.stopPropagation(); onEdit({ isSpacer: true, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey }); } : undefined}
+      >
+        {hasEditHandler && <span className="text-[8px] text-gray-400">+</span>}
+      </div>
+    );
   }
 
-
-
-  let displayStatus = data.Status;
-  if (data.Notes && data.Notes.toLowerCase().includes('vet') && data.Status === 'Occupied') {
-      displayStatus = 'Veteran';
-  }
-
-  const statusColorFull = STATUS_COLORS[displayStatus] || STATUS_COLORS.Default;
-  const statusBg = statusColorFull.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
-
-  const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
-  const hoverClass = `${baseColorClass.replace('100', '200')} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const selectedClass = 'bg-green-300 border-green-700 ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl';
-  const blinkingClass = 'ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-plot-blink';
-  const activeClass = isBlinking ? blinkingClass : (isSelected ? selectedClass : (isHovered ? hoverClass : baseClass));
+  const isVet = data.Notes?.toLowerCase().includes('vet') && data.Status === 'Occupied';
+  const displayStatus = isVet ? 'Veteran' : data.Status;
+  const statusBg = STATUS_COLORS[displayStatus]?.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
 
   return (
-  <div
-      id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined} data-plot-num={plotNum != null ? plotNum : undefined} data-section={sectionForId}
-      onClick={(e) => {
-      e.stopPropagation();
-      if (onEdit && data && !data.isSpacer) onEdit(data);
-      }}
-      onMouseEnter={(e) => {
-      setIsHovered(true);
-      onHover(e, data);
-      }}
-      onMouseLeave={() => {
-      setIsHovered(false);
-      onHover(null, null);
-      }}
-      className={`
-                  relative transition-all duration-200 ease-in-out cursor-pointer
-                  border rounded-[1px] 
-                  flex flex-row items-center justify-between px-1.5
-                  w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
-                  ${activeClass}
-                  plot-element
-                  `}
-      title={`Row: ${data.Row}, Grave: ${data.Grave}`}
-  >
-      <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
-      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">
-      {data.Row}
-      </span>
-      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
-  </div>
+    <div
+      id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined}
+      data-plot-num={plotNum}
+      data-section={sectionForId}
+      onClick={(e) => { e.stopPropagation(); if (onEdit && data) onEdit(data); }}
+      onMouseEnter={(e) => onHover?.(e, data)}
+      onMouseLeave={() => onHover?.(null, null)}
+      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element`}
+      title={`${data.Grave} - ${data.Row}`}
+    >
+      <span className="text-[10px] font-black text-gray-800">{data.Grave}</span>
+      <span className="text-[8px] text-gray-600 font-mono truncate">{data.Row}</span>
+      <div className={`w-2.5 h-2.5 rounded-full ${statusBg}`}></div>
+    </div>
   );
 });
 
@@ -1020,10 +838,12 @@ export default function PlotsPage() {
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
 
 
-  // DATA FETCHING
+  // DATA FETCHING - with caching
   const { data: user } = useQuery({
       queryKey: ['currentUser'],
       queryFn: () => base44.auth.me().catch(() => null),
+      staleTime: 5 * 60_000,
+      gcTime: 30 * 60_000,
   });
   
   const isAdmin = user?.role === 'admin';
@@ -1839,7 +1659,10 @@ export default function PlotsPage() {
             <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
               alt="Union Springs Logo" 
-              className="h-14 w-auto rounded-full"
+              className="h-12 w-12 sm:h-14 sm:w-auto rounded-full"
+              loading="eager"
+              width={56}
+              height={56}
             />
             <div className="flex flex-col">
               <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
@@ -1905,13 +1728,15 @@ export default function PlotsPage() {
       )}
 
 
-      {/* Filter Bar */}
+      {/* Filter Bar - lazy loaded */}
       <div id="plots-filters">
-        <PlotFilters 
-            filters={filters} 
-            onFilterChange={setFilters} 
-            statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
-        />
+        <Suspense fallback={<div className="bg-white border-b border-gray-200 px-6 py-4 h-16" />}>
+          <PlotFilters 
+              filters={filters} 
+              onFilterChange={setFilters} 
+              statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
+          />
+        </Suspense>
       </div>
 
       {/* Main Area */}
@@ -1940,7 +1765,8 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <ZoomPan ref={zoomPanRef} className="w-full min-h-[70vh] md:min-h-[78vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.35} maxScale={2.5} initialScale={0.9}>
+                    <Suspense fallback={<div className="w-full min-h-[70vh] bg-white rounded-lg border border-gray-200 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+                    <ZoomPan ref={zoomPanRef} className="w-full min-h-[60vh] md:min-h-[70vh] bg-white rounded-lg border border-gray-200 overflow-hidden" minScale={0.4} maxScale={2} initialScale={0.85}>
                       <div className="p-4 inline-block min-w-max space-y-10">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).sort((a, b) => {
@@ -1971,6 +1797,7 @@ export default function PlotsPage() {
                                 })}
                       </div>
                     </ZoomPan>
+                    </Suspense>
 
                     {Object.keys(sections).length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
@@ -2109,17 +1936,25 @@ export default function PlotsPage() {
 
 
 
-      {/* Guided Tour */}
-      <PlotsTour key={tourSession} open={isTourOpen} onClose={() => setIsTourOpen(false)} />
+      {/* Guided Tour - only render when open */}
+      {isTourOpen && (
+        <Suspense fallback={null}>
+          <PlotsTour key={tourSession} open={isTourOpen} onClose={() => setIsTourOpen(false)} />
+        </Suspense>
+      )}
       
-      {/* Edit Dialog */}
-      <PlotEditDialog 
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        plot={selectedPlotForModal}
-        onSave={handleUpdatePlot}
-        onCreate={handleCreatePlot}
-      />
+      {/* Edit Dialog - only render when open */}
+      {isEditModalOpen && (
+        <Suspense fallback={null}>
+          <PlotEditDialog 
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            plot={selectedPlotForModal}
+            onSave={handleUpdatePlot}
+            onCreate={handleCreatePlot}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
