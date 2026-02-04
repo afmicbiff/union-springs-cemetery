@@ -1,76 +1,139 @@
-import React from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 
-export default function TemplateForm({ open, onOpenChange, initial, onSave }) {
-  const [form, setForm] = React.useState(initial || {
-    name: "",
-    key: "",
-    category: "general",
-    description: "",
-    subject: "",
-    body: "",
-    placeholders: []
-  });
+const DEFAULT_FORM = {
+  name: "",
+  key: "",
+  category: "general",
+  description: "",
+  subject: "",
+  body: "",
+  placeholders: []
+};
 
-  React.useEffect(() => {
-    setForm(initial || { name: "", key: "", category: "general", description: "", subject: "", body: "", placeholders: [] });
-  }, [initial]);
+function TemplateForm({ open, onOpenChange, initial, onSave }) {
+  const [form, setForm] = useState(initial || DEFAULT_FORM);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    setForm(initial || DEFAULT_FORM);
+    setIsSubmitting(false);
+  }, [initial, open]);
+
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    onSave(form);
-  };
+    if (isSubmitting || !form.name?.trim() || !form.subject?.trim() || !form.body?.trim()) return;
+    setIsSubmitting(true);
+    onSave({
+      ...form,
+      name: form.name.trim(),
+      subject: form.subject.trim(),
+      body: form.body.trim()
+    });
+  }, [form, onSave, isSubmitting]);
+
+  const updateField = useCallback((field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle>{initial ? "Edit Template" : "New Template"}</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">{initial ? "Edit Template" : "New Template"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500">Name</label>
-              <Input value={form.name} onChange={(e)=>setForm({...form, name: e.target.value})} required />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="space-y-1">
+              <label className="text-[10px] sm:text-xs text-gray-500">Name *</label>
+              <Input 
+                value={form.name} 
+                onChange={(e) => updateField('name', e.target.value)} 
+                required 
+                maxLength={100}
+                className="h-8 sm:h-9 text-sm"
+              />
             </div>
-            <div>
-              <label className="text-xs text-gray-500">Key (optional)</label>
-              <Input value={form.key || ""} onChange={(e)=>setForm({...form, key: e.target.value})} placeholder="reservation_ack" />
+            <div className="space-y-1">
+              <label className="text-[10px] sm:text-xs text-gray-500">Key (optional)</label>
+              <Input 
+                value={form.key || ""} 
+                onChange={(e) => updateField('key', e.target.value)} 
+                placeholder="reservation_ack" 
+                maxLength={50}
+                className="h-8 sm:h-9 text-sm"
+              />
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-gray-500">Category</label>
-              <select className="w-full border rounded-md px-2 py-2 text-sm" value={form.category} onChange={(e)=>setForm({...form, category: e.target.value})}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div className="space-y-1">
+              <label className="text-[10px] sm:text-xs text-gray-500">Category</label>
+              <select 
+                className="w-full border rounded-md px-2 py-1.5 sm:py-2 text-sm h-8 sm:h-9" 
+                value={form.category} 
+                onChange={(e) => updateField('category', e.target.value)}
+              >
                 <option value="general">General</option>
                 <option value="reservation">Reservation</option>
                 <option value="inquiry">Inquiry</option>
                 <option value="invoice">Invoice</option>
+                <option value="member">Member</option>
               </select>
             </div>
-            <div>
-              <label className="text-xs text-gray-500">Description</label>
-              <Input value={form.description || ""} onChange={(e)=>setForm({...form, description: e.target.value})} />
+            <div className="space-y-1">
+              <label className="text-[10px] sm:text-xs text-gray-500">Description</label>
+              <Input 
+                value={form.description || ""} 
+                onChange={(e) => updateField('description', e.target.value)} 
+                maxLength={200}
+                className="h-8 sm:h-9 text-sm"
+              />
             </div>
           </div>
-          <div>
-            <label className="text-xs text-gray-500">Subject</label>
-            <Input value={form.subject} onChange={(e)=>setForm({...form, subject: e.target.value})} required />
+          <div className="space-y-1">
+            <label className="text-[10px] sm:text-xs text-gray-500">Subject *</label>
+            <Input 
+              value={form.subject} 
+              onChange={(e) => updateField('subject', e.target.value)} 
+              required 
+              maxLength={200}
+              className="h-8 sm:h-9 text-sm"
+            />
           </div>
-          <div>
-            <label className="text-xs text-gray-500">Body</label>
-            <Textarea rows={10} value={form.body} onChange={(e)=>setForm({...form, body: e.target.value})} required />
-            <div className="text-xs text-gray-500 mt-1">Use placeholders with {'{'}{'{'}variable{'}'}{'}'} syntax, e.g. {'{'}{'{'}requester_name{'}'}{'}'}.</div>
+          <div className="space-y-1">
+            <label className="text-[10px] sm:text-xs text-gray-500">Body *</label>
+            <Textarea 
+              rows={8} 
+              value={form.body} 
+              onChange={(e) => updateField('body', e.target.value)} 
+              required 
+              maxLength={5000}
+              className="text-sm"
+            />
+            <div className="text-[10px] sm:text-xs text-gray-500 mt-1">
+              Use placeholders: {'{{'}variable{'}}'}
+            </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={()=>onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="bg-teal-700 hover:bg-teal-800 text-white">Save</Button>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-8 text-xs sm:text-sm">
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              className="bg-teal-700 hover:bg-teal-800 text-white h-8 text-xs sm:text-sm" 
+              disabled={isSubmitting || !form.name?.trim() || !form.subject?.trim() || !form.body?.trim()}
+            >
+              {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save'}
+            </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
+
+export default memo(TemplateForm);

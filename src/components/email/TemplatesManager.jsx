@@ -1,43 +1,84 @@
-import React from "react";
+import React, { useState, useCallback, useMemo, memo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Pencil, Trash2, FileText, Sparkles } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, FileText, Sparkles, AlertCircle, RefreshCw } from "lucide-react";
 import TemplateForm from "./TemplateForm";
 
-export default function TemplatesManager() {
+// Memoized template row
+const TemplateRow = memo(function TemplateRow({ template, onEdit, onDelete, isDeleting }) {
+  return (
+    <div className="py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="min-w-0 flex-1">
+        <div className="font-medium text-sm sm:text-base truncate">
+          {template.name} 
+          {template.key && <span className="text-[10px] sm:text-xs text-gray-400 ml-1">({template.key})</span>}
+        </div>
+        <div className="text-[10px] sm:text-xs text-gray-500 truncate">
+          {template.category || 'general'} {template.description ? `• ${template.description}` : ''}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        <Button size="sm" variant="outline" onClick={() => onEdit(template)} className="gap-1 h-7 sm:h-8 text-xs">
+          <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5"/> <span className="hidden sm:inline">Edit</span>
+        </Button>
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="border-red-200 text-red-700 hover:bg-red-50 h-7 sm:h-8" 
+          onClick={() => onDelete(template.id)}
+          disabled={isDeleting}
+        >
+          {isDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5"/>}
+        </Button>
+      </div>
+    </div>
+  );
+});
+
+function TemplatesManager() {
   const qc = useQueryClient();
-  const { data: templates = [], isLoading } = useQuery({
+  const { data: templates = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["email-templates"],
-    queryFn: async () => base44.entities.EmailTemplate.list("-updated_date", 200)
+    queryFn: () => base44.entities.EmailTemplate.list("-updated_date", 200),
+    staleTime: 5 * 60_000,
+    retry: 2,
   });
 
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState(null);
-  const [search, setSearch] = React.useState("");
-  const seededRef = React.useRef(false);
-  const seededCoreRef = React.useRef(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const seededRef = useRef(false);
+  const seededCoreRef = useRef(false);
 
   const createMut = useMutation({
-    mutationFn: async (payload) => base44.entities.EmailTemplate.create(payload),
+    mutationFn: (payload) => base44.entities.EmailTemplate.create(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
   const updateMut = useMutation({
-    mutationFn: async ({ id, payload }) => base44.entities.EmailTemplate.update(id, payload),
+    mutationFn: ({ id, payload }) => base44.entities.EmailTemplate.update(id, payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
   const deleteMut = useMutation({
-    mutationFn: async (id) => base44.entities.EmailTemplate.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
+    mutationFn: async (id) => {
+      setDeletingId(id);
+      await base44.entities.EmailTemplate.delete(id);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["email-templates"] });
+      setDeletingId(null);
+    },
+    onError: () => setDeletingId(null)
   });
   const bulkCreateMut = useMutation({
-    mutationFn: async () => base44.entities.EmailTemplate.bulkCreate(getStarterTemplates()),
+    mutationFn: () => base44.entities.EmailTemplate.bulkCreate(getStarterTemplates()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
   const bulkCreateCoreMut = useMutation({
-    mutationFn: async (payload) => base44.entities.EmailTemplate.bulkCreate(payload),
+    mutationFn: (payload) => base44.entities.EmailTemplate.bulkCreate(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["email-templates"] })
   });
 
@@ -46,64 +87,100 @@ export default function TemplatesManager() {
       seededRef.current = true;
       bulkCreateMut.mutate();
     }
-  }, [isLoading, templates.length]);
+  }, [isLoading, templates.length, bulkCreateMut.isPending]);
 
   React.useEffect(() => {
-    if (isLoading) return;
-    if (seededCoreRef.current || bulkCreateCoreMut.isPending) return;
+    if (isLoading || seededCoreRef.current || bulkCreateCoreMut.isPending) return;
     const keys = new Set((templates || []).map(t => t.key));
     const coreMissing = getCoreMemberTemplates().filter(t => !keys.has(t.key));
     if (coreMissing.length) {
       seededCoreRef.current = true;
       bulkCreateCoreMut.mutate(coreMissing);
     }
-  }, [isLoading, templates]);
+  }, [isLoading, templates, bulkCreateCoreMut.isPending]);
 
-  const filtered = templates.filter(t => !search || (t.name || "").toLowerCase().includes(search.toLowerCase()) || (t.key || "").toLowerCase().includes(search.toLowerCase()));
+  const handleEdit = useCallback((template) => {
+    setEditing(template);
+    setDialogOpen(true);
+  }, []);
+
+  const handleDelete = useCallback((id) => {
+    if (confirm('Delete this template?')) {
+      deleteMut.mutate(id);
+    }
+  }, [deleteMut]);
+
+  const handleSave = useCallback((form) => {
+    if (editing) {
+      updateMut.mutate({ id: editing.id, payload: form });
+    } else {
+      createMut.mutate(form);
+    }
+    setDialogOpen(false);
+  }, [editing, updateMut, createMut]);
+
+  const filtered = useMemo(() => {
+    if (!search) return templates;
+    const term = search.toLowerCase();
+    return templates.filter(t => 
+      (t.name || "").toLowerCase().includes(term) || 
+      (t.key || "").toLowerCase().includes(term)
+    );
+  }, [templates, search]);
 
   return (
-    <Card className="p-4 mt-6">
-      <div className="flex items-center justify-between mb-3">
+    <Card className="p-3 sm:p-4 mt-4 sm:mt-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-3">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-teal-700" />
-          <h2 className="font-semibold">Email Templates</h2>
+          <h2 className="font-semibold text-sm sm:text-base">Email Templates</h2>
         </div>
-        <div className="flex items-center gap-2">
-          <Input placeholder="Search templates" value={search} onChange={(e)=>setSearch(e.target.value)} className="h-8 w-40" />
-          {templates.length === 0 && (
-            <Button size="sm" variant="outline" onClick={()=>bulkCreateMut.mutate()} disabled={bulkCreateMut.isPending} className="gap-1">
-              {bulkCreateMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <Sparkles className="h-3.5 w-3.5"/>}
-              Seed starter
+        <div className="flex items-center gap-2 flex-wrap">
+          <Input 
+            placeholder="Search..." 
+            value={search} 
+            onChange={(e)=>setSearch(e.target.value)} 
+            className="h-7 sm:h-8 w-full sm:w-32 md:w-40 text-sm" 
+          />
+          {templates.length === 0 && !isLoading && (
+            <Button size="sm" variant="outline" onClick={()=>bulkCreateMut.mutate()} disabled={bulkCreateMut.isPending} className="gap-1 h-7 sm:h-8 text-xs">
+              {bulkCreateMut.isPending ? <Loader2 className="h-3 w-3 animate-spin"/> : <Sparkles className="h-3 w-3"/>}
+              <span className="hidden sm:inline">Seed starter</span><span className="sm:hidden">Seed</span>
             </Button>
           )}
-          <Button size="sm" onClick={()=>{ setEditing(null); setDialogOpen(true); }} className="bg-teal-700 hover:bg-teal-800 text-white gap-1">
-            <Plus className="w-4 h-4" /> New
+          <Button size="sm" onClick={()=>{ setEditing(null); setDialogOpen(true); }} className="bg-teal-700 hover:bg-teal-800 text-white gap-1 h-7 sm:h-8 text-xs">
+            <Plus className="w-3.5 h-3.5" /> <span className="hidden sm:inline">New</span>
           </Button>
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="text-sm text-gray-500 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin"/> Loading…</div>
+      {isError ? (
+        <div className="text-center py-6 sm:py-8">
+          <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-xs sm:text-sm text-stone-500 mb-2">Failed to load templates</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="h-7 text-xs">
+            <RefreshCw className="w-3 h-3 mr-1" /> Retry
+          </Button>
+        </div>
+      ) : isLoading ? (
+        <div className="text-xs sm:text-sm text-gray-500 flex items-center justify-center gap-2 py-6 sm:py-8">
+          <Loader2 className="w-4 h-4 animate-spin"/> Loading…
+        </div>
       ) : (
-        <div className="divide-y">
+        <div className="divide-y divide-stone-100">
           {filtered.map(t => (
-            <div key={t.id} className="py-3 flex items-center justify-between">
-              <div>
-                <div className="font-medium">{t.name} <span className="text-xs text-gray-400">{t.key ? `(${t.key})` : ""}</span></div>
-                <div className="text-xs text-gray-500">{t.category || 'general'} {t.description ? `• ${t.description}` : ''}</div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={()=>{ setEditing(t); setDialogOpen(true); }} className="gap-1">
-                  <Pencil className="w-3.5 h-3.5"/> Edit
-                </Button>
-                <Button size="sm" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50" onClick={()=>{ if (confirm('Delete this template?')) deleteMut.mutate(t.id); }}>
-                  <Trash2 className="w-3.5 h-3.5"/>
-                </Button>
-              </div>
-            </div>
+            <TemplateRow 
+              key={t.id} 
+              template={t} 
+              onEdit={handleEdit} 
+              onDelete={handleDelete}
+              isDeleting={deletingId === t.id}
+            />
           ))}
           {filtered.length === 0 && (
-            <div className="text-sm text-gray-500 py-6 text-center">No templates yet.</div>
+            <div className="text-xs sm:text-sm text-gray-500 py-6 sm:py-8 text-center">
+              {search ? 'No templates match your search.' : 'No templates yet.'}
+            </div>
           )}
         </div>
       )}
@@ -112,15 +189,13 @@ export default function TemplatesManager() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         initial={editing}
-        onSave={(form)=>{
-          if (editing) updateMut.mutate({ id: editing.id, payload: form });
-          else createMut.mutate(form);
-          setDialogOpen(false);
-        }}
+        onSave={handleSave}
       />
     </Card>
   );
 }
+
+export default memo(TemplatesManager);
 
 function getCoreMemberTemplates() {
   return [
