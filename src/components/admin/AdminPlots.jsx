@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense, memo, useCallback } from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,27 +6,34 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Wrench, Plus } from 'lucide-react';
-import PlotMaintenancePanel from "./PlotMaintenancePanel";
-import MaintenanceWizard from "./MaintenanceWizard";
+import { FileText, Wrench, Plus, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import AdminPlotMap from "./AdminPlotMap";
+
+const PlotMaintenancePanel = lazy(() => import("./PlotMaintenancePanel"));
+const MaintenanceWizard = lazy(() => import("./MaintenanceWizard"));
+const AdminPlotMap = lazy(() => import("./AdminPlotMap"));
 
 export default function AdminPlots() {
     const [selectedSource, setSelectedSource] = React.useState('Plot');
 
-    const { data: plotsOld } = useQuery({
+    const { data: plotsOld, isLoading: isLoadingOld } = useQuery({
         queryKey: ['plots-admin-list', 'Plot'],
-        queryFn: async () => base44.entities.Plot.filter({}, null, 5000),
+        queryFn: async () => base44.entities.Plot.filter({}, '-updated_date', 500),
         initialData: [],
-        enabled: selectedSource === 'Plot'
+        enabled: selectedSource === 'Plot',
+        staleTime: 5 * 60_000,
+        gcTime: 15 * 60_000,
+        refetchOnWindowFocus: false,
     });
 
-    const { data: plotsNew } = useQuery({
+    const { data: plotsNew, isLoading: isLoadingNew } = useQuery({
         queryKey: ['plots-admin-list', 'NewPlot'],
-        queryFn: async () => base44.entities.NewPlot.filter({}, null, 5000),
+        queryFn: async () => base44.entities.NewPlot.filter({}, '-updated_date', 500),
         initialData: [],
-        enabled: selectedSource === 'NewPlot'
+        enabled: selectedSource === 'NewPlot',
+        staleTime: 5 * 60_000,
+        gcTime: 15 * 60_000,
+        refetchOnWindowFocus: false,
     });
 
     const plots = React.useMemo(() => selectedSource === 'Plot' ? (plotsOld || []) : (plotsNew || []), [selectedSource, plotsOld, plotsNew]);
@@ -153,12 +160,19 @@ export default function AdminPlots() {
                     </div>
                 </div>
 
+                {(isLoadingOld || isLoadingNew) && (
+                    <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-stone-400 mr-2" />
+                        <span className="text-stone-500">Loading plots...</span>
+                    </div>
+                )}
+
                 <div className="rounded-md border overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-stone-50 text-stone-600 font-medium border-b">
                                 <tr>
-                                    <th className="p-4 w-8">
+                                    <th className="p-2 sm:p-4 w-8">
                                         <input
                                             type="checkbox"
                                             aria-label="Select all"
@@ -169,18 +183,18 @@ export default function AdminPlots() {
                                             }}
                                         />
                                     </th>
-                                    <th className="p-4 whitespace-nowrap">Location</th>
-                                    <th className="p-4 whitespace-nowrap">Status</th>
-                                    <th className="p-4 whitespace-nowrap hidden sm:table-cell">Capacity</th>
-                                    <th className="p-4 whitespace-nowrap hidden md:table-cell">Occupancy</th>
-                                    <th className="p-4 whitespace-nowrap hidden lg:table-cell">Last Maint.</th>
-                                    <th className="p-4 text-right">Actions</th>
+                                    <th className="p-2 sm:p-4 whitespace-nowrap text-xs sm:text-sm">Location</th>
+                                    <th className="p-2 sm:p-4 whitespace-nowrap text-xs sm:text-sm">Status</th>
+                                    <th className="p-2 sm:p-4 whitespace-nowrap hidden sm:table-cell">Capacity</th>
+                                    <th className="p-2 sm:p-4 whitespace-nowrap hidden md:table-cell">Occupancy</th>
+                                    <th className="p-2 sm:p-4 whitespace-nowrap hidden lg:table-cell">Last Maint.</th>
+                                    <th className="p-2 sm:p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
-                                {filteredPlots.map(plot => (
+                                {filteredPlots.slice(0, 100).map(plot => (
                                     <tr key={plot.id} className="hover:bg-stone-50">
-                                        <td className="p-4 w-8">
+                                        <td className="p-2 sm:p-4 w-8">
                                             <input
                                                 type="checkbox"
                                                 checked={selected.includes(plot.id)}
@@ -189,31 +203,30 @@ export default function AdminPlots() {
                                                 }}
                                             />
                                         </td>
-                                        <td className="p-4 font-medium">{plot.section}-{plot.plot_number}</td>
-                                        <td className="p-4">
+                                        <td className="p-2 sm:p-4 font-medium text-xs sm:text-sm">{plot.section}-{plot.plot_number}</td>
+                                        <td className="p-2 sm:p-4">
                                             <Badge variant="secondary" className={`
-                                                whitespace-nowrap
+                                                whitespace-nowrap text-xs
                                                 ${plot.status === 'Available' ? 'bg-green-100 text-green-800' : ''}
                                                 ${plot.status === 'Reserved' ? 'bg-teal-100 text-teal-800' : ''}
                                                 ${plot.status === 'Occupied' ? 'bg-red-100 text-red-800' : ''}
                                                 ${plot.status === 'Unavailable' ? 'bg-gray-100 text-gray-800' : ''}
-                                                
                                             `}>
                                                 {plot.status}
                                             </Badge>
                                         </td>
-                                        <td className="p-4 hidden sm:table-cell">{plot.capacity || 1} slots</td>
-                                        <td className="p-4 hidden md:table-cell">{plot.current_occupancy || 0} filled</td>
-                                        <td className="p-4 hidden lg:table-cell text-stone-500">
+                                        <td className="p-2 sm:p-4 hidden sm:table-cell text-xs sm:text-sm">{plot.capacity || 1}</td>
+                                        <td className="p-2 sm:p-4 hidden md:table-cell text-xs sm:text-sm">{plot.current_occupancy || 0}</td>
+                                        <td className="p-2 sm:p-4 hidden lg:table-cell text-stone-500 text-xs">
                                             {plot.last_maintained ? format(new Date(plot.last_maintained), 'MMM d') : '-'}
                                         </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setQuickView(plot)}>
-                                                    <FileText className="w-4 h-4" />
+                                        <td className="p-2 sm:p-4 text-right">
+                                            <div className="flex justify-end gap-0.5 sm:gap-1">
+                                                <Button size="sm" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8 p-0" onClick={() => setQuickView(plot)}>
+                                                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 </Button>
-                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Maintenance" onClick={() => setMaintenanceFor({ entity: selectedSource, plot })}>
-                                                    <Wrench className="w-4 h-4" />
+                                                <Button size="sm" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8 p-0" title="Maintenance" onClick={() => setMaintenanceFor({ entity: selectedSource, plot })}>
+                                                    <Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                 </Button>
                                             </div>
                                         </td>
@@ -222,16 +235,23 @@ export default function AdminPlots() {
                             </tbody>
                         </table>
                     </div>
+                    {filteredPlots.length > 100 && (
+                        <div className="p-3 bg-stone-50 border-t text-center text-xs text-stone-500">
+                            Showing first 100 of {filteredPlots.length} plots. Use filters to narrow results.
+                        </div>
+                    )}
                 </div>
 
-                {/* Visual Map */}
-                <div className="mt-6">
+                {/* Visual Map - Hidden on mobile for performance */}
+                <div className="mt-6 hidden md:block">
                     <div className="flex items-center justify-between mb-2">
                         <h3 className="text-base font-semibold text-stone-800">Visual Map</h3>
                         <span className="text-xs text-stone-500">Click a plot to view details</span>
                     </div>
                     <div className="rounded-md border p-4 bg-white">
-                        <AdminPlotMap plots={filteredPlots} onSelect={(p) => setQuickView(p)} />
+                        <Suspense fallback={<div className="h-40 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-stone-400" /></div>}>
+                            <AdminPlotMap plots={filteredPlots.slice(0, 200)} onSelect={(p) => setQuickView(p)} />
+                        </Suspense>
                     </div>
                 </div>
 
@@ -277,18 +297,22 @@ export default function AdminPlots() {
 
                 {/* Maintenance Dialog */}
                 <Dialog open={!!maintenanceFor} onOpenChange={(o) => { if (!o) setMaintenanceFor(null); }}>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Plot Maintenance</DialogTitle>
                         </DialogHeader>
                         {maintenanceFor && (
-                            <PlotMaintenancePanel plot={maintenanceFor.plot} entity={maintenanceFor.entity} />
+                            <Suspense fallback={<div className="h-32 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin" /></div>}>
+                                <PlotMaintenancePanel plot={maintenanceFor.plot} entity={maintenanceFor.entity} />
+                            </Suspense>
                         )}
                     </DialogContent>
                 </Dialog>
 
                 {/* Maintenance Wizard */}
-                <MaintenanceWizard open={wizardOpen} onOpenChange={setWizardOpen} />
+                <Suspense fallback={null}>
+                    {wizardOpen && <MaintenanceWizard open={wizardOpen} onOpenChange={setWizardOpen} />}
+                </Suspense>
 
             </CardContent>
         </Card>

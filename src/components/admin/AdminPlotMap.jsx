@@ -11,10 +11,36 @@ const STATUS_COLORS = {
   "Not Usable": "bg-gray-400",
 };
 
+const PlotButton = React.memo(({ plot, onClick }) => {
+  const st = plot.status && STATUS_COLORS[plot.status] ? plot.status : "Unknown";
+  const dot = STATUS_COLORS[st] || STATUS_COLORS.Unknown;
+  const title = `Plot ${plot.plot_number || ''} • Row ${plot.row_number || '-'} • ${plot.status || 'Unknown'}`;
+  
+  return (
+    <button
+      title={title}
+      onClick={() => onClick?.(plot)}
+      className="text-left border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-mono text-gray-800 font-semibold truncate">
+          {plot.plot_number}
+        </div>
+        <span className={clsx("w-3 h-3 rounded-full", dot)}></span>
+      </div>
+      <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {plot.row_number || '-'}</div>
+      <div className="mt-0.5 text-[11px] text-gray-600 truncate">
+        {[plot.first_name, plot.last_name].filter(Boolean).join(" ") || plot.family_name || ""}
+      </div>
+    </button>
+  );
+});
+
 export default function AdminPlotMap({ plots = [], onSelect }) {
   const grouped = React.useMemo(() => {
     const g = {};
-    (plots || []).forEach((p) => {
+    const limitedPlots = (plots || []).slice(0, 500); // Limit for performance
+    limitedPlots.forEach((p) => {
       const sec = String(p.section || "Unassigned");
       if (!g[sec]) g[sec] = [];
       g[sec].push(p);
@@ -50,34 +76,10 @@ export default function AdminPlotMap({ plots = [], onSelect }) {
               const visible = showAll ? items : items.slice(0, 96);
               return (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                    {visible.map((p) => {
-                      const st = p.status && STATUS_COLORS[p.status] ? p.status : "Unknown";
-                      const dot = STATUS_COLORS[st] || STATUS_COLORS.Unknown;
-                      const title = `Plot ${p.plot_number || ''} • Row ${p.row_number || '-'} • ${p.status || 'Unknown'}`;
-                      return (
-                        <button
-                          key={p.id}
-                          title={title}
-                          onClick={() => onSelect && onSelect(p)}
-                          className={clsx(
-                            "text-left border border-gray-200 rounded-md p-2 bg-gray-50 hover:bg-gray-100 transition",
-                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
-                          )}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="text-[11px] font-mono text-gray-800 font-semibold truncate">
-                              {p.plot_number}
-                            </div>
-                            <span className={clsx("w-3 h-3 rounded-full", dot)}></span>
-                          </div>
-                          <div className="mt-1 text-[11px] text-gray-600 truncate">Row: {p.row_number || '-'}</div>
-                          <div className="mt-0.5 text-[11px] text-gray-600 truncate">
-                            {[p.first_name, p.last_name].filter(Boolean).join(" ") || p.family_name || ""}
-                          </div>
-                        </button>
-                      );
-                    })}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1.5 sm:gap-2">
+                    {visible.map((p) => (
+                      <PlotButton key={p.id} plot={p} onClick={onSelect} />
+                    ))}
                   </div>
                   {!showAll && items.length > 96 && (
                     <div className="mt-3">
