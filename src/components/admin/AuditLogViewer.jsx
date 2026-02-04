@@ -218,8 +218,8 @@ function AuditLogViewer() {
     }, [selectedYear, selectedMonth, selectedWeek, availableWeeks]);
 
 
-    // --- PDF Export ---
-    const handleExportPDF = (scope) => {
+    // --- PDF Export with safe formatting ---
+    const handleExportPDF = useCallback((scope) => {
         const doc = new jsPDF();
         
         doc.setFontSize(20);
@@ -246,9 +246,9 @@ function AuditLogViewer() {
                 doc.addPage();
                 y = 20;
             }
-            const dateStr = format(parseISO(log.timestamp), 'MM/dd HH:mm');
-            const userStr = log.performed_by?.split('@')[0].substring(0, 15);
-            const actionStr = `${log.action} ${log.entity_type}`.substring(0, 20);
+            const dateStr = safeFormatDate(log.timestamp, 'MM/dd HH:mm');
+            const userStr = (log.performed_by?.split('@')[0] || 'Unknown').substring(0, 15);
+            const actionStr = `${log.action || ''} ${log.entity_type || ''}`.substring(0, 20);
             const detailStr = (log.details || "").substring(0, 30);
 
             doc.text(dateStr, 20, y);
@@ -260,7 +260,34 @@ function AuditLogViewer() {
 
         doc.save(`audit_logs_${scope}_${format(new Date(), 'yyyyMMdd')}.pdf`);
         toast.success(`Exported ${scope} logs to PDF`);
-    };
+    }, [filteredLogs]);
+
+    // Memoized callbacks for handlers
+    const handleDeleteLog = useCallback((id) => {
+        deleteLogMutation.mutate(id);
+    }, [deleteLogMutation]);
+
+    const handleYearChange = useCallback((v) => {
+        setSelectedYear(v);
+        setSelectedMonth('all');
+        setSelectedWeek('all');
+        setSelectedDay('all');
+    }, []);
+
+    const handleMonthChange = useCallback((v) => {
+        setSelectedMonth(v);
+        setSelectedWeek('all');
+        setSelectedDay('all');
+    }, []);
+
+    const handleWeekChange = useCallback((v) => {
+        setSelectedWeek(v);
+        setSelectedDay('all');
+    }, []);
+
+    const handleSearchChange = useCallback((e) => {
+        setSearchTerm(e.target.value);
+    }, []);
 
     const getActionColor = (action) => {
         switch (action?.toLowerCase()) {
