@@ -1,13 +1,57 @@
-import React from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Loader2, MapPin, Calendar, AlertCircle, CheckCircle2, RefreshCw, Bell } from 'lucide-react';
+import { format, parseISO, isValid } from 'date-fns';
 
-export default function MemberDashboard({ user, setActiveTab }) {
+// Safe date formatter
+function safeFormatDate(dateStr, formatStr = 'MMM d, yyyy') {
+  if (!dateStr) return 'N/A';
+  try {
+    const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+    return isValid(d) ? format(d, formatStr) : 'N/A';
+  } catch {
+    return 'N/A';
+  }
+}
+
+// Memoized Task Item
+const TaskItem = memo(function TaskItem({ task, onAction }) {
+  return (
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 bg-white p-3 rounded-md border border-stone-200 shadow-sm">
+      <div className="min-w-0 flex-1">
+        <h4 className="font-semibold text-stone-800 text-sm sm:text-base">{task.title}</h4>
+        <p className="text-xs sm:text-sm text-stone-600">{task.description}</p>
+      </div>
+      <Button size="sm" variant="outline" onClick={task.action} className="h-8 text-xs shrink-0 self-end sm:self-center">View</Button>
+    </div>
+  );
+});
+
+// Memoized Reservation Card
+const ReservationCard = memo(function ReservationCard({ reservation, status }) {
+  const isConfirmed = status === 'confirmed';
+  return (
+    <div className={`p-3 rounded-md border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 ${isConfirmed ? 'bg-stone-50' : 'bg-white shadow-sm'}`}>
+      <div className="min-w-0">
+        <div className={`font-medium text-sm ${isConfirmed ? 'text-teal-900' : 'text-stone-800'}`}>
+          Plot {reservation.plot_id}
+        </div>
+        <div className="text-xs text-stone-500">
+          {isConfirmed ? 'Reserved' : 'Submitted'}: {safeFormatDate(reservation.date)}
+        </div>
+      </div>
+      <Badge className={isConfirmed ? 'bg-teal-600' : 'text-amber-600 border-amber-200 bg-amber-50'} variant={isConfirmed ? 'default' : 'outline'}>
+        {isConfirmed ? 'Owned' : 'Pending'}
+      </Badge>
+    </div>
+  );
+});
+
+function MemberDashboard({ user, setActiveTab }) {
     // Fetch Member Record
     const { data: memberData } = useQuery({
         queryKey: ['member-profile', user.email],
