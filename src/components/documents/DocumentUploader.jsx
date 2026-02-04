@@ -60,29 +60,6 @@ function DocumentUploader({ onUploadComplete, versionContext = null }) {
         }
     }, [versionContext]);
 
-    // Removed duplicate docTypes - now at module level
-        "Resume",
-        "Offer Letter",
-        "Form I-9",
-        "Form W-4",
-        "Form L-4",
-        "Minor Cert",
-        "Performance Review",
-        "Disciplinary Action",
-        "Medical",
-        "Certification/License",
-        "Signed Agreement",
-        "Other"
-    ];
-
-    const categories = [
-        "Contracts",
-        "Certifications",
-        "HR Forms",
-        "Legal",
-        "Other"
-    ];
-
     const handleUpload = useCallback(async () => {
         if (!file) {
             toast.error("Please select a file.");
