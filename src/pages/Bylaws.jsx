@@ -165,160 +165,174 @@ function Bylaws() {
         </div>
 
         <Card className="bg-white shadow-lg border-none">
-          <CardContent className="p-8 md:p-12">
-            <Section title="ARTICLE I: Name">
+          <CardContent className="p-4 sm:p-8 md:p-12">
+            <Section title="ARTICLE I: Name" searchTerm={searchTerm}>
               <p>
-                <HighlightedText text={'The cemetery located at 1311 Fire Tower Road, Shongaloo, Webster Parish, Louisiana, 71072 shall be known as the Union Springs Cemetery Association (hereinafter referred to as "the Association").'} />
+                <HighlightedText text={'The cemetery located at 1311 Fire Tower Road, Shongaloo, Webster Parish, Louisiana, 71072 shall be known as the Union Springs Cemetery Association (hereinafter referred to as "the Association").'} searchTerm={searchTerm} />
               </p>
             </Section>
 
-            <Section title="PREAMBLE">
+            <Section title="PREAMBLE" searchTerm={searchTerm}>
               <p>
-                <HighlightedText text={'The Association is established to provide a respectful, dignified, and well-maintained final resting place for loved ones within the community. The Association shall administer and maintain the cemetery with the highest standards of care and responsibility.'} />
+                <HighlightedText text={'The Association is established to provide a respectful, dignified, and well-maintained final resting place for loved ones within the community. The Association shall administer and maintain the cemetery with the highest standards of care and responsibility.'} searchTerm={searchTerm} />
               </p>
             </Section>
 
-            <Section title="ARTICLE II: Purpose">
-              <p><HighlightedText text={'The purpose of the Association shall be to:'} /></p>
-              <ol className="space-y-2 mt-2">
-                <ListItem><HighlightedText text={'Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.'} /></ListItem>
-                <ListItem><HighlightedText text={'Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.'} /></ListItem>
-                <ListItem><HighlightedText text={'Raise and manage financial resources for the ongoing upkeep of the cemetery.'} /></ListItem>
-                <ListItem><HighlightedText text={'Foster a fraternal and cooperative spirit among members of the Association.'} /></ListItem>
+            <Section title="ARTICLE II: Purpose" searchTerm={searchTerm}>
+              <p><HighlightedText text={'The purpose of the Association shall be to:'} searchTerm={searchTerm} /></p>
+              <ol className="space-y-1.5 sm:space-y-2 mt-2">
+                <ListItem><HighlightedText text={'Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Raise and manage financial resources for the ongoing upkeep of the cemetery.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Foster a fraternal and cooperative spirit among members of the Association.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE III: Perpetual Funds">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'Any funds received and designated for perpetual care shall be preserved in an insured financial institution domiciled in Webster Parish, Louisiana. These funds shall be considered Perpetual Care Fund assets with the primary purpose of generating interest.'} /></ListItem>
-                <ListItem><HighlightedText text={'Interest earned from these accounts shall be deposited into the Association\'s general fund and expended as directed by the Executive Board in accordance with the Association\'s objectives.'} /></ListItem>
+            <Section title="ARTICLE III: Perpetual Funds" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'Any funds received and designated for perpetual care shall be preserved in an insured financial institution domiciled in Webster Parish, Louisiana. These funds shall be considered Perpetual Care Fund assets with the primary purpose of generating interest.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Interest earned from these accounts shall be deposited into the Association\'s general fund and expended as directed by the Executive Board in accordance with the Association\'s objectives.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE IV: Standards of Conduct">
-              <p><HighlightedText text={'All individuals involved in the Association shall adhere to the following:'} /></p>
-              <ol className="space-y-2 mt-2">
-                <ListItem><HighlightedText text={'Democratic governance, including fair elections and member participation rights.'} /></ListItem>
-                <ListItem><HighlightedText text={'Prohibition of conflicts of interest among officers and agents in relation to financial transactions or business operations.'} /></ListItem>
-                <ListItem><HighlightedText text={'Maintenance of fiscal responsibility and transparency in all financial affairs.'} /></ListItem>
+            <Section title="ARTICLE IV: Standards of Conduct" searchTerm={searchTerm}>
+              <p><HighlightedText text={'All individuals involved in the Association shall adhere to the following:'} searchTerm={searchTerm} /></p>
+              <ol className="space-y-1.5 sm:space-y-2 mt-2">
+                <ListItem><HighlightedText text={'Democratic governance, including fair elections and member participation rights.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Prohibition of conflicts of interest among officers and agents in relation to financial transactions or business operations.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Maintenance of fiscal responsibility and transparency in all financial affairs.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE V: Membership">
-              <p><HighlightedText text={'Membership is open to individuals who:'} /></p>
-              <ol className="space-y-2 mt-2 mb-4">
-                <ListItem><HighlightedText text={'Are 18 years of age or older and have a familial relationship (by blood or marriage) to a person interred within the Union Springs Cemetery.'} /></ListItem>
-                <ListItem><HighlightedText text={'Are 18 years of age or older, reside in the community, and have actively contributed to the cemetery\'s preservation and upkeep.'} /></ListItem>
-                <ListItem><HighlightedText text={'Submit a formal membership certification request to the Secretary, including documentation of their eligibility.'} /></ListItem>
+            <Section title="ARTICLE V: Membership" searchTerm={searchTerm}>
+              <p><HighlightedText text={'Membership is open to individuals who:'} searchTerm={searchTerm} /></p>
+              <ol className="space-y-1.5 sm:space-y-2 mt-2 mb-3 sm:mb-4">
+                <ListItem><HighlightedText text={'Are 18 years of age or older and have a familial relationship (by blood or marriage) to a person interred within the Union Springs Cemetery.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Are 18 years of age or older, reside in the community, and have actively contributed to the cemetery\'s preservation and upkeep.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Submit a formal membership certification request to the Secretary, including documentation of their eligibility.'} searchTerm={searchTerm} /></ListItem>
               </ol>
-              <p className="font-semibold mt-4 mb-2"><HighlightedText text={'Membership provisions:'} /></p>
-              <ul className="space-y-2">
-                <SubListItem><HighlightedText text={'Each member is entitled to one certificate of membership and one vote.'} /></SubListItem>
-                <SubListItem><HighlightedText text={'Membership does not guarantee burial rights within the cemetery.'} /></SubListItem>
-                <SubListItem><HighlightedText text={'Membership is non-transferable and expires upon the member\'s death or voluntary termination.'} /></SubListItem>
+              <p className="font-semibold mt-3 sm:mt-4 mb-2"><HighlightedText text={'Membership provisions:'} searchTerm={searchTerm} /></p>
+              <ul className="space-y-1.5 sm:space-y-2">
+                <SubListItem><HighlightedText text={'Each member is entitled to one certificate of membership and one vote.'} searchTerm={searchTerm} /></SubListItem>
+                <SubListItem><HighlightedText text={'Membership does not guarantee burial rights within the cemetery.'} searchTerm={searchTerm} /></SubListItem>
+                <SubListItem><HighlightedText text={'Membership is non-transferable and expires upon the member\'s death or voluntary termination.'} searchTerm={searchTerm} /></SubListItem>
               </ul>
             </Section>
 
-            <Section title="ARTICLE VI: Meetings">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'The Annual Meeting shall take place on the second Saturday in May at the Union Springs Cemetery.'} /></ListItem>
-                <ListItem><HighlightedText text={'Additional meetings may be scheduled by the Association as necessary.'} /></ListItem>
-                <ListItem><HighlightedText text={'Special meetings may be convened at the discretion of the President or at the request of 25% of members in good standing.'} /></ListItem>
-                <ListItem><HighlightedText text={'A quorum shall consist of attending members in good standing, provided a reasonable effort was made to notify the membership of the meeting.'} /></ListItem>
+            <Section title="ARTICLE VI: Meetings" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'The Annual Meeting shall take place on the second Saturday in May at the Union Springs Cemetery.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Additional meetings may be scheduled by the Association as necessary.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Special meetings may be convened at the discretion of the President or at the request of 25% of members in good standing.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'A quorum shall consist of attending members in good standing, provided a reasonable effort was made to notify the membership of the meeting.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE VII: Elections">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'Only members in good standing who are 18 years of age or older at the time of nomination and election shall be eligible to hold office.'} /></ListItem>
-                <ListItem><HighlightedText text={'Nominations for officers shall be made at the Annual Meeting, and any eligible member may nominate candidates.'} /></ListItem>
-                <ListItem><HighlightedText text={'A maximum of two individuals from the same immediate family may serve in elected positions.'} /></ListItem>
-                <ListItem><HighlightedText text={'Elections shall be conducted via secret ballot among eligible voting members.'} /></ListItem>
-                <ListItem><HighlightedText text={'The Executive Board shall fill vacant positions, if necessary, except within 60 days of the next Annual Meeting.'} /></ListItem>
+            <Section title="ARTICLE VII: Elections" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'Only members in good standing who are 18 years of age or older at the time of nomination and election shall be eligible to hold office.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Nominations for officers shall be made at the Annual Meeting, and any eligible member may nominate candidates.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'A maximum of two individuals from the same immediate family may serve in elected positions.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Elections shall be conducted via secret ballot among eligible voting members.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'The Executive Board shall fill vacant positions, if necessary, except within 60 days of the next Annual Meeting.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE VIII: Officers">
-              <p className="mb-2"><HighlightedText text={'The Association shall have the following officers:'} /></p>
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'President – Presides over meetings, appoints committees, calls special meetings, and oversees Association operations.'} /></ListItem>
-                <ListItem><HighlightedText text={'Vice President – Assumes the duties of the President in their absence and manages delegated responsibilities.'} /></ListItem>
-                <ListItem><HighlightedText text={'Secretary – Maintains records of meetings, membership details, official communications, and reports.'} /></ListItem>
-                <ListItem><HighlightedText text={'Treasurer – Manages financial accounts, prepares reports, oversees expenditure, and ensures fiscal compliance.'} /></ListItem>
+            <Section title="ARTICLE VIII: Officers" searchTerm={searchTerm}>
+              <p className="mb-2"><HighlightedText text={'The Association shall have the following officers:'} searchTerm={searchTerm} /></p>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'President – Presides over meetings, appoints committees, calls special meetings, and oversees Association operations.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Vice President – Assumes the duties of the President in their absence and manages delegated responsibilities.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Secretary – Maintains records of meetings, membership details, official communications, and reports.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Treasurer – Manages financial accounts, prepares reports, oversees expenditure, and ensures fiscal compliance.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE IX: Board of Directors">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'The Executive Board shall consist of the elected officers and three Members At Large.'} /></ListItem>
+            <Section title="ARTICLE IX: Board of Directors" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'The Executive Board shall consist of the elected officers and three Members At Large.'} searchTerm={searchTerm} /></ListItem>
                 <ListItem>
-                  <HighlightedText text={'The Executive Board shall have the authority to:'} />
+                  <HighlightedText text={'The Executive Board shall have the authority to:'} searchTerm={searchTerm} />
                   <ul className="mt-2 space-y-1">
-                    <SubListItem><HighlightedText text={'Appoint a Caretaker for cemetery maintenance.'} /></SubListItem>
-                    <SubListItem><HighlightedText text={'Manage and hold all Association property in trust.'} /></SubListItem>
-                    <SubListItem><HighlightedText text={'Represent the Association in legal and financial matters.'} /></SubListItem>
-                    <SubListItem><HighlightedText text={'Conduct annual audits and present findings at the Annual Meeting.'} /></SubListItem>
+                    <SubListItem><HighlightedText text={'Appoint a Caretaker for cemetery maintenance.'} searchTerm={searchTerm} /></SubListItem>
+                    <SubListItem><HighlightedText text={'Manage and hold all Association property in trust.'} searchTerm={searchTerm} /></SubListItem>
+                    <SubListItem><HighlightedText text={'Represent the Association in legal and financial matters.'} searchTerm={searchTerm} /></SubListItem>
+                    <SubListItem><HighlightedText text={'Conduct annual audits and present findings at the Annual Meeting.'} searchTerm={searchTerm} /></SubListItem>
                   </ul>
                 </ListItem>
-                <ListItem><HighlightedText text={'The Executive Board shall convene annually in April before the Annual Meeting to address business matters.'} /></ListItem>
+                <ListItem><HighlightedText text={'The Executive Board shall convene annually in April before the Annual Meeting to address business matters.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE X: Impeachment & Removal">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'The Executive Board may suspend an officer or board member for misconduct or negligence following a fair hearing.'} /></ListItem>
-                <ListItem><HighlightedText text={'Upon formal impeachment, the individual shall have the right to a hearing before a three-member Review Committee appointed by the Board.'} /></ListItem>
-                <ListItem><HighlightedText text={'All officers removed from the office must surrender all records, funds, and Association property to their successors.'} /></ListItem>
+            <Section title="ARTICLE X: Impeachment & Removal" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'The Executive Board may suspend an officer or board member for misconduct or negligence following a fair hearing.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Upon formal impeachment, the individual shall have the right to a hearing before a three-member Review Committee appointed by the Board.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'All officers removed from the office must surrender all records, funds, and Association property to their successors.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE XI: Conduct of Meetings">
-              <p className="mb-2"><HighlightedText text={'Meetings shall follow standard parliamentary procedure and adhere to the following agenda:'} /></p>
+            <Section title="ARTICLE XI: Conduct of Meetings" searchTerm={searchTerm}>
+              <p className="mb-2"><HighlightedText text={'Meetings shall follow standard parliamentary procedure and adhere to the following agenda:'} searchTerm={searchTerm} /></p>
               <ol className="space-y-1">
-                <ListItem><HighlightedText text={'Call to Order'} /></ListItem>
-                <ListItem><HighlightedText text={'Invocation'} /></ListItem>
-                <ListItem><HighlightedText text={'Approval of Previous Meeting Minutes'} /></ListItem>
-                <ListItem><HighlightedText text={'Financial Reports'} /></ListItem>
-                <ListItem><HighlightedText text={'Committee Reports'} /></ListItem>
-                <ListItem><HighlightedText text={'Old Business'} /></ListItem>
-                <ListItem><HighlightedText text={'New Business'} /></ListItem>
-                <ListItem><HighlightedText text={'Benediction'} /></ListItem>
-                <ListItem><HighlightedText text={'Adjournment'} /></ListItem>
+                <ListItem><HighlightedText text={'Call to Order'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Invocation'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Approval of Previous Meeting Minutes'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Financial Reports'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Committee Reports'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Old Business'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'New Business'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Benediction'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Adjournment'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE XII: Amendments">
-              <p><HighlightedText text={'Changes to these By-Laws require a two-thirds majority vote of the members at the Annual Meeting on the Second Saturday of May.'} /></p>
+            <Section title="ARTICLE XII: Amendments" searchTerm={searchTerm}>
+              <p><HighlightedText text={'Changes to these By-Laws require a two-thirds majority vote of the members at the Annual Meeting on the Second Saturday of May.'} searchTerm={searchTerm} /></p>
             </Section>
 
-            <Section title="ARTICLE XIII: Burial Plots">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.'} /></ListItem>
-                <ListItem><HighlightedText text={'The size of all burial plots are five feet wide and ten feet in length. The Association shall strive to maintain a dignified and orderly manner when marking plots.'} /></ListItem>
-                <ListItem><HighlightedText text={'The President, Vice-President, or Caretaker shall have sole authority for reserving or marking grave sites. Any sites marked by an individual other than the authorized persons will not be recognized.'} /></ListItem>
-                <ListItem><HighlightedText text={'All grave sites will remain the property of the Union Springs Cemetery Association with no right of transfer to any person. A reserved plot cannot be transferred to another individual by the person who reserved it; if they no longer wish to keep the plot, they should notify a member of the Executive Board so the plot can be marked for use by another person.'} /></ListItem>
-                <ListItem><HighlightedText text={'Maintenance Fees – A minimum donation of $400 secures a plot. Members must reaffirm intent to use the plot every five years; the Association will attempt to verify contact for one year. If no contact is successful the plot will revert to the Association.'} /></ListItem>
+            <Section title="ARTICLE XIII: Burial Plots" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'The size of all burial plots are five feet wide and ten feet in length. The Association shall strive to maintain a dignified and orderly manner when marking plots.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'The President, Vice-President, or Caretaker shall have sole authority for reserving or marking grave sites. Any sites marked by an individual other than the authorized persons will not be recognized.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'All grave sites will remain the property of the Union Springs Cemetery Association with no right of transfer to any person. A reserved plot cannot be transferred to another individual by the person who reserved it; if they no longer wish to keep the plot, they should notify a member of the Executive Board so the plot can be marked for use by another person.'} searchTerm={searchTerm} /></ListItem>
+                <ListItem><HighlightedText text={'Maintenance Fees – A minimum donation of $400 secures a plot. Members must reaffirm intent to use the plot every five years; the Association will attempt to verify contact for one year. If no contact is successful the plot will revert to the Association.'} searchTerm={searchTerm} /></ListItem>
               </ol>
             </Section>
 
-            <Section title="ARTICLE XIV: Urns">
-              <ol className="space-y-4">
-                <ListItem><HighlightedText text={'Urns may be interred with dignity and care, subject to:'} /></ListItem>
+            <Section title="ARTICLE XIV: Urns" searchTerm={searchTerm}>
+              <ol className="space-y-3 sm:space-y-4">
+                <ListItem><HighlightedText text={'Urns may be interred with dignity and care, subject to:'} searchTerm={searchTerm} /></ListItem>
               </ol>
-              <ul className="ml-8 mt-2 space-y-4">
+              <ul className="ml-4 sm:ml-8 mt-2 space-y-3 sm:space-y-4">
                 <SubListItem>
-                  <span className="font-semibold"><HighlightedText text={'Maximum of three urns per plot.'} /></span>
-                  <ul className="mt-2 space-y-2">
-                    <li className="ml-6 list-[circle]"><HighlightedText text={'Place the first urn 12 inches from the headstone base or marker, centered on the plot. The second urn should be placed 12 inches from the first urn in the row. The third and final urn will be positioned 12 inches from the second urn in the row.'} /></li>
-                    <li className="ml-6 list-[circle]"><HighlightedText text={'Dimensional limits: No more than 200 cubic inches, 9 inches tall, and 7 inches in diameter.'} /></li>
+                  <span className="font-semibold"><HighlightedText text={'Maximum of three urns per plot.'} searchTerm={searchTerm} /></span>
+                  <ul className="mt-2 space-y-1.5 sm:space-y-2">
+                    <li className="ml-4 sm:ml-6 list-[circle] text-sm sm:text-base"><HighlightedText text={'Place the first urn 12 inches from the headstone base or marker, centered on the plot. The second urn should be placed 12 inches from the first urn in the row. The third and final urn will be positioned 12 inches from the second urn in the row.'} searchTerm={searchTerm} /></li>
+                    <li className="ml-4 sm:ml-6 list-[circle] text-sm sm:text-base"><HighlightedText text={'Dimensional limits: No more than 200 cubic inches, 9 inches tall, and 7 inches in diameter.'} searchTerm={searchTerm} /></li>
                   </ul>
                 </SubListItem>
-                <SubListItem><HighlightedText text={'Placement shall be regulated and mapped by the Association.'} /></SubListItem>
+                <SubListItem><HighlightedText text={'Placement shall be regulated and mapped by the Association.'} searchTerm={searchTerm} /></SubListItem>
               </ul>
             </Section>
           </CardContent>
         </Card>
+
+        {/* Back to Top Button */}
+        {showScrollTop && (
+          <Button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-teal-700 hover:bg-teal-800 shadow-lg"
+            size="icon"
+            aria-label="Scroll to top"
+          >
+            <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
+          </Button>
+        )}
       </div>
     </div>
   );
 }
+
+export default memo(Bylaws);
