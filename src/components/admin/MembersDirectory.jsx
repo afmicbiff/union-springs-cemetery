@@ -99,7 +99,7 @@ function MembersDirectory({ openMemberId }) {
         gcTime: 30 * 60 * 1000,
     });
 
-    const { data: members, isLoading, isError, error } = useQuery({
+    const { data: members, isLoading, isError, error, refetch } = useQuery({
         queryKey: ['members'],
         refetchOnWindowFocus: false,
         queryFn: async () => {
@@ -116,9 +116,8 @@ function MembersDirectory({ openMemberId }) {
         initialData: [],
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
-        onError: (err) => {
-            toast.error("Failed to load members: " + err.message);
-        },
+        retry: 2,
+        retryDelay: 1000,
     });
 
     useEffect(() => {
@@ -266,28 +265,37 @@ function MembersDirectory({ openMemberId }) {
         }));
     }, []);
 
-    const exportToCSV = () => {
-        if (!members || members.length === 0) return;
+    const exportToCSV = useCallback(() => {
+        if (!filteredMembers || filteredMembers.length === 0) {
+            toast.error("No members to export");
+            return;
+        }
         
-        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments"];
+        // Escape CSV values properly
+        const escapeCSV = (val) => {
+            const str = String(val || '').replace(/"/g, '""');
+            return `"${str}"`;
+        };
+        
+        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments", "Last Donation", "Last Contact", "Follow-up"];
         const csvContent = [
             headers.join(","),
             ...filteredMembers.map(m => [
-                `"${m.last_name || ''}"`,
-                `"${m.first_name || ''}"`,
-                `"${m.address || ''}"`,
-                `"${m.city || ''}"`,
-                `"${m.state || ''}"`,
-                `"${m.zip || ''}"`,
-                `"${m.phone_primary || ''}"`,
-                `"${m.phone_secondary || ''}"`,
-                `"${m.email_primary || ''}"`,
-                `"${m.email_secondary || ''}"`,
-                `"${m.donation || ''}"`,
-                `"${m.comments || ''}"`,
-                `"${m.last_donation_date || ''}"`,
-                `"${m.last_contact_date || ''}"`,
-                `"${m.follow_up_date || ''}"`
+                escapeCSV(m.last_name),
+                escapeCSV(m.first_name),
+                escapeCSV(m.address),
+                escapeCSV(m.city),
+                escapeCSV(m.state),
+                escapeCSV(m.zip),
+                escapeCSV(m.phone_primary),
+                escapeCSV(m.phone_secondary),
+                escapeCSV(m.email_primary),
+                escapeCSV(m.email_secondary),
+                escapeCSV(m.donation),
+                escapeCSV(m.comments),
+                escapeCSV(m.last_donation_date),
+                escapeCSV(m.last_contact_date),
+                escapeCSV(m.follow_up_date)
             ].join(","))
         ].join("\n");
 
@@ -295,9 +303,11 @@ function MembersDirectory({ openMemberId }) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "members_directory.csv";
+        link.download = `members_directory_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
-    };
+        URL.revokeObjectURL(url);
+        toast.success(`Exported ${filteredMembers.length} members`);
+    }, [filteredMembers]);
 
     // Advanced Filtering Logic
     const evaluateRule = (member, rule) => {
@@ -565,13 +575,13 @@ function MembersDirectory({ openMemberId }) {
                                 <th className="p-4 w-[40px]">
                                     <Checkbox 
                                         checked={filteredMembers.length > 0 && selectedMemberIds.length === filteredMembers.length}
-                                        onCheckedChange={(checked) => {
+                                        onCheckedChange={useCallback((checked) => {
                                             if (checked) {
                                                 setSelectedMemberIds(filteredMembers.map(m => m.id));
                                             } else {
                                                 setSelectedMemberIds([]);
                                             }
-                                        }}
+                                        }, [filteredMembers])}
                                     />
                                 </th>
                                 <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('last_name')}>
@@ -688,13 +698,14 @@ function MembersDirectory({ openMemberId }) {
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-8 w-8 text-stone-400 hover:text-red-600"
+                                                        disabled={deleteMutation.isPending}
                                                         onClick={() => {
                                                             if (confirm('Are you sure you want to delete this member?')) {
                                                                 deleteMutation.mutate(member.id);
                                                             }
                                                         }}
                                                     >
-                                                        <Trash2 className="w-4 h-4" />
+                                                        {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                                                     </Button>
                                                 </div>
                                             </td>
@@ -889,7 +900,10 @@ function MembersDirectory({ openMemberId }) {
                                         <div className="flex-1">
                                             <div className="flex justify-between">
                                                 <span className="font-semibold text-stone-800 capitalize">{log.action}</span>
-                                                <span className="text-xs text-stone-400">{format(new Date(log.timestamp), 'MMM d, h:mm a')}</span>
+                                                <span className="text-xs text-stone-400">{(() => {
+                                                    const d = safeParseDateISO(log.timestamp);
+                                                    return d ? format(d, 'MMM d, h:mm a') : '—';
+                                                })()}</span>
                                             </div>
                                             <p className="text-stone-600 mt-0.5">
                                                 <span className="font-medium">{log.member_name}</span> - {log.details}
