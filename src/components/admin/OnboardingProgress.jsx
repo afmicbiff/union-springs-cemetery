@@ -57,75 +57,47 @@ export default function OnboardingProgress() {
 
     return (
         <Card>
-            <CardHeader>
-                <div className="flex justify-between items-center">
+            <CardHeader className="px-4 sm:px-6 py-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
-                        <CardTitle className="flex items-center gap-2">
-                            <Clock className="w-5 h-5 text-teal-600"/> Onboarding Tracker
+                        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600"/> Progress
                         </CardTitle>
-                        <CardDescription>
-                            Monitor completion status and automate follow-ups.
-                        </CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">Monitor completion status</CardDescription>
                     </div>
                     <Button 
+                        size="sm"
                         onClick={handleRunReminders} 
                         disabled={isRunning || incompleteEmployees.length === 0}
-                        className="bg-teal-700 hover:bg-teal-800"
+                        className="bg-teal-700 hover:bg-teal-800 w-full sm:w-auto h-8"
                     >
-                        {isRunning ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : <Send className="w-4 h-4 mr-2"/>}
-                        Send Reminders
+                        {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1"/> : <Send className="w-3.5 h-3.5 mr-1"/>}
+                        <span className="text-xs">Send Reminders</span>
                     </Button>
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-6">
-                    {incompleteEmployees.length === 0 ? (
-                        <div className="text-center py-8 bg-green-50 rounded-lg border border-green-100">
-                            <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-2"/>
-                            <h3 className="font-semibold text-green-800">All Clear!</h3>
-                            <p className="text-green-700 text-sm">All active employees have completed their onboarding.</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                            {incompleteEmployees.map(emp => {
-                                const progress = getProgress(emp);
-                                const missing = getMissingItems(emp);
-                                
-                                return (
-                                    <div key={emp.id} className="border rounded-lg p-4 bg-white hover:bg-stone-50 transition-colors">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div>
-                                                <h4 className="font-semibold text-stone-900">{emp.first_name} {emp.last_name}</h4>
-                                                <p className="text-xs text-stone-500">{emp.email}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <Badge variant={progress < 50 ? "destructive" : "secondary"} className="mb-1">
-                                                    {progress}% Complete
-                                                </Badge>
-                                                {emp.last_reminder_sent && (
-                                                    <p className="text-[10px] text-stone-400">
-                                                        Last reminded: {format(new Date(emp.last_reminder_sent), 'MMM d, HH:mm')}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        
-                                        <Progress value={progress} className="h-2 mb-3" />
-                                        
-                                        <div className="flex flex-wrap gap-2">
-                                            {missing.map(item => (
-                                                <Badge key={item} variant="outline" className="text-xs border-red-200 bg-red-50 text-red-700">
-                                                    Missing: {item}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+            <CardContent className="px-4 sm:px-6">
+                {incompleteEmployees.length === 0 ? (
+                    <div className="text-center py-6 bg-green-50 rounded-lg border border-green-100">
+                        <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-green-600 mx-auto mb-2"/>
+                        <h3 className="font-semibold text-sm text-green-800">All Clear!</h3>
+                        <p className="text-green-700 text-xs">Onboarding complete.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-2 sm:space-y-3 max-h-[300px] overflow-y-auto">
+                        {incompleteEmployees.map(emp => (
+                            <EmployeeProgressCard
+                                key={emp.id}
+                                emp={emp}
+                                progress={getProgress(emp)}
+                                missing={getMissingItems(emp)}
+                            />
+                        ))}
+                    </div>
+                )}
             </CardContent>
         </Card>
     );
-}
+});
+
+export default OnboardingProgress;
