@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Search, Trash2, Filter, AlertTriangle, ChevronRight, ChevronDown, History, Upload } from 'lucide-react';
+import { FileText, Search, Trash2, Filter, ChevronRight, ChevronDown, Upload } from 'lucide-react';
 import SecureFileLink from './SecureFileLink';
-import { format, isPast, isBefore, addDays } from 'date-fns';
+import { format, isPast, isBefore, addDays, parseISO, isValid } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import DocumentUploader from './DocumentUploader';
 
@@ -22,7 +22,16 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export default function DocumentList({ documents, onDelete, onUpdate }) {
+// Safe date formatting
+function safeFormatDate(dateStr, formatStr = 'MMM d, yyyy') {
+    if (!dateStr) return null;
+    try {
+        const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+        return isValid(d) ? format(d, formatStr) : null;
+    } catch { return null; }
+}
+
+function DocumentList({ documents, onDelete, onUpdate }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [expandedGroups, setExpandedGroups] = useState({});
@@ -66,19 +75,25 @@ export default function DocumentList({ documents, onDelete, onUpdate }) {
         return matchesSearch && matchesCategory;
     });
 
-    const uniqueCategories = ["All", ...new Set((documents || []).map(d => d.category || "Other"))].sort();
+    const uniqueCategories = useMemo(() => 
+        ["All", ...new Set((documents || []).map(d => d.category || "Other"))].sort(),
+        [documents]
+    );
 
-    const toggleGroup = (groupId) => {
+    const toggleGroup = useCallback((groupId) => {
         setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
-    };
+    }, []);
 
-    const getExpirationStatus = (dateStr) => {
+    const getExpirationStatus = useCallback((dateStr) => {
         if (!dateStr) return null;
-        const date = new Date(dateStr);
-        if (isPast(date)) return { label: "Expired", color: "text-red-600 bg-red-50 border-red-200" };
-        if (isBefore(date, addDays(new Date(), 30))) return { label: "Expiring Soon", color: "text-amber-600 bg-amber-50 border-amber-200" };
-        return { label: "Valid", color: "text-green-600 bg-green-50 border-green-200" };
-    };
+        try {
+            const date = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
+            if (!isValid(date)) return null;
+            if (isPast(date)) return { label: "Expired", color: "text-red-600 bg-red-50 border-red-200" };
+            if (isBefore(date, addDays(new Date(), 30))) return { label: "Expiring Soon", color: "text-amber-600 bg-amber-50 border-amber-200" };
+            return { label: "Valid", color: "text-green-600 bg-green-50 border-green-200" };
+        } catch { return null; }
+    }, []);
 
     const RenderDocRow = ({ doc, isHistory = false }) => {
         const expStatus = getExpirationStatus(doc.expiration_date);
@@ -113,7 +128,7 @@ export default function DocumentList({ documents, onDelete, onUpdate }) {
                             )}
                             {expStatus && (
                                 <Badge variant="outline" className={`text-[10px] h-5 px-1 ${expStatus.color}`}>
-                                    {expStatus.label}: {format(new Date(doc.expiration_date), 'MMM d, yyyy')}
+                                    {expStatus.label}: {safeFormatDate(doc.expiration_date) || 'N/A'}
                                 </Badge>
                             )}
                         </div>
@@ -121,7 +136,7 @@ export default function DocumentList({ documents, onDelete, onUpdate }) {
                             <p className="text-xs text-stone-600 mt-1 italic">"{doc.notes}"</p>
                         )}
                         <p className="text-xs text-stone-400 mt-1">
-                            Uploaded: {doc.uploaded_at ? format(new Date(doc.uploaded_at), 'MMM d, yyyy h:mm a') : 'N/A'}
+                            Uploaded: {safeFormatDate(doc.uploaded_at, 'MMM d, yyyy h:mm a') || 'N/A'}
                         </p>
                     </div>
                 </div>
@@ -233,3 +248,5 @@ export default function DocumentList({ documents, onDelete, onUpdate }) {
         </div>
     );
 }
+
+export default memo(DocumentList);
