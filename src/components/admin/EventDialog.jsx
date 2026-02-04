@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
-export default function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventToEdit }) {
+const EventDialog = memo(function EventDialog({ isOpen, onClose, selectedDate, onSave, employees, eventToEdit }) {
     const [formData, setFormData] = useState({
         title: "",
         type: "other",
@@ -56,57 +56,14 @@ export default function EventDialog({ isOpen, onClose, selectedDate, onSave, emp
     }, [eventToEdit, isOpen]);
     const [employeeSearch, setEmployeeSearch] = useState("");
 
-    // Enhanced fuzzy search for employees
+    // Simplified search (no fuzzy for mobile perf)
     const filteredEmployees = useMemo(() => {
-        if (!employeeSearch.trim()) return employees;
+        if (!employeeSearch.trim()) return employees.slice(0, 50); // Limit for perf
         const search = employeeSearch.toLowerCase().trim();
-
-        // Levenshtein distance
-        const getDist = (a, b) => {
-            if (a.length === 0) return b.length;
-            if (b.length === 0) return a.length;
-            const matrix = [];
-            for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-            for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-            for (let i = 1; i <= b.length; i++) {
-                for (let j = 1; j <= a.length; j++) {
-                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j] + 1
-                        );
-                    }
-                }
-            }
-            return matrix[b.length][a.length];
-        };
-
-        const uniqueEmployees = Array.from(new Map(employees.map(item => [item.id, item])).values());
-        
-        return uniqueEmployees.filter(emp => {
-            const first = (emp.first_name || "").toLowerCase();
-            const last = (emp.last_name || "").toLowerCase();
-            const email = (emp.email || "").toLowerCase();
-            const full = `${first} ${last}`.trim();
-            
-            // 1. Direct match (includes)
-            if (full.includes(search) || email.includes(search)) return true;
-
-            // 2. Fuzzy match parts
-            const targets = [first, last, full];
-            
-            // Allow leniency based on search length
-            const maxDist = search.length <= 3 ? 1 : (search.length <= 6 ? 2 : 3);
-
-            return targets.some(target => {
-                if (!target) return false;
-                // If close enough
-                return getDist(target, search) <= maxDist;
-            });
-        });
+        return employees.filter(emp => {
+            const full = `${emp.first_name || ''} ${emp.last_name || ''}`.toLowerCase();
+            return full.includes(search) || (emp.email || '').toLowerCase().includes(search);
+        }).slice(0, 30);
     }, [employees, employeeSearch]);
 
     const handleSubmit = (e) => {
@@ -139,36 +96,28 @@ export default function EventDialog({ isOpen, onClose, selectedDate, onSave, emp
         onSave(eventData);
     };
 
-    const toggleAttendee = (empId) => {
+    const toggleAttendee = useCallback((empId) => {
         setFormData(prev => ({
             ...prev,
-            attendee_ids: prev.attendee_ids.includes(empId) 
-                ? prev.attendee_ids.filter(id => id !== empId)
-                : [...prev.attendee_ids, empId]
+            attendee_ids: prev.attendee_ids.includes(empId) ? prev.attendee_ids.filter(id => id !== empId) : [...prev.attendee_ids, empId]
         }));
-    };
+    }, []);
 
-    const addExternalAttendee = () => {
-        setFormData(prev => ({
-            ...prev,
-            external_attendees: [...prev.external_attendees, { name: "", email: "", status: "pending" }]
-        }));
-    };
+    const addExternalAttendee = useCallback(() => {
+        setFormData(prev => ({ ...prev, external_attendees: [...prev.external_attendees, { name: "", email: "", status: "pending" }] }));
+    }, []);
 
-    const removeExternalAttendee = (index) => {
-        setFormData(prev => ({
-            ...prev,
-            external_attendees: prev.external_attendees.filter((_, i) => i !== index)
-        }));
-    };
+    const removeExternalAttendee = useCallback((index) => {
+        setFormData(prev => ({ ...prev, external_attendees: prev.external_attendees.filter((_, i) => i !== index) }));
+    }, []);
 
-    const updateExternalAttendee = (index, field, value) => {
+    const updateExternalAttendee = useCallback((index, field, value) => {
         setFormData(prev => {
             const updated = [...prev.external_attendees];
             updated[index] = { ...updated[index], [field]: value };
             return { ...prev, external_attendees: updated };
         });
-    };
+    }, []);
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -384,12 +333,14 @@ export default function EventDialog({ isOpen, onClose, selectedDate, onSave, emp
                         />
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800">{eventToEdit ? 'Update' : 'Save'} Event</Button>
+                    <DialogFooter className="gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+                        <Button type="submit" size="sm" className="bg-teal-700 hover:bg-teal-800">{eventToEdit ? 'Update' : 'Save'}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
     );
-}
+});
+
+export default EventDialog;

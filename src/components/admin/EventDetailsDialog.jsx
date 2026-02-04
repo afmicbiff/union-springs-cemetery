@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,10 +6,13 @@ import { Label } from "@/components/ui/label";
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
-export default function EventDetailsDialog({ event, isOpen, onClose, employees, onDelete, onEdit }) {
-    if (!event) return null;
+const EventDetailsDialog = memo(function EventDetailsDialog({ event, isOpen, onClose, employees, onDelete, onEdit }) {
+    const attendees = useMemo(() => {
+        if (!event) return [];
+        return employees.filter(emp => event.attendee_ids?.includes(emp.id));
+    }, [event, employees]);
 
-    const attendees = employees.filter(emp => event.attendee_ids?.includes(emp.id));
+    if (!event) return null;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -88,20 +91,16 @@ export default function EventDetailsDialog({ event, isOpen, onClose, employees, 
                     )}
                 </div>
 
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="destructive" onClick={() => {
-                        if (confirm("Are you sure you want to delete this event?")) {
-                            onDelete(event.id);
-                        }
-                    }}>
-                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                <DialogFooter className="gap-2 flex-wrap">
+                    <Button variant="destructive" size="sm" onClick={() => { if (confirm("Delete?")) onDelete(event.id); }}>
+                        <Trash2 className="w-3.5 h-3.5 mr-1"/>Delete
                     </Button>
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={onClose}>Close</Button>
-                        <Button onClick={() => onEdit(event)} className="bg-teal-700 hover:bg-teal-800">Edit Event</Button>
-                    </div>
+                    <Button variant="outline" size="sm" onClick={onClose}>Close</Button>
+                    <Button size="sm" onClick={() => onEdit(event)} className="bg-teal-700 hover:bg-teal-800">Edit</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
-}
+});
+
+export default EventDetailsDialog;
