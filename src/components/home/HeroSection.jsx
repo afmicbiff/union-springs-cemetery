@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Search, MapPin, Map } from 'lucide-react';
 
-export default function HeroSection() {
+const HeroSection = memo(function HeroSection() {
   const [activeImage, setActiveImage] = useState(null);
 
   const handleImageClick = (index) => {
@@ -14,10 +14,24 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-4 overflow-hidden py-12 md:py-0">
       {/* Background Image with optimized loading and overlay */}
-      <div 
-        className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center bg-no-repeat mix-blend-overlay"
-        aria-hidden="true"
-      />
+      <picture className="absolute inset-0" aria-hidden="true">
+        <source 
+          media="(max-width: 640px)" 
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=60&w=640&auto=format&fit=crop" 
+        />
+        <source 
+          media="(max-width: 1024px)" 
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=70&w=1024&auto=format&fit=crop" 
+        />
+        <img 
+          src="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/50 to-stone-900/90 absolute inset-0"></div>
       
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 px-4 animate-fade-in-up">
@@ -128,4 +142,6 @@ export default function HeroSection() {
       </div>
     </section>
   );
-}
+});
+
+export default HeroSection;
