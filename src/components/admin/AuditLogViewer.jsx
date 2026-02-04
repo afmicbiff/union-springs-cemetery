@@ -354,13 +354,13 @@ function AuditLogViewer() {
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
                 {/* Hierarchical Toolbar */}
-                <div className="space-y-4 mb-6 p-4 bg-stone-50 rounded-lg border border-stone-200">
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div className="space-y-3 mb-4 p-3 sm:p-4 bg-stone-50 rounded-lg border border-stone-200">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
                          {/* Year */}
-                         <Select value={selectedYear} onValueChange={(v) => { setSelectedYear(v); setSelectedMonth('all'); setSelectedWeek('all'); setSelectedDay('all'); }}>
-                            <SelectTrigger className="bg-white">
+                         <Select value={selectedYear} onValueChange={handleYearChange}>
+                            <SelectTrigger className="bg-white h-8 sm:h-9 text-xs sm:text-sm">
                                 <SelectValue placeholder="Year" />
                             </SelectTrigger>
                             <SelectContent>
@@ -370,28 +370,28 @@ function AuditLogViewer() {
                         </Select>
 
                         {/* Month */}
-                        <Select value={selectedMonth} onValueChange={(v) => { setSelectedMonth(v); setSelectedWeek('all'); setSelectedDay('all'); }} disabled={selectedYear === 'all'}>
-                            <SelectTrigger className="bg-white">
+                        <Select value={selectedMonth} onValueChange={handleMonthChange} disabled={selectedYear === 'all'}>
+                            <SelectTrigger className="bg-white h-8 sm:h-9 text-xs sm:text-sm">
                                 <SelectValue placeholder="Month" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Months</SelectItem>
                                 {Array.from({length: 12}).map((_, i) => (
-                                    <SelectItem key={i} value={i.toString()}>{format(new Date(2024, i, 1), 'MMMM')}</SelectItem>
+                                    <SelectItem key={i} value={i.toString()}>{format(new Date(2024, i, 1), 'MMM')}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
                         {/* Week */}
-                        <Select value={selectedWeek} onValueChange={(v) => { setSelectedWeek(v); setSelectedDay('all'); }} disabled={selectedMonth === 'all'}>
-                            <SelectTrigger className="bg-white">
+                        <Select value={selectedWeek} onValueChange={handleWeekChange} disabled={selectedMonth === 'all'}>
+                            <SelectTrigger className="bg-white h-8 sm:h-9 text-xs sm:text-sm">
                                 <SelectValue placeholder="Week" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Weeks</SelectItem>
                                 {availableWeeks.map(w => (
                                     <SelectItem key={getWeek(w)} value={getWeek(w).toString()}>
-                                        Week {getWeek(w)} ({format(startOfWeek(w), 'MMM d')} - {format(endOfWeek(w), 'MMM d')})
+                                        Wk {getWeek(w)} ({format(startOfWeek(w), 'M/d')})
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -399,29 +399,32 @@ function AuditLogViewer() {
 
                         {/* Day */}
                         <Select value={selectedDay} onValueChange={setSelectedDay} disabled={selectedMonth === 'all'}>
-                            <SelectTrigger className="bg-white">
+                            <SelectTrigger className="bg-white h-8 sm:h-9 text-xs sm:text-sm">
                                 <SelectValue placeholder="Day" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Days</SelectItem>
                                 {availableDays.map(d => (
                                     <SelectItem key={d.toISOString()} value={d.toISOString()}>
-                                        {format(d, 'EEE, MMM d')}
+                                        {format(d, 'EEE M/d')}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
                          {/* Search */}
-                         <div className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-stone-500" />
+                         <div className="relative col-span-2 sm:col-span-1">
+                            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-stone-500" />
                             <Input
-                                placeholder="Search..."
-                                className="pl-9 bg-white"
+                                placeholder="Search logs..."
+                                className="pl-8 bg-white h-8 sm:h-9 text-xs sm:text-sm"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={handleSearchChange}
                             />
                         </div>
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-stone-500">
+                        Showing {filteredLogs.length} of {logs?.length || 0} entries
                     </div>
                 </div>
 
