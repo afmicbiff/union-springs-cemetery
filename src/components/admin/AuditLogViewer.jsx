@@ -429,16 +429,16 @@ function AuditLogViewer() {
                 </div>
 
                 {/* Log Table */}
-                <div className="rounded-md border border-stone-200 overflow-hidden">
+                <div className="rounded-md border border-stone-200 overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-stone-50">
                             <TableRow>
-                                <TableHead className="w-[180px]">Timestamp</TableHead>
-                                <TableHead className="w-[150px]">User</TableHead>
-                                <TableHead className="w-[120px]">Action</TableHead>
-                                <TableHead className="w-[120px]">Entity</TableHead>
-                                <TableHead>Details</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[100px] sm:w-[140px] text-[10px] sm:text-xs">Time</TableHead>
+                                <TableHead className="w-[80px] sm:w-[120px] text-[10px] sm:text-xs">User</TableHead>
+                                <TableHead className="w-[70px] sm:w-[100px] text-[10px] sm:text-xs">Action</TableHead>
+                                <TableHead className="w-[80px] sm:w-[100px] text-[10px] sm:text-xs hidden sm:table-cell">Entity</TableHead>
+                                <TableHead className="text-[10px] sm:text-xs">Details</TableHead>
+                                <TableHead className="w-[40px] sm:w-[50px]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -452,61 +452,32 @@ function AuditLogViewer() {
                                 </TableRow>
                             ) : filteredLogs.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center text-stone-500">
-                                        No log entries found matching your criteria.
+                                    <TableCell colSpan={6} className="h-24 sm:h-32 text-center text-stone-500">
+                                        <Archive className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                                        <p className="text-sm">No log entries found.</p>
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredLogs.map((log) => (
-                                    <TableRow key={log.id} className="group hover:bg-stone-50 transition-colors">
-                                        <TableCell className="text-xs text-stone-500 font-mono">
-                                            {format(parseISO(log.timestamp), 'yyyy-MM-dd HH:mm:ss')}
-                                        </TableCell>
-                                        <TableCell className="text-sm font-medium text-stone-700">
-                                            <div className="flex items-center gap-1.5 overflow-hidden">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-stone-300"></div>
-                                                <span className="truncate" title={log.performed_by}>
-                                                    {log.performed_by?.split('@')[0]}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className={`text-xs font-normal capitalize ${getActionColor(log.action)}`}>
-                                                {log.action}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-sm text-stone-600">
-                                            {log.entity_type}
-                                            {log.entity_id && (
-                                                <span className="text-[10px] text-stone-400 block truncate font-mono max-w-[80px]">
-                                                    {log.entity_id}
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-sm text-stone-600 max-w-[300px]">
-                                            <p className="truncate" title={log.details}>{log.details}</p>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-stone-400 opacity-0 group-hover:opacity-100 hover:text-red-600 hover:bg-red-50 transition-all"
-                                                onClick={() => {
-                                                    if (confirm("Are you sure you want to delete this log entry?")) {
-                                                        deleteLogMutation.mutate(log.id);
-                                                    }
-                                                }}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
+                                filteredLogs.slice(0, 200).map((log) => (
+                                    <LogRow 
+                                        key={log.id} 
+                                        log={log} 
+                                        onDelete={handleDeleteLog}
+                                        getActionColor={getActionColor}
+                                    />
                                 ))
                             )}
                         </TableBody>
                     </Table>
                 </div>
+                {filteredLogs.length > 200 && (
+                    <p className="text-xs text-stone-500 text-center mt-3">
+                        Showing first 200 of {filteredLogs.length} entries. Use filters to narrow results.
+                    </p>
+                )}
             </CardContent>
         </Card>
     );
 }
+
+export default memo(AuditLogViewer);
