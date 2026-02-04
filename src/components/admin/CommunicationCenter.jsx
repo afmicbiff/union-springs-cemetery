@@ -402,20 +402,7 @@ const InboxView = memo(function InboxView() {
   const handleSelectThread = useCallback((thread) => setSelectedThread(thread), []);
   const handleReplyChange = useCallback((e) => setReplyText(e.target.value), []);
 
-  if (isError) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
-        <p className="text-stone-600 mb-3">Failed to load conversations</p>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />} Try Again
-        </Button>
-      </div>
-    );
-  }
-
-  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>;
-
+  // Move all hooks BEFORE any conditional returns to comply with React rules of hooks
   const getClass = useCallback((id) => aiClass?.classifications?.[id], [aiClass]);
   const urgencyColor = useMemo(() => ({ low: 'bg-green-100 text-green-700', medium: 'bg-amber-100 text-amber-700', high: 'bg-orange-100 text-orange-700', urgent: 'bg-red-100 text-red-700' }), []);
   const sentimentIcon = useCallback((s) => (s === 'positive' ? <Smile className="w-3 h-3" /> : s === 'negative' ? <Frown className="w-3 h-3" /> : <Meh className="w-3 h-3" />), []);
@@ -432,6 +419,21 @@ const InboxView = memo(function InboxView() {
     }
     return true;
   }), [allThreads, viewMode, searchTerm]);
+
+  // Conditional returns AFTER all hooks
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+        <p className="text-stone-600 mb-3">Failed to load conversations</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />} Try Again
+        </Button>
+      </div>
+    );
+  }
+
+  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 h-auto md:h-[70vh] min-h-0">
