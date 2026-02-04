@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { listEntity } from "@/components/gov/dataClient";
@@ -6,8 +6,8 @@ import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter, ExternalLink } from 'lucide-react';
-import { format, isPast, parseISO, addDays, differenceInDays } from 'date-fns';
+import { Search, Plus, Edit2, Trash2, MapPin, Mail, Phone, ArrowUpDown, Download, Calendar, CheckSquare, Bell, FileClock, History, Filter, ExternalLink, Loader2 } from 'lucide-react';
+import { format, isPast, parseISO, addDays, differenceInDays, isValid } from 'date-fns';
 import {
     Dialog,
     DialogContent,
@@ -23,7 +23,26 @@ import SegmentBuilder from './SegmentBuilder';
 import BulkActionDialog from './BulkActionDialog';
 import { Checkbox } from "@/components/ui/checkbox";
 
-export default function MembersDirectory({ openMemberId }) {
+// Debounce hook for search optimization
+function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+    return debouncedValue;
+}
+
+// Safe date parsing helper
+function safeParseDateISO(dateStr) {
+    if (!dateStr) return null;
+    try {
+        const d = parseISO(dateStr);
+        return isValid(d) ? d : null;
+    } catch { return null; }
+}
+
+function MembersDirectory({ openMemberId }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [stateFilter, setStateFilter] = useState("all");
     const [donationFilter, setDonationFilter] = useState("all"); 
@@ -232,14 +251,20 @@ export default function MembersDirectory({ openMemberId }) {
             });
         }, [activityLogs, activitySearch]);
 
-    const uniqueStates = [...new Set((members || []).map(m => m.state).filter(Boolean))].sort();
+    // Debounced search for performance
+    const debouncedSearch = useDebounce(searchTerm, 300);
 
-    const handleSort = (key) => {
+    const uniqueStates = useMemo(() => 
+        [...new Set((members || []).map(m => m.state).filter(Boolean))].sort(),
+        [members]
+    );
+
+    const handleSort = useCallback((key) => {
         setSortConfig(current => ({
             key,
             direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
         }));
-    };
+    }, []);
 
     const exportToCSV = () => {
         if (!members || members.length === 0) return;
@@ -323,48 +348,84 @@ export default function MembersDirectory({ openMemberId }) {
         return false;
     };
 
-    const filteredMembers = (members || []).filter(member => {
-                  // Temporarily disable all filters to verify rendering of records
-                  return true;
-              }).sort((a, b) => {
-                  const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
-                  const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
+    // Memoized filtered and sorted members
+    const filteredMembers = useMemo(() => {
+        const list = (members || []).filter(member => {
+            // Basic search filter
+            const searchLower = (debouncedSearch || "").toLowerCase();
+            if (searchLower) {
+                const searchFields = [member.first_name, member.last_name, member.city, member.email_primary]
+                    .filter(Boolean).join(" ").toLowerCase();
+                if (!searchFields.includes(searchLower)) return false;
+            }
 
-                  if (sortConfig.key === 'donation') {
-                       const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
-                       const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
-                       if (!isNaN(aNum) && !isNaN(bNum)) {
-                           return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
-                       }
-                  }
+            // State filter
+            if (stateFilter !== "all" && member.state !== stateFilter) return false;
 
-                  if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-                  if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-                  return 0;
-              });
+            // Donation filter
+            if (donationFilter === "donated" && !member.donation) return false;
+            if (donationFilter === "none" && member.donation) return false;
 
-    const handleSave = (e) => {
+            // Follow-up filter
+            if (followUpFilter === "pending" && member.follow_up_status !== "pending") return false;
+            if (followUpFilter === "due") {
+                const fuDate = safeParseDateISO(member.follow_up_date);
+                if (!fuDate || member.follow_up_status !== "pending") return false;
+                if (!isPast(fuDate)) return false;
+            }
+
+            // Advanced segment filters
+            if (segmentCriteria.rules.length > 0) {
+                const matchAll = segmentCriteria.match === 'all';
+                const results = segmentCriteria.rules.map(rule => evaluateRule(member, rule));
+                if (matchAll && !results.every(Boolean)) return false;
+                if (!matchAll && !results.some(Boolean)) return false;
+            }
+
+            return true;
+        });
+
+        // Sort
+        return list.sort((a, b) => {
+            const aValue = (a[sortConfig.key] || "").toString().toLowerCase();
+            const bValue = (b[sortConfig.key] || "").toString().toLowerCase();
+
+            if (sortConfig.key === 'donation') {
+                const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g,""));
+                const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g,""));
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return sortConfig.direction === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+            }
+
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }, [members, debouncedSearch, stateFilter, donationFilter, followUpFilter, segmentCriteria, sortConfig]);
+
+    const handleSave = useCallback((e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = {
-            first_name: formData.get('first_name'),
-            last_name: formData.get('last_name'),
-            address: formData.get('address'),
-            city: formData.get('city'),
-            state: formData.get('state'),
-            zip: formData.get('zip'),
-            phone_primary: formData.get('phone_primary'),
-            phone_secondary: formData.get('phone_secondary'),
-            email_primary: formData.get('email_primary'),
-            email_secondary: formData.get('email_secondary'),
-            donation: formData.get('donation'),
-            comments: formData.get('comments'),
-            last_donation_date: formData.get('last_donation_date'),
-            last_contact_date: formData.get('last_contact_date'),
-            follow_up_date: formData.get('follow_up_date'),
+            first_name: (formData.get('first_name') || '').trim().slice(0, 100),
+            last_name: (formData.get('last_name') || '').trim().slice(0, 100),
+            address: (formData.get('address') || '').trim().slice(0, 200),
+            city: (formData.get('city') || '').trim().slice(0, 100),
+            state: (formData.get('state') || '').trim().slice(0, 2).toUpperCase(),
+            zip: (formData.get('zip') || '').trim().slice(0, 10),
+            phone_primary: (formData.get('phone_primary') || '').trim().slice(0, 20),
+            phone_secondary: (formData.get('phone_secondary') || '').trim().slice(0, 20),
+            email_primary: (formData.get('email_primary') || '').trim().slice(0, 100),
+            email_secondary: (formData.get('email_secondary') || '').trim().slice(0, 100),
+            donation: (formData.get('donation') || '').trim().slice(0, 50),
+            comments: (formData.get('comments') || '').trim().slice(0, 500),
+            last_donation_date: formData.get('last_donation_date') || null,
+            last_contact_date: formData.get('last_contact_date') || null,
+            follow_up_date: formData.get('follow_up_date') || null,
             follow_up_status: formData.get('follow_up_status') || 'pending',
-            follow_up_notes: formData.get('follow_up_notes'),
-            follow_up_assignee_id: formData.get('follow_up_assignee_id'),
+            follow_up_notes: (formData.get('follow_up_notes') || '').trim().slice(0, 500),
+            follow_up_assignee_id: formData.get('follow_up_assignee_id') || null,
         };
 
         if (editingMember) {
@@ -372,84 +433,88 @@ export default function MembersDirectory({ openMemberId }) {
         } else {
             createMutation.mutate(data);
         }
-    };
+    }, [editingMember, updateMutation, createMutation]);
 
     return (
         <Card className="h-full border-stone-200 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 gap-4">
                 <div>
                     <CardTitle className="text-xl font-serif">Member Directory</CardTitle>
                     <CardDescription>
                         Manage contact information for cemetery members and donors.
                     </CardDescription>
                 </div>
-                <div className="flex gap-2">
-                    {/* Profile Page button removed */}
-                    <Button variant="outline" onClick={() => setIsActivityLogOpen(true)}>
-                        <History className="w-4 h-4 mr-2" /> Audit Log
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setIsActivityLogOpen(true)} className="h-9">
+                        <History className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Audit Log</span>
                     </Button>
-                    <Button variant="outline" onClick={exportToCSV}>
-                        <Download className="w-4 h-4 mr-2" /> Export CSV
+                    <Button variant="outline" size="sm" onClick={exportToCSV} className="h-9">
+                        <Download className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Export CSV</span>
                     </Button>
                     <Button 
+                        size="sm"
                         onClick={() => { setEditingMember(null); setIsDialogOpen(true); }}
-                        className="bg-teal-700 hover:bg-teal-800"
+                        className="bg-teal-700 hover:bg-teal-800 h-9"
                     >
-                        <Plus className="w-4 h-4 mr-2" /> Add Member
+                        <Plus className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Add Member</span>
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-stone-400" />
-                        <Input
-                            placeholder="Search by name or city..."
-                            className="pl-9 bg-stone-50"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                <div className="flex flex-col gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-1 min-w-0">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                            <Input
+                                placeholder="Search by name or city..."
+                                className="pl-9 bg-stone-50 h-10"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                maxLength={100}
+                            />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <Select value={stateFilter} onValueChange={setStateFilter}>
+                                <SelectTrigger className="w-[130px] sm:w-[150px] h-10">
+                                    <SelectValue placeholder="State" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All States</SelectItem>
+                                    {uniqueStates.map(state => (
+                                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Select value={donationFilter} onValueChange={setDonationFilter}>
+                                <SelectTrigger className="w-[130px] sm:w-[150px] h-10">
+                                    <SelectValue placeholder="Donation" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Members</SelectItem>
+                                    <SelectItem value="donated">Donors Only</SelectItem>
+                                    <SelectItem value="none">Non-Donors</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Select value={followUpFilter} onValueChange={setFollowUpFilter}>
+                                <SelectTrigger className="w-[130px] sm:w-[150px] h-10">
+                                    <SelectValue placeholder="Follow-Up" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="due">Due / Overdue</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button 
+                                variant={showAdvancedFilters ? "secondary" : "outline"}
+                                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                                className={`h-10 ${showAdvancedFilters ? "bg-stone-200 border-stone-300" : ""}`}
+                            >
+                                <Filter className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Advanced</span>
+                            </Button>
+                        </div>
                     </div>
-                    <Select value={stateFilter} onValueChange={setStateFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Filter by State" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All States</SelectItem>
-                            {uniqueStates.map(state => (
-                                <SelectItem key={state} value={state}>{state}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select value={donationFilter} onValueChange={setDonationFilter}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Donation Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Members</SelectItem>
-                            <SelectItem value="donated">Donors Only</SelectItem>
-                            <SelectItem value="none">Non-Donors</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={followUpFilter} onValueChange={setFollowUpFilter}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Follow-Up" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="due">Due / Overdue</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                    </SelectContent>
-                    </Select>
-
-                    <Button 
-                    variant={showAdvancedFilters ? "secondary" : "outline"}
-                    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                    className={showAdvancedFilters ? "bg-stone-200 border-stone-300" : ""}
-                    >
-                    <Filter className="w-4 h-4 mr-2" /> Advanced
-                    </Button>
-                    </div>
+                </div>
 
                     {showAdvancedFilters && (
                     <div className="mb-6 animate-in fade-in slide-in-from-top-2">
@@ -540,8 +605,11 @@ export default function MembersDirectory({ openMemberId }) {
                                     </tr>
                                 ) : isLoading ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center text-stone-500 italic">
-                                            Loading members...
+                                        <td colSpan="11" className="p-8 text-center text-stone-500">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <span>Loading members...</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : filteredMembers.length === 0 ? (
@@ -581,17 +649,29 @@ export default function MembersDirectory({ openMemberId }) {
                                             <td className="p-4 text-stone-600 font-mono text-xs">{member.zip}</td>
                                             <td className="p-4 text-stone-600">{member.donation}</td>
                                             <td className="p-4">
-                                                {member.follow_up_date && member.follow_up_status === 'pending' && (
-                                                    <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit mb-1 ${isPast(parseISO(member.follow_up_date)) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                                                        <Calendar className="w-3 h-3" />
-                                                        {format(parseISO(member.follow_up_date), 'MMM d')}
-                                                    </div>
-                                                )}
-                                                {member.last_contact_date && isPast(addDays(parseISO(member.last_contact_date), 180)) && (
-                                                    <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit bg-purple-100 text-purple-700" title="No contact in 6+ months">
-                                                        <Bell className="w-3 h-3" /> Re-engage
-                                                    </div>
-                                                )}
+                                                {(() => {
+                                                    const fuDate = safeParseDateISO(member.follow_up_date);
+                                                    if (fuDate && member.follow_up_status === 'pending') {
+                                                        return (
+                                                            <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit mb-1 ${isPast(fuDate) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                                <Calendar className="w-3 h-3" />
+                                                                {format(fuDate, 'MMM d')}
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
+                                                {(() => {
+                                                    const lcDate = safeParseDateISO(member.last_contact_date);
+                                                    if (lcDate && isPast(addDays(lcDate, 180))) {
+                                                        return (
+                                                            <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full w-fit bg-purple-100 text-purple-700" title="No contact in 6+ months">
+                                                                <Bell className="w-3 h-3" /> Re-engage
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
                                             </td>
                                             <td className="p-4 text-right">
                                                 <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
@@ -743,9 +823,16 @@ export default function MembersDirectory({ openMemberId }) {
                             </Select>
                             </div>
 
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                            <Button type="submit" className="bg-teal-700 hover:bg-teal-800">Save Member</Button>
+                        <DialogFooter className="flex-col sm:flex-row gap-2">
+                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+                            <Button 
+                                type="submit" 
+                                className="bg-teal-700 hover:bg-teal-800 w-full sm:w-auto"
+                                disabled={createMutation.isPending || updateMutation.isPending}
+                            >
+                                {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                                Save Member
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -823,3 +910,5 @@ export default function MembersDirectory({ openMemberId }) {
         </Card>
     );
 }
+
+export default React.memo(MembersDirectory);
