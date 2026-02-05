@@ -83,7 +83,7 @@ const Home = memo(function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col w-full overflow-x-hidden">
+    <div className="flex flex-col w-full">
       <NotificationBanner notification={activeNotification} onDismiss={handleDismiss} />
       <HeroSection />
       <Suspense fallback={<SectionLoader />}>
