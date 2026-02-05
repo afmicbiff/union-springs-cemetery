@@ -303,49 +303,90 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
           {/* GETTING STARTED */}
           <ManualSection icon={HelpCircle} title="Getting Started - Read This First">
             <p className="text-lg mb-4">
-              Welcome to the Union Springs Cemetery Admin Dashboard. This system helps you manage 
-              all cemetery operations from one central location.
+              <strong>Welcome to the Union Springs Cemetery Admin Dashboard!</strong> This comprehensive system 
+              puts all cemetery management tools at your fingertips. Whether you're tracking plots, managing 
+              members, or handling day-to-day operations, everything is organized in one easy-to-use location.
             </p>
             
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Navigate</h4>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Screen Layout</h4>
+            <p className="mb-3">When you first log in, you'll see several important areas:</p>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Tabs at the top:</strong> Click any tab (Overview, Deceased, Sales, etc.) to switch between sections</li>
-              <li><strong>Search bar:</strong> Type to quickly find members, plots, employees, or any record</li>
-              <li><strong>Bell icon:</strong> Shows your notifications - click to see alerts and reminders</li>
+              <li><strong>Header Bar (Top of Screen):</strong> Contains the title "Admin Dashboard," the search box, notifications bell, and important buttons like "Backups" and "Import Data"</li>
+              <li><strong>Tab Navigation (Below Header):</strong> A row of clickable tabs like Overview, Deceased, Sales, Plots, etc. Click any tab to go to that section</li>
+              <li><strong>Main Content Area (Below Tabs):</strong> This is where you see the information for whichever tab you've selected</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Actions on Every Page</h4>
-            <ButtonGuide icon={Plus} label="Add New" description="Creates a new record (member, task, event, etc.)" />
-            <ButtonGuide icon={Edit} label="Edit" description="Opens the record so you can make changes" />
-            <ButtonGuide icon={Save} label="Save" description="Saves your changes - ALWAYS click this when done!" />
-            <ButtonGuide icon={Trash2} label="Delete" description="Removes the record permanently - use with caution" />
-            <ButtonGuide icon={Filter} label="Filter" description="Narrows down the list to show only what you need" />
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Navigate Between Sections</h4>
+            <Step number="1">Look at the row of tabs below the header (Overview, Deceased, Sales, Plots, etc.)</Step>
+            <Step number="2">Click once on any tab name with your mouse</Step>
+            <Step number="3">The content below will change to show that section's information</Step>
+            <Step number="4">The tab you're currently viewing will be highlighted in teal/green color</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Special Tabs with Dropdown Menus</h4>
+            <p className="mb-2">Some tabs have a small arrow (▼) next to them. These have additional options:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Employees ▼:</strong> Click the arrow to see "Employees," "Onboarding," and "Archives" options</li>
+              <li><strong>Communications ▼:</strong> Click the arrow to access communication features</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Buttons You'll See Everywhere</h4>
+            <ButtonGuide icon={Plus} label="Add New / Create" description="Creates a brand new record - look for green or blue buttons with a + sign" />
+            <ButtonGuide icon={Edit} label="Edit / Pencil Icon" description="Opens a record so you can change information - click this first, make changes, then Save" />
+            <ButtonGuide icon={Save} label="Save / Save Changes" description="VERY IMPORTANT! Always click Save when you're done making changes, or your work will be lost" />
+            <ButtonGuide icon={Trash2} label="Delete / Trash Icon" description="Permanently removes something - you'll be asked to confirm first. Use carefully!" />
+            <ButtonGuide icon={Filter} label="Filter / Sort" description="Helps you narrow down long lists to find what you need faster" />
 
             <Tip>
-              If you make a mistake, look for an "Undo" option or check the System Logs tab 
-              to see recent changes. When in doubt, ask before deleting anything!
+              <strong>Golden Rule:</strong> Always click "Save" after making changes! If you navigate away 
+              without saving, your changes will be lost. The system will usually warn you, but it's good 
+              practice to save frequently.
+            </Tip>
+
+            <Tip>
+              If something doesn't look right or you make a mistake, check the <strong>System Logs</strong> tab 
+              to see what changed. When in doubt, ask a colleague before deleting anything permanently!
             </Tip>
           </ManualSection>
 
           {/* OVERVIEW */}
           <ManualSection icon={LayoutDashboard} title="Overview Dashboard">
-            <p>
-              The Overview is your home base. It shows a summary of everything happening 
-              at Union Springs Cemetery at a glance.
+            <p className="text-lg mb-4">
+              <strong>The Overview is your command center.</strong> Every time you log into the Admin Dashboard, 
+              this is what you'll see first. It gives you a quick snapshot of everything happening at 
+              Union Springs Cemetery without having to click through multiple sections.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">What You'll See</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Quick Stats:</strong> Total plots, available plots, recent reservations, upcoming tasks</li>
-              <li><strong>Recent Activity:</strong> Latest changes made by any administrator</li>
-              <li><strong>Upcoming Events:</strong> Calendar events happening soon</li>
-              <li><strong>Task Summary:</strong> Tasks that need attention</li>
-              <li><strong>News Preview:</strong> Recent announcements</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Overview Cards</h4>
+            <p className="mb-3">The Overview displays several "cards" - boxes with information. Here's what each one shows:</p>
+            <ul className="list-disc pl-5 space-y-3">
+              <li><strong>Plot Statistics:</strong> Shows total number of plots, how many are available for sale, how many are reserved, and how many are occupied</li>
+              <li><strong>Recent Reservations/Sales:</strong> Lists the most recent plot purchases or reservations with buyer names and dates</li>
+              <li><strong>Upcoming Events:</strong> Shows calendar events coming up soon - meetings, memorial services, etc.</li>
+              <li><strong>Tasks Needing Attention:</strong> Displays tasks that are due soon or overdue. Red items need immediate attention!</li>
+              <li><strong>Recent Activity:</strong> A log of recent changes made by administrators - helps you see what others have been working on</li>
+              <li><strong>Announcements:</strong> Quick preview of recent news posts</li>
+              <li><strong>Lawn Care Status:</strong> When each section was last mowed or maintained</li>
             </ul>
 
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Reading the Color Codes</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><span className="inline-block w-4 h-4 bg-red-500 rounded mr-2"></span><strong>Red items:</strong> Urgent! Needs immediate attention (overdue tasks, critical alerts)</li>
+              <li><span className="inline-block w-4 h-4 bg-orange-500 rounded mr-2"></span><strong>Orange/Yellow items:</strong> Coming due soon - plan to address these</li>
+              <li><span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span><strong>Green items:</strong> Good status, completed, or healthy</li>
+              <li><span className="inline-block w-4 h-4 bg-blue-500 rounded mr-2"></span><strong>Blue items:</strong> Information or in-progress items</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What to Do When You Log In</h4>
+            <Step number="1">Look at the Overview first thing each morning</Step>
+            <Step number="2">Check for any red or orange items that need attention</Step>
+            <Step number="3">Review the "Tasks Needing Attention" section</Step>
+            <Step number="4">Note any upcoming events for the day</Step>
+            <Step number="5">If everything looks good, proceed to your regular work</Step>
+
             <Tip>
-              Check the Overview each time you log in to see if anything needs your 
-              immediate attention. Red or orange items usually mean something is urgent!
+              Make it a habit to check the Overview each time you log in! It only takes 
+              30 seconds and helps you catch important items before they become problems. 
+              Think of it as your daily "briefing."
             </Tip>
           </ManualSection>
 
@@ -494,81 +535,178 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* ONBOARDING */}
           <ManualSection icon={UserPlus} title="Onboarding New Members">
-            <p>
-              This section helps you add new cemetery association members and track 
-              their onboarding progress.
+            <p className="text-lg mb-4">
+              <strong>The Onboarding section helps you add new association members and track their setup progress.</strong> 
+              When a new family joins Union Springs Cemetery, this is where you register them and send them 
+              access to the Member Portal.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Member</h4>
-            <Step number="1">Fill out the <strong>Onboarding Form</strong> on the left side:
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Full legal name</li>
-                <li>Email address (this is how they'll log in)</li>
-                <li>Phone number</li>
-                <li>Mailing address</li>
-              </ul>
-            </Step>
-            <Step number="2">Click <strong>"Send Invitation"</strong></Step>
-            <Step number="3">The new member will receive an email with login instructions</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Employees" tab, then click the small arrow (▼) and select "Onboarding"</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Tracking Progress</h4>
-            <p>
-              The <strong>Onboarding Progress</strong> panel in the middle shows which 
-              members have:
-            </p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Accepted their invitation</li>
-              <li>Completed their profile</li>
-              <li>Signed required documents</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Three-Panel Layout</h4>
+            <p className="mb-3">The Onboarding page is divided into three sections:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Left Panel - Onboarding Form:</strong> Where you type in the new member's information</li>
+              <li><strong>Middle Panel - Onboarding Progress:</strong> Shows all members who are in the process of setting up their accounts</li>
+              <li><strong>Right Panel - Onboarding Guide:</strong> Helpful reference information about the process</li>
             </ul>
 
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a Brand New Member</h4>
+            <Step number="1">Look at the <strong>Onboarding Form</strong> on the left side of the screen</Step>
+            <Step number="2">Fill in each field carefully:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>First Name:</strong> The person's first/given name (e.g., "John")</li>
+                <li><strong>Last Name:</strong> The person's family name (e.g., "Smith")</li>
+                <li><strong>Email Address:</strong> VERY IMPORTANT - this is how they will log in. Make sure it's correct!</li>
+                <li><strong>Phone Number:</strong> Best number to reach them (include area code)</li>
+                <li><strong>Address:</strong> Their mailing address for correspondence</li>
+              </ul>
+            </Step>
+            <Step number="3">Double-check the email address - if it's wrong, they won't receive their invitation!</Step>
+            <Step number="4">Click the <strong>"Send Invitation"</strong> button</Step>
+            <Step number="5">The system will automatically send an email to the new member with instructions on how to set up their account</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What Happens After You Send the Invitation</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>The new member appears in the <strong>Onboarding Progress</strong> panel with a "Pending" status</li>
+              <li>They receive an email with a link to create their password</li>
+              <li>Once they click the link and set up their account, their status changes to "Active"</li>
+              <li>They can then log into the Member Portal to view their information, sign documents, etc.</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Tracking Member Progress</h4>
+            <p className="mb-2">The middle panel shows the status of each new member:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Invitation Sent:</strong> Email has been sent, waiting for them to respond</li>
+              <li><strong>Account Created:</strong> They've clicked the link and created a password</li>
+              <li><strong>Profile Completed:</strong> They've filled in their personal information</li>
+              <li><strong>Documents Signed:</strong> They've signed any required agreements</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">If Someone Didn't Get Their Invitation</h4>
+            <Step number="1">Find their name in the Onboarding Progress panel</Step>
+            <Step number="2">Click the <strong>"Resend Invitation"</strong> button next to their name</Step>
+            <Step number="3">Ask them to check their spam/junk folder if they still don't see it</Step>
+            <Step number="4">If needed, verify the email address is correct and update it</Step>
+
             <Tip>
-              If someone hasn't responded to their invitation after a week, 
-              you can resend it by clicking "Resend Invitation" next to their name.
+              If a member says they never received the email, ask them to check their 
+              <strong> spam or junk mail folder</strong> first. The invitation often gets filtered there. 
+              If still not found, verify you typed their email address correctly!
+            </Tip>
+
+            <Tip>
+              It's good practice to follow up with new members after one week if they haven't 
+              completed their account setup. A friendly phone call can help!
             </Tip>
           </ManualSection>
 
           {/* EMPLOYEES */}
           <ManualSection icon={Users} title="Employee Management">
-            <p>
-              Manage staff information, contact details, and employment records.
+            <p className="text-lg mb-4">
+              <strong>The Employee Management section stores all information about your staff, volunteers, and administrators.</strong> 
+              This is your central hub for contact information, employment records, and important HR documents.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Employee</h4>
-            <Step number="1">Click <strong>"Add Employee"</strong></Step>
-            <Step number="2">Fill in their personal information:
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Full name</li>
-                <li>Phone number(s)</li>
-                <li>Email address</li>
-                <li>Home address</li>
-                <li>Emergency contact</li>
-              </ul>
-            </Step>
-            <Step number="3">Select their employment type:
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Administrator:</strong> Has full access to this system</li>
-                <li><strong>Paid Employee:</strong> Regular staff member</li>
-                <li><strong>Volunteer:</strong> Unpaid helper</li>
-              </ul>
-            </Step>
-            <Step number="4">Choose their department and job title</Step>
-            <Step number="5">Click <strong>"Save Employee"</strong></Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Employees" tab in the navigation bar</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Employee Documents</h4>
-            <p>
-              Each employee record can store important documents like:
-            </p>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Employee List</h4>
+            <p className="mb-2">When you open the Employees section, you'll see a list of all active staff members showing:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Signed contracts</li>
-              <li>Certifications</li>
-              <li>Tax forms (W-4, I-9)</li>
-              <li>Training certificates</li>
+              <li>Name and photo (if uploaded)</li>
+              <li>Job title and department</li>
+              <li>Employment type (Administrator, Paid Employee, or Volunteer)</li>
+              <li>Contact phone number and email</li>
+              <li>Status (Active or Inactive)</li>
             </ul>
 
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Employee</h4>
+            <Step number="1">Click the <strong>"Add Employee"</strong> button (usually green or blue with a + icon)</Step>
+            <Step number="2">A form will appear. Fill in the <strong>Basic Information</strong> section:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>First Name:</strong> Their given name</li>
+                <li><strong>Last Name:</strong> Their family name</li>
+                <li><strong>Email Address:</strong> Work or primary email (required for system access)</li>
+                <li><strong>Primary Phone:</strong> Best number to reach them - include area code</li>
+                <li><strong>Secondary Phone:</strong> Optional backup number</li>
+              </ul>
+            </Step>
+            <Step number="3">Fill in the <strong>Address</strong> section:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Street Address</li>
+                <li>City, State, ZIP Code</li>
+              </ul>
+            </Step>
+            <Step number="4">Select their <strong>Employment Type</strong> - this is very important:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Administrator:</strong> Has FULL access to this Admin Dashboard - use sparingly!</li>
+                <li><strong>Paid Employee:</strong> Regular wage or salary staff member</li>
+                <li><strong>Volunteer:</strong> Unpaid helper who assists with operations</li>
+              </ul>
+            </Step>
+            <Step number="5">Choose their <strong>Department</strong>:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Administration</li>
+                <li>Groundskeeping</li>
+                <li>Sales</li>
+                <li>Maintenance</li>
+                <li>Security</li>
+                <li>Other</li>
+              </ul>
+            </Step>
+            <Step number="6">Enter their <strong>Job Title</strong> (e.g., "Groundskeeper," "Office Manager")</Step>
+            <Step number="7">Fill in <strong>Emergency Contact</strong> information - name, phone, relationship</Step>
+            <Step number="8">Click <strong>"Save Employee"</strong> to add them to the system</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">The Employee Onboarding Checklist</h4>
+            <p className="mb-2">Each employee record has a checklist to track required paperwork:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Form I-9:</strong> Employment eligibility verification</li>
+              <li><strong>Form W-4:</strong> Federal tax withholding</li>
+              <li><strong>Form L-4:</strong> Louisiana state tax withholding</li>
+              <li><strong>Offer Letter:</strong> Signed employment offer</li>
+              <li><strong>New Hire Reporting:</strong> State notification completed</li>
+              <li><strong>Minor Cert:</strong> Work permit (if under 18)</li>
+            </ul>
+            <p className="mt-2">Check each box as documents are received. This helps ensure compliance!</p>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Uploading Employee Documents</h4>
+            <Step number="1">Open an employee's profile by clicking their name</Step>
+            <Step number="2">Scroll down to the <strong>"Documents"</strong> section</Step>
+            <Step number="3">Click <strong>"Upload Document"</strong></Step>
+            <Step number="4">Click <strong>"Choose File"</strong> and select the document from your computer</Step>
+            <Step number="5">Select the document category:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Contracts</li>
+                <li>Certifications</li>
+                <li>HR Forms</li>
+                <li>Legal</li>
+                <li>Other</li>
+              </ul>
+            </Step>
+            <Step number="6">If the document expires (like a certification), set the expiration date</Step>
+            <Step number="7">Click <strong>"Upload"</strong> to save the document</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Editing an Existing Employee</h4>
+            <Step number="1">Find the employee in the list</Step>
+            <Step number="2">Click on their name to open their profile</Step>
+            <Step number="3">Click the <strong>"Edit"</strong> button</Step>
+            <Step number="4">Make your changes</Step>
+            <Step number="5">Click <strong>"Save Changes"</strong> - don't forget this step!</Step>
+
             <Tip>
-              Keep employee documents up to date! The system will alert you 
-              when certifications are about to expire.
+              Keep employee contact information current! If someone changes their phone number 
+              or address, update it right away. You don't want to have outdated information 
+              when you need to reach someone urgently.
+            </Tip>
+
+            <Tip>
+              The system will automatically alert you when employee certifications are 
+              about to expire. Make sure to set expiration dates when uploading documents!
             </Tip>
           </ManualSection>
 
@@ -772,34 +910,95 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* DOCUMENTS */}
           <ManualSection icon={FileText} title="Document Management">
-            <p>
-              Store and organize important cemetery documents, forms, and files.
+            <p className="text-lg mb-4">
+              <strong>The Documents section is your central filing cabinet.</strong> Store and organize all important 
+              cemetery documents including contracts, forms, policies, and records from members and employees. 
+              This section shows documents uploaded by administrators, members, and employees all in one place.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Upload a Document</h4>
-            <Step number="1">Click <strong>"Upload Document"</strong></Step>
-            <Step number="2">Click "Choose File" and select the file from your computer</Step>
-            <Step number="3">Enter a clear, descriptive name for the document</Step>
-            <Step number="4">Select a category (Contracts, Forms, Policies, etc.)</Step>
-            <Step number="5">Click <strong>"Upload"</strong></Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Documents" tab in the navigation bar</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Document Categories</h4>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Document List</h4>
+            <p className="mb-2">The Documents page shows a table with all uploaded documents. Each row displays:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Contracts:</strong> Legal agreements</li>
-              <li><strong>Forms:</strong> Blank forms for various purposes</li>
-              <li><strong>Policies:</strong> Rules and procedures</li>
-              <li><strong>Meeting Minutes:</strong> Records of board meetings</li>
-              <li><strong>Financial:</strong> Budgets, reports, tax documents</li>
+              <li><strong>Document Name:</strong> The file name and description</li>
+              <li><strong>Category:</strong> What type of document it is (Contracts, Forms, etc.)</li>
+              <li><strong>Source:</strong> Who uploaded it - "Member" or "Employee" badges show where it came from</li>
+              <li><strong>Associated With:</strong> Which member or employee the document belongs to</li>
+              <li><strong>Upload Date:</strong> When it was added to the system</li>
+              <li><strong>Expiration Date:</strong> When the document expires (if applicable)</li>
+              <li><strong>Actions:</strong> Buttons to view, download, or manage the document</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Finding Documents</h4>
-            <Step number="1">Use the search box to find by name</Step>
-            <Step number="2">Or filter by category using the dropdown</Step>
-            <Step number="3">Click on a document to view or download it</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Document Sources Explained</h4>
+            <div className="bg-stone-50 rounded-lg p-4 mb-4">
+              <ul className="space-y-2">
+                <li><span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mr-2">Member</span> Documents uploaded by members through the Member Portal</li>
+                <li><span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 mr-2">Employee</span> Documents uploaded by employees through the Employee Portal</li>
+                <li><span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-stone-100 text-stone-800 mr-2">Admin</span> Documents uploaded directly by administrators</li>
+              </ul>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Find a Specific Document</h4>
+            <Step number="1">Use the <strong>Search Box</strong> at the top to type part of the document name</Step>
+            <Step number="2">Use the <strong>Category Filter</strong> dropdown to show only certain types (e.g., only Contracts)</Step>
+            <Step number="3">Use the <strong>Source Filter</strong> to show only Member documents, only Employee documents, or all</Step>
+            <Step number="4">Click on column headers to sort (e.g., click "Upload Date" to sort by newest first)</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Upload a New Document</h4>
+            <Step number="1">Click the <strong>"Upload Document"</strong> button at the top of the page</Step>
+            <Step number="2">Click <strong>"Choose File"</strong> or drag and drop a file from your computer</Step>
+            <Step number="3">Enter a <strong>clear, descriptive name</strong> for the document (e.g., "2024 Board Meeting Minutes - March")</Step>
+            <Step number="4">Select the appropriate <strong>Category</strong>:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Contracts:</strong> Legal agreements, signed contracts</li>
+                <li><strong>Forms:</strong> Blank forms, applications</li>
+                <li><strong>Policies:</strong> Rules, bylaws, procedures</li>
+                <li><strong>Meeting Minutes:</strong> Records of board or committee meetings</li>
+                <li><strong>Financial:</strong> Budgets, financial reports, tax documents</li>
+                <li><strong>Legal:</strong> Legal notices, court documents</li>
+                <li><strong>Other:</strong> Anything that doesn't fit the above</li>
+              </ul>
+            </Step>
+            <Step number="5">If the document expires, set the <strong>Expiration Date</strong> (click the calendar icon)</Step>
+            <Step number="6">Add any <strong>Notes</strong> that might be helpful for future reference</Step>
+            <Step number="7">Click <strong>"Upload"</strong> to save the document</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing and Downloading Documents</h4>
+            <Step number="1">Find the document in the list</Step>
+            <Step number="2">Click the <strong>"View"</strong> or <strong>eye icon</strong> to open the document in a new tab</Step>
+            <Step number="3">To download, click the <strong>"Download"</strong> or <strong>arrow-down icon</strong></Step>
+            <Step number="4">The file will download to your computer's Downloads folder</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Managing Document Categories</h4>
+            <p className="mb-2">You can change a document's category after it's uploaded:</p>
+            <Step number="1">Check the checkbox next to the document(s) you want to change</Step>
+            <Step number="2">Click the <strong>"Categorize"</strong> button that appears</Step>
+            <Step number="3">Select the new category from the dropdown</Step>
+            <Step number="4">Click <strong>"Apply"</strong> to save the change</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Document Audit Trail</h4>
+            <p className="mb-2">
+              At the bottom of the Documents page, you'll see a <strong>Recent Activity</strong> section. 
+              This shows who uploaded, changed, or deleted documents recently - helpful for tracking changes!
+            </p>
 
             <Tip>
-              Use clear, consistent naming for documents. For example: 
-              "2024-Board-Meeting-Minutes-January" is better than "meeting notes.pdf"
+              <strong>Naming Best Practice:</strong> Use clear, consistent names like 
+              "2024-01-15-Board-Meeting-Minutes.pdf" instead of vague names like "notes.pdf". 
+              This makes documents much easier to find later!
+            </Tip>
+
+            <Tip>
+              Documents with expiration dates will trigger alerts before they expire. 
+              This is especially useful for certifications, insurance policies, and permits!
+            </Tip>
+
+            <Tip>
+              Member and Employee documents are automatically linked to their profiles. 
+              You can also view them from the individual Member or Employee detail page.
             </Tip>
           </ManualSection>
 
@@ -905,86 +1104,234 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* NOTIFICATIONS */}
           <ManualSection icon={Bell} title="Notifications (Bell Icon)">
-            <p>
-              The bell icon in the top right shows alerts and reminders 
-              that need your attention.
+            <p className="text-lg mb-4">
+              <strong>The bell icon is your alert center.</strong> It's located in the top right corner of the screen 
+              and shows you important reminders, task alerts, new messages, and system notifications that need your attention.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Bell</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Red dot with number:</strong> You have unread notifications</li>
-              <li><strong>No dot:</strong> All notifications have been viewed</li>
-              <li><strong>Shaking bell:</strong> New notification just arrived</li>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>Where to Find It:</strong> Look in the upper right area of the Admin Dashboard, near the search bar and Backups button</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Reading the Bell Icon</h4>
+            <ul className="list-disc pl-5 space-y-3">
+              <li><strong>Red circle with a number:</strong> You have unread notifications! The number tells you how many. If it shows "9+" that means 10 or more waiting</li>
+              <li><strong>Plain bell (no red circle):</strong> All caught up - no new notifications to review</li>
+              <li><strong>Red/colored bell:</strong> Important items are waiting - check them soon</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Types of Notifications</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Tasks:</strong> Task assigned to you or coming due</li>
-              <li><strong>Events:</strong> Upcoming calendar events</li>
-              <li><strong>Messages:</strong> New contact form submissions</li>
-              <li><strong>Alerts:</strong> System alerts or important notices</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to View Your Notifications</h4>
+            <Step number="1">Click once on the bell icon</Step>
+            <Step number="2">A dropdown list appears showing all your notifications</Step>
+            <Step number="3">Unread notifications appear with a light background; read ones appear normal</Step>
+            <Step number="4">The newest notifications are at the top of the list</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Types of Notifications You'll See</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Task Notifications (Blue checkbox icon):</strong> A task has been assigned to you, is coming due, or is overdue</li>
+              <li><strong>Event Notifications (Calendar icon):</strong> An upcoming event is approaching or starting soon</li>
+              <li><strong>Message Notifications (Mail icon):</strong> A new message arrived from the website contact form or member portal</li>
+              <li><strong>Document Notifications (File icon):</strong> A document is expiring soon or needs attention</li>
+              <li><strong>Alert Notifications (Warning icon):</strong> System alerts or important administrative notices</li>
             </ul>
 
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Taking Action on Notifications</h4>
+            <p className="mb-3">Each notification has action buttons to help you respond quickly:</p>
+            
+            <div className="space-y-3 ml-4">
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800 mb-2">For Task Notifications:</p>
+                <ButtonGuide label="Complete" description="Marks the task as done and clears the notification" />
+                <ButtonGuide label="Updated" description="Mark as reviewed without completing the task" />
+              </div>
+              
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800 mb-2">For Event Notifications:</p>
+                <ButtonGuide label="Complete" description="Mark the event reminder as handled" />
+                <ButtonGuide label="Update" description="Go to the calendar to view or edit the event" />
+              </div>
+              
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800 mb-2">For Message Notifications:</p>
+                <ButtonGuide label="View" description="Go to the Communications section to read the message" />
+                <ButtonGuide label="Dismiss" description="Clear the notification without viewing" />
+              </div>
+              
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800 mb-2">For Other Notifications:</p>
+                <ButtonGuide label="Dismiss" description="Remove the notification from your list" />
+              </div>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Dismissing All Notifications</h4>
             <Step number="1">Click the bell icon to open the list</Step>
-            <Step number="2">Click on a notification to go to that item</Step>
-            <Step number="3">Use the action buttons to Complete, Update, or Dismiss</Step>
+            <Step number="2">At the top of the notification list, click <strong>"Dismiss All"</strong></Step>
+            <Step number="3">This clears general notifications but keeps task and message items for proper handling</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Clicking on a Notification</h4>
+            <p className="mb-2">You can click directly on any notification text to go to the related item:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Clicking a task notification opens the Tasks section</li>
+              <li>Clicking a message notification opens the Communications section</li>
+              <li>Clicking an event notification opens the Calendar</li>
+              <li>Clicking a member notification opens the Members directory</li>
+            </ul>
 
             <Tip>
-              Check your notifications regularly! Don't let important items 
-              pile up without attention.
+              <strong>Check notifications first thing!</strong> Make it a habit to click the bell icon 
+              when you log in. A quick review of notifications helps you prioritize your day and ensures 
+              nothing important falls through the cracks.
+            </Tip>
+
+            <Tip>
+              If the bell shows a red number, address those notifications soon! They might be 
+              overdue tasks, urgent messages, or time-sensitive alerts.
             </Tip>
           </ManualSection>
 
           {/* SEARCH */}
           <ManualSection icon={Search} title="Using the Search Bar">
-            <p>
-              The search bar at the top of the page helps you quickly find 
-              anything in the system.
+            <p className="text-lg mb-4">
+              <strong>The Search Bar is the fastest way to find anything.</strong> Instead of clicking through 
+              multiple tabs, just type what you're looking for and the system will find it instantly. 
+              It searches across all sections at once!
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Search</h4>
-            <Step number="1">Click in the search box (or press Ctrl+K on your keyboard)</Step>
-            <Step number="2">Type what you're looking for</Step>
-            <Step number="3">Results appear as you type</Step>
-            <Step number="4">Click on a result to go to that record</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>Where to Find It:</strong> The search bar is in the top right area of the Admin Dashboard header, usually showing a magnifying glass icon</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Search Tips</h4>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Search Step-by-Step</h4>
+            <Step number="1">Look for the search icon (magnifying glass) in the top right of the screen</Step>
+            <Step number="2">Click on it - a search box will appear</Step>
+            <Step number="3">Type what you're looking for (a name, plot number, phone number, etc.)</Step>
+            <Step number="4">Results start appearing as you type - you don't need to press Enter</Step>
+            <Step number="5">Look through the results shown below the search box</Step>
+            <Step number="6">Click on the result you want to go directly to that record</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What You Can Search For</h4>
             <ul className="list-disc pl-5 space-y-2">
-              <li>Search finds: Members, plots, employees, vendors, tasks, and more</li>
-              <li>Partial matches work: "John" finds "Johnson"</li>
-              <li>Not case sensitive: "smith" finds "Smith"</li>
-              <li>Search by plot number: "A-15" finds that plot</li>
+              <li><strong>Members:</strong> Type a member's name (first or last) → "Johnson"</li>
+              <li><strong>Plots:</strong> Type a plot number → "A-15" or just "15"</li>
+              <li><strong>Employees:</strong> Type an employee's name → "Robert"</li>
+              <li><strong>Vendors:</strong> Type a company name → "Landscaping"</li>
+              <li><strong>Tasks:</strong> Type words from a task → "mow north"</li>
+              <li><strong>Phone Numbers:</strong> Type part of a phone number → "555-1234"</li>
+              <li><strong>Email Addresses:</strong> Type part of an email → "gmail"</li>
+              <li><strong>Deceased Records:</strong> Type a name → "Smith"</li>
             </ul>
 
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Search Tips That Make Life Easier</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Partial names work:</strong> Typing "John" finds "John," "Johnson," "Johnny," etc.</li>
+              <li><strong>Capitalization doesn't matter:</strong> "SMITH," "Smith," and "smith" all find the same results</li>
+              <li><strong>Results are grouped:</strong> Members appear together, plots together, etc. - look for section headers</li>
+              <li><strong>Be specific when needed:</strong> If "Smith" shows too many results, try "John Smith"</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Search Results</h4>
+            <p className="mb-2">When results appear, you'll see:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>The type of record (Member, Plot, Employee, etc.) shown as a label</li>
+              <li>The name or title of the record</li>
+              <li>Brief details to help you identify the right one</li>
+            </ul>
+            <p className="mt-2">Click on any result to jump directly to that record!</p>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">If You Can't Find What You're Looking For</h4>
+            <Step number="1">Try different search terms (last name instead of first name)</Step>
+            <Step number="2">Check your spelling</Step>
+            <Step number="3">Try searching for less text (just "Smith" instead of "John Smith")</Step>
+            <Step number="4">If still not found, browse the relevant tab manually</Step>
+
             <Tip>
-              The search is very powerful. If you can't find something by 
-              browsing, try searching for it instead!
+              <strong>The search bar is your best friend!</strong> It's much faster than clicking through 
+              multiple tabs looking for something. When in doubt, search for it!
+            </Tip>
+
+            <Tip>
+              If you know you'll need to find a record again, write down an easy-to-remember 
+              detail like the plot number or last name. Then you can search for it quickly later.
             </Tip>
           </ManualSection>
 
           {/* NEED HELP */}
           <ManualSection icon={Phone} title="Getting Additional Help">
-            <p>
-              If you need help that isn't covered in this manual, here are your options:
+            <p className="text-lg mb-4">
+              <strong>You're not alone!</strong> If you need help that isn't covered in this manual, 
+              or if something isn't working as expected, here's how to get assistance.
             </p>
 
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Contact Support</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Darrell Clendennen:</strong> (540) 760-8863 or clencsm@yahoo.com</li>
-              <li><strong>RD Teutsch:</strong> (318) 846-2201 or royteutsch@yahoo.com</li>
-            </ul>
+            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-teal-700" />
+                  <div>
+                    <strong className="text-stone-800">Darrell Clendennen</strong><br />
+                    <span className="text-stone-600">Phone: (540) 760-8863</span><br />
+                    <span className="text-stone-600">Email: clencsm@yahoo.com</span>
+                  </div>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-teal-700" />
+                  <div>
+                    <strong className="text-stone-800">RD Teutsch</strong><br />
+                    <span className="text-stone-600">Phone: (318) 846-2201</span><br />
+                    <span className="text-stone-600">Email: royteutsch@yahoo.com</span>
+                  </div>
+                </li>
+              </ul>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Before Calling for Help</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Note down exactly what you were trying to do</li>
-              <li>Write down any error messages you see</li>
-              <li>Take a screenshot if possible (press Print Screen on your keyboard)</li>
-            </ul>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Before Calling for Help - Gather This Information</h4>
+            <p className="mb-2">Having this information ready makes it MUCH easier to help you:</p>
+            <Step number="1"><strong>What were you trying to do?</strong> (e.g., "I was trying to add a new member")</Step>
+            <Step number="2"><strong>What happened instead?</strong> (e.g., "I got an error message" or "nothing happened when I clicked Save")</Step>
+            <Step number="3"><strong>Write down any error messages</strong> - the exact words on the screen help diagnose the problem</Step>
+            <Step number="4"><strong>Which tab/section were you in?</strong> (e.g., "I was in the Members section")</Step>
+            <Step number="5"><strong>Take a screenshot if possible:</strong>
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>On Windows: Press the <strong>Print Screen</strong> key (or <strong>PrtSc</strong>) on your keyboard</li>
+                <li>Then open an email, click in the message area, and press <strong>Ctrl+V</strong> to paste the image</li>
+                <li>Send the screenshot with your description of the problem</li>
+              </ul>
+            </Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Issues and Quick Fixes</h4>
+            <div className="space-y-3">
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">"The page won't load" or "It's frozen"</p>
+                <p className="text-stone-600 text-sm mt-1">Try refreshing the page by pressing <strong>F5</strong> on your keyboard, or click the circular arrow in your browser. If still stuck, close the browser completely and reopen it.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">"I can't find my changes"</p>
+                <p className="text-stone-600 text-sm mt-1">Did you click <strong>Save</strong> after making changes? If not, your changes were lost. Also try refreshing the page to see the latest data.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">"I'm locked out" or "Wrong password"</p>
+                <p className="text-stone-600 text-sm mt-1">Use the "Forgot Password" link on the login page, or contact an administrator to reset your password.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">"The search isn't finding anything"</p>
+                <p className="text-stone-600 text-sm mt-1">Try different search terms. Check your spelling. Search for just the last name instead of full name. Try fewer words.</p>
+              </div>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Check the System Logs</h4>
+            <p className="mb-2">
+              If something changed unexpectedly, the <strong>System Logs</strong> tab shows a record of all 
+              changes made in the system. This can help you (or support) figure out what happened.
+            </p>
 
             <Tip>
-              Most problems have simple solutions! Don't be afraid to ask 
-              for help – that's what we're here for.
+              <strong>Don't be shy about asking for help!</strong> Everyone needs assistance sometimes, 
+              and it's better to ask than to struggle alone or make a mistake. We're here to help you succeed!
+            </Tip>
+
+            <Tip>
+              <strong>Write down solutions!</strong> If you figure out how to do something tricky, 
+              write yourself a note for next time. You might also share it with other administrators!
             </Tip>
           </ManualSection>
 
