@@ -307,44 +307,114 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
               puts all cemetery management tools at your fingertips. Whether you're tracking plots, managing 
               members, or handling day-to-day operations, everything is organized in one easy-to-use location.
             </p>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-800 font-medium">🎉 <strong>Good News:</strong> You don't need to be a computer expert to use this system! 
+              This manual explains everything step-by-step. Take your time, and don't hesitate to refer back to these instructions.</p>
+            </div>
             
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Screen Layout</h4>
-            <p className="mb-3">When you first log in, you'll see several important areas:</p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Header Bar (Top of Screen):</strong> Contains the title "Admin Dashboard," the search box, notifications bell, and important buttons like "Backups" and "Import Data"</li>
-              <li><strong>Tab Navigation (Below Header):</strong> A row of clickable tabs like Overview, Deceased, Sales, Plots, etc. Click any tab to go to that section</li>
-              <li><strong>Main Content Area (Below Tabs):</strong> This is where you see the information for whichever tab you've selected</li>
+            <p className="mb-3">When you first log in, you'll see several important areas. Here's a map of the screen:</p>
+            
+            <div className="bg-stone-100 rounded-lg p-4 mb-4 border-2 border-stone-300">
+              <div className="space-y-2 text-sm">
+                <div className="bg-stone-700 text-white p-2 rounded text-center font-medium">
+                  📍 TOP: Header Bar - "Admin Dashboard" title, Search icon (🔍), Bell icon (🔔)
+                </div>
+                <div className="bg-teal-600 text-white p-2 rounded text-center font-medium">
+                  📍 MIDDLE: Tab Navigation Bar - Overview | Deceased | Sales | Plots | etc. | How-To Manual
+                </div>
+                <div className="bg-white p-4 rounded border-2 border-dashed border-stone-400 text-center">
+                  📍 BOTTOM: Main Content Area<br/>
+                  <span className="text-stone-500 text-xs">(This area changes based on which tab you click)</span>
+                </div>
+              </div>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What Each Part Does</h4>
+            <ul className="list-disc pl-5 space-y-3">
+              <li><strong>Header Bar (Very Top):</strong> Shows the page title "Admin Dashboard." On the right side, you'll find:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li><strong>Search Icon (magnifying glass 🔍):</strong> Click to search for anything in the system</li>
+                  <li><strong>Bell Icon (🔔):</strong> Shows notifications - if there's a red number, you have alerts to check!</li>
+                </ul>
+              </li>
+              <li><strong>Tab Navigation Bar:</strong> This is the row of clickable words like "Overview," "Deceased," "Sales," etc. Click any word to go to that section. The "How-To Manual" button is at the far right of this bar.</li>
+              <li><strong>Main Content Area:</strong> This big area below the tabs shows information for whichever section you've selected. It changes when you click different tabs.</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Navigate Between Sections</h4>
-            <Step number="1">Look at the row of tabs below the header (Overview, Deceased, Sales, Plots, etc.)</Step>
-            <Step number="2">Click once on any tab name with your mouse</Step>
-            <Step number="3">The content below will change to show that section's information</Step>
-            <Step number="4">The tab you're currently viewing will be highlighted in teal/green color</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Navigate Between Sections - Step by Step</h4>
+            <Step number="1">Look at the row of tabs below the header. You'll see words like: Overview, Deceased, Sales, Plots, Lawn Care, CRM, Tasks, etc.</Step>
+            <Step number="2">Position your mouse cursor (the arrow on screen) over the tab you want</Step>
+            <Step number="3">Click once with the LEFT mouse button (don't double-click, just one click)</Step>
+            <Step number="4">The content below will change to show that section's information</Step>
+            <Step number="5">Notice that the tab you clicked is now highlighted in a teal/green color - this tells you where you are</Step>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Special Tabs with Dropdown Menus</h4>
-            <p className="mb-2">Some tabs have a small arrow (▼) next to them. These have additional options:</p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Employees ▼:</strong> Click the arrow to see "Employees," "Onboarding," and "Archives" options</li>
-              <li><strong>Communications ▼:</strong> Click the arrow to access communication features</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Special Tabs with Dropdown Menus (The Little Arrows ▼)</h4>
+            <p className="mb-2">Some tabs have a small down-arrow (▼) next to them. These tabs have extra options hidden inside:</p>
+            <ul className="list-disc pl-5 space-y-3">
+              <li><strong>Employees ▼:</strong> Click the down-arrow to reveal three choices:
+                <ul className="list-disc pl-5 mt-1 space-y-1">
+                  <li>"Employees" - See all current staff</li>
+                  <li>"Onboarding" - Add new members to the system</li>
+                  <li>"Archives" - See former employees</li>
+                </ul>
+              </li>
+              <li><strong>Email Tool ▼:</strong> Click the down-arrow for email options:
+                <ul className="list-disc pl-5 mt-1 space-y-1">
+                  <li>"Open Send Email" - Write and send an email</li>
+                  <li>"Templates" - Use pre-written email templates</li>
+                </ul>
+              </li>
+              <li><strong>Communications ▼:</strong> Click the down-arrow to access the communications center</li>
             </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Use Dropdown Menus</h4>
+            <Step number="1">Find a tab with a small arrow (▼) next to it</Step>
+            <Step number="2">Click on the arrow (not the tab name itself)</Step>
+            <Step number="3">A small menu will drop down showing your options</Step>
+            <Step number="4">Click on the option you want</Step>
+            <Step number="5">The dropdown will close and you'll be taken to that section</Step>
 
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Buttons You'll See Everywhere</h4>
-            <ButtonGuide icon={Plus} label="Add New / Create" description="Creates a brand new record - look for green or blue buttons with a + sign" />
-            <ButtonGuide icon={Edit} label="Edit / Pencil Icon" description="Opens a record so you can change information - click this first, make changes, then Save" />
-            <ButtonGuide icon={Save} label="Save / Save Changes" description="VERY IMPORTANT! Always click Save when you're done making changes, or your work will be lost" />
-            <ButtonGuide icon={Trash2} label="Delete / Trash Icon" description="Permanently removes something - you'll be asked to confirm first. Use carefully!" />
-            <ButtonGuide icon={Filter} label="Filter / Sort" description="Helps you narrow down long lists to find what you need faster" />
+            <p className="mb-3">Throughout the system, you'll encounter these buttons. Learn what they do:</p>
+            <ButtonGuide icon={Plus} label="Add New / + Create" description="Creates a brand new record. Look for green or teal buttons with a + sign. Click this when you want to add something new to the system." />
+            <ButtonGuide icon={Edit} label="Edit / Pencil Icon ✏️" description="Opens a record so you can change information. Always click this FIRST, then make your changes, then click Save." />
+            <ButtonGuide icon={Save} label="Save / Save Changes" description="VERY IMPORTANT! Always click Save when you're done making changes. If you don't click Save, your work will be LOST!" />
+            <ButtonGuide icon={Trash2} label="Delete / Trash Icon 🗑️" description="Permanently removes something. The system will ask 'Are you sure?' first. Think carefully before clicking Yes!" />
+            <ButtonGuide icon={Filter} label="Filter / Sort" description="Helps you narrow down long lists. For example, show only 'Reserved' plots instead of all plots." />
 
-            <Tip>
-              <strong>Golden Rule:</strong> Always click "Save" after making changes! If you navigate away 
-              without saving, your changes will be lost. The system will usually warn you, but it's good 
-              practice to save frequently.
-            </Tip>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Opening This Help Manual</h4>
+            <p className="mb-2">You can open this How-To Manual anytime you need help:</p>
+            <Step number="1">Look at the far right end of the tab navigation bar</Step>
+            <Step number="2">Find the button that says "How-To Manual" (with a book icon 📖)</Step>
+            <Step number="3">Click it once to open this manual</Step>
+            <Step number="4">Click any section title to expand and read the instructions</Step>
+            <Step number="5">Click the X in the top right corner to close the manual when done</Step>
+
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-4 my-4 rounded-r-lg">
+              <h5 className="font-bold text-amber-800 mb-2">⚠️ THE GOLDEN RULE - PLEASE READ!</h5>
+              <p className="text-amber-800">
+                <strong>Always click "Save" after making changes!</strong> If you change information and then 
+                click away to another section without saving, your changes will be LOST. The system sometimes 
+                shows a warning, but not always. Make it a habit: <strong>Change → Save → Then move on.</strong>
+              </p>
+            </div>
 
             <Tip>
               If something doesn't look right or you make a mistake, check the <strong>System Logs</strong> tab 
-              to see what changed. When in doubt, ask a colleague before deleting anything permanently!
+              to see what changed and when. This can help you understand what happened.
+            </Tip>
+
+            <Tip>
+              <strong>When in doubt, ask!</strong> It's always better to ask a colleague or call for help 
+              than to guess and potentially delete something important. Don't be embarrassed - everyone 
+              needs help sometimes!
+            </Tip>
+
+            <Tip>
+              <strong>Take your time.</strong> There's no rush. Read each screen carefully before clicking. 
+              If you're unsure what a button does, refer back to this manual.
             </Tip>
           </ManualSection>
 
