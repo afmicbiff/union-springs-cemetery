@@ -661,6 +661,13 @@ function AdminDashboard() {
                     >
                         Bylaws
                     </Link>
+
+                    <TabsTrigger 
+                      value="documents"
+                      className="hidden md:flex px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium data-[state=active]:bg-teal-700 data-[state=active]:text-white hover:text-green-700 hover:bg-green-50 touch-manipulation items-center justify-center min-w-[50px] sm:min-w-[70px] md:min-w-0 min-h-[44px] sm:min-h-0"
+                    >
+                      Documents
+                    </TabsTrigger>
                 </TabsList>
             </div>
 
