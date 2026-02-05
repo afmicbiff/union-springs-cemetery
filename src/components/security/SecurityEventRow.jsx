@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -27,7 +27,7 @@ function SecurityEventRow({ event, isBlocked, intelMatch, onView, onBlockIp }) {
   const handleView = useCallback(() => onView(event), [event, onView]);
   const handleBlock = useCallback(() => onBlockIp(event.ip_address), [event.ip_address, onBlockIp]);
 
-  const formattedDate = useMemo(() => formatEventDate(event.created_date), [event.created_date]);
+  const formattedDate = formatEventDate(event.created_date);
   const sevClass = SEV_BADGE[event.severity] || SEV_BADGE.info;
 
   return (
