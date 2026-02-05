@@ -44,6 +44,7 @@ function safeParseDateISO(dateStr) {
 
 function MembersDirectory({ openMemberId }) {
     const [searchTerm, setSearchTerm] = useState("");
+    const [roleFilter, setRoleFilter] = useState("all");
     const [stateFilter, setStateFilter] = useState("all");
     const [donationFilter, setDonationFilter] = useState("all"); 
     const [followUpFilter, setFollowUpFilter] = useState("all"); 
@@ -336,6 +337,9 @@ function MembersDirectory({ openMemberId }) {
                 if (!searchFields.includes(searchLower)) return false;
             }
 
+            // Role filter
+            if (roleFilter !== "all" && member.role !== roleFilter) return false;
+
             // State filter
             if (stateFilter !== "all" && member.state !== stateFilter) return false;
 
@@ -379,7 +383,7 @@ function MembersDirectory({ openMemberId }) {
             if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
             return 0;
         });
-    }, [members, debouncedSearch, stateFilter, donationFilter, followUpFilter, segmentCriteria, sortConfig]);
+    }, [members, debouncedSearch, roleFilter, stateFilter, donationFilter, followUpFilter, segmentCriteria, sortConfig]);
 
     const exportToCSV = useCallback(() => {
         if (!filteredMembers || filteredMembers.length === 0) {
@@ -497,6 +501,23 @@ function MembersDirectory({ openMemberId }) {
                             />
                         </div>
                         <div className="flex flex-wrap gap-2">
+                            <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                <SelectTrigger className="w-[130px] sm:w-[150px] h-10">
+                                    <SelectValue placeholder="Role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Roles</SelectItem>
+                                    <SelectItem value="Administrator">Administrator</SelectItem>
+                                    <SelectItem value="President">President</SelectItem>
+                                    <SelectItem value="Vice President">Vice President</SelectItem>
+                                    <SelectItem value="Caretaker">Caretaker</SelectItem>
+                                    <SelectItem value="Secretary">Secretary</SelectItem>
+                                    <SelectItem value="Treasurer">Treasurer</SelectItem>
+                                    <SelectItem value="Legal">Legal</SelectItem>
+                                    <SelectItem value="Member">Member</SelectItem>
+                                    <SelectItem value="Associate">Associate</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <Select value={stateFilter} onValueChange={setStateFilter}>
                                 <SelectTrigger className="w-[130px] sm:w-[150px] h-10">
                                     <SelectValue placeholder="State" />
