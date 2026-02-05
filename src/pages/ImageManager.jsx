@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import ImageDetailDialog from '@/components/images/ImageDetailDialog';
+import SVGCard from '@/components/images/SVGCard';
 
 // Utility: format bytes
 const formatBytes = (bytes) => {
