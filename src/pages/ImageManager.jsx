@@ -323,10 +323,14 @@ function ImageManager() {
 
     if (filters.originalType !== 'all') {
       arr = arr.filter(img => {
+        // Check image_type field first for SVG
+        if (img.image_type === 'svg') {
+          return filters.originalType === 'svg';
+        }
         const ext = getExt(img.original_url);
-        const map = { jpg: 'jpeg', jpeg: 'jpeg', png: 'png', webp: 'webp', gif: 'gif' };
+        const map = { jpg: 'jpeg', jpeg: 'jpeg', png: 'png', webp: 'webp', gif: 'gif', svg: 'svg' };
         const norm = map[ext] || 'other';
-        return filters.originalType === norm || (filters.originalType === 'other' && !(norm in { jpeg:1,png:1,webp:1,gif:1 }));
+        return filters.originalType === norm || (filters.originalType === 'other' && !(norm in { jpeg:1,png:1,webp:1,gif:1,svg:1 }));
       });
     }
 
@@ -499,6 +503,7 @@ function ImageManager() {
                             <SelectItem value="png">PNG</SelectItem>
                             <SelectItem value="webp">WEBP</SelectItem>
                             <SelectItem value="gif">GIF</SelectItem>
+                            <SelectItem value="svg">SVG</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
