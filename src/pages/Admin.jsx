@@ -113,21 +113,25 @@ export default function AdminDashboard() {
 
 
 
-  // Notifications for Header
-  const { data: notifications = [] } = useQuery({
+  // Notifications for Header - fetch ALL notifications (both read and unread) for display
+  // The bell badge will show count of unread ones
+  const { data: notifications = [], refetch: refetchNotifications } = useQuery({
     queryKey: ['notifications'],
     queryFn: ({ signal }) => filterEntity(
       'Notification',
-      { is_read: false },
-      { sort: '-created_at', limit: 20, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] },
+      {}, // Fetch all - we'll filter unread in UI for badge
+      { sort: '-created_at', limit: 30, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] },
       { signal }
     ),
     initialData: [],
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
-    refetchInterval: 120_000,
+    refetchInterval: 60_000, // Check every minute
   });
+
+  // Count unread for badge
+  const unreadCount = React.useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
 
   const dismissibleNotes = React.useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
 
@@ -365,18 +369,22 @@ export default function AdminDashboard() {
                     <PopoverTrigger asChild>
                         <motion.button
                             className="relative p-2 rounded-full hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200"
-                            animate={notifications.some(n => !n.is_read) ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
-                            transition={{ repeat: Infinity, repeatDelay: 2, duration: 0.5 }}
+                            animate={unreadCount > 0 ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
+                            transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.5 }}
                         >
-                            <Bell className={`w-5 h-5 md:w-6 md:h-6 ${notifications.some(n => !n.is_read) ? 'text-red-600 fill-red-50' : 'text-stone-500'}`} />
-                            {notifications.some(n => !n.is_read) && (
-                                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white" />
+                            <Bell className={`w-5 h-5 md:w-6 md:h-6 ${unreadCount > 0 ? 'text-red-600 fill-red-50' : 'text-stone-500'}`} />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-600 rounded-full border-2 border-white flex items-center justify-center text-[10px] text-white font-bold">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
                             )}
                         </motion.button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-0" align="end">
                         <div className="p-3 border-b bg-stone-50 flex items-center justify-between">
-                            <h4 className="font-semibold text-stone-900 text-sm">Notifications</h4>
+                            <h4 className="font-semibold text-stone-900 text-sm">
+                                Notifications {unreadCount > 0 && <span className="text-red-600">({unreadCount} unread)</span>}
+                            </h4>
                             <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-stone-700" disabled={dismissibleNotes.length === 0} onClick={dismissAllNotifications}>
                               Dismiss All
                             </Button>
