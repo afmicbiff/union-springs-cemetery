@@ -66,9 +66,10 @@ function useFlattenedDocuments() {
       });
     },
     initialData: [],
-    staleTime: 2 * 60 * 1000, // Refresh more frequently to catch new uploads
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: true, // Refetch when admin returns to tab
+    staleTime: 30 * 1000, // 30s - refresh frequently to catch new member uploads
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     retry: 2,
   });
 }
@@ -342,8 +343,9 @@ const AuditTrailList = React.memo(function AuditTrailList() {
     queryKey: ['document-audit-log'],
     queryFn: () => base44.entities.DocumentAuditLog.list('-timestamp', 30),
     initialData: [],
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30s - sync with document list
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   if (isLoading) {

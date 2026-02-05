@@ -183,9 +183,13 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
                 });
             } catch {}
 
-            queryClient.invalidateQueries({ queryKey: ['member-profile'] });
-            queryClient.invalidateQueries({ queryKey: ['all-member-documents'] });
-            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            // Invalidate all relevant queries to sync admin dashboard immediately
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['member-profile'] }),
+                queryClient.invalidateQueries({ queryKey: ['all-member-documents'] }),
+                queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+                queryClient.invalidateQueries({ queryKey: ['document-audit-log'] })
+            ]);
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input
             setExpirationDate('');
@@ -218,8 +222,11 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
             } catch {}
         },
         onSuccess: () => {
+            // Sync all related queries
             queryClient.invalidateQueries({ queryKey: ['member-profile'] });
             queryClient.invalidateQueries({ queryKey: ['all-member-documents'] });
+            queryClient.invalidateQueries({ queryKey: ['document-audit-log'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             toast.success("Document removed");
         },
         onError: (err) => {

@@ -43,7 +43,7 @@ const PRIORITY_COLORS = {
 };
 
 // Memoized task row component with optimized renders
-const TaskRow = memo(({ task, isAdmin, employeeNameById, onToggleStatus, onEdit, onLogTime, onArchive, onDelete }) => {
+const TaskRow = memo(function TaskRow({ task, isAdmin, employeeNameById, onToggleStatus, onEdit, onLogTime, onArchive, onDelete }) {
     const assigneeName = useMemo(() => !task.assignee_id ? "Unassigned" : (employeeNameById.get(task.assignee_id) || "Unknown"), [task.assignee_id, employeeNameById]);
     const priorityColor = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.default;
     
