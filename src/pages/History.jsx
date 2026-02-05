@@ -299,9 +299,9 @@ export default function HistoryPage() {
                             )}
                         </>
                     ) : (
-                        <div className="w-full h-full p-4 md:p-8 overflow-hidden flex items-center justify-center">
-                            <div className="w-full max-w-6xl h-full flex gap-4">
-                                <div className="flex-1 h-full rounded-2xl overflow-hidden shadow-lg border border-stone-300 bg-stone-100">
+                        <div className="w-full h-full p-4 md:p-8 overflow-auto">
+                            <div className="w-full max-w-6xl mx-auto" style={{ minHeight: '500px', height: 'calc(100vh - 280px)' }}>
+                                <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg border border-stone-300">
                                     <Suspense fallback={<MapSkeleton />}>
                                         <HistoryMap 
                                             events={historyTimelineData} 
