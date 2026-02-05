@@ -218,8 +218,9 @@ export default function Layout({ children }) {
     isDropdown: true,
     items: [
     { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
-    { label: 'Employees', path: '/Employees', icon: Users },
-    { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
+    { label: 'Employee Portal', path: '/Employees', icon: Users },
+    { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
+    { label: 'Principle Portal', path: '/PrinciplePortal', icon: UserCircle },
     
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
     { label: 'Security Dashboard', path: '/SecurityDashboard', icon: Activity },
