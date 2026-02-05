@@ -156,19 +156,32 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
             const updatedDocs = [...documents, newDoc];
             await base44.entities.Member.update(memberRecord.id, { documents: updatedDocs });
 
-            // C. Create Notification for Admin
+            // C. Create Notification for Admin (visible in admin dashboard)
             await base44.entities.Notification.create({
-                message: `New document uploaded by ${memberRecord.first_name} ${memberRecord.last_name}: ${file.name} (${docType})`,
+                message: `New document uploaded by ${memberRecord.first_name || ''} ${memberRecord.last_name || ''}: ${file.name} (${docType})`,
                 type: "document",
                 is_read: false,
-                user_email: null,
+                user_email: null, // null means admin-wide notification
                 related_entity_id: memberRecord.id,
-                related_entity_type: "member",
-                link: `/admin?tab=members&memberId=${memberRecord.id}`, // Custom link logic
+                related_entity_type: "document",
+                link: `/Admin?tab=documents`,
                 created_at: new Date().toISOString()
             });
 
-            queryClient.invalidateQueries(['member-profile']);
+            // D. Also create audit log for document tracking
+            try {
+                await base44.entities.DocumentAuditLog.create({
+                    action: 'upload',
+                    document_id: newDoc.id,
+                    member_id: memberRecord.id,
+                    member_name: `${memberRecord.first_name || ''} ${memberRecord.last_name || ''}`.trim(),
+                    details: `Uploaded ${file.name} (${docType}, ${category})`,
+                    timestamp: new Date().toISOString()
+                });
+            } catch {}
+
+            queryClient.invalidateQueries({ queryKey: ['member-profile'] });
+            queryClient.invalidateQueries({ queryKey: ['all-member-documents'] });
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input
             setExpirationDate('');
@@ -185,11 +198,24 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
     const deleteMutation = useMutation({
         mutationFn: async (docId) => {
             setDeletingDocId(docId);
+            const docToDelete = documents.find(d => d.id === docId);
             const updatedDocs = documents.filter(d => d.id !== docId);
             await base44.entities.Member.update(memberRecord.id, { documents: updatedDocs });
+            // Audit log
+            try {
+                await base44.entities.DocumentAuditLog.create({
+                    action: 'delete',
+                    document_id: docId,
+                    member_id: memberRecord.id,
+                    member_name: `${memberRecord.first_name || ''} ${memberRecord.last_name || ''}`.trim(),
+                    details: `Deleted ${docToDelete?.name || 'document'}`,
+                    timestamp: new Date().toISOString()
+                });
+            } catch {}
         },
         onSuccess: () => {
-            queryClient.invalidateQueries(['member-profile']);
+            queryClient.invalidateQueries({ queryKey: ['member-profile'] });
+            queryClient.invalidateQueries({ queryKey: ['all-member-documents'] });
             toast.success("Document removed");
         },
         onError: (err) => {

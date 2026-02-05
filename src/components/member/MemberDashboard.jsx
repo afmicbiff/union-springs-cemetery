@@ -53,7 +53,7 @@ const ReservationCard = memo(function ReservationCard({ reservation, status }) {
 
 function MemberDashboard({ user, setActiveTab }) {
     // Fetch Member Record with proper defaults
-    const { data: memberData, isLoading: loadingMember } = useQuery({
+    const { data: memberData, isLoading: loadingMember, isError: memberError, refetch: refetchMember } = useQuery({
         queryKey: ['member-profile', user?.email],
         queryFn: async () => {
             if (!user?.email) return null;
@@ -141,7 +141,31 @@ function MemberDashboard({ user, setActiveTab }) {
 
     const handleRefresh = useCallback(() => {
         refetchReservations();
-    }, [refetchReservations]);
+        refetchMember();
+    }, [refetchReservations, refetchMember]);
+
+    // Loading state
+    if (loadingMember) {
+        return (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+                <span className="text-sm text-stone-500">Loading your dashboard...</span>
+            </div>
+        );
+    }
+
+    // Error state
+    if (memberError) {
+        return (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
+                <AlertCircle className="w-10 h-10 text-red-400" />
+                <p className="text-sm text-red-600 font-medium">Failed to load dashboard</p>
+                <Button variant="outline" size="sm" onClick={handleRefresh} className="h-9">
+                    <RefreshCw className="w-4 h-4 mr-2" /> Try Again
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-4 sm:space-y-6">

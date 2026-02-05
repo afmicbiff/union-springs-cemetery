@@ -38,7 +38,9 @@ function useFlattenedDocuments() {
       const members = await base44.entities.Member.list('-updated_date', 500);
       const out = [];
       for (const m of members || []) {
-        const docs = Array.isArray(m.documents) ? m.documents : [];
+        // Handle both flat and nested data structures from SDK
+        const memberData = m.data && typeof m.data === 'object' ? { ...m, ...m.data } : m;
+        const docs = Array.isArray(memberData.documents) ? memberData.documents : [];
         for (const d of docs) {
           out.push({
             key: `${m.id}:${d.id}`,
@@ -49,19 +51,24 @@ function useFlattenedDocuments() {
             uploaded_at: d.uploaded_at,
             expiration_date: d.expiration_date,
             member_id: m.id,
-            member_name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'Unknown',
-            member_email: m.email_primary || '',
+            member_name: `${memberData.first_name || ''} ${memberData.last_name || ''}`.trim() || 'Unknown',
+            member_email: memberData.email_primary || '',
             file_uri: d.file_uri,
             _doc: d
           });
         }
       }
-      return out;
+      // Sort by upload date descending (newest first)
+      return out.sort((a, b) => {
+        const dateA = a.uploaded_at ? new Date(a.uploaded_at).getTime() : 0;
+        const dateB = b.uploaded_at ? new Date(b.uploaded_at).getTime() : 0;
+        return dateB - dateA;
+      });
     },
     initialData: [],
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // Refresh more frequently to catch new uploads
     gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Refetch when admin returns to tab
     retry: 2,
   });
 }
