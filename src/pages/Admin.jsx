@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -10,33 +10,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { 
     Bell, 
-    Upload, 
     Database,
     AlertTriangle,
-    LayoutDashboard,
-    DollarSign,
-    Map,
-    UserPlus,
-    Users,
-    Truck,
-    Shield,
     FileText,
     Calendar,
-    Megaphone,
     CheckSquare,
-    Archive,
     Check,
     Eye,
     X,
-    Plus,
     Mail,
-    Settings,
-    ChevronDown
+    ChevronDown,
+    Loader2
 } from 'lucide-react';
-import { motion } from "framer-motion";
 import { format } from 'date-fns';
 import { toast } from "sonner";
-import { Loader2 } from 'lucide-react';
 import { filterEntity } from "@/components/gov/dataClient";
 
 // Components (lazy-loaded to reduce initial bundle)
@@ -68,7 +55,85 @@ import DataImportDialog from "@/components/admin/DataImportDialog";
 import AdminManual from "@/components/admin/AdminManual";
 
 
-export default function AdminDashboard() {
+// Memoized notification item to prevent re-renders
+const NotificationItem = memo(function NotificationItem({ 
+  note, 
+  onNotificationClick, 
+  onTaskAction, 
+  onEventAction, 
+  onMessageAction, 
+  onDismiss 
+}) {
+  const handleClick = useCallback(() => onNotificationClick(note), [onNotificationClick, note]);
+  const handleTaskComplete = useCallback((e) => { e.stopPropagation(); onTaskAction(note, 'Completed'); }, [onTaskAction, note]);
+  const handleTaskUpdate = useCallback((e) => { e.stopPropagation(); onTaskAction(note, 'Updated'); }, [onTaskAction, note]);
+  const handleEventComplete = useCallback((e) => { e.stopPropagation(); onEventAction(note, 'complete'); }, [onEventAction, note]);
+  const handleEventUpdate = useCallback((e) => { e.stopPropagation(); onEventAction(note, 'update'); }, [onEventAction, note]);
+  const handleMessageView = useCallback((e) => { e.stopPropagation(); onMessageAction(note, 'view'); }, [onMessageAction, note]);
+  const handleMessageDismiss = useCallback((e) => { e.stopPropagation(); onMessageAction(note, 'dismiss'); }, [onMessageAction, note]);
+  const handleDismiss = useCallback((e) => { e.stopPropagation(); onDismiss(note); }, [onDismiss, note]);
+
+  const isTask = note.related_entity_type === 'task';
+  const isMessage = note.related_entity_type === 'message' || note.type === 'message';
+  const isEvent = note.related_entity_type === 'event' || (note.message && note.message.toLowerCase().includes('event'));
+
+  return (
+    <div className={`p-3 border-b last:border-0 hover:bg-stone-50 ${!note.is_read ? 'bg-red-50/30' : ''}`}>
+      <div className="flex gap-3 cursor-pointer" onClick={handleClick}>
+        <div className="mt-0.5 shrink-0">
+          {isTask ? <CheckSquare className="w-4 h-4 text-blue-500" /> :
+           isMessage ? <Mail className="w-4 h-4 text-teal-500" /> :
+           <AlertTriangle className={`w-4 h-4 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-stone-800 leading-snug line-clamp-2">{note.message}</p>
+          <p className="text-[10px] text-stone-400 mt-1">
+            {format(new Date(note.created_at), 'MMM d, HH:mm')}
+            <span className="ml-2">
+              • From {isTask ? 'Tasks' : isMessage ? 'Member Messages' : note.related_entity_type === 'event' ? 'Calendar' : (note.related_entity_type === 'member' || note.related_entity_type === 'document') ? 'Member Directory' : (note.message?.toLowerCase().includes('event') ? 'Calendar' : 'Admin')}
+            </span>
+          </p>
+        </div>
+      </div>
+      <div className="flex gap-2 mt-2 ml-7 flex-wrap">
+        {isTask ? (
+          <>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100 touch-manipulation" onClick={handleTaskComplete}>
+              <Check className="w-3 h-3 mr-1" /> Complete
+            </Button>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 touch-manipulation" onClick={handleTaskUpdate}>
+              <Eye className="w-3 h-3 mr-1" /> Updated
+            </Button>
+          </>
+        ) : isEvent ? (
+          <>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100 touch-manipulation" onClick={handleEventComplete}>
+              <Check className="w-3 h-3 mr-1" /> Complete
+            </Button>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 touch-manipulation" onClick={handleEventUpdate}>
+              <Calendar className="w-3 h-3 mr-1" /> Update
+            </Button>
+          </>
+        ) : isMessage ? (
+          <>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100 touch-manipulation" onClick={handleMessageView}>
+              <Mail className="w-3 h-3 mr-1" /> View
+            </Button>
+            <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100 touch-manipulation" onClick={handleMessageDismiss}>
+              <Check className="w-3 h-3 mr-1" /> Dismiss
+            </Button>
+          </>
+        ) : (
+          <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 text-stone-600 bg-stone-50 border-stone-200 hover:bg-stone-100 touch-manipulation" onClick={handleDismiss}>
+            <X className="w-3 h-3 mr-1" /> Dismiss
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+});
+
+function AdminDashboard() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -83,22 +148,18 @@ export default function AdminDashboard() {
         window.location.href = createPageUrl('SecurityDashboard');
         return;
     }
-    if (tab) {
-        setActiveTab(tab);
-    }
+    if (tab) setActiveTab(tab);
     const memberId = params.get('memberId');
-    if (memberId) {
-        setInitialParams(prev => ({ ...prev, memberId }));
-    }
+    if (memberId) setInitialParams(prev => ({ ...prev, memberId }));
     const showNotifications = params.get('showNotifications');
-    if (showNotifications === '1' || showNotifications === 'true') {
-        setNotifPopoverOpen(true);
-    }
+    if (showNotifications === '1' || showNotifications === 'true') setNotifPopoverOpen(true);
   }, [location.search]);
 
   React.useEffect(() => {
+    let mounted = true;
     const checkAuth = async () => {
       const user = await base44.auth.me().catch(() => null);
+      if (!mounted) return;
       if (!user) {
         base44.auth.redirectToLogin(window.location.pathname);
         return;
@@ -110,6 +171,7 @@ export default function AdminDashboard() {
       setIsAuthorized(true);
     };
     checkAuth();
+    return () => { mounted = false; };
   }, []);
 
 
@@ -131,12 +193,12 @@ export default function AdminDashboard() {
     refetchInterval: 60_000, // Check every minute
   });
 
-  // Count unread for badge
-  const unreadCount = React.useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
+  // Count unread for badge - memoized
+  const unreadCount = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
 
-  const dismissibleNotes = React.useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
+  const dismissibleNotes = useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
 
-  const dismissAllNotifications = async () => {
+  const dismissAllNotifications = useCallback(async () => {
     try {
       const user = await base44.auth.me().catch(() => null);
       await Promise.all(dismissibleNotes.map(async (note) => {
@@ -157,42 +219,20 @@ export default function AdminDashboard() {
     } catch (err) {
       toast.error('Failed to dismiss all');
     }
-  };
+  }, [dismissibleNotes, queryClient]);
 
-  const updateTaskStatus = async (note, status) => {
+  const updateTaskStatus = useCallback(async (note, status) => {
       if (!note.related_entity_id) return;
       try {
-          // Call backend function to handle recurrence and audit logs
           if (status === 'Completed') {
-              const res = await base44.functions.invoke('updateTaskStatus', { 
-                  id: note.related_entity_id, 
-                  status: 'Completed' 
-              });
+              const res = await base44.functions.invoke('updateTaskStatus', { id: note.related_entity_id, status: 'Completed' });
               if (res.data.error) throw new Error(res.data.error);
-          } else {
-               // Just mark as updated/viewed manually if not completing
-               // Or potentially just navigate to it. 
-               // For "Update" button which usually implies acknowledging:
-               // We'll keeps existing logic but just add a note if needed, 
-               // but mostly we just want to clear the notification.
-               // If the user meant "Update" as in "I'm working on it", we might set to In Progress?
-               // The previous logic didn't change status unless 'Completed'.
-               // It just added a note. We'll stick to that for non-complete actions or just mark read.
           }
-
-          // Mark Notification Read
           await base44.entities.Notification.update(note.id, { is_read: true });
-          
           queryClient.invalidateQueries(['notifications']);
           queryClient.invalidateQueries(['tasks']);
-          
-          if (status === 'Completed') {
-              toast.success("Task Completed");
-          } else {
-              toast.success("Notification updated");
-          }
+          toast.success(status === 'Completed' ? "Task Completed" : "Notification updated");
       } catch (err) {
-          // If task not found (404), clear notification
           if (err.message && (err.message.includes("not found") || err.message.includes("404"))) {
                await base44.entities.Notification.update(note.id, { is_read: true });
                queryClient.invalidateQueries(['notifications']);
@@ -201,20 +241,56 @@ export default function AdminDashboard() {
                toast.error("Action failed: " + err.message);
           }
       }
-  };
+  }, [queryClient]);
 
-  const handleNotificationClick = async (note) => {
-       // Mark as read
+  const handleEventAction = useCallback(async (note, action) => {
+    await base44.entities.Notification.update(note.id, { is_read: true });
+    queryClient.invalidateQueries(['notifications']);
+    if (action === 'complete') {
+      toast.success("Event notification marked as complete");
+    } else {
+      setActiveTab('calendar');
+      setNotifPopoverOpen(false);
+    }
+  }, [queryClient]);
+
+  const handleMessageAction = useCallback(async (note, action) => {
+    await base44.entities.Notification.update(note.id, { is_read: true });
+    queryClient.invalidateQueries(['notifications']);
+    if (action === 'view') {
+      setActiveTab('communication');
+      setNotifPopoverOpen(false);
+    } else {
+      toast.success("Message notification dismissed");
+    }
+  }, [queryClient]);
+
+  const handleDismiss = useCallback(async (note) => {
+    try {
+      await base44.entities.Notification.delete(note.id);
+      const user = await base44.auth.me();
+      await base44.entities.AuditLog.create({
+        action: 'dismiss',
+        entity_type: 'Notification',
+        entity_id: note.id,
+        details: `Notification dismissed: "${note.message}"`,
+        performed_by: user.email,
+        timestamp: new Date().toISOString()
+      });
+      queryClient.invalidateQueries(['notifications']);
+      toast.success("Notification dismissed");
+    } catch (err) {
+      toast.error("Failed to dismiss notification");
+    }
+  }, [queryClient]);
+
+  const handleNotificationClick = useCallback(async (note) => {
        if (!note.is_read) {
            try {
                await base44.entities.Notification.update(note.id, { is_read: true });
                queryClient.invalidateQueries(['notifications']);
-           } catch (err) {
-               console.error('Failed to mark notification as read:', err);
-           }
+           } catch (err) { /* silent */ }
        }
-
-       // Navigate if link exists
        if (note.link) {
            window.location.href = note.link; 
        } else if (note.related_entity_type === 'message' || note.type === 'message') {
@@ -230,7 +306,7 @@ export default function AdminDashboard() {
            setActiveTab('members');
            setNotifPopoverOpen(false);
        }
-  };
+  }, [queryClient]);
 
   // Background polling for reminders (batched)
   useQueries({
@@ -273,39 +349,19 @@ export default function AdminDashboard() {
     <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>
   );
 
-  const handleSearchNavigate = (link) => {
-      // Redirect security results to the dedicated page
+  const handleSearchNavigate = useCallback((link) => {
       if (link.type === 'security') {
           window.location.href = createPageUrl('SecurityDashboard');
           return;
       }
-      // Map search result types to tabs
       const tabMap = {
-          member: 'members',
-          plot: 'plots',
-          reservation: 'reservations',
-          employee: 'employees',
-          vendor: 'vendors',
-          task: 'tasks',
-          announcement: 'announcements',
-          // Navigation types map directly or via aliases
-          overview: 'overview',
-          onboarding: 'onboarding',
-
-          calendar: 'calendar',
-          reservations: 'reservations',
-          plots: 'plots',
-          employees: 'employees',
-          vendors: 'vendors',
-          tasks: 'tasks',
-          announcements: 'announcements',
-          members: 'members'
+          member: 'members', plot: 'plots', reservation: 'reservations', employee: 'employees',
+          vendor: 'vendors', task: 'tasks', announcement: 'announcements', overview: 'overview',
+          onboarding: 'onboarding', calendar: 'calendar', reservations: 'reservations', plots: 'plots',
+          employees: 'employees', vendors: 'vendors', tasks: 'tasks', announcements: 'announcements', members: 'members'
       };
-
-      if (tabMap[link.type]) {
-          setActiveTab(tabMap[link.type]);
-      }
-  };
+      if (tabMap[link.type]) setActiveTab(tabMap[link.type]);
+  }, []);
 
   // On-Demand Data Export
   const exportData = async () => {
@@ -327,18 +383,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const tabs = [
+  // Memoize tabs to prevent recreation on every render
+  const tabs = useMemo(() => [
       { id: "overview", label: "Overview", component: <AdminOverview /> },
       { id: "deceased", label: "Deceased", component: <DeceasedManager /> },
       { id: "reservations", label: "Sales", component: <AdminReservations /> },
       { id: "plots", label: "Plots", component: <AdminPlots /> },
-{ id: "lawncare", label: "Lawn Care", component: <LawnCare /> },
-{ id: "crm", label: "CRM", component: <CRM /> },
+      { id: "lawncare", label: "Lawn Care", component: <LawnCare /> },
+      { id: "crm", label: "CRM", component: <CRM /> },
       { id: "onboarding", label: "Onboarding", component: (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              <div className="xl:col-span-1 space-y-6"><OnboardingForm /></div>
-              <div className="xl:col-span-1 space-y-6"><OnboardingProgress /></div>
-              <div className="xl:col-span-1"><OnboardingGuide /></div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+              <div className="space-y-4 md:space-y-6"><OnboardingForm /></div>
+              <div className="space-y-4 md:space-y-6"><OnboardingProgress /></div>
+              <div className="lg:col-span-2 xl:col-span-1"><OnboardingGuide /></div>
           </div>
       )},
       { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
@@ -349,11 +406,10 @@ export default function AdminDashboard() {
       { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
       { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
       { id: "documents", label: "Documents", component: <AdminDocumentsManager /> },
-
       { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },
       { id: "logs", label: "System Logs", component: <AuditLogViewer /> },
-  ];
+  ], [initialParams.memberId]);
 
   if (!isAuthorized) {
     return notAuthorizedView;
@@ -398,152 +454,20 @@ export default function AdminDashboard() {
                               Dismiss All
                             </Button>
                         </div>
-                        <div className="max-h-[400px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-y-auto overscroll-contain">
                             {notifications.length === 0 ? (
                                 <p className="p-4 text-center text-sm text-stone-500">No new notifications</p>
                             ) : (
                                 notifications.map((note) => (
-                                    <div key={note.id} className={`p-3 border-b last:border-0 hover:bg-stone-50 ${!note.is_read ? 'bg-red-50/30' : ''}`}>
-                                        <div 
-                                          className="flex gap-3 cursor-pointer"
-                                          onClick={() => handleNotificationClick(note)}
-                                        >
-                                            <div className="mt-0.5 shrink-0">
-                                                {note.related_entity_type === 'task' ? <CheckSquare className="w-4 h-4 text-blue-500" /> :
-                                                 (note.related_entity_type === 'message' || note.type === 'message') ? <Mail className="w-4 h-4 text-teal-500" /> :
-                                                 <AlertTriangle className={`w-4 h-4 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="text-sm text-stone-800 leading-snug">{note.message}</p>
-                                                <p className="text-[10px] text-stone-400 mt-1">
-                                                    {format(new Date(note.created_at), 'MMM d, HH:mm')}
-                                                    <span className="ml-2">
-                                                        • From {
-                                                            note.related_entity_type === 'task' ? 'Tasks' :
-                                                            (note.related_entity_type === 'message' || note.type === 'message') ? 'Member Messages' :
-                                                            note.related_entity_type === 'event' ? 'Calendar' :
-                                                            (note.related_entity_type === 'member' || note.related_entity_type === 'document') ? 'Member Directory' :
-                                                            (note.message.toLowerCase().includes('event') ? 'Calendar' : 'Admin')
-                                                        }
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Unified Action Buttons */}
-                                        <div className="flex gap-2 mt-2 ml-7">
-                                            {note.related_entity_type === 'task' ? (
-                                                <>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
-                                                        onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Completed'); }}
-                                                    >
-                                                        <Check className="w-3 h-3 mr-1" /> Complete Task
-                                                    </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
-                                                        onClick={(e) => { e.stopPropagation(); updateTaskStatus(note, 'Updated'); }}
-                                                    >
-                                                        <Eye className="w-3 h-3 mr-1" /> Updated
-                                                    </Button>
-                                                </>
-                                            ) : (note.related_entity_type === 'event' || note.message.toLowerCase().includes('event')) ? (
-                                                <>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
-                                                        onClick={async (e) => { 
-                                                            e.stopPropagation(); 
-                                                            await base44.entities.Notification.update(note.id, { is_read: true });
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            toast.success("Event notification marked as complete");
-                                                        }}
-                                                    >
-                                                        <Check className="w-3 h-3 mr-1" /> Complete
-                                                    </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
-                                                        onClick={async (e) => { 
-                                                            e.stopPropagation(); 
-                                                            await base44.entities.Notification.update(note.id, { is_read: true });
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            setActiveTab('calendar');
-                                                        }}
-                                                    >
-                                                        <Calendar className="w-3 h-3 mr-1" /> Update
-                                                    </Button>
-                                                </>
-                                            ) : (note.related_entity_type === 'message' || note.type === 'message') ? (
-                                                <>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
-                                                        onClick={async (e) => { 
-                                                            e.stopPropagation(); 
-                                                            await base44.entities.Notification.update(note.id, { is_read: true });
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            setActiveTab('communication');
-                                                            setNotifPopoverOpen(false);
-                                                        }}
-                                                    >
-                                                        <Mail className="w-3 h-3 mr-1" /> View Message
-                                                    </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100"
-                                                        onClick={async (e) => { 
-                                                            e.stopPropagation(); 
-                                                            await base44.entities.Notification.update(note.id, { is_read: true });
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            toast.success("Message notification dismissed");
-                                                        }}
-                                                    >
-                                                        <Check className="w-3 h-3 mr-1" /> Dismiss
-                                                    </Button>
-                                                </>
-                                            ) : (
-                                                <Button 
-                                                    size="sm" 
-                                                    variant="outline" 
-                                                    className="h-6 text-[10px] px-2 text-stone-600 bg-stone-50 border-stone-200 hover:bg-stone-100"
-                                                    onClick={async (e) => { 
-                                                        e.stopPropagation(); 
-                                                        try {
-                                                            await base44.entities.Notification.delete(note.id);
-                                                            
-                                                            // Audit Log
-                                                            const user = await base44.auth.me();
-                                                            await base44.entities.AuditLog.create({
-                                                                action: 'dismiss',
-                                                                entity_type: 'Notification',
-                                                                entity_id: note.id,
-                                                                details: `Notification dismissed: "${note.message}"`,
-                                                                performed_by: user.email,
-                                                                timestamp: new Date().toISOString()
-                                                            });
-
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            toast.success("Notification dismissed");
-                                                        } catch (err) {
-                                                            console.error("Failed to dismiss:", err);
-                                                            toast.error("Failed to dismiss notification");
-                                                        }
-                                                    }}
-                                                >
-                                                    <X className="w-3 h-3 mr-1" /> Dismiss
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
+                                    <NotificationItem 
+                                      key={note.id}
+                                      note={note}
+                                      onNotificationClick={handleNotificationClick}
+                                      onTaskAction={updateTaskStatus}
+                                      onEventAction={handleEventAction}
+                                      onMessageAction={handleMessageAction}
+                                      onDismiss={handleDismiss}
+                                    />
                                 ))
                             )}
                         </div>
@@ -734,13 +658,9 @@ export default function AdminDashboard() {
             {tabs.filter(t => t.id !== 'security').map(tab => (
                 <TabsContent key={tab.id} value={tab.id} className="focus-visible:outline-none">
                     <React.Suspense fallback={<div className="py-10 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>}>
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {tab.component}
-                        </motion.div>
+                        </div>
                     </React.Suspense>
                 </TabsContent>
             ))}
