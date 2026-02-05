@@ -156,6 +156,9 @@ function AdminDashboard() {
     if (showNotifications === '1' || showNotifications === 'true') setNotifPopoverOpen(true);
   }, [location.search]);
 
+  // Board member roles that have admin-level access
+  const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
+
   useEffect(() => {
     let mounted = true;
     const checkAuth = async () => {
@@ -166,7 +169,8 @@ function AdminDashboard() {
           base44.auth.redirectToLogin(window.location.pathname);
           return;
         }
-        if (user.role !== 'admin') {
+        // Check if user has admin or board member role
+        if (!ADMIN_ROLES.includes(user.role)) {
           window.location.href = '/';
           return;
         }

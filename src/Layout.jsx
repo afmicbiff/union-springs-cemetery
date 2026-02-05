@@ -60,6 +60,14 @@ const MobileDropdownSection = memo(function MobileDropdownSection({ item, onClos
   );
 });
 
+// Board member roles that have admin-level access
+const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
+
+// Helper to check if user has admin-level access
+export function isAdminRole(userRole) {
+  return ADMIN_ROLES.includes(userRole);
+}
+
 export default function Layout({ children }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -72,7 +80,9 @@ export default function Layout({ children }) {
   
   useEffect(() => {
     let mounted = true;
-    base44.auth.me().then(u => { if (mounted) setIsAdminUser(u?.role === 'admin'); }).catch(() => { if (mounted) setIsAdminUser(false); });
+    base44.auth.me().then(u => { 
+      if (mounted) setIsAdminUser(u?.role === 'admin' || isAdminRole(u?.role)); 
+    }).catch(() => { if (mounted) setIsAdminUser(false); });
     return () => { mounted = false; };
   }, []);
   
