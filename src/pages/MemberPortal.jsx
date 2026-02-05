@@ -85,21 +85,21 @@ const MemberPortal = memo(function MemberPortal() {
         [convData?.threads]
     );
 
-    // Resolve memberId once after login to avoid repeated queries
-    const [memberId, setMemberId] = useState(null);
-    useEffect(() => {
-        let mounted = true;
-        if (!user?.email) { setMemberId(null); return; }
-        (async () => {
-            try {
-                const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
-                if (mounted) setMemberId((res && res[0]?.id) || null);
-            } catch {
-                if (mounted) setMemberId(null);
-            }
-        })();
-        return () => { mounted = false; };
-    }, [user?.email]);
+    // Resolve memberId using react-query for proper caching and deduplication
+    const { data: memberRecord } = useQuery({
+        queryKey: ['member-record-portal', user?.email],
+        queryFn: async () => {
+            if (!user?.email) return null;
+            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+            return res?.[0] || null;
+        },
+        enabled: !!user?.email,
+        staleTime: 5 * 60_000,
+        gcTime: 10 * 60_000,
+        retry: 2,
+        refetchOnWindowFocus: false,
+    });
+    const memberId = memberRecord?.id || null;
 
     const { data: memberTasksForIndicator = [] } = useQuery({
         queryKey: ['member-tasks-indicator', memberId],
