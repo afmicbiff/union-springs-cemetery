@@ -448,14 +448,7 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
 
   return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 md:p-4">
-        {/* Instruction */}
-      <div className="mb-4 flex items-center justify-center">
-        <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-700 text-white text-xs sm:text-sm shadow font-medium">
-          Click on the plot to start the reservation process.
-        </span>
-      </div>
-
-      {/* Legend */}
+        {/* Legend */}
       <div className="bg-white border-b border-gray-200 py-3 mb-4">
         <div className="flex flex-wrap justify-center items-center gap-2 px-2">
           <div className="w-full text-center mb-1 md:w-auto md:mb-0 md:mr-2">
