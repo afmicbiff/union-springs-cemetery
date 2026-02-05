@@ -130,20 +130,20 @@ const MemberTasks = memo(function MemberTasks({ user }) {
   const isLoading = memberLoading || tasksLoading;
 
   const toggleStatus = useMutation({
-    mutationFn: async (task) => {
-      setTogglingTaskId(task.id);
-      const newStatus = task.status === 'Completed' ? 'To Do' : 'Completed';
-      const res = await base44.functions.invoke('updateTaskStatus', { id: task.id, status: newStatus });
-      if (res.data?.error) throw new Error(res.data.error);
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['member-tasks'] });
-      queryClient.invalidateQueries({ queryKey: ['member-tasks-indicator'] });
-      toast.success('Task status updated');
-    },
-    onError: (e) => toast.error(e.message || 'Failed to update task'),
-    onSettled: () => setTogglingTaskId(null),
+      mutationFn: async (task) => {
+          setTogglingTaskId(task.id);
+          const newStatus = task.status === 'Completed' ? 'To Do' : 'Completed';
+          const res = await base44.functions.invoke('updateTaskStatus', { id: task.id, status: newStatus });
+          if (res.data?.error) throw new Error(res.data.error);
+          return res.data;
+      },
+      onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['member-tasks', member?.id] });
+          queryClient.invalidateQueries({ queryKey: ['member-tasks-indicator'] });
+          toast.success('Task status updated');
+      },
+      onError: (e) => toast.error(e.message || 'Failed to update task'),
+      onSettled: () => setTogglingTaskId(null),
   });
 
   const handleToggle = useCallback((task) => {
