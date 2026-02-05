@@ -398,12 +398,12 @@ function AdminDashboard() {
               <div className="lg:col-span-2 xl:col-span-1"><OnboardingGuide /></div>
           </div>
       )},
-      { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
+      { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
       { id: "archives", label: "Archives", component: <EmployeeList view="archived" /> },
       { id: "vendors", label: "Vendors", component: <VendorManager /> },
       { id: "calendar", label: "Calendar", component: <EventCalendar /> },
       { id: "announcements", label: "News", component: <AnnouncementManager /> },
-      { id: "tasks", label: "Tasks", component: <TaskManager isAdmin={true} /> },
+      { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
       { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
       { id: "documents", label: "Documents", component: <AdminDocumentsManager /> },
       { id: "backups", label: "Backups", component: <BackupManager /> },
