@@ -111,14 +111,18 @@ const MemberPortal = memo(function MemberPortal() {
         queryKey: ['member-tasks-indicator', memberId],
         queryFn: async () => {
             if (!memberId) return [];
-            return base44.entities.Task.filter({ member_id: memberId, is_archived: false }, '-created_date', 50);
+            try {
+                return await base44.entities.Task.filter({ member_id: memberId, is_archived: false }, '-created_date', 50);
+            } catch {
+                return [];
+            }
         },
         enabled: !!memberId,
         refetchInterval: 120000,
         refetchOnWindowFocus: false,
         staleTime: 60_000,
-        initialData: [],
-        retry: 2,
+        gcTime: 5 * 60_000,
+        retry: 1,
     });
 
     const tasksDueCount = useMemo(() => 
