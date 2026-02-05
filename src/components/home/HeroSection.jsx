@@ -5,8 +5,10 @@ import { createPageUrl } from '@/utils';
 import { Search, MapPin, Map } from 'lucide-react';
 
 // Memoized hero image component - all 4 visible on mobile with scattered layout
-const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClick, positionClass, mobilePositionClass }) {
+// Optimized with WebP, responsive srcSet, and proper aspect ratio
+const HeroImage = memo(function HeroImage({ index, src, webpSrc, alt, activeImage, onClick, positionClass, mobilePositionClass }) {
   const isActive = activeImage === index;
+  const isPriority = index <= 2;
   
   return (
     <div 
@@ -17,7 +19,9 @@ const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClic
           : `${mobilePositionClass} md:${positionClass} active:scale-105 z-${index * 10}`
       }`}
       style={{ 
-        transitionTimingFunction: isActive ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
+        transitionTimingFunction: isActive ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out',
+        contentVisibility: 'auto',
+        containIntrinsicSize: '340px 255px'
       }}
       role="button"
       tabIndex={0}
@@ -27,15 +31,20 @@ const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClic
       <div className={`rounded-sm shadow-lg md:shadow-2xl overflow-hidden ${
         isActive ? 'max-w-[240px] sm:max-w-[280px] md:max-w-[340px]' : 'max-w-[140px] sm:max-w-[180px] md:max-w-[340px]'
       }`}>
-        <img 
-          src={src}
-          alt={alt}
-          className="w-full h-auto"
-          loading={index <= 2 ? "eager" : "lazy"}
-          decoding="async"
-          width={340}
-          height={255}
-        />
+        <picture>
+          {webpSrc && <source srcSet={webpSrc} type="image/webp" />}
+          <img 
+            src={src}
+            alt={alt}
+            className="w-full h-auto"
+            loading={isPriority ? "eager" : "lazy"}
+            decoding={isPriority ? "sync" : "async"}
+            fetchpriority={isPriority ? "high" : "auto"}
+            width={340}
+            height={255}
+            style={{ aspectRatio: '340/255' }}
+          />
+        </picture>
       </div>
     </div>
   );
@@ -49,22 +58,42 @@ const HeroSection = memo(function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-[480px] sm:min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 overflow-hidden py-8 sm:py-12 md:py-0">
-      {/* Background - simplified for mobile performance */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center opacity-30"
-        style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=50&w=800&auto=format&fit=crop)' }}
-        aria-hidden="true"
-      />
+    <section className="relative min-h-[480px] sm:min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 overflow-hidden py-8 sm:py-12 md:py-0" style={{ contentVisibility: 'auto', containIntrinsicSize: '100vw 700px' }}>
+      {/* Background - optimized with smaller mobile image and WebP */}
+      <picture className="absolute inset-0" aria-hidden="true">
+        <source 
+          media="(max-width: 640px)" 
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=30&w=400&auto=format&fit=crop&fm=webp"
+          type="image/webp"
+        />
+        <source 
+          media="(max-width: 1024px)" 
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=40&w=800&auto=format&fit=crop&fm=webp"
+          type="image/webp"
+        />
+        <source 
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=50&w=1200&auto=format&fit=crop&fm=webp"
+          type="image/webp"
+        />
+        <img 
+          src="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=50&w=800&auto=format&fit=crop"
+          alt=""
+          className="w-full h-full object-cover opacity-30"
+          loading="eager"
+          decoding="async"
+          fetchpriority="low"
+        />
+      </picture>
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/60 to-stone-900/90 absolute inset-0"></div>
       
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-16 px-2 sm:px-4">
         {/* Left Side Image Gallery - all 4 images visible on mobile, scattered layout */}
-        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[320px] sm:h-[380px] md:h-[450px] flex items-center justify-center">
+        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[320px] sm:h-[380px] md:h-[450px] flex items-center justify-center" style={{ contentVisibility: 'auto' }}>
           {/* Image 1 - Top Left */}
           <HeroImage
             index={1}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/884fb99da_image.webp"
             alt="Union Springs Cemetery"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -75,6 +104,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={2}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.webp"
             alt="Union Springs Cemetery Gate"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -85,6 +115,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={3}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/419a6d107_image.webp"
             alt="Union Springs History"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -95,6 +126,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={4}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/865c809e6_image.webp"
             alt="Union Springs Church"
             activeImage={activeImage}
             onClick={handleImageClick}

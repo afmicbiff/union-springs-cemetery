@@ -22,15 +22,27 @@ const ServicesSection = memo(function ServicesSection() {
        <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center gap-12 lg:gap-20">
           <div className="md:w-1/2 w-full">
               <div className="relative group">
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg"
-                  alt="Peaceful cemetery grounds"
-                  className="relative rounded-sm shadow-[0_35px_60px_-15px_rgba(0,0,0,0.8)] w-full h-[300px] md:h-[400px] object-cover grayscale hover:grayscale-0 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-700 ease-in-out"
-                  loading="lazy"
-                  decoding="async"
-                  width={600}
-                  height={400}
-                />
+                <picture>
+                  <source 
+                    media="(max-width: 640px)"
+                    srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg?width=400"
+                    type="image/jpeg"
+                  />
+                  <source 
+                    srcSet="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg?width=600"
+                    type="image/jpeg"
+                  />
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/b9bd76074_wooden-crosss.jpg"
+                    alt="Peaceful cemetery grounds"
+                    className="relative rounded-sm shadow-[0_35px_60px_-15px_rgba(0,0,0,0.8)] w-full h-[300px] md:h-[400px] object-cover grayscale hover:grayscale-0 hover:-translate-y-2 hover:scale-[1.02] transition-all duration-700 ease-in-out"
+                    loading="lazy"
+                    decoding="async"
+                    width={600}
+                    height={400}
+                    style={{ aspectRatio: '600/400', contentVisibility: 'auto' }}
+                  />
+                </picture>
               </div>
           </div>
           
