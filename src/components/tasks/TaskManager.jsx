@@ -190,7 +190,7 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
     const queryClient = useQueryClient();
 
     // 1. Fetch Tasks
-    const { data: tasks = [], isLoading: isLoadingTasks, isError: isTasksError } = useQuery({
+    const { data: tasks = [], isLoading: isLoadingTasks, isError: isTasksError, isFetching } = useQuery({
         queryKey: ['tasks', isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, debouncedSearchTerm],
         queryFn: async () => {
             const where = { is_archived: showArchived };
@@ -198,13 +198,17 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
             if (statusFilter !== 'all') where.status = statusFilter;
             if (priorityFilter !== 'all') where.priority = priorityFilter;
             if (debouncedSearchTerm) {
-                const res = await base44.functions.invoke('searchTasks', { isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, searchTerm: debouncedSearchTerm });
-                return res.data?.tasks || [];
+                try {
+                    const res = await base44.functions.invoke('searchTasks', { isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, searchTerm: debouncedSearchTerm });
+                    return res.data?.tasks || [];
+                } catch {
+                    return [];
+                }
             }
             return base44.entities.Task.filter(where, '-updated_date', 200);
         },
         initialData: [],
-        staleTime: 90_000,
+        staleTime: 60_000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
         retry: 2,
@@ -414,14 +418,19 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
     return (
         <Card className="h-full border-stone-200 shadow-sm">
             <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 px-3 sm:px-6">
-                <div>
-                    <CardTitle className="flex items-center gap-2 text-base sm:text-xl font-serif">
-                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
-                        {isAdmin ? 'Task Management' : 'My Tasks'}
-                    </CardTitle>
-                    <CardDescription className="text-xs sm:text-sm">
-                        {isAdmin ? 'Manage all tasks and assignments.' : 'Track your assigned work.'}
-                    </CardDescription>
+                <div className="flex items-center gap-2">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-xl font-serif">
+                            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-teal-700" />
+                            {isAdmin ? 'Task Management' : 'My Tasks'}
+                        </CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">
+                            {isAdmin ? 'Manage all tasks and assignments.' : 'Track your assigned work.'}
+                        </CardDescription>
+                    </div>
+                    {isFetching && !isLoadingTasks && (
+                        <Loader2 className="w-4 h-4 animate-spin text-teal-600 ml-2" />
+                    )}
                 </div>
                 <div className="flex gap-2">
                     {isAdmin && (
