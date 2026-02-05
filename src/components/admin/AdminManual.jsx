@@ -1183,35 +1183,130 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* MEMBERS */}
           <ManualSection icon={Users} title="Member Directory">
-            <p>
-              View and manage all cemetery association members, their contact 
-              information, and their accounts.
+            <p className="text-lg mb-4">
+              <strong>The Member Directory is your central hub for managing all cemetery association members.</strong> 
+              View contact information, track donations, assign follow-ups, and manage member roles all in one place.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Finding a Member</h4>
-            <Step number="1">Use the search box to type a name, email, or phone number</Step>
-            <Step number="2">Or use the filters to narrow by status, membership type, etc.</Step>
-            <Step number="3">Click on a member's name to view their full profile</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Members" tab in the navigation bar</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Member Profile Contents</h4>
-            <p>Each member profile shows:</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Contact information (phone, email, address)</li>
-              <li>Plots they own or are associated with</li>
-              <li>Payment history</li>
-              <li>Documents they've signed</li>
-              <li>Communication history</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Member Directory Layout</h4>
+            <p className="mb-2">When you open the Member Directory, you'll see:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Search Bar:</strong> Quickly find members by typing their name or city</li>
+              <li><strong>Filter Dropdowns:</strong> Narrow down the list by Role, State, Donation status, and Follow-up status</li>
+              <li><strong>Action Buttons:</strong> Audit Log, Export CSV, and Add Member buttons in the top right</li>
+              <li><strong>Member Table:</strong> A sortable list showing all member information</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Updating Member Information</h4>
-            <Step number="1">Open the member's profile</Step>
-            <Step number="2">Click <strong>"Edit"</strong></Step>
-            <Step number="3">Make your changes</Step>
-            <Step number="4">Click <strong>"Save Changes"</strong></Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Using the Filter Dropdowns</h4>
+            <p className="mb-2">The filter bar has several dropdowns to help you find specific members:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>All Roles:</strong> Filter by member role - Administrator, President, Vice President, Caretaker, Secretary, Treasurer, Legal, Member, or Associate</li>
+              <li><strong>All States:</strong> Filter by the member's state (e.g., LA, TX)</li>
+              <li><strong>All Members:</strong> Filter by donation status - Donors Only or Non-Donors</li>
+              <li><strong>All Status:</strong> Filter by follow-up status - Due/Overdue or Pending</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Member Roles</h4>
+            <p className="mb-2">Each member can be assigned a role that appears as a colored badge in the table:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><span className="inline-block px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full mr-2">President</span> The association president</li>
+              <li><span className="inline-block px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs rounded-full mr-2">Vice President</span> The vice president</li>
+              <li><span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full mr-2">Treasurer</span> Handles finances</li>
+              <li><span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full mr-2">Secretary</span> Handles records and correspondence</li>
+              <li><span className="inline-block px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full mr-2">Caretaker</span> Grounds and maintenance</li>
+              <li><span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full mr-2">Legal</span> Legal counsel</li>
+              <li><span className="inline-block px-2 py-0.5 bg-teal-100 text-teal-700 text-xs rounded-full mr-2">Administrator</span> System administrator</li>
+              <li><span className="inline-block px-2 py-0.5 bg-stone-50 text-stone-500 text-xs rounded-full mr-2">Member</span> Regular association member</li>
+              <li><span className="inline-block px-2 py-0.5 bg-stone-100 text-stone-600 text-xs rounded-full mr-2">Associate</span> Associate member</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Finding a Member</h4>
+            <Step number="1">Use the <strong>search box</strong> to type a name or city - results filter as you type</Step>
+            <Step number="2">Use the <strong>Role dropdown</strong> to show only members with a specific role (e.g., "President")</Step>
+            <Step number="3">Use other filters to narrow by state, donation status, or follow-up status</Step>
+            <Step number="4">Click on column headers (Last Name, First Name, Role, City, State, Donation) to sort the list</Step>
+            <Step number="5">Click on a member's row to view their full profile</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Adding a New Member</h4>
+            <Step number="1">Click the <strong>"Add Member"</strong> button (teal button with + icon)</Step>
+            <Step number="2">Fill in the member's information:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>First Name / Last Name:</strong> The member's full name</li>
+                <li><strong>Role:</strong> Select their role from the dropdown (President, Vice President, Caretaker, Secretary, Treasurer, Legal, Administrator, Member, or Associate)</li>
+                <li><strong>Address, City, State, ZIP:</strong> Mailing address</li>
+                <li><strong>Primary Phone / Secondary Phone:</strong> Contact numbers</li>
+                <li><strong>Primary Email / Secondary Email:</strong> Email addresses</li>
+                <li><strong>Donation:</strong> Donation amount or type</li>
+                <li><strong>Comments:</strong> Any additional notes</li>
+              </ul>
+            </Step>
+            <Step number="3">Fill in tracking information if needed:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Last Donation Date:</strong> When they last donated</li>
+                <li><strong>Last Contact Date:</strong> When you last communicated</li>
+                <li><strong>Follow-up Date:</strong> When to follow up next</li>
+                <li><strong>Follow-up Status:</strong> Pending, Completed, or Cancelled</li>
+                <li><strong>Follow-up Notes:</strong> What the follow-up is about</li>
+                <li><strong>Assign To:</strong> Which employee should handle the follow-up</li>
+              </ul>
+            </Step>
+            <Step number="4">Click <strong>"Save Member"</strong> to add them to the directory</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Editing a Member</h4>
+            <Step number="1">Find the member in the list</Step>
+            <Step number="2">Click the <strong>pencil icon</strong> in the Actions column, OR click on the row to open their profile and then click Edit</Step>
+            <Step number="3">Make your changes (update role, contact info, follow-up details, etc.)</Step>
+            <Step number="4">Click <strong>"Save Member"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Member Profile Contents</h4>
+            <p className="mb-2">Click on any member's row to open their detailed profile, which shows:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Complete contact information (all phones, emails, address)</li>
+              <li>Their assigned role in the organization</li>
+              <li>Donation history and amounts</li>
+              <li>Follow-up schedule and status</li>
+              <li>Documents they've uploaded or signed</li>
+              <li>Communication and contact history</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Exporting Member Data</h4>
+            <Step number="1">Apply any filters you want (the export will include only filtered results)</Step>
+            <Step number="2">Click the <strong>"Export CSV"</strong> button</Step>
+            <Step number="3">A CSV file downloads with all member data including their role</Step>
+            <Step number="4">Open in Excel or Google Sheets for reporting</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing the Audit Log</h4>
+            <p className="mb-2">Click the <strong>"Audit Log"</strong> button to see a history of all member changes:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Who was added, updated, or deleted</li>
+              <li>When the change was made</li>
+              <li>Who made the change</li>
+              <li>Details about what changed</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Bulk Actions</h4>
+            <p className="mb-2">To perform actions on multiple members at once:</p>
+            <Step number="1">Check the checkboxes next to the members you want to select</Step>
+            <Step number="2">A blue bar appears showing how many are selected</Step>
+            <Step number="3">Click <strong>"Bulk Actions"</strong> to send communications or update multiple records</Step>
 
             <Tip>
-              If a member has moved or changed their phone number, update it right away! 
-              Accurate contact information is essential for important communications.
+              <strong>Use the Role filter to quickly find board members!</strong> Select "President" or "Treasurer" 
+              from the All Roles dropdown to instantly see only those with that role.
+            </Tip>
+
+            <Tip>
+              <strong>Keep member information current!</strong> If someone's phone number or address changes, 
+              update it right away. Accurate contact information is essential for important communications.
+            </Tip>
+
+            <Tip>
+              <strong>Set follow-up reminders!</strong> When you speak with a member, set a follow-up date 
+              to check in with them later. The system will remind you when it's due.
             </Tip>
           </ManualSection>
 
