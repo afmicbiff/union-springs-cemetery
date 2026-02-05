@@ -1,34 +1,40 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Phone, ExternalLink } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-// Memoized section component for performance
+// Memoized section component - GPU compositing hint for smooth scrolling
 const ServiceSection = memo(function ServiceSection({ title, children, className = "" }) {
     return (
-        <section className={`bg-slate-50 p-5 sm:p-6 md:p-8 rounded-lg shadow-md ${className}`}>
+        <section 
+            className={`bg-slate-50 p-5 sm:p-6 md:p-8 rounded-lg shadow-md ${className}`}
+            style={{ contain: 'layout style paint' }}
+        >
             <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">{title}</h3>
             {children}
         </section>
     );
 });
 
-// Memoized list item for external links
+// Memoized list item for external links - precompute URL display
 const ExternalLinkItem = memo(function ExternalLinkItem({ name, url }) {
-    const displayUrl = url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+    const displayUrl = useMemo(() => 
+        url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), 
+        [url]
+    );
     return (
-        <li className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+        <li className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-h-[44px] py-1">
             <span className="font-semibold text-stone-700">{name}:</span>
             <a 
                 href={url} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-teal-700 hover:text-teal-800 active:text-teal-900 underline underline-offset-2 flex items-center gap-1 touch-manipulation break-all"
+                className="text-teal-700 hover:text-teal-800 active:text-teal-900 underline underline-offset-2 flex items-center gap-1.5 touch-manipulation break-all min-h-[44px] py-2"
             >
                 {displayUrl}
-                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <ExternalLink className="w-4 h-4 shrink-0" aria-hidden="true" />
             </a>
         </li>
     );
