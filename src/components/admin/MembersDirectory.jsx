@@ -99,25 +99,36 @@ function MembersDirectory({ openMemberId }) {
         gcTime: 30 * 60 * 1000,
     });
 
-    const { data: members, isLoading, isError, error, refetch } = useQuery({
-        queryKey: ['members'],
+    const { data: members, isLoading, isError, error, refetch, isFetching } = useQuery({
+        queryKey: ['members-directory'],
         refetchOnWindowFocus: false,
         queryFn: async () => {
-            const records = await base44.entities.Member.list('-updated_date', 1000);
-            return (records || []).map((r) => {
-                const flat = { ...(r || {}) };
-                if (r?.data && typeof r.data === 'object') {
-                    Object.assign(flat, r.data);
+            try {
+                // Direct SDK call - RLS will filter based on user role
+                const records = await base44.entities.Member.list('-updated_date', 1000);
+                if (!records || !Array.isArray(records)) {
+                    console.warn('Member.list returned non-array:', records);
+                    return [];
                 }
-                flat.id = r.id || flat.id;
-                return flat;
-            });
+                return records.map((r) => {
+                    if (!r) return null;
+                    // Flatten nested data structure if present
+                    const flat = { ...r };
+                    if (r.data && typeof r.data === 'object') {
+                        Object.assign(flat, r.data);
+                    }
+                    flat.id = r.id || flat.id;
+                    return flat;
+                }).filter(Boolean);
+            } catch (err) {
+                console.error('Failed to fetch members:', err);
+                throw err;
+            }
         },
-        initialData: [],
-        staleTime: 5 * 60 * 1000,
-        gcTime: 10 * 60 * 1000,
-        retry: 2,
-        retryDelay: 1000,
+        staleTime: 2 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+        retry: 3,
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
     });
 
     useEffect(() => {
