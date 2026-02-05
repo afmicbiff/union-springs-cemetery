@@ -25,28 +25,31 @@ import { format } from 'date-fns';
 import { toast } from "sonner";
 import { filterEntity } from "@/components/gov/dataClient";
 
-// Components (lazy-loaded to reduce initial bundle)
-const AdminOverview = React.lazy(() => import("@/components/admin/AdminOverview.jsx"));
-const AdminReservations = React.lazy(() => import("@/components/admin/AdminReservations.jsx"));
-const AdminPlots = React.lazy(() => import("@/components/admin/AdminPlots.jsx"));
-const DeceasedManager = React.lazy(() => import("@/components/admin/DeceasedManager.jsx"));
-const OnboardingForm = React.lazy(() => import("@/components/admin/OnboardingForm.jsx"));
-const OnboardingProgress = React.lazy(() => import("@/components/admin/OnboardingProgress.jsx"));
-const OnboardingGuide = React.lazy(() => import("@/components/admin/OnboardingGuide.jsx"));
-const EmployeeList = React.lazy(() => import("@/components/admin/EmployeeList.jsx"));
-const VendorManager = React.lazy(() => import("@/components/admin/VendorManager.jsx"));
-const AdminSecurity = React.lazy(() => import("@/components/admin/AdminSecurity.jsx"));
-const EventCalendar = React.lazy(() => import("@/components/admin/EventCalendar"));
-const AnnouncementManager = React.lazy(() => import("@/components/admin/AnnouncementManager.jsx"));
-const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager.jsx"));
-const MembersDirectory = React.lazy(() => import("@/components/admin/MembersDirectory.jsx"));
+// Components (lazy-loaded with webpackChunkName for better caching)
+// Priority components - likely to be accessed first
+const AdminOverview = React.lazy(() => import(/* webpackChunkName: "admin-overview" */ "@/components/admin/AdminOverview.jsx"));
+const TaskManager = React.lazy(() => import(/* webpackChunkName: "admin-tasks" */ "@/components/tasks/TaskManager.jsx"));
+const MembersDirectory = React.lazy(() => import(/* webpackChunkName: "admin-members" */ "@/components/admin/MembersDirectory.jsx"));
 
-const BackupManager = React.lazy(() => import("@/components/admin/BackupManager.jsx"));
-const CommunicationCenter = React.lazy(() => import("@/components/admin/CommunicationCenter.jsx"));
-const AuditLogViewer = React.lazy(() => import("@/components/admin/AuditLogViewer.jsx"));
-const LawnCare = React.lazy(() => import("@/components/admin/LawnCare.jsx"));
-const CRM = React.lazy(() => import("@/components/crm/CRM.jsx"));
-const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminDocumentsManager.jsx"));
+// Secondary components - accessed less frequently
+const AdminReservations = React.lazy(() => import(/* webpackChunkName: "admin-reservations" */ "@/components/admin/AdminReservations.jsx"));
+const AdminPlots = React.lazy(() => import(/* webpackChunkName: "admin-plots" */ "@/components/admin/AdminPlots.jsx"));
+const DeceasedManager = React.lazy(() => import(/* webpackChunkName: "admin-deceased" */ "@/components/admin/DeceasedManager.jsx"));
+const EmployeeList = React.lazy(() => import(/* webpackChunkName: "admin-employees" */ "@/components/admin/EmployeeList.jsx"));
+const EventCalendar = React.lazy(() => import(/* webpackChunkName: "admin-calendar" */ "@/components/admin/EventCalendar"));
+
+// Tertiary components - rarely accessed
+const OnboardingForm = React.lazy(() => import(/* webpackChunkName: "admin-onboarding" */ "@/components/admin/OnboardingForm.jsx"));
+const OnboardingProgress = React.lazy(() => import(/* webpackChunkName: "admin-onboarding" */ "@/components/admin/OnboardingProgress.jsx"));
+const OnboardingGuide = React.lazy(() => import(/* webpackChunkName: "admin-onboarding" */ "@/components/admin/OnboardingGuide.jsx"));
+const VendorManager = React.lazy(() => import(/* webpackChunkName: "admin-vendors" */ "@/components/admin/VendorManager.jsx"));
+const AnnouncementManager = React.lazy(() => import(/* webpackChunkName: "admin-announcements" */ "@/components/admin/AnnouncementManager.jsx"));
+const BackupManager = React.lazy(() => import(/* webpackChunkName: "admin-backups" */ "@/components/admin/BackupManager.jsx"));
+const CommunicationCenter = React.lazy(() => import(/* webpackChunkName: "admin-comms" */ "@/components/admin/CommunicationCenter.jsx"));
+const AuditLogViewer = React.lazy(() => import(/* webpackChunkName: "admin-logs" */ "@/components/admin/AuditLogViewer.jsx"));
+const LawnCare = React.lazy(() => import(/* webpackChunkName: "admin-lawncare" */ "@/components/admin/LawnCare.jsx"));
+const CRM = React.lazy(() => import(/* webpackChunkName: "admin-crm" */ "@/components/crm/CRM.jsx"));
+const AdminDocumentsManager = React.lazy(() => import(/* webpackChunkName: "admin-docs" */ "@/components/admin/AdminDocumentsManager.jsx"));
 
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";

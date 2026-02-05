@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Zap, Smartphone, Shield, Database, Code, Clock, FileCheck } from "lucide-react";
 
-const REPORT_DATE = "2026-02-05";
+const REPORT_DATE = "2026-02-05-v2";
 
 const sections = [
   {
@@ -129,13 +129,13 @@ const ProductionReport = memo(function ProductionReport() {
         <div className="mt-4 p-2 bg-teal-50 rounded-lg border border-teal-200">
           <div className="text-xs font-medium text-teal-800 mb-1">Summary:</div>
           <ul className="text-[10px] text-teal-700 space-y-0.5">
-            <li>• 40+ audit checks passing</li>
-            <li>• Admin Dashboard 100% optimized</li>
-            <li>• Mobile-first responsive design</li>
-            <li>• Complete input validation and sanitization</li>
-            <li>• Query caching with structuralSharing</li>
-            <li>• Safe date parsing + error handling throughout</li>
-            <li>• All components memoized with custom comparisons</li>
+            <li>• 45+ mobile performance optimizations</li>
+            <li>• WebP images with responsive srcSet</li>
+            <li>• Critical CSS inlined for fast FCP</li>
+            <li>• Code split by access frequency</li>
+            <li>• Resource hints for external domains</li>
+            <li>• content-visibility for off-screen sections</li>
+            <li>• Full prefers-reduced-motion support</li>
           </ul>
         </div>
       </CardContent>

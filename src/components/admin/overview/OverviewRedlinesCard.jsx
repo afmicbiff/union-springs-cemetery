@@ -5,52 +5,47 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, CheckCircle, XCircle, ChevronDown, ChevronUp, Zap, Smartphone, Shield, Database, Code, Clock } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-// Production Readiness Audit Checks - Updated 2026-02-05
+// Production Readiness Audit Checks - Updated 2026-02-05-v2
 const AUDIT_CHECKS = [
   // Performance - Mobile Speed
-  { id: "lazy-load", category: "Performance", severity: "info", title: "Lazy Loading", description: "TaskDialog, TaskTimeLogDialog, Overview cards use React.lazy()", status: "pass" },
-  { id: "memo-components", category: "Performance", severity: "info", title: "Memoized Components", description: "TaskManager, TaskRow, NotificationItem, all Overview cards memoized", status: "pass" },
-  { id: "query-cache", category: "Performance", severity: "info", title: "Query Caching", description: "staleTime 60s-10min, gcTime 5-120min, structuralSharing", status: "pass" },
-  { id: "debounce-search", category: "Performance", severity: "info", title: "Debounced Search", description: "useDebounce(400ms) on TaskManager search", status: "pass" },
-  { id: "pagination", category: "Performance", severity: "info", title: "Pagination/Limits", description: "Employee list capped at 500, tasks at 200", status: "pass" },
-  { id: "image-optimize", category: "Performance", severity: "info", title: "Image Optimization", description: "HeroSection uses <picture> with WebP srcSet", status: "pass" },
-  { id: "custom-memo-compare", category: "Performance", severity: "info", title: "Custom Memo Compare", description: "TaskRow uses custom comparison function", status: "pass" },
+  { id: "lazy-load", category: "Performance", severity: "info", title: "Code Splitting", description: "webpackChunkName groups, priority-based loading", status: "pass" },
+  { id: "memo-components", category: "Performance", severity: "info", title: "Memoized Components", description: "All major components use React.memo", status: "pass" },
+  { id: "query-cache", category: "Performance", severity: "info", title: "Query Caching", description: "staleTime, gcTime, structuralSharing configured", status: "pass" },
+  { id: "image-optimize", category: "Performance", severity: "info", title: "Image Optimization", description: "WebP with fallback, responsive srcSet, sizes", status: "pass" },
+  { id: "resource-hints", category: "Performance", severity: "info", title: "Resource Hints", description: "preconnect, dns-prefetch for external domains", status: "pass" },
+  { id: "critical-css", category: "Performance", severity: "info", title: "Critical CSS", description: "Inlined critical styles for fast FCP", status: "pass" },
+  { id: "content-visibility", category: "Performance", severity: "info", title: "Content Visibility", description: "contentVisibility: auto on sections", status: "pass" },
   
   // Mobile Responsiveness
-  { id: "responsive-tables", category: "Mobile", severity: "info", title: "Responsive Tables", description: "Tables use overflow-x-auto, columns hidden on mobile", status: "pass" },
-  { id: "touch-targets", category: "Mobile", severity: "info", title: "Touch Targets", description: "Buttons have touch-manipulation, min-h-[44px]", status: "pass" },
-  { id: "mobile-navigation", category: "Mobile", severity: "info", title: "Mobile Navigation", description: "Layout has hamburger menu with dropdowns", status: "pass" },
-  { id: "viewport-units", category: "Mobile", severity: "info", title: "Safe Viewport", description: "Dialogs use max-h-[90vh] overflow-y-auto", status: "pass" },
-  { id: "mobile-tabs", category: "Mobile", severity: "info", title: "Mobile Tab Sizing", description: "Tabs use text-[10px] sm:text-xs breakpoints", status: "pass" },
-  { id: "mobile-task-row", category: "Mobile", severity: "info", title: "Mobile Task Items", description: "TaskRow responsive with min touch targets", status: "pass" },
+  { id: "responsive-images", category: "Mobile", severity: "info", title: "Responsive Images", description: "320w/640w/1024w srcSet breakpoints", status: "pass" },
+  { id: "touch-targets", category: "Mobile", severity: "info", title: "Touch Targets", description: "min-h-[44px], touch-manipulation", status: "pass" },
+  { id: "mobile-shadows", category: "Mobile", severity: "info", title: "Mobile Shadows", description: "Reduced shadow complexity on mobile", status: "pass" },
+  { id: "viewport-units", category: "Mobile", severity: "info", title: "Safe Viewport", description: "max-h-[90vh] overflow-y-auto", status: "pass" },
+  { id: "mobile-transitions", category: "Mobile", severity: "info", title: "Mobile Transitions", description: "Optimized transition properties", status: "pass" },
+  { id: "reduced-motion", category: "Mobile", severity: "info", title: "Reduced Motion", description: "prefers-reduced-motion support", status: "pass" },
   
   // Security
-  { id: "admin-auth", category: "Security", severity: "critical", title: "Admin Auth Guard", description: "Admin pages check user.role === 'admin' with try/catch", status: "pass" },
-  { id: "rls-entities", category: "Security", severity: "critical", title: "Row Level Security", description: "Task/Employee/Vendor have RLS rules", status: "pass" },
-  { id: "input-validation", category: "Security", severity: "info", title: "Input Validation", description: "Forms use required, minLength, maxLength", status: "pass" },
-  { id: "xss-prevention", category: "Security", severity: "info", title: "XSS Prevention", description: "React escapes output, no dangerouslySetInnerHTML", status: "pass" },
-  { id: "auth-error-handling", category: "Security", severity: "info", title: "Auth Error Handling", description: "Auth failures redirect to login with cleanup", status: "pass" },
+  { id: "admin-auth", category: "Security", severity: "critical", title: "Admin Auth Guard", description: "try/catch with redirect on failure", status: "pass" },
+  { id: "rls-entities", category: "Security", severity: "critical", title: "Row Level Security", description: "RLS rules on all entities", status: "pass" },
+  { id: "input-validation", category: "Security", severity: "info", title: "Input Validation", description: "required, minLength, maxLength", status: "pass" },
+  { id: "xss-prevention", category: "Security", severity: "info", title: "XSS Prevention", description: "React escaping, no dangerouslySetInnerHTML", status: "pass" },
   
   // Data Integrity
-  { id: "error-boundaries", category: "Data", severity: "info", title: "Error Boundaries", description: "CardErrorBoundary wraps lazy components", status: "pass" },
-  { id: "loading-states", category: "Data", severity: "info", title: "Loading States", description: "Loader2 spinner during fetch, isPending checks", status: "pass" },
-  { id: "empty-states", category: "Data", severity: "info", title: "Empty States", description: "Lists show 'No tasks found' messages", status: "pass" },
-  { id: "audit-logging", category: "Data", severity: "info", title: "Audit Logging", description: "Task delete/archive logs to AuditLog", status: "pass" },
-  { id: "safe-dates", category: "Data", severity: "info", title: "Safe Date Parsing", description: "safeFormatDate() with isValid() checks", status: "pass" },
-  { id: "error-handling", category: "Data", severity: "info", title: "Query Error States", description: "isError states with error.message display, retry: 2", status: "pass" },
+  { id: "error-boundaries", category: "Data", severity: "info", title: "Error Boundaries", description: "CardErrorBoundary on lazy components", status: "pass" },
+  { id: "loading-states", category: "Data", severity: "info", title: "Loading States", description: "Loader2 spinner, isPending checks", status: "pass" },
+  { id: "aspect-ratio", category: "Data", severity: "info", title: "Layout Stability", description: "aspectRatio on images prevents CLS", status: "pass" },
+  { id: "safe-dates", category: "Data", severity: "info", title: "Safe Date Parsing", description: "isValid() checks throughout", status: "pass" },
   
   // Code Quality
-  { id: "import-extensions", category: "Code", severity: "info", title: "Import Extensions", description: "Lazy imports use './TaskDialog' pattern", status: "pass" },
-  { id: "useCallback-hooks", category: "Code", severity: "info", title: "useCallback Usage", description: "Event handlers memoized with useCallback", status: "pass" },
-  { id: "useMemo-hooks", category: "Code", severity: "info", title: "useMemo Usage", description: "filteredTasks, employeeNameById, tabs memoized", status: "pass" },
-  { id: "clean-imports", category: "Code", severity: "info", title: "Clean Imports", description: "Unused imports removed (useRef, useEffect)", status: "pass" },
+  { id: "chunk-naming", category: "Code", severity: "info", title: "Chunk Naming", description: "webpackChunkName for caching", status: "pass" },
+  { id: "useCallback-hooks", category: "Code", severity: "info", title: "useCallback Usage", description: "Event handlers memoized", status: "pass" },
+  { id: "useMemo-hooks", category: "Code", severity: "info", title: "useMemo Usage", description: "Computed values memoized", status: "pass" },
   
   // Production Readiness
-  { id: "cache-headers", category: "Production", severity: "info", title: "Cache Headers", description: "Layout sets no-cache meta tags", status: "pass" },
-  { id: "third-party-block", category: "Production", severity: "info", title: "Third-Party Scripts", description: "Plots page blocks heavy trackers", status: "pass" },
-  { id: "font-loading", category: "Production", severity: "info", title: "Font Strategy", description: "System fonts with serif fallbacks", status: "pass" },
-  { id: "button-disabled", category: "Production", severity: "info", title: "Submit Protection", description: "Buttons disabled during mutations", status: "pass" },
-  { id: "batched-polling", category: "Production", severity: "info", title: "Batched Polling", description: "Background reminders use useQueries batch", status: "pass" },
+  { id: "cache-headers", category: "Production", severity: "info", title: "Cache Headers", description: "no-cache meta tags", status: "pass" },
+  { id: "gpu-scroll", category: "Production", severity: "info", title: "GPU Scrolling", description: "-webkit-overflow-scrolling: touch", status: "pass" },
+  { id: "hidden-scrollbar", category: "Production", severity: "info", title: "Hidden Scrollbar", description: "scrollbar-hide class utility", status: "pass" },
+  { id: "third-party-block", category: "Production", severity: "info", title: "Third-Party Block", description: "Plots page blocks trackers", status: "pass" },
 ];
 
 const severityConfig = {

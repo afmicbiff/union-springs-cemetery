@@ -109,9 +109,29 @@ export default function Layout({ children }) {
       document.head.appendChild(m);
       return m;
     });
+
+    // Add resource hints for performance
+    const hints = [
+      // Preconnect to external domains
+      { rel: 'preconnect', href: 'https://qtrypzzcjebvfcihiynt.supabase.co' },
+      { rel: 'preconnect', href: 'https://images.unsplash.com' },
+      { rel: 'dns-prefetch', href: 'https://base44.app' },
+    ];
+    const linkElements = hints.map(({ rel, href }) => {
+      const link = document.createElement('link');
+      link.rel = rel;
+      link.href = href;
+      if (rel === 'preconnect') link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+      return link;
+    });
+
     return () => {
       created.forEach((m) => {
         if (m && m.parentNode) m.parentNode.removeChild(m);
+      });
+      linkElements.forEach((l) => {
+        if (l && l.parentNode) l.parentNode.removeChild(l);
       });
     };
   }, []);
@@ -242,6 +262,7 @@ export default function Layout({ children }) {
   return (
     <div className={`min-h-screen ${pageBackground} font-sans text-stone-900 flex flex-col app-font-scope`}>
       <style>{`
+        /* Critical CSS - inlined for fastest first paint */
         .app-font-scope {
           --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           --font-heading: Georgia, "Times New Roman", Times, serif;
@@ -266,6 +287,44 @@ export default function Layout({ children }) {
         input[type='number']::-webkit-inner-spin-button {
           -webkit-appearance: none;
           margin: 0;
+        }
+        /* Mobile performance optimizations */
+        @media (max-width: 640px) {
+          /* Reduce paint complexity on mobile */
+          .shadow-lg, .shadow-xl, .shadow-2xl {
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+          }
+          /* Optimize animations */
+          .transition-all {
+            transition-property: opacity, transform;
+          }
+        }
+        /* GPU acceleration for smooth scrolling */
+        .overflow-y-auto, .overflow-x-auto {
+          -webkit-overflow-scrolling: touch;
+          will-change: scroll-position;
+        }
+        /* Content visibility for off-screen sections */
+        section {
+          content-visibility: auto;
+          contain-intrinsic-size: auto 500px;
+        }
+        /* Prefers reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+        /* Hide scrollbar but keep functionality */
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
       {/* Header */}
