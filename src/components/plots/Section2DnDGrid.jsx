@@ -7,14 +7,14 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
+// Plots that should have +New button below them - defined outside component for stable reference
+const NEW_PLOT_TARGETS = new Set([186, 199, 217, 236, 248, 271, 309, 391, 477, 595]);
+
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
   const extraBottomRow = 1; // Extra row for +New under specific plots
   const totalRows = perCol + extraBottomRow;
   const dataCols = 10;
-  
-  // Plots that should have +New button below them
-  const newPlotTargets = new Set([186, 199, 217, 236, 248, 271, 309, 391, 477, 595]);
 
   const { cells, bottomRowMarkers } = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
