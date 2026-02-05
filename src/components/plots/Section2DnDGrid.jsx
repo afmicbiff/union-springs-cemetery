@@ -8,7 +8,7 @@ function parseNum(v) {
 }
 
 // Plots that should have +New button below them - defined outside component for stable reference
-const NEW_PLOT_TARGETS = new Set([186, 217, 236, 248, 271, 309, 391, 477, 595]);
+const NEW_PLOT_TARGETS = new Set([228, 217, 236, 248, 271, 309, 391, 477, 595]);
 
 // Special column for plots 228-250 (first column in Section 2)
 const SPECIAL_COL_RANGE = { start: 228, end: 250 };
