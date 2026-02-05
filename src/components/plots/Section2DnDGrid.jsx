@@ -99,35 +99,41 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     return { cells: out, bottomRowMarkers: markers };
   }, [plots, dataCols, perCol, totalRows, extraBottomRow]);
 
+  // Render columns in reverse row order so +New appears at the bottom visually
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
-      <div className="grid grid-flow-col gap-2 sm:gap-3" style={{ gridTemplateRows: `repeat(${totalRows}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${dataCols}, max-content)`, gridAutoColumns: 'max-content' }}>
-        {cells.map((item, idx) => {
-          const col = Math.floor(idx / totalRows);
-          const row = idx % totalRows;
-          const isBottomRow = row === 0;
-          const showNewPlot = isBottomRow && bottomRowMarkers[col];
-          
-          return (
-            <div key={idx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-              {showNewPlot ? (
-                <div className="w-full h-full flex items-center justify-center text-[10px] text-teal-600 font-medium cursor-pointer hover:bg-teal-50">
+      <div className="flex gap-2 sm:gap-3">
+        {Array.from({ length: dataCols }).map((_, col) => (
+          <div key={col} className="flex flex-col-reverse gap-0.5">
+            {/* Bottom row for +New button */}
+            <div className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+              {bottomRowMarkers[col] ? (
+                <div className="w-full h-full flex items-center justify-center text-[10px] text-teal-600 font-medium cursor-pointer hover:bg-teal-50 border border-dashed border-teal-300 rounded-[1px]">
                   + New
                 </div>
               ) : (
-                <GravePlotCell
-                  item={item}
-                  baseColorClass=""
-                  statusColors={statusColors}
-                  isAdmin={isAdmin}
-                  onHover={onHover}
-                  onEdit={onEdit}
-                  sectionKey="2"
-                />
+                <div className="w-full h-full" />
               )}
             </div>
-          );
-        })}
+            {/* Data rows - render bottom to top */}
+            {Array.from({ length: perCol }).map((_, row) => {
+              const item = cells[col * totalRows + row + extraBottomRow];
+              return (
+                <div key={row} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+                  <GravePlotCell
+                    item={item}
+                    baseColorClass=""
+                    statusColors={statusColors}
+                    isAdmin={isAdmin}
+                    onHover={onHover}
+                    onEdit={onEdit}
+                    sectionKey="2"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );
