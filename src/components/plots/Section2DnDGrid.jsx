@@ -16,7 +16,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
   // Plots that should have +New button below them
   const newPlotTargets = new Set([186, 199, 217, 236, 248, 271, 309, 391, 477, 595]);
 
-  const cells = React.useMemo(() => {
+  const { cells, bottomRowMarkers } = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     const idx186 = sorted.findIndex(p => parseNum(p.Grave) === 186);
     const pivoted = idx186 > -1 ? [...sorted.slice(idx186), ...sorted.slice(0, idx186)] : sorted;
@@ -25,7 +25,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
 
     let i = 0;
     for (let c = 0; c < dataCols && i < pivoted.length; c++) {
-      for (let r = perCol - 1 - reservedBottomRows; r >= 0 && i < pivoted.length; r--) {
+      for (let r = perCol - 1; r >= 0 && i < pivoted.length; r--) {
         baseColumns[c][r] = pivoted[i++];
       }
     }
@@ -56,7 +56,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
       }
 
       const seqCol = Array(perCol).fill(null);
-      let rPtr = perCol - 1 - reservedBottomRows;
+      let rPtr = perCol - 1;
       for (let n = seqStart; n <= seqEnd && rPtr >= 0; n++, rPtr--) {
         const p = byNum.get(n);
         if (p) seqCol[rPtr] = p;
@@ -71,20 +71,27 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
       }
     }
 
-    // Build output with leading and trailing spacer columns
-    const out = Array(totalCols * perCol).fill(null);
+    // Build output - just data columns, no spacers
+    const out = Array(dataCols * totalRows).fill(null);
+    const markers = Array(dataCols).fill(false);
     
-    // Leading spacer column (index 0) - all nulls (spacers)
-    // Data columns (index 1 to dataCols)
     for (let c = 0; c < dataCols; c++) {
-      for (let r = 0; r < perCol; r++) {
-        out[(c + 1) * perCol + r] = baseColumns[c][r];
+      // Check if bottom plot (row 0) is a target for +New
+      const bottomPlot = baseColumns[c][0];
+      const bottomNum = parseNum(bottomPlot?.Grave);
+      if (bottomNum && newPlotTargets.has(bottomNum)) {
+        markers[c] = true;
       }
+      
+      // Fill data rows (rows 1 to perCol)
+      for (let r = 0; r < perCol; r++) {
+        out[c * totalRows + r + extraBottomRow] = baseColumns[c][r];
+      }
+      // Row 0 is the extra bottom row - leave as null, will render +New if markers[c]
     }
-    // Trailing spacer column (last) - all nulls (spacers)
     
-    return out;
-  }, [plots, dataCols, perCol, reservedBottomRows, totalCols]);
+    return { cells: out, bottomRowMarkers: markers };
+  }, [plots, dataCols, perCol, totalRows, extraBottomRow, newPlotTargets]);
 
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
