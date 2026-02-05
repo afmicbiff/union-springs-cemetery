@@ -8,10 +8,10 @@ function parseNum(v) {
 }
 
 // Plots that should have +New button below them - defined outside component for stable reference
-const NEW_PLOT_TARGETS = new Set([228, 217, 236, 248, 271, 309, 391, 477, 595]);
+const NEW_PLOT_TARGETS = new Set([186, 217, 236, 248, 271, 309, 391, 477, 595]);
 
-// Special column for plots 228-250 (first column in Section 2)
-const SPECIAL_COL_RANGE = { start: 228, end: 250 };
+// Special column for plots 186-207 (first column in Section 2)
+const SPECIAL_COL_RANGE = { start: 186, end: 207 };
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
@@ -47,9 +47,9 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     regularPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     
-    // For regular plots, pivot starting from 251 (since 228-250 are in the special column)
-    const idx251 = regularPlots.findIndex(p => parseNum(p.Grave) === 251);
-    const pivoted = idx251 > -1 ? [...regularPlots.slice(idx251), ...regularPlots.slice(0, idx251)] : regularPlots;
+    // For regular plots, pivot starting from 208 (since 186-207 are in the special column)
+    const idx208 = regularPlots.findIndex(p => parseNum(p.Grave) === 208);
+    const pivoted = idx208 > -1 ? [...regularPlots.slice(idx208), ...regularPlots.slice(0, idx208)] : regularPlots;
 
     // 11 columns: column 0 is special (186-207), columns 1-10 are regular
     const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
@@ -113,7 +113,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     const out = Array(dataCols * totalRows).fill(null);
     const markers = Array(dataCols).fill(false);
     
-    // Mark column 0 for +New since it starts with 228
+    // Mark column 0 for +New since it starts with 186
     markers[0] = true;
     
     for (let c = 0; c < dataCols; c++) {
