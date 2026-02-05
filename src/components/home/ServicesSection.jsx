@@ -22,10 +22,10 @@ const ServicesSection = memo(function ServicesSection() {
       {/* Quick Links Section - Overlapping black area */}
       <section className="relative z-20">
         {/* Black background extension for card overlap effect */}
-        <div className="absolute inset-x-0 top-0 h-16 sm:h-20 md:h-24 bg-stone-900" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 h-20 sm:h-24 md:h-28 bg-[#0c0a09]" aria-hidden="true" />
         {/* Stone background for below */}
-        <div className="absolute inset-x-0 top-16 sm:top-20 md:top-24 bottom-0 bg-stone-50" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-4 sm:pt-6 pb-8 md:pb-12">
+        <div className="absolute inset-x-0 top-20 sm:top-24 md:top-28 bottom-0 bg-stone-50" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-8 md:pb-12">
           <div className="bg-white p-4 sm:p-6 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-center gap-2 sm:gap-4 md:gap-8 text-center">
             <Link 
               to={createPageUrl('Plots')} 

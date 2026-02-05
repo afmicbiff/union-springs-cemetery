@@ -18,10 +18,10 @@ const InfoSection = memo(function InfoSection() {
       {/* Hours & Contact Cards - Overlapping black area */}
       <section className="relative z-20">
         {/* Black background extension for card overlap effect */}
-        <div className="absolute inset-x-0 top-0 h-24 sm:h-28 md:h-32 bg-stone-900" aria-hidden="true" />
+        <div className="absolute inset-x-0 top-0 h-28 sm:h-32 md:h-36 lg:h-40 bg-[#0c0a09]" aria-hidden="true" />
         {/* Stone background for below cards */}
-        <div className="absolute inset-x-0 top-24 sm:top-28 md:top-32 bottom-0 bg-stone-100" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-12 md:pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div className="absolute inset-x-0 top-28 sm:top-32 md:top-36 lg:top-40 bottom-0 bg-stone-100" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-8 sm:pt-10 md:pt-12 pb-12 md:pb-16 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {/* Hours & Location Card */}
           <InfoCard>
             <h3 className="text-lg sm:text-xl font-serif font-bold text-stone-800 mb-4">Hours & Location</h3>
