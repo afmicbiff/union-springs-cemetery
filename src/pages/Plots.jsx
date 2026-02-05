@@ -728,7 +728,7 @@ export default function PlotsPage() {
   const isAdmin = user?.role === 'admin';
 
   const { data: plotEntities = [], isLoading } = usePlotsMapData({
-            activeTab,
+            activeTab: 'map',
             openSections,
             filterEntity,
           });
@@ -1378,7 +1378,6 @@ export default function PlotsPage() {
                     match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
                   }
                   if (match && match.sectionKey && match.plotNum) {
-                    setActiveTab('map');
                     setCollapsedSections(prev => ({
                       ...prev,
                       [match.sectionKey]: false,
@@ -1627,7 +1626,7 @@ export default function PlotsPage() {
       {/* Guided Tour - only render when open */}
       {isTourOpen && (
         <Suspense fallback={null}>
-          <PlotsTour key={tourSession} open={isTourOpen} onClose={() => setIsTourOpen(false)} />
+          <PlotsTour open={isTourOpen} onClose={() => setIsTourOpen(false)} />
         </Suspense>
       )}
       
