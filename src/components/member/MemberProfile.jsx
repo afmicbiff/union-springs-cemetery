@@ -27,14 +27,21 @@ const MemberProfile = memo(function MemberProfile({ user }) {
         const requiredFields = ['first_name','last_name','phone_primary','address','city','state','zip'];
 
     const { data: memberRecord, isLoading, isError, refetch } = useQuery({
-        queryKey: ['member-profile', user.email],
+        queryKey: ['member-profile', user?.email],
         queryFn: async () => {
-            const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
-            return res[0] || null;
+            if (!user?.email) return null;
+            try {
+                const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+                return res?.[0] || null;
+            } catch {
+                return null;
+            }
         },
-        enabled: !!user.email,
+        enabled: !!user?.email,
         staleTime: 5 * 60_000,
+        gcTime: 10 * 60_000,
         retry: 2,
+        refetchOnWindowFocus: false,
     });
 
     useEffect(() => {
