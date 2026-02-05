@@ -368,144 +368,154 @@ export default function SearchPage() {
   // "Did you mean?" logic removed due to missing full list client-side
 
   return (
-    <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-stone-200 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         <Breadcrumbs items={[{ label: 'Deceased Search' }]} />
         
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Deceased Search</h1>
-          </div>
-          <p className="text-stone-600 max-w-2xl mx-auto text-lg">
+        {/* Header - responsive typography */}
+        <div className="text-center space-y-3 sm:space-y-4 px-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-stone-900">Deceased Search</h1>
+          <p className="text-stone-600 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
             Search our directory to find resting places, obituaries, and memorials of those interred at Union Springs.
           </p>
         </div>
 
-        {/* Search Bar & Filters */}
-        <div className="bg-white p-6 rounded-sm shadow-xl space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-grow">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" />
+        {/* Search Bar & Filters - mobile optimized */}
+        <div className="bg-white p-4 sm:p-6 rounded-sm shadow-xl space-y-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 w-5 h-5" aria-hidden="true" />
               <Input
                 type="text"
-                placeholder="Search by name, use natural language or terms..."
+                placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
+                className="pl-10 h-12 text-base sm:text-lg border-stone-300 focus:border-teal-500 focus:ring-teal-500 bg-stone-50"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
               />
             </div>
 
-            <div className="flex gap-2">
-
-
-              <Button 
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="h-12 px-4 border-stone-300 text-stone-700 hover:bg-stone-50 font-serif"
-              >
-                  <Filter className="w-4 h-4 mr-2" /> Filters
-              </Button>
-            </div>
+            <Button 
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className="h-12 px-4 border-stone-300 text-stone-700 hover:bg-stone-50 active:bg-stone-100 font-serif touch-manipulation w-full sm:w-auto"
+              aria-expanded={showFilters}
+            >
+              <Filter className="w-4 h-4 mr-2" aria-hidden="true" /> 
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+            </Button>
           </div>
 
-          {/* Advanced Filters */}
+          {/* Advanced Filters - mobile optimized layout */}
           {showFilters && (
-            <div className="pt-4 border-t border-stone-100 animate-in slide-in-from-top-2">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wider">Advanced Options</h3>
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleClearFilters}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8"
-                    >
-                        <X className="w-3 h-3 mr-1" /> Clear all filters
-                    </Button>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-stone-600">Plot Section</Label>
-                <Select value={section} onValueChange={setSection}>
-                  <SelectTrigger aria-label="Select Plot Section" className="bg-stone-50 border-stone-300">
-                    <SelectValue placeholder="Select Section" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sections</SelectItem>
-                    <SelectItem value="North">North</SelectItem>
-                    <SelectItem value="South">South</SelectItem>
-                    <SelectItem value="East">East</SelectItem>
-                    <SelectItem value="West">West</SelectItem>
-                    <SelectItem value="Garden of Peace">Garden of Peace</SelectItem>
-                    <SelectItem value="Old Historic">Old Historic</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-stone-600">Family Name</Label>
-                <Input 
-                  placeholder="e.g. Smith" 
-                  value={familyName}
-                  onChange={(e) => setFamilyName(e.target.value)}
-                  className="bg-stone-50 border-stone-300"
-                />
+            <div className="pt-4 border-t border-stone-100" style={{ contain: 'layout style' }}>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                <h3 className="text-sm font-semibold text-stone-500 uppercase tracking-wider">Advanced Options</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleClearFilters}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 h-10 touch-manipulation self-start sm:self-auto"
+                >
+                  <X className="w-3 h-3 mr-1" aria-hidden="true" /> Clear all filters
+                </Button>
               </div>
               
-              <div className="space-y-2">
-                <Label className="text-stone-600">Veteran Status</Label>
-                <Select value={veteranStatus} onValueChange={setVeteranStatus}>
-                  <SelectTrigger aria-label="Select Veteran Status" className="bg-stone-50 border-stone-300">
-                    <SelectValue placeholder="All" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="true">Veteran</SelectItem>
-                    <SelectItem value="false">Non-Veteran</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Plot Section */}
+                <div className="space-y-2">
+                  <Label className="text-stone-600 text-sm">Plot Section</Label>
+                  <Select value={section} onValueChange={setSection}>
+                    <SelectTrigger aria-label="Select Plot Section" className="bg-stone-50 border-stone-300 h-11">
+                      <SelectValue placeholder="Select Section" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SECTION_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Family Name */}
+                <div className="space-y-2">
+                  <Label className="text-stone-600 text-sm">Family Name</Label>
+                  <Input 
+                    placeholder="e.g. Smith" 
+                    value={familyName}
+                    onChange={(e) => setFamilyName(e.target.value)}
+                    className="bg-stone-50 border-stone-300 h-11"
+                  />
+                </div>
+                
+                {/* Veteran Status */}
+                <div className="space-y-2">
+                  <Label className="text-stone-600 text-sm">Veteran Status</Label>
+                  <Select value={veteranStatus} onValueChange={setVeteranStatus}>
+                    <SelectTrigger aria-label="Select Veteran Status" className="bg-stone-50 border-stone-300 h-11">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VETERAN_OPTIONS.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Date Ranges */}
-              <div className="col-span-1 md:col-span-2 pt-2">
-                  <div className="flex flex-col md:flex-row gap-6">
-                      <div className="flex-1 flex items-center gap-3">
-                          <Label className="text-stone-600 whitespace-nowrap min-w-[80px]">Birth Year:</Label>
-                          <Input 
-                              placeholder="From" 
-                              value={birthYearMin}
-                              onChange={(e) => setBirthYearMin(e.target.value)}
-                              className="bg-stone-50 border-stone-300"
-                          />
-                          <span className="text-stone-400 font-medium">-</span>
-                          <Input 
-                              placeholder="To" 
-                              value={birthYearMax}
-                              onChange={(e) => setBirthYearMax(e.target.value)}
-                              className="bg-stone-50 border-stone-300"
-                          />
-                      </div>
-                      <div className="flex-1 flex items-center gap-3">
-                          <Label className="text-stone-600 whitespace-nowrap min-w-[90px]">Passing Year:</Label>
-                          <Input 
-                              placeholder="From" 
-                              value={deathYearMin}
-                              onChange={(e) => setDeathYearMin(e.target.value)}
-                              className="bg-stone-50 border-stone-300"
-                          />
-                          <span className="text-stone-400 font-medium">-</span>
-                          <Input 
-                              placeholder="To" 
-                              value={deathYearMax}
-                              onChange={(e) => setDeathYearMax(e.target.value)}
-                              className="bg-stone-50 border-stone-300"
-                          />
-                      </div>
+                {/* Birth Year Range - stacked on mobile */}
+                <div className="space-y-2">
+                  <Label className="text-stone-600 text-sm">Birth Year Range</Label>
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      placeholder="From" 
+                      value={birthYearMin}
+                      onChange={(e) => setBirthYearMin(e.target.value)}
+                      className="bg-stone-50 border-stone-300 h-11 flex-1"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                    />
+                    <span className="text-stone-400 font-medium px-1">-</span>
+                    <Input 
+                      placeholder="To" 
+                      value={birthYearMax}
+                      onChange={(e) => setBirthYearMax(e.target.value)}
+                      className="bg-stone-50 border-stone-300 h-11 flex-1"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                    />
                   </div>
+                </div>
+                
+                {/* Death Year Range - stacked on mobile */}
+                <div className="space-y-2 sm:col-span-2 md:col-span-1">
+                  <Label className="text-stone-600 text-sm">Passing Year Range</Label>
+                  <div className="flex items-center gap-2">
+                    <Input 
+                      placeholder="From" 
+                      value={deathYearMin}
+                      onChange={(e) => setDeathYearMin(e.target.value)}
+                      className="bg-stone-50 border-stone-300 h-11 flex-1"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                    />
+                    <span className="text-stone-400 font-medium px-1">-</span>
+                    <Input 
+                      placeholder="To" 
+                      value={deathYearMax}
+                      onChange={(e) => setDeathYearMax(e.target.value)}
+                      className="bg-stone-50 border-stone-300 h-11 flex-1"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                    />
+                  </div>
+                </div>
               </div>
-              </div>
-              </div>
-              )}
-              </div>
+            </div>
+          )}
+        </div>
 
         {/* Results */}
         <div className="space-y-4">
