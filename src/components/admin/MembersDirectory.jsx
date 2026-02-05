@@ -393,12 +393,13 @@ function MembersDirectory({ openMemberId }) {
             return `"${str}"`;
         };
         
-        const headers = ["Last Name", "First Name", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments", "Last Donation", "Last Contact", "Follow-up"];
+        const headers = ["Last Name", "First Name", "Role", "Address", "City", "State", "Zip", "Phone", "Sec. Phone", "Email", "Sec. Email", "Donation", "Comments", "Last Donation", "Last Contact", "Follow-up"];
         const csvContent = [
             headers.join(","),
             ...filteredMembers.map(m => [
                 escapeCSV(m.last_name),
                 escapeCSV(m.first_name),
+                escapeCSV(m.role || 'Member'),
                 escapeCSV(m.address),
                 escapeCSV(m.city),
                 escapeCSV(m.state),
@@ -447,6 +448,7 @@ function MembersDirectory({ openMemberId }) {
             follow_up_status: formData.get('follow_up_status') || 'pending',
             follow_up_notes: (formData.get('follow_up_notes') || '').trim().slice(0, 500),
             follow_up_assignee_id: formData.get('follow_up_assignee_id') || null,
+            role: formData.get('role') || 'Member',
         };
 
         if (editingMember) {
@@ -601,6 +603,9 @@ function MembersDirectory({ openMemberId }) {
                                 <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('first_name')}>
                                     <div className="flex items-center gap-1">First Name <ArrowUpDown className="w-3 h-3" /></div>
                                 </th>
+                                <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('role')}>
+                                    <div className="flex items-center gap-1">Role <ArrowUpDown className="w-3 h-3" /></div>
+                                </th>
                                     <th className="p-4 font-semibold">Address</th>
                                     <th className="p-4 font-semibold">Contact</th>
                                     <th className="p-4 font-semibold cursor-pointer hover:bg-stone-200" onClick={() => handleSort('city')}>
@@ -633,7 +638,7 @@ function MembersDirectory({ openMemberId }) {
                                     </tr>
                                 ) : isLoading ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center text-stone-500">
+                                        <td colSpan="12" className="p-8 text-center text-stone-500">
                                             <div className="flex items-center justify-center gap-2">
                                                 <Loader2 className="w-5 h-5 animate-spin text-teal-600" />
                                                 <span>Loading members...</span>
@@ -642,7 +647,7 @@ function MembersDirectory({ openMemberId }) {
                                     </tr>
                                 ) : !members || members.length === 0 ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center text-stone-500">
+                                        <td colSpan="12" className="p-8 text-center text-stone-500">
                                             <div className="flex flex-col items-center gap-2">
                                                 <span className="text-lg">No members in database</span>
                                                 <span className="text-xs text-stone-400">Click "Add Member" to create the first one.</span>
@@ -651,7 +656,7 @@ function MembersDirectory({ openMemberId }) {
                                     </tr>
                                 ) : filteredMembers.length === 0 ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center text-stone-500 italic">
+                                        <td colSpan="12" className="p-8 text-center text-stone-500 italic">
                                             No members match your filters. Try adjusting your search or filters.
                                         </td>
                                     </tr>
@@ -676,6 +681,21 @@ function MembersDirectory({ openMemberId }) {
                                             </td>
                                             <td className="p-4 font-medium text-stone-900">{member.last_name}</td>
                                             <td className="p-4 text-stone-700">{member.first_name}</td>
+                                            <td className="p-4">
+                                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                                    member.role === 'President' ? 'bg-purple-100 text-purple-700' :
+                                                    member.role === 'Vice President' ? 'bg-indigo-100 text-indigo-700' :
+                                                    member.role === 'Treasurer' ? 'bg-green-100 text-green-700' :
+                                                    member.role === 'Secretary' ? 'bg-blue-100 text-blue-700' :
+                                                    member.role === 'Caretaker' ? 'bg-amber-100 text-amber-700' :
+                                                    member.role === 'Legal' ? 'bg-red-100 text-red-700' :
+                                                    member.role === 'Administrator' ? 'bg-teal-100 text-teal-700' :
+                                                    member.role === 'Associate' ? 'bg-stone-100 text-stone-600' :
+                                                    'bg-stone-50 text-stone-500'
+                                                }`}>
+                                                    {member.role || 'Member'}
+                                                </span>
+                                            </td>
                                             <td className="p-4 text-stone-600 truncate max-w-[200px]" title={member.address}>{member.address}</td>
                                             <td className="p-4 text-stone-600 text-xs">
                                                 {member.phone_primary && <div className="flex items-center gap-1 mb-0.5"><Phone className="w-3 h-3" /> {member.phone_primary}</div>}
@@ -760,6 +780,25 @@ function MembersDirectory({ openMemberId }) {
                                 <Label htmlFor="last_name">Last Name</Label>
                                 <Input id="last_name" name="last_name" defaultValue={editingMember?.last_name} required />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="role">Role</Label>
+                            <Select name="role" defaultValue={editingMember?.role || "Member"}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="President">President</SelectItem>
+                                    <SelectItem value="Vice President">Vice President</SelectItem>
+                                    <SelectItem value="Caretaker">Caretaker</SelectItem>
+                                    <SelectItem value="Secretary">Secretary</SelectItem>
+                                    <SelectItem value="Treasurer">Treasurer</SelectItem>
+                                    <SelectItem value="Legal">Legal</SelectItem>
+                                    <SelectItem value="Administrator">Administrator</SelectItem>
+                                    <SelectItem value="Member">Member</SelectItem>
+                                    <SelectItem value="Associate">Associate</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="address">Address</Label>
