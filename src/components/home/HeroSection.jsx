@@ -91,7 +91,7 @@ const HeroSection = memo(function HeroSection() {
             positionClass="-rotate-12 -translate-y-24 -translate-x-6"
             mobilePositionClass="-rotate-10 -translate-x-12 translate-y-20"
           />
-          {/* Image 4 - Bottom Right (now visible on mobile!) */}
+          {/* Image 4 - Church (moved to left on mobile, catty-cornered) */}
           <HeroImage
             index={4}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
@@ -99,7 +99,7 @@ const HeroSection = memo(function HeroSection() {
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="rotate-[25deg] translate-x-48 translate-y-32"
-            mobilePositionClass="rotate-12 translate-x-14 translate-y-24"
+            mobilePositionClass="-rotate-8 -translate-x-20 translate-y-28"
           />
         </div>
 
