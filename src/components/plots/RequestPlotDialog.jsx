@@ -88,7 +88,6 @@ export default function RequestPlotDialog({ open, onOpenChange, selectedPlot }) 
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-            <Button className="bg-teal-700 hover:bg-teal-800" onClick={goToPortal}>Member Portal/Account</Button>
           </div>
         </div>
       </DialogContent>
