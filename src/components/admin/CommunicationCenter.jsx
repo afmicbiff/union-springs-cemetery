@@ -49,12 +49,12 @@ function CommunicationCenter() {
             
             {/* Notifications with dropdown */}
             <div className="flex items-stretch">
-              <TabsTrigger value="notifications" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9 rounded-r-none"><Bell className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Notifications</span><span className="sm:hidden">Notifs</span></TabsTrigger>
+              <TabsTrigger value="notifications" className={`flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9 rounded-r-none ${activeTab === 'notifications' ? 'data-[state=active]:bg-teal-700 data-[state=active]:text-white' : ''}`}><Bell className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Notifications</span><span className="sm:hidden">Notifs</span></TabsTrigger>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="px-2 h-9 text-xs font-medium border-l border-stone-200 rounded-r-md flex items-center hover:bg-stone-100"
+                    className={`px-2 h-9 text-xs font-medium border-l border-stone-200 rounded-r-md flex items-center hover:bg-stone-100 ${activeTab === 'notifications' ? 'bg-teal-700 text-white border-teal-600' : ''}`}
                     aria-label="Notification options"
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
