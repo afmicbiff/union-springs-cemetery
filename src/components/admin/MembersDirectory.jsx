@@ -625,7 +625,7 @@ function MembersDirectory({ openMemberId }) {
                             <tbody className="divide-y divide-stone-100 bg-white">
                                 {isError ? (
                                     <tr>
-                                        <td colSpan="11" className="p-8 text-center">
+                                        <td colSpan="12" className="p-8 text-center">
                                             <div className="text-red-500 mb-2">
                                                 Error loading members: {error?.message || 'Unknown error'}
                                             </div>
