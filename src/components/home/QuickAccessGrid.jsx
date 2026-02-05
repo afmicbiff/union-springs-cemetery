@@ -31,8 +31,8 @@ const QuickAccessCard = memo(function QuickAccessCard({ icon: Icon, title, descr
 
 const QuickAccessGrid = memo(function QuickAccessGrid() {
   return (
-    <section className="py-12 md:py-20 px-4 md:px-8 bg-stone-100 relative z-20">
-      <div className="max-w-4xl mx-auto -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-32 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+    <section className="px-4 md:px-8 bg-stone-100 relative z-20 pt-0 pb-12 md:pb-20">
+      <div className="max-w-4xl mx-auto -mt-20 sm:-mt-24 md:-mt-28 lg:-mt-32 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         
         <QuickAccessCard
           icon={Search}
