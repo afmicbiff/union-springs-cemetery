@@ -79,7 +79,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
       // Check if bottom plot (row 0) is a target for +New
       const bottomPlot = baseColumns[c][0];
       const bottomNum = parseNum(bottomPlot?.Grave);
-      if (bottomNum && newPlotTargets.has(bottomNum)) {
+      if (bottomNum && NEW_PLOT_TARGETS.has(bottomNum)) {
         markers[c] = true;
       }
       
@@ -91,7 +91,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     }
     
     return { cells: out, bottomRowMarkers: markers };
-  }, [plots, dataCols, perCol, totalRows, extraBottomRow, newPlotTargets]);
+  }, [plots, dataCols, perCol, totalRows, extraBottomRow]);
 
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
