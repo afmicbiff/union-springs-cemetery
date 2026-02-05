@@ -66,18 +66,24 @@ const MemberPortal = memo(function MemberPortal() {
         return () => { mounted = false; };
     }, []);
 
-    // Fetch conversations to detect unread messages
+    // Fetch conversations to detect unread messages - with proper error handling
     const { data: convData, refetch: refetchConversations } = useQuery({
-        queryKey: ['member-conversations'],
+        queryKey: ['member-conversations', user?.email],
         queryFn: async () => {
-            const res = await base44.functions.invoke('communication', { action: 'getConversations' });
-            return res.data;
+            if (!user) return { threads: [] };
+            try {
+                const res = await base44.functions.invoke('communication', { action: 'getConversations' });
+                return res?.data || { threads: [] };
+            } catch {
+                return { threads: [] };
+            }
         },
-        enabled: !!user,
+        enabled: !!user?.email,
         refetchInterval: 120000,
         refetchOnWindowFocus: false,
         staleTime: 60_000,
-        retry: 2,
+        gcTime: 5 * 60_000,
+        retry: 1,
     });
     
     const unreadCount = useMemo(() => 
