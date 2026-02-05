@@ -182,6 +182,7 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
 
             queryClient.invalidateQueries({ queryKey: ['member-profile'] });
             queryClient.invalidateQueries({ queryKey: ['all-member-documents'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             toast.success("Document uploaded successfully");
             e.target.value = ''; // Reset input
             setExpirationDate('');
