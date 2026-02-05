@@ -11,6 +11,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from 'date-fns';
 import TaskManager from "@/components/tasks/TaskManager";
+import EmployeeDocuments from "@/components/employee/EmployeeDocuments";
 
 export default function EmployeesPage() {
     // Fetch Current User & Employee Profile for Task Filtering
@@ -90,6 +91,7 @@ export default function EmployeesPage() {
                         <TabsTrigger value="resources" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Resources & News</TabsTrigger>
                         <TabsTrigger value="schedule" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Schedule</TabsTrigger>
                         <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Tasks</TabsTrigger>
+                        <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Documents</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="resources">
@@ -191,6 +193,13 @@ export default function EmployeesPage() {
                     <TaskManager 
                         isAdmin={false} 
                         currentEmployeeId={employeeProfile?.id} 
+                    />
+                </TabsContent>
+
+                <TabsContent value="documents">
+                    <EmployeeDocuments 
+                        employeeId={employeeProfile?.id}
+                        employeeName={`${employeeProfile?.first_name || ''} ${employeeProfile?.last_name || ''}`.trim()}
                     />
                 </TabsContent>
                 </Tabs>
