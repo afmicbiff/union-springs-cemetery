@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 // Memoized card component for better performance
 const VisitorCard = memo(function VisitorCard({ icon: Icon, iconBgClass, iconColorClass, title, children, footer }) {
   return (
-    <div className="bg-slate-50 p-6 sm:p-8 rounded-sm shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col touch-manipulation">
+    <div className="bg-white p-6 sm:p-8 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.5)] hover:shadow-[0_-20px_45px_rgba(0,0,0,0.6)] hover:-translate-y-1 transition-all duration-300 group flex flex-col touch-manipulation border-b-4 border-transparent hover:border-teal-600">
       <div className={`w-10 h-10 sm:w-12 sm:h-12 ${iconBgClass} rounded-full flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}>
         <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${iconColorClass}`} aria-hidden="true" />
       </div>
