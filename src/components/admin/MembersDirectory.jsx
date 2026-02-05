@@ -621,8 +621,12 @@ function MembersDirectory({ openMemberId }) {
                                 {isError ? (
                                     <tr>
                                         <td colSpan="11" className="p-8 text-center">
-                                            <div className="text-red-500 mb-2">Error loading members. Please ensure you are logged in.</div>
-                                            <Button variant="outline" size="sm" onClick={() => refetch()}>
+                                            <div className="text-red-500 mb-2">
+                                                Error loading members: {error?.message || 'Unknown error'}
+                                            </div>
+                                            <p className="text-xs text-stone-500 mb-3">Please ensure you are logged in as an admin.</p>
+                                            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+                                                {isFetching ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : null}
                                                 Try Again
                                             </Button>
                                         </td>
@@ -631,15 +635,24 @@ function MembersDirectory({ openMemberId }) {
                                     <tr>
                                         <td colSpan="11" className="p-8 text-center text-stone-500">
                                             <div className="flex items-center justify-center gap-2">
-                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <Loader2 className="w-5 h-5 animate-spin text-teal-600" />
                                                 <span>Loading members...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : !members || members.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="11" className="p-8 text-center text-stone-500">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="text-lg">No members in database</span>
+                                                <span className="text-xs text-stone-400">Click "Add Member" to create the first one.</span>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : filteredMembers.length === 0 ? (
                                     <tr>
                                         <td colSpan="11" className="p-8 text-center text-stone-500 italic">
-                                            No members found.
+                                            No members match your filters. Try adjusting your search or filters.
                                         </td>
                                     </tr>
                                 ) : (
