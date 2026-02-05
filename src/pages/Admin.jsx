@@ -51,7 +51,6 @@ const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminD
 
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
-import DataImportDialog from "@/components/admin/DataImportDialog";
 import AdminManual from "@/components/admin/AdminManual";
 
 
@@ -484,8 +483,6 @@ function AdminDashboard() {
                 >
                     <Database className="w-4 h-4 mr-2" /> Backups
                 </Button>
-                
-                <DataImportDialog />
             </div>
         </div>
 
