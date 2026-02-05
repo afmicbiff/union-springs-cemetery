@@ -103,15 +103,18 @@ const MemberDocuments = memo(function MemberDocuments({ user }) {
     const [deletingDocId, setDeletingDocId] = useState(null);
 
     // 1. Fetch Member Record to get documents list
-    const { data: memberRecord, isLoading, isError, refetch } = useQuery({
-        queryKey: ['member-profile', user.email],
+    const { data: memberRecord, isLoading, isError, refetch, isFetching } = useQuery({
+        queryKey: ['member-profile', user?.email],
         queryFn: async () => {
+            if (!user?.email) return null;
             const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
             return (res && res[0]) || null;
         },
-        enabled: !!user.email,
-        staleTime: 5 * 60_000,
+        enabled: !!user?.email,
+        staleTime: 2 * 60_000,
+        gcTime: 5 * 60_000,
         retry: 2,
+        refetchOnWindowFocus: false,
     });
 
     const documents = useMemo(() => memberRecord?.documents || [], [memberRecord?.documents]);
