@@ -1,19 +1,32 @@
-import React from "react";
+import React, { memo, useMemo, useState, useCallback, lazy, Suspense } from "react";
 import { useGovernedQuery } from "@/components/gov/hooks";
 import { filterEntity } from "@/components/gov/dataClient";
 import { format, parseISO, isValid, startOfMonth } from "date-fns";
-import { Loader2, BarChart2 } from "lucide-react";
-import ReportParams from "@/components/reports/ReportParams";
-import ReportCharts from "@/components/reports/ReportCharts";
-import AIInsights from "@/components/reports/AIInsights";
+import { Loader2, BarChart2, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-function monthKey(d) {
-  const dt = typeof d === 'string' ? parseISO(d) : d;
-  if (!isValid(dt)) return null;
-  return format(startOfMonth(dt), 'yyyy-MM');
-}
+// Lazy load heavy chart components
+const ReportParams = lazy(() => import("@/components/reports/ReportParams"));
+const ReportCharts = lazy(() => import("@/components/reports/ReportCharts"));
+const AIInsights = lazy(() => import("@/components/reports/AIInsights"));
 
-function lastNMonths(n = 12) {
+// Loading fallback
+const ChartSkeleton = memo(() => (
+  <div className="bg-white border rounded-lg p-3 animate-pulse">
+    <div className="h-64 sm:h-80 bg-stone-100 rounded" />
+  </div>
+));
+
+// Memoized utility functions
+const monthKey = (d) => {
+  if (!d) return null;
+  try {
+    const dt = typeof d === 'string' ? parseISO(d) : d;
+    return isValid(dt) ? format(startOfMonth(dt), 'yyyy-MM') : null;
+  } catch { return null; }
+};
+
+const lastNMonths = (n = 12) => {
   const now = new Date();
   const arr = [];
   for (let i = n - 1; i >= 0; i--) {
@@ -21,17 +34,17 @@ function lastNMonths(n = 12) {
     arr.push({ key: format(d, 'yyyy-MM'), label: format(d, 'MMM yyyy') });
   }
   return arr;
-}
+};
 
-export default function ReportsPage() {
-  const defaultParams = React.useMemo(() => {
+export default memo(function ReportsPage() {
+  const defaultParams = useMemo(() => {
     const to = format(new Date(), 'yyyy-MM-dd');
     const from = format(new Date(new Date().setMonth(new Date().getMonth() - 11)), 'yyyy-MM-01');
     return { type: 'sales', from, to, granularity: 'monthly', ai: true };
   }, []);
 
-  const [params, setParams] = React.useState(defaultParams);
-  const runReport = (p) => setParams(p);
+  const [params, setParams] = useState(defaultParams);
+  const runReport = useCallback((p) => setParams(p), []);
 
   // SALES DATA
   const salesQuery = useGovernedQuery({
@@ -69,100 +82,125 @@ export default function ReportsPage() {
     staleTime: 60_000,
   });
 
-  // Aggregations
-  const seriesMonths = React.useMemo(() => lastNMonths(12), [params.from, params.to]);
+  // Aggregations - memoized with stable dependencies
+  const seriesMonths = useMemo(() => lastNMonths(12), []);
 
-  const salesSeries = React.useMemo(() => {
-    if (!salesQuery.data) return [];
+  const salesSeries = useMemo(() => {
+    if (!salesQuery.data?.length) return [];
     const map = new Map(seriesMonths.map((m) => [m.key, { label: m.label, total: 0 }]));
-    salesQuery.data.forEach((inv) => {
-      if (params.invoiceStatus && params.invoiceStatus !== 'all' && inv.status !== params.invoiceStatus) return;
+    const statusFilter = params.invoiceStatus && params.invoiceStatus !== 'all' ? params.invoiceStatus : null;
+    for (let i = 0; i < salesQuery.data.length; i++) {
+      const inv = salesQuery.data[i];
+      if (statusFilter && inv.status !== statusFilter) continue;
       const key = monthKey(inv.paid_date || inv.due_date);
       if (key && map.has(key)) {
-        map.get(key).total += Number(inv.amount || 0);
+        map.get(key).total += Number(inv.amount) || 0;
       }
-    });
+    }
     return Array.from(map.values());
   }, [salesQuery.data, seriesMonths, params.invoiceStatus]);
 
-  const plotUtil = React.useMemo(() => {
-    if (!plotsQuery.data) return [];
+  const plotUtil = useMemo(() => {
+    if (!plotsQuery.data?.length) return [];
     const counts = {};
-    plotsQuery.data.forEach((p) => {
-      if (params.section && String(p.section || '').replace(/Section\s*/i,'').trim() !== String(params.section).trim()) return;
-      counts[p.status || 'Unknown'] = (counts[p.status || 'Unknown'] || 0) + 1;
-    });
+    const sectionFilter = params.section ? String(params.section).trim() : null;
+    for (let i = 0; i < plotsQuery.data.length; i++) {
+      const p = plotsQuery.data[i];
+      if (sectionFilter && String(p.section || '').replace(/Section\s*/i,'').trim() !== sectionFilter) continue;
+      const status = p.status || 'Unknown';
+      counts[status] = (counts[status] || 0) + 1;
+    }
     return Object.entries(counts).map(([status, count]) => ({ status, count }));
   }, [plotsQuery.data, params.section]);
 
-  const deceasedBuckets = React.useMemo(() => {
-    if (!deceasedQuery.data) return [];
-    const inRange = (d) => {
-      if (!params.from && !params.to) return true;
-      const dt = typeof d === 'string' ? parseISO(d) : d;
-      if (!isValid(dt)) return false;
-      const fromOk = params.from ? new Date(params.from) <= dt : true;
-      const toOk = params.to ? dt <= new Date(params.to + 'T23:59:59') : true;
-      return fromOk && toOk;
-    };
+  const deceasedBuckets = useMemo(() => {
+    if (!deceasedQuery.data?.length) return [];
+    const fromDate = params.from ? new Date(params.from) : null;
+    const toDate = params.to ? new Date(params.to + 'T23:59:59') : null;
     const buckets = { '<40':0, '40-59':0, '60-79':0, '80+':0 };
-    deceasedQuery.data.forEach((d) => {
-      if (params.veteranOnly && !d.veteran_status) return;
-      if (!inRange(d.date_of_death)) return;
-      const dob = d.date_of_birth ? parseISO(d.date_of_birth) : null;
+    const msPerYear = 365.25 * 24 * 3600 * 1000;
+    
+    for (let i = 0; i < deceasedQuery.data.length; i++) {
+      const d = deceasedQuery.data[i];
+      if (params.veteranOnly && !d.veteran_status) continue;
+      
       const dod = d.date_of_death ? parseISO(d.date_of_death) : null;
-      if (!isValid(dob) || !isValid(dod)) return;
-      const age = Math.max(0, Math.floor((dod - dob) / (365.25*24*3600*1000)));
-      if (age < 40) buckets['<40']++; else if (age < 60) buckets['40-59']++; else if (age < 80) buckets['60-79']++; else buckets['80+']++;
-    });
+      if (!dod || !isValid(dod)) continue;
+      if (fromDate && dod < fromDate) continue;
+      if (toDate && dod > toDate) continue;
+      
+      const dob = d.date_of_birth ? parseISO(d.date_of_birth) : null;
+      if (!dob || !isValid(dob)) continue;
+      
+      const age = Math.max(0, Math.floor((dod - dob) / msPerYear));
+      if (age < 40) buckets['<40']++;
+      else if (age < 60) buckets['40-59']++;
+      else if (age < 80) buckets['60-79']++;
+      else buckets['80+']++;
+    }
     return Object.entries(buckets).map(([bucket, count]) => ({ bucket, count }));
   }, [deceasedQuery.data, params.from, params.to, params.veteranOnly]);
 
   // Predictive simple baseline (naive): copy last 3 actuals
-  const predicted = React.useMemo(() => {
-    if (params.type !== 'predictive') return [];
-    const tail = salesSeries.slice(-3);
-    return tail.map((t) => ({ label: t.label, value: t.total }));
+  const predicted = useMemo(() => {
+    if (params.type !== 'predictive' || !salesSeries.length) return [];
+    return salesSeries.slice(-3).map((t) => ({ label: t.label, value: t.total }));
   }, [params.type, salesSeries]);
 
-  const summaryInput = React.useMemo(() => ({
+  const summaryInput = useMemo(() => ({
     type: params.type,
     window: { from: params.from, to: params.to, granularity: params.granularity },
     sales: salesSeries,
     utilization: plotUtil,
     demographics: deceasedBuckets,
-  }), [params, salesSeries, plotUtil, deceasedBuckets]);
+  }), [params.type, params.from, params.to, params.granularity, salesSeries, plotUtil, deceasedBuckets]);
 
   const isLoading = salesQuery.isLoading || plotsQuery.isLoading || deceasedQuery.isLoading;
   const hasError = salesQuery.error || plotsQuery.error || deceasedQuery.error;
+  
+  const handleRetry = useCallback(() => {
+    salesQuery.refetch?.();
+    plotsQuery.refetch?.();
+    deceasedQuery.refetch?.();
+  }, [salesQuery, plotsQuery, deceasedQuery]);
 
   return (
-    <div className="min-h-screen bg-stone-100 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-3">
-          <BarChart2 className="w-6 h-6 text-teal-700" />
-          <h1 className="text-2xl font-serif">Advanced Reports</h1>
+    <div className="min-h-screen bg-stone-100 p-3 sm:p-6">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BarChart2 className="w-5 h-5 sm:w-6 sm:h-6 text-teal-700" />
+          <h1 className="text-xl sm:text-2xl font-serif">Advanced Reports</h1>
         </div>
 
-        <ReportParams initial={defaultParams} onRun={runReport} />
+        <Suspense fallback={<div className="bg-white border rounded-lg p-4 animate-pulse h-48" />}>
+          <ReportParams initial={defaultParams} onRun={runReport} />
+        </Suspense>
 
         {isLoading ? (
-          <div className="flex items-center gap-2 text-stone-600"><Loader2 className="w-5 h-5 animate-spin"/> Loading data…</div>
+          <div className="flex items-center justify-center gap-2 text-stone-600 py-12">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span className="text-sm">Loading report data…</span>
+          </div>
         ) : hasError ? (
-          <div className="text-red-600 text-sm">Failed to load report data.</div>
+          <div className="text-center py-8 sm:py-12 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
+            <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+            <p className="text-sm text-red-600 font-medium">Failed to load report data</p>
+            <p className="text-xs text-red-500 mt-1">Please check your connection</p>
+            <Button variant="outline" size="sm" onClick={handleRetry} className="mt-3 h-8 text-xs">
+              <RefreshCw className="w-3.5 h-3.5 mr-1" /> Retry
+            </Button>
+          </div>
         ) : (
-          <>
-            {params.type === 'sales' && (<ReportCharts type="sales" data={salesSeries} />)}
-            {params.type === 'plot' && (<ReportCharts type="plot" data={plotUtil} />)}
-            {params.type === 'deceased' && (<ReportCharts type="deceased" data={deceasedBuckets} />)}
-            {params.type === 'predictive' && (<ReportCharts type="predictive" data={salesSeries} predicted={predicted} />)}
+          <Suspense fallback={<ChartSkeleton />}>
+            {params.type === 'sales' && <ReportCharts type="sales" data={salesSeries} />}
+            {params.type === 'plot' && <ReportCharts type="plot" data={plotUtil} />}
+            {params.type === 'deceased' && <ReportCharts type="deceased" data={deceasedBuckets} />}
+            {params.type === 'predictive' && <ReportCharts type="predictive" data={salesSeries} predicted={predicted} />}
 
-            {params.ai && (
-              <AIInsights params={params} summaryInput={summaryInput} />
-            )}
-          </>
+            {params.ai && <AIInsights params={params} summaryInput={summaryInput} />}
+          </Suspense>
         )}
       </div>
     </div>
   );
-}
+});
