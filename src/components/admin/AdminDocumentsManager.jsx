@@ -35,15 +35,21 @@ function useFlattenedDocuments() {
   return useQuery({
     queryKey: ['all-member-documents'],
     queryFn: async () => {
-      const members = await base44.entities.Member.list('-updated_date', 500);
+      // Fetch both members and employees in parallel
+      const [members, employees] = await Promise.all([
+        base44.entities.Member.list('-updated_date', 500),
+        base44.entities.Employee.list('-updated_date', 500)
+      ]);
+      
       const out = [];
+      
+      // Process member documents
       for (const m of members || []) {
-        // Handle both flat and nested data structures from SDK
         const memberData = m.data && typeof m.data === 'object' ? { ...m, ...m.data } : m;
         const docs = Array.isArray(memberData.documents) ? memberData.documents : [];
         for (const d of docs) {
           out.push({
-            key: `${m.id}:${d.id}`,
+            key: `member:${m.id}:${d.id}`,
             doc_id: d.id,
             name: d.name || 'Untitled',
             type: d.type || 'Other',
@@ -54,10 +60,35 @@ function useFlattenedDocuments() {
             member_name: `${memberData.first_name || ''} ${memberData.last_name || ''}`.trim() || 'Unknown',
             member_email: memberData.email_primary || '',
             file_uri: d.file_uri,
+            source: 'member',
             _doc: d
           });
         }
       }
+      
+      // Process employee documents
+      for (const e of employees || []) {
+        const empData = e.data && typeof e.data === 'object' ? { ...e, ...e.data } : e;
+        const docs = Array.isArray(empData.documents) ? empData.documents : [];
+        for (const d of docs) {
+          out.push({
+            key: `employee:${e.id}:${d.id}`,
+            doc_id: d.id,
+            name: d.name || 'Untitled',
+            type: d.type || 'Other',
+            category: d.category || 'Other',
+            uploaded_at: d.uploaded_at,
+            expiration_date: d.expiration_date,
+            member_id: e.id,
+            member_name: `${empData.first_name || ''} ${empData.last_name || ''}`.trim() || 'Unknown',
+            member_email: empData.email || '',
+            file_uri: d.file_uri,
+            source: 'employee',
+            _doc: d
+          });
+        }
+      }
+      
       // Sort by upload date descending (newest first)
       return out.sort((a, b) => {
         const dateA = a.uploaded_at ? new Date(a.uploaded_at).getTime() : 0;
@@ -66,7 +97,7 @@ function useFlattenedDocuments() {
       });
     },
     initialData: [],
-    staleTime: 30 * 1000, // 30s - refresh frequently to catch new member uploads
+    staleTime: 30 * 1000,
     gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -260,7 +291,8 @@ function AdminDocumentsManager() {
                   <th className="p-3 w-[40px]">
                     <Checkbox checked={filtered.length>0 && selectedList.length===filtered.length} onCheckedChange={(c)=>toggleAll(c, filtered)} />
                   </th>
-                  <th className="p-3">Member</th>
+                  <th className="p-3">Name</th>
+                  <th className="p-3">Source</th>
                   <th className="p-3">Email</th>
                   <th className="p-3">Document</th>
                   <th className="p-3">Type</th>
@@ -273,14 +305,14 @@ function AdminDocumentsManager() {
               <tbody className="divide-y bg-white">
                 {isError ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center">
+                    <td colSpan={10} className="p-8 text-center">
                       <div className="text-red-500 mb-2">Error loading documents</div>
                       <Button variant="outline" size="sm" onClick={() => refetch()}>Try Again</Button>
                     </td>
                   </tr>
                 ) : isLoading ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-stone-500">
+                    <td colSpan={10} className="p-8 text-center text-stone-500">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="w-5 h-5 animate-spin" />
                         <span>Loading documents...</span>
@@ -288,7 +320,7 @@ function AdminDocumentsManager() {
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan={9} className="p-8 text-center text-stone-500 italic">No documents found.</td></tr>
+                  <tr><td colSpan={10} className="p-8 text-center text-stone-500 italic">No documents found.</td></tr>
                 ) : (
                   filtered.map((r) => (
                     <tr key={r.key} className={selected[r.key] ? 'bg-teal-50/50' : ''}>
@@ -296,6 +328,11 @@ function AdminDocumentsManager() {
                         <Checkbox checked={!!selected[r.key]} onCheckedChange={(c)=>setSelected(prev=>({ ...prev, [r.key]: !!c }))} />
                       </td>
                       <td className="p-3 whitespace-nowrap">{r.member_name}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        <Badge variant={r.source === 'employee' ? 'secondary' : 'outline'} className={r.source === 'employee' ? 'bg-blue-100 text-blue-700' : ''}>
+                          {r.source === 'employee' ? 'Employee' : 'Member'}
+                        </Badge>
+                      </td>
                       <td className="p-3 whitespace-nowrap text-stone-600">{r.member_email}</td>
                       <td className="p-3 truncate max-w-[260px]" title={r.name}><div className="flex items-center gap-2"><FileText className="w-4 h-4"/>{r.name}</div></td>
                       <td className="p-3">{r.type}</td>
