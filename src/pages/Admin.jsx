@@ -206,21 +206,29 @@ export default function AdminDashboard() {
   const handleNotificationClick = async (note) => {
        // Mark as read
        if (!note.is_read) {
-           await base44.entities.Notification.update(note.id, { is_read: true });
-           queryClient.invalidateQueries(['notifications']);
+           try {
+               await base44.entities.Notification.update(note.id, { is_read: true });
+               queryClient.invalidateQueries(['notifications']);
+           } catch (err) {
+               console.error('Failed to mark notification as read:', err);
+           }
        }
 
        // Navigate if link exists
        if (note.link) {
            window.location.href = note.link; 
-       } else if (note.related_entity_type === 'message') {
+       } else if (note.related_entity_type === 'message' || note.type === 'message') {
            setActiveTab('communication');
+           setNotifPopoverOpen(false);
        } else if (note.related_entity_type === 'task') {
            setActiveTab('tasks');
+           setNotifPopoverOpen(false);
        } else if (note.related_entity_type === 'event' || (note.message && note.message.toLowerCase().includes('event'))) {
            setActiveTab('calendar');
+           setNotifPopoverOpen(false);
        } else if (note.related_entity_type === 'member' || note.related_entity_type === 'document') {
            setActiveTab('members');
+           setNotifPopoverOpen(false);
        }
   };
 
