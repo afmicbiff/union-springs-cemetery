@@ -70,24 +70,22 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
           )}
         </div>
 
-        {/* Action buttons - stacked on mobile, side by side on larger */}
-        <div className="mt-4 pt-3 border-t border-stone-200 flex flex-col sm:flex-row gap-2 sm:gap-3">
+        {/* Action buttons - centered */}
+        <div className="mt-4 pt-3 border-t border-stone-200 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center">
           <Link 
             to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizedSection)}&plot=${encodeURIComponent(plotNumber)}&from=search`}
             state={{ search: locationSearch }}
-            className="flex-1"
           >
-            <Button variant="outline" className="w-full h-11 bg-white text-teal-700 border-teal-600 hover:bg-teal-50 active:bg-teal-100 touch-manipulation">
+            <Button variant="outline" className="h-11 px-6 bg-white text-teal-700 border-teal-600 hover:bg-teal-50 active:bg-teal-100 touch-manipulation">
               View on Map
             </Button>
           </Link>
           <Link 
             to={`${createPageUrl('Memorial')}?id=${person.id}`}
             state={{ search: locationSearch }}
-            className="flex-1"
           >
-            <Button className="w-full h-11 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation">
-              Memorial &gt; <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
+            <Button className="h-11 px-6 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation">
+              Memorial &gt;
             </Button>
           </Link>
         </div>
