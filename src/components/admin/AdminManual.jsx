@@ -421,42 +421,83 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
           {/* OVERVIEW */}
           <ManualSection icon={LayoutDashboard} title="Overview Dashboard">
             <p className="text-lg mb-4">
-              <strong>The Overview is your command center.</strong> Every time you log into the Admin Dashboard, 
+              <strong>The Overview is your command center - like the front page of a newspaper about your cemetery.</strong> Every time you log into the Admin Dashboard, 
               this is what you'll see first. It gives you a quick snapshot of everything happening at 
               Union Springs Cemetery without having to click through multiple sections.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Overview Cards</h4>
-            <p className="mb-3">The Overview displays several "cards" - boxes with information. Here's what each one shows:</p>
-            <ul className="list-disc pl-5 space-y-3">
-              <li><strong>Plot Statistics:</strong> Shows total number of plots, how many are available for sale, how many are reserved, and how many are occupied</li>
-              <li><strong>Recent Reservations/Sales:</strong> Lists the most recent plot purchases or reservations with buyer names and dates</li>
-              <li><strong>Upcoming Events:</strong> Shows calendar events coming up soon - meetings, memorial services, etc.</li>
-              <li><strong>Tasks Needing Attention:</strong> Displays tasks that are due soon or overdue. Red items need immediate attention!</li>
-              <li><strong>Recent Activity:</strong> A log of recent changes made by administrators - helps you see what others have been working on</li>
-              <li><strong>Announcements:</strong> Quick preview of recent news posts</li>
-              <li><strong>Lawn Care Status:</strong> When each section was last mowed or maintained</li>
-            </ul>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Overview" tab in the navigation bar. This is usually the first tab on the left, and it's where you start when you log in.</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Reading the Color Codes</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><span className="inline-block w-4 h-4 bg-red-500 rounded mr-2"></span><strong>Red items:</strong> Urgent! Needs immediate attention (overdue tasks, critical alerts)</li>
-              <li><span className="inline-block w-4 h-4 bg-orange-500 rounded mr-2"></span><strong>Orange/Yellow items:</strong> Coming due soon - plan to address these</li>
-              <li><span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span><strong>Green items:</strong> Good status, completed, or healthy</li>
-              <li><span className="inline-block w-4 h-4 bg-blue-500 rounded mr-2"></span><strong>Blue items:</strong> Information or in-progress items</li>
-            </ul>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What You'll See on the Overview Screen</h4>
+            <p className="mb-3">The Overview displays several "cards" - these are boxes with information inside them. Think of each card like a sticky note on a bulletin board. Here's what each card shows you:</p>
+            
+            <div className="space-y-3 mb-4">
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-teal-500">
+                <p className="font-semibold text-stone-800">📊 Plot Statistics Card</p>
+                <p className="text-stone-600 text-sm mt-1">Shows the total number of burial plots, how many are available for sale, how many are reserved (someone bought but no burial yet), and how many are occupied (someone is buried there). This gives you the "big picture" of the cemetery.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-green-500">
+                <p className="font-semibold text-stone-800">💰 Recent Reservations/Sales Card</p>
+                <p className="text-stone-600 text-sm mt-1">Lists the most recent plot purchases or reservations. You'll see the buyer's name and the date. This helps you stay aware of recent business.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-blue-500">
+                <p className="font-semibold text-stone-800">📅 Upcoming Events Card</p>
+                <p className="text-stone-600 text-sm mt-1">Shows calendar events coming up soon - board meetings, memorial services, maintenance days, etc. Helps you prepare for what's ahead.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-red-500">
+                <p className="font-semibold text-stone-800">✅ Tasks Needing Attention Card</p>
+                <p className="text-stone-600 text-sm mt-1">Displays tasks that are due soon or overdue. <strong>Red items need immediate attention!</strong> These are your "to-do" items that shouldn't be ignored.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-purple-500">
+                <p className="font-semibold text-stone-800">📝 Recent Activity Card</p>
+                <p className="text-stone-600 text-sm mt-1">A log showing recent changes made by all administrators. If you wonder "who changed that?" or "what did we do yesterday?" - check here.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg border-l-4 border-amber-500">
+                <p className="font-semibold text-stone-800">🌿 Lawn Care Status Card</p>
+                <p className="text-stone-600 text-sm mt-1">Shows when each section of the cemetery was last mowed or maintained. Helps ensure no area gets neglected.</p>
+              </div>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">What to Do When You Log In</h4>
-            <Step number="1">Look at the Overview first thing each morning</Step>
-            <Step number="2">Check for any red or orange items that need attention</Step>
-            <Step number="3">Review the "Tasks Needing Attention" section</Step>
-            <Step number="4">Note any upcoming events for the day</Step>
-            <Step number="5">If everything looks good, proceed to your regular work</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Color Codes - What the Colors Mean</h4>
+            <p className="mb-2">Throughout the Overview (and the whole system), colors have meaning. Learn these and you'll understand the system much faster:</p>
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
+                <span className="inline-block w-6 h-6 bg-red-500 rounded"></span>
+                <div><strong className="text-red-700">RED = URGENT!</strong> <span className="text-red-600">Stop and handle this now. Overdue tasks, critical problems, things that can't wait.</span></div>
+              </div>
+              <div className="flex items-center gap-3 p-2 bg-orange-50 rounded-lg">
+                <span className="inline-block w-6 h-6 bg-orange-500 rounded"></span>
+                <div><strong className="text-orange-700">ORANGE/YELLOW = Due Soon</strong> <span className="text-orange-600">Not urgent yet, but coming up. Plan to address these in the next day or two.</span></div>
+              </div>
+              <div className="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
+                <span className="inline-block w-6 h-6 bg-green-500 rounded"></span>
+                <div><strong className="text-green-700">GREEN = Good/Complete</strong> <span className="text-green-600">Everything is fine! Task is done, status is healthy, no action needed.</span></div>
+              </div>
+              <div className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg">
+                <span className="inline-block w-6 h-6 bg-blue-500 rounded"></span>
+                <div><strong className="text-blue-700">BLUE = In Progress/Info</strong> <span className="text-blue-600">Work is happening, or this is just information for your awareness.</span></div>
+              </div>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Your Daily Routine - What to Do When You Log In</h4>
+            <p className="mb-2">Make this your habit every time you start working:</p>
+            <Step number="1"><strong>Look at the Overview first.</strong> Don't click anywhere else yet - just look at the whole screen for 30 seconds.</Step>
+            <Step number="2"><strong>Check for RED items.</strong> If anything is red, that's your first priority. Handle those before anything else.</Step>
+            <Step number="3"><strong>Check for ORANGE items.</strong> These are coming due soon. Make a mental note or write them down.</Step>
+            <Step number="4"><strong>Look at "Tasks Needing Attention."</strong> This is your to-do list. What needs to be done today?</Step>
+            <Step number="5"><strong>Check "Upcoming Events."</strong> Is there a meeting today? A memorial service? Be prepared.</Step>
+            <Step number="6"><strong>Now proceed to your regular work.</strong> You know what needs attention!</Step>
 
             <Tip>
-              Make it a habit to check the Overview each time you log in! It only takes 
-              30 seconds and helps you catch important items before they become problems. 
-              Think of it as your daily "briefing."
+              <strong>Think of the Overview like checking your mailbox.</strong> You do it every day to see what arrived. 
+              The Overview tells you what's new and what needs your attention. It only takes 30 seconds but prevents big problems!
+            </Tip>
+
+            <Tip>
+              <strong>Don't ignore red items!</strong> They won't go away on their own. The longer you wait, 
+              the worse they become. If you can't handle something, ask for help or assign it to someone else.
             </Tip>
           </ManualSection>
 
@@ -1034,126 +1075,318 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* ARCHIVES */}
           <ManualSection icon={Archive} title="Employee Archives">
-            <p>
-              Former employees are moved to Archives instead of being deleted. 
-              This preserves historical records while keeping the active employee list clean.
+            <p className="text-lg mb-4">
+              <strong>The Archives section stores records of former employees.</strong> When someone leaves the organization, 
+              we don't delete them - we "archive" them. This keeps the active employee list clean while preserving 
+              all historical records. Think of it like moving old files to a storage cabinet instead of throwing them away.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Archive an Employee</h4>
-            <Step number="1">Go to the <strong>Employees</strong> tab</Step>
-            <Step number="2">Find the employee you want to archive</Step>
-            <Step number="3">Click on their name to open their profile</Step>
-            <Step number="4">Click the <strong>"Archive"</strong> button</Step>
-            <Step number="5">Confirm when asked</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Employees" tab, then click the small arrow (▼) next to it, then select "Archives" from the dropdown menu</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Restoring an Archived Employee</h4>
-            <Step number="1">Go to the <strong>Archives</strong> tab</Step>
-            <Step number="2">Find the former employee</Step>
-            <Step number="3">Click <strong>"Restore"</strong> to move them back to active</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Why Archive Instead of Delete?</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Legal records:</strong> You may need employment records for tax purposes or legal questions</li>
+              <li><strong>Historical reference:</strong> "Who worked here in 2020?" - now you can answer that</li>
+              <li><strong>Reversible:</strong> If someone comes back to work, you can restore their record</li>
+              <li><strong>Documents preserved:</strong> All their uploaded documents are kept safe</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Archive an Employee (When Someone Leaves)</h4>
+            <Step number="1">Click on the <strong>"Employees"</strong> tab in the navigation bar</Step>
+            <Step number="2">Find the employee who is leaving in the list (use search if needed)</Step>
+            <Step number="3">Click on their name to open their full profile</Step>
+            <Step number="4">Look for the <strong>"Archive"</strong> button (usually red or gray, near the top)</Step>
+            <Step number="5">Click the "Archive" button</Step>
+            <Step number="6">A confirmation box will appear asking "Are you sure?" - click <strong>"Yes"</strong> or <strong>"Confirm"</strong></Step>
+            <Step number="7">The employee is now moved to Archives and no longer appears in the active list</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Find and View Archived Employees</h4>
+            <Step number="1">Click on the <strong>"Employees"</strong> tab in the navigation bar</Step>
+            <Step number="2">Click the small arrow (▼) next to "Employees"</Step>
+            <Step number="3">From the dropdown menu, click <strong>"Archives"</strong></Step>
+            <Step number="4">You'll see a list of all former employees</Step>
+            <Step number="5">Click on any name to view their complete record and documents</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Restore an Archived Employee (If They Come Back)</h4>
+            <Step number="1">Go to the <strong>Archives</strong> section (see steps above)</Step>
+            <Step number="2">Find the former employee in the archived list</Step>
+            <Step number="3">Click on their name to open their profile</Step>
+            <Step number="4">Click the <strong>"Restore"</strong> button</Step>
+            <Step number="5">Confirm when asked</Step>
+            <Step number="6">The employee is now back in the active Employees list with all their information intact</Step>
 
             <Tip>
-              Archived records are never truly deleted. You can always find 
-              historical information about former staff members here.
+              <strong>Archives are permanent and safe.</strong> Even if you archive someone by mistake, 
+              you can always restore them. Nothing is ever truly deleted from Archives.
+            </Tip>
+
+            <Tip>
+              <strong>Update before archiving:</strong> Before archiving an employee, make sure their record 
+              is complete with their last day of work and any final notes. This information may be important later.
             </Tip>
           </ManualSection>
 
           {/* VENDORS */}
           <ManualSection icon={Truck} title="Vendor Management">
-            <p>
-              Keep track of companies and contractors you work with, such as 
-              landscapers, monument companies, and suppliers.
+            <p className="text-lg mb-4">
+              <strong>The Vendors section is your address book for companies and contractors you work with.</strong> 
+              Keep track of landscapers, monument companies, equipment suppliers, and any other businesses 
+              that provide services to the cemetery. Having all this information in one place makes it easy 
+              to contact them when you need help.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Vendor</h4>
-            <Step number="1">Click <strong>"Add Vendor"</strong></Step>
-            <Step number="2">Enter company information:
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Vendors" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What the Vendors Section Shows You</h4>
+            <p className="mb-2">When you open Vendors, you'll see a list of all companies with:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Company name</li>
+              <li>Contact person (who to ask for when you call)</li>
+              <li>Phone number and email</li>
+              <li>What services they provide</li>
+              <li>Any invoices or payments recorded</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Vendor - Step by Step</h4>
+            <Step number="1">Click the <strong>"Add Vendor"</strong> button (look for a green or teal button with a + sign)</Step>
+            <Step number="2">A form will appear. Fill in each field:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Company name</li>
-                <li>Contact person's name</li>
-                <li>Phone number</li>
-                <li>Email address</li>
-                <li>Services they provide</li>
+                <li><strong>Company Name:</strong> The official business name (e.g., "Smith's Landscaping LLC")</li>
+                <li><strong>Contact Person:</strong> The person you usually deal with (e.g., "Bob Smith")</li>
+                <li><strong>Phone Number:</strong> Their business phone - include area code (e.g., "318-555-1234")</li>
+                <li><strong>Email Address:</strong> Business email for correspondence</li>
+                <li><strong>Address:</strong> Their business address (helpful if you need to visit or send mail)</li>
+                <li><strong>Services Provided:</strong> What do they do for you? (e.g., "Monthly lawn mowing, leaf removal, tree trimming")</li>
+                <li><strong>Notes:</strong> Any helpful information (e.g., "Best to call before 10am", "Offers 10% discount for prepayment")</li>
               </ul>
             </Step>
-            <Step number="3">Click <strong>"Save"</strong></Step>
+            <Step number="3">Double-check the phone number is correct - this is the most important field!</Step>
+            <Step number="4">Click <strong>"Save Vendor"</strong> to add them to your list</Step>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Recording Invoices</h4>
-            <p>
-              You can attach invoices to vendor records to track payments and expenses.
-            </p>
-            <Step number="1">Open the vendor's profile</Step>
-            <Step number="2">Click <strong>"Add Invoice"</strong></Step>
-            <Step number="3">Enter the invoice details and amount</Step>
-            <Step number="4">Upload the invoice document if you have it</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Find a Vendor's Information</h4>
+            <Step number="1">Go to the <strong>Vendors</strong> tab</Step>
+            <Step number="2">Look through the list, OR use the search box to type their name</Step>
+            <Step number="3">Click on the vendor's name to see all their details</Step>
+            <Step number="4">Their phone number, email, and other info will be displayed</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Recording Invoices (Tracking What You Owe or Paid)</h4>
+            <p className="mb-2">You can attach invoices to vendor records to keep track of expenses:</p>
+            <Step number="1">Open the vendor's profile by clicking on their name</Step>
+            <Step number="2">Look for the <strong>"Add Invoice"</strong> or <strong>"Add Payment"</strong> button</Step>
+            <Step number="3">Fill in the invoice details:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Invoice Number:</strong> The number on the invoice (e.g., "INV-2024-001")</li>
+                <li><strong>Invoice Date:</strong> When was it dated?</li>
+                <li><strong>Amount:</strong> How much do you owe? (e.g., "$450.00")</li>
+                <li><strong>Description:</strong> What was it for? (e.g., "January lawn maintenance")</li>
+                <li><strong>Status:</strong> Is it Paid or Unpaid?</li>
+              </ul>
+            </Step>
+            <Step number="4">If you have a copy of the invoice (paper or digital), click <strong>"Upload Document"</strong> to attach it</Step>
+            <Step number="5">Click <strong>"Save"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Edit a Vendor's Information</h4>
+            <Step number="1">Find the vendor in the list and click on their name</Step>
+            <Step number="2">Click the <strong>"Edit"</strong> button</Step>
+            <Step number="3">Update any information that changed (new phone number, different contact person, etc.)</Step>
+            <Step number="4">Click <strong>"Save Changes"</strong> - don't forget this step!</Step>
 
             <Tip>
-              Keep vendor contact information current! It's frustrating to need 
-              a service and find an outdated phone number.
+              <strong>Update vendor info immediately when it changes!</strong> If a vendor gives you a new phone number, 
+              update it right then. It's frustrating to need emergency service and find an outdated number.
+            </Tip>
+
+            <Tip>
+              <strong>Add notes about your experience.</strong> Did a vendor do great work? Or were they difficult? 
+              Put it in the Notes field. This helps everyone remember who's reliable.
+            </Tip>
+
+            <Tip>
+              <strong>Keep invoices attached.</strong> If there's ever a question about what you paid or 
+              what was included, having the invoice on file saves headaches. Scan paper invoices and upload them!
             </Tip>
           </ManualSection>
 
           {/* CALENDAR */}
           <ManualSection icon={Calendar} title="Calendar & Events">
-            <p>
-              Schedule and manage cemetery events, meetings, and important dates.
+            <p className="text-lg mb-4">
+              <strong>The Calendar section is your schedule for everything happening at the cemetery.</strong> 
+              Board meetings, memorial services, maintenance days, holidays when the office is closed - 
+              put it all here so everyone stays informed. The system can even send automatic reminders 
+              so nobody forgets important events.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a New Event</h4>
-            <Step number="1">Click on the date in the calendar, or click <strong>"New Event"</strong></Step>
-            <Step number="2">Fill in the event details:
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Calendar" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Calendar View</h4>
+            <p className="mb-2">When you open the Calendar, you'll see:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Monthly Grid:</strong> A calendar showing the current month with boxes for each day</li>
+              <li><strong>Events:</strong> Colored bars or dots on days that have events scheduled</li>
+              <li><strong>Navigation Arrows:</strong> Click &lt; or &gt; to move to previous or next month</li>
+              <li><strong>"Today" Button:</strong> Click to jump back to today's date</li>
+              <li><strong>"New Event" Button:</strong> Click to add a new event</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to View an Existing Event</h4>
+            <Step number="1">Look at the calendar and find a day with an event (it will have a colored bar or marking)</Step>
+            <Step number="2">Click on that day or click directly on the event name</Step>
+            <Step number="3">A popup or panel will show you the event details: what it is, when, where, and any notes</Step>
+            <Step number="4">Click outside the popup or click "Close" to go back to the calendar</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a New Event - Step by Step</h4>
+            <Step number="1">Click the <strong>"New Event"</strong> button (usually at the top of the calendar page), OR click directly on the date you want</Step>
+            <Step number="2">A form will appear. Fill in each field carefully:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Title:</strong> Name of the event (e.g., "Board Meeting")</li>
-                <li><strong>Date & Time:</strong> When it starts and ends</li>
-                <li><strong>Location:</strong> Where it will be held</li>
-                <li><strong>Description:</strong> Any additional details</li>
+                <li><strong>Event Title:</strong> A clear, short name (e.g., "Board Meeting" or "Memorial Service - Smith Family")</li>
+                <li><strong>Date:</strong> Click the calendar icon and select the day, OR it may already be filled in if you clicked on a date</li>
+                <li><strong>Start Time:</strong> When does it begin? Click the time field and select the hour (e.g., "10:00 AM")</li>
+                <li><strong>End Time:</strong> When does it end? (e.g., "11:30 AM")</li>
+                <li><strong>Location:</strong> Where will it be held? (e.g., "Cemetery Office", "Section B", "Community Center")</li>
+                <li><strong>Description:</strong> Any additional details people need to know (e.g., "Bring the monthly reports", "Family requests privacy")</li>
               </ul>
             </Step>
-            <Step number="3">Choose who should be notified about this event</Step>
-            <Step number="4">Click <strong>"Save Event"</strong></Step>
+            <Step number="3">If you want people to be reminded:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Check the box for <strong>"Send Reminder"</strong></li>
+                <li>Choose when to send it: "1 day before," "1 week before," etc.</li>
+              </ul>
+            </Step>
+            <Step number="4">Review your event details to make sure everything is correct</Step>
+            <Step number="5">Click <strong>"Save Event"</strong> to add it to the calendar</Step>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Event Reminders</h4>
-            <p>
-              The system can send automatic reminders before events. When creating an event:
-            </p>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Edit an Existing Event</h4>
+            <Step number="1">Find the event on the calendar and click on it</Step>
+            <Step number="2">In the popup or panel, click the <strong>"Edit"</strong> button</Step>
+            <Step number="3">Make your changes (change the time, date, location, etc.)</Step>
+            <Step number="4">Click <strong>"Save Changes"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Delete an Event</h4>
+            <Step number="1">Find the event on the calendar and click on it</Step>
+            <Step number="2">Click the <strong>"Delete"</strong> or <strong>"Cancel Event"</strong> button</Step>
+            <Step number="3">Confirm when asked "Are you sure?"</Step>
+            <Step number="4">The event is removed from the calendar</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Types of Events You Might Add</h4>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Check "Send Reminder" to enable notifications</li>
-              <li>Choose when to send: 1 day before, 1 week before, etc.</li>
+              <li><strong>Board Meetings:</strong> Regular association meetings</li>
+              <li><strong>Memorial Services:</strong> When families are holding a service at the cemetery</li>
+              <li><strong>Burials:</strong> Scheduled interments</li>
+              <li><strong>Maintenance Days:</strong> Planned lawn care, repairs, etc.</li>
+              <li><strong>Holidays:</strong> When the office is closed</li>
+              <li><strong>Deadlines:</strong> Payment due dates, permit expirations, etc.</li>
+              <li><strong>Volunteer Days:</strong> Community cleanup events</li>
             </ul>
 
             <Tip>
-              Use different colors for different types of events (meetings, 
-              memorial services, maintenance) to see your schedule at a glance!
+              <strong>Be specific with event names!</strong> "Meeting" is confusing. "Board Meeting - February" or 
+              "Memorial Service - Johnson Family" is much clearer. Future you will thank present you!
+            </Tip>
+
+            <Tip>
+              <strong>Set reminders for important events!</strong> It's easy to forget about a meeting scheduled 
+              a month ago. Having the system remind you the day before prevents embarrassing no-shows.
+            </Tip>
+
+            <Tip>
+              <strong>Include contact information in the description.</strong> For memorial services or special events, 
+              add the family's phone number in the description. If plans change, you can reach them quickly.
             </Tip>
           </ManualSection>
 
           {/* ANNOUNCEMENTS */}
           <ManualSection icon={Megaphone} title="News & Announcements">
-            <p>
-              Post news and announcements that appear on the public website 
-              and member portal.
+            <p className="text-lg mb-4">
+              <strong>The News & Announcements section lets you post updates that appear on the public website and member portal.</strong> 
+              Use this to share important news, upcoming events, office closures, or any information 
+              that families and members need to know. Think of it as your bulletin board that everyone can see.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create an Announcement</h4>
-            <Step number="1">Click <strong>"New Announcement"</strong></Step>
-            <Step number="2">Enter the announcement details:
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "News" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What You'll See in the Announcements Section</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>List of Announcements:</strong> All your posted news items, newest at the top</li>
+              <li><strong>Status:</strong> Whether each announcement is Published (visible) or Draft (not visible yet)</li>
+              <li><strong>Date:</strong> When each was posted</li>
+              <li><strong>"New Announcement" Button:</strong> Click to create a new post</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a New Announcement - Step by Step</h4>
+            <Step number="1">Click the <strong>"New Announcement"</strong> button (usually green or teal)</Step>
+            <Step number="2">Fill in the announcement form:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Title:</strong> A clear, descriptive headline</li>
-                <li><strong>Content:</strong> The full message you want to share</li>
-                <li><strong>Category:</strong> News, Event, Alert, or General</li>
+                <li><strong>Title:</strong> A clear headline that tells people what the announcement is about (e.g., "Office Closed for Memorial Day" or "Annual Meeting Scheduled for March 15")</li>
+                <li><strong>Content/Body:</strong> The full message. Write in plain, easy-to-understand language. Include all important details like dates, times, and locations.</li>
+                <li><strong>Category:</strong> Choose one:
+                  <ul className="list-disc pl-5 mt-1 space-y-1">
+                    <li><strong>News:</strong> General updates and information</li>
+                    <li><strong>Event:</strong> Announcements about upcoming events</li>
+                    <li><strong>Alert:</strong> Important or urgent notices</li>
+                    <li><strong>General:</strong> Anything that doesn't fit the other categories</li>
+                  </ul>
+                </li>
               </ul>
             </Step>
-            <Step number="3">Choose visibility:
+            <Step number="3">Choose who can see it:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Public:</strong> Anyone visiting the website can see it</li>
-                <li><strong>Members Only:</strong> Only logged-in members can see it</li>
+                <li><strong>Public:</strong> Anyone visiting the cemetery website can see this - even if they're not logged in</li>
+                <li><strong>Members Only:</strong> Only people who have logged in with an account can see this - for private association business</li>
               </ul>
             </Step>
-            <Step number="4">Set the publish date (now or schedule for later)</Step>
-            <Step number="5">Click <strong>"Publish"</strong></Step>
+            <Step number="4">Choose when to publish:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Publish Now:</strong> It goes live immediately when you save</li>
+                <li><strong>Schedule for Later:</strong> Pick a future date and it will automatically appear on that day</li>
+                <li><strong>Save as Draft:</strong> Save it without publishing - useful if you want someone to review it first</li>
+              </ul>
+            </Step>
+            <Step number="5">Review your announcement one more time - check spelling and make sure dates are correct</Step>
+            <Step number="6">Click <strong>"Publish"</strong> (or "Save Draft" if not ready yet)</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Edit an Existing Announcement</h4>
+            <Step number="1">Find the announcement in the list</Step>
+            <Step number="2">Click on its title or click the <strong>"Edit"</strong> button</Step>
+            <Step number="3">Make your changes</Step>
+            <Step number="4">Click <strong>"Save Changes"</strong> or <strong>"Update"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Delete an Announcement</h4>
+            <Step number="1">Find the announcement in the list</Step>
+            <Step number="2">Click the <strong>"Delete"</strong> or trash icon button</Step>
+            <Step number="3">Confirm when asked "Are you sure?"</Step>
+            <Step number="4">The announcement is removed from the website</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Good Announcements to Post</h4>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Office hours changes:</strong> "Office Closed December 24-26 for Christmas"</li>
+              <li><strong>Upcoming meetings:</strong> "Board Meeting March 15 at 7pm - All Welcome"</li>
+              <li><strong>Maintenance notices:</strong> "Lawn Treatment Scheduled - Please Keep Pets Away"</li>
+              <li><strong>Policy updates:</strong> "New Decoration Guidelines Effective January 1"</li>
+              <li><strong>Thank you messages:</strong> "Thank You Volunteers for the Fall Cleanup!"</li>
+              <li><strong>Weather alerts:</strong> "Cemetery Roads May Be Icy - Please Drive Carefully"</li>
+            </ul>
 
             <Tip>
-              Keep announcements brief and to the point. If you have detailed 
-              information, consider posting a summary with a link to read more.
+              <strong>Keep it short!</strong> People skim announcements. Put the most important information 
+              in the first sentence. If you have lots of details, use bullet points to make it easy to read.
+            </Tip>
+
+            <Tip>
+              <strong>Include contact information.</strong> End announcements with who to contact for questions: 
+              "For more information, call the office at 318-555-1234."
+            </Tip>
+
+            <Tip>
+              <strong>Remove old announcements.</strong> An announcement about an event that happened 6 months ago 
+              makes your site look neglected. Delete or archive old news to keep things fresh.
             </Tip>
           </ManualSection>
 
@@ -1668,27 +1901,88 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* SYSTEM LOGS */}
           <ManualSection icon={Shield} title="System Logs">
-            <p>
-              View a record of all actions taken in the system. This helps 
-              track changes and troubleshoot issues.
+            <p className="text-lg mb-4">
+              <strong>The System Logs section is like a security camera for your data.</strong> It records 
+              every action taken in the system - who did what, when, and to which record. This is incredibly 
+              useful when something seems wrong and you need to figure out what happened.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">What the Logs Show</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Who made changes (which administrator)</li>
-              <li>What was changed (created, updated, deleted)</li>
-              <li>When it happened (date and time)</li>
-              <li>Details about what changed</li>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "System Logs" tab in the navigation bar (you may need to scroll right to see it)</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What the System Logs Record</h4>
+            <p className="mb-2">Every entry in the logs shows:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>WHO:</strong> Which administrator (by email address) made the change</li>
+              <li><strong>WHAT:</strong> The type of action - Created, Updated, or Deleted</li>
+              <li><strong>WHICH:</strong> What type of record was affected (Member, Plot, Task, etc.)</li>
+              <li><strong>WHEN:</strong> The exact date and time the action happened</li>
+              <li><strong>DETAILS:</strong> Specifics about what changed (e.g., "Changed status from Available to Reserved")</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Finding Specific Activity</h4>
-            <Step number="1">Use the date filter to narrow down the time period</Step>
-            <Step number="2">Use the action filter (Create, Update, Delete)</Step>
-            <Step number="3">Search by username or record type</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">When to Use the System Logs</h4>
+            <div className="space-y-2 mb-4">
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">🔍 "Something changed and I don't know why"</p>
+                <p className="text-stone-600 text-sm mt-1">Check the logs to see who changed it and when.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">🔍 "I think I made a mistake but I'm not sure"</p>
+                <p className="text-stone-600 text-sm mt-1">Look up your recent actions to see exactly what you did.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">🔍 "A record is missing - was it deleted?"</p>
+                <p className="text-stone-600 text-sm mt-1">Search the logs for delete actions to find out.</p>
+              </div>
+              <div className="bg-stone-50 p-3 rounded-lg">
+                <p className="font-semibold text-stone-800">🔍 "What did we do yesterday?"</p>
+                <p className="text-stone-600 text-sm mt-1">Filter by date to see all activity from a specific day.</p>
+              </div>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Search the Logs - Step by Step</h4>
+            <Step number="1">Go to the <strong>System Logs</strong> tab</Step>
+            <Step number="2">You'll see a list of recent actions, newest first</Step>
+            <Step number="3">To find specific activity, use the filters at the top:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Date Range:</strong> Click the date fields to pick a start and end date (e.g., "January 1 to January 15")</li>
+                <li><strong>Action Type:</strong> Select "Create," "Update," or "Delete" to show only that type of action</li>
+                <li><strong>User:</strong> Select a specific administrator to see only their actions</li>
+                <li><strong>Record Type:</strong> Select "Member," "Plot," "Task," etc. to show only that type of record</li>
+              </ul>
+            </Step>
+            <Step number="4">Click <strong>"Apply Filters"</strong> or <strong>"Search"</strong> to see results</Step>
+            <Step number="5">Click on any log entry to see the full details</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Clear Filters and See All Logs</h4>
+            <Step number="1">Look for a <strong>"Clear Filters"</strong> or <strong>"Reset"</strong> button</Step>
+            <Step number="2">Click it to remove all filters and show all recent activity again</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Log Entries</h4>
+            <p className="mb-2">Here's an example of what a log entry might look like:</p>
+            <div className="bg-stone-100 p-3 rounded-lg font-mono text-sm mb-4">
+              <p><strong>Date:</strong> January 15, 2024 at 2:30 PM</p>
+              <p><strong>User:</strong> admin@unionsprings.com</p>
+              <p><strong>Action:</strong> UPDATE</p>
+              <p><strong>Record:</strong> Member - John Smith</p>
+              <p><strong>Details:</strong> Changed phone number from "555-1234" to "555-5678"</p>
+            </div>
+            <p className="text-sm text-stone-600">This tells you that on January 15th at 2:30 PM, someone logged in as admin@unionsprings.com updated John Smith's member record by changing his phone number.</p>
 
             <Tip>
-              If something looks wrong with a record, check the logs to see 
-              what changes were made and when. This can help identify mistakes!
+              <strong>The logs don't lie.</strong> If you're ever in a "he said, she said" situation about 
+              who changed something, the System Logs have the definitive answer.
+            </Tip>
+
+            <Tip>
+              <strong>Logs are permanent.</strong> Once something is logged, it cannot be changed or deleted. 
+              This protects the integrity of your records and provides accountability.
+            </Tip>
+
+            <Tip>
+              <strong>Check logs after problems.</strong> If a member complains "my information was changed and I didn't do it," 
+              you can use the logs to see exactly what happened and explain it to them.
             </Tip>
           </ManualSection>
 
