@@ -1,7 +1,6 @@
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip, Polygon, Circle, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
-import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from 'lucide-react';
 import "leaflet/dist/leaflet.css";
 
@@ -107,10 +106,11 @@ const MapLegend = memo(function MapLegend({ count, dateRange }) {
 function HistoryMap({ events, onEventSelect, dateRange }) {
     // Filter events with memoization
     const mappableEvents = useMemo(() => {
+        if (!events || !Array.isArray(events)) return [];
         return events.filter(event => {
             if (!event.location?.lat || !event.location?.lng) return false;
             
-            const eventYearMatch = event.year.match(/(\d{4})/);
+            const eventYearMatch = event.year?.match(/(\d{4})/);
             const eventYear = eventYearMatch ? parseInt(eventYearMatch[1], 10) : 0;
             
             return eventYear >= dateRange[0] && eventYear <= dateRange[1];
@@ -118,7 +118,7 @@ function HistoryMap({ events, onEventSelect, dateRange }) {
     }, [events, dateRange]);
 
     // Center point for the map
-    const center = useMemo(() => [32.8200, -93.2000], []);
+    const center = useMemo(() => [32.9365, -93.2921], []); // Centered on Union Springs Church
 
     // Handle event selection
     const handleEventSelect = useCallback((id) => {
@@ -128,40 +128,35 @@ function HistoryMap({ events, onEventSelect, dateRange }) {
     const eventCount = mappableEvents.length;
 
     return (
-        <Card className="h-full w-full border-none shadow-none bg-transparent">
-            <CardContent className="p-0 h-full rounded-xl overflow-hidden border border-stone-300 relative">
-                <MapContainer 
-                    center={center} 
-                    zoom={10} 
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={true}
-                    doubleClickZoom={true}
-                    zoomControl={true}
-                    dragging={true}
-                    preferCanvas={true}
-                >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        maxZoom={18}
-                        updateWhenIdle={true}
-                        updateWhenZooming={false}
-                    />
-                    
-                    {mappableEvents.map((event) => (
-                        <React.Fragment key={event.id}>
-                            <EventMarker 
-                                event={event} 
-                                onSelect={handleEventSelect} 
-                            />
-                            <EventOverlay overlay={event.overlay} />
-                        </React.Fragment>
-                    ))}
-                </MapContainer>
+        <div className="h-full w-full relative" style={{ minHeight: '400px' }}>
+            <MapContainer 
+                center={center} 
+                zoom={11} 
+                style={{ height: '100%', width: '100%', minHeight: '400px' }}
+                scrollWheelZoom={true}
+                doubleClickZoom={true}
+                zoomControl={true}
+                dragging={true}
+            >
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    maxZoom={18}
+                />
                 
-                <MapLegend count={eventCount} dateRange={dateRange} />
-            </CardContent>
-        </Card>
+                {mappableEvents.map((event) => (
+                    <React.Fragment key={event.id}>
+                        <EventMarker 
+                            event={event} 
+                            onSelect={handleEventSelect} 
+                        />
+                        {event.overlay && <EventOverlay overlay={event.overlay} />}
+                    </React.Fragment>
+                ))}
+            </MapContainer>
+            
+            <MapLegend count={eventCount} dateRange={dateRange} />
+        </div>
     );
 }
 
