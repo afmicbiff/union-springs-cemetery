@@ -66,9 +66,13 @@ const VisitorPage = memo(function VisitorPage() {
         </div>
       </section>
 
-      {/* Main Content - Quick Access Grid Style */}
-      <section className="bg-stone-200 py-8 sm:py-12 md:py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 md:-mt-20 relative z-20">
+      {/* Main Content - Quick Access Grid Style with black overlap */}
+      <section className="relative z-20">
+        {/* Black background extension for card overlap effect */}
+        <div className="absolute inset-x-0 top-0 h-24 sm:h-28 md:h-32 lg:h-36 bg-[#0c0a09]" aria-hidden="true" />
+        {/* Stone background for below cards */}
+        <div className="absolute inset-x-0 top-24 sm:top-28 md:top-32 lg:top-36 bottom-0 bg-stone-200" aria-hidden="true" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 md:pt-10 pb-8 sm:pb-12 md:pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             
             {/* Card 1: Hours & Location */}
