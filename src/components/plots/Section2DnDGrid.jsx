@@ -9,9 +9,12 @@ function parseNum(v) {
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
-  const reservedBottomRows = 0;
+  const extraBottomRow = 1; // Extra row for +New under specific plots
+  const totalRows = perCol + extraBottomRow;
   const dataCols = 10;
-  const totalCols = dataCols + 2; // Add leading and trailing spacer columns
+  
+  // Plots that should have +New button below them
+  const newPlotTargets = new Set([186, 199, 217, 236, 248, 271, 309, 391, 477, 595]);
 
   const cells = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
