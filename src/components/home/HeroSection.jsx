@@ -59,40 +59,47 @@ const HeroSection = memo(function HeroSection() {
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/60 to-stone-900/90 absolute inset-0"></div>
       
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-16 px-2 sm:px-4">
-        {/* Left Side Image Gallery - reduced height on mobile */}
-        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[280px] sm:h-[350px] md:h-[450px] flex items-center justify-center">
+        {/* Left Side Image Gallery - all 4 images visible on mobile, scattered layout */}
+        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[320px] sm:h-[380px] md:h-[450px] flex items-center justify-center">
+          {/* Image 1 - Top Left */}
           <HeroImage
             index={1}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png"
             alt="Union Springs Cemetery"
             activeImage={activeImage}
             onClick={handleImageClick}
-            positionClass="-rotate-3 sm:-rotate-6 -translate-x-4 sm:-translate-x-8 z-10"
+            positionClass="-rotate-6 -translate-x-8"
+            mobilePositionClass="-rotate-6 -translate-x-16 -translate-y-16"
           />
+          {/* Image 2 - Top Right */}
           <HeroImage
             index={2}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png"
             alt="Union Springs Cemetery Gate"
             activeImage={activeImage}
             onClick={handleImageClick}
-            positionClass="rotate-3 sm:rotate-6 translate-x-4 sm:translate-x-8 translate-y-2 sm:translate-y-4 z-20"
+            positionClass="rotate-6 translate-x-8 translate-y-4"
+            mobilePositionClass="rotate-8 translate-x-16 -translate-y-12"
           />
+          {/* Image 3 - Bottom Left */}
           <HeroImage
             index={3}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png"
             alt="Union Springs History"
             activeImage={activeImage}
             onClick={handleImageClick}
-            positionClass="-rotate-6 sm:-rotate-12 -translate-y-16 sm:-translate-y-24 -translate-x-3 sm:-translate-x-6 z-0"
+            positionClass="-rotate-12 -translate-y-24 -translate-x-6"
+            mobilePositionClass="-rotate-10 -translate-x-12 translate-y-20"
           />
+          {/* Image 4 - Bottom Right (now visible on mobile!) */}
           <HeroImage
             index={4}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
             alt="Union Springs Church"
             activeImage={activeImage}
             onClick={handleImageClick}
-            positionClass="rotate-[25deg] translate-x-48 translate-y-32 z-30"
-            hiddenOnMobile
+            positionClass="rotate-[25deg] translate-x-48 translate-y-32"
+            mobilePositionClass="rotate-12 translate-x-14 translate-y-24"
           />
         </div>
 
