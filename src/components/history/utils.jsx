@@ -104,14 +104,23 @@ function cacheResult(key, value) {
     fuzzyCache.set(key, value);
 }
 
+// Import React for hooks
+import React from 'react';
+
 // Hook for responsive breakpoint detection (SSR-safe)
 export const useIsMobile = () => {
-    if (typeof window === 'undefined') return false;
-    // Use matchMedia for efficient reactive updates
-    const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
+    // SSR-safe initial state
+    const [isMobile, setIsMobile] = React.useState(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth < 768;
+    });
     
     React.useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
         const mq = window.matchMedia('(max-width: 767px)');
+        setIsMobile(mq.matches);
+        
         const handler = (e) => setIsMobile(e.matches);
         
         // Modern API
@@ -126,6 +135,3 @@ export const useIsMobile = () => {
     
     return isMobile;
 };
-
-// Import React for the hook
-import React from 'react';
