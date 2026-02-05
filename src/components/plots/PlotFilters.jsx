@@ -18,6 +18,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         onFilterChange({
             search: '',
             status: 'All',
+            role: 'All',
             birthYearStart: '',
             birthYearEnd: '',
             deathYearStart: '',
@@ -32,7 +33,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center">
                 
                 {/* General Search */}
-                <div className="relative w-full md:w-1/3">
+                <div className="relative w-full md:w-1/4">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                     <Input
                         placeholder="Search grave, name, row..."
@@ -40,6 +41,28 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         value={filters.search}
                         onChange={(e) => handleChange('search', e.target.value)}
                     />
+                </div>
+
+                {/* Role Filter */}
+                <div className="w-full md:w-auto min-w-[150px]">
+                    <Select 
+                        value={filters.role || 'All'} 
+                        onValueChange={(val) => handleChange('role', val)}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="All">All Roles</SelectItem>
+                            <SelectItem value="Administrator">Administrator</SelectItem>
+                            <SelectItem value="President">President</SelectItem>
+                            <SelectItem value="Vice President">Vice President</SelectItem>
+                            <SelectItem value="Caretaker">Caretaker</SelectItem>
+                            <SelectItem value="Secretary">Secretary</SelectItem>
+                            <SelectItem value="Treasurer">Treasurer</SelectItem>
+                            <SelectItem value="Legal">Legal</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 {/* Owner / Family Name */}
@@ -159,7 +182,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                 </div>
 
                 {/* Clear Filters */}
-                {(filters.search || filters.status !== 'All' || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
+                {(filters.search || filters.status !== 'All' || (filters.role && filters.role !== 'All') || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
                     <Button variant="ghost" onClick={handleClear} className="text-sm text-gray-500 hover:text-red-600">
                         Clear
                     </Button>
