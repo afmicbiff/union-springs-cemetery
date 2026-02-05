@@ -266,12 +266,15 @@ function SecurityDashboard() {
     );
   }
 
-  if (user.role !== 'admin') {
+  // Board member roles that have admin-level access
+  const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
+  
+  if (!ADMIN_ROLES.includes(user.role)) {
     return (
       <div className="max-w-5xl mx-auto p-4 sm:p-6">
         <Card>
           <CardHeader><CardTitle className="text-base sm:text-lg">Not authorized</CardTitle></CardHeader>
-          <CardContent className="text-sm">Only administrators can access the Security Dashboard.</CardContent>
+          <CardContent className="text-sm">Only administrators and board members can access the Security Dashboard.</CardContent>
         </Card>
       </div>
     );
