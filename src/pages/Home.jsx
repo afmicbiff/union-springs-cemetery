@@ -1,11 +1,22 @@
-import React, { useState, useEffect, memo, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, memo, useMemo, useCallback, lazy, Suspense } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { X, Megaphone } from 'lucide-react';
+
+// Critical above-the-fold component loaded immediately
 import HeroSection from '@/components/home/HeroSection';
-import QuickAccessGrid from '@/components/home/QuickAccessGrid';
-import InfoSection from '@/components/home/InfoSection';
-import ServicesSection from '@/components/home/ServicesSection';
+
+// Lazy load below-the-fold components for faster initial render on mobile
+const QuickAccessGrid = lazy(() => import('@/components/home/QuickAccessGrid'));
+const InfoSection = lazy(() => import('@/components/home/InfoSection'));
+const ServicesSection = lazy(() => import('@/components/home/ServicesSection'));
+
+// Minimal loading fallback
+const SectionLoader = memo(() => (
+  <div className="w-full py-16 flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+  </div>
+));
 
 // Memoized NotificationBanner component for performance
 const NotificationBanner = memo(function NotificationBanner({ notification, onDismiss }) {
@@ -75,9 +86,15 @@ const Home = memo(function Home() {
     <div className="flex flex-col w-full overflow-x-hidden">
       <NotificationBanner notification={activeNotification} onDismiss={handleDismiss} />
       <HeroSection />
-      <QuickAccessGrid />
-      <InfoSection />
-      <ServicesSection />
+      <Suspense fallback={<SectionLoader />}>
+        <QuickAccessGrid />
+      </Suspense>
+      <Suspense fallback={<SectionLoader />}>
+        <InfoSection />
+      </Suspense>
+      <Suspense fallback={<SectionLoader />}>
+        <ServicesSection />
+      </Suspense>
     </div>
   );
 });
