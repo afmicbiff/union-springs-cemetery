@@ -119,22 +119,16 @@ export default function ServicesPage() {
                         </ol>
                     </section>
 
-                    {/* Allowed Services */}
-                    <section className="bg-stone-50 p-4 sm:p-5 rounded-lg">
+                    {/* Allowed Services - simplified structure */}
+                    <section className="bg-stone-50 p-4 sm:p-5 rounded-lg" style={{ contain: 'layout style paint' }}>
                         <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-800 mb-3">We offer:</h2>
-                        <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
-                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
-                                Traditional Burial Plots
-                            </li>
-                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
-                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
-                                Cremation Niches
-                            </li>
-                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
-                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
-                                Family Estates
-                            </li>
+                        <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
+                            {['Traditional Burial Plots', 'Cremation Niches', 'Family Estates'].map((service) => (
+                                <li key={service} className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
+                                    <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0" aria-hidden="true"></span>
+                                    {service}
+                                </li>
+                            ))}
                         </ul>
                     </section>
                 </div>
