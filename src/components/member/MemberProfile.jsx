@@ -82,8 +82,10 @@ const MemberProfile = memo(function MemberProfile({ user }) {
             }
         },
         onSuccess: () => {
-            // Invalidate all queries starting with this key (covers dashboard and profile tabs)
+            // Invalidate all member-related queries
             queryClient.invalidateQueries({ queryKey: ['member-profile'] });
+            queryClient.invalidateQueries({ queryKey: ['member-record-portal'] });
+            queryClient.invalidateQueries({ queryKey: ['members-directory'] });
             toast.success("Profile updated successfully");
         },
         onError: (err) => {
