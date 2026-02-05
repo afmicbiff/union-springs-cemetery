@@ -1,64 +1,22 @@
-import React, { memo, Suspense, useCallback, useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, Bell, Shield, BookOpen, Loader2, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { FileText, Bell, Shield, BookOpen, Loader2 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import UserSummaryWidget from "@/components/dashboard/UserSummaryWidget";
 import EmployeeSchedule from "@/components/employee/EmployeeSchedule";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { format, isValid, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import TaskManager from "@/components/tasks/TaskManager";
 
-// Lazy load heavier components
-const TaskManager = React.lazy(() => import("@/components/tasks/TaskManager"));
-const EmployeeDocuments = React.lazy(() => import("@/components/employee/EmployeeDocuments"));
-
-// Memoized loading fallback
-const TabLoader = memo(() => (
-    <div className="py-10 flex flex-col items-center justify-center gap-2">
-        <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
-        <span className="text-sm text-stone-500">Loading...</span>
-    </div>
-));
-
-// Memoized error fallback
-const TabError = memo(({ onRetry }) => (
-    <div className="py-10 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
-        <AlertCircle className="w-8 h-8 text-red-400" />
-        <p className="text-sm text-red-600">Failed to load content</p>
-        {onRetry && (
-            <Button variant="outline" size="sm" onClick={onRetry} className="h-8 text-xs">
-                <RefreshCw className="w-3.5 h-3.5 mr-1" /> Try Again
-            </Button>
-        )}
-    </div>
-));
-
-// Safe date formatter
-const safeFormatDate = (dateStr, formatStr = 'MMM d, yyyy') => {
-    if (!dateStr) return '';
-    try {
-        const date = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr);
-        return isValid(date) ? format(date, formatStr) : '';
-    } catch {
-        return '';
-    }
-};
-
-const EmployeesPage = memo(function EmployeesPage() {
-    const [activeTab, setActiveTab] = useState('resources');
-    
+export default function EmployeesPage() {
     // Fetch Current User & Employee Profile for Task Filtering
-    const { data: user, isLoading: isAuthLoading, isError: isAuthError } = useQuery({
+    const { data: user, isLoading: isAuthLoading } = useQuery({
         queryKey: ['me'],
         queryFn: () => base44.auth.me().catch(() => null),
-        staleTime: 5 * 60_000,
-        gcTime: 10 * 60_000,
-        retry: 2,
-        refetchOnWindowFocus: false,
     });
 
     React.useEffect(() => {
@@ -71,7 +29,7 @@ const EmployeesPage = memo(function EmployeesPage() {
         }
     }, [user, isAuthLoading]);
 
-    const { data: employeeProfile, isLoading: isProfileLoading } = useQuery({
+    const { data: employeeProfile } = useQuery({
         queryKey: ['my-employee-profile-page', user?.email],
         queryFn: async () => {
             if (!user?.email) return null;
@@ -80,27 +38,23 @@ const EmployeesPage = memo(function EmployeesPage() {
         },
         enabled: !!user?.email,
         staleTime: 5 * 60_000,
-        gcTime: 10 * 60_000,
-        retry: 2,
-        refetchOnWindowFocus: false,
     });
 
-    const { data: announcements = [], isLoading: isAnnouncementsLoading } = useQuery({
+    // Check if employee is inactive and redirect
+    React.useEffect(() => {
+        if (employeeProfile && employeeProfile.status === 'inactive') {
+            // Log out user or redirect to a blocked page
+            // Logic handled in render
+        }
+    }, [employeeProfile]);
+    
+    const { data: announcements = [] } = useQuery({
         queryKey: ['announcements-public'],
         queryFn: () => base44.entities.Announcement.list('-date', 10),
         staleTime: 10 * 60_000,
-        gcTime: 30 * 60_000,
-        refetchOnWindowFocus: false,
-        retry: 1,
     });
 
-    const activeAnnouncements = React.useMemo(() => 
-        announcements.filter(a => a.is_active !== false), 
-        [announcements]
-    );
-
-    // Tab change handler
-    const handleTabChange = useCallback((tab) => setActiveTab(tab), []);
+    const activeAnnouncements = announcements.filter(a => a.is_active !== false);
 
     if (isAuthLoading || !user) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-teal-600" /></div>;
 
@@ -131,29 +85,12 @@ const EmployeesPage = memo(function EmployeesPage() {
 
                 <UserSummaryWidget />
 
-                <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-                    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
-                        <TabsList className="mb-4 bg-white border border-stone-200 p-1 w-max min-w-full sm:w-auto inline-flex h-auto gap-0.5">
-                            <TabsTrigger value="resources" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 px-2.5 sm:px-3 text-xs sm:text-sm touch-manipulation">
-                                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5 shrink-0" />
-                                <span className="hidden sm:inline">Resources & News</span>
-                                <span className="sm:hidden">News</span>
-                            </TabsTrigger>
-                            <TabsTrigger value="schedule" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 px-2.5 sm:px-3 text-xs sm:text-sm touch-manipulation">
-                                <span className="hidden sm:inline">My Schedule</span>
-                                <span className="sm:hidden">Schedule</span>
-                            </TabsTrigger>
-                            <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 px-2.5 sm:px-3 text-xs sm:text-sm touch-manipulation">
-                                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5 shrink-0" />
-                                <span>My Tasks</span>
-                            </TabsTrigger>
-                            <TabsTrigger value="documents" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 px-2.5 sm:px-3 text-xs sm:text-sm touch-manipulation">
-                                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5 shrink-0" />
-                                <span className="hidden sm:inline">Documents</span>
-                                <span className="sm:hidden">Docs</span>
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
+                <Tabs defaultValue="resources" className="w-full">
+                    <TabsList className="mb-4">
+                        <TabsTrigger value="resources" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">Resources & News</TabsTrigger>
+                        <TabsTrigger value="schedule" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Schedule</TabsTrigger>
+                        <TabsTrigger value="tasks" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white">My Tasks</TabsTrigger>
+                    </TabsList>
                     
                     <TabsContent value="resources">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -178,7 +115,7 @@ const EmployeesPage = memo(function EmployeesPage() {
                                                     <div className="flex justify-between items-start mb-2">
                                                         <h3 className="font-semibold text-stone-900">{update.title}</h3>
                                                         <span className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded">
-                                                            {safeFormatDate(update.date, 'MMM d, yyyy')}
+                                                            {format(new Date(update.date), 'MMM d, yyyy')}
                                                         </span>
                                                     </div>
                                                     <p className="text-stone-600 text-sm leading-relaxed">{update.content}</p>
@@ -246,30 +183,18 @@ const EmployeesPage = memo(function EmployeesPage() {
                 </div>
                 </TabsContent>
                 
-                <TabsContent value="schedule" className="focus-visible:outline-none">
-                    <Suspense fallback={<TabLoader />}>
-                        <EmployeeSchedule />
-                    </Suspense>
+                <TabsContent value="schedule">
+                    <EmployeeSchedule />
                 </TabsContent>
 
-                <TabsContent value="tasks" className="focus-visible:outline-none">
-                    <Suspense fallback={<TabLoader />}>
-                        <TaskManager 
-                            isAdmin={false} 
-                            currentEmployeeId={employeeProfile?.id} 
-                        />
-                    </Suspense>
-                </TabsContent>
-
-                <TabsContent value="documents" className="focus-visible:outline-none">
-                    <Suspense fallback={<TabLoader />}>
-                        <EmployeeDocuments user={user} />
-                    </Suspense>
+                <TabsContent value="tasks">
+                    <TaskManager 
+                        isAdmin={false} 
+                        currentEmployeeId={employeeProfile?.id} 
+                    />
                 </TabsContent>
                 </Tabs>
             </div>
         </div>
     );
-});
-
-export default EmployeesPage;
+}
