@@ -21,13 +21,33 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
 
   const { cells, bottomRowMarkers } = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
-    const idx186 = sorted.findIndex(p => parseNum(p.Grave) === 186);
-    const pivoted = idx186 > -1 ? [...sorted.slice(idx186), ...sorted.slice(0, idx186)] : sorted;
+    
+    // Separate special range plots (186-207) from regular plots
+    const specialPlots = sorted.filter(p => {
+      const n = parseNum(p.Grave);
+      return n >= SPECIAL_COL_RANGE.start && n <= SPECIAL_COL_RANGE.end;
+    });
+    const regularPlots = sorted.filter(p => {
+      const n = parseNum(p.Grave);
+      return n < SPECIAL_COL_RANGE.start || n > SPECIAL_COL_RANGE.end;
+    });
+    
+    // For regular plots, pivot starting from 199 (which now starts column 0)
+    const idx199 = regularPlots.findIndex(p => parseNum(p.Grave) === 208); // Start from 208 since 186-207 are special
+    const pivoted = idx199 > -1 ? [...regularPlots.slice(idx199), ...regularPlots.slice(0, idx199)] : regularPlots;
 
+    // 11 columns: column 0 is special (186-207), columns 1-10 are regular
     const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
 
+    // Fill special column (column 0) with plots 186-207
+    const specialSorted = specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
+    for (let i = 0; i < specialSorted.length && i < perCol; i++) {
+      baseColumns[0][i] = specialSorted[i];
+    }
+
+    // Fill regular columns (1-10) with remaining plots
     let i = 0;
-    for (let c = 0; c < dataCols && i < pivoted.length; c++) {
+    for (let c = 1; c < dataCols && i < pivoted.length; c++) {
       for (let r = perCol - 1; r >= 0 && i < pivoted.length; r--) {
         baseColumns[c][r] = pivoted[i++];
       }
@@ -48,7 +68,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     for (let n = seqStart; n <= seqEnd; n++) { if (byNum.has(n)) { hasAnySeq = true; break; } }
 
     if (hasAnySeq) {
-      for (let c = 0; c < dataCols; c++) {
+      for (let c = 1; c < dataCols; c++) { // Skip column 0 (special)
         for (let r = 0; r < perCol; r++) {
           const cell = baseColumns[c][r];
           const n = parseNum(cell?.Grave);
@@ -65,8 +85,8 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
         if (p) seqCol[rPtr] = p;
       }
 
-      let anchorIdx = baseColumns.findIndex((col) => col.some((cell) => parseNum(cell?.Grave) === anchorNum));
-      if (anchorIdx < 0) anchorIdx = 0;
+      let anchorIdx = baseColumns.findIndex((col, idx) => idx > 0 && col.some((cell) => parseNum(cell?.Grave) === anchorNum));
+      if (anchorIdx < 1) anchorIdx = 1;
       const targetIdx = Math.min(anchorIdx + 1, dataCols - 1);
 
       for (let r = 0; r < perCol; r++) {
