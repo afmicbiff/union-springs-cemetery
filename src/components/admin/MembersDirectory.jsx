@@ -160,7 +160,7 @@ function MembersDirectory({ openMemberId }) {
     const saveSegmentMutation = useMutation({
         mutationFn: (name) => base44.entities.MemberSegment.create({ name, criteria: segmentCriteria, description: "Custom segment" }),
         onSuccess: () => {
-            queryClient.invalidateQueries(['member-segments']);
+            queryClient.invalidateQueries({ queryKey: ['member-segments'] });
             toast.success("Segment saved");
         }
     });
@@ -179,7 +179,7 @@ function MembersDirectory({ openMemberId }) {
             toast.success(`Processed: ${data.success} successful, ${data.failed} failed`);
             setIsBulkActionOpen(false);
             setSelectedMemberIds([]);
-            queryClient.invalidateQueries(['members']);
+            queryClient.invalidateQueries({ queryKey: ['members-directory'] });
         },
         onError: (err) => toast.error("Bulk action failed: " + err.message)
     });
