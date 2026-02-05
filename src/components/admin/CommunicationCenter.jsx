@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, Sparkles, Lightbulb, Megaphone, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon, Tag, AlertTriangle, Smile, Meh, Frown, Wand2, AlertCircle } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, Sparkles, Lightbulb, Megaphone, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon, Tag, AlertTriangle, Smile, Meh, Frown, Wand2, AlertCircle, Bell, Check, X, Eye, CheckSquare, Calendar } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
 import { format, parseISO, isValid } from 'date-fns';
 import AIEmailAssistant from './AIEmailAssistant';
+import { filterEntity } from "@/components/gov/dataClient";
 
 // Safe date formatting helper
 function safeFormatDate(dateStr, formatStr = 'MMM d') {
@@ -43,11 +44,13 @@ function CommunicationCenter() {
           <TabsList className="mb-4 flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="inbox" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden xs:inline">Inbox</span><span className="xs:hidden">Inbox</span></TabsTrigger>
             <TabsTrigger value="compose" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Send className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Mass Notification</span><span className="sm:hidden">Mass</span></TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Bell className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Notifications</span><span className="sm:hidden">Notifs</span></TabsTrigger>
             <TabsTrigger value="campaigns" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">AI Campaigns</span><span className="sm:hidden">AI</span></TabsTrigger>
             <TabsTrigger value="home-alert" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Megaphone className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Home Page</span><span className="sm:hidden">Home</span></TabsTrigger>
           </TabsList>
           <TabsContent value="inbox"><InboxView /></TabsContent>
           <TabsContent value="compose"><MassNotificationForm onSuccess={() => handleTabChange('inbox')} /></TabsContent>
+          <TabsContent value="notifications"><NotificationsPanel onNavigate={handleTabChange} /></TabsContent>
           <TabsContent value="campaigns"><CampaignSuggestions /></TabsContent>
           <TabsContent value="home-alert"><HomeNotificationManager /></TabsContent>
         </Tabs>
@@ -57,6 +60,203 @@ function CommunicationCenter() {
 }
 
 export default memo(CommunicationCenter);
+
+// Notifications Panel Component
+const NotificationsPanel = memo(function NotificationsPanel({ onNavigate }) {
+  const queryClient = useQueryClient();
+
+  const { data: notifications = [], isLoading, isError, refetch, isFetching } = useQuery({
+    queryKey: ['admin-notifications-panel'],
+    queryFn: ({ signal }) => filterEntity(
+      'Notification',
+      {},
+      { sort: '-created_at', limit: 50, select: ['id','message','type','is_read','related_entity_type','related_entity_id','link','created_at'] },
+      { signal }
+    ),
+    initialData: [],
+    staleTime: 30_000,
+    retry: 2,
+  });
+
+  const unreadCount = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
+
+  const dismissibleNotes = useMemo(() => notifications.filter(note => 
+    !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))
+  ), [notifications]);
+
+  const dismissAllNotifications = useCallback(async () => {
+    try {
+      const user = await base44.auth.me().catch(() => null);
+      await Promise.all(dismissibleNotes.map(async (note) => {
+        await base44.entities.Notification.delete(note.id);
+        if (user?.email) {
+          await base44.entities.AuditLog.create({
+            action: 'dismiss',
+            entity_type: 'Notification',
+            entity_id: note.id,
+            details: `Notification dismissed: "${note.message || ''}"`,
+            performed_by: user.email,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }));
+      queryClient.invalidateQueries(['admin-notifications-panel']);
+      toast.success('Dismissed all notifications');
+    } catch (err) {
+      toast.error('Failed to dismiss all');
+    }
+  }, [dismissibleNotes, queryClient]);
+
+  const handleNotificationAction = useCallback(async (note, action) => {
+    try {
+      if (action === 'dismiss') {
+        await base44.entities.Notification.delete(note.id);
+        const user = await base44.auth.me();
+        await base44.entities.AuditLog.create({
+          action: 'dismiss',
+          entity_type: 'Notification',
+          entity_id: note.id,
+          details: `Notification dismissed: "${note.message}"`,
+          performed_by: user.email,
+          timestamp: new Date().toISOString()
+        });
+        toast.success("Notification dismissed");
+      } else if (action === 'markRead') {
+        await base44.entities.Notification.update(note.id, { is_read: true });
+        toast.success("Marked as read");
+      } else if (action === 'completeTask') {
+        if (note.related_entity_id) {
+          const res = await base44.functions.invoke('updateTaskStatus', { id: note.related_entity_id, status: 'Completed' });
+          if (res.data.error) throw new Error(res.data.error);
+        }
+        await base44.entities.Notification.update(note.id, { is_read: true });
+        queryClient.invalidateQueries(['tasks']);
+        toast.success("Task Completed");
+      }
+      queryClient.invalidateQueries(['admin-notifications-panel']);
+      queryClient.invalidateQueries(['notifications']);
+    } catch (err) {
+      if (err.message && (err.message.includes("not found") || err.message.includes("404"))) {
+        await base44.entities.Notification.update(note.id, { is_read: true });
+        queryClient.invalidateQueries(['admin-notifications-panel']);
+        toast.error("Item not found. Notification cleared.");
+      } else {
+        toast.error("Action failed: " + err.message);
+      }
+    }
+  }, [queryClient]);
+
+  const handleNavigate = useCallback((note) => {
+    if (note.related_entity_type === 'message' || note.type === 'message') {
+      onNavigate('inbox');
+    }
+  }, [onNavigate]);
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center">
+        <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+        <p className="text-stone-600 mb-3">Failed to load notifications</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+          {isFetching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />} Try Again
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h3 className="text-base md:text-lg font-medium flex items-center gap-2">
+            <Bell className="w-5 h-5" /> System Notifications
+            {unreadCount > 0 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">{unreadCount} unread</span>}
+          </h3>
+          <p className="text-xs md:text-sm text-stone-500">View and manage all system notifications</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading || isFetching} className="h-9">
+            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={dismissAllNotifications} disabled={dismissibleNotes.length === 0} className="h-9 text-red-600 hover:text-red-700 hover:bg-red-50">
+            <Trash2 className="w-4 h-4 mr-2" /> Dismiss All
+          </Button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-teal-600" /></div>
+      ) : notifications.length === 0 ? (
+        <div className="text-center p-12 text-stone-400 border-2 border-dashed rounded-lg">
+          <Bell className="w-12 h-12 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No notifications</p>
+          <p className="text-sm">You're all caught up!</p>
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+          {notifications.map((note) => (
+            <div key={note.id} className={`p-3 md:p-4 rounded-lg border ${!note.is_read ? 'bg-blue-50 border-blue-200' : 'bg-white border-stone-200'}`}>
+              <div className="flex gap-3">
+                <div className="mt-0.5 shrink-0">
+                  {note.related_entity_type === 'task' ? <CheckSquare className="w-5 h-5 text-blue-500" /> :
+                   (note.related_entity_type === 'message' || note.type === 'message') ? <Mail className="w-5 h-5 text-teal-500" /> :
+                   (note.related_entity_type === 'event' || (note.message && note.message.toLowerCase().includes('event'))) ? <Calendar className="w-5 h-5 text-purple-500" /> :
+                   <AlertTriangle className={`w-5 h-5 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-stone-800 leading-snug">{note.message}</p>
+                  <p className="text-[10px] md:text-xs text-stone-400 mt-1">
+                    {safeFormatDate(note.created_at, 'MMM d, HH:mm')}
+                    <span className="ml-2">• {
+                      note.related_entity_type === 'task' ? 'Tasks' :
+                      (note.related_entity_type === 'message' || note.type === 'message') ? 'Member Messages' :
+                      note.related_entity_type === 'event' ? 'Calendar' :
+                      (note.related_entity_type === 'member' || note.related_entity_type === 'document') ? 'Members' :
+                      'System'
+                    }</span>
+                  </p>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    {note.related_entity_type === 'task' ? (
+                      <>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => handleNotificationAction(note, 'completeTask')}>
+                          <Check className="w-3 h-3 mr-1" /> Complete Task
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100" onClick={() => handleNotificationAction(note, 'markRead')}>
+                          <Eye className="w-3 h-3 mr-1" /> Mark Read
+                        </Button>
+                      </>
+                    ) : (note.related_entity_type === 'message' || note.type === 'message') ? (
+                      <>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100" onClick={() => { handleNotificationAction(note, 'markRead'); handleNavigate(note); }}>
+                          <Mail className="w-3 h-3 mr-1" /> View Message
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => handleNotificationAction(note, 'markRead')}>
+                          <Check className="w-3 h-3 mr-1" /> Dismiss
+                        </Button>
+                      </>
+                    ) : (note.related_entity_type === 'event' || (note.message && note.message.toLowerCase().includes('event'))) ? (
+                      <>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => handleNotificationAction(note, 'markRead')}>
+                          <Check className="w-3 h-3 mr-1" /> Complete
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-stone-600 bg-stone-50 border-stone-200 hover:bg-stone-100" onClick={() => handleNotificationAction(note, 'dismiss')}>
+                        <X className="w-3 h-3 mr-1" /> Dismiss
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
 
 const CampaignSuggestions = memo(function CampaignSuggestions() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
