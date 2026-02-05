@@ -677,4 +677,4 @@ function AdminDashboard() {
   );
 }
 
-export default memo(AdminDashboard);
+export default AdminDashboard;
