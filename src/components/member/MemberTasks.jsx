@@ -89,31 +89,45 @@ const MemberTasks = memo(function MemberTasks({ user }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [togglingTaskId, setTogglingTaskId] = useState(null);
 
-  // 1) Load member record for this user
-  const { data: member } = useQuery({
+  // 1) Load member record for this user - with proper caching
+  const { data: member, isLoading: memberLoading } = useQuery({
     queryKey: ['member-for-user', user?.email],
     queryFn: async () => {
-      const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
-      return (res && res[0]) || null;
+      if (!user?.email) return null;
+      try {
+        const res = await base44.entities.Member.filter({ email_primary: user.email }, null, 1);
+        return (res && res[0]) || null;
+      } catch {
+        return null;
+      }
     },
     enabled: !!user?.email,
     staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
     retry: 2,
+    refetchOnWindowFocus: false,
   });
 
-  // 2) Load tasks assigned to this member
-  const { data: tasks = [], isLoading, isError, refetch } = useQuery({
+  // 2) Load tasks assigned to this member - with proper error handling
+  const { data: tasks = [], isLoading: tasksLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['member-tasks', member?.id],
     queryFn: async () => {
       if (!member?.id) return [];
-      return base44.entities.Task.filter({ member_id: member.id, is_archived: false }, '-created_date', 100);
+      try {
+        return await base44.entities.Task.filter({ member_id: member.id, is_archived: false }, '-created_date', 100);
+      } catch {
+        return [];
+      }
     },
     enabled: !!member?.id,
-    initialData: [],
     staleTime: 30_000,
+    gcTime: 5 * 60_000,
     refetchInterval: 60000,
     retry: 2,
+    refetchOnWindowFocus: false,
   });
+
+  const isLoading = memberLoading || tasksLoading;
 
   const toggleStatus = useMutation({
     mutationFn: async (task) => {
