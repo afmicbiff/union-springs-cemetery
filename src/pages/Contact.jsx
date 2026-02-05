@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,51 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Loader2, Send, CheckCircle2, Map, Search } from 'lucide-react';
+import { Phone, MapPin, Loader2, Send, CheckCircle2, ExternalLink } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
+
+// Memoized contact card for performance
+const ContactCard = memo(function ContactCard({ icon: Icon, iconBg, title, children }) {
+    return (
+        <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
+            <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
+                <div className={`${iconBg} p-2.5 sm:p-3 rounded-full shrink-0`}>
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    {title && <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800 mb-1">{title}</h3>}
+                    {children}
+                </div>
+            </CardContent>
+        </Card>
+    );
+});
+
+// Memoized contact person info
+const ContactPerson = memo(function ContactPerson({ name, phone, email, isLast }) {
+    return (
+        <div className={!isLast ? "pb-3 mb-3 border-b border-stone-200" : ""}>
+            <h4 className="font-serif font-bold text-sm sm:text-base text-stone-800">{name}</h4>
+            <a 
+                href={`tel:${phone.replace(/[^0-9]/g, '')}`} 
+                className="flex items-center gap-2 text-stone-600 text-sm sm:text-base py-1.5 hover:text-teal-700 active:text-teal-800 touch-manipulation"
+            >
+                <Phone className="w-4 h-4 text-teal-600 shrink-0" />
+                <span className="underline underline-offset-2">{phone}</span>
+            </a>
+            <a 
+                href={`mailto:${email}`} 
+                className="flex items-center gap-2 text-stone-600 text-sm sm:text-base py-1.5 hover:text-teal-700 active:text-teal-800 touch-manipulation break-all"
+            >
+                <ExternalLink className="w-4 h-4 text-teal-600 shrink-0" />
+                <span className="underline underline-offset-2">{email}</span>
+            </a>
+        </div>
+    );
+});
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -33,18 +73,18 @@ export default function ContactPage() {
         onError: (error) => {
             const msg = error?.response?.data?.error || "Failed to send message. Please check the form and try again.";
             toast.error(msg);
-            console.error(error);
         }
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = useCallback((e) => {
         e.preventDefault();
         contactMutation.mutate(formData);
-    };
+    }, [formData, contactMutation]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    const handleChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    }, []);
 
     return (
         <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
