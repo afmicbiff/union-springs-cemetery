@@ -10,7 +10,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { 
     Bell, 
-    Database,
     AlertTriangle,
     FileText,
     Calendar,
@@ -470,19 +469,6 @@ function AdminDashboard() {
                         </div>
                     </PopoverContent>
                 </Popover>
-
-
-
-                <AdminManual currentTab={activeTab} />
-
-                <Button 
-                    onClick={() => setActiveTab('backups')} 
-                    variant="outline" 
-                    size="sm" 
-                    className="hidden lg:flex border-teal-600 text-teal-700 hover:bg-teal-50 h-9 touch-manipulation"
-                >
-                    <Database className="w-4 h-4 mr-2" /> Backups
-                </Button>
             </div>
         </div>
 
@@ -665,6 +651,10 @@ function AdminDashboard() {
                     >
                       Documents
                     </TabsTrigger>
+
+                    <div className="hidden md:flex items-center ml-2">
+                      <AdminManual currentTab={activeTab} />
+                    </div>
                 </TabsList>
             </div>
 
