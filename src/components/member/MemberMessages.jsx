@@ -90,6 +90,10 @@ const MemberMessages = memo(function MemberMessages({ user }) {
         onSuccess: () => {
             setReplyText('');
             queryClient.invalidateQueries(['member-conversations']);
+            toast.success("Message sent to administration");
+        },
+        onError: (err) => {
+            toast.error("Failed to send message: " + (err.message || "Please try again"));
         }
     });
 
@@ -105,7 +109,10 @@ const MemberMessages = memo(function MemberMessages({ user }) {
         onSuccess: () => {
             setIsNewOpen(false);
             queryClient.invalidateQueries(['member-conversations']);
-            toast.success("Inquiry sent successfully");
+            toast.success("Inquiry sent to administration");
+        },
+        onError: (err) => {
+            toast.error("Failed to send inquiry: " + (err.message || "Please try again"));
         }
     });
 
