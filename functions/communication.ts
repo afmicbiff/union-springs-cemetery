@@ -104,12 +104,15 @@ export default Deno.serve(async (req) => {
                     created_at: new Date().toISOString()
                 });
             } else {
-                // Notify Admins
+                // Notify Admins - include related_entity_type so admin dashboard routes correctly
                 await base44.asServiceRole.entities.Notification.create({
                     message: `New message from ${user.email}: ${subject}`,
-                    type: 'info',
+                    type: 'message',
                     user_email: null, // Null indicates system-wide / admin notification
                     is_read: false,
+                    related_entity_type: 'message',
+                    related_entity_id: newMessage.id,
+                    link: null, // Admin dashboard handles routing via related_entity_type
                     created_at: new Date().toISOString()
                 });
             }
