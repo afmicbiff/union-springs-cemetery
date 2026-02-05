@@ -40,11 +40,23 @@ const ExternalLinkItem = memo(function ExternalLinkItem({ name, url }) {
     );
 });
 
+// Static data moved outside component to prevent re-creation on each render
+const FUNERAL_CONTACTS = [
+    { name: "Bailey Funeral Home", url: "https://www.baileyfuneralhome.net" },
+    { name: "Smith Monument", url: "http://www.smithmonumentcompany.com/" },
+    { name: "Central Monument", url: "https://centralmonument.com/" }
+];
+
+const BREADCRUMB_ITEMS = [{ label: 'Services' }];
+
 export default function ServicesPage() {
     return (
-        <div className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+        <div 
+            className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+        >
             <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
-                <Breadcrumbs items={[{ label: 'Services' }]} />
+                <Breadcrumbs items={BREADCRUMB_ITEMS} />
                 
                 {/* Header */}
                 <header className="text-center space-y-4 sm:space-y-6">
