@@ -71,20 +71,13 @@ const Section1DnDGrid = memo(function Section1DnDGrid({ plots, baseColorClass, i
     );
   };
 
-  // Total columns = leading spacer + data cols + trailing spacer
-  const totalCols = dataCols + 2;
-
   return (
     <div className="flex gap-4 justify-center overflow-x-auto pb-2">
-      {Array.from({ length: totalCols }).map((_, colIdx) => {
-        const isLeading = colIdx === 0;
-        const isTrailing = colIdx === totalCols - 1;
-        const dataColIdx = colIdx - 1;
-        
+      {Array.from({ length: dataCols }).map((_, colIdx) => {
         return (
           <div key={colIdx} className="flex flex-col-reverse gap-1 justify-start">
             {Array.from({ length: targetRows }).map((__, r) => 
-              renderCell(dataColIdx, r, isLeading || isTrailing)
+              renderCell(colIdx, r, false)
             )}
           </div>
         );
