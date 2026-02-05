@@ -24,6 +24,7 @@ import {
 import { format } from 'date-fns';
 import { toast } from "sonner";
 import { filterEntity } from "@/components/gov/dataClient";
+import { ADMIN_ROLES } from "@/components/auth/adminRoles";
 
 // Components (lazy-loaded with webpackChunkName for better caching)
 // Priority components - likely to be accessed first
@@ -155,9 +156,6 @@ function AdminDashboard() {
     const showNotifications = params.get('showNotifications');
     if (showNotifications === '1' || showNotifications === 'true') setNotifPopoverOpen(true);
   }, [location.search]);
-
-  // Board member roles that have admin-level access
-  const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
 
   useEffect(() => {
     let mounted = true;
