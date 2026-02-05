@@ -552,39 +552,76 @@ function AdminDashboard() {
                         if (tab.id === 'communication') {
                           const isCommActive = activeTab === 'communication';
                           return (
-                            <div key="communication-group" className="flex items-stretch">
-                              <TabsTrigger 
-                                value="communication"
-                                className={`
-                                  px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium 
-                                  data-[state=active]:bg-teal-700 data-[state=active]:text-white
-                                  hover:text-green-700 hover:bg-green-50 touch-manipulation
-                                  flex flex-col md:flex-row items-center gap-1 md:gap-1 md:justify-center
-                                  min-w-[60px] sm:min-w-[80px] md:min-w-0
-                                  ${isCommActive ? 'bg-teal-700 text-white' : ''}
-                                `}
-                              >
-                                <div className="whitespace-nowrap flex items-center gap-1">
-                                  <span className="hidden sm:inline">Communications</span>
-                                  <span className="sm:hidden">Comms</span>
-                                </div>
-                              </TabsTrigger>
+                            <React.Fragment key="email-comm-group">
+                              {/* Email Tool - moved to left of Communications */}
+                              <div className="hidden sm:flex items-stretch">
+                                <Link
+                                  to={createPageUrl('SendEmail')}
+                                  className="px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[60px] sm:min-w-[80px] touch-manipulation min-h-[44px] sm:min-h-0"
+                                >
+                                  <span className="hidden md:inline">Email Tool</span>
+                                  <span className="md:hidden">Email</span>
+                                </Link>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] sm:min-h-0"
+                                      aria-label="Email tool options"
+                                    >
+                                      <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start" className="min-w-[200px]">
+                                    <DropdownMenuItem asChild className="min-h-[44px] sm:min-h-0">
+                                      <Link to={createPageUrl('SendEmail')} className="flex items-center">
+                                        <Mail className="w-4 h-4 mr-2" /> Open Send Email
+                                      </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild className="min-h-[44px] sm:min-h-0">
+                                      <Link to={`${createPageUrl('SendEmail')}#templates-section`} className="flex items-center">
+                                        <FileText className="w-4 h-4 mr-2" /> Templates
+                                      </Link>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
 
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <button
-                                    type="button"
-                                    className={`px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
-                                    aria-label="Communications options"
-                                  >
-                                    <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="min-w-[160px]">
-                                  <DropdownMenuItem onClick={() => setActiveTab('communication')} className="min-h-[44px] sm:min-h-0">Open</DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
+                              {/* Communications */}
+                              <div className="flex items-stretch">
+                                <TabsTrigger 
+                                  value="communication"
+                                  className={`
+                                    px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium 
+                                    data-[state=active]:bg-teal-700 data-[state=active]:text-white
+                                    hover:text-green-700 hover:bg-green-50 touch-manipulation
+                                    flex flex-col md:flex-row items-center gap-1 md:gap-1 md:justify-center
+                                    min-w-[60px] sm:min-w-[80px] md:min-w-0
+                                    ${isCommActive ? 'bg-teal-700 text-white' : ''}
+                                  `}
+                                >
+                                  <div className="whitespace-nowrap flex items-center gap-1">
+                                    <span className="hidden sm:inline">Communications</span>
+                                    <span className="sm:hidden">Comms</span>
+                                  </div>
+                                </TabsTrigger>
+
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className={`px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
+                                      aria-label="Communications options"
+                                    >
+                                      <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    </button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="start" className="min-w-[160px]">
+                                    <DropdownMenuItem onClick={() => setActiveTab('communication')} className="min-h-[44px] sm:min-h-0">Open</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </React.Fragment>
                           );
                         }
 
