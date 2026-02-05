@@ -1,15 +1,45 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Search, MapPin, Map } from 'lucide-react';
 
+// Memoized hero image component for better performance
+const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClick, positionClass, hiddenOnMobile }) {
+  const isActive = activeImage === index;
+  
+  return (
+    <div 
+      onClick={() => onClick(index)}
+      className={`absolute transform transition-all duration-500 ease-out cursor-pointer will-change-transform ${
+        hiddenOnMobile ? 'hidden md:block' : ''
+      } ${isActive ? 'rotate-0 scale-110 z-50' : `${positionClass} hover:scale-105 hover:z-50`}`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick(index)}
+      aria-label={`View ${alt}`}
+    >
+      <div className="max-w-[280px] md:max-w-[340px] rounded-sm shadow-2xl">
+        <img 
+          src={src}
+          alt={alt}
+          className="w-full h-auto shadow-2xl drop-shadow-2xl"
+          loading={index <= 2 ? "eager" : "lazy"}
+          decoding="async"
+          width={340}
+          height={255}
+        />
+      </div>
+    </div>
+  );
+});
+
 const HeroSection = memo(function HeroSection() {
   const [activeImage, setActiveImage] = useState(null);
 
-  const handleImageClick = (index) => {
-    setActiveImage(activeImage === index ? null : index);
-  };
+  const handleImageClick = useCallback((index) => {
+    setActiveImage(prev => prev === index ? null : index);
+  }, []);
 
   return (
     <section className="relative min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-4 overflow-hidden py-12 md:py-0">
@@ -18,10 +48,12 @@ const HeroSection = memo(function HeroSection() {
         <source 
           media="(max-width: 640px)" 
           srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=60&w=640&auto=format&fit=crop" 
+          type="image/jpeg"
         />
         <source 
           media="(max-width: 1024px)" 
           srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=70&w=1024&auto=format&fit=crop" 
+          type="image/jpeg"
         />
         <img 
           src="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=80&w=2000&auto=format&fit=crop"
@@ -30,84 +62,48 @@ const HeroSection = memo(function HeroSection() {
           loading="eager"
           fetchPriority="high"
           decoding="async"
+          width={2000}
+          height={1333}
         />
       </picture>
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/50 to-stone-900/90 absolute inset-0"></div>
       
-      <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 px-4 animate-fade-in-up">
-        {/* Left Side Image */}
+      <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-8 md:gap-16 px-4">
+        {/* Left Side Image Gallery */}
         <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[350px] md:h-[450px] flex items-center justify-center">
-           {/* First Image - Tilted Left */}
-           <div 
-             onClick={() => handleImageClick(1)}
-             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
-               activeImage === 1 
-                 ? 'rotate-0 scale-110 z-50' 
-                 : '-rotate-6 -translate-x-8 z-10 hover:scale-105 hover:z-50'
-             }`}
-           >
-             <div className="max-w-[280px] md:max-w-[340px] rounded-sm shadow-2xl">
-               <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png" 
-                  alt="Union Springs Cemetery" 
-                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
-               />
-             </div>
-           </div>
-           
-           {/* Second Image - Tilted Right */}
-           <div 
-             onClick={() => handleImageClick(2)}
-             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
-               activeImage === 2 
-                 ? 'rotate-0 scale-110 z-50' 
-                 : 'rotate-6 translate-x-8 translate-y-4 z-20 hover:scale-105 hover:z-50'
-             }`}
-           >
-             <div className="max-w-[280px] md:max-w-[340px] rounded-sm shadow-2xl">
-               <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png" 
-                  alt="Union Springs Cemetery Gate" 
-                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
-               />
-             </div>
-           </div>
-
-           {/* Third Image - Top Position */}
-           <div 
-             onClick={() => handleImageClick(3)}
-             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer ${
-               activeImage === 3 
-                 ? 'rotate-0 translate-y-0 translate-x-0 scale-110 z-50' 
-                 : '-rotate-12 -translate-y-24 -translate-x-6 z-0 hover:scale-105 hover:z-50'
-             }`}
-           >
-             <div className="max-w-[280px] md:max-w-[340px] rounded-sm shadow-2xl">
-               <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png" 
-                  alt="Union Springs History" 
-                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
-               />
-             </div>
-           </div>
-
-           {/* Fourth Image - Bottom Right Overlay */}
-           <div 
-             onClick={() => handleImageClick(4)}
-             className={`absolute transform transition-all duration-500 ease-in-out cursor-pointer hidden md:block ${
-               activeImage === 4 
-                 ? 'rotate-0 translate-x-0 translate-y-0 scale-110 z-50' 
-                 : 'rotate-[25deg] translate-x-48 translate-y-32 z-30 hover:scale-105 hover:z-50'
-             }`}
-           >
-             <div className="max-w-[280px] md:max-w-[340px] rounded-sm shadow-2xl">
-               <img 
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png" 
-                  alt="Union Springs Church" 
-                  className="w-full h-auto shadow-2xl drop-shadow-2xl md:shadow-2xl"
-               />
-             </div>
-           </div>
+          <HeroImage
+            index={1}
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png"
+            alt="Union Springs Cemetery"
+            activeImage={activeImage}
+            onClick={handleImageClick}
+            positionClass="-rotate-6 -translate-x-8 z-10"
+          />
+          <HeroImage
+            index={2}
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png"
+            alt="Union Springs Cemetery Gate"
+            activeImage={activeImage}
+            onClick={handleImageClick}
+            positionClass="rotate-6 translate-x-8 translate-y-4 z-20"
+          />
+          <HeroImage
+            index={3}
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png"
+            alt="Union Springs History"
+            activeImage={activeImage}
+            onClick={handleImageClick}
+            positionClass="-rotate-12 -translate-y-24 -translate-x-6 z-0"
+          />
+          <HeroImage
+            index={4}
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
+            alt="Union Springs Church"
+            activeImage={activeImage}
+            onClick={handleImageClick}
+            positionClass="rotate-[25deg] translate-x-48 translate-y-32 z-30"
+            hiddenOnMobile
+          />
         </div>
 
         {/* Right Side Content */}
