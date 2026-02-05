@@ -170,10 +170,10 @@ export default function ServicesPage() {
                     </ServiceSection>
 
                     <ServiceSection title="Funeral Home Contacts" className="md:col-span-2">
-                        <ul className="space-y-3 sm:space-y-4 text-sm sm:text-base">
-                            <ExternalLinkItem name="Bailey Funeral Home" url="https://www.baileyfuneralhome.net" />
-                            <ExternalLinkItem name="Smith Monument" url="http://www.smithmonumentcompany.com/" />
-                            <ExternalLinkItem name="Central Monument" url="https://centralmonument.com/" />
+                        <ul className="space-y-1 sm:space-y-2 text-sm sm:text-base">
+                            {FUNERAL_CONTACTS.map((contact) => (
+                                <ExternalLinkItem key={contact.name} name={contact.name} url={contact.url} />
+                            ))}
                         </ul>
                     </ServiceSection>
                 </div>
