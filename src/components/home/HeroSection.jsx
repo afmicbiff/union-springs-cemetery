@@ -58,7 +58,7 @@ const HeroSection = memo(function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-[480px] sm:min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 py-8 sm:py-12 md:py-0" style={{ contentVisibility: 'auto', containIntrinsicSize: '100vw 700px' }}>
+    <section className="relative min-h-[600px] sm:min-h-[620px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 py-12 sm:py-16 md:py-0">
       {/* Background - optimized with smaller mobile image and WebP */}
       <picture className="absolute inset-0" aria-hidden="true">
         <source 
@@ -87,52 +87,119 @@ const HeroSection = memo(function HeroSection() {
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/60 to-stone-900/90 absolute inset-0"></div>
       
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-16 px-2 sm:px-4">
-        {/* Left Side Image Gallery - all 4 images visible on mobile, scattered layout */}
-        <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[320px] sm:h-[380px] md:h-[450px] flex items-center justify-center" style={{ contentVisibility: 'auto' }}>
-          {/* Image 1 - Top Left - Union Springs Cemetery */}
-          <HeroImage
-            index={1}
-            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/80931bb52_img-1767267629071.jpg"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/1cf0694e7_img-1767267629072.webp"
-            alt="Union Springs Cemetery"
-            activeImage={activeImage}
-            onClick={handleImageClick}
-            positionClass="-rotate-6 -translate-x-8"
-            mobilePositionClass="-rotate-6 -translate-x-20 -translate-y-24"
-          />
-          {/* Image 2 - Top Right - Union Springs Cemetery Gate */}
-          <HeroImage
-            index={2}
-            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ffe750753_img-1767267602235.jpg"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/7948b6c15_img-1767267602235.webp"
-            alt="Union Springs Cemetery Gate"
-            activeImage={activeImage}
-            onClick={handleImageClick}
-            positionClass="rotate-6 translate-x-8 translate-y-4"
-            mobilePositionClass="rotate-6 translate-x-20 -translate-y-20"
-          />
-          {/* Image 3 - Bottom Left - Union Springs History */}
-          <HeroImage
-            index={3}
-            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/b65c10f44_img-1767267640474.jpg"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/6e06dcd71_img-1767267640474.webp"
-            alt="Union Springs History"
-            activeImage={activeImage}
-            onClick={handleImageClick}
-            positionClass="-rotate-12 -translate-y-24 -translate-x-6"
-            mobilePositionClass="-rotate-8 -translate-x-20 translate-y-16"
-          />
-          {/* Image 4 - Church - Bottom Right on mobile */}
-          <HeroImage
-            index={4}
-            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dd9991be5_img-1767267584485.jpg"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ab190c6ca_img-1767267584485.webp"
-            alt="Union Springs Church"
-            activeImage={activeImage}
-            onClick={handleImageClick}
-            positionClass="rotate-[25deg] translate-x-48 translate-y-32"
-            mobilePositionClass="rotate-8 translate-x-20 translate-y-20"
-          />
+        {/* Left Side Image Gallery - 2x2 grid on mobile for all 4 images visible */}
+        <div className="flex-shrink-0 w-full md:w-1/2 max-w-md md:max-w-xl relative">
+          {/* Mobile: CSS Grid 2x2 layout, Desktop: absolute scattered */}
+          <div className="grid grid-cols-2 gap-3 md:hidden">
+            {/* Image 1 - Union Springs Cemetery */}
+            <div className="transform -rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300 cursor-pointer" onClick={() => handleImageClick(1)}>
+              <div className={`rounded-sm shadow-lg overflow-hidden ${activeImage === 1 ? 'ring-2 ring-teal-500 scale-105' : ''}`}>
+                <picture>
+                  <source srcSet="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/1cf0694e7_img-1767267629072.webp" type="image/webp" />
+                  <img 
+                    src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/80931bb52_img-1767267629071.jpg"
+                    alt="Union Springs Cemetery"
+                    className="w-full h-auto"
+                    loading="eager"
+                    width={170}
+                    height={128}
+                  />
+                </picture>
+              </div>
+            </div>
+            {/* Image 2 - Cemetery Gate */}
+            <div className="transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-300 cursor-pointer" onClick={() => handleImageClick(2)}>
+              <div className={`rounded-sm shadow-lg overflow-hidden ${activeImage === 2 ? 'ring-2 ring-teal-500 scale-105' : ''}`}>
+                <picture>
+                  <source srcSet="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/7948b6c15_img-1767267602235.webp" type="image/webp" />
+                  <img 
+                    src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ffe750753_img-1767267602235.jpg"
+                    alt="Union Springs Cemetery Gate"
+                    className="w-full h-auto"
+                    loading="eager"
+                    width={170}
+                    height={128}
+                  />
+                </picture>
+              </div>
+            </div>
+            {/* Image 3 - History */}
+            <div className="transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-300 cursor-pointer" onClick={() => handleImageClick(3)}>
+              <div className={`rounded-sm shadow-lg overflow-hidden ${activeImage === 3 ? 'ring-2 ring-teal-500 scale-105' : ''}`}>
+                <picture>
+                  <source srcSet="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/6e06dcd71_img-1767267640474.webp" type="image/webp" />
+                  <img 
+                    src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/b65c10f44_img-1767267640474.jpg"
+                    alt="Union Springs History"
+                    className="w-full h-auto"
+                    loading="lazy"
+                    width={170}
+                    height={128}
+                  />
+                </picture>
+              </div>
+            </div>
+            {/* Image 4 - Church */}
+            <div className="transform -rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-300 cursor-pointer" onClick={() => handleImageClick(4)}>
+              <div className={`rounded-sm shadow-lg overflow-hidden ${activeImage === 4 ? 'ring-2 ring-teal-500 scale-105' : ''}`}>
+                <picture>
+                  <source srcSet="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ab190c6ca_img-1767267584485.webp" type="image/webp" />
+                  <img 
+                    src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dd9991be5_img-1767267584485.jpg"
+                    alt="Union Springs Church"
+                    className="w-full h-auto"
+                    loading="lazy"
+                    width={170}
+                    height={128}
+                  />
+                </picture>
+              </div>
+            </div>
+          </div>
+          
+          {/* Desktop: Scattered absolute positioned layout */}
+          <div className="hidden md:block relative h-[450px]">
+            <HeroImage
+              index={1}
+              src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/80931bb52_img-1767267629071.jpg"
+              webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/1cf0694e7_img-1767267629072.webp"
+              alt="Union Springs Cemetery"
+              activeImage={activeImage}
+              onClick={handleImageClick}
+              positionClass="-rotate-6 -translate-x-8"
+              mobilePositionClass=""
+            />
+            <HeroImage
+              index={2}
+              src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ffe750753_img-1767267602235.jpg"
+              webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/7948b6c15_img-1767267602235.webp"
+              alt="Union Springs Cemetery Gate"
+              activeImage={activeImage}
+              onClick={handleImageClick}
+              positionClass="rotate-6 translate-x-8 translate-y-4"
+              mobilePositionClass=""
+            />
+            <HeroImage
+              index={3}
+              src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/b65c10f44_img-1767267640474.jpg"
+              webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/6e06dcd71_img-1767267640474.webp"
+              alt="Union Springs History"
+              activeImage={activeImage}
+              onClick={handleImageClick}
+              positionClass="-rotate-12 -translate-y-24 -translate-x-6"
+              mobilePositionClass=""
+            />
+            <HeroImage
+              index={4}
+              src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dd9991be5_img-1767267584485.jpg"
+              webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ab190c6ca_img-1767267584485.webp"
+              alt="Union Springs Church"
+              activeImage={activeImage}
+              onClick={handleImageClick}
+              positionClass="rotate-[25deg] translate-x-48 translate-y-32"
+              mobilePositionClass=""
+            />
+          </div>
         </div>
 
         {/* Right Side Content */}
