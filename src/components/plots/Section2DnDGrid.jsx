@@ -22,15 +22,30 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
   const { cells, bottomRowMarkers } = React.useMemo(() => {
     const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     
-    // Separate special range plots (186-207) from regular plots
-    const specialPlots = sorted.filter(p => {
+    // Build a map to deduplicate by plot number - keep the most recent one
+    const plotByNum = new Map();
+    sorted.forEach(p => {
       const n = parseNum(p.Grave);
-      return n >= SPECIAL_COL_RANGE.start && n <= SPECIAL_COL_RANGE.end;
+      if (n != null) {
+        plotByNum.set(n, p); // Later entries (same plot #) will overwrite
+      }
     });
-    const regularPlots = sorted.filter(p => {
-      const n = parseNum(p.Grave);
-      return n < SPECIAL_COL_RANGE.start || n > SPECIAL_COL_RANGE.end;
+    
+    // Separate special range plots (186-207) from regular plots - NO DUPLICATES
+    const specialPlots = [];
+    const regularPlots = [];
+    
+    plotByNum.forEach((p, n) => {
+      if (n >= SPECIAL_COL_RANGE.start && n <= SPECIAL_COL_RANGE.end) {
+        specialPlots.push(p);
+      } else {
+        regularPlots.push(p);
+      }
     });
+    
+    // Sort special plots by plot number ascending
+    specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
+    regularPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     
     // For regular plots, pivot starting from 208 (since 186-207 are in the special column)
     const idx208 = regularPlots.findIndex(p => parseNum(p.Grave) === 208);
@@ -39,12 +54,10 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     // 11 columns: column 0 is special (186-207), columns 1-10 are regular
     const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
 
-    // Fill special column (column 0) with plots 186-207 sorted ascending
-    // 186 at bottom (row 0), 207 at top (row 21)
-    const specialSorted = specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
-    for (let i = 0; i < specialSorted.length && i < perCol; i++) {
-      // Place 186 at row 0 (bottom), 187 at row 1, etc.
-      baseColumns[0][i] = specialSorted[i];
+    // Fill special column (column 0) with plots 186-207
+    // 186 at row 0 (bottom), 207 at row 21 (top) - exactly 22 plots
+    for (let i = 0; i < specialPlots.length && i < perCol; i++) {
+      baseColumns[0][i] = specialPlots[i];
     }
 
     // Fill regular columns (1-10) with remaining plots
