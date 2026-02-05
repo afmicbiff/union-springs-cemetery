@@ -58,7 +58,7 @@ const HeroSection = memo(function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-[480px] sm:min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 overflow-hidden py-8 sm:py-12 md:py-0" style={{ contentVisibility: 'auto', containIntrinsicSize: '100vw 700px' }}>
+    <section className="relative min-h-[480px] sm:min-h-[500px] md:h-[700px] flex items-center justify-center bg-[#0c0a09] px-3 sm:px-4 py-8 sm:py-12 md:py-0" style={{ contentVisibility: 'auto', containIntrinsicSize: '100vw 700px' }}>
       {/* Background - optimized with smaller mobile image and WebP */}
       <picture className="absolute inset-0" aria-hidden="true">
         <source 
