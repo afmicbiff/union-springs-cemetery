@@ -81,25 +81,7 @@ export default function NewPlotsAndMap() {
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">New Plots for Reservation</h1>
               <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
             </div>
-            <div className="flex flex-col items-center gap-2 w-full md:w-auto">
-              {/* Tab toggles */}
-              <div className="flex flex-col md:flex-row md:space-x-1 space-y-1 md:space-y-0 bg-gray-100 p-1 rounded-lg w-full max-w-xs md:max-w-none md:w-auto">
-                <button 
-                  onClick={() => setActiveTab('reservation1')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 whitespace-nowrap flex-shrink-0 w-full md:w-auto ${activeTab === 'reservation1' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  <Grid3X3 size={14} /> New Plots Map
-                </button>
 
-                <button 
-                  onClick={() => setActiveTab('data')}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition flex items-center justify-center gap-1 whitespace-nowrap flex-shrink-0 w-full md:w-auto ${activeTab === 'data' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                >
-                  <FileText size={14} /> Data List
-                </button>
-              </div>
-
-            </div>
           </div>
         </div>
       </header>
