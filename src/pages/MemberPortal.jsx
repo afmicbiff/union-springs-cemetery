@@ -126,10 +126,18 @@ const MemberPortal = memo(function MemberPortal() {
     // Memoized logout handler
     const handleLogout = useCallback(() => base44.auth.logout(), []);
 
-    // Manual dialog state
-    const [showManual, setShowManual] = useState(false);
+    // Manual dialog state - show on first visit unless dismissed
+    const [showManual, setShowManual] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return localStorage.getItem('member_portal_manual_dismissed') !== 'true';
+    });
     const handleOpenManual = useCallback(() => setShowManual(true), []);
-    const handleCloseManual = useCallback(() => setShowManual(false), []);
+    const handleCloseManual = useCallback((neverShowAgain = false) => {
+        if (neverShowAgain) {
+            localStorage.setItem('member_portal_manual_dismissed', 'true');
+        }
+        setShowManual(false);
+    }, []);
 
     if (authLoading) {
         return (

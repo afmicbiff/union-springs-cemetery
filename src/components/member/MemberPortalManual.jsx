@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   BookOpen, LayoutDashboard, UserCircle, MessageSquare, FileText, CheckCircle2,
   Receipt, MapPin, ChevronDown, ChevronRight, HelpCircle, Phone, Mail,
@@ -112,6 +114,11 @@ const ButtonExample = memo(function ButtonExample({ children, variant = 'default
 
 const MemberPortalManual = memo(function MemberPortalManual({ onClose }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [dontShowAgain, setDontShowAgain] = useState(false);
+
+  const handleClose = useCallback(() => {
+    if (onClose) onClose(dontShowAgain);
+  }, [onClose, dontShowAgain]);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -130,7 +137,7 @@ const MemberPortalManual = memo(function MemberPortalManual({ onClose }) {
               </div>
             </div>
             {onClose && (
-              <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20 shrink-0">
+              <Button variant="ghost" size="icon" onClick={handleClose} className="text-white hover:bg-white/20 shrink-0">
                 <X className="w-5 h-5" />
               </Button>
             )}
@@ -679,6 +686,25 @@ const MemberPortalManual = memo(function MemberPortalManual({ onClose }) {
               <Printer className="w-4 h-4" /> Print This Guide
             </Button>
           </div>
+
+          {/* Don't Show Again + Close */}
+          {onClose && (
+            <div className="mt-6 pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Checkbox 
+                  id="dont-show-again" 
+                  checked={dontShowAgain} 
+                  onCheckedChange={setDontShowAgain}
+                />
+                <Label htmlFor="dont-show-again" className="text-sm text-stone-600 cursor-pointer">
+                  Don't show this guide automatically on login
+                </Label>
+              </div>
+              <Button onClick={handleClose} className="bg-teal-700 hover:bg-teal-800 h-10 px-6 touch-manipulation">
+                Close Guide
+              </Button>
+            </div>
+          )}
 
         </CardContent>
       </Card>
