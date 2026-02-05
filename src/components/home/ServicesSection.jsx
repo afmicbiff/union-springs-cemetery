@@ -19,38 +19,6 @@ const ServiceItem = memo(function ServiceItem({ text }) {
 const ServicesSection = memo(function ServicesSection() {
   return (
     <>
-      {/* Quick Links Section - Overlapping black area */}
-      <section className="relative z-20">
-        {/* Black background extension for card overlap effect */}
-        <div className="absolute inset-x-0 top-0 h-20 sm:h-24 md:h-28 bg-[#0c0a09]" aria-hidden="true" />
-        {/* Stone background for below */}
-        <div className="absolute inset-x-0 top-20 sm:top-24 md:top-28 bottom-0 bg-stone-50" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-8 md:pb-12">
-          <div className="bg-white p-4 sm:p-6 rounded-sm shadow-[0_-15px_35px_rgba(0,0,0,0.5)] flex flex-wrap items-center justify-center gap-2 sm:gap-4 md:gap-8 text-center">
-            <Link 
-              to={createPageUrl('Plots')} 
-              className="text-teal-700 font-bold uppercase text-xs tracking-widest hover:text-teal-900 hover:underline underline-offset-4 px-2 py-1"
-            >
-              Old Cemetery Plots
-            </Link>
-            <span className="text-stone-300 hidden sm:inline" aria-hidden="true">|</span>
-            <Link 
-              to={createPageUrl('Search')} 
-              className="text-teal-700 font-bold uppercase text-xs tracking-widest hover:text-teal-900 hover:underline underline-offset-4 px-2 py-1"
-            >
-              Search Records
-            </Link>
-            <span className="text-stone-300 hidden sm:inline" aria-hidden="true">|</span>
-            <Link 
-              to={createPageUrl('NewPlotsAndMap')} 
-              className="text-teal-700 font-bold uppercase text-xs tracking-widest hover:text-teal-900 hover:underline underline-offset-4 px-2 py-1"
-            >
-              New Plots
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Services Section */}
       <section className="py-16 md:py-24 bg-stone-50 border-t border-stone-200">
          <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center gap-12 lg:gap-20">
