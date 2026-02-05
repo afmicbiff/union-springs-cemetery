@@ -138,8 +138,8 @@ const MemberTasks = memo(function MemberTasks({ user }) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['member-tasks']);
-      queryClient.invalidateQueries(['member-tasks-indicator']);
+      queryClient.invalidateQueries({ queryKey: ['member-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['member-tasks-indicator'] });
       toast.success('Task status updated');
     },
     onError: (e) => toast.error(e.message || 'Failed to update task'),
