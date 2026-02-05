@@ -9,13 +9,13 @@ import { Loader2, Shield, RefreshCw, AlertCircle, ChevronDown, ChevronUp } from 
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
-// Critical path components - loaded immediately
+// Critical path components - loaded immediately (already memoized)
 import SecurityStatsCards from '@/components/security/SecurityStatsCards';
 import SecurityFilters from '@/components/security/SecurityFilters';
 import SecurityEventRow from '@/components/security/SecurityEventRow';
 import ExportDropdown from '@/components/security/ExportDropdown';
 
-// Lazy load heavy/non-critical components
+// Lazy load ALL heavy/non-critical components for mobile performance
 const SecurityCharts = lazy(() => import('@/components/security/SecurityCharts'));
 const BlockedIPsTable = lazy(() => import('@/components/security/BlockedIPsTable'));
 const AISecurityInsights = lazy(() => import('@/components/security/AISecurityInsights'));
@@ -30,14 +30,36 @@ const SIEMCorrelationEngine = lazy(() => import('@/components/security/SIEMCorre
 const IOCSweepPanel = lazy(() => import('@/components/security/IOCSweepPanel'));
 const InvestigationPlaybooks = lazy(() => import('@/components/security/InvestigationPlaybooks'));
 
-// Skeleton loader for lazy components
-const CardSkeleton = () => (
+// Minimal skeleton loader
+const CardSkeleton = memo(() => (
   <Card>
-    <CardContent className="py-8 flex justify-center">
-      <Loader2 className="w-5 h-5 animate-spin text-stone-400" />
+    <CardContent className="py-6 flex justify-center">
+      <div className="w-5 h-5 border-2 border-stone-300 border-t-transparent rounded-full animate-spin" />
     </CardContent>
   </Card>
-);
+));
+
+// Collapsible section wrapper for mobile - prevents unnecessary renders
+const CollapsibleSection = memo(function CollapsibleSection({ title, isOpen, onToggle, children }) {
+  return (
+    <div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onToggle}
+        className="h-8 text-xs gap-1.5 mb-2 touch-manipulation active:bg-stone-200"
+      >
+        {isOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        {title}
+      </Button>
+      {isOpen && (
+        <Suspense fallback={<CardSkeleton />}>
+          {children}
+        </Suspense>
+      )}
+    </div>
+  );
+});
 
 function SecurityDashboard() {
   const qc = useQueryClient();
@@ -48,13 +70,21 @@ function SecurityDashboard() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   
-  // UI state
+  // UI state - all collapsed by default for mobile performance
   const [details, setDetails] = useState(null);
   const [blockIp, setBlockIp] = useState({ open: false, ip: '' });
   const [blockedView, setBlockedView] = useState('active');
-  const [showCharts, setShowCharts] = useState(false); // Default collapsed for faster initial load
+  const [showCharts, setShowCharts] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [showBlockedIPs, setShowBlockedIPs] = useState(false); // Lazy load blocked IPs section
+  const [showBlockedIPs, setShowBlockedIPs] = useState(false);
+  const [showAIInsights, setShowAIInsights] = useState(false);
+  const [showPlaybooks, setShowPlaybooks] = useState(false);
+  const [showSIEM, setShowSIEM] = useState(false);
+  const [showIOC, setShowIOC] = useState(false);
+  const [showThreatHunting, setShowThreatHunting] = useState(false);
+  const [showThreatIntel, setShowThreatIntel] = useState(false);
+  const [showIncidentTriage, setShowIncidentTriage] = useState(false);
+  const [showAutoResponse, setShowAutoResponse] = useState(false);
 
   // Auth check - high priority
   const { data: user, isLoading: userLoading } = useQuery({
@@ -201,6 +231,19 @@ function SecurityDashboard() {
 
   const openDetails = useCallback((event) => setDetails(event), []);
   const closeDetails = useCallback((open) => !open && setDetails(null), []);
+  
+  // Toggle handlers - memoized for performance
+  const toggleCharts = useCallback(() => setShowCharts(p => !p), []);
+  const toggleConfig = useCallback(() => setShowConfig(p => !p), []);
+  const toggleBlockedIPs = useCallback(() => setShowBlockedIPs(p => !p), []);
+  const toggleAIInsights = useCallback(() => setShowAIInsights(p => !p), []);
+  const togglePlaybooks = useCallback(() => setShowPlaybooks(p => !p), []);
+  const toggleSIEM = useCallback(() => setShowSIEM(p => !p), []);
+  const toggleIOC = useCallback(() => setShowIOC(p => !p), []);
+  const toggleThreatHunting = useCallback(() => setShowThreatHunting(p => !p), []);
+  const toggleThreatIntel = useCallback(() => setShowThreatIntel(p => !p), []);
+  const toggleIncidentTriage = useCallback(() => setShowIncidentTriage(p => !p), []);
+  const toggleAutoResponse = useCallback(() => setShowAutoResponse(p => !p), []);
 
   // Loading state
   if (userLoading) {
@@ -288,98 +331,74 @@ function SecurityDashboard() {
           types={types}
         />
 
-        {/* Charts Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowCharts(!showCharts)}
-          className="h-7 text-xs gap-1"
-        >
-          {showCharts ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {showCharts ? 'Hide Charts' : 'Show Charts'}
-        </Button>
-
-        {/* Charts - Lazy loaded */}
-        {showCharts && (
-          <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-3 gap-3"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>}>
+        {/* All sections collapsed by default for mobile - expand on demand */}
+        <div className="space-y-2">
+          {/* Charts */}
+          <CollapsibleSection title={showCharts ? 'Hide Charts' : 'Show Charts'} isOpen={showCharts} onToggle={toggleCharts}>
             <SecurityCharts events={filtered} />
-          </Suspense>
-        )}
+          </CollapsibleSection>
 
-        {/* AI Insights - Lazy loaded */}
-        <Suspense fallback={<CardSkeleton />}>
-          <AISecurityInsights events={filtered} />
-        </Suspense>
+          {/* AI Insights */}
+          <CollapsibleSection title={showAIInsights ? 'Hide AI Insights' : 'AI Security Insights'} isOpen={showAIInsights} onToggle={toggleAIInsights}>
+            <AISecurityInsights events={filtered} />
+          </CollapsibleSection>
 
-        {/* Investigation Playbooks */}
-        <Suspense fallback={<CardSkeleton />}>
-          <InvestigationPlaybooks />
-        </Suspense>
+          {/* Investigation Playbooks */}
+          <CollapsibleSection title={showPlaybooks ? 'Hide Playbooks' : 'Investigation Playbooks'} isOpen={showPlaybooks} onToggle={togglePlaybooks}>
+            <InvestigationPlaybooks />
+          </CollapsibleSection>
 
-        {/* SIEM Correlation Engine */}
-        <Suspense fallback={<CardSkeleton />}>
-          <SIEMCorrelationEngine />
-        </Suspense>
+          {/* SIEM Correlation */}
+          <CollapsibleSection title={showSIEM ? 'Hide SIEM' : 'SIEM Correlation Engine'} isOpen={showSIEM} onToggle={toggleSIEM}>
+            <SIEMCorrelationEngine />
+          </CollapsibleSection>
 
-        {/* IOC Sweep */}
-        <Suspense fallback={<CardSkeleton />}>
-          <IOCSweepPanel />
-        </Suspense>
+          {/* IOC Sweep */}
+          <CollapsibleSection title={showIOC ? 'Hide IOC Sweep' : 'IOC Sweep Panel'} isOpen={showIOC} onToggle={toggleIOC}>
+            <IOCSweepPanel />
+          </CollapsibleSection>
 
-        {/* Threat Hunting Dashboard */}
-        <Suspense fallback={<CardSkeleton />}>
-          <ThreatHuntingDashboard />
-        </Suspense>
+          {/* Threat Hunting */}
+          <CollapsibleSection title={showThreatHunting ? 'Hide Threat Hunting' : 'Threat Hunting'} isOpen={showThreatHunting} onToggle={toggleThreatHunting}>
+            <ThreatHuntingDashboard />
+          </CollapsibleSection>
 
-        {/* Threat Intelligence Panel */}
-        <Suspense fallback={<CardSkeleton />}>
-          <ThreatIntelPanel 
-            initialIndicators={indicators.slice(0, 10)} 
-            onBlockIp={openBlockIp} 
-          />
-        </Suspense>
+          {/* Threat Intel */}
+          <CollapsibleSection title={showThreatIntel ? 'Hide Threat Intel' : 'Threat Intelligence'} isOpen={showThreatIntel} onToggle={toggleThreatIntel}>
+            <ThreatIntelPanel initialIndicators={indicators.slice(0, 10)} onBlockIp={openBlockIp} />
+          </CollapsibleSection>
 
-        {/* Incident Triage */}
-        <Suspense fallback={<CardSkeleton />}>
-          <IncidentTriageManager events={filtered} />
-        </Suspense>
+          {/* Incident Triage */}
+          <CollapsibleSection title={showIncidentTriage ? 'Hide Triage' : 'Incident Triage'} isOpen={showIncidentTriage} onToggle={toggleIncidentTriage}>
+            <IncidentTriageManager events={filtered} />
+          </CollapsibleSection>
 
-        {/* Auto-Response Rules */}
-        <Suspense fallback={<CardSkeleton />}>
-          <AutoResponseManager />
-        </Suspense>
+          {/* Auto-Response */}
+          <CollapsibleSection title={showAutoResponse ? 'Hide Auto-Response' : 'Auto-Response Rules'} isOpen={showAutoResponse} onToggle={toggleAutoResponse}>
+            <AutoResponseManager />
+          </CollapsibleSection>
 
-        {/* Alert Configuration (collapsible) */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowConfig(!showConfig)}
-          className="h-7 text-xs gap-1"
-        >
-          {showConfig ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {showConfig ? 'Hide Alert Configuration' : 'Show Alert Configuration'}
-        </Button>
-        {showConfig && (
-          <Suspense fallback={<CardSkeleton />}>
+          {/* Alert Config */}
+          <CollapsibleSection title={showConfig ? 'Hide Alert Config' : 'Alert Configuration'} isOpen={showConfig} onToggle={toggleConfig}>
             <AlertConfigPanel />
-          </Suspense>
-        )}
+          </CollapsibleSection>
+        </div>
 
-        {/* Blocked IPs - Collapsible to reduce initial load */}
+        {/* Blocked IPs - Collapsible */}
         <Card>
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <Button
                 variant="ghost"
-                className="p-0 h-auto text-sm sm:text-base lg:text-lg font-semibold justify-start gap-1"
-                onClick={() => setShowBlockedIPs(!showBlockedIPs)}
+                className="p-0 h-auto text-sm sm:text-base font-semibold justify-start gap-1.5 touch-manipulation"
+                onClick={toggleBlockedIPs}
               >
                 {showBlockedIPs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 Blocked IPs {showBlockedIPs && `(${filteredBlocked.length})`}
               </Button>
               {showBlockedIPs && (
                 <Select value={blockedView} onValueChange={setBlockedView}>
-                  <SelectTrigger className="w-28 sm:w-32 h-7 sm:h-8 text-xs sm:text-sm">
+                  <SelectTrigger className="w-24 sm:w-28 h-7 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -392,8 +411,8 @@ function SecurityDashboard() {
             </div>
           </CardHeader>
           {showBlockedIPs && (
-            <CardContent className="px-3 sm:px-6">
-              <Suspense fallback={<div className="py-4 flex justify-center"><Loader2 className="w-5 h-5 animate-spin" /></div>}>
+            <CardContent className="px-2 sm:px-6">
+              <Suspense fallback={<div className="py-4 flex justify-center"><div className="w-5 h-5 border-2 border-stone-300 border-t-transparent rounded-full animate-spin" /></div>}>
                 <BlockedIPsTable
                   records={filteredBlocked}
                   intelMap={intelMap}
@@ -405,40 +424,40 @@ function SecurityDashboard() {
           )}
         </Card>
 
-        {/* Events Table */}
+        {/* Events Table - optimized for mobile */}
         <Card>
-          <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <CardTitle className="text-sm sm:text-base lg:text-lg">
+          <CardHeader className="pb-2 px-2 sm:px-6">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-sm sm:text-base">
                 Events ({filtered.length})
               </CardTitle>
               <ExportDropdown events={filtered} />
             </div>
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
+          <CardContent className="px-0 sm:px-6">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8 sm:py-12 text-stone-500 text-sm">
-                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" /> Loading events…
+              <div className="flex items-center justify-center py-8 text-stone-500 text-sm">
+                <div className="w-4 h-4 mr-2 border-2 border-stone-300 border-t-transparent rounded-full animate-spin" /> Loading…
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-8 sm:py-12 text-stone-500 text-sm">
-                No security events match your filters.
+              <div className="text-center py-8 text-stone-500 text-xs sm:text-sm">
+                No events match filters.
               </div>
             ) : (
-              <div className="overflow-x-auto -mx-3 sm:mx-0">
-                <table className="w-full text-sm min-w-[600px]">
-                  <thead className="bg-stone-50">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs sm:text-sm min-w-[500px]">
+                  <thead className="bg-stone-50 sticky top-0">
                     <tr>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">When</th>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">Severity</th>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">Type</th>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">Message</th>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">IP</th>
-                      <th className="p-1.5 sm:p-2 text-left text-[10px] sm:text-xs font-medium">Actions</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium">When</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium">Sev</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium hidden sm:table-cell">Type</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium">Message</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium">IP</th>
+                      <th className="p-1.5 text-left text-[10px] sm:text-xs font-medium">Act</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {filtered.slice(0, 100).map(e => (
+                    {filtered.slice(0, 50).map(e => (
                       <SecurityEventRow
                         key={e.id}
                         event={e}
@@ -450,9 +469,9 @@ function SecurityDashboard() {
                     ))}
                   </tbody>
                 </table>
-                {filtered.length > 100 && (
-                  <p className="text-center py-3 text-xs text-stone-500">
-                    Showing first 100 of {filtered.length} events. Use filters to narrow results.
+                {filtered.length > 50 && (
+                  <p className="text-center py-2 text-[10px] sm:text-xs text-stone-500">
+                    Showing 50 of {filtered.length}. Filter to see more.
                   </p>
                 )}
               </div>
