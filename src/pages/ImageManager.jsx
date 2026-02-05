@@ -553,23 +553,41 @@ function ImageManager() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                   style={{ contentVisibility: 'auto', containIntrinsicSize: '0 500px' }}
                 >
-                  {displayed.map(img => (
-                    <ImageCard
-                      key={img.id}
-                      img={img}
-                      altEdit={altEdits[img.id] ?? (img.alt_text || '')}
-                      onAltChange={handleAltChange}
-                      onSaveAlt={updateAlt}
-                      quality={perImageQuality[img.id] ?? 80}
-                      onQualityChange={handleQualityChange}
-                      reoptLoading={!!reoptLoading[img.id]}
-                      onReOptimize={reOptimize}
-                      onDownload={handleDownload}
-                      onCopy={handleCopy}
-                      onDelete={deleteImage}
-                      onOpenDetails={openDetails}
-                    />
-                  ))}
+                  {displayed.map(img => {
+                    const isSvg = img.image_type === 'svg' || img.svg_url || img.original_url?.toLowerCase().endsWith('.svg');
+                    
+                    if (isSvg) {
+                      return (
+                        <SVGCard
+                          key={img.id}
+                          img={img}
+                          altEdit={altEdits[img.id] ?? (img.alt_text || '')}
+                          onAltChange={handleAltChange}
+                          onSaveAlt={updateAlt}
+                          onCopy={handleCopy}
+                          onDelete={deleteImage}
+                        />
+                      );
+                    }
+                    
+                    return (
+                      <ImageCard
+                        key={img.id}
+                        img={img}
+                        altEdit={altEdits[img.id] ?? (img.alt_text || '')}
+                        onAltChange={handleAltChange}
+                        onSaveAlt={updateAlt}
+                        quality={perImageQuality[img.id] ?? 80}
+                        onQualityChange={handleQualityChange}
+                        reoptLoading={!!reoptLoading[img.id]}
+                        onReOptimize={reOptimize}
+                        onDownload={handleDownload}
+                        onCopy={handleCopy}
+                        onDelete={deleteImage}
+                        onOpenDetails={openDetails}
+                      />
+                    );
+                  })}
                 </div>
 
                 {displayed.length === 0 && images.length > 0 && (
