@@ -670,3 +670,5 @@ function AdminDashboard() {
     </div>
   );
 }
+
+export default memo(AdminDashboard);
