@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback, useMemo, lazy, Suspense, useRef, useEffect } from 'react';
+import React, { useState, memo, useCallback, useMemo, lazy, Suspense } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -189,8 +189,8 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
 
     const queryClient = useQueryClient();
 
-    // 1. Fetch Tasks
-    const { data: tasks = [], isLoading: isLoadingTasks, isError: isTasksError } = useQuery({
+    // 1. Fetch Tasks - optimized with select for reduced re-renders
+    const { data: tasks = [], isLoading: isLoadingTasks, isError: isTasksError, error: tasksError } = useQuery({
         queryKey: ['tasks', isAdmin, currentEmployeeId, statusFilter, priorityFilter, showArchived, debouncedSearchTerm],
         queryFn: async () => {
             const where = { is_archived: showArchived };
@@ -208,6 +208,8 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
         retry: 2,
+        // Stabilize reference to prevent unnecessary re-renders
+        structuralSharing: true,
     });
 
     // 2. Fetch Employees (for assignment mapping)
@@ -563,8 +565,8 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
                         <div className="text-center py-8 sm:py-12 text-red-600 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
                             <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-60" />
                             <p className="text-sm font-medium">Failed to load tasks</p>
-                            <p className="text-xs text-red-500 mt-1">Please check your connection and try again</p>
-                            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries(['tasks'])} className="mt-3 h-8 text-xs">
+                            <p className="text-xs text-red-500 mt-1">{tasksError?.message || 'Please check your connection and try again'}</p>
+                            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries(['tasks'])} className="mt-3 h-8 text-xs touch-manipulation">
                                 <RefreshCw className="w-3.5 h-3.5 mr-1" /> Retry
                             </Button>
                         </div>

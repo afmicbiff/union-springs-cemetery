@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo, Fragment } from 'react';
+import React, { useState, useCallback, useMemo, memo, Fragment, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -139,7 +139,7 @@ function AdminDashboard() {
   const [initialParams, setInitialParams] = useState({});
   const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
     if (tab === 'security') {
@@ -153,20 +153,25 @@ function AdminDashboard() {
     if (showNotifications === '1' || showNotifications === 'true') setNotifPopoverOpen(true);
   }, [location.search]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let mounted = true;
     const checkAuth = async () => {
-      const user = await base44.auth.me().catch(() => null);
-      if (!mounted) return;
-      if (!user) {
+      try {
+        const user = await base44.auth.me();
+        if (!mounted) return;
+        if (!user) {
+          base44.auth.redirectToLogin(window.location.pathname);
+          return;
+        }
+        if (user.role !== 'admin') {
+          window.location.href = '/';
+          return;
+        }
+        setIsAuthorized(true);
+      } catch {
+        if (!mounted) return;
         base44.auth.redirectToLogin(window.location.pathname);
-        return;
       }
-      if (user.role !== 'admin') {
-        window.location.href = '/';
-        return;
-      }
-      setIsAuthorized(true);
     };
     checkAuth();
     return () => { mounted = false; };
