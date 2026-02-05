@@ -1052,8 +1052,6 @@ export default function PlotsPage() {
       const rawPlot = params.get('plot') || '';
       if (!rawSection && !rawPlot) return;
 
-      setActiveTab('map');
-
       const rawNorm = rawSection.replace(/Section\s/i, '').trim();
       const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
       if (sectionNorm) {
