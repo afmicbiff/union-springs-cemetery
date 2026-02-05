@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo, memo } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -6,17 +6,142 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, Calendar, MapPin, ChevronRight, ExternalLink, MessageSquare } from 'lucide-react';
+import { Search, Loader2, MapPin, ChevronRight, ExternalLink, Filter, X } from 'lucide-react';
 import { format, isValid } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-
 import { Label } from "@/components/ui/label";
-import { Filter, X } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
-import QuickSearchDropdown from "@/components/search/QuickSearchDropdown";
+
+// Memoized result card for performance
+const ResultCard = memo(function ResultCard({ person, locationSearch }) {
+  const plotSection = person.plot_location?.split('-')[0] || 'Main';
+  const plotNumber = (person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '';
+  const normalizedSection = normalizeSectionKey(plotSection);
+  
+  const birthYear = person.date_of_birth && isValid(new Date(person.date_of_birth)) 
+    ? format(new Date(person.date_of_birth), 'yyyy') : '';
+  const deathYear = person.date_of_death && isValid(new Date(person.date_of_death)) 
+    ? format(new Date(person.date_of_death), 'yyyy') : '';
+  const dateRange = birthYear && deathYear ? `${birthYear} - ${deathYear}` : birthYear || deathYear || '';
+
+  return (
+    <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardContent className="p-4 sm:p-5 flex flex-col h-full">
+        {/* Header with name and section badge */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-900 leading-tight break-words">
+              {person.first_name} {person.last_name}
+            </h3>
+            {dateRange && (
+              <p className="text-stone-500 text-sm font-medium uppercase tracking-wider mt-1">
+                {dateRange}
+              </p>
+            )}
+          </div>
+          <Badge variant="outline" className="self-start border-teal-600 text-teal-700 bg-teal-50 rounded-sm px-3 py-1 whitespace-nowrap text-xs sm:text-sm">
+            Section {plotSection}
+          </Badge>
+        </div>
+
+        {/* Details */}
+        <div className="space-y-2 flex-1">
+          {person.family_name && (
+            <p className="text-stone-700 text-sm">Family: <span className="font-medium">{person.family_name}</span></p>
+          )}
+          {person.veteran_status && (
+            <p className="text-red-700 text-xs font-semibold uppercase tracking-wide">Veteran</p>
+          )}
+          <div className="flex items-center text-stone-600 text-sm">
+            <MapPin className="w-4 h-4 mr-2 text-red-600 shrink-0" aria-hidden="true" />
+            <span className="break-words">Plot: {person.plot_location || 'Unknown'}</span>
+          </div>
+          {person.notes && (
+            <p className="text-stone-600 text-sm bg-yellow-50 p-2 rounded border border-yellow-100 break-words line-clamp-2">
+              Note: {person.notes}
+            </p>
+          )}
+          {person.obituary && (
+            <p className="text-stone-600 text-sm line-clamp-2 italic break-words">
+              {person.obituary}
+            </p>
+          )}
+        </div>
+
+        {/* Action buttons - stacked on mobile, side by side on larger */}
+        <div className="mt-4 pt-3 border-t border-stone-200 flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <Link 
+            to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizedSection)}&plot=${encodeURIComponent(plotNumber)}&from=search`}
+            state={{ search: locationSearch }}
+            className="flex-1"
+          >
+            <Button variant="outline" className="w-full h-11 bg-white text-teal-700 border-teal-600 hover:bg-teal-50 active:bg-teal-100 touch-manipulation">
+              View on Map
+            </Button>
+          </Link>
+          <Link 
+            to={`${createPageUrl('Memorial')}?id=${person.id}`}
+            state={{ search: locationSearch }}
+            className="flex-1"
+          >
+            <Button className="w-full h-11 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation">
+              Full Memorial <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+// Memoized empty state component
+const EmptyState = memo(function EmptyState({ onClear }) {
+  return (
+    <div className="text-center py-12 bg-white rounded-sm border border-stone-200 space-y-4 px-4">
+      <p className="text-stone-500 text-lg font-serif">No records found matching your search.</p>
+      <Button variant="link" onClick={onClear} className="text-teal-600 h-11 touch-manipulation">
+        Clear filters
+      </Button>
+      <div className="pt-4 border-t border-stone-100 max-w-md mx-auto mt-4">
+        <p className="text-stone-600 mb-3 text-sm sm:text-base">Click on the Find A Grave button for additional searches for your loved ones.</p>
+        <a href="https://www.findagrave.com/" target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" className="border-stone-400 text-stone-600 hover:bg-stone-100 h-11 touch-manipulation">
+            Find a Grave <ExternalLink className="w-4 h-4 ml-2" aria-hidden="true" />
+          </Button>
+        </a>
+      </div>
+    </div>
+  );
+});
+
+// Memoized initial state component
+const InitialState = memo(function InitialState() {
+  return (
+    <div className="text-center py-16 sm:py-24 bg-stone-50/50 rounded-sm border border-stone-200 border-dashed px-4">
+      <Search className="w-10 h-10 sm:w-12 sm:h-12 text-stone-300 mx-auto mb-4" aria-hidden="true" />
+      <p className="text-stone-500 text-base sm:text-lg font-serif">Enter a name or use filters to search the directory.</p>
+    </div>
+  );
+});
+
+// Section options - static data outside component
+const SECTION_OPTIONS = [
+  { value: 'all', label: 'All Sections' },
+  { value: 'North', label: 'North' },
+  { value: 'South', label: 'South' },
+  { value: 'East', label: 'East' },
+  { value: 'West', label: 'West' },
+  { value: 'Garden of Peace', label: 'Garden of Peace' },
+  { value: 'Old Historic', label: 'Old Historic' },
+];
+
+const VETERAN_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'true', label: 'Veteran' },
+  { value: 'false', label: 'Non-Veteran' },
+];
 
 
 
