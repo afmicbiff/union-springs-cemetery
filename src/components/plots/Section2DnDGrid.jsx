@@ -10,8 +10,8 @@ function parseNum(v) {
 // Plots that should have +New button below them - defined outside component for stable reference
 const NEW_PLOT_TARGETS = new Set([186, 217, 236, 248, 271, 309, 391, 477, 595]);
 
-// Special column for plots 186-207 (inserted as column 1, after 199's original position)
-const SPECIAL_COL_RANGE = { start: 186, end: 207 };
+// Special column for plots 228-250 (first column in Section 2)
+const SPECIAL_COL_RANGE = { start: 228, end: 250 };
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
   const perCol = 25;
