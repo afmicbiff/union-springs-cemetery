@@ -171,10 +171,28 @@ function ImageManager() {
       const uploaded = await base44.integrations.Core.UploadFile({ file });
       const file_url = uploaded?.file_url;
       if (!file_url) throw new Error('Upload failed');
-      await base44.functions.invoke('tinyPngOptimize', { file_url, alt_text: alt, quality_jpeg: qualityJpeg, quality_webp: qualityWebp, mode: 'new' });
+      
+      // Check if it's an SVG file
+      const isSvg = file.name?.toLowerCase().endsWith('.svg') || file.type === 'image/svg+xml';
+      
+      if (isSvg) {
+        // For SVG, store directly without optimization
+        await base44.entities.Image.create({
+          original_url: file_url,
+          svg_url: file_url,
+          image_type: 'svg',
+          alt_text: alt || '',
+          original_size: file.size,
+        });
+        toast.success('SVG uploaded successfully');
+      } else {
+        // For raster images, optimize
+        await base44.functions.invoke('tinyPngOptimize', { file_url, alt_text: alt, quality_jpeg: qualityJpeg, quality_webp: qualityWebp, mode: 'new' });
+        toast.success('Image uploaded & optimized');
+      }
+      
       setFile(null);
       setAlt('');
-      toast.success('Image uploaded & optimized');
       qc.invalidateQueries({ queryKey: ['images'] });
     } catch (err) {
       toast.error('Upload failed: ' + (err?.message || 'Unknown error'));
@@ -414,7 +432,7 @@ function ImageManager() {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Input 
                 type="file" 
-                accept="image/*" 
+                accept="image/*,.svg" 
                 onChange={(e) => setFile(e.target.files?.[0] || null)} 
                 className="h-8 sm:h-9 text-sm flex-1"
               />
