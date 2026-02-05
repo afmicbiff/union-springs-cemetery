@@ -151,23 +151,23 @@ export default function ContactPage() {
                         </div>
                     </div>
 
-                    {/* Contact Form */}
-                    <Card className="border-none shadow-xl bg-white">
-                        <CardHeader className="bg-stone-900 text-white rounded-t-xl p-8">
-                            <CardTitle className="font-serif text-2xl">Send us a Message</CardTitle>
-                            <CardDescription className="text-stone-300">
-                                Fill out the form below and we'll get back to you as soon as possible.
+                    {/* Contact Form - shows first on mobile */}
+                    <Card className="border-none shadow-xl bg-white order-1 lg:order-2">
+                        <CardHeader className="bg-stone-900 text-white rounded-t-xl p-5 sm:p-6 md:p-8">
+                            <CardTitle className="font-serif text-xl sm:text-2xl">Send us a Message</CardTitle>
+                            <CardDescription className="text-stone-300 text-sm sm:text-base">
+                                We'll respond within 24 hours.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="p-8">
+                        <CardContent className="p-4 sm:p-6 md:p-8">
                             {isSubmitted ? (
-                                <div className="text-center py-12 space-y-4 animate-in fade-in zoom-in duration-500">
-                                    <div className="w-16 h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircle2 className="w-8 h-8" />
+                                <div className="text-center py-8 sm:py-12 space-y-4">
+                                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <CheckCircle2 className="w-7 h-7 sm:w-8 sm:h-8" />
                                     </div>
-                                    <h3 className="text-2xl font-serif text-stone-800">Message Sent</h3>
-                                    <p className="text-stone-600 max-w-sm mx-auto">
-                                        The message "<strong>{formData.subject}</strong>" was successfully sent, and within 24 hours, a team member will get back to you about your question.
+                                    <h3 className="text-xl sm:text-2xl font-serif text-stone-800">Message Sent!</h3>
+                                    <p className="text-stone-600 text-sm sm:text-base max-w-sm mx-auto px-2">
+                                        We received your message about "<strong className="text-stone-800">{formData.subject}</strong>" and will respond soon.
                                     </p>
                                     <Button 
                                         variant="outline" 
@@ -175,57 +175,60 @@ export default function ContactPage() {
                                             setIsSubmitted(false);
                                             setFormData({ name: '', email: '', subject: '', message: '' });
                                         }}
-                                        className="mt-6"
+                                        className="mt-4 sm:mt-6 touch-manipulation"
                                     >
                                         Send Another Message
                                     </Button>
                                 </div>
                             ) : (
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-stone-700">Full Name</Label>
+                                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="name" className="text-stone-700 text-sm sm:text-base">Full Name</Label>
                                         <Input
                                             id="name"
                                             name="name"
-                                            placeholder="John Doe"
+                                            placeholder="Your name"
                                             minLength={2}
                                             required
+                                            autoComplete="name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className="bg-stone-50 border-stone-200 focus:border-teal-500"
+                                            className="bg-stone-50 border-stone-200 focus:border-teal-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-stone-700">Email Address</Label>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="email" className="text-stone-700 text-sm sm:text-base">Email Address</Label>
                                         <Input
                                             id="email"
                                             name="email"
                                             type="email"
-                                            placeholder="john@example.com"
+                                            placeholder="your@email.com"
                                             required
+                                            autoComplete="email"
+                                            inputMode="email"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className="bg-stone-50 border-stone-200 focus:border-teal-500"
+                                            className="bg-stone-50 border-stone-200 focus:border-teal-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="subject" className="text-stone-700">Subject</Label>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="subject" className="text-stone-700 text-sm sm:text-base">Subject</Label>
                                         <Input
                                             id="subject"
                                             name="subject"
-                                            placeholder="e.g. Plot Reservation Inquiry"
+                                            placeholder="e.g. Plot Inquiry"
                                             maxLength={200}
                                             required
                                             value={formData.subject}
                                             onChange={handleChange}
-                                            className="bg-stone-50 border-stone-200 focus:border-teal-500"
+                                            className="bg-stone-50 border-stone-200 focus:border-teal-500 h-11 sm:h-10 text-base sm:text-sm"
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="message" className="text-stone-700">Message</Label>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="message" className="text-stone-700 text-sm sm:text-base">Message</Label>
                                         <Textarea
                                             id="message"
                                             name="message"
@@ -234,13 +237,13 @@ export default function ContactPage() {
                                             required
                                             value={formData.message}
                                             onChange={handleChange}
-                                            className="min-h-[150px] bg-stone-50 border-stone-200 focus:border-teal-500"
+                                            className="min-h-[120px] sm:min-h-[150px] bg-stone-50 border-stone-200 focus:border-teal-500 text-base sm:text-sm"
                                         />
                                     </div>
 
                                     <Button 
                                         type="submit" 
-                                        className="w-full bg-red-700 hover:bg-red-800 text-white py-6 text-lg font-serif"
+                                        className="w-full bg-red-700 hover:bg-red-800 active:bg-red-900 text-white h-12 sm:h-14 text-base sm:text-lg font-serif touch-manipulation"
                                         disabled={contactMutation.isPending}
                                     >
                                         {contactMutation.isPending ? (
