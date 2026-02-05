@@ -158,7 +158,7 @@ const HeroSection = memo(function HeroSection() {
           </div>
           
           {/* Desktop: Scattered absolute positioned layout */}
-          <div className="hidden md:block relative h-[450px]">
+          <div className="hidden md:flex relative h-[450px] items-center justify-center">
             <HeroImage
               index={1}
               src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/80931bb52_img-1767267629071.jpg"
