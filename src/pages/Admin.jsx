@@ -410,7 +410,7 @@ export default function AdminDashboard() {
                                         >
                                             <div className="mt-0.5 shrink-0">
                                                 {note.related_entity_type === 'task' ? <CheckSquare className="w-4 h-4 text-blue-500" /> :
-                                                 note.related_entity_type === 'message' ? <Megaphone className="w-4 h-4 text-teal-500" /> :
+                                                 (note.related_entity_type === 'message' || note.type === 'message') ? <Mail className="w-4 h-4 text-teal-500" /> :
                                                  <AlertTriangle className={`w-4 h-4 ${note.type === 'alert' ? 'text-red-500' : 'text-stone-400'}`} />}
                                             </div>
                                             <div className="flex-1">
@@ -420,7 +420,7 @@ export default function AdminDashboard() {
                                                     <span className="ml-2">
                                                         • From {
                                                             note.related_entity_type === 'task' ? 'Tasks' :
-                                                            note.related_entity_type === 'message' ? 'Communications' :
+                                                            (note.related_entity_type === 'message' || note.type === 'message') ? 'Member Messages' :
                                                             note.related_entity_type === 'event' ? 'Calendar' :
                                                             (note.related_entity_type === 'member' || note.related_entity_type === 'document') ? 'Member Directory' :
                                                             (note.message.toLowerCase().includes('event') ? 'Calendar' : 'Admin')
@@ -480,8 +480,22 @@ export default function AdminDashboard() {
                                                         <Calendar className="w-3 h-3 mr-1" /> Update
                                                     </Button>
                                                 </>
-                                            ) : note.related_entity_type === 'message' ? (
+                                            ) : (note.related_entity_type === 'message' || note.type === 'message') ? (
                                                 <>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-6 text-[10px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100"
+                                                        onClick={async (e) => { 
+                                                            e.stopPropagation(); 
+                                                            await base44.entities.Notification.update(note.id, { is_read: true });
+                                                            queryClient.invalidateQueries(['notifications']);
+                                                            setActiveTab('communication');
+                                                            setNotifPopoverOpen(false);
+                                                        }}
+                                                    >
+                                                        <Mail className="w-3 h-3 mr-1" /> View Message
+                                                    </Button>
                                                     <Button 
                                                         size="sm" 
                                                         variant="outline" 
@@ -490,23 +504,10 @@ export default function AdminDashboard() {
                                                             e.stopPropagation(); 
                                                             await base44.entities.Notification.update(note.id, { is_read: true });
                                                             queryClient.invalidateQueries(['notifications']);
-                                                            toast.success("Message marked as read");
+                                                            toast.success("Message notification dismissed");
                                                         }}
                                                     >
-                                                        <Check className="w-3 h-3 mr-1" /> Complete
-                                                    </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline" 
-                                                        className="h-6 text-[10px] px-2 text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
-                                                        onClick={async (e) => { 
-                                                            e.stopPropagation(); 
-                                                            await base44.entities.Notification.update(note.id, { is_read: true });
-                                                            queryClient.invalidateQueries(['notifications']);
-                                                            setActiveTab('communication');
-                                                        }}
-                                                    >
-                                                        <Eye className="w-3 h-3 mr-1" /> Update
+                                                        <Check className="w-3 h-3 mr-1" /> Dismiss
                                                     </Button>
                                                 </>
                                             ) : (
