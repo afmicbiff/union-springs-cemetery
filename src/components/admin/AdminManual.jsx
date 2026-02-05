@@ -2143,79 +2143,145 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
           <ManualSection icon={Phone} title="Getting Additional Help">
             <p className="text-lg mb-4">
               <strong>You're not alone!</strong> If you need help that isn't covered in this manual, 
-              or if something isn't working as expected, here's how to get assistance.
+              or if something isn't working as expected, here's how to get assistance. Don't struggle 
+              in silence - we want you to succeed!
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Contact Support</h4>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-800 font-medium">💚 <strong>It's OK to ask for help!</strong> Everyone needs assistance sometimes. 
+              There are no "dumb questions." Asking for help is smart - it prevents mistakes and saves time.</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Who to Contact for Help</h4>
             <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-teal-700" />
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <Phone className="w-6 h-6 text-teal-700 mt-1" />
                   <div>
-                    <strong className="text-stone-800">Darrell Clendennen</strong><br />
-                    <span className="text-stone-600">Phone: (540) 760-8863</span><br />
-                    <span className="text-stone-600">Email: clencsm@yahoo.com</span>
+                    <strong className="text-stone-800 text-lg">Darrell Clendennen</strong><br />
+                    <span className="text-stone-700">📞 Phone: <strong>(540) 760-8863</strong></span><br />
+                    <span className="text-stone-700">✉️ Email: <strong>clencsm@yahoo.com</strong></span>
                   </div>
                 </li>
-                <li className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-teal-700" />
+                <li className="flex items-start gap-3">
+                  <Phone className="w-6 h-6 text-teal-700 mt-1" />
                   <div>
-                    <strong className="text-stone-800">RD Teutsch</strong><br />
-                    <span className="text-stone-600">Phone: (318) 846-2201</span><br />
-                    <span className="text-stone-600">Email: royteutsch@yahoo.com</span>
+                    <strong className="text-stone-800 text-lg">RD Teutsch</strong><br />
+                    <span className="text-stone-700">📞 Phone: <strong>(318) 846-2201</strong></span><br />
+                    <span className="text-stone-700">✉️ Email: <strong>royteutsch@yahoo.com</strong></span>
                   </div>
                 </li>
               </ul>
             </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Before Calling for Help - Gather This Information</h4>
-            <p className="mb-2">Having this information ready makes it MUCH easier to help you:</p>
-            <Step number="1"><strong>What were you trying to do?</strong> (e.g., "I was trying to add a new member")</Step>
-            <Step number="2"><strong>What happened instead?</strong> (e.g., "I got an error message" or "nothing happened when I clicked Save")</Step>
-            <Step number="3"><strong>Write down any error messages</strong> - the exact words on the screen help diagnose the problem</Step>
-            <Step number="4"><strong>Which tab/section were you in?</strong> (e.g., "I was in the Members section")</Step>
-            <Step number="5"><strong>Take a screenshot if possible:</strong>
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>On Windows: Press the <strong>Print Screen</strong> key (or <strong>PrtSc</strong>) on your keyboard</li>
-                <li>Then open an email, click in the message area, and press <strong>Ctrl+V</strong> to paste the image</li>
-                <li>Send the screenshot with your description of the problem</li>
-              </ul>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Before You Call - Write Down This Information</h4>
+            <p className="mb-2">Having these details ready makes it MUCH faster to help you:</p>
+            <Step number="1"><strong>What were you trying to do?</strong>
+              <p className="text-stone-600 text-sm mt-1 ml-11">Example: "I was trying to add a new member to the system"</p>
+            </Step>
+            <Step number="2"><strong>What happened instead?</strong>
+              <p className="text-stone-600 text-sm mt-1 ml-11">Example: "I got an error message" or "nothing happened when I clicked Save" or "the page went blank"</p>
+            </Step>
+            <Step number="3"><strong>Write down the EXACT words of any error message</strong>
+              <p className="text-stone-600 text-sm mt-1 ml-11">The specific wording helps us diagnose the problem. Even if it seems like gibberish, write it down.</p>
+            </Step>
+            <Step number="4"><strong>Which section/tab were you in?</strong>
+              <p className="text-stone-600 text-sm mt-1 ml-11">Example: "I was in the Members section" or "I was on the Overview page"</p>
+            </Step>
+            <Step number="5"><strong>What time did it happen?</strong>
+              <p className="text-stone-600 text-sm mt-1 ml-11">Approximately when - this helps check the system logs.</p>
             </Step>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Issues and Quick Fixes</h4>
-            <div className="space-y-3">
-              <div className="bg-stone-50 p-3 rounded-lg">
-                <p className="font-semibold text-stone-800">"The page won't load" or "It's frozen"</p>
-                <p className="text-stone-600 text-sm mt-1">Try refreshing the page by pressing <strong>F5</strong> on your keyboard, or click the circular arrow in your browser. If still stuck, close the browser completely and reopen it.</p>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Take a Screenshot (Picture of Your Screen)</h4>
+            <p className="mb-2">A screenshot is very helpful when reporting problems. Here's how:</p>
+            <div className="bg-stone-50 p-4 rounded-lg mb-4">
+              <p className="font-semibold text-stone-800 mb-2">On a Windows Computer:</p>
+              <Step number="1">Make sure the error or problem is visible on your screen</Step>
+              <Step number="2">Find the <strong>Print Screen</strong> key on your keyboard (it might say "PrtSc" or "Print Scrn" - usually in the top right area)</Step>
+              <Step number="3">Press that key once. Nothing visible will happen, but the picture is now copied.</Step>
+              <Step number="4">Open your email program and start a new email</Step>
+              <Step number="5">Click in the message area where you type</Step>
+              <Step number="6">Press and hold <strong>Ctrl</strong>, then press <strong>V</strong> (this is "paste")</Step>
+              <Step number="7">The screenshot should appear in your email! Now type your description of the problem and send it.</Step>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Common Problems and Quick Fixes</h4>
+            <p className="mb-2">Try these solutions before calling - they fix most issues!</p>
+            
+            <div className="space-y-4">
+              <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-blue-500">
+                <p className="font-semibold text-stone-800 text-lg">😟 "The page won't load" or "It's frozen" or "Nothing is happening"</p>
+                <p className="text-stone-600 mt-2"><strong>Try this:</strong></p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-stone-600">
+                  <li>Press the <strong>F5</strong> key on your keyboard (this refreshes the page)</li>
+                  <li>OR click the circular arrow icon (↻) near the top of your browser</li>
+                  <li>If that doesn't work, close the browser completely (click the X) and reopen it</li>
+                  <li>If still not working, try restarting your computer</li>
+                </ul>
               </div>
-              <div className="bg-stone-50 p-3 rounded-lg">
-                <p className="font-semibold text-stone-800">"I can't find my changes"</p>
-                <p className="text-stone-600 text-sm mt-1">Did you click <strong>Save</strong> after making changes? If not, your changes were lost. Also try refreshing the page to see the latest data.</p>
+
+              <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-amber-500">
+                <p className="font-semibold text-stone-800 text-lg">😟 "I made changes but they're gone" or "My work disappeared"</p>
+                <p className="text-stone-600 mt-2"><strong>What probably happened:</strong> You didn't click "Save" before leaving the page.</p>
+                <p className="text-stone-600 mt-1"><strong>Unfortunately:</strong> If you didn't save, the changes are lost and you'll need to re-enter them.</p>
+                <p className="text-stone-600 mt-1"><strong>Prevent this:</strong> Always click "Save" or "Save Changes" before clicking away to another section!</p>
               </div>
-              <div className="bg-stone-50 p-3 rounded-lg">
-                <p className="font-semibold text-stone-800">"I'm locked out" or "Wrong password"</p>
-                <p className="text-stone-600 text-sm mt-1">Use the "Forgot Password" link on the login page, or contact an administrator to reset your password.</p>
+
+              <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-red-500">
+                <p className="font-semibold text-stone-800 text-lg">😟 "I'm locked out" or "It says wrong password"</p>
+                <p className="text-stone-600 mt-2"><strong>Try this:</strong></p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-stone-600">
+                  <li>Make sure CAPS LOCK is not on (passwords are case-sensitive)</li>
+                  <li>Look for a "Forgot Password" link on the login page and click it</li>
+                  <li>If that doesn't work, call one of the contacts above to reset your password</li>
+                </ul>
               </div>
-              <div className="bg-stone-50 p-3 rounded-lg">
-                <p className="font-semibold text-stone-800">"The search isn't finding anything"</p>
-                <p className="text-stone-600 text-sm mt-1">Try different search terms. Check your spelling. Search for just the last name instead of full name. Try fewer words.</p>
+
+              <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-purple-500">
+                <p className="font-semibold text-stone-800 text-lg">😟 "The search isn't finding what I'm looking for"</p>
+                <p className="text-stone-600 mt-2"><strong>Try this:</strong></p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-stone-600">
+                  <li>Check your spelling - even one wrong letter can cause no results</li>
+                  <li>Try searching for less (just "Smith" instead of "John Smith")</li>
+                  <li>Try the last name only</li>
+                  <li>Make sure you're in the right section (searching in Members won't find Employees)</li>
+                </ul>
+              </div>
+
+              <div className="bg-stone-50 p-4 rounded-lg border-l-4 border-green-500">
+                <p className="font-semibold text-stone-800 text-lg">😟 "Something changed and I don't know why" or "A record looks wrong"</p>
+                <p className="text-stone-600 mt-2"><strong>Try this:</strong></p>
+                <ul className="list-disc pl-5 mt-1 space-y-1 text-stone-600">
+                  <li>Go to the <strong>System Logs</strong> tab</li>
+                  <li>Search for the record in question</li>
+                  <li>The logs will show who changed it and when</li>
+                </ul>
               </div>
             </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Check the System Logs</h4>
-            <p className="mb-2">
-              If something changed unexpectedly, the <strong>System Logs</strong> tab shows a record of all 
-              changes made in the system. This can help you (or support) figure out what happened.
-            </p>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">If Nothing Works...</h4>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-800">
+                <strong>Don't panic!</strong> Call one of the contacts listed above. Explain what happened and what you've already tried. 
+                We can usually figure it out together. Your data is safe - problems are almost always fixable.
+              </p>
+            </div>
 
             <Tip>
-              <strong>Don't be shy about asking for help!</strong> Everyone needs assistance sometimes, 
-              and it's better to ask than to struggle alone or make a mistake. We're here to help you succeed!
+              <strong>Write down what worked!</strong> If you figure out how to fix a problem, 
+              write yourself a note. Next time it happens, you'll know exactly what to do. 
+              You might even share it with other administrators!
             </Tip>
 
             <Tip>
-              <strong>Write down solutions!</strong> If you figure out how to do something tricky, 
-              write yourself a note for next time. You might also share it with other administrators!
+              <strong>Don't be embarrassed to call.</strong> Everyone has computer troubles sometimes. 
+              The people you call have seen every problem imaginable - yours won't surprise them. 
+              They genuinely want to help you succeed!
+            </Tip>
+
+            <Tip>
+              <strong>When in doubt, don't click Delete.</strong> If you're unsure about something, 
+              stop and ask first. It's much easier to help you BEFORE something is deleted than after!
             </Tip>
           </ManualSection>
 
