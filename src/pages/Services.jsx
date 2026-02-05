@@ -139,11 +139,11 @@ export default function ServicesPage() {
                     </section>
                 </div>
 
-                {/* CTA Button */}
-                <div className="flex justify-center px-4">
+                {/* CTA Button - sticky on mobile for easy access */}
+                <div className="flex justify-center px-0 sm:px-4">
                     <Link to={createPageUrl('Contact')} className="w-full sm:w-auto">
-                        <Button className="w-full sm:w-auto bg-red-800 hover:bg-red-900 active:bg-red-950 text-white font-serif px-6 py-4 h-auto text-base sm:text-lg rounded-lg shadow-lg flex items-center justify-center gap-2 touch-manipulation">
-                            <Phone className="w-5 h-5 shrink-0" />
+                        <Button className="w-full sm:w-auto bg-red-800 hover:bg-red-900 active:bg-red-950 text-white font-serif px-6 h-14 sm:h-auto sm:py-4 text-base sm:text-lg rounded-none sm:rounded-lg shadow-lg flex items-center justify-center gap-2.5 touch-manipulation will-change-transform active:scale-[0.98] transition-transform">
+                            <Phone className="w-5 h-5 shrink-0" aria-hidden="true" />
                             <span>Contact the Administrator</span>
                         </Button>
                     </Link>
