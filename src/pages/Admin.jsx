@@ -552,7 +552,7 @@ function AdminDashboard() {
                         if (tab.id === 'communication') {
                           const isCommActive = activeTab === 'communication';
                           return (
-                            <React.Fragment key="email-comm-group">
+                            <Fragment key="email-comm-group">
                               {/* Email Tool - moved to left of Communications */}
                               <div className="hidden sm:flex items-stretch">
                                 <Link
