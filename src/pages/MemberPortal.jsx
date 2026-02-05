@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, UserCircle, MessageSquare, LogOut, FileText, Receipt, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, LayoutDashboard, UserCircle, MessageSquare, LogOut, FileText, Receipt, CheckCircle2, AlertCircle, RefreshCw, BookOpen, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 // Eager load critical path components
 const MemberDashboard = React.lazy(() => import("@/components/member/MemberDashboard"));
@@ -16,6 +17,7 @@ const MemberInvoices = React.lazy(() => import("@/components/member/MemberInvoic
 const MemberTasks = React.lazy(() => import("@/components/member/MemberTasks"));
 const ReservationHistory = React.lazy(() => import("@/components/member/ReservationHistory"));
 const ReservationWizard = React.lazy(() => import("@/components/member/ReservationWizard"));
+const MemberPortalManual = React.lazy(() => import("@/components/member/MemberPortalManual"));
 
 // Memoized loading fallback
 const TabLoader = memo(() => (
@@ -124,6 +126,11 @@ const MemberPortal = memo(function MemberPortal() {
     // Memoized logout handler
     const handleLogout = useCallback(() => base44.auth.logout(), []);
 
+    // Manual dialog state
+    const [showManual, setShowManual] = useState(false);
+    const handleOpenManual = useCallback(() => setShowManual(true), []);
+    const handleCloseManual = useCallback(() => setShowManual(false), []);
+
     if (authLoading) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-teal-800">
@@ -190,6 +197,15 @@ const MemberPortal = memo(function MemberPortal() {
                             <span className="ml-1.5 bg-white/20 px-1.5 py-0.5 rounded text-xs">{tasksDueCount}</span>
                         </Button>
                     )}
+                    <Button 
+                        variant="outline" 
+                        onClick={handleOpenManual} 
+                        className="text-teal-700 border-teal-300 hover:bg-teal-50 h-9 text-sm touch-manipulation"
+                        title="How to Use This Portal"
+                    >
+                        <BookOpen className="w-4 h-4 sm:mr-1.5" /> 
+                        <span className="hidden sm:inline">Help Guide</span>
+                    </Button>
                     <Button 
                         variant="outline" 
                         onClick={handleLogout} 
@@ -301,6 +317,15 @@ const MemberPortal = memo(function MemberPortal() {
                     </React.Suspense>
                 </TabsContent>
             </Tabs>
+
+            {/* Help Manual Dialog */}
+            <Dialog open={showManual} onOpenChange={setShowManual}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+                    <React.Suspense fallback={<TabLoader />}>
+                        <MemberPortalManual onClose={handleCloseManual} />
+                    </React.Suspense>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 });
