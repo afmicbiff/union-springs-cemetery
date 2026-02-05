@@ -416,26 +416,24 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="p-4 md:p-6 w-full max-w-[1600px] mx-auto">
-      <div className="space-y-6 md:space-y-8">
+    <div className="p-3 sm:p-4 md:p-6 w-full max-w-[1600px] mx-auto">
+      <div className="space-y-4 sm:space-y-6 md:space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 sm:gap-4">
             <div>
-                <h1 className="text-2xl md:text-3xl font-serif font-bold text-stone-900">Admin Dashboard</h1>
-                <p className="text-stone-600 text-sm md:text-base">Administrative Overview & Management</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-stone-900">Admin Dashboard</h1>
+                <p className="text-stone-600 text-xs sm:text-sm md:text-base">Administrative Overview & Management</p>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end flex-wrap">
                 <AdminSearch onNavigate={handleSearchNavigate} />
                 
                 {/* Notifications */}
                 <Popover open={notifPopoverOpen} onOpenChange={setNotifPopoverOpen}>
                     <PopoverTrigger asChild>
-                        <motion.button
-                            className="relative p-2 rounded-full hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200"
-                            animate={unreadCount > 0 ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
-                            transition={{ repeat: Infinity, repeatDelay: 3, duration: 0.5 }}
+                        <button
+                            className="relative p-2 rounded-full hover:bg-stone-100 transition-colors border border-transparent hover:border-stone-200 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
                         >
                             <Bell className={`w-5 h-5 md:w-6 md:h-6 ${unreadCount > 0 ? 'text-red-600 fill-red-50' : 'text-stone-500'}`} />
                             {unreadCount > 0 && (
@@ -443,9 +441,9 @@ function AdminDashboard() {
                                     {unreadCount > 9 ? '9+' : unreadCount}
                                 </span>
                             )}
-                        </motion.button>
+                        </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80 p-0" align="end">
+                    <PopoverContent className="w-[90vw] sm:w-80 max-w-[360px] p-0" align="end">
                         <div className="p-3 border-b bg-stone-50 flex items-center justify-between">
                             <h4 className="font-semibold text-stone-900 text-sm">
                                 Notifications {unreadCount > 0 && <span className="text-red-600">({unreadCount} unread)</span>}
@@ -482,7 +480,7 @@ function AdminDashboard() {
                     onClick={() => setActiveTab('backups')} 
                     variant="outline" 
                     size="sm" 
-                    className="hidden md:flex border-teal-600 text-teal-700 hover:bg-teal-50"
+                    className="hidden lg:flex border-teal-600 text-teal-700 hover:bg-teal-50 h-9 touch-manipulation"
                 >
                     <Database className="w-4 h-4 mr-2" /> Backups
                 </Button>
@@ -492,9 +490,9 @@ function AdminDashboard() {
         </div>
 
         {/* Navigation & Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
-                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+            <div className="w-full overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 md:mx-0 md:px-0 scrollbar-hide overscroll-x-contain">
+                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-0.5 sm:gap-1">
                     {tabs.map(tab => {
                       // Keep invisible triggers for tabs that are in dropdowns to maintain Tabs structure
                       if (tab.id === 'archives' || tab.id === 'onboarding') {
@@ -518,31 +516,34 @@ function AdminDashboard() {
                             <TabsTrigger 
                               value="employees"
                               className={`
-                                px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
+                                px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium 
                                 data-[state=active]:bg-teal-700 data-[state=active]:text-white
-                                hover:text-green-700 hover:bg-green-50
-                                flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
-                                min-w-[80px] md:min-w-0
+                                hover:text-green-700 hover:bg-green-50 touch-manipulation
+                                flex flex-col md:flex-row items-center gap-1 md:gap-1 md:justify-center
+                                min-w-[60px] sm:min-w-[80px] md:min-w-0
                                 ${isEmployeesGroupActive && activeTab !== 'employees' ? 'bg-teal-700 text-white' : ''}
                               `}
                             >
-                              <div className="whitespace-nowrap flex items-center gap-1">Employees</div>
+                              <div className="whitespace-nowrap flex items-center gap-1">
+                                <span className="hidden sm:inline">Employees</span>
+                                <span className="sm:hidden">Emp</span>
+                              </div>
                             </TabsTrigger>
 
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button
                                   type="button"
-                                  className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isEmployeesGroupActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
+                                  className={`px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] ${isEmployeesGroupActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
                                   aria-label="Employees options"
                                 >
-                                  <ChevronDown className="w-4 h-4" />
+                                  <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="start" className="min-w-[160px]">
-                                <DropdownMenuItem onClick={() => setActiveTab('employees')}>Employees</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setActiveTab('onboarding')}>Onboarding</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setActiveTab('archives')}>Archives</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setActiveTab('employees')} className="min-h-[44px] sm:min-h-0">Employees</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setActiveTab('onboarding')} className="min-h-[44px] sm:min-h-0">Onboarding</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setActiveTab('archives')} className="min-h-[44px] sm:min-h-0">Archives</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
@@ -555,29 +556,32 @@ function AdminDashboard() {
                               <TabsTrigger 
                                 value="communication"
                                 className={`
-                                  px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
+                                  px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium 
                                   data-[state=active]:bg-teal-700 data-[state=active]:text-white
-                                  hover:text-green-700 hover:bg-green-50
-                                  flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
-                                  min-w-[80px] md:min-w-0
+                                  hover:text-green-700 hover:bg-green-50 touch-manipulation
+                                  flex flex-col md:flex-row items-center gap-1 md:gap-1 md:justify-center
+                                  min-w-[60px] sm:min-w-[80px] md:min-w-0
                                   ${isCommActive ? 'bg-teal-700 text-white' : ''}
                                 `}
                               >
-                                <div className="whitespace-nowrap flex items-center gap-1">Communications</div>
+                                <div className="whitespace-nowrap flex items-center gap-1">
+                                  <span className="hidden sm:inline">Communications</span>
+                                  <span className="sm:hidden">Comms</span>
+                                </div>
                               </TabsTrigger>
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <button
                                     type="button"
-                                    className={`px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
+                                    className={`px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] ${isCommActive ? 'bg-teal-700 text-white hover:bg-teal-700' : ''}`}
                                     aria-label="Communications options"
                                   >
-                                    <ChevronDown className="w-4 h-4" />
+                                    <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                   </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="start" className="min-w-[160px]">
-                                  <DropdownMenuItem onClick={() => setActiveTab('communication')}>Open</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setActiveTab('communication')} className="min-h-[44px] sm:min-h-0">Open</DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -589,12 +593,12 @@ function AdminDashboard() {
                           key={tab.id} 
                           value={tab.id} 
                           className={`
-                            px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium 
+                            px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium 
                             data-[state=active]:bg-teal-700 data-[state=active]:text-white
-                            hover:text-green-700 hover:bg-green-50
-                            flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
-                            min-w-[80px] md:min-w-0
-                            ${tab.id === 'communication' ? 'ml-4 md:ml-0 md:col-span-2 px-6' : ''}
+                            hover:text-green-700 hover:bg-green-50 touch-manipulation
+                            flex flex-col md:flex-row items-center gap-1 md:gap-1 md:justify-center
+                            min-w-[50px] sm:min-w-[70px] md:min-w-0 min-h-[44px] sm:min-h-0
+                            ${tab.id === 'communication' ? 'ml-2 sm:ml-4 md:ml-0 md:col-span-2 px-3 sm:px-6' : ''}
                           `}
                         >
                           <div className="whitespace-nowrap flex items-center gap-1">
@@ -605,46 +609,48 @@ function AdminDashboard() {
                       );
                     })}
 
-                    {/* Action button beside System Logs */}
+                    {/* Action buttons - hidden on small mobile, visible on sm+ */}
                     <Link
                         to={createPageUrl('NewPlotReservations')}
-                        className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                        className="hidden sm:flex px-3 sm:px-6 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 items-center justify-center gap-1.5 min-w-[60px] sm:min-w-[80px] touch-manipulation min-h-[44px] sm:min-h-0"
                     >
-                        New Plot Reservation
+                        <span className="hidden md:inline">New Plot Reservation</span>
+                        <span className="md:hidden">New Plot</span>
                     </Link>
 
                     <Link
                         to={createPageUrl('Bylaws')}
-                        className="px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                        className="hidden md:flex px-6 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 items-center justify-center gap-1.5 min-w-[80px] touch-manipulation"
                     >
                         Bylaws
                     </Link>
 
 
-                    <div className="flex items-stretch">
+                    <div className="hidden sm:flex items-stretch">
                       <Link
                         to={createPageUrl('SendEmail')}
-                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
+                        className="px-2 sm:px-3 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[60px] sm:min-w-[80px] touch-manipulation min-h-[44px] sm:min-h-0"
                       >
-                        Email Tool
+                        <span className="hidden md:inline">Email Tool</span>
+                        <span className="md:hidden">Email</span>
                       </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
-                            className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
+                            className="px-1.5 sm:px-2 py-2 text-[10px] sm:text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50 touch-manipulation min-h-[44px] sm:min-h-0"
                             aria-label="Email tool options"
                           >
-                            <ChevronDown className="w-4 h-4" />
+                            <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start" className="min-w-[200px]">
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="min-h-[44px] sm:min-h-0">
                             <Link to={createPageUrl('SendEmail')} className="flex items-center">
                               <Mail className="w-4 h-4 mr-2" /> Open Send Email
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem asChild className="min-h-[44px] sm:min-h-0">
                             <Link to={`${createPageUrl('SendEmail')}#templates-section`} className="flex items-center">
                               <FileText className="w-4 h-4 mr-2" /> Templates
                             </Link>
