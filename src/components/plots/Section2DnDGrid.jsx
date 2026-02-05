@@ -32,16 +32,18 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
       return n < SPECIAL_COL_RANGE.start || n > SPECIAL_COL_RANGE.end;
     });
     
-    // For regular plots, pivot starting from 199 (which now starts column 0)
-    const idx199 = regularPlots.findIndex(p => parseNum(p.Grave) === 208); // Start from 208 since 186-207 are special
-    const pivoted = idx199 > -1 ? [...regularPlots.slice(idx199), ...regularPlots.slice(0, idx199)] : regularPlots;
+    // For regular plots, pivot starting from 208 (since 186-207 are in the special column)
+    const idx208 = regularPlots.findIndex(p => parseNum(p.Grave) === 208);
+    const pivoted = idx208 > -1 ? [...regularPlots.slice(idx208), ...regularPlots.slice(0, idx208)] : regularPlots;
 
     // 11 columns: column 0 is special (186-207), columns 1-10 are regular
     const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
 
-    // Fill special column (column 0) with plots 186-207
+    // Fill special column (column 0) with plots 186-207 sorted ascending
+    // 186 at bottom (row 0), 207 at top (row 21)
     const specialSorted = specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     for (let i = 0; i < specialSorted.length && i < perCol; i++) {
+      // Place 186 at row 0 (bottom), 187 at row 1, etc.
       baseColumns[0][i] = specialSorted[i];
     }
 
@@ -98,18 +100,23 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     const out = Array(dataCols * totalRows).fill(null);
     const markers = Array(dataCols).fill(false);
     
+    // Mark column 0 for +New since it starts with 186
+    markers[0] = true;
+    
     for (let c = 0; c < dataCols; c++) {
-      // Find the bottom-most plot in this column (lowest row index with data)
-      let bottomPlot = null;
-      for (let r = 0; r < perCol; r++) {
-        if (baseColumns[c][r]) {
-          bottomPlot = baseColumns[c][r];
-          break;
+      // For other columns, find the bottom-most plot
+      if (c > 0) {
+        let bottomPlot = null;
+        for (let r = 0; r < perCol; r++) {
+          if (baseColumns[c][r]) {
+            bottomPlot = baseColumns[c][r];
+            break;
+          }
         }
-      }
-      const bottomNum = parseNum(bottomPlot?.Grave);
-      if (bottomNum && NEW_PLOT_TARGETS.has(bottomNum)) {
-        markers[c] = true;
+        const bottomNum = parseNum(bottomPlot?.Grave);
+        if (bottomNum && NEW_PLOT_TARGETS.has(bottomNum)) {
+          markers[c] = true;
+        }
       }
       
       // Fill data rows (rows 1 to perCol)
