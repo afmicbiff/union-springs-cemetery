@@ -528,13 +528,7 @@ function MembersDirectory({ openMemberId }) {
                                     <SelectItem value="pending">Pending</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Button 
-                                variant={showAdvancedFilters ? "secondary" : "outline"}
-                                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                                className={`h-10 ${showAdvancedFilters ? "bg-stone-200 border-stone-300" : ""}`}
-                            >
-                                <Filter className="w-4 h-4 sm:mr-2" /> <span className="hidden sm:inline">Advanced</span>
-                            </Button>
+
                         </div>
                     </div>
                 </div>
