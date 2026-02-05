@@ -572,8 +572,8 @@ export default function AdminDashboard() {
             <div className="w-full overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-1">
                     {tabs.map(tab => {
-                      // Keep an invisible Archives trigger to maintain Tabs structure and avoid hook/order issues
-                      if (tab.id === 'archives') {
+                      // Keep invisible triggers for tabs that are in dropdowns to maintain Tabs structure
+                      if (tab.id === 'archives' || tab.id === 'onboarding') {
                         return (
                           <TabsTrigger 
                             key={tab.id}
@@ -588,7 +588,7 @@ export default function AdminDashboard() {
                       }
 
                       if (tab.id === 'employees') {
-                        const isEmployeesGroupActive = activeTab === 'employees' || activeTab === 'archives';
+                        const isEmployeesGroupActive = activeTab === 'employees' || activeTab === 'archives' || activeTab === 'onboarding';
                         return (
                           <div key="employees-group" className="flex items-stretch">
                             <TabsTrigger 
@@ -599,7 +599,7 @@ export default function AdminDashboard() {
                                 hover:text-green-700 hover:bg-green-50
                                 flex flex-col md:flex-row items-center gap-1.5 md:gap-1 md:justify-center
                                 min-w-[80px] md:min-w-0
-                                ${isEmployeesGroupActive && activeTab === 'archives' ? 'bg-teal-700 text-white' : ''}
+                                ${isEmployeesGroupActive && activeTab !== 'employees' ? 'bg-teal-700 text-white' : ''}
                               `}
                             >
                               <div className="whitespace-nowrap flex items-center gap-1">Employees</div>
@@ -617,6 +617,7 @@ export default function AdminDashboard() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="start" className="min-w-[160px]">
                                 <DropdownMenuItem onClick={() => setActiveTab('employees')}>Employees</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setActiveTab('onboarding')}>Onboarding</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setActiveTab('archives')}>Archives</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>

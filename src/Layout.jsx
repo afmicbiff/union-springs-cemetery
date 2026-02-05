@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, Activity, BarChart2, Trash2, Image, ClipboardList } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, Activity, BarChart2, Trash2, Image } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -219,7 +219,6 @@ export default function Layout({ children }) {
     items: [
     { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
     { label: 'Employees', path: '/Employees', icon: Users },
-    { label: 'Employee Onboarding', path: '/Admin?tab=onboarding', icon: ClipboardList },
     { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
     
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
