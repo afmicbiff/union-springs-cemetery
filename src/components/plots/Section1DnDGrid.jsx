@@ -83,7 +83,7 @@ const Section1DnDGrid = memo(function Section1DnDGrid({ plots, baseColorClass, i
         const dataColIdx = colIdx - 1;
         
         return (
-          <div key={colIdx} className="flex flex-col gap-1 justify-end">
+          <div key={colIdx} className="flex flex-col-reverse gap-1 justify-start">
             {Array.from({ length: targetRows }).map((__, r) => 
               renderCell(dataColIdx, r, isLeading || isTrailing)
             )}
