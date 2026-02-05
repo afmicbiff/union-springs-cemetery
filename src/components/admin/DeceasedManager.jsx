@@ -168,7 +168,7 @@ export default function DeceasedManager() {
                                 className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Deceased' ? 'bg-teal-700 hover:bg-teal-800' : 'text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100'}`}
                                 onClick={() => { setStatusFilter('Deceased'); setPage(1); }}
                             >
-                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} </span>Deceased
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_records || 0)} Deceased
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'All' ? "default" : "outline"}
@@ -182,21 +182,21 @@ export default function DeceasedManager() {
                                 className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Reserved' ? 'bg-amber-700 hover:bg-amber-800' : 'text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100'}`}
                                 onClick={() => { setStatusFilter('Reserved'); setPage(1); }}
                             >
-                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} </span>Reserved
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_reserved || 0)} Reserved
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Available' ? "default" : "outline"}
                                 className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Available' ? 'bg-emerald-700 hover:bg-emerald-800' : 'text-emerald-700 border-emerald-200 bg-emerald-50 hover:bg-emerald-100'}`}
                                 onClick={() => { setStatusFilter('Available'); setPage(1); }}
                             >
-                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} </span>Available
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_available || 0)} Available
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Veteran' ? "default" : "outline"}
                                 className={`cursor-pointer transition-all text-xs sm:text-sm px-2 py-0.5 sm:px-2.5 sm:py-0.5 ${statusFilter === 'Veteran' ? 'bg-blue-700 hover:bg-blue-800' : 'text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100'}`}
                                 onClick={() => { setStatusFilter('Veteran'); setPage(1); }}
                             >
-                                <span className="hidden sm:inline">{isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} </span>Veterans
+                                {isLoading && !searchResults ? '...' : (searchResults?.stats?.total_veterans || 0)} Veterans
                             </Badge>
                             <Badge 
                                 variant={statusFilter === 'Not Usable' ? "default" : "outline"}
