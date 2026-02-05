@@ -31,8 +31,12 @@ const QuickAccessCard = memo(function QuickAccessCard({ icon: Icon, title, descr
 
 const QuickAccessGrid = memo(function QuickAccessGrid() {
   return (
-    <section className="px-4 md:px-8 bg-stone-100 relative z-20 pt-0 pb-12 md:pb-20">
-      <div className="max-w-4xl mx-auto -mt-20 sm:-mt-24 md:-mt-28 lg:-mt-32 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+    <section className="relative z-20">
+      {/* Black background extension for card overlap effect */}
+      <div className="absolute inset-x-0 top-0 h-28 sm:h-32 md:h-36 lg:h-40 bg-[#0c0a09]" aria-hidden="true" />
+      {/* Stone background for below cards */}
+      <div className="absolute inset-x-0 top-28 sm:top-32 md:top-36 lg:top-40 bottom-0 bg-stone-100" aria-hidden="true" />
+      <div className="relative max-w-4xl mx-auto px-4 md:px-8 pt-8 sm:pt-10 md:pt-12 pb-12 md:pb-20 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         
         <QuickAccessCard
           icon={Search}
