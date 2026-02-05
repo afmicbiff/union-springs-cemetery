@@ -120,12 +120,14 @@ const MapLegend = memo(function MapLegend({ count, dateRange }) {
 });
 
 function HistoryMap({ events, onEventSelect, dateRange }) {
-    // Filter events with memoization
+    // Filter events with location data
     const mappableEvents = useMemo(() => {
         if (!events || !Array.isArray(events)) return [];
         return events.filter(event => {
+            // Must have valid location coordinates
             if (!event.location?.lat || !event.location?.lng) return false;
             
+            // Check year range
             const eventYearMatch = event.year?.match(/(\d{4})/);
             const eventYear = eventYearMatch ? parseInt(eventYearMatch[1], 10) : 0;
             
@@ -133,10 +135,10 @@ function HistoryMap({ events, onEventSelect, dateRange }) {
         });
     }, [events, dateRange]);
 
-    // Center point for the map
-    const center = useMemo(() => [32.9365, -93.2921], []); // Centered on Union Springs Church
+    // Center on Union Springs Church (main location)
+    const center = useMemo(() => [32.9365, -93.2921], []);
 
-    // Handle event selection
+    // Handle event selection - switch to timeline view and highlight
     const handleEventSelect = useCallback((id) => {
         onEventSelect?.(id);
     }, [onEventSelect]);
@@ -160,6 +162,7 @@ function HistoryMap({ events, onEventSelect, dateRange }) {
                     maxZoom={18}
                 />
                 
+                {/* Render all historical markers with their overlays */}
                 {mappableEvents.map((event) => (
                     <React.Fragment key={event.id}>
                         <EventMarker 
@@ -172,6 +175,25 @@ function HistoryMap({ events, onEventSelect, dateRange }) {
             </MapContainer>
             
             <MapLegend count={eventCount} dateRange={dateRange} />
+            
+            {/* Event list sidebar for mobile/tablet */}
+            <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-white/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-stone-200 max-w-[200px] max-h-[150px] overflow-y-auto z-[1000] text-xs">
+                <h5 className="font-bold text-stone-700 mb-1 text-[10px] uppercase tracking-wider">Locations</h5>
+                <ul className="space-y-0.5">
+                    {mappableEvents.slice(0, 8).map(event => (
+                        <li 
+                            key={event.id} 
+                            className="text-stone-600 hover:text-teal-700 cursor-pointer truncate"
+                            onClick={() => handleEventSelect(event.id)}
+                        >
+                            • {event.title} ({event.year})
+                        </li>
+                    ))}
+                    {mappableEvents.length > 8 && (
+                        <li className="text-stone-400 italic">+{mappableEvents.length - 8} more</li>
+                    )}
+                </ul>
+            </div>
         </div>
     );
 }
