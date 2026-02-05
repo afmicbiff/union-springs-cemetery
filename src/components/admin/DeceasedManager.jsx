@@ -240,11 +240,11 @@ export default function DeceasedManager() {
                 <div className="rounded-md border overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-stone-50 text-stone-600 font-medium border-b">
+                            <thead className="bg-stone-50 text-stone-600 font-medium border-b sticky top-0 z-10">
                                 <tr>
-                                    <th className="p-4 whitespace-nowrap">Name</th>
-                                    <th className="p-4 whitespace-nowrap">Dates</th>
-                                    <th className="p-4 whitespace-nowrap">Location</th>
+                                    <th className="p-4 whitespace-nowrap min-w-[140px]">Name</th>
+                                    <th className="p-4 whitespace-nowrap min-w-[160px]">Dates</th>
+                                    <th className="p-4 whitespace-nowrap min-w-[120px]">Location</th>
                                     <th className="p-4 whitespace-nowrap">Type</th>
                                     <th className="p-4 whitespace-nowrap">Attributes</th>
                                     <th className="p-4 text-right">Actions</th>
@@ -266,16 +266,16 @@ export default function DeceasedManager() {
                                                 )}
                                                 {record.family_name && <div className="text-xs text-stone-500">née {record.family_name}</div>}
                                             </td>
-                                            <td className="p-4 text-stone-600">
-                                                <div className="text-xs">
-                                                    B: {(() => {
+                                            <td className="p-4 text-stone-600 min-w-[160px]">
+                                                <div className="text-sm whitespace-nowrap">
+                                                    <span className="text-stone-400">Birth:</span> {(() => {
                                                         if (!record.date_of_birth) return '-';
                                                         const d = new Date(record.date_of_birth);
                                                         return isNaN(d.getTime()) ? record.date_of_birth : format(d, 'MMM d, yyyy');
                                                     })()}
                                                 </div>
-                                                <div className="text-xs">
-                                                    D: {(() => {
+                                                <div className="text-sm whitespace-nowrap">
+                                                    <span className="text-stone-400">Death:</span> {(() => {
                                                         if (!record.date_of_death) return '-';
                                                         const d = new Date(record.date_of_death);
                                                         return isNaN(d.getTime()) ? record.date_of_death : format(d, 'MMM d, yyyy');
