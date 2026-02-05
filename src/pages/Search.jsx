@@ -87,7 +87,7 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
             className="flex-1"
           >
             <Button className="w-full h-11 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation">
-              Full Memorial <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
+              Memorial &gt; <ChevronRight className="w-4 h-4 ml-1" aria-hidden="true" />
             </Button>
           </Link>
         </div>
