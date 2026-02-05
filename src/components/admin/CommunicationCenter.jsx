@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, Sparkles, Lightbulb, Megaphone, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon, Tag, AlertTriangle, Smile, Meh, Frown, Wand2, AlertCircle, Bell, Check, X, Eye, CheckSquare, Calendar } from 'lucide-react';
+import { Send, Mail, MessageSquare, Loader2, User, RefreshCw, Sparkles, Lightbulb, Megaphone, Archive, Trash2, Star, Search, MoreVertical, MailOpen, Mail as MailIcon, Tag, AlertTriangle, Smile, Meh, Frown, Wand2, AlertCircle, Bell, Check, X, Eye, CheckSquare, Calendar, Settings, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { toast } from 'sonner';
@@ -44,7 +46,33 @@ function CommunicationCenter() {
           <TabsList className="mb-4 flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="inbox" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden xs:inline">Inbox</span><span className="xs:hidden">Inbox</span></TabsTrigger>
             <TabsTrigger value="compose" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Send className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Mass Notification</span><span className="sm:hidden">Mass</span></TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Bell className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Notifications</span><span className="sm:hidden">Notifs</span></TabsTrigger>
+            
+            {/* Notifications with dropdown */}
+            <div className="flex items-stretch">
+              <TabsTrigger value="notifications" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9 rounded-r-none"><Bell className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Notifications</span><span className="sm:hidden">Notifs</span></TabsTrigger>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="px-2 h-9 text-xs font-medium border-l border-stone-200 rounded-r-md flex items-center hover:bg-stone-100"
+                    aria-label="Notification options"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-[200px]">
+                  <DropdownMenuItem onClick={() => handleTabChange('notifications')}>
+                    <Bell className="w-4 h-4 mr-2" /> Open Notifications
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={createPageUrl('NotificationSettings')} className="flex items-center">
+                      <Settings className="w-4 h-4 mr-2" /> Notification Settings
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
             <TabsTrigger value="campaigns" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">AI Campaigns</span><span className="sm:hidden">AI</span></TabsTrigger>
             <TabsTrigger value="home-alert" className="flex items-center gap-1.5 text-xs md:text-sm px-2 md:px-3 h-9"><Megaphone className="w-3.5 h-3.5 md:w-4 md:h-4" /> <span className="hidden sm:inline">Home Page</span><span className="sm:hidden">Home</span></TabsTrigger>
           </TabsList>
