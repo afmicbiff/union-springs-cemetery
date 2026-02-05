@@ -1,14 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
-import NewPlotsImport from "../components/plots/NewPlotsImport";
-import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
 import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
 import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Map as MapIcon, FileText, Grid3X3 } from "lucide-react";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
 
 
