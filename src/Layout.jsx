@@ -218,7 +218,7 @@ export default function Layout({ children }) {
     isDropdown: true,
     items: [
     { label: 'Administrators', path: '/admin', icon: LayoutDashboard },
-    { label: 'Board Members & Employees', path: '/Employees', icon: Users },
+    { label: 'Employees', path: '/Employees', icon: Users },
     { label: 'Member Portal/Account', path: '/MemberPortal', icon: UserCircle },
     
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
