@@ -64,8 +64,11 @@ export default function ServicesPage() {
                     <div className="w-20 sm:w-24 h-1 bg-red-700 mx-auto"></div>
                 </header>
 
-                {/* Main Content */}
-                <div className="bg-white rounded-lg shadow-md p-5 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+                {/* Main Content - contain for paint optimization */}
+                <div 
+                    className="bg-white rounded-lg shadow-md p-5 sm:p-6 md:p-8 space-y-6 sm:space-y-8"
+                    style={{ contain: 'layout style' }}
+                >
                     
                     {/* Staff Services */}
                     <section>
