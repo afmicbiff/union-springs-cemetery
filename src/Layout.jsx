@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, UserPlus, Settings, Mail, Activity, BarChart2, Trash2, Image } from 'lucide-react';
+import { Menu, X, Search, Map, Info, Home, Lock, UserCircle, ChevronDown, LayoutDashboard, Users, Calendar, Facebook, Activity, BarChart2, Trash2, Image } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Toaster } from "sonner";
@@ -15,14 +15,74 @@ import {
 import GovernanceProvider from '@/components/gov/GovernanceProvider';
 import ImageContextMenu from '@/components/common/ImageContextMenu';
 import { base44 } from '@/api/base44Client';
-export default function Layout({ children }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+// Memoized mobile menu item for performance
+const MobileMenuItem = memo(function MobileMenuItem({ item, onClose }) {
   const location = useLocation();
-  const [isAdminUser, setIsAdminUser] = React.useState(false);
-  React.useEffect(() => {
+  const isActive = location.pathname === item.path;
+  
+  return (
+    <Link
+      to={createPageUrl(item.path.replace('/', '')) || '/'}
+      onClick={onClose}
+      className={`flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium touch-manipulation active:bg-stone-700 ${
+        isActive ? 'bg-stone-800 text-white' : 'text-stone-300'
+      }`}
+    >
+      <item.icon className="w-5 h-5 text-teal-500" aria-hidden="true" />
+      {item.label}
+    </Link>
+  );
+});
+
+// Memoized mobile dropdown section
+const MobileDropdownSection = memo(function MobileDropdownSection({ item, onClose }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-stone-400 uppercase tracking-wider">
+        <item.icon className="w-4 h-4 text-teal-500" aria-hidden="true" />
+        {item.label}
+      </div>
+      <div className="pl-8 space-y-0.5">
+        {item.items.map((subItem) => (
+          <Link
+            key={subItem.label}
+            to={createPageUrl(subItem.path.replace('/', ''))}
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-stone-400 active:bg-stone-700 active:text-white touch-manipulation"
+          >
+            <subItem.icon className="w-4 h-4 text-stone-500" aria-hidden="true" />
+            {subItem.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+export default function Layout({ children }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+  
+  useEffect(() => {
     let mounted = true;
     base44.auth.me().then(u => { if (mounted) setIsAdminUser(u?.role === 'admin'); }).catch(() => { if (mounted) setIsAdminUser(false); });
     return () => { mounted = false; };
+  }, []);
+  
+  // Memoized toggle handler
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(prev => !prev);
+  }, []);
+  
+  const closeMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(false);
   }, []);
 
   // Design System Constants mapped to Tailwind classes
@@ -36,7 +96,7 @@ export default function Layout({ children }) {
   };
 
   const isAdmin = location.pathname.startsWith('/admin');
-  React.useEffect(() => {
+  useEffect(() => {
     const tags = [
       ['Cache-Control', 'no-cache, no-store, must-revalidate'],
       ['Pragma', 'no-cache'],
@@ -57,7 +117,7 @@ export default function Layout({ children }) {
   }, []);
 
   // On the Plots page, block third-party trackers and heavy CDNs to reduce JS cost
-  React.useEffect(() => {
+  useEffect(() => {
     const isPlots = location.pathname.toLowerCase().startsWith('/plots');
     if (!isPlots) return;
     try {
@@ -169,14 +229,14 @@ export default function Layout({ children }) {
     }
   ];
 
-  const navItemsFiltered = navItems.map((item) => {
+  const navItemsFiltered = useMemo(() => navItems.map((item) => {
     if (item.label === 'Admin Dashboard' && item.items) {
       const adminOnly = ['Performance Dashboard', 'Advanced Reports', 'Image Management', 'Security Dashboard', 'Board Members & Employees'];
       const items = isAdminUser ? item.items : item.items.filter((s) => !adminOnly.includes(s.label));
       return { ...item, items };
     }
     return item;
-  });
+  }), [isAdminUser]);
 
   return (
     <div className={`min-h-screen ${pageBackground} font-sans text-stone-900 flex flex-col app-font-scope`}>
@@ -263,57 +323,35 @@ export default function Layout({ children }) {
               ))}
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - optimized for touch */}
             <button
-              className="md:hidden p-2 rounded-md text-stone-300 hover:text-white hover:bg-stone-800"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle navigation"
+              className="md:hidden p-2 rounded-md text-stone-300 active:bg-stone-700 touch-manipulation"
+              onClick={toggleMobileMenu}
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-stone-900 border-t border-stone-800">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navItemsFiltered.map((item) => (
-                item.isDropdown ? (
-                  <div key={item.label} className="space-y-1">
-                    <div className="flex items-center gap-3 px-3 py-4 text-base font-medium text-stone-300">
-                      <item.icon className="w-5 h-5 text-teal-500" />
-                      {item.label}
-                    </div>
-                    <div className="pl-11 space-y-1">
-                      {item.items.map((subItem) => (
-                        <Link
-                          key={subItem.label}
-                          to={createPageUrl(subItem.path.replace('/', ''))}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium text-stone-400 hover:text-white hover:bg-stone-800"
-                        >
-                          <subItem.icon className="w-4 h-4 text-stone-500" />
-                          {subItem.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={item.label}
-                    to={createPageUrl(item.path.replace('/', '')) || '/'}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-4 rounded-md text-base font-medium text-stone-300 hover:text-white hover:bg-stone-800"
-                  >
-                    <item.icon className="w-5 h-5 text-teal-500" />
-                    {item.label}
-                  </Link>
-                )
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Mobile Navigation - GPU-accelerated slide animation */}
+        <div 
+          className={`md:hidden bg-stone-900 border-t border-stone-800 overflow-hidden transition-all duration-200 ease-out ${
+            isMobileMenuOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
+          }`}
+          style={{ willChange: 'max-height, opacity' }}
+        >
+          <nav className="px-2 pt-2 pb-3 space-y-1 overflow-y-auto max-h-[70vh]" aria-label="Mobile navigation">
+            {navItemsFiltered.map((item) => (
+              item.isDropdown ? (
+                <MobileDropdownSection key={item.label} item={item} onClose={closeMobileMenu} />
+              ) : (
+                <MobileMenuItem key={item.label} item={item} onClose={closeMobileMenu} />
+              )
+            ))}
+          </nav>
+        </div>
       </header>
 
       {/* Main Content */}
