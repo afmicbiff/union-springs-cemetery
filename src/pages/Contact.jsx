@@ -87,64 +87,68 @@ export default function ContactPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
                 <Breadcrumbs items={[{ label: 'Contact Us' }]} />
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Contact Information */}
-                    <div className="space-y-8">
-                        <div>
-                            <h1 className="text-4xl md:text-5xl font-serif text-stone-900 mb-6">Get in Touch</h1>
-                            <p className="text-stone-600 text-lg leading-relaxed">
-                                Whether you have questions about plot availability, genealogy services, or memorial planning, our compassionate staff is here to assist you.
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+                    {/* Contact Information - stacks on mobile */}
+                    <div className="space-y-5 sm:space-y-6 order-2 lg:order-1">
+                        <div className="text-center lg:text-left">
+                            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-stone-900 mb-3 sm:mb-4">Get in Touch</h1>
+                            <p className="text-stone-600 text-base sm:text-lg leading-relaxed">
+                                Questions about plot availability, genealogy services, or memorial planning? We're here to help.
                             </p>
-                            <p className="mt-2 text-stone-700">Need assistance locating a loved one? Our board is here to help.</p>
                         </div>
 
-                        <div className="grid gap-6">
-                            <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
-                                    <div className="bg-stone-200 p-2 sm:p-3 rounded-full">
-                                        <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-stone-700" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Office Location</h3>
-                                        <p className="text-stone-600 text-sm sm:text-base">
-                                            1311 Fire Tower Road<br />
-                                            Shongaloo, Webster Parish, Louisiana, 71072
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                        <div className="grid gap-4 sm:gap-5">
+                            {/* Location Card */}
+                            <ContactCard 
+                                icon={MapPin} 
+                                iconBg="bg-stone-200 text-stone-700"
+                                title="Office Location"
+                            >
+                                <address className="text-stone-600 text-sm sm:text-base not-italic">
+                                    1311 Fire Tower Road<br />
+                                    Shongaloo, LA 71072
+                                </address>
+                                <a 
+                                    href="https://maps.google.com/?q=1311+Fire+Tower+Road+Shongaloo+LA+71072"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-teal-700 text-sm mt-2 hover:underline active:text-teal-800 touch-manipulation"
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                    Get Directions
+                                </a>
+                            </ContactCard>
 
-                            <Card className="bg-slate-50 border-none shadow-md hover:shadow-lg transition-shadow">
-                                <CardContent className="flex items-start gap-3 p-4 sm:gap-4 sm:p-6">
-                                    <div className="bg-teal-100 p-2 sm:p-3 rounded-full">
-                                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-teal-700" />
-                                    </div>
-                                    <div className="space-y-4 w-full">
-                                        <div>
-                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">Darrell Clendennen</h3>
-                                            <p className="text-stone-600 text-sm sm:text-base">Phone: <a href="tel:5407608863" className="hover:text-teal-700 hover:underline">(540) 760-8863</a></p>
-                                            <p className="text-stone-600 text-sm sm:text-base">Email: <a href="mailto:clencsm@yahoo.com" className="hover:text-teal-700 hover:underline">clencsm@yahoo.com</a></p>
-                                        </div>
-                                        <div className="border-t border-stone-200" />
-                                        <div>
-                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">RD Teutsch</h3>
-                                            <p className="text-stone-600 text-sm sm:text-base">Phone: <a href="tel:3188462201" className="hover:text-teal-700 hover:underline">(318) 846-2201</a></p>
-                                            <p className="text-stone-600 text-sm sm:text-base">Email: <a href="mailto:royteutsch@yahoo.com" className="hover:text-teal-700 hover:underline">royteutsch@yahoo.com</a></p>
-                                        </div>
-                                        <div className="border-t border-stone-200" />
-                                        <div>
-                                            <h3 className="font-serif font-bold text-base sm:text-lg text-stone-800">General Inquiries</h3>
-                                            <p className="text-stone-600 text-sm sm:text-base">Email: <Link to={createPageUrl('MemberPortal?tab=messages')} className="hover:text-teal-700 hover:underline">office@unionsprings.com</Link></p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            {/* Contacts Card */}
+                            <ContactCard 
+                                icon={Phone} 
+                                iconBg="bg-teal-100 text-teal-700"
+                            >
+                                <ContactPerson 
+                                    name="Darrell Clendennen"
+                                    phone="(540) 760-8863"
+                                    email="clencsm@yahoo.com"
+                                />
+                                <ContactPerson 
+                                    name="RD Teutsch"
+                                    phone="(318) 846-2201"
+                                    email="royteutsch@yahoo.com"
+                                />
+                                <div>
+                                    <h4 className="font-serif font-bold text-sm sm:text-base text-stone-800">General Inquiries</h4>
+                                    <Link 
+                                        to={createPageUrl('MemberPortal?tab=messages')} 
+                                        className="text-teal-700 text-sm sm:text-base hover:underline active:text-teal-800 touch-manipulation"
+                                    >
+                                        office@unionsprings.com
+                                    </Link>
+                                </div>
+                            </ContactCard>
                         </div>
-
                     </div>
 
                     {/* Contact Form */}
