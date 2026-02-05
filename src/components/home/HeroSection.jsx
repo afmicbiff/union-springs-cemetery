@@ -93,7 +93,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={1}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/884fb99da_image.webp"
+            webpSrc={null}
             alt="Union Springs Cemetery"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -104,7 +104,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={2}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.webp"
+            webpSrc={null}
             alt="Union Springs Cemetery Gate"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -115,7 +115,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={3}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/419a6d107_image.webp"
+            webpSrc={null}
             alt="Union Springs History"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -126,7 +126,7 @@ const HeroSection = memo(function HeroSection() {
           <HeroImage
             index={4}
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
-            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/865c809e6_image.webp"
+            webpSrc={null}
             alt="Union Springs Church"
             activeImage={activeImage}
             onClick={handleImageClick}
