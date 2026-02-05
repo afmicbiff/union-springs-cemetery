@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -25,6 +25,45 @@ export default function DeceasedManager() {
     const [page, setPage] = useState(1);
     const limit = 50;
     const queryClient = useQueryClient();
+    
+    // Refs for synced horizontal scrollbars
+    const topScrollRef = useRef(null);
+    const tableScrollRef = useRef(null);
+    const tableRef = useRef(null);
+    const [tableWidth, setTableWidth] = useState(800);
+    const isScrolling = useRef(false);
+
+    // Sync scroll positions between top scrollbar and table
+    const handleTopScroll = useCallback(() => {
+        if (isScrolling.current) return;
+        isScrolling.current = true;
+        if (tableScrollRef.current && topScrollRef.current) {
+            tableScrollRef.current.scrollLeft = topScrollRef.current.scrollLeft;
+        }
+        requestAnimationFrame(() => { isScrolling.current = false; });
+    }, []);
+
+    const handleTableScroll = useCallback(() => {
+        if (isScrolling.current) return;
+        isScrolling.current = true;
+        if (topScrollRef.current && tableScrollRef.current) {
+            topScrollRef.current.scrollLeft = tableScrollRef.current.scrollLeft;
+        }
+        requestAnimationFrame(() => { isScrolling.current = false; });
+    }, []);
+
+    // Measure table width for top scrollbar
+    useEffect(() => {
+        if (tableRef.current) {
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    setTableWidth(entry.target.scrollWidth);
+                }
+            });
+            resizeObserver.observe(tableRef.current);
+            return () => resizeObserver.disconnect();
+        }
+    }, [filteredList]);
 
     // Debounce search input
     useEffect(() => {
@@ -238,8 +277,21 @@ export default function DeceasedManager() {
                 </div>
 
                 <div className="rounded-md border overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
+                    {/* Top scrollbar for mobile - syncs with table scroll */}
+                    <div 
+                        className="overflow-x-auto md:hidden border-b border-stone-200"
+                        ref={topScrollRef}
+                        onScroll={handleTopScroll}
+                        style={{ height: '16px' }}
+                    >
+                        <div style={{ width: tableWidth, height: '1px' }} />
+                    </div>
+                    <div 
+                        className="overflow-x-auto"
+                        ref={tableScrollRef}
+                        onScroll={handleTableScroll}
+                    >
+                        <table className="w-full text-sm text-left" ref={tableRef}>
                             <thead className="bg-stone-50 text-stone-600 font-medium border-b sticky top-0 z-10">
                                 <tr>
                                     <th className="p-4 whitespace-nowrap min-w-[140px]">Name</th>
