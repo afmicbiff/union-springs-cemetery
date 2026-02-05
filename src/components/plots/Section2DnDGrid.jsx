@@ -76,8 +76,14 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     const markers = Array(dataCols).fill(false);
     
     for (let c = 0; c < dataCols; c++) {
-      // Check if bottom plot (row 0) is a target for +New
-      const bottomPlot = baseColumns[c][0];
+      // Find the bottom-most plot in this column (lowest row index with data)
+      let bottomPlot = null;
+      for (let r = 0; r < perCol; r++) {
+        if (baseColumns[c][r]) {
+          bottomPlot = baseColumns[c][r];
+          break;
+        }
+      }
       const bottomNum = parseNum(bottomPlot?.Grave);
       if (bottomNum && NEW_PLOT_TARGETS.has(bottomNum)) {
         markers[c] = true;
