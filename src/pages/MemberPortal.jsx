@@ -272,10 +272,12 @@ const MemberPortal = memo(function MemberPortal() {
                             <Receipt className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5 shrink-0" /> 
                             <span>Invoices</span>
                         </TabsTrigger>
+{user?.role === 'admin' && (
                         <TabsTrigger value="reservations" className="data-[state=active]:bg-teal-700 data-[state=active]:text-white py-2 px-2.5 sm:px-3 text-xs sm:text-sm touch-manipulation">
                             <span className="hidden sm:inline">Reservations</span>
                             <span className="sm:hidden">Reserve</span>
                         </TabsTrigger>
+                        )}
                     </TabsList>
                 </div>
 
