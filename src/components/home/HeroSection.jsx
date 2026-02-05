@@ -4,22 +4,29 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Search, MapPin, Map } from 'lucide-react';
 
-// Memoized hero image component - optimized for mobile with reduced transforms
-const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClick, positionClass, hiddenOnMobile }) {
+// Memoized hero image component - all 4 visible on mobile with scattered layout
+const HeroImage = memo(function HeroImage({ index, src, alt, activeImage, onClick, positionClass, mobilePositionClass }) {
   const isActive = activeImage === index;
   
   return (
     <div 
       onClick={() => onClick(index)}
-      className={`absolute transform transition-transform duration-300 ease-out cursor-pointer ${
-        hiddenOnMobile ? 'hidden md:block' : ''
-      } ${isActive ? 'rotate-0 scale-110 z-50' : `${positionClass} active:scale-105`}`}
+      className={`absolute transform cursor-pointer transition-all duration-500 ease-out will-change-transform ${
+        isActive 
+          ? 'rotate-0 scale-125 md:scale-110 z-50 translate-x-0 translate-y-0' 
+          : `${mobilePositionClass} md:${positionClass} active:scale-105 z-${index * 10}`
+      }`}
+      style={{ 
+        transitionTimingFunction: isActive ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
+      }}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onClick(index)}
       aria-label={`View ${alt}`}
     >
-      <div className="max-w-[200px] sm:max-w-[260px] md:max-w-[340px] rounded-sm shadow-lg md:shadow-2xl">
+      <div className={`rounded-sm shadow-lg md:shadow-2xl overflow-hidden ${
+        isActive ? 'max-w-[240px] sm:max-w-[280px] md:max-w-[340px]' : 'max-w-[140px] sm:max-w-[180px] md:max-w-[340px]'
+      }`}>
         <img 
           src={src}
           alt={alt}
