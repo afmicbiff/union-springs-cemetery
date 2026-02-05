@@ -92,13 +92,15 @@ const TaskTimeLogDialog = memo(function TaskTimeLogDialog({ isOpen, onClose, tas
                                 <Input
                                     id="minutes"
                                     type="number"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                     placeholder="30"
                                     value={minutes}
                                     onChange={(e) => setMinutes(e.target.value)}
                                     required
                                     min="1"
                                     max="1440"
-                                    className="h-8 text-sm"
+                                    className="h-10 sm:h-8 text-sm"
                                 />
                             </div>
                             <div className="col-span-3 space-y-1">
@@ -109,13 +111,13 @@ const TaskTimeLogDialog = memo(function TaskTimeLogDialog({ isOpen, onClose, tas
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     maxLength={200}
-                                    className="h-8 text-sm"
+                                    className="h-10 sm:h-8 text-sm"
                                 />
                             </div>
                         </div>
                         <Button 
                             type="submit" 
-                            className="w-full bg-teal-700 hover:bg-teal-800 h-8 text-sm" 
+                            className="w-full bg-teal-700 hover:bg-teal-800 h-10 sm:h-8 text-sm touch-manipulation" 
                             size="sm"
                             disabled={!minutes || addLogMutation.isPending}
                         >

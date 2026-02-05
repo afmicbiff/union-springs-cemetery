@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, isValid, parseISO } from 'date-fns';
-import { Check, Search, User, Repeat, Link2, X, Loader2 } from 'lucide-react';
+import { Check, Search, User, Repeat, Link2, X, Loader2, AlertCircle } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 // Safe date formatter for form
 const formatDateForInput = (dateStr) => {
@@ -72,14 +73,27 @@ const TaskDialog = memo(function TaskDialog({ isOpen, onClose, task, onSave, emp
         if (isSubmitting) return;
         
         // Validation
-        if (!formData.title?.trim()) {
+        const title = formData.title?.trim();
+        if (!title) {
+            toast.error("Title is required");
+            return;
+        }
+        if (title.length < 2) {
+            toast.error("Title must be at least 2 characters");
             return;
         }
         
         setIsSubmitting(true);
-        const dataToSave = { ...formData, title: formData.title.trim() };
+        const dataToSave = { ...formData, title };
         if (dataToSave.assignee_id === "unassigned") dataToSave.assignee_id = null;
-        onSave(dataToSave);
+        
+        // Wrap in try-catch for safety
+        try {
+            onSave(dataToSave);
+        } catch (err) {
+            setIsSubmitting(false);
+            toast.error("Failed to save task");
+        }
     }, [formData, onSave, isSubmitting]);
 
     const handleCompleteAndArchive = useCallback(() => {
@@ -169,15 +183,16 @@ const TaskDialog = memo(function TaskDialog({ isOpen, onClose, task, onSave, emp
                     <div className="space-y-1">
                         <Label className="text-xs sm:text-sm">Assignee</Label>
                         <div className="relative">
-                            <div 
-                                className="flex items-center justify-between w-full p-2 border rounded-md cursor-pointer hover:bg-stone-50 h-8 sm:h-9 text-sm"
+                            <button 
+                                type="button"
+                                className="flex items-center justify-between w-full p-2 border rounded-md cursor-pointer hover:bg-stone-50 h-9 sm:h-10 text-sm touch-manipulation"
                                 onClick={() => setIsAssigneeOpen(!isAssigneeOpen)}
                             >
                                 <span className={`truncate ${formData.assignee_id === "unassigned" ? "text-stone-500" : "font-medium"}`}>
                                     {getAssigneeLabel()}
                                 </span>
                                 <User className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
-                            </div>
+                            </button>
 
                             {isAssigneeOpen && (
                                 <div className="absolute z-50 w-full mt-1 bg-white border rounded-md shadow-lg p-2">
@@ -216,10 +231,11 @@ const TaskDialog = memo(function TaskDialog({ isOpen, onClose, task, onSave, emp
                                                 {formData.assignee_id === "unassigned" && <Check className="w-3.5 h-3.5 text-teal-600" />}
                                             </div>
                                             {filteredEmployees.map(emp => (
-                                                <div 
+                                                <button 
+                                                    type="button"
                                                     key={emp.id}
                                                     className={cn(
-                                                        "flex items-center justify-between px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-stone-100",
+                                                        "flex items-center justify-between px-2 py-2.5 sm:py-1.5 text-sm rounded cursor-pointer hover:bg-stone-100 w-full text-left touch-manipulation",
                                                         formData.assignee_id === emp.id && "bg-stone-100 font-medium"
                                                     )}
                                                     onClick={() => {
@@ -232,7 +248,7 @@ const TaskDialog = memo(function TaskDialog({ isOpen, onClose, task, onSave, emp
                                                         <div className="text-[10px] text-stone-400 truncate">{emp.email}</div>
                                                     </div>
                                                     {formData.assignee_id === emp.id && <Check className="w-3.5 h-3.5 text-teal-600 flex-shrink-0" />}
-                                                </div>
+                                                </button>
                                             ))}
                                             {filteredEmployees.length === 0 && (
                                                 <div className="text-center py-4 text-xs text-stone-500">No employees found</div>
@@ -356,10 +372,10 @@ const TaskDialog = memo(function TaskDialog({ isOpen, onClose, task, onSave, emp
                         </div>
                     )}
 
-                    <DialogFooter className="gap-2 pt-2">
-                        <Button type="button" variant="outline" onClick={onClose} size="sm" className="h-8">Cancel</Button>
-                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800 h-8" size="sm" disabled={isSubmitting}>
-                            {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (task ? 'Update' : 'Create')}
+                    <DialogFooter className="gap-2 pt-2 flex-col sm:flex-row">
+                        <Button type="button" variant="outline" onClick={onClose} size="sm" className="h-10 sm:h-8 w-full sm:w-auto touch-manipulation">Cancel</Button>
+                        <Button type="submit" className="bg-teal-700 hover:bg-teal-800 h-10 sm:h-8 w-full sm:w-auto touch-manipulation" size="sm" disabled={isSubmitting || !formData.title?.trim()}>
+                            {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : (task ? 'Update Task' : 'Create Task')}
                         </Button>
                     </DialogFooter>
                 </form>

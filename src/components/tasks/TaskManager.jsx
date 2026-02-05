@@ -1,11 +1,11 @@
-import React, { useState, memo, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, memo, useCallback, useMemo, lazy, Suspense, useRef, useEffect } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Clock, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, Timer, Repeat, Link2, Loader2, X } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Plus, Filter, Search, MoreHorizontal, Pencil, Trash2, Archive, RotateCcw, Timer, Repeat, Link2, Loader2, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { format, isPast, parseISO, isValid } from 'date-fns';
 import { toast } from "sonner";
 import {
@@ -34,42 +34,53 @@ const safeFormatDate = (dateStr, formatStr = 'MMM d, yyyy') => {
     }
 };
 
-// Memoized task row component
-const TaskRow = memo(({ task, tasks, isAdmin, employeeNameById, onToggleStatus, onEdit, onLogTime, onArchive, onDelete }) => {
-    const getAssigneeName = (id) => (!id ? "Unassigned" : (employeeNameById.get(id) || "Unknown"));
-    
-    const getPriorityColor = (p) => {
-        switch (p) {
-            case 'High': return 'text-red-600 bg-red-50 border-red-200';
-            case 'Medium': return 'text-amber-600 bg-amber-50 border-amber-200';
-            case 'Low': return 'text-blue-600 bg-blue-50 border-blue-200';
-            default: return 'text-stone-600 bg-stone-50 border-stone-200';
-        }
-    };
+// Priority color constants (avoid recalculation)
+const PRIORITY_COLORS = {
+    High: 'text-red-600 bg-red-50 border-red-200',
+    Medium: 'text-amber-600 bg-amber-50 border-amber-200',
+    Low: 'text-blue-600 bg-blue-50 border-blue-200',
+    default: 'text-stone-600 bg-stone-50 border-stone-200'
+};
 
-    const getStatusIcon = (status) => {
-        switch (status) {
+// Memoized task row component with optimized renders
+const TaskRow = memo(({ task, isAdmin, employeeNameById, onToggleStatus, onEdit, onLogTime, onArchive, onDelete }) => {
+    const assigneeName = useMemo(() => !task.assignee_id ? "Unassigned" : (employeeNameById.get(task.assignee_id) || "Unknown"), [task.assignee_id, employeeNameById]);
+    const priorityColor = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.default;
+    
+    const isOverdue = useMemo(() => {
+        if (task.status === 'Completed' || !task.due_date) return false;
+        try {
+            return isPast(parseISO(task.due_date));
+        } catch { return false; }
+    }, [task.status, task.due_date]);
+
+    const statusIcon = useMemo(() => {
+        switch (task.status) {
             case 'Completed': return <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
             case 'In Progress': return <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />;
             default: return <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400" />;
         }
-    };
+    }, [task.status]);
 
-    const isOverdue = task.status !== 'Completed' && task.due_date && isPast(parseISO(task.due_date));
+    const handleToggle = useCallback(() => onToggleStatus(task.id, task.status === 'Completed' ? 'To Do' : 'Completed'), [onToggleStatus, task.id, task.status]);
+    const handleEdit = useCallback(() => onEdit(task), [onEdit, task]);
+    const handleLogTime = useCallback(() => onLogTime(task), [onLogTime, task]);
+    const handleArchive = useCallback((archive) => onArchive(task.id, archive), [onArchive, task.id]);
+    const handleDelete = useCallback(() => onDelete(task.id), [onDelete, task.id]);
 
     return (
-        <div className="flex items-start justify-between p-3 sm:p-4 rounded-lg border border-stone-200 bg-white hover:shadow-md transition-shadow group">
+        <div className="flex items-start justify-between p-3 sm:p-4 rounded-lg border border-stone-200 bg-white hover:shadow-md transition-shadow will-change-transform">
             <div className="flex items-start gap-2 sm:gap-3 flex-1 min-w-0">
                 <button 
-                    className="mt-0.5 flex-shrink-0 hover:scale-110 transition-transform touch-manipulation"
-                    onClick={() => onToggleStatus(task.id, task.status === 'Completed' ? 'To Do' : 'Completed')}
-                    title="Toggle Status"
+                    className="mt-0.5 flex-shrink-0 hover:scale-110 transition-transform touch-manipulation active:scale-95 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center -m-2 sm:m-0"
+                    onClick={handleToggle}
+                    aria-label={`Mark task ${task.status === 'Completed' ? 'incomplete' : 'complete'}`}
                 >
-                    {getStatusIcon(task.status)}
+                    {statusIcon}
                 </button>
                 <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                        <h3 className={`font-semibold text-sm sm:text-base text-stone-900 truncate max-w-[200px] sm:max-w-none ${task.status === 'Completed' ? 'line-through text-stone-500' : ''}`}>
+                        <h3 className={`font-semibold text-sm sm:text-base text-stone-900 truncate max-w-[180px] sm:max-w-none ${task.status === 'Completed' ? 'line-through text-stone-500' : ''}`}>
                             {task.title}
                         </h3>
                         {task.dependencies?.length > 0 && (
@@ -78,12 +89,12 @@ const TaskRow = memo(({ task, tasks, isAdmin, employeeNameById, onToggleStatus, 
                                 <span>{task.dependencies.length}</span>
                             </Badge>
                         )}
-                        <Badge variant="outline" className={`text-[9px] sm:text-xs font-normal ${getPriorityColor(task.priority)}`}>
+                        <Badge variant="outline" className={`text-[9px] sm:text-xs font-normal ${priorityColor}`}>
                             {task.priority}
                         </Badge>
                         {isAdmin && (
                             <Badge variant="secondary" className="text-[9px] sm:text-xs bg-stone-100 text-stone-600 truncate max-w-[80px] sm:max-w-none">
-                                {getAssigneeName(task.assignee_id)}
+                                {assigneeName}
                             </Badge>
                         )}
                     </div>
@@ -111,34 +122,34 @@ const TaskRow = memo(({ task, tasks, isAdmin, employeeNameById, onToggleStatus, 
 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white shadow-sm font-medium h-7 sm:h-8 px-2 sm:px-3 text-xs">
+                    <Button size="sm" className="bg-teal-700 hover:bg-teal-800 text-white shadow-sm font-medium h-8 sm:h-8 px-2 sm:px-3 text-xs touch-manipulation min-w-[44px]">
                         <span className="hidden sm:inline mr-1">Actions</span>
                         <MoreHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="text-sm">
+                <DropdownMenuContent align="end" className="text-sm min-w-[140px]">
                     {!task.is_archived && (
                         <>
-                            <DropdownMenuItem onClick={() => onLogTime(task)}>
+                            <DropdownMenuItem onClick={handleLogTime} className="min-h-[44px] sm:min-h-0">
                                 <Timer className="w-4 h-4 mr-2" /> Log Time
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEdit(task)}>
+                            <DropdownMenuItem onClick={handleEdit} className="min-h-[44px] sm:min-h-0">
                                 <Pencil className="w-4 h-4 mr-2" /> Edit
                             </DropdownMenuItem>
                         </>
                     )}
                     {isAdmin && !task.is_archived && (
-                        <DropdownMenuItem onClick={() => onArchive(task.id, true)}>
+                        <DropdownMenuItem onClick={() => handleArchive(true)} className="min-h-[44px] sm:min-h-0">
                             <Archive className="w-4 h-4 mr-2" /> Archive
                         </DropdownMenuItem>
                     )}
                     {isAdmin && task.is_archived && (
-                        <DropdownMenuItem onClick={() => onArchive(task.id, false)}>
+                        <DropdownMenuItem onClick={() => handleArchive(false)} className="min-h-[44px] sm:min-h-0">
                             <RotateCcw className="w-4 h-4 mr-2" /> Restore
                         </DropdownMenuItem>
                     )}
                     {isAdmin && (
-                        <DropdownMenuItem className="text-red-600" onClick={() => onDelete(task.id)}>
+                        <DropdownMenuItem className="text-red-600 min-h-[44px] sm:min-h-0" onClick={handleDelete}>
                             <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </DropdownMenuItem>
                     )}
@@ -146,6 +157,19 @@ const TaskRow = memo(({ task, tasks, isAdmin, employeeNameById, onToggleStatus, 
             </DropdownMenu>
         </div>
     );
+}, (prev, next) => {
+    // Custom comparison to prevent unnecessary re-renders
+    return prev.task.id === next.task.id &&
+           prev.task.status === next.task.status &&
+           prev.task.title === next.task.title &&
+           prev.task.priority === next.task.priority &&
+           prev.task.due_date === next.task.due_date &&
+           prev.task.description === next.task.description &&
+           prev.task.assignee_id === next.task.assignee_id &&
+           prev.task.is_archived === next.task.is_archived &&
+           prev.task.recurrence === next.task.recurrence &&
+           prev.isAdmin === next.isAdmin &&
+           prev.employeeNameById === next.employeeNameById;
 });
 
 const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployeeId = null }) {
@@ -533,23 +557,30 @@ const TaskManager = memo(function TaskManager({ isAdmin = false, currentEmployee
                     {isLoadingTasks ? (
                         <div className="flex items-center justify-center py-12 text-stone-500">
                             <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                            Loading tasks...
+                            <span className="text-sm">Loading tasks...</span>
                         </div>
                     ) : isTasksError ? (
-                        <div className="text-center py-12 text-red-500 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
-                            <p className="text-sm">Failed to load tasks. Please try again.</p>
+                        <div className="text-center py-8 sm:py-12 text-red-600 border-2 border-dashed border-red-200 rounded-lg bg-red-50">
+                            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-60" />
+                            <p className="text-sm font-medium">Failed to load tasks</p>
+                            <p className="text-xs text-red-500 mt-1">Please check your connection and try again</p>
+                            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries(['tasks'])} className="mt-3 h-8 text-xs">
+                                <RefreshCw className="w-3.5 h-3.5 mr-1" /> Retry
+                            </Button>
                         </div>
                     ) : filteredTasks.length === 0 ? (
                         <div className="text-center py-8 sm:py-12 text-stone-500 border-2 border-dashed rounded-lg">
                             <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 opacity-20" />
                             <p className="text-sm">No tasks found.</p>
+                            {(debouncedSearchTerm || priorityFilter !== 'all' || statusFilter !== 'all') && (
+                                <p className="text-xs text-stone-400 mt-1">Try adjusting your filters</p>
+                            )}
                         </div>
                     ) : (
                         filteredTasks.map(task => (
                             <TaskRow 
                                 key={task.id}
                                 task={task}
-                                tasks={tasks}
                                 isAdmin={isAdmin}
                                 employeeNameById={employeeNameById}
                                 onToggleStatus={handleToggleStatus}
