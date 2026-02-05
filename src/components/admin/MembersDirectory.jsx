@@ -327,7 +327,11 @@ function MembersDirectory({ openMemberId }) {
 
     // Memoized filtered and sorted members
     const filteredMembers = useMemo(() => {
-        const list = (members || []).filter(member => {
+        if (!members || !Array.isArray(members) || members.length === 0) {
+            return [];
+        }
+        const list = members.filter(member => {
+            if (!member) return false;
             // Basic search filter
             const searchLower = (debouncedSearch || "").toLowerCase();
             if (searchLower) {
