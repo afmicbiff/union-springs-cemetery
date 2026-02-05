@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
 import PlotFilters from "../components/plots/PlotFilters";
