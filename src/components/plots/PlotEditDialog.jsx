@@ -90,7 +90,7 @@ export default function PlotEditDialog({ isOpen, onClose, plot, onSave, onCreate
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border-0 shadow-xl">
         <DialogHeader>
           <DialogTitle>{isNewPlot ? 'Create New Plot' : 'Edit Plot Details'}</DialogTitle>
         </DialogHeader>
