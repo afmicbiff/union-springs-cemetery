@@ -47,9 +47,9 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     regularPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
     
-    // For regular plots, pivot starting from 208 (since 186-207 are in the special column)
-    const idx208 = regularPlots.findIndex(p => parseNum(p.Grave) === 208);
-    const pivoted = idx208 > -1 ? [...regularPlots.slice(idx208), ...regularPlots.slice(0, idx208)] : regularPlots;
+    // For regular plots, pivot starting from 251 (since 228-250 are in the special column)
+    const idx251 = regularPlots.findIndex(p => parseNum(p.Grave) === 251);
+    const pivoted = idx251 > -1 ? [...regularPlots.slice(idx251), ...regularPlots.slice(0, idx251)] : regularPlots;
 
     // 11 columns: column 0 is special (186-207), columns 1-10 are regular
     const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
