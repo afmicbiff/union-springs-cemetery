@@ -63,7 +63,7 @@ export default function DeceasedManager() {
             resizeObserver.observe(tableRef.current);
             return () => resizeObserver.disconnect();
         }
-    }, [filteredList]);
+    }, [searchResults?.results]);
 
     // Debounce search input
     useEffect(() => {
