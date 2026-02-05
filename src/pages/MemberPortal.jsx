@@ -320,7 +320,7 @@ const MemberPortal = memo(function MemberPortal() {
 
             {/* Help Manual Dialog */}
             <Dialog open={showManual} onOpenChange={setShowManual}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-0 shadow-2xl" hideCloseButton>
                     <React.Suspense fallback={<TabLoader />}>
                         <MemberPortalManual onClose={handleCloseManual} />
                     </React.Suspense>
