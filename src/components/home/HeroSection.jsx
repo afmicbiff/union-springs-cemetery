@@ -98,7 +98,7 @@ const HeroSection = memo(function HeroSection() {
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="-rotate-6 -translate-x-8"
-            mobilePositionClass="-rotate-6 -translate-x-16 -translate-y-16"
+            mobilePositionClass="-rotate-6 -translate-x-20 -translate-y-24"
           />
           {/* Image 2 - Top Right - Union Springs Cemetery Gate */}
           <HeroImage
@@ -109,7 +109,7 @@ const HeroSection = memo(function HeroSection() {
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="rotate-6 translate-x-8 translate-y-4"
-            mobilePositionClass="rotate-8 translate-x-16 -translate-y-12"
+            mobilePositionClass="rotate-6 translate-x-20 -translate-y-20"
           />
           {/* Image 3 - Bottom Left - Union Springs History */}
           <HeroImage
@@ -120,9 +120,9 @@ const HeroSection = memo(function HeroSection() {
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="-rotate-12 -translate-y-24 -translate-x-6"
-            mobilePositionClass="-rotate-10 -translate-x-12 translate-y-20"
+            mobilePositionClass="-rotate-8 -translate-x-20 translate-y-16"
           />
-          {/* Image 4 - Church (moved to left on mobile, catty-cornered) */}
+          {/* Image 4 - Church - Bottom Right on mobile */}
           <HeroImage
             index={4}
             src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dd9991be5_img-1767267584485.jpg"
@@ -131,7 +131,7 @@ const HeroSection = memo(function HeroSection() {
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="rotate-[25deg] translate-x-48 translate-y-32"
-            mobilePositionClass="-rotate-8 -translate-x-20 translate-y-28"
+            mobilePositionClass="rotate-8 translate-x-20 translate-y-20"
           />
         </div>
 
