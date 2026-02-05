@@ -406,9 +406,9 @@ function AdminDashboard() {
       { id: "employees", label: "Employees", component: <EmployeeList view="active" /> },
       { id: "members", label: "Members", component: <MembersDirectory openMemberId={initialParams.memberId} /> },
       { id: "documents", label: "Documents", component: <AdminDocumentsManager /> },
-      { id: "backups", label: "Backups", component: <BackupManager /> },
       { id: "communication", label: "Communications", component: <CommunicationCenter /> },
       { id: "logs", label: "System Logs", component: <AuditLogViewer /> },
+      { id: "backups", label: "Backups", component: <BackupManager /> },
   ], [initialParams.memberId]);
 
   if (!isAuthorized) {
