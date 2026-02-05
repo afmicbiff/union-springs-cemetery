@@ -21,6 +21,10 @@ const EventMarker = memo(function EventMarker({ event, onSelect }) {
         onSelect?.(event.id);
     }, [onSelect, event.id]);
 
+    if (!event?.location?.lat || !event?.location?.lng) {
+        return null;
+    }
+
     return (
         <Marker 
             position={[event.location.lat, event.location.lng]}
@@ -31,19 +35,31 @@ const EventMarker = memo(function EventMarker({ event, onSelect }) {
                 direction="top" 
                 offset={[0, -20]} 
                 opacity={1} 
-                className="font-sans rounded-md shadow-md border-none px-3 py-2"
+                permanent={false}
             >
-                <div className="text-center">
+                <div className="text-center min-w-[120px]">
                     <span className="block font-bold text-sm text-teal-900">{event.title}</span>
-                    <span className="block text-xs text-stone-500 font-serif">{event.year}</span>
+                    <span className="block text-xs text-stone-500">{event.year}</span>
+                    {event.location?.label && (
+                        <span className="block text-[10px] text-stone-600 mt-1">{event.location.label}</span>
+                    )}
                     {event.weather && (
                         <div className="flex items-center justify-center gap-1 mt-1 text-xs text-amber-600 font-medium bg-amber-50 px-1 py-0.5 rounded">
                             <span>{event.weather.condition}</span>
                         </div>
                     )}
-                    <span className="block text-[10px] text-stone-400 mt-1 uppercase tracking-wide">Click to view on timeline</span>
+                    <span className="block text-[10px] text-stone-400 mt-1 uppercase tracking-wide">Click to view</span>
                 </div>
             </Tooltip>
+            <Popup>
+                <div className="text-center p-1">
+                    <h4 className="font-bold text-teal-800">{event.title}</h4>
+                    <p className="text-xs text-stone-600">{event.year}</p>
+                    {event.location?.label && (
+                        <p className="text-xs text-stone-500 mt-1">{event.location.label}</p>
+                    )}
+                </div>
+            </Popup>
         </Marker>
     );
 });
