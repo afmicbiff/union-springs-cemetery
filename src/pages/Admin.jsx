@@ -495,7 +495,7 @@ function AdminDashboard() {
                 <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-0.5 sm:gap-1">
                     {tabs.map(tab => {
                       // Keep invisible triggers for tabs that are in dropdowns to maintain Tabs structure
-                      if (tab.id === 'archives' || tab.id === 'onboarding') {
+                      if (tab.id === 'archives' || tab.id === 'onboarding' || tab.id === 'documents') {
                         return (
                           <TabsTrigger 
                             key={tab.id}
