@@ -89,33 +89,33 @@ const HeroSection = memo(function HeroSection() {
       <div className="relative z-10 max-w-7xl w-full flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-16 px-2 sm:px-4">
         {/* Left Side Image Gallery - all 4 images visible on mobile, scattered layout */}
         <div className="flex-shrink-0 w-full md:w-1/2 max-w-xl relative h-[320px] sm:h-[380px] md:h-[450px] flex items-center justify-center" style={{ contentVisibility: 'auto' }}>
-          {/* Image 1 - Top Left */}
+          {/* Image 1 - Top Left - Union Springs Cemetery */}
           <HeroImage
             index={1}
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/884fb99da_image.png"
-            webpSrc={null}
+            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/80931bb52_img-1767267629071.jpg"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/1cf0694e7_img-1767267629072.webp"
             alt="Union Springs Cemetery"
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="-rotate-6 -translate-x-8"
             mobilePositionClass="-rotate-6 -translate-x-16 -translate-y-16"
           />
-          {/* Image 2 - Top Right */}
+          {/* Image 2 - Top Right - Union Springs Cemetery Gate */}
           <HeroImage
             index={2}
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/a5956ebdb_image.png"
-            webpSrc={null}
+            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ffe750753_img-1767267602235.jpg"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/7948b6c15_img-1767267602235.webp"
             alt="Union Springs Cemetery Gate"
             activeImage={activeImage}
             onClick={handleImageClick}
             positionClass="rotate-6 translate-x-8 translate-y-4"
             mobilePositionClass="rotate-8 translate-x-16 -translate-y-12"
           />
-          {/* Image 3 - Bottom Left */}
+          {/* Image 3 - Bottom Left - Union Springs History */}
           <HeroImage
             index={3}
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/419a6d107_image.png"
-            webpSrc={null}
+            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/b65c10f44_img-1767267640474.jpg"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/6e06dcd71_img-1767267640474.webp"
             alt="Union Springs History"
             activeImage={activeImage}
             onClick={handleImageClick}
@@ -125,8 +125,8 @@ const HeroSection = memo(function HeroSection() {
           {/* Image 4 - Church (moved to left on mobile, catty-cornered) */}
           <HeroImage
             index={4}
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/865c809e6_image.png"
-            webpSrc={null}
+            src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dd9991be5_img-1767267584485.jpg"
+            webpSrc="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ab190c6ca_img-1767267584485.webp"
             alt="Union Springs Church"
             activeImage={activeImage}
             onClick={handleImageClick}
