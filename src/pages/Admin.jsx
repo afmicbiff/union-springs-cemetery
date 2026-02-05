@@ -695,35 +695,7 @@ export default function AdminDashboard() {
                         Bylaws
                     </Link>
 
-                    <div className="flex items-stretch">
-                      <button
-                        className="px-3 py-2 text-xs md:text-[11px] lg:text-xs font-medium hover:text-green-700 hover:bg-green-50 flex items-center justify-center gap-1.5 min-w-[80px]"
-                        onClick={() => setNotifPopoverOpen(true)}
-                      >
-                        <Bell className="w-4 h-4" /> Notifications
-                      </button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className="px-2 py-2 text-xs md:text-[11px] lg:text-xs font-medium border-l border-stone-200 rounded-none rounded-r-md flex items-center hover:bg-green-50"
-                            aria-label="Notifications options"
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="min-w-[200px]">
-                          <DropdownMenuItem onClick={() => setNotifPopoverOpen(true)}>
-                            <Bell className="w-4 h-4 mr-2" /> Open Notifications
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link to={createPageUrl('NotificationSettings')} className="flex items-center">
-                              <Settings className="w-4 h-4 mr-2" /> Notification Settings
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+
                     <div className="flex items-stretch">
                       <Link
                         to={createPageUrl('SendEmail')}
