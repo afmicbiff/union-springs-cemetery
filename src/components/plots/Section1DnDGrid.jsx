@@ -36,9 +36,10 @@ const Section1DnDGrid = memo(function Section1DnDGrid({ plots, baseColorClass, i
           const n = parseNum(p.Grave);
           return n && n >= start && n <= end;
         })
-        .sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
+        // Sort descending so lowest number ends up at bottom (row 0 = bottom in flex-col)
+        .sort((a, b) => (parseNum(b.Grave) || 0) - (parseNum(a.Grave) || 0));
 
-      // Place plots from bottom, leaving spacers at top
+      // Place plots from top of array (highest nums) at top rows, lowest nums at bottom rows
       const topPadding = targetRows - colPlots.length;
       colPlots.forEach((plot, idx) => {
         const row = topPadding + idx;
