@@ -1,12 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, useDragControls } from 'framer-motion';
-import { X, Download, Maximize2, ZoomIn } from 'lucide-react';
+import { X, Download, Maximize2, ZoomIn, Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { jsPDF } from "jspdf";
+
+// Lazy load jsPDF only when needed
+const loadJsPDF = () => import('jspdf').then(m => m.jsPDF);
 
 export default function DraggableImageModal({ isOpen, onClose, imageUrl, caption }) {
-    if (!isOpen) return null;
+    if (!isOpen || typeof document === 'undefined') return null;
 
     return createPortal(
         <DraggableModalContent onClose={onClose} imageUrl={imageUrl} caption={caption} />,
@@ -17,36 +19,73 @@ export default function DraggableImageModal({ isOpen, onClose, imageUrl, caption
 function DraggableModalContent({ onClose, imageUrl, caption }) {
     const [zIndex, setZIndex] = useState(100);
     const [size, setSize] = useState({ width: 600, height: 500 });
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const dragControls = useDragControls();
     
     // Magnifier State
     const [isMagnifying, setIsMagnifying] = useState(false);
     const [magnifierState, setMagnifierState] = useState({ show: false, x: 0, y: 0, width: 0, height: 0 });
     const imageRef = useRef(null);
-    const containerRef = useRef(null);
 
-    const handleDownloadPDF = () => {
-        const doc = new jsPDF();
+    // Calculate initial position (centered)
+    const initialPosition = useMemo(() => {
+        if (typeof window === 'undefined') return { x: 100, y: 100 };
+        return {
+            x: Math.max(20, (window.innerWidth - 600) / 2),
+            y: Math.max(20, (window.innerHeight - 500) / 2)
+        };
+    }, []);
+
+    // Check if mobile
+    const isMobile = useMemo(() => {
+        if (typeof window === 'undefined') return false;
+        return window.innerWidth < 768;
+    }, []);
+
+    const handleDownloadPDF = useCallback(async () => {
+        if (!imageUrl || isDownloading) return;
         
-        const imgProps = doc.getImageProperties(imageUrl);
-        const pdfWidth = doc.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        
-        doc.addImage(imageUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        if (caption) {
-            doc.setFontSize(10);
-            doc.text(caption, 10, pdfHeight + 10);
+        setIsDownloading(true);
+        try {
+            const jsPDF = await loadJsPDF();
+            const doc = new jsPDF();
+            
+            // Create an image element to get dimensions
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = imageUrl;
+            });
+            
+            const pdfWidth = doc.internal.pageSize.getWidth() - 20;
+            const pdfHeight = (img.height * pdfWidth) / img.width;
+            
+            doc.addImage(imageUrl, 'JPEG', 10, 10, pdfWidth, Math.min(pdfHeight, 250));
+            
+            if (caption) {
+                doc.setFontSize(10);
+                doc.text(caption, 10, Math.min(pdfHeight + 20, 270), { maxWidth: pdfWidth });
+            }
+            
+            doc.save("historical-image.pdf");
+        } catch (error) {
+            console.error('PDF download failed:', error);
+            // Fallback: open image in new tab
+            window.open(imageUrl, '_blank');
+        } finally {
+            setIsDownloading(false);
         }
-        
-        doc.save("historical-image.pdf");
-    };
+    }, [imageUrl, caption, isDownloading]);
 
-    // Bring to front on click
-    const handleFocus = () => {
+    const handleFocus = useCallback(() => {
         setZIndex(prev => prev + 1);
-    };
+    }, []);
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!isMagnifying || !imageRef.current) return;
         
         const imgRect = imageRef.current.getBoundingClientRect();
@@ -67,140 +106,222 @@ function DraggableModalContent({ onClose, imageUrl, caption }) {
             imgOffsetLeft: imageRef.current.offsetLeft,
             imgOffsetTop: imageRef.current.offsetTop
         });
-    };
+    }, [isMagnifying]);
 
-    return (
-        <motion.div
-            drag
-            dragListener={false}
-            dragControls={dragControls}
-            dragMomentum={false}
-            initial={{ opacity: 0, scale: 0.9, x: window.innerWidth / 2 - 300, y: window.innerHeight / 2 - 250 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            style={{ 
-                width: size.width, 
-                height: size.height,
-                zIndex: zIndex,
-                position: 'fixed',
-                top: 0,
-                left: 0
-            }}
-            className="bg-white rounded-lg shadow-2xl border border-stone-200 flex flex-col overflow-hidden"
-            onPointerDown={handleFocus}
-        >
-            {/* Header / Drag Handle */}
-            <div className="bg-stone-100 p-2 border-b border-stone-200 flex justify-between items-center cursor-move select-none"
-                 onPointerDown={(e) => { handleFocus(); dragControls.start(e); }}
+    const handleMouseLeave = useCallback(() => {
+        setMagnifierState(prev => ({ ...prev, show: false }));
+    }, []);
+
+    const toggleMagnify = useCallback(() => {
+        setIsMagnifying(prev => !prev);
+    }, []);
+
+    const handleImageError = useCallback(() => {
+        setImageError(true);
+    }, []);
+
+    const handleResize = useCallback((w, h) => {
+        setSize({ width: Math.max(300, w), height: Math.max(200, h) });
+    }, []);
+
+    // Mobile-optimized modal (fullscreen)
+    if (isMobile) {
+        return (
+            <div 
+                className="fixed inset-0 z-50 bg-black flex flex-col"
+                onClick={(e) => e.target === e.currentTarget && onClose()}
             >
-                <span className="text-xs font-bold text-stone-500 uppercase tracking-wider px-2">Image Viewer</span>
-                <div className="hidden md:flex gap-1">
-                    <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className={`h-6 w-6 ${isMagnifying ? 'bg-teal-100 text-teal-700' : ''}`}
-                        onClick={() => setIsMagnifying(!isMagnifying)} 
-                        title="Toggle Magnifying Glass"
-                    >
-                        <ZoomIn className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleDownloadPDF} title="Download PDF">
-                        <Download className="w-3 h-3" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-red-100 hover:text-red-600" onClick={onClose}>
-                        <X className="w-3 h-3" />
-                    </Button>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 bg-stone-900 flex items-center justify-center overflow-hidden relative group"
-                 onMouseMove={handleMouseMove}
-                 onMouseLeave={() => setMagnifierState(prev => ({ ...prev, show: false }))}
-            >
-                <img 
-                    ref={imageRef}
-                    src={imageUrl} 
-                    alt={caption} 
-                    className={`max-w-full max-h-full object-contain ${isMagnifying ? 'cursor-none' : ''}`}
-                    onDragStart={(e) => e.preventDefault()}
-                />
-                
-                {isMagnifying && magnifierState.show && (
-                    <div 
-                        style={{
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            // Center the 200px loupe on the cursor
-                            // Position = (cursor X relative to image) + (image offset left) - (half loupe width)
-                            transform: `translate(${magnifierState.x + magnifierState.imgOffsetLeft - 100}px, ${magnifierState.y + magnifierState.imgOffsetTop - 100}px)`,
-                            width: '200px',
-                            height: '200px',
-                            borderRadius: '50%',
-                            border: '3px solid #14b8a6', // teal-500
-                            boxShadow: '0 0 20px rgba(0,0,0,0.4)',
-                            pointerEvents: 'none',
-                            backgroundImage: `url("${imageUrl}")`,
-                            backgroundRepeat: 'no-repeat',
-                            backgroundColor: '#000',
-                            // Zoom level 3x
-                            backgroundSize: `${magnifierState.width * 3}px ${magnifierState.height * 3}px`,
-                            backgroundPosition: `-${magnifierState.x * 3 - 100}px -${magnifierState.y * 3 - 100}px`,
-                            zIndex: 999
-                        }}
-                    />
-                )}
-
-                {/* Mobile-centered controls overlay */}
-                <div className="absolute inset-0 flex items-center justify-center md:hidden pointer-events-none">
-                    <div className="bg-black/50 rounded-full p-2 flex items-center gap-2 pointer-events-auto">
+                {/* Header */}
+                <div className="flex-shrink-0 bg-stone-900 p-3 flex justify-between items-center safe-area-inset-top">
+                    <span className="text-sm font-medium text-white truncate flex-1 mr-4">{caption || 'Image Viewer'}</span>
+                    <div className="flex gap-2">
                         <Button 
                             variant="ghost" 
                             size="icon" 
-                            className={`h-9 w-9 text-white ${isMagnifying ? 'bg-teal-600/30' : ''}`}
-                            onClick={() => setIsMagnifying(!isMagnifying)}
-                            title="Toggle Magnifying Glass"
-                        >
-                            <ZoomIn className="w-5 h-5" />
-                        </Button>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-9 w-9 text-white"
+                            className="h-9 w-9 text-white hover:bg-white/20"
                             onClick={handleDownloadPDF}
-                            title="Download PDF"
+                            disabled={isDownloading}
+                            aria-label="Download PDF"
                         >
-                            <Download className="w-5 h-5" />
+                            {isDownloading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
                         </Button>
                         <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-9 w-9 text-white hover:bg-red-600/30"
+                            className="h-9 w-9 text-white hover:bg-white/20"
                             onClick={onClose}
-                            title="Close"
+                            aria-label="Close"
                         >
                             <X className="w-5 h-5" />
                         </Button>
                     </div>
                 </div>
 
-                {/* Resize Handles - Simple 4 corners implementation */}
-                <ResizeHandle onResize={(w, h) => setSize({ width: Math.max(300, w), height: Math.max(200, h) })} size={size} position="br" />
-            </div>
-
-            {/* Footer */}
-            {caption && (
-                <div className="p-3 bg-white border-t border-stone-200 text-sm text-stone-600 font-serif text-center">
-                    {caption}
+                {/* Image */}
+                <div className="flex-1 flex items-center justify-center overflow-hidden p-4">
+                    {imageError ? (
+                        <div className="text-white text-center">
+                            <p className="text-lg mb-2">Failed to load image</p>
+                            <Button variant="outline" onClick={() => window.open(imageUrl, '_blank')}>
+                                Open in new tab
+                            </Button>
+                        </div>
+                    ) : (
+                        <img 
+                            src={imageUrl} 
+                            alt={caption || "Historical image"} 
+                            className="max-w-full max-h-full object-contain"
+                            onError={handleImageError}
+                            loading="eager"
+                        />
+                    )}
                 </div>
-            )}
-        </motion.div>
+
+                {/* Caption */}
+                {caption && !imageError && (
+                    <div className="flex-shrink-0 bg-stone-900 p-3 text-center safe-area-inset-bottom">
+                        <p className="text-sm text-stone-300 font-serif">{caption}</p>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // Desktop draggable modal
+    return (
+        <>
+            {/* Backdrop */}
+            <div 
+                className="fixed inset-0 bg-black/30 z-40"
+                onClick={onClose}
+            />
+            
+            <motion.div
+                drag
+                dragListener={false}
+                dragControls={dragControls}
+                dragMomentum={false}
+                initial={{ opacity: 0, scale: 0.9, x: initialPosition.x, y: initialPosition.y }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                style={{ 
+                    width: size.width, 
+                    height: size.height,
+                    zIndex: zIndex,
+                    position: 'fixed',
+                    top: 0,
+                    left: 0
+                }}
+                className="bg-white rounded-lg shadow-2xl border border-stone-200 flex flex-col overflow-hidden"
+                onPointerDown={handleFocus}
+            >
+                {/* Header / Drag Handle */}
+                <div 
+                    className="bg-stone-100 p-2 border-b border-stone-200 flex justify-between items-center cursor-move select-none"
+                    onPointerDown={(e) => { handleFocus(); dragControls.start(e); }}
+                >
+                    <span className="text-xs font-bold text-stone-500 uppercase tracking-wider px-2">Image Viewer</span>
+                    <div className="flex gap-1">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className={`h-6 w-6 ${isMagnifying ? 'bg-teal-100 text-teal-700' : ''}`}
+                            onClick={toggleMagnify} 
+                            title="Toggle Magnifying Glass"
+                            aria-label={isMagnifying ? "Disable magnifier" : "Enable magnifier"}
+                        >
+                            <ZoomIn className="w-3 h-3" />
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6" 
+                            onClick={handleDownloadPDF} 
+                            title="Download PDF"
+                            disabled={isDownloading}
+                            aria-label="Download as PDF"
+                        >
+                            {isDownloading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+                        </Button>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6 hover:bg-red-100 hover:text-red-600" 
+                            onClick={onClose}
+                            aria-label="Close"
+                        >
+                            <X className="w-3 h-3" />
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div 
+                    className="flex-1 bg-stone-900 flex items-center justify-center overflow-hidden relative group"
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    {imageError ? (
+                        <div className="text-white text-center p-4">
+                            <p className="mb-2">Failed to load image</p>
+                            <Button variant="outline" size="sm" onClick={() => window.open(imageUrl, '_blank')}>
+                                Open in new tab
+                            </Button>
+                        </div>
+                    ) : (
+                        <img 
+                            ref={imageRef}
+                            src={imageUrl} 
+                            alt={caption || "Historical image"} 
+                            className={`max-w-full max-h-full object-contain ${isMagnifying ? 'cursor-none' : ''}`}
+                            onDragStart={(e) => e.preventDefault()}
+                            onError={handleImageError}
+                            loading="eager"
+                        />
+                    )}
+                    
+                    {/* Magnifier lens */}
+                    {isMagnifying && magnifierState.show && !imageError && (
+                        <div 
+                            style={{
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                transform: `translate(${magnifierState.x + magnifierState.imgOffsetLeft - 100}px, ${magnifierState.y + magnifierState.imgOffsetTop - 100}px)`,
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '50%',
+                                border: '3px solid #14b8a6',
+                                boxShadow: '0 0 20px rgba(0,0,0,0.4)',
+                                pointerEvents: 'none',
+                                backgroundImage: `url("${imageUrl}")`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundColor: '#000',
+                                backgroundSize: `${magnifierState.width * 3}px ${magnifierState.height * 3}px`,
+                                backgroundPosition: `-${magnifierState.x * 3 - 100}px -${magnifierState.y * 3 - 100}px`,
+                                zIndex: 999
+                            }}
+                            aria-hidden="true"
+                        />
+                    )}
+
+                    {/* Resize Handle */}
+                    <ResizeHandle onResize={handleResize} size={size} />
+                </div>
+
+                {/* Footer */}
+                {caption && !imageError && (
+                    <div className="p-3 bg-white border-t border-stone-200 text-sm text-stone-600 font-serif text-center">
+                        {caption}
+                    </div>
+                )}
+            </motion.div>
+        </>
     );
 }
 
-function ResizeHandle({ onResize, size, position }) {
-    const handleMouseDown = (e) => {
+const ResizeHandle = React.memo(function ResizeHandle({ onResize, size }) {
+    const handleMouseDown = useCallback((e) => {
         e.preventDefault();
         e.stopPropagation();
         
@@ -212,9 +333,6 @@ function ResizeHandle({ onResize, size, position }) {
         const handleMouseMove = (moveEvent) => {
             const deltaX = moveEvent.clientX - startX;
             const deltaY = moveEvent.clientY - startY;
-            
-            // Only implementing bottom-right resize for simplicity and robustness in this constrained environment
-            // Full multi-directional resize requires complex coordinate math relative to the dragged position
             onResize(startWidth + deltaX, startHeight + deltaY);
         };
 
@@ -225,14 +343,15 @@ function ResizeHandle({ onResize, size, position }) {
 
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
-    };
+    }, [onResize, size]);
 
     return (
         <div 
             className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize bg-teal-500/50 hover:bg-teal-600 rounded-tl-md z-50 flex items-center justify-center"
             onMouseDown={handleMouseDown}
+            aria-label="Resize"
         >
-            <Maximize2 className="w-2 h-2 text-white rotate-90" />
+            <Maximize2 className="w-2 h-2 text-white rotate-90" aria-hidden="true" />
         </div>
     );
-}
+});

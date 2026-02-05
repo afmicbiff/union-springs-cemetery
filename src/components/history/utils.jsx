@@ -1,59 +1,131 @@
+// Optimized Levenshtein with early exit for performance
 export const levenshtein = (a, b) => {
+    if (a === b) return 0;
     if (a.length === 0) return b.length;
     if (b.length === 0) return a.length;
-    const matrix = [];
-    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
+    
+    // Early exit if length difference is too great
+    if (Math.abs(a.length - b.length) > 3) return Math.max(a.length, b.length);
+    
+    // Use single array optimization (2x memory reduction)
+    const aLen = a.length;
+    const bLen = b.length;
+    let prev = new Array(aLen + 1);
+    let curr = new Array(aLen + 1);
+    
+    for (let j = 0; j <= aLen; j++) prev[j] = j;
+    
+    for (let i = 1; i <= bLen; i++) {
+        curr[0] = i;
+        for (let j = 1; j <= aLen; j++) {
             if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
+                curr[j] = prev[j - 1];
             } else {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1,
-                    matrix[i][j - 1] + 1,
-                    matrix[i - 1][j] + 1
-                );
+                curr[j] = 1 + Math.min(prev[j - 1], curr[j - 1], prev[j]);
             }
         }
+        [prev, curr] = [curr, prev];
     }
-    return matrix[b.length][a.length];
+    return prev[aLen];
 };
 
 export const getFootnotesContent = (text, footnotesMap) => {
-    const noteMatches = text.match(/NOTE\s*(\d+)/g);
+    if (!text || !footnotesMap) return "";
+    const noteMatches = text.match(/NOTE\s*\[?(\d+)\]?/g);
     if (!noteMatches) return "";
     return noteMatches.map(match => {
-        const id = parseInt(match.match(/\d+/)[0]);
+        const idMatch = match.match(/\d+/);
+        if (!idMatch) return "";
+        const id = parseInt(idMatch[0], 10);
         return footnotesMap[id] || "";
     }).join(" ");
 };
 
 export const parseYear = (yearStr) => {
+    if (!yearStr) return 0;
     const match = yearStr.match(/(\d{4})/);
-    return match ? parseInt(match[1]) : 0;
+    return match ? parseInt(match[1], 10) : 0;
 };
 
+// Memoization cache for fuzzy matching
+const fuzzyCache = new Map();
+const MAX_CACHE_SIZE = 500;
+
 export const isFuzzyMatch = (text, query) => {
-    if (!query) return false;
+    if (!query || !text) return false;
+    
+    const cacheKey = `${text.slice(0, 100)}|${query}`;
+    if (fuzzyCache.has(cacheKey)) {
+        return fuzzyCache.get(cacheKey);
+    }
+    
     const lowerText = text.toLowerCase();
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = query.toLowerCase().trim();
     
-    // Exact substring match
-    if (lowerText.includes(lowerQuery)) return true;
+    // Fast path: exact substring match
+    if (lowerText.includes(lowerQuery)) {
+        cacheResult(cacheKey, true);
+        return true;
+    }
     
-    // Split query into words and check if all words match (fuzzy or exact)
-    const queryWords = lowerQuery.split(/\s+/);
-    return queryWords.every(word => {
-        // Check for substring
+    // Split query into words and check if all words match
+    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 0);
+    if (queryWords.length === 0) {
+        cacheResult(cacheKey, false);
+        return false;
+    }
+    
+    const result = queryWords.every(word => {
+        // Check for substring first (fast path)
         if (lowerText.includes(word)) return true;
+        
+        // Only do fuzzy match for words >= 3 chars (avoid false positives)
+        if (word.length < 3) return false;
         
         // Check for fuzzy match on words in text
         const textWords = lowerText.split(/\s+/);
         return textWords.some(textWord => {
             if (Math.abs(textWord.length - word.length) > 2) return false;
             const distance = levenshtein(textWord, word);
-            return distance <= 2; // Allow up to 2 typos
+            return distance <= 2;
         });
     });
+    
+    cacheResult(cacheKey, result);
+    return result;
 };
+
+function cacheResult(key, value) {
+    // Prevent unbounded cache growth
+    if (fuzzyCache.size >= MAX_CACHE_SIZE) {
+        const firstKey = fuzzyCache.keys().next().value;
+        fuzzyCache.delete(firstKey);
+    }
+    fuzzyCache.set(key, value);
+}
+
+// Hook for responsive breakpoint detection (SSR-safe)
+export const useIsMobile = () => {
+    if (typeof window === 'undefined') return false;
+    // Use matchMedia for efficient reactive updates
+    const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 768);
+    
+    React.useEffect(() => {
+        const mq = window.matchMedia('(max-width: 767px)');
+        const handler = (e) => setIsMobile(e.matches);
+        
+        // Modern API
+        if (mq.addEventListener) {
+            mq.addEventListener('change', handler);
+            return () => mq.removeEventListener('change', handler);
+        }
+        // Legacy fallback
+        mq.addListener(handler);
+        return () => mq.removeListener(handler);
+    }, []);
+    
+    return isMobile;
+};
+
+// Import React for the hook
+import React from 'react';
