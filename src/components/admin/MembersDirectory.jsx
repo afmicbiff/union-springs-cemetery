@@ -99,31 +99,27 @@ function MembersDirectory({ openMemberId }) {
         gcTime: 30 * 60 * 1000,
     });
 
-    const { data: members, isLoading, isError, error, refetch, isFetching } = useQuery({
+    const { data: members = [], isLoading, isError, error, refetch, isFetching } = useQuery({
         queryKey: ['members-directory'],
         refetchOnWindowFocus: false,
         queryFn: async () => {
-            try {
-                // Direct SDK call - RLS will filter based on user role
-                const records = await base44.entities.Member.list('-updated_date', 1000);
-                if (!records || !Array.isArray(records)) {
-                    console.warn('Member.list returned non-array:', records);
-                    return [];
-                }
-                return records.map((r) => {
-                    if (!r) return null;
-                    // Flatten nested data structure if present
-                    const flat = { ...r };
-                    if (r.data && typeof r.data === 'object') {
-                        Object.assign(flat, r.data);
-                    }
-                    flat.id = r.id || flat.id;
-                    return flat;
-                }).filter(Boolean);
-            } catch (err) {
-                console.error('Failed to fetch members:', err);
-                throw err;
+            // Direct SDK call - RLS will filter based on user role
+            const records = await base44.entities.Member.list('-updated_date', 1000);
+            if (!records || !Array.isArray(records)) {
+                return [];
             }
+            return records.map((r) => {
+                if (!r) return null;
+                // Flatten nested data structure if present (Base44 SDK returns {id, data: {...fields}})
+                const flat = { id: r.id, created_date: r.created_date, updated_date: r.updated_date };
+                if (r.data && typeof r.data === 'object') {
+                    Object.assign(flat, r.data);
+                } else {
+                    // If no nested data, spread the record directly
+                    Object.assign(flat, r);
+                }
+                return flat;
+            }).filter(Boolean);
         },
         staleTime: 2 * 60 * 1000,
         gcTime: 5 * 60 * 1000,
