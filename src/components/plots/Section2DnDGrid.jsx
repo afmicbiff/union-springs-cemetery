@@ -95,20 +95,33 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
 
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
-      <div className="grid grid-flow-col gap-2 sm:gap-3" style={{ gridTemplateRows: `repeat(${perCol}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${totalCols}, max-content)`, gridAutoColumns: 'max-content' }}>
-        {cells.map((item, idx) => (
-          <div key={idx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-            <GravePlotCell
-              item={item}
-              baseColorClass=""
-              statusColors={statusColors}
-              isAdmin={isAdmin}
-              onHover={onHover}
-              onEdit={onEdit}
-              sectionKey="2"
-            />
-          </div>
-        ))}
+      <div className="grid grid-flow-col gap-2 sm:gap-3" style={{ gridTemplateRows: `repeat(${totalRows}, minmax(0, 1fr))`, gridTemplateColumns: `repeat(${dataCols}, max-content)`, gridAutoColumns: 'max-content' }}>
+        {cells.map((item, idx) => {
+          const col = Math.floor(idx / totalRows);
+          const row = idx % totalRows;
+          const isBottomRow = row === 0;
+          const showNewPlot = isBottomRow && bottomRowMarkers[col];
+          
+          return (
+            <div key={idx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+              {showNewPlot ? (
+                <div className="w-full h-full flex items-center justify-center text-[10px] text-teal-600 font-medium cursor-pointer hover:bg-teal-50">
+                  + New
+                </div>
+              ) : (
+                <GravePlotCell
+                  item={item}
+                  baseColorClass=""
+                  statusColors={statusColors}
+                  isAdmin={isAdmin}
+                  onHover={onHover}
+                  onEdit={onEdit}
+                  sectionKey="2"
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
