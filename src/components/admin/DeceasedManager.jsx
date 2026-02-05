@@ -52,19 +52,6 @@ export default function DeceasedManager() {
         requestAnimationFrame(() => { isScrolling.current = false; });
     }, []);
 
-    // Measure table width for top scrollbar
-    useEffect(() => {
-        if (tableRef.current) {
-            const resizeObserver = new ResizeObserver((entries) => {
-                for (const entry of entries) {
-                    setTableWidth(entry.target.scrollWidth);
-                }
-            });
-            resizeObserver.observe(tableRef.current);
-            return () => resizeObserver.disconnect();
-        }
-    }, [searchResults?.results]);
-
     // Debounce search input
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -141,6 +128,19 @@ export default function DeceasedManager() {
             if (nameA > nameB) return 1;
             return 0;
         });
+    }, [searchResults?.results]);
+
+    // Measure table width for top scrollbar
+    useEffect(() => {
+        if (tableRef.current) {
+            const resizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    setTableWidth(entry.target.scrollWidth);
+                }
+            });
+            resizeObserver.observe(tableRef.current);
+            return () => resizeObserver.disconnect();
+        }
     }, [searchResults?.results]);
 
     const handleEdit = (record) => {
