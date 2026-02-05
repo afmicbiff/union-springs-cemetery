@@ -621,7 +621,7 @@ function AdminDashboard() {
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
-                            </React.Fragment>
+                            </Fragment>
                           );
                         }
 
