@@ -113,7 +113,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     const out = Array(dataCols * totalRows).fill(null);
     const markers = Array(dataCols).fill(false);
     
-    // Mark column 0 for +New since it starts with 186
+    // Mark column 0 for +New since it starts with 228
     markers[0] = true;
     
     for (let c = 0; c < dataCols; c++) {
