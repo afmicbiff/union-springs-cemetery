@@ -14,10 +14,11 @@ import { toast } from 'sonner';
 import {
   Loader2, Plus, Play, Trash2, Search, Target, AlertTriangle, Brain, Edit2,
   ChevronDown, ChevronUp, ExternalLink, Filter, Clock, Eye, Crosshair, RefreshCw,
-  Server, Globe, Hash, FileText, Activity, CheckCircle, XCircle, AlertOctagon
+  Globe, Hash, FileText, Activity, CheckCircle, AlertOctagon
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import AIAnalystAssistant from './AIAnalystAssistant';
 
 const SEV_COLORS = { critical: '#dc2626', high: '#ea580c', medium: '#d97706', low: '#16a34a', info: '#64748b' };
 const SEV_BG = { critical: 'bg-red-100 text-red-800', high: 'bg-orange-100 text-orange-800', medium: 'bg-amber-100 text-amber-800', low: 'bg-emerald-100 text-emerald-800', info: 'bg-slate-100 text-slate-700' };
@@ -84,7 +85,7 @@ const HuntCard = memo(function HuntCard({ hunt, onRun, onEdit, onDelete, onViewF
 });
 
 // Finding Card with drill-down
-const FindingCard = memo(function FindingCard({ finding, onUpdateStatus, onDelete }) {
+const FindingCard = memo(function FindingCard({ finding, onUpdateStatus, onDelete, onSelectForAI }) {
   const [expanded, setExpanded] = useState(false);
   const evidence = finding.evidence || {};
   const isIOC = finding.finding_type === 'ioc_match';
@@ -104,9 +105,12 @@ const FindingCard = memo(function FindingCard({ finding, onUpdateStatus, onDelet
           <p className="text-[10px] text-stone-600 mt-0.5 line-clamp-2">{finding.description}</p>
           {finding.hunt_name && <p className="text-[9px] text-stone-400 mt-0.5">Hunt: {finding.hunt_name}</p>}
         </div>
-        <Button variant="ghost" size="sm" onClick={() => setExpanded(!expanded)} className="h-6 text-[10px] shrink-0">
-          {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-        </Button>
+        <div className="flex items-center gap-1 shrink-0">
+          {onSelectForAI && <Button variant="ghost" size="sm" onClick={() => onSelectForAI(finding)} className="h-6 text-[10px]" title="AI Analysis"><Brain className="w-3 h-3 text-purple-500" /></Button>}
+          <Button variant="ghost" size="sm" onClick={() => setExpanded(!expanded)} className="h-6 text-[10px]">
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </Button>
+        </div>
       </div>
 
       {expanded && (
@@ -394,6 +398,7 @@ function ThreatHuntingDashboard() {
   const [selectedHunt, setSelectedHunt] = useState(null);
   const [runningHunt, setRunningHunt] = useState(null);
   const [findingFilters, setFindingFilters] = useState({ severity: 'all', status: 'all', type: 'all', search: '' });
+  const [selectedForAI, setSelectedForAI] = useState(null);
 
   const { data: hunts = [], isLoading: huntsLoading, refetch: refetchHunts } = useQuery({
     queryKey: ['threat-hunts'],
@@ -504,6 +509,12 @@ function ThreatHuntingDashboard() {
           <div className="flex items-center gap-2 flex-wrap">
             {stats.confirmedThreats > 0 && <Badge className="bg-red-100 text-red-700 text-[10px]">{stats.confirmedThreats} confirmed</Badge>}
             {stats.newFindings > 0 && <Badge className="bg-blue-100 text-blue-700 text-[10px]">{stats.newFindings} new</Badge>}
+            <AIAnalystAssistant 
+              context={selectedForAI} 
+              findings={allFindings} 
+              hunts={hunts}
+              onSuggestHunt={(name) => { const h = hunts.find(x => x.name === name); if (h) runHunt(h); }}
+            />
             <Button variant="outline" size="sm" onClick={refreshAll} className="h-7 text-xs gap-1"><RefreshCw className="w-3 h-3" /></Button>
             <Button size="sm" onClick={() => { setEditHunt(null); setEditorOpen(true); }} className="h-7 text-xs gap-1"><Plus className="w-3.5 h-3.5" /> New Hunt</Button>
           </div>
@@ -656,7 +667,7 @@ function ThreatHuntingDashboard() {
             ) : (
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
                 {findings.map(f => (
-                  <FindingCard key={f.id} finding={f} onUpdateStatus={(id, s) => updateFindingMutation.mutate({ id, status: s })} onDelete={(id) => confirm('Delete?') && deleteFindingMutation.mutate(id)} />
+                  <FindingCard key={f.id} finding={f} onUpdateStatus={(id, s) => updateFindingMutation.mutate({ id, status: s })} onDelete={(id) => confirm('Delete?') && deleteFindingMutation.mutate(id)} onSelectForAI={(finding) => setSelectedForAI({ type: 'finding', data: finding })} />
                 ))}
               </div>
             )}
@@ -672,7 +683,7 @@ function ThreatHuntingDashboard() {
                 <h4 className="text-xs font-medium mb-2 flex items-center gap-1"><Search className="w-3.5 h-3.5 text-purple-500" /> Recent IOC Matches</h4>
                 <div className="space-y-2 max-h-72 overflow-y-auto">
                   {allFindings.filter(f => f.finding_type === 'ioc_match').slice(0, 10).map(f => (
-                    <FindingCard key={f.id} finding={f} onUpdateStatus={(id, s) => updateFindingMutation.mutate({ id, status: s })} onDelete={(id) => confirm('Delete?') && deleteFindingMutation.mutate(id)} />
+                    <FindingCard key={f.id} finding={f} onUpdateStatus={(id, s) => updateFindingMutation.mutate({ id, status: s })} onDelete={(id) => confirm('Delete?') && deleteFindingMutation.mutate(id)} onSelectForAI={(finding) => setSelectedForAI({ type: 'finding', data: finding })} />
                   ))}
                 </div>
               </div>

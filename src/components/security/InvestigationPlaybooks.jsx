@@ -20,6 +20,7 @@ import {
   Clock, Target, FileText, Clipboard, ArrowRight, RotateCcw, X, Eye, Trash2
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import AIAnalystAssistant from './AIAnalystAssistant';
 
 const SEV_COLORS = { critical: 'bg-red-100 text-red-800', high: 'bg-orange-100 text-orange-800', medium: 'bg-amber-100 text-amber-800', low: 'bg-emerald-100 text-emerald-800' };
 const STATUS_COLORS = { in_progress: 'bg-blue-100 text-blue-700', paused: 'bg-amber-100 text-amber-700', completed: 'bg-emerald-100 text-emerald-700', escalated: 'bg-red-100 text-red-700', closed: 'bg-stone-100 text-stone-600' };
@@ -323,7 +324,7 @@ function StartInvestigationDialog({ playbook, open, onOpenChange, onStart, linke
 }
 
 // Active Investigation View
-function ActiveInvestigationView({ investigation, playbook, onClose, onUpdate }) {
+function ActiveInvestigationView({ investigation, playbook, onClose, onUpdate, allPlaybooks }) {
   const qc = useQueryClient();
   const [stepProgress, setStepProgress] = useState(investigation.step_progress || []);
   const [currentStep, setCurrentStep] = useState(investigation.current_step_index || 0);
@@ -414,6 +415,10 @@ function ActiveInvestigationView({ investigation, playbook, onClose, onUpdate })
               <div className="text-xs text-stone-500">Progress</div>
               <div className="text-sm font-medium">{Math.round(progress)}%</div>
             </div>
+            <AIAnalystAssistant 
+              context={{ type: 'investigation', data: investigation }}
+              playbooks={allPlaybooks}
+            />
             <Button variant="outline" size="sm" onClick={handleSaveNotes} className="h-7 text-xs">Save</Button>
             {progress >= 100 && <Button size="sm" onClick={handleComplete} className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700"><CheckCircle className="w-3.5 h-3.5 mr-1" /> Complete</Button>}
             <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7"><X className="w-4 h-4" /></Button>
@@ -603,6 +608,7 @@ function InvestigationPlaybooks() {
           playbook={activeInvestigation._playbook || playbooks.find(p => p.id === activeInvestigation.playbook_id)}
           onClose={() => setActiveInvestigation(null)}
           onUpdate={() => qc.invalidateQueries({ queryKey: ['active-investigations'] })}
+          allPlaybooks={playbooks}
         />
       )}
     </Card>
