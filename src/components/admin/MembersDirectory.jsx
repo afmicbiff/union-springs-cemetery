@@ -191,7 +191,7 @@ function MembersDirectory({ openMemberId }) {
             return res.data;
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['members']);
+            queryClient.invalidateQueries({ queryKey: ['members-directory'] });
             setIsDialogOpen(false);
             setEditingMember(null);
             toast.success("Member added successfully");
@@ -212,7 +212,7 @@ function MembersDirectory({ openMemberId }) {
             return res.data;
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries(['members']);
+            queryClient.invalidateQueries({ queryKey: ['members-directory'] });
             setIsDialogOpen(false);
             setEditingMember(null);
             toast.success("Member updated successfully");
@@ -230,8 +230,8 @@ function MembersDirectory({ openMemberId }) {
             return res.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries(['members']);
-            queryClient.invalidateQueries(['member-activity']);
+            queryClient.invalidateQueries({ queryKey: ['members-directory'] });
+            queryClient.invalidateQueries({ queryKey: ['member-activity'] });
             toast.success("Member removed");
         }
     });
