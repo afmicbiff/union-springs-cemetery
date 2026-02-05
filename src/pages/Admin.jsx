@@ -65,6 +65,7 @@ const AdminDocumentsManager = React.lazy(() => import("@/components/admin/AdminD
 // Keep header essentials eager-loaded
 import AdminSearch from "@/components/admin/AdminSearch";
 import DataImportDialog from "@/components/admin/DataImportDialog";
+import AdminManual from "@/components/admin/AdminManual";
 
 
 export default function AdminDashboard() {
@@ -541,6 +542,8 @@ export default function AdminDashboard() {
                 </Popover>
 
 
+
+                <AdminManual currentTab={activeTab} />
 
                 <Button 
                     onClick={() => setActiveTab('backups')} 
