@@ -1,118 +1,162 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Phone } from 'lucide-react';
+import { Phone, ExternalLink } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
 
+// Memoized section component for performance
+const ServiceSection = memo(function ServiceSection({ title, children, className = "" }) {
+    return (
+        <section className={`bg-slate-50 p-5 sm:p-6 md:p-8 rounded-lg shadow-md ${className}`}>
+            <h3 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">{title}</h3>
+            {children}
+        </section>
+    );
+});
+
+// Memoized list item for external links
+const ExternalLinkItem = memo(function ExternalLinkItem({ name, url }) {
+    const displayUrl = url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+    return (
+        <li className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span className="font-semibold text-stone-700">{name}:</span>
+            <a 
+                href={url} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-teal-700 hover:text-teal-800 active:text-teal-900 underline underline-offset-2 flex items-center gap-1 touch-manipulation break-all"
+            >
+                {displayUrl}
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            </a>
+        </li>
+    );
+});
+
 export default function ServicesPage() {
-  return (
-    <div className="min-h-screen bg-stone-200 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-12">
-        <Breadcrumbs items={[{ label: 'Services' }]} />
-        
-        <div className="text-center space-y-6">
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900">Services</h1>
-          <div className="w-24 h-1 bg-red-700 mx-auto"></div>
-          <div className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed text-left">
-            <br />
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-6 mb-4">The staff at the Union Springs Cemetery will:</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-2 text-left marker:font-bold">
-                <li>Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.</li>
-                <li>Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.</li>
-                <li>Raise and manage financial resources for the ongoing upkeep of the cemetery.</li>
-                <li>Foster a fraternal and cooperative spirit among members of the Association.</li>
-            </ol>
+    return (
+        <div className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
+                <Breadcrumbs items={[{ label: 'Services' }]} />
+                
+                {/* Header */}
+                <header className="text-center space-y-4 sm:space-y-6">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-stone-900">Services</h1>
+                    <div className="w-20 sm:w-24 h-1 bg-red-700 mx-auto"></div>
+                </header>
 
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Perpetual Funds</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
-                <li>Any funds received and designated for perpetual care shall be preserved in an insured financial institution domiciled in Webster Parish, Louisiana. These funds shall be considered Perpetual Care Fund assets with the primary purpose of generating interest.</li>
-                <li>Interest earned from these accounts shall be deposited into the Association’s general fund and expended as directed by the Executive Board in accordance with the Association’s objectives.</li>
-            </ol>
+                {/* Main Content */}
+                <div className="bg-white rounded-lg shadow-md p-5 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+                    
+                    {/* Staff Services */}
+                    <section>
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">
+                            The staff at Union Springs Cemetery will:
+                        </h2>
+                        <ol className="list-decimal list-outside ml-5 sm:ml-6 space-y-2 sm:space-y-3 text-stone-600 text-sm sm:text-base leading-relaxed">
+                            <li>Provide proper care, maintenance, and preservation of grave sites and cemetery grounds.</li>
+                            <li>Maintain and improve cemetery infrastructure, including grounds, fences, and grave markers.</li>
+                            <li>Raise and manage financial resources for the ongoing upkeep of the cemetery.</li>
+                            <li>Foster a fraternal and cooperative spirit among members of the Association.</li>
+                        </ol>
+                    </section>
 
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Burial Plots</h3>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
-                <li>Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.</li>
-                <li>The size of all burial plots are five feet wide and ten feet in length. The Association shall strive to maintain a dignified and orderly manner when marking plots.</li>
-                <li>The President, Vice-President, or Caretaker shall have sole authority for reserving or marking grave sites. Any sites marked by an individual other than the authorized persons will not be recognized.</li>
-                <li>All grave sites will remain the property of the Union Springs Cemetery Association with no right of transfer to any person. A reserved plot cannot be transferred to another individual by the person who reserved it, if they no longer wish to keep the plot, they should notify a member of the Executive Board so the plot can be marked for use by another person.</li>
-                <li>Maintenance Fees – <strong>A minimum donation of $400 secures a plot</strong>. Members must reaffirm intent to use the plot every five years, the Association will attempt to verify contact for one year. If no contact is successful the plot will revert to the Association.</li>
-            </ol>
+                    {/* Perpetual Funds */}
+                    <section>
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">Perpetual Funds</h2>
+                        <ol className="list-decimal list-outside ml-5 sm:ml-6 space-y-3 sm:space-y-4 text-stone-600 text-sm sm:text-base leading-relaxed">
+                            <li>Funds designated for perpetual care shall be preserved in an insured financial institution in Webster Parish, Louisiana. These funds generate interest as Perpetual Care Fund assets.</li>
+                            <li>Interest earned shall be deposited into the Association's general fund and expended as directed by the Executive Board.</li>
+                        </ol>
+                    </section>
 
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Urns</h3>
-            <p className="text-left text-stone-600 font-medium mb-4">Maximum of three urns per plot.</p>
-            <ol className="list-decimal list-inside ml-4 space-y-4 text-left text-stone-600 marker:font-bold">
-                <li>Place the first urn 12 inches from the headstone base or marker, centered on the plot. The second urn should be placed 12 inches from the first urn in the row. The third and final urn will be positioned 12 inches from the second urn in the row.</li>
-                <li>Dimensional limits: No more than 200 cubic inches, 9 inches tall, and 7 inches in diameter.</li>
-                <li>Placement shall be regulated and mapped by the Association.</li>
-            </ol>
-            <br />
-            <h3 className="text-2xl font-serif font-bold text-stone-800 mt-10 mb-4">Union Springs Cemetery allows for:</h3>
-            <ul className="list-disc list-inside ml-4 space-y-2 font-medium">
-                <li>Traditional Burial Plots</li>
-                <li>Cremation Niches</li>
-                <li>Family Estates</li>
-            </ul>
-          </div>
+                    {/* Burial Plots */}
+                    <section>
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">Burial Plots</h2>
+                        <ol className="list-decimal list-outside ml-5 sm:ml-6 space-y-3 sm:space-y-4 text-stone-600 text-sm sm:text-base leading-relaxed">
+                            <li>Plot reservations shall be managed by the President, Vice President, or Caretaker. Unauthorized markings are not valid.</li>
+                            <li>All burial plots are <strong className="text-stone-800">5 feet wide × 10 feet long</strong>.</li>
+                            <li>Only authorized personnel may reserve or mark grave sites.</li>
+                            <li>All grave sites remain property of the Association with no right of transfer. Reserved plots cannot be transferred to others.</li>
+                            <li className="bg-teal-50 p-3 sm:p-4 rounded-lg border-l-4 border-teal-600">
+                                <strong className="text-teal-800 block mb-1">Maintenance Fees</strong>
+                                <span className="text-teal-700">A minimum donation of <strong>$400</strong> secures a plot.</span>
+                                <span className="block text-stone-600 mt-1 text-xs sm:text-sm">Members must reaffirm intent every 5 years. Unverified plots revert to the Association after 1 year.</span>
+                            </li>
+                        </ol>
+                    </section>
+
+                    {/* Urns */}
+                    <section>
+                        <h2 className="text-xl sm:text-2xl font-serif font-bold text-stone-800 mb-3 sm:mb-4">Urns</h2>
+                        <p className="text-stone-700 font-semibold mb-3 text-sm sm:text-base">Maximum of 3 urns per plot</p>
+                        <ol className="list-decimal list-outside ml-5 sm:ml-6 space-y-3 text-stone-600 text-sm sm:text-base leading-relaxed">
+                            <li>First urn: 12" from headstone, centered. Each subsequent urn: 12" apart in the row.</li>
+                            <li><strong>Size limits:</strong> Max 200 cubic inches, 9" tall, 7" diameter.</li>
+                            <li>Placement regulated and mapped by the Association.</li>
+                        </ol>
+                    </section>
+
+                    {/* Allowed Services */}
+                    <section className="bg-stone-50 p-4 sm:p-5 rounded-lg">
+                        <h2 className="text-lg sm:text-xl font-serif font-bold text-stone-800 mb-3">We offer:</h2>
+                        <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
+                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
+                                Traditional Burial Plots
+                            </li>
+                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
+                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
+                                Cremation Niches
+                            </li>
+                            <li className="flex items-center gap-2 text-stone-700 font-medium text-sm sm:text-base">
+                                <span className="w-2 h-2 bg-teal-600 rounded-full shrink-0"></span>
+                                Family Estates
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+
+                {/* CTA Button */}
+                <div className="flex justify-center px-4">
+                    <Link to={createPageUrl('Contact')} className="w-full sm:w-auto">
+                        <Button className="w-full sm:w-auto bg-red-800 hover:bg-red-900 active:bg-red-950 text-white font-serif px-6 py-4 h-auto text-base sm:text-lg rounded-lg shadow-lg flex items-center justify-center gap-2 touch-manipulation">
+                            <Phone className="w-5 h-5 shrink-0" />
+                            <span>Contact the Administrator</span>
+                        </Button>
+                    </Link>
+                </div>
+
+                {/* Service Cards Grid */}
+                <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+                    <ServiceSection title="Traditional Burial">
+                        <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
+                            Community Funeral Homes will assist you with traditional burial services.
+                        </p>
+                    </ServiceSection>
+
+                    <ServiceSection title="Cremation Services">
+                        <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
+                            Community Funeral Homes will assist you with cremation services.
+                        </p>
+                    </ServiceSection>
+                    
+                    <ServiceSection title="Memorial Planning" className="md:col-span-2">
+                        <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
+                            Community Funeral Homes will assist you with memorial planning services.
+                        </p>
+                    </ServiceSection>
+
+                    <ServiceSection title="Funeral Home Contacts" className="md:col-span-2">
+                        <ul className="space-y-3 sm:space-y-4 text-sm sm:text-base">
+                            <ExternalLinkItem name="Bailey Funeral Home" url="https://www.baileyfuneralhome.net" />
+                            <ExternalLinkItem name="Smith Monument" url="http://www.smithmonumentcompany.com/" />
+                            <ExternalLinkItem name="Central Monument" url="https://centralmonument.com/" />
+                        </ul>
+                    </ServiceSection>
+                </div>
+            </div>
         </div>
-
-        <div className="w-full flex justify-center my-6">
-          <Link to={createPageUrl('Contact')}>
-            <Button className="bg-red-800 hover:bg-red-900 text-white font-serif px-4 py-4 text-base md:text-lg rounded-sm shadow-lg whitespace-normal break-words leading-snug text-center flex items-center justify-center gap-2">
-              <Phone className="w-5 h-5" />
-              <span className="block">Contact the Administrator of the Grounds</span>
-            </Button>
-          </Link>
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-2">
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md">
-                <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Traditional Burial</h3>
-                <p className="text-stone-600 text-lg leading-relaxed">
-                    The community Funeral Homes will assist you in the services of traditional burial.
-                </p>
-            </div>
-
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md">
-                <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Cremation Services</h3>
-                <p className="text-stone-600 text-lg leading-relaxed">
-                    The community Funeral Homes will assist you in the services of cremation.
-                </p>
-            </div>
-            
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md md:col-span-2">
-                <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Memorial Planning</h3>
-                <p className="text-stone-600 text-lg leading-relaxed">
-                    The community Funeral Homes will assist you in the services of memorial planning.
-                </p>
-            </div>
-
-            <div className="bg-slate-50 p-8 rounded-sm shadow-md md:col-span-2">
-                <h3 className="text-2xl font-serif font-bold text-stone-800 mb-4">Contact for funeral home services</h3>
-                <ul className="space-y-3 text-stone-600 text-lg leading-relaxed">
-                    <li>
-                        <span className="font-semibold">Bailey Funeral Home:</span>{' '}
-                        <a href="https://www.baileyfuneralhome.net" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
-                            https://www.baileyfuneralhome.net
-                        </a>
-                    </li>
-                    <li>
-                        <span className="font-semibold">Smith Monument:</span>{' '}
-                        <a href="http://www.smithmonumentcompany.com/" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
-                            http://www.smithmonumentcompany.com/
-                        </a>
-                    </li>
-                    <li>
-                        <span className="font-semibold">Central Monument:</span>{' '}
-                        <a href="https://centralmonument.com/" target="_blank" rel="noopener noreferrer" className="text-teal-700 hover:underline break-all">
-                            https://centralmonument.com/
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }
