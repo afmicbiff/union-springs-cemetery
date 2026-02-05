@@ -392,144 +392,396 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* DECEASED */}
           <ManualSection icon={Users} title="Deceased Records">
-            <p>
-              This section stores information about individuals who are interred (buried) 
-              at Union Springs Cemetery.
+            <p className="text-lg mb-4">
+              <strong>The Deceased Records section is where you maintain information about individuals who are buried at Union Springs Cemetery.</strong> 
+              This is one of the most important sections - it's the permanent record of who rests in our cemetery and where they are located.
             </p>
 
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Deceased" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Deceased List</h4>
+            <p className="mb-2">When you open this section, you'll see a list showing:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Name of the deceased person</li>
+              <li>Date of birth and date of death</li>
+              <li>Plot location (Section, Row, and Plot number)</li>
+              <li>Veteran status (if applicable)</li>
+              <li>Any notes or special information</li>
+            </ul>
+
             <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Deceased Record</h4>
-            <Step number="1">Click the <strong>"Add Deceased"</strong> button at the top right</Step>
-            <Step number="2">Fill in the person's information:
+            <Step number="1">Click the <strong>"Add Deceased"</strong> button (usually at the top right, green or blue with a + icon)</Step>
+            <Step number="2">A form will appear. Fill in the person's information carefully:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>First Name & Last Name:</strong> The person's full legal name</li>
-                <li><strong>Date of Birth:</strong> Click the calendar icon and select the date</li>
-                <li><strong>Date of Death:</strong> Click the calendar icon and select the date</li>
-                <li><strong>Plot Location:</strong> Select which plot they are buried in</li>
-                <li><strong>Veteran Status:</strong> Check this box if the person served in the military</li>
+                <li><strong>First Name:</strong> The person's given name (e.g., "John")</li>
+                <li><strong>Last Name:</strong> The person's family name (e.g., "Smith")</li>
+                <li><strong>Date of Birth:</strong> Click the calendar icon, then select the month, year, and day</li>
+                <li><strong>Date of Death:</strong> Click the calendar icon, then select the month, year, and day</li>
+                <li><strong>Plot Location:</strong> Select the Section, Row, and Plot number where they are buried</li>
+                <li><strong>Veteran Status:</strong> Check this box if the person served in the U.S. military</li>
+                <li><strong>Notes:</strong> Any additional information (maiden name, nickname, etc.)</li>
               </ul>
             </Step>
-            <Step number="3">Click <strong>"Save"</strong> to store the record</Step>
+            <Step number="3">Double-check all the information is correct - especially dates and plot numbers</Step>
+            <Step number="4">Click <strong>"Save"</strong> to store the record permanently</Step>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Search for a Record</h4>
-            <Step number="1">Use the search box at the top of the page</Step>
-            <Step number="2">Type any part of the person's name</Step>
-            <Step number="3">Press Enter or click the magnifying glass</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Search for a Deceased Record</h4>
+            <Step number="1">Look for the search box at the top of the Deceased page</Step>
+            <Step number="2">Type any part of the person's name (first name, last name, or both)</Step>
+            <Step number="3">Press the Enter key on your keyboard, or click the magnifying glass icon</Step>
+            <Step number="4">The list will filter to show only matching records</Step>
+            <Step number="5">To clear the search and see all records again, delete the text in the search box and press Enter</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Edit an Existing Record</h4>
+            <Step number="1">Find the record in the list (use search if needed)</Step>
+            <Step number="2">Click on the person's name, or click the <strong>"Edit"</strong> button</Step>
+            <Step number="3">Make your corrections in the form that appears</Step>
+            <Step number="4">Click <strong>"Save Changes"</strong> when done</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Using Filters to Find Records</h4>
+            <p className="mb-2">Besides searching, you can filter the list by:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Section:</strong> Show only deceased in a specific cemetery section</li>
+              <li><strong>Veteran Status:</strong> Show only veterans or only non-veterans</li>
+              <li><strong>Date Range:</strong> Show deaths within a specific time period</li>
+            </ul>
 
             <Tip>
-              You can search by first name, last name, or plot number. 
-              The search is not case-sensitive, so "Smith" and "smith" will find the same results.
+              <strong>Search is flexible:</strong> You can search by first name, last name, or even plot number. 
+              Capitalization doesn't matter - "Smith," "SMITH," and "smith" all find the same results.
+            </Tip>
+
+            <Tip>
+              <strong>Be careful with dates!</strong> Always double-check birth and death dates before saving. 
+              A typo in the year (like 1945 vs 1954) can cause confusion later.
             </Tip>
           </ManualSection>
 
           {/* SALES & RESERVATIONS */}
           <ManualSection icon={DollarSign} title="Sales & Reservations">
-            <p>
-              Manage plot sales, reservations, and payments. This is where you track 
-              who has purchased or reserved burial plots.
+            <p className="text-lg mb-4">
+              <strong>The Sales & Reservations section is where you manage all plot purchases and reservations.</strong> 
+              When someone wants to buy or reserve a burial plot, this is where you record the transaction 
+              and track payment status.
             </p>
 
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Sales" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Reservation Status</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Pending:</strong> Reservation started but not yet confirmed or paid</li>
+              <li><strong>Confirmed:</strong> Reservation is official, may be awaiting full payment</li>
+              <li><strong>Paid in Full:</strong> All payments received, reservation complete</li>
+              <li><strong>Cancelled:</strong> Reservation was cancelled</li>
+            </ul>
+
             <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a New Reservation</h4>
-            <Step number="1">Click <strong>"New Reservation"</strong> button</Step>
-            <Step number="2">Select the plot(s) being reserved from the dropdown</Step>
-            <Step number="3">Enter the buyer's information:
+            <Step number="1">Click the <strong>"New Reservation"</strong> button at the top of the page</Step>
+            <Step number="2">A form will open. First, select the plot(s) being reserved:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Name:</strong> Person making the reservation</li>
-                <li><strong>Phone:</strong> Best number to reach them</li>
-                <li><strong>Email:</strong> For sending confirmations</li>
-                <li><strong>Address:</strong> Mailing address for documents</li>
+                <li>Click the <strong>"Select Plot"</strong> dropdown</li>
+                <li>Choose the Section, Row, and Plot number</li>
+                <li>You can add multiple plots to one reservation if the buyer wants more than one</li>
               </ul>
             </Step>
-            <Step number="4">Enter payment information:
+            <Step number="3">Enter the <strong>Buyer's Information</strong>:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Amount:</strong> Total price of the reservation</li>
-                <li><strong>Payment Status:</strong> Paid, Pending, or Partial</li>
-                <li><strong>Payment Method:</strong> Cash, Check, Card, etc.</li>
+                <li><strong>Full Name:</strong> The person making the purchase</li>
+                <li><strong>Phone Number:</strong> Best number to reach them (include area code)</li>
+                <li><strong>Email Address:</strong> For sending confirmations and receipts</li>
+                <li><strong>Mailing Address:</strong> Street, City, State, ZIP for official documents</li>
               </ul>
             </Step>
-            <Step number="5">Click <strong>"Save Reservation"</strong></Step>
+            <Step number="4">Enter the <strong>Payment Information</strong>:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Total Amount:</strong> The full price of the reservation</li>
+                <li><strong>Amount Paid:</strong> How much they've paid so far</li>
+                <li><strong>Payment Method:</strong> Cash, Check, Credit Card, or Money Order</li>
+                <li><strong>Check Number:</strong> If they paid by check, record the check number</li>
+                <li><strong>Payment Status:</strong> Pending, Partial, or Paid in Full</li>
+              </ul>
+            </Step>
+            <Step number="5">Add any <strong>Notes</strong> about the transaction (special requests, payment plans, etc.)</Step>
+            <Step number="6">Click <strong>"Save Reservation"</strong> to record the transaction</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Recording Additional Payments</h4>
+            <p className="mb-2">If someone is making payments over time:</p>
+            <Step number="1">Find the reservation in the list</Step>
+            <Step number="2">Click on it to open the details</Step>
+            <Step number="3">Click <strong>"Add Payment"</strong></Step>
+            <Step number="4">Enter the payment amount, date, and method</Step>
+            <Step number="5">Click <strong>"Save"</strong> - the system automatically updates the balance due</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Sending Confirmation to the Buyer</h4>
+            <Step number="1">Open the reservation by clicking on it</Step>
+            <Step number="2">Click the <strong>"Send Confirmation"</strong> button</Step>
+            <Step number="3">Review the email that will be sent</Step>
+            <Step number="4">Click <strong>"Send"</strong> to email the confirmation to the buyer</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing Payment History</h4>
+            <p className="mb-2">Each reservation shows a complete payment history:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Date of each payment</li>
+              <li>Amount received</li>
+              <li>Payment method</li>
+              <li>Running balance</li>
+            </ul>
 
             <Tip>
-              After saving a reservation, you can send a confirmation email to the buyer 
-              by clicking "Send Confirmation" in the reservation details.
+              <strong>Always get contact information!</strong> Make sure to record both phone number AND email 
+              address. If there's ever a question about the reservation, you'll need to reach the buyer.
+            </Tip>
+
+            <Tip>
+              <strong>For check payments:</strong> Always write down the check number! This helps if there's 
+              ever a question about payment or if a check bounces.
             </Tip>
           </ManualSection>
 
           {/* PLOTS */}
           <ManualSection icon={Map} title="Plot Management">
-            <p>
-              View and manage all cemetery plots. See which plots are available, 
-              reserved, or occupied.
+            <p className="text-lg mb-4">
+              <strong>The Plot Management section gives you a complete view of every burial plot in the cemetery.</strong> 
+              You can see which plots are available, reserved, or occupied, and update plot information as needed. 
+              This section includes both a visual map view and a list view.
             </p>
 
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Plots" tab in the navigation bar</p>
+            </div>
+
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Plot Status Colors</h4>
+            <p className="mb-2">Each plot is color-coded so you can see its status at a glance:</p>
             <ul className="list-disc pl-5 space-y-2">
-              <li><span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span><strong>Green = Available:</strong> Plot is open for sale</li>
-              <li><span className="inline-block w-4 h-4 bg-yellow-500 rounded mr-2"></span><strong>Yellow = Reserved:</strong> Plot is reserved but not yet used</li>
-              <li><span className="inline-block w-4 h-4 bg-blue-500 rounded mr-2"></span><strong>Blue = Occupied:</strong> Someone is buried here</li>
-              <li><span className="inline-block w-4 h-4 bg-purple-500 rounded mr-2"></span><strong>Purple = Veteran:</strong> Reserved for or occupied by a veteran</li>
-              <li><span className="inline-block w-4 h-4 bg-gray-400 rounded mr-2"></span><strong>Gray = Not Usable:</strong> Plot cannot be used</li>
+              <li><span className="inline-block w-5 h-5 bg-green-500 rounded mr-2 align-middle"></span><strong>Green = Available:</strong> This plot is open for sale - no one has reserved or purchased it</li>
+              <li><span className="inline-block w-5 h-5 bg-yellow-500 rounded mr-2 align-middle"></span><strong>Yellow = Reserved:</strong> Someone has reserved this plot but no one is buried there yet</li>
+              <li><span className="inline-block w-5 h-5 bg-blue-500 rounded mr-2 align-middle"></span><strong>Blue = Occupied:</strong> Someone is buried in this plot</li>
+              <li><span className="inline-block w-5 h-5 bg-purple-500 rounded mr-2 align-middle"></span><strong>Purple = Veteran:</strong> Reserved for or occupied by a military veteran</li>
+              <li><span className="inline-block w-5 h-5 bg-gray-400 rounded mr-2 align-middle"></span><strong>Gray = Not Usable:</strong> This plot cannot be used (pathway, utility area, etc.)</li>
+              <li><span className="inline-block w-5 h-5 bg-stone-300 rounded mr-2 align-middle"></span><strong>Light Gray = Unknown:</strong> Status needs to be verified</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Update a Plot</h4>
-            <Step number="1">Find the plot using the map view or search</Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Using the Map View</h4>
+            <Step number="1">When you open Plots, you may see a visual map of the cemetery</Step>
+            <Step number="2">Each small square or rectangle represents one plot</Step>
+            <Step number="3">Hover your mouse over a plot to see basic information</Step>
+            <Step number="4">Click on a plot to see full details and edit options</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Using Filters to Find Plots</h4>
+            <Step number="1">Look for the filter options at the top of the page</Step>
+            <Step number="2"><strong>Section Filter:</strong> Select a section (like "North" or "Section A") to show only plots in that area</Step>
+            <Step number="3"><strong>Row Filter:</strong> After selecting a section, choose a specific row</Step>
+            <Step number="4"><strong>Status Filter:</strong> Show only Available, Reserved, Occupied, etc.</Step>
+            <Step number="5">The display will update immediately to show only matching plots</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Find a Specific Plot</h4>
+            <Step number="1">If you know the plot number (like "A-15" or "Section 2, Row 3, Plot 7"):</Step>
+            <Step number="2">Use the search box and type the plot identifier</Step>
+            <Step number="3">Or use the Section and Row filters to narrow down, then find the plot visually</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Update a Plot's Information</h4>
+            <Step number="1">Find the plot using search, filters, or the map view</Step>
             <Step number="2">Click on the plot to select it</Step>
-            <Step number="3">Click <strong>"Edit"</strong> in the popup that appears</Step>
-            <Step number="4">Change the information you need to update</Step>
-            <Step number="5">Click <strong>"Save Changes"</strong></Step>
+            <Step number="3">A panel or popup will appear with plot details</Step>
+            <Step number="4">Click the <strong>"Edit"</strong> button</Step>
+            <Step number="5">Make your changes:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Status:</strong> Change from Available to Reserved, etc.</li>
+                <li><strong>Occupant Info:</strong> Add or update who is buried there</li>
+                <li><strong>Family Name:</strong> The family associated with this plot</li>
+                <li><strong>Notes:</strong> Any special information about the plot</li>
+              </ul>
+            </Step>
+            <Step number="6">Click <strong>"Save Changes"</strong> - the color will update to reflect the new status</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Changing a Plot's Status</h4>
+            <p className="mb-2">Common status changes:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Available → Reserved:</strong> When someone buys/reserves the plot</li>
+              <li><strong>Reserved → Occupied:</strong> When a burial takes place</li>
+              <li><strong>Available → Veteran:</strong> When designated for veteran use</li>
+              <li><strong>Any → Not Usable:</strong> When a plot is discovered to be unusable</li>
+            </ul>
 
             <Tip>
-              Use the Section and Row filters at the top to quickly narrow down 
-              which plots you're looking at. This is especially helpful for large sections!
+              <strong>Use filters to work faster!</strong> If you're updating plots in Section 2, set the Section 
+              filter to "Section 2" first. This makes it much easier to find and update multiple plots in the same area.
+            </Tip>
+
+            <Tip>
+              <strong>The map is interactive:</strong> You can click and drag to move around, and use zoom 
+              controls (if available) to zoom in on specific areas.
             </Tip>
           </ManualSection>
 
           {/* LAWN CARE */}
           <ManualSection icon={Leaf} title="Lawn Care">
-            <p>
-              Track lawn maintenance schedules, mowing records, and groundskeeping activities.
+            <p className="text-lg mb-4">
+              <strong>The Lawn Care section helps you track all grounds maintenance activities.</strong> 
+              Keep records of when each section was mowed, trimmed, or maintained. This ensures 
+              no area gets neglected and helps plan future maintenance schedules.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Log Lawn Care Activity</h4>
-            <Step number="1">Click <strong>"Add Entry"</strong></Step>
-            <Step number="2">Select the date the work was done</Step>
-            <Step number="3">Choose the type of work:
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Lawn Care" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Lawn Care Dashboard</h4>
+            <p className="mb-2">When you open Lawn Care, you'll see:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Section Status Cards:</strong> Each cemetery section shows when it was last serviced</li>
+              <li><strong>Color Indicators:</strong> Green = recently done, Yellow = due soon, Red = overdue</li>
+              <li><strong>Recent Activity Log:</strong> List of recent lawn care entries</li>
+              <li><strong>Statistics:</strong> Summary of maintenance activities</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Log a Lawn Care Activity</h4>
+            <Step number="1">Click the <strong>"Add Entry"</strong> or <strong>"Log Activity"</strong> button</Step>
+            <Step number="2">Select the <strong>Date</strong> the work was performed (click the calendar icon)</Step>
+            <Step number="3">Choose the <strong>Type of Work</strong> from the dropdown:
               <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li>Mowing</li>
-                <li>Trimming/Edging</li>
-                <li>Leaf Removal</li>
-                <li>Fertilizing</li>
-                <li>Other Maintenance</li>
+                <li><strong>Mowing:</strong> Grass cutting</li>
+                <li><strong>Trimming/Edging:</strong> Weed eating around headstones and borders</li>
+                <li><strong>Leaf Removal:</strong> Raking or blowing leaves</li>
+                <li><strong>Fertilizing:</strong> Applying lawn fertilizer</li>
+                <li><strong>Weed Treatment:</strong> Applying herbicide</li>
+                <li><strong>Irrigation:</strong> Watering or sprinkler system work</li>
+                <li><strong>Other Maintenance:</strong> Any other groundskeeping work</li>
               </ul>
             </Step>
-            <Step number="4">Select which sections were serviced</Step>
-            <Step number="5">Add any notes about conditions or issues found</Step>
-            <Step number="6">Click <strong>"Save"</strong></Step>
+            <Step number="4">Select <strong>Which Sections</strong> were serviced:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Check the boxes for each section that was worked on</li>
+                <li>You can select multiple sections if the same work was done in several areas</li>
+              </ul>
+            </Step>
+            <Step number="5">Add <strong>Notes</strong> about conditions or issues found:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Note any problems (bare spots, drainage issues, ant hills, etc.)</li>
+                <li>Record weather conditions if relevant</li>
+                <li>Mention if any areas need follow-up work</li>
+              </ul>
+            </Step>
+            <Step number="6">Click <strong>"Save"</strong> to record the entry</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing Maintenance History</h4>
+            <Step number="1">Click on a specific section card to see its full history</Step>
+            <Step number="2">Or use the history/log view to see all activities</Step>
+            <Step number="3">You can filter by date range, section, or type of work</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Planning Future Maintenance</h4>
+            <p className="mb-2">The dashboard shows you:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Which sections are <strong>overdue</strong> (red - need attention now!)</li>
+              <li>Which sections are <strong>due soon</strong> (yellow - plan for this week)</li>
+              <li>Which sections are <strong>recently done</strong> (green - good for now)</li>
+            </ul>
 
             <Tip>
-              Regular lawn care logging helps track when each section was last serviced 
-              and ensures no area is neglected.
+              <strong>Log entries promptly!</strong> It's best to record lawn care activities the same day 
+              they're completed. If you wait, you might forget important details about what was done.
+            </Tip>
+
+            <Tip>
+              <strong>Note problems when you see them!</strong> If groundskeepers notice issues like damaged 
+              headstones, sunken plots, or drainage problems during mowing, add them to the notes. 
+              This creates a record for follow-up.
             </Tip>
           </ManualSection>
 
           {/* CRM */}
           <ManualSection icon={MessageSquare} title="CRM (Customer Relations)">
-            <p>
-              The CRM (Customer Relationship Management) helps you track interactions 
-              with families, follow-ups needed, and maintain good relationships.
+            <p className="text-lg mb-4">
+              <strong>The CRM (Customer Relationship Management) section helps you maintain excellent relationships with families and members.</strong> 
+              Track every phone call, email, and meeting. Set reminders for follow-ups so no one falls through the cracks.
+              Good record-keeping here helps provide personal, caring service to families.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a Contact Interaction</h4>
-            <Step number="1">Find the contact in the list or search by name</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "CRM" tab in the navigation bar</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What is CRM?</h4>
+            <p className="mb-2">
+              CRM stands for Customer Relationship Management. Think of it as a detailed address book 
+              combined with a diary of every conversation you've had with each person. It helps you:
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Remember what was discussed in past conversations</li>
+              <li>Keep track of who needs a follow-up call</li>
+              <li>See the complete history with any family at a glance</li>
+              <li>Never forget important details about a relationship</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the CRM Screen</h4>
+            <p className="mb-2">The CRM section shows:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Contacts List:</strong> All the people and families you track</li>
+              <li><strong>Follow-Ups Due:</strong> A list of people you need to contact soon</li>
+              <li><strong>Recent Interactions:</strong> Latest conversations and meetings logged</li>
+              <li><strong>Segments:</strong> Groups of contacts organized by category</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Add a New Contact Interaction</h4>
+            <p className="mb-2">When you talk to someone (phone, email, in person), record it:</p>
+            <Step number="1">Find the contact in the list, or search by their name</Step>
             <Step number="2">Click on their name to open their profile</Step>
-            <Step number="3">Click <strong>"Add Interaction"</strong></Step>
-            <Step number="4">Choose the type: Phone Call, Email, Visit, or Other</Step>
-            <Step number="5">Write a brief note about what was discussed</Step>
-            <Step number="6">If follow-up is needed, check the box and set a date</Step>
-            <Step number="7">Click <strong>"Save"</strong></Step>
+            <Step number="3">Click the <strong>"Add Interaction"</strong> or <strong>"Log Contact"</strong> button</Step>
+            <Step number="4">Select the <strong>Type of Interaction</strong>:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Phone Call:</strong> You spoke on the telephone</li>
+                <li><strong>Email:</strong> You exchanged emails</li>
+                <li><strong>In-Person Visit:</strong> They came to the cemetery or office</li>
+                <li><strong>Meeting:</strong> A scheduled appointment</li>
+                <li><strong>Note:</strong> A general note to remember (no actual contact)</li>
+                <li><strong>Other:</strong> Any other type of communication</li>
+              </ul>
+            </Step>
+            <Step number="5">Write a <strong>brief summary</strong> of what was discussed:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>What did they want or ask about?</li>
+                <li>What information did you provide?</li>
+                <li>Were there any concerns or issues?</li>
+                <li>What, if anything, needs to happen next?</li>
+              </ul>
+            </Step>
+            <Step number="6">If you need to <strong>follow up</strong>:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Check the "Schedule Follow-Up" box</li>
+                <li>Select the date you should contact them again</li>
+                <li>Add a note about what the follow-up is for</li>
+              </ul>
+            </Step>
+            <Step number="7">Click <strong>"Save"</strong> to record the interaction</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Managing Follow-Ups</h4>
+            <p className="mb-2">The system will remind you when follow-ups are due:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Check the <strong>"Follow-Ups Due"</strong> section regularly</li>
+              <li>Items turn <strong>red</strong> when they're overdue</li>
+              <li>After completing a follow-up, mark it as "Completed"</li>
+              <li>If you need more time, you can reschedule to a new date</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing Contact History</h4>
+            <Step number="1">Click on any contact's name</Step>
+            <Step number="2">Their profile shows ALL past interactions in chronological order</Step>
+            <Step number="3">You can see the complete story of your relationship with them</Step>
+            <Step number="4">This is invaluable when they call and you need to remember past discussions</Step>
 
             <Tip>
-              Set follow-up reminders for important contacts. The system will 
-              notify you when it's time to reach out again!
+              <strong>Log interactions right after they happen!</strong> Even a 30-second note 
+              ("Called about plot availability, interested in Section B, will visit Saturday") 
+              is incredibly helpful when they call back a week later.
+            </Tip>
+
+            <Tip>
+              <strong>Set follow-ups generously!</strong> If someone says "I'll decide in a couple weeks," 
+              set a follow-up for 2-3 weeks out. It's better to check in than to let them slip away.
             </Tip>
           </ManualSection>
 
@@ -837,40 +1089,95 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* TASKS */}
           <ManualSection icon={CheckSquare} title="Task Management">
-            <p>
-              Create and track tasks for yourself and other administrators. 
-              Never forget an important to-do again!
+            <p className="text-lg mb-4">
+              <strong>The Task Management section is your to-do list for the cemetery.</strong> 
+              Create tasks for yourself or assign them to other staff members. Set due dates, 
+              track progress, and never forget an important job. The system will remind you 
+              when tasks are due!
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a Task</h4>
-            <Step number="1">Click <strong>"Add Task"</strong></Step>
-            <Step number="2">Enter the task details:
-              <ul className="list-disc pl-5 mt-2 space-y-1">
-                <li><strong>Title:</strong> What needs to be done</li>
-                <li><strong>Description:</strong> Additional details or instructions</li>
-                <li><strong>Due Date:</strong> When it should be completed</li>
-                <li><strong>Priority:</strong> Low, Medium, High, or Urgent</li>
-                <li><strong>Assign To:</strong> Who is responsible</li>
-              </ul>
-            </Step>
-            <Step number="3">Click <strong>"Save Task"</strong></Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Tasks" tab in the navigation bar</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Completing a Task</h4>
-            <Step number="1">Find the task in your list</Step>
-            <Step number="2">Click the checkbox next to the task, OR</Step>
-            <Step number="3">Open the task and click <strong>"Mark Complete"</strong></Step>
-
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Task Notifications</h4>
-            <p>You'll receive notifications when:</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>A task is assigned to you</li>
-              <li>A due date is approaching</li>
-              <li>A task becomes overdue</li>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Task List</h4>
+            <p className="mb-2">The Tasks section shows all tasks organized by status:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Pending/To Do:</strong> Tasks that haven't been started yet</li>
+              <li><strong>In Progress:</strong> Tasks someone is currently working on</li>
+              <li><strong>Completed:</strong> Finished tasks (kept for records)</li>
+              <li><strong>Overdue:</strong> Tasks past their due date (shown in red!)</li>
             </ul>
 
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding Task Priority</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><span className="inline-block px-2 py-0.5 bg-gray-200 text-gray-800 text-xs rounded mr-2">Low</span> Can be done when there's time</li>
+              <li><span className="inline-block px-2 py-0.5 bg-blue-200 text-blue-800 text-xs rounded mr-2">Medium</span> Normal priority, do within the timeframe</li>
+              <li><span className="inline-block px-2 py-0.5 bg-orange-200 text-orange-800 text-xs rounded mr-2">High</span> Important - prioritize this task</li>
+              <li><span className="inline-block px-2 py-0.5 bg-red-200 text-red-800 text-xs rounded mr-2">Urgent</span> Drop everything - this needs immediate attention!</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a New Task</h4>
+            <Step number="1">Click the <strong>"Add Task"</strong> button (usually green with a + icon)</Step>
+            <Step number="2">Fill in the task details:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li><strong>Title:</strong> A short, clear description of what needs to be done (e.g., "Repair fence near Section B")</li>
+                <li><strong>Description:</strong> Additional details, instructions, or context</li>
+                <li><strong>Due Date:</strong> Click the calendar and select when it should be completed</li>
+                <li><strong>Priority:</strong> Select Low, Medium, High, or Urgent</li>
+                <li><strong>Assign To:</strong> Choose who should do this task (yourself or another staff member)</li>
+                <li><strong>Related To:</strong> Optionally link to a member, plot, or other record</li>
+              </ul>
+            </Step>
+            <Step number="3">Review the information to make sure it's clear</Step>
+            <Step number="4">Click <strong>"Save Task"</strong> to create it</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Complete a Task</h4>
+            <p className="mb-2">When you finish a task, mark it complete:</p>
+            <Step number="1">Find the task in your list</Step>
+            <Step number="2"><strong>Quick Method:</strong> Click the checkbox or circle icon next to the task title</Step>
+            <Step number="3"><strong>Detailed Method:</strong> Click on the task to open it, then click <strong>"Mark Complete"</strong></Step>
+            <Step number="4">The task moves to the "Completed" section and is kept for your records</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Updating a Task's Status</h4>
+            <Step number="1">Click on the task to open it</Step>
+            <Step number="2">Click <strong>"Edit"</strong></Step>
+            <Step number="3">Change the status (Pending → In Progress, for example)</Step>
+            <Step number="4">Add notes about progress if helpful</Step>
+            <Step number="5">Click <strong>"Save"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Logging Time on a Task</h4>
+            <p className="mb-2">If you need to track how much time was spent:</p>
+            <Step number="1">Open the task</Step>
+            <Step number="2">Click <strong>"Log Time"</strong></Step>
+            <Step number="3">Enter the hours and minutes spent</Step>
+            <Step number="4">Add a note about what was done (optional)</Step>
+            <Step number="5">Click <strong>"Save"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Task Notifications and Reminders</h4>
+            <p className="mb-2">The system automatically notifies you when:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>A new task is assigned to you</li>
+              <li>A task's due date is approaching (usually 1 day before)</li>
+              <li>A task becomes overdue</li>
+              <li>Someone updates a task you're assigned to</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Filtering and Finding Tasks</h4>
+            <Step number="1">Use the <strong>Status tabs</strong> to switch between Pending, In Progress, Completed</Step>
+            <Step number="2">Use the <strong>Search box</strong> to find tasks by keyword</Step>
+            <Step number="3">Use <strong>Filters</strong> to show only certain priorities or assignees</Step>
+
             <Tip>
-              Set realistic due dates! It's better to finish early than to have 
-              a list full of overdue tasks.
+              <strong>Be specific in task titles!</strong> Instead of "Fix headstone," write 
+              "Repair damaged headstone - Johnson family, Section A, Row 3." This makes it clear 
+              exactly what needs to be done.
+            </Tip>
+
+            <Tip>
+              <strong>Set realistic due dates!</strong> It's better to set a reasonable deadline 
+              and finish early than to have a long list of overdue tasks. Overdue tasks can 
+              become overwhelming!
             </Tip>
           </ManualSection>
 
@@ -1004,75 +1311,193 @@ const ResizeableManualContent = memo(function ResizeableManualContent({ defaultS
 
           {/* BACKUPS */}
           <ManualSection icon={Database} title="Backups & Data Safety">
-            <p>
-              Create backups of your cemetery data to protect against loss. 
-              This is very important!
+            <p className="text-lg mb-4">
+              <strong>The Backups section protects all your cemetery data.</strong> 
+              Creating regular backups ensures that if anything ever goes wrong - 
+              computer problems, accidental deletions, or other issues - you can 
+              recover your information. This is one of the most important things you can do!
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a Backup</h4>
-            <Step number="1">Click <strong>"Create Backup"</strong></Step>
-            <Step number="2">Wait while the system prepares your data (this may take a minute)</Step>
-            <Step number="3">When ready, click <strong>"Download"</strong> to save to your computer</Step>
-            <Step number="4">Store the downloaded file in a safe location</Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Backups" tab, or click the "Backups" button in the header</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Backup Best Practices</h4>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Create a backup at least once a week</li>
-              <li>Store backups in multiple locations (computer, external drive, cloud)</li>
-              <li>Keep backups for at least 6 months before deleting old ones</li>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-800"><strong>⚠️ Important:</strong> Creating backups is one of your most critical responsibilities! 
+              Without backups, data could be permanently lost. Make this a regular habit.</p>
+            </div>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">What Gets Backed Up?</h4>
+            <p className="mb-2">A backup saves everything in the system:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>All member and family records</li>
+              <li>All deceased records</li>
+              <li>All plot information and statuses</li>
+              <li>All reservations and payment records</li>
+              <li>All employee information</li>
+              <li>All tasks, events, and announcements</li>
+              <li>All system settings</li>
             </ul>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Restoring from Backup</h4>
-            <p className="text-red-700 font-semibold">
-              ⚠️ Restoring a backup will replace current data! Only do this if something 
-              has gone wrong and you need to recover lost information.
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">How to Create a Manual Backup</h4>
+            <Step number="1">Go to the <strong>Backups</strong> tab</Step>
+            <Step number="2">Click the <strong>"Create Backup"</strong> button</Step>
+            <Step number="3">Wait while the system prepares your data - this may take 1-2 minutes. A progress message will appear</Step>
+            <Step number="4">When ready, a <strong>"Download"</strong> button appears. Click it</Step>
+            <Step number="5">Your browser will download a file. Save it somewhere safe:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Your computer's Documents folder</li>
+                <li>A USB flash drive</li>
+                <li>An external hard drive</li>
+                <li>A cloud service like Google Drive or Dropbox</li>
+              </ul>
+            </Step>
+            <Step number="6">The file will be named something like "UnionSprings_Backup_2024-03-15.json"</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Backup Best Practices - PLEASE FOLLOW THESE!</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Create a backup at least once a week</strong> - set a reminder for the same day each week</li>
+              <li><strong>Store backups in multiple locations</strong> - if one copy is lost, you have another</li>
+              <li><strong>Keep backups for at least 6 months</strong> - sometimes you don't realize data is missing until later</li>
+              <li><strong>Label your backups clearly</strong> - the file name includes the date, but you can also rename it</li>
+              <li><strong>Test a restore occasionally</strong> - to make sure your backups actually work (ask for help with this)</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Automatic Backups</h4>
+            <p className="mb-2">
+              Good news: The system also creates automatic backups regularly. You can see these 
+              in the Backups section. However, <strong>always create your own backups too</strong> - 
+              having multiple copies protects you better.
             </p>
-            <Step number="1">Click <strong>"Restore Backup"</strong></Step>
-            <Step number="2">Select the backup file from your computer</Step>
-            <Step number="3">Confirm that you want to proceed</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Restoring from a Backup</h4>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-800 font-semibold">
+                ⚠️ <strong>WARNING:</strong> Restoring a backup will REPLACE all current data 
+                with the data from the backup file! Only do this if something has gone seriously 
+                wrong and you need to recover lost information. If unsure, contact support first!
+              </p>
+            </div>
+            <Step number="1">Make sure you really need to restore (consider calling support first)</Step>
+            <Step number="2">Click <strong>"Restore Backup"</strong></Step>
+            <Step number="3">Click <strong>"Choose File"</strong> and select your backup file</Step>
+            <Step number="4">The system will ask you to confirm - read the warning carefully</Step>
+            <Step number="5">Type "CONFIRM" or check the confirmation box</Step>
+            <Step number="6">Click <strong>"Restore"</strong> and wait for the process to complete</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Suggested Backup Schedule</h4>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <ul className="space-y-2 text-green-800">
+                <li>✓ <strong>Every Friday:</strong> Create a weekly backup before going home for the weekend</li>
+                <li>✓ <strong>Before major changes:</strong> Create a backup before importing data or making big updates</li>
+                <li>✓ <strong>Monthly:</strong> Copy your backup to an external drive and store it safely off-site</li>
+              </ul>
+            </div>
 
             <Tip>
-              The system also creates automatic backups, but it's wise to keep 
-              your own copies just in case!
+              <strong>Set a calendar reminder!</strong> Every Friday at 4:00 PM, remind yourself to 
+              create a backup. It only takes a minute and could save months of work!
+            </Tip>
+
+            <Tip>
+              <strong>Keep a backup off-site!</strong> Store at least one recent backup somewhere 
+              other than the cemetery office - at home, in a safe deposit box, or in the cloud. 
+              This protects against theft, fire, or other disasters.
             </Tip>
           </ManualSection>
 
           {/* COMMUNICATIONS */}
           <ManualSection icon={Mail} title="Communications Center">
-            <p>
-              Send emails, view messages from the contact form, and manage 
-              all correspondence with members and the public.
+            <p className="text-lg mb-4">
+              <strong>The Communications Center is your email and messaging hub.</strong> 
+              View messages from the website contact form, send emails to members and families, 
+              and keep track of all correspondence. This ensures no inquiry goes unanswered.
             </p>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing Incoming Messages</h4>
-            <p>
-              When someone submits the Contact Form on the website, their message 
-              appears here. To respond:
-            </p>
-            <Step number="1">Click on the message to open it</Step>
-            <Step number="2">Read the full message and any attachments</Step>
-            <Step number="3">Click <strong>"Reply"</strong> to send a response</Step>
-            <Step number="4">When finished, click <strong>"Mark as Handled"</strong></Step>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-medium">📍 <strong>How to Get Here:</strong> Click the "Communications" tab in the navigation bar</p>
+            </div>
 
-            <h4 className="font-bold text-stone-800 mt-4 mb-2">Sending an Email</h4>
-            <Step number="1">Click <strong>"Compose Email"</strong></Step>
-            <Step number="2">Choose recipients (individual, group, or all members)</Step>
-            <Step number="3">Enter your subject line</Step>
-            <Step number="4">Write your message in the body area</Step>
-            <Step number="5">Click <strong>"Send"</strong></Step>
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Understanding the Communications Layout</h4>
+            <p className="mb-2">The Communications section typically shows:</p>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Inbox:</strong> Messages received from the website contact form and member portal</li>
+              <li><strong>Sent Messages:</strong> Emails you've sent (for your records)</li>
+              <li><strong>Templates:</strong> Pre-written message templates for common situations</li>
+              <li><strong>Compose:</strong> Where you write new emails</li>
+            </ul>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Viewing and Responding to Incoming Messages</h4>
+            <p className="mb-2">When someone fills out the Contact Form on your website, their message appears here:</p>
+            <Step number="1">Look at the <strong>Inbox</strong> - new/unread messages usually appear in bold or have a colored indicator</Step>
+            <Step number="2">Click on a message to open and read it</Step>
+            <Step number="3">You'll see:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Who sent it (their name and email)</li>
+                <li>When it was sent</li>
+                <li>The subject line</li>
+                <li>The full message content</li>
+              </ul>
+            </Step>
+            <Step number="4">To respond, click the <strong>"Reply"</strong> button</Step>
+            <Step number="5">Type your response in the message area</Step>
+            <Step number="6">Click <strong>"Send"</strong> to email your response to them</Step>
+            <Step number="7">After handling the inquiry, click <strong>"Mark as Handled"</strong> or <strong>"Archive"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Sending a New Email</h4>
+            <Step number="1">Click <strong>"Compose Email"</strong> or <strong>"New Message"</strong></Step>
+            <Step number="2">In the <strong>"To"</strong> field:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Type an email address directly, OR</li>
+                <li>Start typing a name to search for a member, OR</li>
+                <li>Select from a dropdown of saved contacts</li>
+              </ul>
+            </Step>
+            <Step number="3">Enter a clear <strong>Subject Line</strong> (e.g., "Your Plot Reservation Confirmation")</Step>
+            <Step number="4">Write your message in the large <strong>Body</strong> area</Step>
+            <Step number="5"><strong>Review your message carefully</strong> - check spelling and make sure it's complete</Step>
+            <Step number="6">Click <strong>"Send"</strong> to deliver the email</Step>
 
             <h4 className="font-bold text-stone-800 mt-4 mb-2">Using Email Templates</h4>
-            <p>
-              For common messages, you can use templates to save time:
-            </p>
-            <Step number="1">Click <strong>"Use Template"</strong></Step>
-            <Step number="2">Select the template you want</Step>
-            <Step number="3">The message fills in automatically</Step>
-            <Step number="4">Customize as needed, then send</Step>
+            <p className="mb-2">Templates are pre-written messages for common situations, saving you time:</p>
+            <Step number="1">When composing an email, look for <strong>"Use Template"</strong> or a template icon</Step>
+            <Step number="2">Click it to see available templates:
+              <ul className="list-disc pl-5 mt-2 space-y-1">
+                <li>Reservation Confirmation</li>
+                <li>Payment Reminder</li>
+                <li>General Inquiry Response</li>
+                <li>Event Invitation</li>
+                <li>And others...</li>
+              </ul>
+            </Step>
+            <Step number="3">Click on the template you want</Step>
+            <Step number="4">The subject and body fill in automatically with placeholder text</Step>
+            <Step number="5"><strong>Customize the message</strong> - replace placeholders like [NAME] with actual information</Step>
+            <Step number="6">Review, then click <strong>"Send"</strong></Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Sending to Multiple People</h4>
+            <p className="mb-2">To send the same message to several people:</p>
+            <Step number="1">In the "To" field, add multiple email addresses separated by commas</Step>
+            <Step number="2">Or look for a "Select Group" or "Select Segment" option</Step>
+            <Step number="3">You can send to groups like "All Members" or custom segments you've created</Step>
+
+            <h4 className="font-bold text-stone-800 mt-4 mb-2">Email Best Practices</h4>
+            <ul className="list-disc pl-5 space-y-2">
+              <li><strong>Clear subject lines:</strong> "Union Springs: Your Reservation is Confirmed" is better than "Hello"</li>
+              <li><strong>Professional but warm:</strong> Be friendly and respectful</li>
+              <li><strong>Answer all questions:</strong> If they asked multiple things, address each one</li>
+              <li><strong>Include contact info:</strong> End with phone number in case they want to call</li>
+            </ul>
 
             <Tip>
-              Always proofread before sending! Once an email is sent, 
-              you cannot take it back.
+              <strong>Always proofread before sending!</strong> Read your email once more before clicking Send. 
+              Once sent, you cannot take it back. Check for spelling errors and make sure all the 
+              information is correct.
+            </Tip>
+
+            <Tip>
+              <strong>Respond promptly!</strong> Try to answer messages within 24-48 hours. 
+              Quick responses show families that Union Springs cares about them.
             </Tip>
           </ManualSection>
 
