@@ -18,7 +18,6 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         onFilterChange({
             search: '',
             status: 'All',
-            role: 'All',
             birthYearStart: '',
             birthYearEnd: '',
             deathYearStart: '',
