@@ -229,6 +229,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const plotNum = useMemo(() => parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null, [data?.Grave]);
   const sectionForId = computedSectionKey || String(data?.Section || '').replace(/Section\s/i, '').trim();
   const [isBlinking, setIsBlinking] = useState(false);
+  const [blinkColor, setBlinkColor] = useState('green'); // 'green' or 'blue'
   const elementRef = useRef(null);
 
   // Listen for plot-start-blink event to trigger highlight animation
@@ -248,8 +249,18 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
                 return; // Don't blink - this isn't the specific element that was targeted
               }
             }
+            setBlinkColor('green');
             setIsBlinking(true);
             // No timeout - keeps blinking until clicked or page changes
+          }
+        };
+
+        // Handle search-triggered blue blink
+        const handleSearchBlink = (e) => {
+          const { targetPlotNum } = e.detail || {};
+          if (targetPlotNum != null && targetPlotNum === plotNum) {
+            setBlinkColor('blue');
+            setIsBlinking(true);
           }
         };
 
@@ -258,9 +269,11 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
         };
 
         window.addEventListener('plot-start-blink', handleBlink);
+        window.addEventListener('plot-search-blink', handleSearchBlink);
         window.addEventListener('plot-stop-all-blink', handleStopBlink);
         return () => {
           window.removeEventListener('plot-start-blink', handleBlink);
+          window.removeEventListener('plot-search-blink', handleSearchBlink);
           window.removeEventListener('plot-stop-all-blink', handleStopBlink);
         };
       }, [plotNum, data?.isSpacer]);
