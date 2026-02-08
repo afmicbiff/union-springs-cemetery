@@ -65,10 +65,18 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         </button>
                     )}
                     
-                    {/* Search button */}
+                    {/* Search button - triggers locate and blink */}
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
                         <Button 
                             className="h-10 sm:h-12 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md"
+                            onClick={() => {
+                                if (filters.search) {
+                                    // Dispatch event to locate and blink matching plots
+                                    window.dispatchEvent(new CustomEvent('plot-locate-search', {
+                                        detail: { searchTerm: filters.search }
+                                    }));
+                                }
+                            }}
                         >
                             <Search className="h-5 w-5 sm:mr-2" />
                             <span className="hidden sm:inline">Search</span>
