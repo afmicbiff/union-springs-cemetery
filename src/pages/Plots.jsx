@@ -1567,7 +1567,7 @@ export default function PlotsPage() {
 
       {showBackToSearch && (
         <div className="bg-stone-100 border-b border-stone-200 px-4 sm:px-6 py-3">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="max-w-7xl mx-auto flex items-center gap-3">
             <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
               <ArrowLeft className="w-4 h-4 mr-1" /> Back to Search
             </Link>
@@ -1575,11 +1575,10 @@ export default function PlotsPage() {
             {showLocateButton && selectedPlotNum && (
               <button
                 onClick={locatePlot}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-base shadow-lg transition-all duration-200 touch-manipulation bg-green-600 text-white hover:bg-green-700 animate-pulse ring-2 ring-green-400 ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-green-600 text-white hover:bg-green-700 animate-pulse ring-2 ring-green-400 ring-offset-2"
               >
-                <MapPin className="w-5 h-5" />
+                <MapPin className="w-4 h-4" />
                 <span>Locate Grave #{selectedPlotNum}</span>
-                <ChevronRight className="w-5 h-5 animate-bounce" />
               </button>
             )}
           </div>
