@@ -304,6 +304,8 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
     if (onEdit && data) onEdit(data);
   };
 
+  const blinkClass = isBlinking ? (blinkColor === 'blue' ? 'animate-plot-blink-blue' : 'animate-plot-blink') : '';
+
   return (
     <div
       ref={elementRef}
@@ -313,7 +315,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
       onClick={handleClick}
       onMouseEnter={(e) => onHover?.(e, data)}
       onMouseLeave={() => onHover?.(null, null)}
-      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element ${isBlinking ? 'animate-plot-blink' : ''}`}
+      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element ${blinkClass}`}
       title={`${data.Grave} - ${data.Row}`}
     >
       <span className="text-[10px] font-black text-gray-800">{data.Grave}</span>
