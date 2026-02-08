@@ -115,7 +115,8 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
   const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
 
-  const blinkingClass = 'ring-4 sm:ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-105 sm:scale-110 z-50 shadow-2xl animate-plot-blink';
+  // Enhanced blinking style - larger ring, more visible, better centered appearance
+  const blinkingClass = 'ring-4 sm:ring-8 md:ring-12 ring-green-500 ring-offset-2 sm:ring-offset-4 ring-offset-white scale-110 sm:scale-125 z-50 shadow-2xl animate-plot-blink relative';
 
   return (
     <div

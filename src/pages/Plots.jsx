@@ -1422,25 +1422,44 @@ export default function PlotsPage() {
     let attempts = 0;
     const maxAttempts = 300; // ~5 seconds at 60fps
     let hasCentered = false;
+    let isCancelled = false;
 
     const tryCenter = () => {
+      if (isCancelled) return;
       attempts++;
       const el = findPlotElement(normalizedSection, plotNum);
 
       if (el && !hasCentered) {
         hasCentered = true;
-        // Small delay to ensure ZoomPan is fully initialized
-        setTimeout(() => {
-          centerElement(el);
-          // Dispatch blink event after centering completes
-          if (shouldHighlight || fromSearch) {
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-              }));
-            }, 300);
+        
+        // Wait for ZoomPan to be fully initialized and element to be laid out
+        requestAnimationFrame(() => {
+          if (isCancelled) return;
+          
+          // Use ZoomPan's centerOnElement with callback for precise timing
+          if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
+            zoomPanRef.current.centerOnElement(el, 'center', () => {
+              // Callback fires after centering animation completes
+              if (isCancelled) return;
+              if (shouldHighlight || fromSearch) {
+                window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                }));
+              }
+            });
+          } else {
+            // Fallback: native scroll with delayed blink
+            el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            if (shouldHighlight || fromSearch) {
+              setTimeout(() => {
+                if (isCancelled) return;
+                window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                }));
+              }, 500);
+            }
           }
-        }, 100);
+        });
         return;
       }
 
@@ -1449,11 +1468,17 @@ export default function PlotsPage() {
       }
     };
 
-    // Start trying after a short delay to let React render
-    setTimeout(() => {
+    // Start trying after a short delay to let React render and ZoomPan initialize
+    const startTimer = setTimeout(() => {
       requestAnimationFrame(tryCenter);
-    }, 200);
-  }, [findPlotElement, centerElement]);
+    }, 250);
+
+    // Cleanup on unmount or dependency change
+    return () => {
+      isCancelled = true;
+      clearTimeout(startTimer);
+    };
+  }, [findPlotElement]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {

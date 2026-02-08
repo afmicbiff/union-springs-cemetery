@@ -103,13 +103,17 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     []
   );
 
-  const centerOnElement = React.useCallback((element, align = 'center') => {
+  const centerOnElement = React.useCallback((element, align = 'center', callback) => {
     if (!containerRef.current || !contentRef.current || !element) return;
+
+    // Force layout recalculation to get accurate measurements
+    element.offsetHeight;
 
     const { scale, tx, ty } = transformRef.current;
     const containerRect = containerRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
+    // Calculate element position in content space (before any transform)
     const elLeftInContent = (elementRect.left - containerRect.left - tx) / scale;
     const elTopInContent = (elementRect.top - containerRect.top - ty) / scale;
     const elWidth = elementRect.width / scale;
@@ -122,6 +126,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
       targetTx = padding - (elLeftInContent * scale);
       targetTy = padding - (elTopInContent * scale);
     } else {
+      // Center alignment - place element exactly in the center of the viewport
       const elCenterInContentX = elLeftInContent + elWidth / 2;
       const elCenterInContentY = elTopInContent + elHeight / 2;
       targetTx = (containerRect.width / 2) - (elCenterInContentX * scale);
@@ -131,13 +136,13 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     // Smooth animation using requestAnimationFrame
     const startTx = tx;
     const startTy = ty;
-    const duration = 300;
+    const duration = 400; // Slightly longer for smoother feel
     const startTime = performance.now();
 
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
+      // Ease out cubic for smooth deceleration
       const eased = 1 - Math.pow(1 - progress, 3);
       
       transformRef.current.tx = startTx + (targetTx - startTx) * eased;
@@ -146,6 +151,11 @@ const ZoomPan = React.forwardRef(function ZoomPan(
 
       if (progress < 1) {
         requestAnimationFrame(animate);
+      } else {
+        // Animation complete - invoke callback if provided
+        if (typeof callback === 'function') {
+          callback();
+        }
       }
     };
 
