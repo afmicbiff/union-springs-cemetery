@@ -265,13 +265,22 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const displayStatus = isVet ? 'Veteran' : data.Status;
   const statusBg = STATUS_COLORS[displayStatus]?.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
 
+  const handleClick = (e) => {
+    e.stopPropagation();
+    // Stop blinking when user clicks on this plot
+    if (isBlinking) {
+      setIsBlinking(false);
+    }
+    if (onEdit && data) onEdit(data);
+  };
+
   return (
     <div
       ref={elementRef}
       id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined}
       data-plot-num={plotNum}
       data-section={sectionForId}
-      onClick={(e) => { e.stopPropagation(); if (onEdit && data) onEdit(data); }}
+      onClick={handleClick}
       onMouseEnter={(e) => onHover?.(e, data)}
       onMouseLeave={() => onHover?.(null, null)}
       className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element ${isBlinking ? 'animate-plot-blink' : ''}`}
