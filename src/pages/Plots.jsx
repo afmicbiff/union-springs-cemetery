@@ -1723,11 +1723,11 @@ export default function PlotsPage() {
                     <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center shrink-0">
                                               <Info size={12} className="mr-1 sm:mr-1.5" /> Status for all graves
                                           </span>
-                    <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? 'All' : 'Available' }))} active={filters.status === 'Available'} />
-                    <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? 'All' : 'Reserved' }))} active={filters.status === 'Reserved'} />
-                    <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? 'All' : 'Occupied' }))} active={filters.status === 'Occupied'} />
-                    <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Veteran' ? 'All' : 'Veteran' }))} active={filters.status === 'Veteran'} />
-                    <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Unavailable' ? 'All' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
+                    <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? '' : 'Available' }))} active={filters.status === 'Available'} />
+                                            <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? '' : 'Reserved' }))} active={filters.status === 'Reserved'} />
+                                            <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? '' : 'Occupied' }))} active={filters.status === 'Occupied'} />
+                                            <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Veteran' ? '' : 'Veteran' }))} active={filters.status === 'Veteran'} />
+                                            <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Unavailable' ? '' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
                 </div>
             </div>
 
