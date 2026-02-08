@@ -745,26 +745,6 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
-  const [mapContainerHeight, setMapContainerHeight] = useState(null);
-  const viewportHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 800);
-  
-  // Track viewport height for responsive calculations
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const updateViewport = () => { viewportHeightRef.current = window.innerHeight; };
-    updateViewport();
-    window.addEventListener('resize', updateViewport, { passive: true });
-    return () => window.removeEventListener('resize', updateViewport);
-  }, []);
-  
-  // Callback for MapControls to report zoom-based dimensions
-  const handleZoomChange = useCallback(({ scaledHeight }) => {
-    // Add padding and clamp to viewport
-    const paddedHeight = scaledHeight + 80;
-    const maxHeight = viewportHeightRef.current * 0.85;
-    const minHeight = 300;
-    setMapContainerHeight(Math.max(minHeight, Math.min(paddedHeight, maxHeight)));
-  }, []);
   // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
           const params = new URLSearchParams(window.location.search);
