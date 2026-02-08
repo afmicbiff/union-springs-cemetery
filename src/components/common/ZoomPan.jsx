@@ -544,7 +544,8 @@ const ZoomPan = React.forwardRef(function ZoomPan(
         {children}
       </div>
 
-      {/* Zoom controls - responsive positioning */}
+      {/* Zoom controls - DISABLED but preserved for future use */}
+      {false && (
       <div
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[100] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-gray-300 p-1.5 sm:p-2 flex flex-row sm:flex-col gap-1.5 sm:gap-2"
         data-zoom-controls="true"
@@ -582,6 +583,7 @@ const ZoomPan = React.forwardRef(function ZoomPan(
           Reset
         </button>
       </div>
+      )}
     </div>
   );
 });

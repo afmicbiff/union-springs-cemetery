@@ -1465,6 +1465,9 @@ export default function PlotsPage() {
     const plotNum = parseInt(targetPlot, 10);
     if (!Number.isFinite(plotNum)) return;
 
+    // Stop any existing blinks first
+    window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
+
     let attempts = 0;
     const maxAttempts = 300;
     let hasCentered = false;
@@ -1477,28 +1480,29 @@ export default function PlotsPage() {
       if (!el) {
         el = document.querySelector(`[id$="-${plotNum}"]`);
       }
-      
-      const foundSection = el?.getAttribute('data-section') || '';
 
       if (el && !hasCentered) {
         hasCentered = true;
         
+        // Use ZoomPan centerOnElement for smooth centering, then trigger blink
         requestAnimationFrame(() => {
           if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
             zoomPanRef.current.centerOnElement(el, 'center', () => {
+              // Trigger blink after centering animation completes
               window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                detail: { targetPlotNum: plotNum, targetSection: foundSection }
+                detail: { targetPlotNum: plotNum }
               }));
               setHasLocated(true);
             });
           } else {
+            // Fallback: scroll into view and blink
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
             setTimeout(() => {
               window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                detail: { targetPlotNum: plotNum, targetSection: foundSection }
+                detail: { targetPlotNum: plotNum }
               }));
               setHasLocated(true);
-            }, 500);
+            }, 600);
           }
         });
         return;
