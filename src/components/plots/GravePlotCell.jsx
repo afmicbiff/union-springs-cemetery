@@ -23,7 +23,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const plotNum = parseNum(item?.Grave);
 
   // Blinking logic - triggered by custom event after centering completes
-  // Blinks until user navigates away or selects different plot
+  // Blinks until user clicks on the plot
   useEffect(() => {
     if (!item) return;
 
@@ -45,11 +45,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       if (isMatch && !hasInitializedBlink.current) {
         hasInitializedBlink.current = true;
         setIsBlinking(true);
-        // Auto-stop blinking after 4 seconds for better UX
-        setTimeout(() => {
-          setIsBlinking(false);
-          hasInitializedBlink.current = false;
-        }, 4000);
+        // Keep blinking until user clicks the plot - no auto-stop timeout
       }
     };
 
@@ -79,10 +75,15 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
+    // Stop blinking when user clicks on this plot
+    if (isBlinking) {
+      setIsBlinking(false);
+      hasInitializedBlink.current = false;
+    }
     // Stop any existing blinks when clicking a new plot
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
     if (isAdmin && onEdit && item?._entity === 'Plot') onEdit(item);
-  }, [isAdmin, onEdit, item]);
+  }, [isAdmin, onEdit, item, isBlinking]);
 
   const handleMouseEnter = useCallback((e) => {
     if (onHover) onHover(e, item);

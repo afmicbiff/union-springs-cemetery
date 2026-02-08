@@ -1575,15 +1575,11 @@ export default function PlotsPage() {
             {showLocateButton && selectedPlotNum && (
               <button
                 onClick={locatePlot}
-                className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-base shadow-lg transition-all duration-200 touch-manipulation ${
-                  hasLocated 
-                    ? 'bg-green-600 text-white hover:bg-green-700 ring-2 ring-green-400 ring-offset-2' 
-                    : 'bg-teal-700 text-white hover:bg-teal-800 animate-pulse'
-                }`}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-base shadow-lg transition-all duration-200 touch-manipulation bg-green-600 text-white hover:bg-green-700 animate-pulse ring-2 ring-green-400 ring-offset-2"
               >
                 <MapPin className="w-5 h-5" />
                 <span>Locate Grave #{selectedPlotNum}</span>
-                {!hasLocated && <ChevronRight className="w-5 h-5 animate-bounce" />}
+                <ChevronRight className="w-5 h-5 animate-bounce" />
               </button>
             )}
           </div>
