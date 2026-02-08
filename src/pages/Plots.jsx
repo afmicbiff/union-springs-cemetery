@@ -993,36 +993,18 @@ export default function PlotsPage() {
         '5': []
     };
 
-    // Section 3 plot number ranges for assignment
-    const section3Ranges = [
-      [251, 268], [326, 348], [406, 430], [489, 512],
-      [605, 633], [688, 711], [765, 788], [821, 843], [898, 930]
-    ];
-    const isInSection3Range = (num) => section3Ranges.some(([s, e]) => num >= s && num <= e);
-
     filteredData.forEach(item => {
         const rawSection = (item.Section || '').trim();
         const rowVal = String(item.Row || '');
         let sectionKey = rawSection ? rawSection.replace(/Section\s/i, '').trim() : '';
-        const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
 
-        // Force key ranges into Section 3 based on plot number
-        if (isInSection3Range(graveNum)) {
-            sectionKey = '3';
-        }
         // Force key ranges into Section 4 to ensure proper rendering
-        else if ((graveNum >= 513 && graveNum <= 542) ||
+        const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
+        if ((graveNum >= 513 && graveNum <= 542) ||
             (graveNum >= 548 && graveNum <= 559) ||
             (graveNum >= 560 && graveNum <= 562) ||
             (graveNum >= 564 && graveNum <= 576)) {
             sectionKey = '4';
-        }
-        // Handle plots with null/empty section - try to infer from plot number
-        else if (!sectionKey) {
-            // Fallback: try to determine section from row pattern
-            if (/^Row\s+[A-D]\b/i.test(rawSection) || /^[A-D]-/i.test(rowVal)) {
-                sectionKey = '1';
-            }
         }
 
         // Handle plots with just numeric section (e.g., "5" instead of "Section 5")
@@ -1391,36 +1373,15 @@ export default function PlotsPage() {
   }, []);
 
   const findPlotElement = useCallback((sectionKey, plotNum) => {
-    if (!plotNum) return null;
-    
-    // Try exact ID match first (most performant)
+    if (!sectionKey || !plotNum) return null;
     let el = document.getElementById(`plot-${sectionKey}-${plotNum}`);
-    if (el) return el;
-    
-    // Try data attributes match
-    if (sectionKey) {
+    if (!el) {
       el = document.querySelector(`[data-section="${sectionKey}"][data-plot-num="${plotNum}"]`);
-      if (el) return el;
     }
-    
-    // Try any section with matching plot number
-    el = document.querySelector(`[data-plot-num="${plotNum}"]`);
-    if (el) return el;
-    
-    // Try partial ID match
-    el = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
-    if (el) return el;
-    
-    // Try without section in ID
-    const allPlotElements = document.querySelectorAll('.plot-element');
-    for (const plotEl of allPlotElements) {
-      const elPlotNum = plotEl.getAttribute('data-plot-num');
-      if (elPlotNum && parseInt(elPlotNum, 10) === plotNum) {
-        return plotEl;
-      }
+    if (!el) {
+      el = document.querySelector(`[id^="plot-${sectionKey}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
     }
-    
-    return null;
+    return el;
   }, []);
 
   const doQuickSearch = useCallback((q) => {
@@ -1476,63 +1437,45 @@ export default function PlotsPage() {
 
     // Wait for sections to expand and DOM to render, then center
     let attempts = 0;
-    const maxAttempts = 500; // ~8 seconds to allow for lazy loading
+    const maxAttempts = 300; // ~5 seconds at 60fps
     let hasCentered = false;
     let isCancelled = false;
 
     const tryCenter = () => {
       if (isCancelled) return;
       attempts++;
-      
       const el = findPlotElement(normalizedSection, plotNum);
 
       if (el && !hasCentered) {
-        // Verify element is actually rendered and visible
-        const rect = el.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-          // Element exists but not yet laid out, keep trying
-          if (attempts < maxAttempts) {
-            requestAnimationFrame(tryCenter);
-          }
-          return;
-        }
-
         hasCentered = true;
         
-        // Double RAF to ensure paint is complete
+        // Wait for ZoomPan to be fully initialized and element to be laid out
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (isCancelled) return;
-            
-            // Use ZoomPan's centerOnElement with callback for precise timing
-            if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
-              zoomPanRef.current.centerOnElement(el, 'center', () => {
-                // Callback fires after centering animation completes
-                if (isCancelled) return;
-                
-                // Small delay to ensure transform is applied before blinking
-                setTimeout(() => {
-                  if (isCancelled) return;
-                  if (shouldHighlight || fromSearch) {
-                    window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                      detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-                    }));
-                  }
-                }, 50);
-              });
-            } else {
-              // Fallback: native scroll with delayed blink
-              el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+          if (isCancelled) return;
+          
+          // Use ZoomPan's centerOnElement with callback for precise timing
+          if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
+            zoomPanRef.current.centerOnElement(el, 'center', () => {
+              // Callback fires after centering animation completes
+              if (isCancelled) return;
               if (shouldHighlight || fromSearch) {
-                setTimeout(() => {
-                  if (isCancelled) return;
-                  window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                    detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-                  }));
-                }, 600);
+                window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                }));
               }
+            });
+          } else {
+            // Fallback: native scroll with delayed blink
+            el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            if (shouldHighlight || fromSearch) {
+              setTimeout(() => {
+                if (isCancelled) return;
+                window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                }));
+              }, 500);
             }
-          });
+          }
         });
         return;
       }
@@ -1542,10 +1485,10 @@ export default function PlotsPage() {
       }
     };
 
-    // Start trying after a delay to let React render, sections expand, and ZoomPan initialize
+    // Start trying after a short delay to let React render and ZoomPan initialize
     const startTimer = setTimeout(() => {
       requestAnimationFrame(tryCenter);
-    }, 400);
+    }, 250);
 
     // Cleanup on unmount or dependency change
     return () => {
