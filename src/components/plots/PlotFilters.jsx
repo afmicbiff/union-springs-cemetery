@@ -119,15 +119,13 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     </Button>
 
                     {/* Saved Searches */}
-                    <div className="hidden sm:block">
-                        <Suspense fallback={null}>
-                            <SavedSearchManager 
-                                type="plot" 
-                                currentFilters={filters}
-                                onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
-                            />
-                        </Suspense>
-                    </div>
+                    <Suspense fallback={null}>
+                        <SavedSearchManager 
+                            type="plot" 
+                            currentFilters={filters}
+                            onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
+                        />
+                    </Suspense>
 
                     {/* Clear All - Only show when filters active */}
                     {hasActiveFilters && (
