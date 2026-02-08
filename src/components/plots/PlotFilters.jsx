@@ -86,22 +86,6 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
 
                 {/* Quick Actions Row */}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    
-                    {/* Status Quick Filter - Large Touch Targets */}
-                    <Select 
-                        value={filters.status} 
-                        onValueChange={(val) => handleChange('status', val)}
-                    >
-                        <SelectTrigger className="h-11 sm:h-12 min-w-[140px] sm:min-w-[160px] text-base font-medium border-2 border-gray-200 rounded-lg">
-                            <SelectValue placeholder="All Statuses" />
-                        </SelectTrigger>
-                        <SelectContent className="text-base">
-                            <SelectItem value="All" className="py-3 text-base">All Statuses</SelectItem>
-                            {statusOptions.map(status => (
-                                <SelectItem key={status} value={status} className="py-3 text-base">{status}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
 
                     {/* More Filters Toggle */}
                     <Button 
