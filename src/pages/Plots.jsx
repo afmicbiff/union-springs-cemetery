@@ -745,6 +745,15 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [mapContainerSize, setMapContainerSize] = useState({ width: null, height: null });
+  
+  // Callback for MapControls to report zoom-based dimensions
+  const handleZoomChange = useCallback(({ zoom, scaledWidth, scaledHeight }) => {
+    // Add padding for comfortable viewing
+    const paddedHeight = scaledHeight + 80;
+    const paddedWidth = scaledWidth + 40;
+    setMapContainerSize({ width: paddedWidth, height: paddedHeight });
+  }, []);
   // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
           const params = new URLSearchParams(window.location.search);
@@ -1656,7 +1665,7 @@ export default function PlotsPage() {
               <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                 <Suspense fallback={null}>
-                  <MapControls />
+                  <MapControls onZoomChange={handleZoomChange} />
                 </Suspense>
               </div>
             </div>
@@ -1733,7 +1742,13 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <div className="w-full min-h-[60vh] md:min-h-[70vh] bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container">
+                    <div 
+                      className="w-full bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-all duration-200 ease-out"
+                      style={{
+                        minHeight: mapContainerSize.height ? `${Math.min(mapContainerSize.height, window.innerHeight * 0.85)}px` : '70vh',
+                        maxHeight: '85vh'
+                      }}
+                    >
                       <div className="p-4 inline-block min-w-max space-y-10 map-zoom-inner transition-transform duration-150 ease-out">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).sort((a, b) => {
