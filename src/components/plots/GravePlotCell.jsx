@@ -28,14 +28,12 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
     if (!item) return;
 
     const handleStartBlink = (e) => {
-      const { targetPlotNum, targetSection } = e.detail || {};
-      const normalizedTarget = normalizeSectionKey(targetSection);
-      const normalizedPlot = normalizeSectionKey(sectionKey);
+      const { targetPlotNum } = e.detail || {};
 
+      // Match by plot number ONLY (ignore section for cross-section searching)
       const isMatch = Number.isFinite(targetPlotNum)
         && Number.isFinite(plotNum)
-        && plotNum === targetPlotNum
-        && (!normalizedTarget || normalizedPlot === normalizedTarget);
+        && plotNum === targetPlotNum;
 
       // Stop blinking on non-matching plots when a new plot is selected
       if (!isMatch && isBlinking) {
@@ -47,7 +45,11 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       if (isMatch && !hasInitializedBlink.current) {
         hasInitializedBlink.current = true;
         setIsBlinking(true);
-        // Blink indefinitely until navigation or new selection - no auto-stop
+        // Auto-stop blinking after 4 seconds for better UX
+        setTimeout(() => {
+          setIsBlinking(false);
+          hasInitializedBlink.current = false;
+        }, 4000);
       }
     };
 
