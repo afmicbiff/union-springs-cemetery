@@ -1403,41 +1403,52 @@ export default function PlotsPage() {
     doQuickSearch(deferredSearch);
   }, [deferredSearch, doQuickSearch]);
 
-  // Auto-center on target plot when coming from deceased search
+  // Auto-center on target plot when coming from deceased search and trigger blinking
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const targetPlot = params.get('plot');
     const targetSection = params.get('section');
     const fromSearch = params.get('from') === 'search';
-    
+    const shouldHighlight = params.get('highlight') === 'true';
+
     if (!fromSearch || !targetPlot) return;
-    
+
     const normalizedSection = normalizeSectionKey(targetSection || '');
     const plotNum = parseInt(targetPlot, 10);
-    
+
     if (!Number.isFinite(plotNum)) return;
-    
+
     // Wait for sections to expand and DOM to render, then center
     let attempts = 0;
     const maxAttempts = 300; // ~5 seconds at 60fps
-    
+    let hasCentered = false;
+
     const tryCenter = () => {
       attempts++;
       const el = findPlotElement(normalizedSection, plotNum);
-      
-      if (el) {
+
+      if (el && !hasCentered) {
+        hasCentered = true;
         // Small delay to ensure ZoomPan is fully initialized
         setTimeout(() => {
           centerElement(el);
+          // Dispatch blink event after centering completes
+          if (shouldHighlight || fromSearch) {
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+              }));
+            }, 300);
+          }
         }, 100);
         return;
       }
-      
+
       if (attempts < maxAttempts) {
         requestAnimationFrame(tryCenter);
       }
     };
-    
+
     // Start trying after a short delay to let React render
     setTimeout(() => {
       requestAnimationFrame(tryCenter);

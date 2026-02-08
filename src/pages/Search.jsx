@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo, memo } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -6,7 +6,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Loader2, MapPin, ChevronRight, ExternalLink, Filter, X } from 'lucide-react';
+import { Search, Loader2, MapPin, ExternalLink, Filter, X } from 'lucide-react';
 import { format, isValid } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,20 +14,43 @@ import { Label } from "@/components/ui/label";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 
-// Memoized result card for performance
+// Memoized result card for performance - production-ready with error handling
 const ResultCard = memo(function ResultCard({ person, locationSearch }) {
-  const plotSection = person.plot_location?.split('-')[0] || 'Main';
-  const plotNumber = (person.plot_location || '').match(/\d+/g)?.slice(-1)[0] || '';
-  const normalizedSection = normalizeSectionKey(plotSection);
+  const plotSection = React.useMemo(() => {
+    if (!person?.plot_location) return 'Main';
+    return person.plot_location.split('-')[0] || 'Main';
+  }, [person?.plot_location]);
+
+  const plotNumber = React.useMemo(() => {
+    if (!person?.plot_location) return '';
+    const matches = person.plot_location.match(/\d+/g);
+    return matches?.slice(-1)[0] || '';
+  }, [person?.plot_location]);
+
+  const normalizedSection = React.useMemo(() => normalizeSectionKey(plotSection), [plotSection]);
   
-  const birthYear = person.date_of_birth && isValid(new Date(person.date_of_birth)) 
-    ? format(new Date(person.date_of_birth), 'yyyy') : '';
-  const deathYear = person.date_of_death && isValid(new Date(person.date_of_death)) 
-    ? format(new Date(person.date_of_death), 'yyyy') : '';
-  const dateRange = birthYear && deathYear ? `${birthYear} - ${deathYear}` : birthYear || deathYear || '';
+  const dateRange = React.useMemo(() => {
+    const birthYear = person?.date_of_birth && isValid(new Date(person.date_of_birth)) 
+      ? format(new Date(person.date_of_birth), 'yyyy') : '';
+    const deathYear = person?.date_of_death && isValid(new Date(person.date_of_death)) 
+      ? format(new Date(person.date_of_death), 'yyyy') : '';
+    return birthYear && deathYear ? `${birthYear} - ${deathYear}` : birthYear || deathYear || '';
+  }, [person?.date_of_birth, person?.date_of_death]);
+
+  // Build map URL with all required params for blinking highlight
+  const mapUrl = React.useMemo(() => {
+    const params = new URLSearchParams();
+    if (normalizedSection) params.set('section', normalizedSection);
+    if (plotNumber) params.set('plot', plotNumber);
+    params.set('from', 'search');
+    params.set('highlight', 'true');
+    return `${createPageUrl('Plots')}?${params.toString()}`;
+  }, [normalizedSection, plotNumber]);
+
+  if (!person) return null;
 
   return (
-    <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className="h-full rounded-lg border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 will-change-transform">
       <CardContent className="p-4 sm:p-5 flex flex-col h-full">
         {/* Header with name and section badge */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3">
@@ -70,21 +93,27 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
           )}
         </div>
 
-        {/* Action buttons - centered */}
+        {/* Action buttons - centered, mobile-first touch targets */}
         <div className="mt-4 pt-3 border-t border-stone-200 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-center">
           <Link 
-            to={`${createPageUrl('Plots')}?section=${encodeURIComponent(normalizedSection)}&plot=${encodeURIComponent(plotNumber)}&from=search`}
+            to={mapUrl}
             state={{ search: locationSearch }}
+            className="w-full sm:w-auto"
           >
-            <Button variant="outline" className="h-11 px-6 bg-white text-teal-700 border-teal-600 hover:bg-teal-50 active:bg-teal-100 touch-manipulation">
+            <Button 
+              variant="outline" 
+              className="h-12 sm:h-11 px-6 w-full sm:w-auto bg-white text-teal-700 border-teal-600 hover:bg-teal-50 active:bg-teal-100 touch-manipulation min-w-[140px]"
+            >
+              <MapPin className="w-4 h-4 mr-2" aria-hidden="true" />
               View on Map
             </Button>
           </Link>
           <Link 
             to={`${createPageUrl('Memorial')}?id=${person.id}`}
             state={{ search: locationSearch }}
+            className="w-full sm:w-auto"
           >
-            <Button className="h-11 px-6 bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation">
+            <Button className="h-12 sm:h-11 px-6 w-full sm:w-auto bg-teal-700 hover:bg-teal-800 active:bg-teal-900 text-white font-serif shadow-md touch-manipulation min-w-[140px]">
               Memorial &gt;
             </Button>
           </Link>

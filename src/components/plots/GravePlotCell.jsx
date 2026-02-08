@@ -23,6 +23,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const plotNum = parseNum(item?.Grave);
 
   // Blinking logic - triggered by custom event after centering completes
+  // Blinks until user navigates away or selects different plot
   useEffect(() => {
     if (!item) return;
 
@@ -36,16 +37,43 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
         && plotNum === targetPlotNum
         && (!normalizedTarget || normalizedPlot === normalizedTarget);
 
+      // Stop blinking on non-matching plots when a new plot is selected
+      if (!isMatch && isBlinking) {
+        setIsBlinking(false);
+        hasInitializedBlink.current = false;
+        return;
+      }
+
       if (isMatch && !hasInitializedBlink.current) {
         hasInitializedBlink.current = true;
         setIsBlinking(true);
-        setTimeout(() => setIsBlinking(false), 60000);
+        // Blink indefinitely until navigation or new selection - no auto-stop
+      }
+    };
+
+    // Stop blink event for when user selects different plot
+    const handleStopBlink = () => {
+      if (isBlinking) {
+        setIsBlinking(false);
+        hasInitializedBlink.current = false;
       }
     };
 
     window.addEventListener('plot-start-blink', handleStartBlink);
-    return () => window.removeEventListener('plot-start-blink', handleStartBlink);
-  }, [plotNum, sectionKey, item]);
+    window.addEventListener('plot-stop-all-blink', handleStopBlink);
+    
+    return () => {
+      window.removeEventListener('plot-start-blink', handleStartBlink);
+      window.removeEventListener('plot-stop-all-blink', handleStopBlink);
+    };
+  }, [plotNum, sectionKey, item, isBlinking]);
+
+  // Cleanup blink state on unmount (page navigation)
+  useEffect(() => {
+    return () => {
+      hasInitializedBlink.current = false;
+    };
+  }, []);
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
@@ -85,7 +113,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const bgClass = (fullClass.split(' ').find(cn => cn.startsWith('bg-'))) || 'bg-gray-400';
   const textClass = STATUS_TEXT[statusKey] || STATUS_TEXT.Default;
 
-  const blinkingClass = 'ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-110 z-30 shadow-2xl animate-plot-blink';
+  const blinkingClass = 'ring-4 sm:ring-8 ring-green-500 ring-offset-2 ring-offset-white scale-105 sm:scale-110 z-50 shadow-2xl animate-plot-blink';
 
   return (
     <div
