@@ -77,6 +77,8 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
 
   const handleClick = useCallback((e) => {
     e.stopPropagation();
+    // Stop any existing blinks when clicking a new plot
+    window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
     if (isAdmin && onEdit && item?._entity === 'Plot') onEdit(item);
   }, [isAdmin, onEdit, item]);
 
