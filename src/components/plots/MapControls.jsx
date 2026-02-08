@@ -30,16 +30,17 @@ const MapControls = memo(function MapControls({ containerRef, onZoomChange }) {
       inner.style.transform = `scale(${clampedZoom})`;
       inner.style.transformOrigin = 'top left';
       
-      // Notify parent of zoom change with scaled dimensions
+      // Notify parent of zoom change with scaled dimensions after transform settles
       if (onZoomChange) {
-        // Use requestAnimationFrame to ensure transform is applied before measuring
+        // Double RAF to ensure layout recalc after transform
         requestAnimationFrame(() => {
-          const intrinsicWidth = inner.scrollWidth;
-          const intrinsicHeight = inner.scrollHeight;
-          onZoomChange({
-            zoom: clampedZoom,
-            scaledWidth: Math.ceil(intrinsicWidth * clampedZoom),
-            scaledHeight: Math.ceil(intrinsicHeight * clampedZoom)
+          requestAnimationFrame(() => {
+            const intrinsicHeight = inner.scrollHeight;
+            onZoomChange({
+              zoom: clampedZoom,
+              scaledWidth: Math.ceil(inner.scrollWidth * clampedZoom),
+              scaledHeight: Math.ceil(intrinsicHeight * clampedZoom)
+            });
           });
         });
       }
