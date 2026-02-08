@@ -1476,7 +1476,8 @@ export default function PlotsPage() {
     const tryCenter = () => {
       attempts++;
       
-      // Search for the plot element by plot number only (across all sections)
+      // Search for the FIRST plot element by plot number only (across all sections)
+      // Use querySelector which returns only the first match
       let el = document.querySelector(`[data-plot-num="${plotNum}"]`);
       if (!el) {
         el = document.querySelector(`[id$="-${plotNum}"]`);
@@ -1485,13 +1486,20 @@ export default function PlotsPage() {
       if (el && !hasCentered) {
         hasCentered = true;
         
-        // Scroll into view and blink
+        // Get the specific element's ID to use for precise blinking
+        const targetId = el.id || el.getAttribute('data-plot-id');
+        
+        // Scroll into view and blink only THIS specific element
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         setTimeout(() => {
+          // Add a unique identifier to only blink this specific element
+          el.setAttribute('data-blink-target', 'true');
           window.dispatchEvent(new CustomEvent('plot-start-blink', {
-            detail: { targetPlotNum: plotNum }
+            detail: { targetPlotNum: plotNum, targetElementId: el.id }
           }));
           setHasLocated(true);
+          // Remove the marker after blink starts
+          setTimeout(() => el.removeAttribute('data-blink-target'), 100);
         }, 600);
         return;
       }
