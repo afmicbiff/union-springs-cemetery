@@ -170,8 +170,11 @@ const Tooltip = React.memo(({ data, visible }) => {
           <span className="text-xs text-gray-500 ml-auto">{statusKey}</span>
         </div>
         <p className="text-sm text-gray-600">Row {data.Row} • {data.Section || 'Section'}</p>
+        {data['Family Name'] && (
+          <p className="text-sm font-medium mt-2 text-teal-700">Family: {data['Family Name']}</p>
+        )}
         {(data['First Name'] || data['Last Name']) && (
-          <p className="text-sm font-medium mt-2">{data['First Name']} {data['Last Name']}</p>
+          <p className="text-sm font-medium mt-1">{data['First Name']} {data['Last Name']}</p>
         )}
         {data.Birth && data.Death && (
           <p className="text-xs text-gray-500">{data.Birth} - {data.Death}</p>
