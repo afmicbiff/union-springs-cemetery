@@ -1492,11 +1492,7 @@ export default function PlotsPage() {
                   }
                 }, [quickIndex, normalize, findPlotElement, centerElement]);
 
-  // Auto-center on search input when possible (moved below doQuickSearch to avoid TDZ)
-  useEffect(() => {
-    if (!deferredSearch) return;
-    doQuickSearch(deferredSearch);
-  }, [deferredSearch, doQuickSearch]);
+  // Removed auto-center on search input - only search when user clicks the Search button
 
   // Locate plot function - called when user clicks the locate button
   const locatePlot = useCallback(() => {
