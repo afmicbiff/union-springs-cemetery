@@ -1024,7 +1024,7 @@ export default function PlotsPage() {
           }
 
           // 3. Status Filter
-          if (filters.status !== 'All' && item.Status !== filters.status) {
+          if (filters.status && filters.status !== 'All' && item.Status !== filters.status) {
               const isVeteran = item.Status === 'Veteran' || (item.Notes && item.Notes.toLowerCase().includes('vet') && item.Status === 'Occupied');
               if (filters.status === 'Veteran' && !isVeteran) return false;
               if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
