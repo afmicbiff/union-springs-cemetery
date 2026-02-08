@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { ZoomIn, ZoomOut, Hand, RotateCcw } from 'lucide-react';
 
 const ZOOM_STEP = 0.25;
@@ -8,6 +8,7 @@ const MAX_ZOOM = 3;
 const MapControls = memo(function MapControls({ containerRef }) {
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
+  const dragStateRef = useRef({ isDragging: false, startX: 0, startY: 0, scrollLeft: 0, scrollTop: 0 });
 
   const getMapContainer = useCallback(() => {
     if (containerRef?.current) return containerRef.current;
@@ -38,11 +39,93 @@ const MapControls = memo(function MapControls({ containerRef }) {
 
   const handleReset = useCallback(() => {
     applyZoom(1);
+    setZoom(1);
     const container = getMapContainer();
     if (container) {
       container.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, [applyZoom, getMapContainer]);
+
+  // Pan drag handlers
+  useEffect(() => {
+    const container = getMapContainer();
+    if (!container) return;
+
+    const handleMouseDown = (e) => {
+      if (!isPanning) return;
+      e.preventDefault();
+      dragStateRef.current = {
+        isDragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        scrollLeft: container.scrollLeft,
+        scrollTop: container.scrollTop
+      };
+      container.style.cursor = 'grabbing';
+    };
+
+    const handleMouseMove = (e) => {
+      if (!dragStateRef.current.isDragging) return;
+      e.preventDefault();
+      const dx = e.clientX - dragStateRef.current.startX;
+      const dy = e.clientY - dragStateRef.current.startY;
+      container.scrollLeft = dragStateRef.current.scrollLeft - dx;
+      container.scrollTop = dragStateRef.current.scrollTop - dy;
+    };
+
+    const handleMouseUp = () => {
+      if (dragStateRef.current.isDragging) {
+        dragStateRef.current.isDragging = false;
+        container.style.cursor = isPanning ? 'grab' : 'default';
+      }
+    };
+
+    // Touch support
+    const handleTouchStart = (e) => {
+      if (!isPanning || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      dragStateRef.current = {
+        isDragging: true,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        scrollLeft: container.scrollLeft,
+        scrollTop: container.scrollTop
+      };
+    };
+
+    const handleTouchMove = (e) => {
+      if (!dragStateRef.current.isDragging || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - dragStateRef.current.startX;
+      const dy = touch.clientY - dragStateRef.current.startY;
+      container.scrollLeft = dragStateRef.current.scrollLeft - dx;
+      container.scrollTop = dragStateRef.current.scrollTop - dy;
+    };
+
+    const handleTouchEnd = () => {
+      dragStateRef.current.isDragging = false;
+    };
+
+    if (isPanning) {
+      container.addEventListener('mousedown', handleMouseDown);
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseup', handleMouseUp);
+      container.addEventListener('mouseleave', handleMouseUp);
+      container.addEventListener('touchstart', handleTouchStart, { passive: true });
+      container.addEventListener('touchmove', handleTouchMove, { passive: true });
+      container.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener('mouseup', handleMouseUp);
+      container.removeEventListener('mouseleave', handleMouseUp);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isPanning, getMapContainer]);
 
   const togglePan = useCallback(() => {
     setIsPanning(prev => {
