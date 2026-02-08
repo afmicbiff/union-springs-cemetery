@@ -1571,7 +1571,7 @@ export default function PlotsPage() {
         <div className="bg-stone-100 border-b border-stone-200 px-4 sm:px-6 py-3">
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Search
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
             </Link>
             
             {showLocateButton && selectedPlotNum && (
