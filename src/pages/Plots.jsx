@@ -1577,10 +1577,10 @@ export default function PlotsPage() {
             {showLocateButton && selectedPlotNum && (
               <button
                 onClick={locatePlot}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-green-600 text-white hover:bg-green-700 animate-pulse ring-2 ring-green-400 ring-offset-2"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2"
               >
                 <MapPin className="w-4 h-4" />
-                <span>Locate Grave #{selectedPlotNum}</span>
+                <span>Click to Locate Grave #{selectedPlotNum}</span>
               </button>
             )}
           </div>
