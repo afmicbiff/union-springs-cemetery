@@ -41,13 +41,13 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
             <div className="max-w-4xl mx-auto space-y-4">
                 
-                {/* Main Unified Search - Large, Accessible */}
-                <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-teal-600" />
+                {/* Main Unified Search - Compact */}
+                <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
                     <Input
                         type="text"
-                        placeholder="Search by name, plot number, row, or family..."
-                        className="w-full h-14 sm:h-16 pl-14 pr-32 text-lg sm:text-xl rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
+                        placeholder="Search name, plot, row, family..."
+                        className="w-full h-10 pl-10 pr-28 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
                         value={filters.search}
                         onChange={(e) => handleChange('search', e.target.value)}
                         autoComplete="off"
@@ -59,17 +59,17 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     {filters.search && (
                         <button
                             onClick={() => handleChange('search', '')}
-                            className="absolute right-24 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                            className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
                             aria-label="Clear search"
                         >
-                            <X className="h-5 w-5" />
+                            <X className="h-4 w-4" />
                         </button>
                     )}
                     
                     {/* Search button - triggers locate and blink */}
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
                         <Button 
-                            className="h-10 sm:h-12 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md"
+                            className="h-8 px-3 bg-teal-700 hover:bg-teal-800 text-white font-medium rounded-md shadow-sm text-sm"
                             disabled={isSearching}
                             onClick={() => {
                                 if (filters.search) {
@@ -85,13 +85,13 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         >
                             {isSearching ? (
                                 <>
-                                    <Loader2 className="h-5 w-5 animate-spin sm:mr-2" />
-                                    <span className="hidden sm:inline">Searching...</span>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                    <span>Searching...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Search className="h-5 w-5 sm:mr-2" />
-                                    <span className="hidden sm:inline">Search</span>
+                                    <Search className="h-4 w-4 mr-1" />
+                                    <span>Search</span>
                                 </>
                             )}
                         </Button>
@@ -105,16 +105,16 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     <Button 
                         variant="outline" 
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className={`h-11 sm:h-12 px-4 text-base font-medium border-2 rounded-lg transition-colors ${
+                        className={`h-8 px-3 text-sm font-medium border rounded-md transition-colors ${
                             showAdvanced || hasAdvancedFilters 
                                 ? 'border-teal-500 bg-teal-50 text-teal-700' 
                                 : 'border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                     >
-                        <SlidersHorizontal className="h-5 w-5 mr-2" />
+                        <SlidersHorizontal className="h-4 w-4 mr-1" />
                         More Filters
                         {hasAdvancedFilters && (
-                            <span className="ml-2 w-2 h-2 rounded-full bg-teal-500" />
+                            <span className="ml-1 w-1.5 h-1.5 rounded-full bg-teal-500" />
                         )}
                     </Button>
 
