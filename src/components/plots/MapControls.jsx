@@ -7,7 +7,7 @@ const MAX_ZOOM = 1;
 
 const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10];
 
-const MapControls = memo(function MapControls({ containerRef }) {
+const MapControls = memo(function MapControls({ containerRef, onZoomChange }) {
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [opacity, setOpacity] = useState(50);
@@ -29,8 +29,22 @@ const MapControls = memo(function MapControls({ containerRef }) {
     if (inner) {
       inner.style.transform = `scale(${clampedZoom})`;
       inner.style.transformOrigin = 'top left';
+      
+      // Notify parent of zoom change with scaled dimensions
+      if (onZoomChange) {
+        // Use requestAnimationFrame to ensure transform is applied before measuring
+        requestAnimationFrame(() => {
+          const intrinsicWidth = inner.scrollWidth;
+          const intrinsicHeight = inner.scrollHeight;
+          onZoomChange({
+            zoom: clampedZoom,
+            scaledWidth: Math.ceil(intrinsicWidth * clampedZoom),
+            scaledHeight: Math.ceil(intrinsicHeight * clampedZoom)
+          });
+        });
+      }
     }
-  }, [getMapContainer]);
+  }, [getMapContainer, onZoomChange]);
 
   const handleZoomIn = useCallback(() => {
     applyZoom(zoom + ZOOM_STEP);
@@ -42,12 +56,33 @@ const MapControls = memo(function MapControls({ containerRef }) {
 
   const handleReset = useCallback(() => {
     applyZoom(1);
-    setZoom(1);
     const container = getMapContainer();
     if (container) {
       container.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }
   }, [applyZoom, getMapContainer]);
+
+  // Measure and report initial dimensions on mount
+  useEffect(() => {
+    if (!onZoomChange) return;
+    const container = getMapContainer();
+    if (!container) return;
+    
+    const inner = container.querySelector('.map-zoom-inner');
+    if (inner) {
+      // Delay measurement to ensure content is rendered
+      const timer = setTimeout(() => {
+        const intrinsicWidth = inner.scrollWidth;
+        const intrinsicHeight = inner.scrollHeight;
+        onZoomChange({
+          zoom: 1,
+          scaledWidth: intrinsicWidth,
+          scaledHeight: intrinsicHeight
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [getMapContainer, onZoomChange]);
 
   // Pan drag handlers
   useEffect(() => {
