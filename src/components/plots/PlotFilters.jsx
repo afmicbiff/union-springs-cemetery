@@ -18,7 +18,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
     const handleClear = () => {
         onFilterChange({
             search: '',
-            status: 'All',
+            status: '',
             birthYearStart: '',
             birthYearEnd: '',
             deathYearStart: '',
@@ -28,11 +28,11 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         });
     };
 
-    const hasActiveFilters = filters.search || filters.status !== 'All' || 
+    const hasActiveFilters = filters.search || filters.status || 
         filters.birthYearStart || filters.deathYearStart || 
         filters.owner || filters.plot;
 
-    const hasAdvancedFilters = filters.status !== 'All' || 
+    const hasAdvancedFilters = filters.status || 
         filters.birthYearStart || filters.birthYearEnd || 
         filters.deathYearStart || filters.deathYearEnd;
 
