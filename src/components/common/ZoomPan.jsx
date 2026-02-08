@@ -112,54 +112,42 @@ const ZoomPan = React.forwardRef(function ZoomPan(
     // Force layout recalculation to get accurate measurements
     void element.offsetHeight;
     void contentRef.current.offsetHeight;
+    void containerRef.current.offsetHeight;
 
     const { scale, tx, ty } = transformRef.current;
     const containerRect = containerRef.current.getBoundingClientRect();
-    const contentRect = contentRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
 
-    // Calculate element's position relative to the content (untransformed coordinates)
-    // Element position in screen space relative to content's current transformed position
-    const elScreenX = elementRect.left + elementRect.width / 2;
-    const elScreenY = elementRect.top + elementRect.height / 2;
-    
-    // Content's current origin in screen space
-    const contentScreenX = contentRect.left;
-    const contentScreenY = contentRect.top;
-    
-    // Element center in content's local coordinate system (accounting for current scale)
-    const elInContentX = (elScreenX - contentScreenX) / scale;
-    const elInContentY = (elScreenY - contentScreenY) / scale;
+    // Current element center in screen coordinates
+    const elCenterScreenX = elementRect.left + elementRect.width / 2;
+    const elCenterScreenY = elementRect.top + elementRect.height / 2;
 
-    // Container center in screen space
-    const containerCenterX = containerRect.left + containerRect.width / 2;
-    const containerCenterY = containerRect.top + containerRect.height / 2;
+    // Container center in screen coordinates  
+    const containerCenterScreenX = containerRect.left + containerRect.width / 2;
+    const containerCenterScreenY = containerRect.top + containerRect.height / 2;
+
+    // How far we need to move in screen coordinates to center the element
+    const deltaScreenX = containerCenterScreenX - elCenterScreenX;
+    const deltaScreenY = containerCenterScreenY - elCenterScreenY;
 
     let targetTx, targetTy;
 
     if (align === 'top-left') {
       const padding = 80;
-      targetTx = padding - (elInContentX * scale) + tx;
-      targetTy = padding - (elInContentY * scale) + ty;
+      // For top-left, offset from current position to bring element to top-left with padding
+      targetTx = tx + deltaScreenX + (containerRect.width / 2) - padding - (elementRect.width / 2);
+      targetTy = ty + deltaScreenY + (containerRect.height / 2) - padding - (elementRect.height / 2);
     } else {
-      // Center alignment - calculate where content origin needs to be
-      // so that the element center aligns with container center
-      // 
-      // We need: contentScreenX + elInContentX * scale = containerCenterX
-      // contentScreenX = containerRect.left + targetTx (since content is positioned via transform)
-      // Actually: contentRect.left = containerRect.left + tx (current state)
-      // So: containerRect.left + targetTx + elInContentX * scale = containerCenterX
-      // targetTx = containerCenterX - containerRect.left - elInContentX * scale
-      // targetTx = containerRect.width / 2 - elInContentX * scale
-      
-      targetTx = (containerRect.width / 2) - (elInContentX * scale);
-      targetTy = (containerRect.height / 2) - (elInContentY * scale);
+      // Center alignment - simply add the screen delta to current translation
+      // This moves the content so the element ends up at container center
+      targetTx = tx + deltaScreenX;
+      targetTy = ty + deltaScreenY;
     }
 
     // Smooth animation using requestAnimationFrame
     const startTx = tx;
     const startTy = ty;
-    const duration = 450; // Smooth animation duration
+    const duration = 400; // Slightly faster for snappier feel
     const startTime = performance.now();
 
     const animate = (currentTime) => {

@@ -1476,15 +1476,21 @@ export default function PlotsPage() {
 
     // Wait for sections to expand and DOM to render, then center
     let attempts = 0;
-    const maxAttempts = 500; // ~8 seconds to allow for lazy loading
+    const maxAttempts = 600; // ~10 seconds to allow for lazy loading and data fetch
     let hasCentered = false;
     let isCancelled = false;
 
     const tryCenter = () => {
       if (isCancelled) return;
       attempts++;
-      
-      const el = findPlotElement(normalizedSection, plotNum);
+
+      // Try to find the plot element - search across all sections if section unknown
+      let el = findPlotElement(normalizedSection, plotNum);
+
+      // If not found with section, try without section constraint
+      if (!el) {
+        el = findPlotElement('', plotNum);
+      }
 
       if (el && !hasCentered) {
         // Verify element is actually rendered and visible
@@ -1492,60 +1498,66 @@ export default function PlotsPage() {
         if (rect.width === 0 || rect.height === 0) {
           // Element exists but not yet laid out, keep trying
           if (attempts < maxAttempts) {
-            requestAnimationFrame(tryCenter);
+            setTimeout(() => requestAnimationFrame(tryCenter), 16);
           }
           return;
         }
 
         hasCentered = true;
-        
-        // Double RAF to ensure paint is complete
+
+        // Get the actual section from the found element for blinking
+        const actualSection = el.getAttribute('data-section') || normalizedSection;
+
+        // Triple RAF to ensure paint is complete after data loads
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            if (isCancelled) return;
-            
-            // Use ZoomPan's centerOnElement with callback for precise timing
-            if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
-              zoomPanRef.current.centerOnElement(el, 'center', () => {
-                // Callback fires after centering animation completes
-                if (isCancelled) return;
-                
-                // Small delay to ensure transform is applied before blinking
-                setTimeout(() => {
+            requestAnimationFrame(() => {
+              if (isCancelled) return;
+
+              // Use ZoomPan's centerOnElement with callback for precise timing
+              if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
+                zoomPanRef.current.centerOnElement(el, 'center', () => {
+                  // Callback fires after centering animation completes
                   if (isCancelled) return;
-                  if (shouldHighlight || fromSearch) {
+
+                  // Trigger blinking after centering is complete
+                  setTimeout(() => {
+                    if (isCancelled) return;
+                    if (shouldHighlight || fromSearch) {
+                      window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                        detail: { targetPlotNum: plotNum, targetSection: actualSection }
+                      }));
+                    }
+                  }, 100);
+                });
+              } else {
+                // Fallback: native scroll with delayed blink
+                el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                if (shouldHighlight || fromSearch) {
+                  setTimeout(() => {
+                    if (isCancelled) return;
                     window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                      detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                      detail: { targetPlotNum: plotNum, targetSection: actualSection }
                     }));
-                  }
-                }, 50);
-              });
-            } else {
-              // Fallback: native scroll with delayed blink
-              el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-              if (shouldHighlight || fromSearch) {
-                setTimeout(() => {
-                  if (isCancelled) return;
-                  window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                    detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-                  }));
-                }, 600);
+                  }, 600);
+                }
               }
-            }
+            });
           });
         });
         return;
       }
 
       if (attempts < maxAttempts) {
-        requestAnimationFrame(tryCenter);
+        // Use setTimeout to not block main thread, with RAF for paint sync
+        setTimeout(() => requestAnimationFrame(tryCenter), 16);
       }
     };
 
-    // Start trying after a delay to let React render, sections expand, and ZoomPan initialize
+    // Start trying after a delay to let React render, sections expand, data load, and ZoomPan initialize
     const startTimer = setTimeout(() => {
       requestAnimationFrame(tryCenter);
-    }, 400);
+    }, 600);
 
     // Cleanup on unmount or dependency change
     return () => {
