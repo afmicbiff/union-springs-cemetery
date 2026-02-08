@@ -43,28 +43,6 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     />
                 </div>
 
-                {/* Role Filter */}
-                <div className="w-full md:w-auto min-w-[150px]">
-                    <Select 
-                        value={filters.role || 'All'} 
-                        onValueChange={(val) => handleChange('role', val)}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="All">All Roles</SelectItem>
-                            <SelectItem value="Administrator">Administrator</SelectItem>
-                            <SelectItem value="President">President</SelectItem>
-                            <SelectItem value="Vice President">Vice President</SelectItem>
-                            <SelectItem value="Caretaker">Caretaker</SelectItem>
-                            <SelectItem value="Secretary">Secretary</SelectItem>
-                            <SelectItem value="Treasurer">Treasurer</SelectItem>
-                            <SelectItem value="Legal">Legal</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
                 {/* Owner / Family Name */}
                 <div className="relative w-full md:w-1/4">
                     <Input
