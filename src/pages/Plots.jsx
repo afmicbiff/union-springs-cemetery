@@ -968,31 +968,17 @@ export default function PlotsPage() {
       return m;
   }, [parsedData]);
 
-  // Filtered Data Computation
+  // Filtered Data Computation - NO LONGER FILTERS BY SEARCH (all plots always shown)
+  // Search is now used only for locating and highlighting plots
   const filteredData = useMemo(() => {
       return parsedData.filter(item => {
-          // 1. General Search (debounced + deferred)
-          if (deferredSearch) {
-              const term = deferredSearch.toLowerCase();
-              const searchable = [
-                  item.Grave, 
-                  item.Row, 
-                  item['First Name'], 
-                  item['Last Name'], 
-                  item['Family Name'],
-                  item.Notes,
-                  item.Section
-              ].join(' ').toLowerCase();
-              if (!searchable.includes(term)) return false;
-          }
-
-          // 2. Owner Name (Family)
+          // 1. Owner Name (Family) - still filters
           if (filters.owner) {
               const owner = String(item['Family Name'] || '').toLowerCase();
               if (!owner.includes(filters.owner.toLowerCase())) return false;
           }
 
-          // 3. Plot Number
+          // 2. Plot Number - still filters
           if (filters.plot) {
               const plotStr = String(item.Grave || '').toLowerCase();
               const wanted = filters.plot.toLowerCase();
@@ -1005,14 +991,14 @@ export default function PlotsPage() {
               }
           }
 
-          // 4. Status Filter
+          // 3. Status Filter
           if (filters.status !== 'All' && item.Status !== filters.status) {
               const isVeteran = item.Status === 'Veteran' || (item.Notes && item.Notes.toLowerCase().includes('vet') && item.Status === 'Occupied');
               if (filters.status === 'Veteran' && !isVeteran) return false;
               if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
           }
 
-          // 5. Date Filters (Year)
+          // 4. Date Filters (Year)
           const getYear = (dateStr) => {
               if (!dateStr) return null;
               const date = new Date(dateStr);
@@ -1035,7 +1021,7 @@ export default function PlotsPage() {
 
           return true;
       });
-  }, [parsedData, deferredSearch, filters.owner, filters.plot, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
+  }, [parsedData, filters.owner, filters.plot, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
 
   // Sync debounced search with filters.search
   useEffect(() => {
