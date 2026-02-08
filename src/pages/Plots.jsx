@@ -731,7 +731,7 @@ export default function PlotsPage() {
   const [showLocateButton, setShowLocateButton] = useState(false);
   const [hasLocated, setHasLocated] = useState(false);
   
-  // Initialize locate button when coming from search
+  // Initialize locate button when coming from search and scroll to top
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const fromSearch = params.get('from') === 'search';
@@ -739,6 +739,8 @@ export default function PlotsPage() {
     if (fromSearch && targetPlot) {
       setShowLocateButton(true);
       setHasLocated(false);
+      // Scroll to top so user sees the page title and locate button
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   }, []);
 
