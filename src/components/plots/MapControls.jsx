@@ -1,13 +1,16 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, Move, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, Move, RotateCcw, Eye } from 'lucide-react';
 
 const ZOOM_STEP = 0.05;
 const MIN_ZOOM = 0.10;
 const MAX_ZOOM = 1;
 
+const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10];
+
 const MapControls = memo(function MapControls({ containerRef }) {
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
+  const [opacity, setOpacity] = useState(50);
   const dragStateRef = useRef({ isDragging: false, startX: 0, startY: 0, scrollLeft: 0, scrollTop: 0 });
 
   const getMapContainer = useCallback(() => {
@@ -139,10 +142,22 @@ const MapControls = memo(function MapControls({ containerRef }) {
     });
   }, [getMapContainer]);
 
+  const applyOpacity = useCallback((newOpacity) => {
+    setOpacity(newOpacity);
+    const container = getMapContainer();
+    if (container) {
+      // Remove existing opacity classes and apply new one
+      container.classList.remove('bg-white/100', 'bg-white/75', 'bg-white/50', 'bg-white/25', 'bg-white/15', 'bg-white/10');
+      container.style.backgroundColor = `rgba(255, 255, 255, ${newOpacity / 100})`;
+    }
+  }, [getMapContainer]);
+
   const zoomPercent = Math.round(zoom * 100);
 
   return (
-    <div className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5 ml-3">
+    <div className="inline-flex items-center gap-2 ml-3">
+      {/* Zoom & Pan Controls */}
+      <div className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
       {/* Zoom Out */}
       <button
         type="button"
@@ -202,6 +217,28 @@ const MapControls = memo(function MapControls({ containerRef }) {
       >
         <RotateCcw className="w-4 h-4 text-gray-600" />
       </button>
+      </div>
+
+      {/* Transparency Controls */}
+      <div className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
+        <Eye className="w-3.5 h-3.5 text-gray-500 ml-1" />
+        {OPACITY_OPTIONS.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => applyOpacity(opt)}
+            className={`px-1.5 py-1 rounded text-[10px] font-medium transition-colors touch-manipulation ${
+              opacity === opt
+                ? 'bg-teal-100 text-teal-700'
+                : 'hover:bg-gray-100 active:bg-gray-200 text-gray-600'
+            }`}
+            aria-label={`Set transparency to ${opt}%`}
+            title={`${opt}% opacity`}
+          >
+            {opt}%
+          </button>
+        ))}
+      </div>
     </div>
   );
 });
