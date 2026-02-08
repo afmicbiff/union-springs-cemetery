@@ -198,8 +198,25 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
         box-shadow: 0 0 50px 25px rgba(74, 222, 128, 0.9), 0 0 80px 40px rgba(74, 222, 128, 0.5); 
       }
     }
+    @keyframes plotBlinkBlue {
+      0%, 100% { 
+        background-color: #3b82f6; 
+        border-color: #1d4ed8; 
+        box-shadow: 0 0 30px 15px rgba(59, 130, 246, 0.8), 0 0 60px 30px rgba(59, 130, 246, 0.4); 
+      }
+      50% { 
+        background-color: #60a5fa; 
+        border-color: #3b82f6; 
+        box-shadow: 0 0 50px 25px rgba(96, 165, 250, 0.9), 0 0 80px 40px rgba(96, 165, 250, 0.5); 
+      }
+    }
     .animate-plot-blink {
       animation: plotBlink 0.7s ease-in-out infinite;
+      position: relative;
+      z-index: 9999 !important;
+    }
+    .animate-plot-blink-blue {
+      animation: plotBlinkBlue 0.7s ease-in-out infinite;
       position: relative;
       z-index: 9999 !important;
     }
