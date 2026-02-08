@@ -806,7 +806,7 @@ export default function PlotsPage() {
   // Filtering State
   const [filters, setFilters] = useState({
           search: '',
-          status: 'All',
+          status: '',
           birthYearStart: '',
           birthYearEnd: '',
           deathYearStart: '',
