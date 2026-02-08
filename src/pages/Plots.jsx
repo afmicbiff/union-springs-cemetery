@@ -1571,9 +1571,12 @@ export default function PlotsPage() {
       if (!searchTerm) return;
 
       const term = searchTerm.toLowerCase().trim();
+      const terms = term.split(/\s+/).filter(Boolean);
 
-      // Find all matching plots
-      const matches = quickIndex.filter((it) => it.text.includes(term));
+      // Find all matching plots - match if ANY term appears in plot text
+      const matches = quickIndex.filter((it) => {
+        return terms.some(t => it.text.includes(t));
+      });
 
       if (matches.length === 0) {
         toast.info('No plots found matching your search');
@@ -1594,6 +1597,9 @@ export default function PlotsPage() {
       // Show toast with match count
       toast.success(`Found ${matches.length} plot${matches.length > 1 ? 's' : ''} matching "${searchTerm}"`);
 
+      // Collect all matching plot IDs for highlighting
+      const matchingPlotIds = new Set(matches.map(m => m.p?._id).filter(Boolean));
+
       // Find the first match to scroll to
       const firstMatch = matches[0];
       if (firstMatch && firstMatch.sectionKey) {
@@ -1608,7 +1614,7 @@ export default function PlotsPage() {
               // Dispatch blink event for ALL matching plots
               matches.forEach((match) => {
                 window.dispatchEvent(new CustomEvent('plot-search-blink', {
-                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey }
+                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
                 }));
               });
             });
