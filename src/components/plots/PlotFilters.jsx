@@ -1,5 +1,5 @@
-import React, { memo, useCallback, lazy, Suspense } from 'react';
-import { Search, Calendar } from 'lucide-react';
+import React, { memo, useCallback, useState, lazy, Suspense } from 'react';
+import { Search, X, SlidersHorizontal, Calendar } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 const SavedSearchManager = lazy(() => import("@/components/common/SavedSearchManager"));
 
 const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions }) {
+    const [showAdvanced, setShowAdvanced] = useState(false);
     
     const handleChange = useCallback((key, value) => {
         onFilterChange(prev => ({ ...prev, [key]: value }));
@@ -27,142 +28,187 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         });
     };
 
+    const hasActiveFilters = filters.search || filters.status !== 'All' || 
+        filters.birthYearStart || filters.deathYearStart || 
+        filters.owner || filters.plot;
+
+    const hasAdvancedFilters = filters.status !== 'All' || 
+        filters.birthYearStart || filters.birthYearEnd || 
+        filters.deathYearStart || filters.deathYearEnd;
+
     return (
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-4 items-center">
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div className="max-w-4xl mx-auto space-y-4">
                 
-                {/* General Search */}
-                <div className="relative w-full md:w-1/4">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                {/* Main Unified Search - Large, Accessible */}
+                <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-6 w-6 text-teal-600" />
                     <Input
-                        placeholder="Search grave, name, row..."
-                        className="pl-9"
+                        type="text"
+                        placeholder="Search by name, plot number, row, or family..."
+                        className="w-full h-14 sm:h-16 pl-14 pr-32 text-lg sm:text-xl rounded-xl border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
                         value={filters.search}
                         onChange={(e) => handleChange('search', e.target.value)}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        spellCheck="false"
                     />
+                    
+                    {/* Clear button inside search */}
+                    {filters.search && (
+                        <button
+                            onClick={() => handleChange('search', '')}
+                            className="absolute right-24 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                            aria-label="Clear search"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    )}
+                    
+                    {/* Search button */}
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <Button 
+                            className="h-10 sm:h-12 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md"
+                        >
+                            <Search className="h-5 w-5 sm:mr-2" />
+                            <span className="hidden sm:inline">Search</span>
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Owner / Family Name */}
-                <div className="relative w-full md:w-1/4">
-                    <Input
-                        placeholder="Owner / Family Name"
-                        value={filters.owner || ''}
-                        onChange={(e) => handleChange('owner', e.target.value)}
-                        className=""
-                    />
-                </div>
-
-                {/* Plot Number */}
-                <div className="relative w-full md:w-40">
-                    <Input
-                        placeholder="Plot #"
-                        value={filters.plot || ''}
-                        onChange={(e) => handleChange('plot', e.target.value)}
-                        className=""
-                    />
-                </div>
-
-                {/* Status Filter */}
-                <div className="w-full md:w-auto min-w-[150px]">
+                {/* Quick Actions Row */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    
+                    {/* Status Quick Filter - Large Touch Targets */}
                     <Select 
                         value={filters.status} 
                         onValueChange={(val) => handleChange('status', val)}
                     >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Status" />
+                        <SelectTrigger className="h-11 sm:h-12 min-w-[140px] sm:min-w-[160px] text-base font-medium border-2 border-gray-200 rounded-lg">
+                            <SelectValue placeholder="All Statuses" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="All">All Statuses</SelectItem>
+                        <SelectContent className="text-base">
+                            <SelectItem value="All" className="py-3 text-base">All Statuses</SelectItem>
                             {statusOptions.map(status => (
-                                <SelectItem key={status} value={status}>{status}</SelectItem>
+                                <SelectItem key={status} value={status} className="py-3 text-base">{status}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
+
+                    {/* More Filters Toggle */}
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                        className={`h-11 sm:h-12 px-4 text-base font-medium border-2 rounded-lg transition-colors ${
+                            showAdvanced || hasAdvancedFilters 
+                                ? 'border-teal-500 bg-teal-50 text-teal-700' 
+                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                    >
+                        <SlidersHorizontal className="h-5 w-5 mr-2" />
+                        More Filters
+                        {hasAdvancedFilters && (
+                            <span className="ml-2 w-2 h-2 rounded-full bg-teal-500" />
+                        )}
+                    </Button>
+
+                    {/* Saved Searches */}
+                    <div className="hidden sm:block">
+                        <Suspense fallback={null}>
+                            <SavedSearchManager 
+                                type="plot" 
+                                currentFilters={filters}
+                                onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
+                            />
+                        </Suspense>
+                    </div>
+
+                    {/* Clear All - Only show when filters active */}
+                    {hasActiveFilters && (
+                        <Button 
+                            onClick={handleClear} 
+                            variant="ghost"
+                            className="h-11 sm:h-12 px-4 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                        >
+                            <X className="h-5 w-5 mr-1" />
+                            Clear All
+                        </Button>
+                    )}
                 </div>
 
-                {/* Date Filters Popover */}
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full md:w-auto text-gray-600 border-dashed">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Date Filters
-                            {(filters.birthYearStart || filters.deathYearStart) && (
-                                <div className="ml-2 w-2 h-2 rounded-full bg-blue-500" />
-                            )}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-4">
-                        <div className="grid gap-4">
+                {/* Advanced Filters Panel - Collapsible */}
+                {showAdvanced && (
+                    <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            
+                            {/* Owner/Family Name */}
                             <div className="space-y-2">
-                                <h4 className="font-medium leading-none text-gray-900">Birth Year Range</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="birthStart" className="text-xs">From</Label>
-                                        <Input
-                                            id="birthStart"
-                                            placeholder="YYYY"
-                                            value={filters.birthYearStart}
-                                            onChange={(e) => handleChange('birthYearStart', e.target.value)}
-                                            className="h-8"
-                                        />
-                                    </div>
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="birthEnd" className="text-xs">To</Label>
-                                        <Input
-                                            id="birthEnd"
-                                            placeholder="YYYY"
-                                            value={filters.birthYearEnd}
-                                            onChange={(e) => handleChange('birthYearEnd', e.target.value)}
-                                            className="h-8"
-                                        />
-                                    </div>
+                                <Label className="text-sm font-semibold text-gray-700">Family Name</Label>
+                                <Input
+                                    placeholder="e.g. Smith, Johnson..."
+                                    value={filters.owner || ''}
+                                    onChange={(e) => handleChange('owner', e.target.value)}
+                                    className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                />
+                            </div>
+
+                            {/* Plot Number */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Plot Number</Label>
+                                <Input
+                                    placeholder="e.g. 123, 456..."
+                                    value={filters.plot || ''}
+                                    onChange={(e) => handleChange('plot', e.target.value)}
+                                    className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                    inputMode="numeric"
+                                />
+                            </div>
+
+                            {/* Birth Year Range */}
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold text-gray-700">Birth Year</Label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        placeholder="From"
+                                        value={filters.birthYearStart}
+                                        onChange={(e) => handleChange('birthYearStart', e.target.value)}
+                                        className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                        inputMode="numeric"
+                                    />
+                                    <span className="text-gray-400 font-medium">–</span>
+                                    <Input
+                                        placeholder="To"
+                                        value={filters.birthYearEnd}
+                                        onChange={(e) => handleChange('birthYearEnd', e.target.value)}
+                                        className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                        inputMode="numeric"
+                                    />
                                 </div>
                             </div>
+
+                            {/* Death Year Range */}
                             <div className="space-y-2">
-                                <h4 className="font-medium leading-none text-gray-900">Death Year Range</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="deathStart" className="text-xs">From</Label>
-                                        <Input
-                                            id="deathStart"
-                                            placeholder="YYYY"
-                                            value={filters.deathYearStart}
-                                            onChange={(e) => handleChange('deathYearStart', e.target.value)}
-                                            className="h-8"
-                                        />
-                                    </div>
-                                    <div className="grid gap-1">
-                                        <Label htmlFor="deathEnd" className="text-xs">To</Label>
-                                        <Input
-                                            id="deathEnd"
-                                            placeholder="YYYY"
-                                            value={filters.deathYearEnd}
-                                            onChange={(e) => handleChange('deathYearEnd', e.target.value)}
-                                            className="h-8"
-                                        />
-                                    </div>
+                                <Label className="text-sm font-semibold text-gray-700">Passing Year</Label>
+                                <div className="flex items-center gap-2">
+                                    <Input
+                                        placeholder="From"
+                                        value={filters.deathYearStart}
+                                        onChange={(e) => handleChange('deathYearStart', e.target.value)}
+                                        className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                        inputMode="numeric"
+                                    />
+                                    <span className="text-gray-400 font-medium">–</span>
+                                    <Input
+                                        placeholder="To"
+                                        value={filters.deathYearEnd}
+                                        onChange={(e) => handleChange('deathYearEnd', e.target.value)}
+                                        className="h-12 text-base border-2 border-gray-200 rounded-lg"
+                                        inputMode="numeric"
+                                    />
                                 </div>
                             </div>
                         </div>
-                    </PopoverContent>
-                </Popover>
-
-                {/* Saved Searches - hidden on mobile */}
-                <div className="hidden lg:block">
-                    <Suspense fallback={null}>
-                        <SavedSearchManager 
-                            type="plot" 
-                            currentFilters={filters}
-                            onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
-                        />
-                    </Suspense>
-                </div>
-
-                {/* Clear Filters */}
-                {(filters.search || filters.status !== 'All' || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
-                    <Button onClick={handleClear} className="text-sm bg-red-600 text-white hover:bg-red-700">
-                        Clear
-                    </Button>
+                    </div>
                 )}
             </div>
         </div>
