@@ -1437,45 +1437,63 @@ export default function PlotsPage() {
 
     // Wait for sections to expand and DOM to render, then center
     let attempts = 0;
-    const maxAttempts = 300; // ~5 seconds at 60fps
+    const maxAttempts = 500; // ~8 seconds to allow for lazy loading
     let hasCentered = false;
     let isCancelled = false;
 
     const tryCenter = () => {
       if (isCancelled) return;
       attempts++;
+      
       const el = findPlotElement(normalizedSection, plotNum);
 
       if (el && !hasCentered) {
+        // Verify element is actually rendered and visible
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+          // Element exists but not yet laid out, keep trying
+          if (attempts < maxAttempts) {
+            requestAnimationFrame(tryCenter);
+          }
+          return;
+        }
+
         hasCentered = true;
         
-        // Wait for ZoomPan to be fully initialized and element to be laid out
+        // Double RAF to ensure paint is complete
         requestAnimationFrame(() => {
-          if (isCancelled) return;
-          
-          // Use ZoomPan's centerOnElement with callback for precise timing
-          if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
-            zoomPanRef.current.centerOnElement(el, 'center', () => {
-              // Callback fires after centering animation completes
-              if (isCancelled) return;
-              if (shouldHighlight || fromSearch) {
-                window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-                }));
-              }
-            });
-          } else {
-            // Fallback: native scroll with delayed blink
-            el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            if (shouldHighlight || fromSearch) {
-              setTimeout(() => {
+          requestAnimationFrame(() => {
+            if (isCancelled) return;
+            
+            // Use ZoomPan's centerOnElement with callback for precise timing
+            if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
+              zoomPanRef.current.centerOnElement(el, 'center', () => {
+                // Callback fires after centering animation completes
                 if (isCancelled) return;
-                window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
-                }));
-              }, 500);
+                
+                // Small delay to ensure transform is applied before blinking
+                setTimeout(() => {
+                  if (isCancelled) return;
+                  if (shouldHighlight || fromSearch) {
+                    window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                      detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                    }));
+                  }
+                }, 50);
+              });
+            } else {
+              // Fallback: native scroll with delayed blink
+              el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+              if (shouldHighlight || fromSearch) {
+                setTimeout(() => {
+                  if (isCancelled) return;
+                  window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                    detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                  }));
+                }, 600);
+              }
             }
-          }
+          });
         });
         return;
       }
@@ -1485,10 +1503,10 @@ export default function PlotsPage() {
       }
     };
 
-    // Start trying after a short delay to let React render and ZoomPan initialize
+    // Start trying after a delay to let React render, sections expand, and ZoomPan initialize
     const startTimer = setTimeout(() => {
       requestAnimationFrame(tryCenter);
-    }, 250);
+    }, 400);
 
     // Cleanup on unmount or dependency change
     return () => {
