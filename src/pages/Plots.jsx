@@ -745,14 +745,25 @@ export default function PlotsPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
   const [isTourOpen, setIsTourOpen] = useState(false);
-  const [mapContainerSize, setMapContainerSize] = useState({ width: null, height: null });
+  const [mapContainerHeight, setMapContainerHeight] = useState(null);
+  const viewportHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 800);
+  
+  // Track viewport height for responsive calculations
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const updateViewport = () => { viewportHeightRef.current = window.innerHeight; };
+    updateViewport();
+    window.addEventListener('resize', updateViewport, { passive: true });
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
   
   // Callback for MapControls to report zoom-based dimensions
-  const handleZoomChange = useCallback(({ zoom, scaledWidth, scaledHeight }) => {
-    // Add padding for comfortable viewing
+  const handleZoomChange = useCallback(({ scaledHeight }) => {
+    // Add padding and clamp to viewport
     const paddedHeight = scaledHeight + 80;
-    const paddedWidth = scaledWidth + 40;
-    setMapContainerSize({ width: paddedWidth, height: paddedHeight });
+    const maxHeight = viewportHeightRef.current * 0.85;
+    const minHeight = 300;
+    setMapContainerHeight(Math.max(minHeight, Math.min(paddedHeight, maxHeight)));
   }, []);
   // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
@@ -1743,9 +1754,9 @@ export default function PlotsPage() {
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
                     <div 
-                      className="w-full bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-all duration-200 ease-out"
+                      className="w-full bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-[height] duration-200 ease-out"
                       style={{
-                        minHeight: mapContainerSize.height ? `${Math.min(mapContainerSize.height, window.innerHeight * 0.85)}px` : '70vh',
+                        height: mapContainerHeight ? `${mapContainerHeight}px` : '70vh',
                         maxHeight: '85vh'
                       }}
                     >
