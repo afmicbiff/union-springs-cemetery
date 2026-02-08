@@ -1664,18 +1664,7 @@ export default function PlotsPage() {
           <div className="flex items-center space-x-3">
 
 
-            {isAdmin && (
-            <div className="flex gap-2">
-                <label className="flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-teal-700 text-white rounded-lg cursor-pointer hover:bg-teal-800 transition shadow-sm active:scale-95 touch-manipulation">
-                    {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-1.5 sm:mr-2" size={14} /> : <Upload size={14} className="mr-1.5 sm:mr-2" />}
-                    <span className="font-medium text-xs sm:text-sm">Import</span>
-                    <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" disabled={createPlotsMutation.isPending} />
-                </label>
 
-
-
-            </div>
-            )}
           </div>
           </div>
         </div>
