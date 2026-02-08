@@ -1571,10 +1571,10 @@ export default function PlotsPage() {
       if (!searchTerm) return;
 
       const term = searchTerm.toLowerCase().trim();
-      
+
       // Find all matching plots
       const matches = quickIndex.filter((it) => it.text.includes(term));
-      
+
       if (matches.length === 0) {
         toast.info('No plots found matching your search');
         return;
@@ -1583,16 +1583,21 @@ export default function PlotsPage() {
       // Stop any existing blinks
       window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
+      // Expand ALL sections that contain matches
+      const sectionsToExpand = [...new Set(matches.map(m => m.sectionKey).filter(Boolean))];
+      setCollapsedSections(prev => {
+        const updated = { ...prev };
+        sectionsToExpand.forEach(key => { updated[key] = false; });
+        return updated;
+      });
+
+      // Show toast with match count
+      toast.success(`Found ${matches.length} plot${matches.length > 1 ? 's' : ''} matching "${searchTerm}"`);
+
       // Find the first match to scroll to
       const firstMatch = matches[0];
       if (firstMatch && firstMatch.sectionKey) {
-        // Expand the section containing the first match
-        setCollapsedSections(prev => ({
-          ...prev,
-          [firstMatch.sectionKey]: false,
-        }));
-
-        // Wait for section to expand, then scroll and blink
+        // Wait for sections to expand, then scroll and blink ALL matches
         let attempts = 0;
         const maxAttempts = 240;
         const tryFind = () => {
