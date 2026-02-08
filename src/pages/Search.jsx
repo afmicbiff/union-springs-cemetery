@@ -21,6 +21,7 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
     return person.plot_location.split('-')[0] || 'Main';
   }, [person?.plot_location]);
 
+  // Extract only the grave number (last number in plot_location, e.g., "822" from "F-9-822")
   const plotNumber = React.useMemo(() => {
     if (!person?.plot_location) return '';
     const matches = person.plot_location.match(/\d+/g);
@@ -37,15 +38,15 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
     return birthYear && deathYear ? `${birthYear} - ${deathYear}` : birthYear || deathYear || '';
   }, [person?.date_of_birth, person?.date_of_death]);
 
-  // Build map URL with all required params for blinking highlight
+  // Build map URL using only the grave/plot number for searching
   const mapUrl = React.useMemo(() => {
     const params = new URLSearchParams();
-    if (normalizedSection) params.set('section', normalizedSection);
+    // Only pass the plot number - the map will find it regardless of section
     if (plotNumber) params.set('plot', plotNumber);
     params.set('from', 'search');
     params.set('highlight', 'true');
     return `${createPageUrl('Plots')}?${params.toString()}`;
-  }, [normalizedSection, plotNumber]);
+  }, [plotNumber]);
 
   if (!person) return null;
 
