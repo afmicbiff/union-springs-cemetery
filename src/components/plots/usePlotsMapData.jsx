@@ -22,7 +22,23 @@ function buildSectionFilter(sectionsToLoad) {
   const orClauses = [
     { section: { $in: normalized } },
     { section: { $in: withPrefixes } },
+    // Include plots with null/empty section (data hygiene fallback)
+    { section: null },
+    { section: "" },
   ];
+
+  // Section 3 plot number ranges (from Plots.js SectionRenderer)
+  if (normalized.includes('3')) {
+    const ranges = [
+      [251, 268], [326, 348], [406, 430], [489, 512],
+      [605, 633], [688, 711], [765, 788], [821, 843], [898, 930]
+    ];
+    const seq = [];
+    ranges.forEach(([start, end]) => {
+      for (let i = start; i <= end; i++) seq.push(String(i));
+    });
+    orClauses.push({ plot_number: { $in: seq } });
+  }
 
   // Ensure Section 4 also pulls key ranges regardless of recorded section (data hygiene fallback)
   if (normalized.includes('4')) {

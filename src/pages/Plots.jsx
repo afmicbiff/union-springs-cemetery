@@ -993,18 +993,36 @@ export default function PlotsPage() {
         '5': []
     };
 
+    // Section 3 plot number ranges for assignment
+    const section3Ranges = [
+      [251, 268], [326, 348], [406, 430], [489, 512],
+      [605, 633], [688, 711], [765, 788], [821, 843], [898, 930]
+    ];
+    const isInSection3Range = (num) => section3Ranges.some(([s, e]) => num >= s && num <= e);
+
     filteredData.forEach(item => {
         const rawSection = (item.Section || '').trim();
         const rowVal = String(item.Row || '');
         let sectionKey = rawSection ? rawSection.replace(/Section\s/i, '').trim() : '';
-
-        // Force key ranges into Section 4 to ensure proper rendering
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
-        if ((graveNum >= 513 && graveNum <= 542) ||
+
+        // Force key ranges into Section 3 based on plot number
+        if (isInSection3Range(graveNum)) {
+            sectionKey = '3';
+        }
+        // Force key ranges into Section 4 to ensure proper rendering
+        else if ((graveNum >= 513 && graveNum <= 542) ||
             (graveNum >= 548 && graveNum <= 559) ||
             (graveNum >= 560 && graveNum <= 562) ||
             (graveNum >= 564 && graveNum <= 576)) {
             sectionKey = '4';
+        }
+        // Handle plots with null/empty section - try to infer from plot number
+        else if (!sectionKey) {
+            // Fallback: try to determine section from row pattern
+            if (/^Row\s+[A-D]\b/i.test(rawSection) || /^[A-D]-/i.test(rowVal)) {
+                sectionKey = '1';
+            }
         }
 
         // Handle plots with just numeric section (e.g., "5" instead of "Section 5")
