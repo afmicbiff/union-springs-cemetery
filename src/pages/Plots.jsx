@@ -1529,6 +1529,63 @@ export default function PlotsPage() {
           if (debouncedSearchRef.current) debouncedSearchRef.current(v);
         }, []);
 
+  // Listen for search button click to locate and blink matching plots
+  useEffect(() => {
+    const handleLocateSearch = (e) => {
+      const { searchTerm } = e.detail || {};
+      if (!searchTerm) return;
+
+      const term = searchTerm.toLowerCase().trim();
+      
+      // Find all matching plots
+      const matches = quickIndex.filter((it) => it.text.includes(term));
+      
+      if (matches.length === 0) {
+        toast.info('No plots found matching your search');
+        return;
+      }
+
+      // Stop any existing blinks
+      window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
+
+      // Find the first match to scroll to
+      const firstMatch = matches[0];
+      if (firstMatch && firstMatch.sectionKey) {
+        // Expand the section containing the first match
+        setCollapsedSections(prev => ({
+          ...prev,
+          [firstMatch.sectionKey]: false,
+        }));
+
+        // Wait for section to expand, then scroll and blink
+        let attempts = 0;
+        const maxAttempts = 240;
+        const tryFind = () => {
+          attempts++;
+          const el = findPlotElement(firstMatch.sectionKey, firstMatch.plotNum);
+          if (el) {
+            centerElement(el, () => {
+              // Dispatch blink event for ALL matching plots
+              matches.forEach((match) => {
+                window.dispatchEvent(new CustomEvent('plot-search-blink', {
+                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey }
+                }));
+              });
+            });
+            return;
+          }
+          if (attempts < maxAttempts) {
+            requestAnimationFrame(tryFind);
+          }
+        };
+        requestAnimationFrame(tryFind);
+      }
+    };
+
+    window.addEventListener('plot-locate-search', handleLocateSearch);
+    return () => window.removeEventListener('plot-locate-search', handleLocateSearch);
+  }, [quickIndex, findPlotElement, centerElement]);
+
 
 
         
