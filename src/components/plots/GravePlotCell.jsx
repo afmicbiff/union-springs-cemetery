@@ -32,10 +32,10 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       const normalizedTarget = normalizeSectionKey(targetSection);
       const normalizedPlot = normalizeSectionKey(sectionKey);
 
-      const isMatch = Number.isFinite(targetPlotNum)
-        && Number.isFinite(plotNum)
-        && plotNum === targetPlotNum
-        && (!normalizedTarget || normalizedPlot === normalizedTarget);
+      // Check if this plot matches the target
+      const plotMatches = Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum;
+      const sectionMatches = !normalizedTarget || !normalizedPlot || normalizedPlot === normalizedTarget;
+      const isMatch = plotMatches && sectionMatches;
 
       // Stop blinking on non-matching plots when a new plot is selected
       if (!isMatch && isBlinking) {
@@ -44,19 +44,17 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
         return;
       }
 
-      if (isMatch && !hasInitializedBlink.current) {
+      if (isMatch) {
+        // Always start blinking for matching plot, even if already initialized
         hasInitializedBlink.current = true;
         setIsBlinking(true);
-        // Blink indefinitely until navigation or new selection - no auto-stop
       }
     };
 
     // Stop blink event for when user selects different plot
     const handleStopBlink = () => {
-      if (isBlinking) {
-        setIsBlinking(false);
-        hasInitializedBlink.current = false;
-      }
+      setIsBlinking(false);
+      hasInitializedBlink.current = false;
     };
 
     window.addEventListener('plot-start-blink', handleStartBlink);
