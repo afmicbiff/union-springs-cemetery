@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Upload, Info, Map as MapIcon, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
@@ -726,6 +726,21 @@ export default function PlotsPage() {
   const zoomPanRef = useRef(null);
   const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
   const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
+  
+  // Target plot button state - shows grave number from search, user clicks to locate
+  const [showLocateButton, setShowLocateButton] = useState(false);
+  const [hasLocated, setHasLocated] = useState(false);
+  
+  // Initialize locate button when coming from search
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromSearch = params.get('from') === 'search';
+    const targetPlot = params.get('plot');
+    if (fromSearch && targetPlot) {
+      setShowLocateButton(true);
+      setHasLocated(false);
+    }
+  }, []);
 
 
   
@@ -1441,68 +1456,49 @@ export default function PlotsPage() {
     doQuickSearch(deferredSearch);
   }, [deferredSearch, doQuickSearch]);
 
-  // Auto-center on target plot when coming from deceased search and trigger blinking
-  // Now searches by plot number ONLY across all sections
-  useEffect(() => {
+  // Locate plot function - called when user clicks the locate button
+  const locatePlot = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
     const targetPlot = params.get('plot');
-    const fromSearch = params.get('from') === 'search';
-    const shouldHighlight = params.get('highlight') === 'true';
-
-    if (!fromSearch || !targetPlot) return;
+    if (!targetPlot) return;
 
     const plotNum = parseInt(targetPlot, 10);
     if (!Number.isFinite(plotNum)) return;
 
-    // Wait for sections to expand and DOM to render, then center
     let attempts = 0;
-    const maxAttempts = 300; // ~5 seconds at 60fps
+    const maxAttempts = 300;
     let hasCentered = false;
-    let isCancelled = false;
 
     const tryCenter = () => {
-      if (isCancelled) return;
       attempts++;
       
       // Search for the plot element by plot number only (across all sections)
       let el = document.querySelector(`[data-plot-num="${plotNum}"]`);
       if (!el) {
-        // Try alternative selectors
         el = document.querySelector(`[id$="-${plotNum}"]`);
       }
       
-      // Get the section from the found element
       const foundSection = el?.getAttribute('data-section') || '';
 
       if (el && !hasCentered) {
         hasCentered = true;
         
-        // Wait for ZoomPan to be fully initialized and element to be laid out
         requestAnimationFrame(() => {
-          if (isCancelled) return;
-          
-          // Use ZoomPan's centerOnElement with callback for precise timing
           if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
             zoomPanRef.current.centerOnElement(el, 'center', () => {
-              // Callback fires after centering animation completes
-              if (isCancelled) return;
-              if (shouldHighlight || fromSearch) {
-                window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: foundSection }
-                }));
-              }
+              window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                detail: { targetPlotNum: plotNum, targetSection: foundSection }
+              }));
+              setHasLocated(true);
             });
           } else {
-            // Fallback: native scroll with delayed blink
             el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-            if (shouldHighlight || fromSearch) {
-              setTimeout(() => {
-                if (isCancelled) return;
-                window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: foundSection }
-                }));
-              }, 500);
-            }
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('plot-start-blink', {
+                detail: { targetPlotNum: plotNum, targetSection: foundSection }
+              }));
+              setHasLocated(true);
+            }, 500);
           }
         });
         return;
@@ -1513,16 +1509,7 @@ export default function PlotsPage() {
       }
     };
 
-    // Start trying after a short delay to let React render and ZoomPan initialize
-    const startTimer = setTimeout(() => {
-      requestAnimationFrame(tryCenter);
-    }, 250);
-
-    // Cleanup on unmount or dependency change
-    return () => {
-      isCancelled = true;
-      clearTimeout(startTimer);
-    };
+    requestAnimationFrame(tryCenter);
   }, []);
 
   const debouncedSearchRef = useRef(null);
@@ -1594,11 +1581,26 @@ export default function PlotsPage() {
       </header>
 
       {showBackToSearch && (
-        <div className="bg-stone-100 border-b border-stone-200 px-6 py-2">
-          <div className="max-w-7xl mx-auto">
-            <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
+        <div className="bg-stone-100 border-b border-stone-200 px-4 sm:px-6 py-3">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
+              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Search
             </Link>
+            
+            {showLocateButton && selectedPlotNum && (
+              <button
+                onClick={locatePlot}
+                className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-base shadow-lg transition-all duration-200 touch-manipulation ${
+                  hasLocated 
+                    ? 'bg-green-600 text-white hover:bg-green-700 ring-2 ring-green-400 ring-offset-2' 
+                    : 'bg-teal-700 text-white hover:bg-teal-800 animate-pulse'
+                }`}
+              >
+                <MapPin className="w-5 h-5" />
+                <span>Locate Grave #{selectedPlotNum}</span>
+                {!hasLocated && <ChevronRight className="w-5 h-5 animate-bounce" />}
+              </button>
+            )}
           </div>
         </div>
       )}
