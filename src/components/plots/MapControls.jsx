@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, Hand, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, Move, RotateCcw } from 'lucide-react';
 
 const ZOOM_STEP = 0.25;
 const MIN_ZOOM = 0.25;
@@ -188,7 +188,7 @@ const MapControls = memo(function MapControls({ containerRef }) {
         aria-pressed={isPanning}
         title={isPanning ? 'Click to disable pan mode' : 'Click to enable pan mode'}
       >
-        <Hand className="w-4 h-4" />
+        <Move className="w-4 h-4" />
       </button>
 
       {/* Reset */}
