@@ -1373,15 +1373,36 @@ export default function PlotsPage() {
   }, []);
 
   const findPlotElement = useCallback((sectionKey, plotNum) => {
-    if (!sectionKey || !plotNum) return null;
+    if (!plotNum) return null;
+    
+    // Try exact ID match first (most performant)
     let el = document.getElementById(`plot-${sectionKey}-${plotNum}`);
-    if (!el) {
+    if (el) return el;
+    
+    // Try data attributes match
+    if (sectionKey) {
       el = document.querySelector(`[data-section="${sectionKey}"][data-plot-num="${plotNum}"]`);
+      if (el) return el;
     }
-    if (!el) {
-      el = document.querySelector(`[id^="plot-${sectionKey}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
+    
+    // Try any section with matching plot number
+    el = document.querySelector(`[data-plot-num="${plotNum}"]`);
+    if (el) return el;
+    
+    // Try partial ID match
+    el = document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
+    if (el) return el;
+    
+    // Try without section in ID
+    const allPlotElements = document.querySelectorAll('.plot-element');
+    for (const plotEl of allPlotElements) {
+      const elPlotNum = plotEl.getAttribute('data-plot-num');
+      if (elPlotNum && parseInt(elPlotNum, 10) === plotNum) {
+        return plotEl;
+      }
     }
-    return el;
+    
+    return null;
   }, []);
 
   const doQuickSearch = useCallback((q) => {
