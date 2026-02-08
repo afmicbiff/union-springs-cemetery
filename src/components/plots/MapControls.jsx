@@ -58,34 +58,31 @@ const MapControls = memo(function MapControls({ containerRef }) {
     }
   }, [applyZoom, getMapContainer]);
 
-  // Measure and report dimensions when content changes or on mount
+  // Apply initial sizing when content loads
   useEffect(() => {
-    if (!onZoomChange) return;
-    
-    const measureAndReport = () => {
+    const fitContainer = () => {
       const container = getMapContainer();
       if (!container) return false;
       
       const inner = container.querySelector('.map-zoom-inner');
-      if (!inner || inner.scrollHeight < 50) return false; // Not ready yet
+      if (!inner || inner.scrollHeight < 50) return false;
       
-      const intrinsicHeight = inner.scrollHeight;
-      onZoomChange({
-        zoom,
-        scaledWidth: Math.ceil(inner.scrollWidth * zoom),
-        scaledHeight: Math.ceil(intrinsicHeight * zoom)
-      });
+      const scaledWidth = inner.scrollWidth * zoom;
+      const scaledHeight = inner.scrollHeight * zoom;
+      container.style.width = `${Math.ceil(scaledWidth) + 32}px`;
+      container.style.height = `${Math.ceil(scaledHeight) + 32}px`;
+      container.style.maxWidth = '100%';
+      container.style.maxHeight = '85vh';
       return true;
     };
     
-    // Try immediately, then with delays for lazy-loaded content
-    if (!measureAndReport()) {
+    if (!fitContainer()) {
       const timers = [100, 300, 600, 1000].map(delay => 
-        setTimeout(measureAndReport, delay)
+        setTimeout(fitContainer, delay)
       );
       return () => timers.forEach(clearTimeout);
     }
-  }, [getMapContainer, onZoomChange, zoom]);
+  }, [getMapContainer, zoom]);
 
   // Pan drag handlers
   useEffect(() => {
