@@ -1336,11 +1336,11 @@ export default function PlotsPage() {
 
   
 
-  const centerElement = useCallback((el) => {
+  const centerElement = useCallback((el, callback) => {
     if (!el) return;
     try {
-      if (zoomPanRef.current) {
-        zoomPanRef.current.centerOnElement(el);
+      if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
+        zoomPanRef.current.centerOnElement(el, 'center', callback);
       } else {
         // Fallback to native scroll if ZoomPan ref not available
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -1351,8 +1351,15 @@ export default function PlotsPage() {
           const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
           hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
         }
+        // For fallback, call callback after a delay
+        if (typeof callback === 'function') {
+          setTimeout(callback, 500);
+        }
       }
-    } catch {}
+    } catch (err) {
+      console.warn('centerElement error:', err);
+      if (typeof callback === 'function') callback();
+    }
   }, []);
 
   const findPlotElement = useCallback((sectionKey, plotNum) => {
