@@ -183,7 +183,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
 
                 {/* Clear Filters */}
                 {(filters.search || filters.status !== 'All' || (filters.role && filters.role !== 'All') || filters.birthYearStart || filters.deathYearStart || filters.owner || filters.plot) && (
-                    <Button variant="ghost" onClick={handleClear} className="text-sm text-gray-500 hover:text-red-600">
+                    <Button onClick={handleClear} className="text-sm bg-red-600 text-white hover:bg-red-700">
                         Clear
                     </Button>
                 )}
