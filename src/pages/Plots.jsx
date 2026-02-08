@@ -215,6 +215,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const elementRef = useRef(null);
 
   // Listen for plot-start-blink event to trigger highlight animation
+      // Blinks until user clicks the plot or navigates away
       useEffect(() => {
         if (data?.isSpacer || plotNum == null) return;
 
@@ -231,13 +232,20 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
               }
             }
             setIsBlinking(true);
-            // Stop blinking after 4 seconds
-            setTimeout(() => setIsBlinking(false), 4000);
+            // No timeout - keeps blinking until clicked or page changes
           }
         };
 
+        const handleStopBlink = () => {
+          setIsBlinking(false);
+        };
+
         window.addEventListener('plot-start-blink', handleBlink);
-        return () => window.removeEventListener('plot-start-blink', handleBlink);
+        window.addEventListener('plot-stop-all-blink', handleStopBlink);
+        return () => {
+          window.removeEventListener('plot-start-blink', handleBlink);
+          window.removeEventListener('plot-stop-all-blink', handleStopBlink);
+        };
       }, [plotNum, data?.isSpacer]);
 
   // Early return for spacers
