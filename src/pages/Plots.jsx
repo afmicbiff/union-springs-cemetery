@@ -15,6 +15,7 @@ const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
 const PlotFilters = lazy(() => import("@/components/plots/PlotFilters"));
 
 const PlotsTour = lazy(() => import("@/components/plots/PlotsTour"));
+const MapControls = lazy(() => import("@/components/plots/MapControls"));
 
 
 const Section1DnDGrid = lazy(() => import("@/components/plots/Section1DnDGrid"));
@@ -1652,7 +1653,12 @@ export default function PlotsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
-              <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-1">
+                <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+                <Suspense fallback={null}>
+                  <MapControls />
+                </Suspense>
+              </div>
             </div>
           
           <div className="flex items-center space-x-3">
@@ -1738,8 +1744,8 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <div className="w-full min-h-[60vh] md:min-h-[70vh] bg-white rounded-lg border border-gray-200 overflow-auto">
-                      <div className="p-4 inline-block min-w-max space-y-10">
+                    <div className="w-full min-h-[60vh] md:min-h-[70vh] bg-white rounded-lg border border-gray-200 overflow-auto map-zoom-container">
+                      <div className="p-4 inline-block min-w-max space-y-10 map-zoom-inner transition-transform duration-150 ease-out">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).sort((a, b) => {
                             const numA = parseInt(a);
