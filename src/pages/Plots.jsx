@@ -1483,7 +1483,7 @@ export default function PlotsPage() {
     const tryCenter = () => {
       if (isCancelled) return;
       attempts++;
-
+      
       const el = findPlotElement(normalizedSection, plotNum);
 
       if (el && !hasCentered) {
@@ -1498,18 +1498,18 @@ export default function PlotsPage() {
         }
 
         hasCentered = true;
-
+        
         // Double RAF to ensure paint is complete
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (isCancelled) return;
-
+            
             // Use ZoomPan's centerOnElement with callback for precise timing
             if (zoomPanRef.current && zoomPanRef.current.centerOnElement) {
               zoomPanRef.current.centerOnElement(el, 'center', () => {
                 // Callback fires after centering animation completes
                 if (isCancelled) return;
-
+                
                 // Small delay to ensure transform is applied before blinking
                 setTimeout(() => {
                   if (isCancelled) return;
