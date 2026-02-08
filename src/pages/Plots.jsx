@@ -1611,12 +1611,14 @@ export default function PlotsPage() {
           const el = findPlotElement(firstMatch.sectionKey, firstMatch.plotNum);
           if (el) {
             centerElement(el, () => {
-              // Dispatch blink event for ALL matching plots
-              matches.forEach((match) => {
-                window.dispatchEvent(new CustomEvent('plot-search-blink', {
-                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
-                }));
-              });
+              // Dispatch blink event for ALL matching plots with slight delay to ensure DOM is ready
+              setTimeout(() => {
+                matches.forEach((match) => {
+                  window.dispatchEvent(new CustomEvent('plot-search-blink', {
+                    detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
+                  }));
+                });
+              }, 100);
             });
             return;
           }
