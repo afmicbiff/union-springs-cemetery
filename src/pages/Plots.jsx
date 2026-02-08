@@ -1421,18 +1421,16 @@ export default function PlotsPage() {
   }, [deferredSearch, doQuickSearch]);
 
   // Auto-center on target plot when coming from deceased search and trigger blinking
+  // Now searches by plot number ONLY across all sections
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const targetPlot = params.get('plot');
-    const targetSection = params.get('section');
     const fromSearch = params.get('from') === 'search';
     const shouldHighlight = params.get('highlight') === 'true';
 
     if (!fromSearch || !targetPlot) return;
 
-    const normalizedSection = normalizeSectionKey(targetSection || '');
     const plotNum = parseInt(targetPlot, 10);
-
     if (!Number.isFinite(plotNum)) return;
 
     // Wait for sections to expand and DOM to render, then center
@@ -1444,7 +1442,16 @@ export default function PlotsPage() {
     const tryCenter = () => {
       if (isCancelled) return;
       attempts++;
-      const el = findPlotElement(normalizedSection, plotNum);
+      
+      // Search for the plot element by plot number only (across all sections)
+      let el = document.querySelector(`[data-plot-num="${plotNum}"]`);
+      if (!el) {
+        // Try alternative selectors
+        el = document.querySelector(`[id$="-${plotNum}"]`);
+      }
+      
+      // Get the section from the found element
+      const foundSection = el?.getAttribute('data-section') || '';
 
       if (el && !hasCentered) {
         hasCentered = true;
@@ -1460,7 +1467,7 @@ export default function PlotsPage() {
               if (isCancelled) return;
               if (shouldHighlight || fromSearch) {
                 window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                  detail: { targetPlotNum: plotNum, targetSection: foundSection }
                 }));
               }
             });
@@ -1471,7 +1478,7 @@ export default function PlotsPage() {
               setTimeout(() => {
                 if (isCancelled) return;
                 window.dispatchEvent(new CustomEvent('plot-start-blink', {
-                  detail: { targetPlotNum: plotNum, targetSection: normalizedSection }
+                  detail: { targetPlotNum: plotNum, targetSection: foundSection }
                 }));
               }, 500);
             }
@@ -1495,7 +1502,7 @@ export default function PlotsPage() {
       isCancelled = true;
       clearTimeout(startTimer);
     };
-  }, [findPlotElement]);
+  }, []);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
