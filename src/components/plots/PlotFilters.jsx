@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState, lazy, Suspense } from 'react';
-import { Search, X, SlidersHorizontal, Calendar } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Calendar, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,7 @@ const SavedSearchManager = lazy(() => import("@/components/common/SavedSearchMan
 
 const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions }) {
     const [showAdvanced, setShowAdvanced] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     
     const handleChange = useCallback((key, value) => {
         onFilterChange(prev => ({ ...prev, [key]: value }));
@@ -69,17 +70,30 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
                         <Button 
                             className="h-10 sm:h-12 px-4 sm:px-6 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md"
+                            disabled={isSearching}
                             onClick={() => {
                                 if (filters.search) {
+                                    setIsSearching(true);
                                     // Dispatch event to locate and blink matching plots
                                     window.dispatchEvent(new CustomEvent('plot-locate-search', {
                                         detail: { searchTerm: filters.search }
                                     }));
+                                    // Reset searching state after a short delay
+                                    setTimeout(() => setIsSearching(false), 1500);
                                 }
                             }}
                         >
-                            <Search className="h-5 w-5 sm:mr-2" />
-                            <span className="hidden sm:inline">Search</span>
+                            {isSearching ? (
+                                <>
+                                    <Loader2 className="h-5 w-5 animate-spin sm:mr-2" />
+                                    <span className="hidden sm:inline">Searching...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Search className="h-5 w-5 sm:mr-2" />
+                                    <span className="hidden sm:inline">Search</span>
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>
