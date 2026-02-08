@@ -193,12 +193,12 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
       0%, 100% { 
         background-color: #22c55e; 
         border-color: #15803d; 
-        box-shadow: 0 0 30px 15px rgba(34, 197, 94, 0.8), 0 0 60px 30px rgba(34, 197, 94, 0.4); 
+        box-shadow: 0 0 8px 4px rgba(34, 197, 94, 0.5); 
       }
       50% { 
         background-color: #4ade80; 
         border-color: #22c55e; 
-        box-shadow: 0 0 50px 25px rgba(74, 222, 128, 0.9), 0 0 80px 40px rgba(74, 222, 128, 0.5); 
+        box-shadow: 0 0 12px 6px rgba(74, 222, 128, 0.6); 
       }
     }
     .animate-plot-blink {
