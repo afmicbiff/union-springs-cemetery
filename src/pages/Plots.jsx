@@ -219,13 +219,16 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
         if (data?.isSpacer || plotNum == null) return;
 
         const handleBlink = (e) => {
-          const { targetPlotNum, targetPlotId } = e.detail || {};
-          // Match by exact plot number AND optionally by ID for precision
-          // Only blink if this specific plot matches
+          const { targetPlotNum, targetElementId } = e.detail || {};
+          // Match by exact plot number
           if (targetPlotNum != null && targetPlotNum === plotNum) {
-            // If targetPlotId is provided, only blink if IDs match (for duplicate plot numbers)
-            if (targetPlotId && data?._id && targetPlotId !== data._id) {
-              return;
+            // If targetElementId is provided, only blink if this element's ID matches
+            // This ensures only ONE plot blinks even if multiple have the same plot number
+            if (targetElementId && elementRef.current) {
+              const myId = elementRef.current.id;
+              if (myId && myId !== targetElementId) {
+                return; // Don't blink - this isn't the specific element that was targeted
+              }
             }
             setIsBlinking(true);
             // Stop blinking after 4 seconds
@@ -235,7 +238,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
         window.addEventListener('plot-start-blink', handleBlink);
         return () => window.removeEventListener('plot-start-blink', handleBlink);
-      }, [plotNum, data?.isSpacer, data?._id]);
+      }, [plotNum, data?.isSpacer]);
 
   // Early return for spacers
   if (data?.isSpacer) {
