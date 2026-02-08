@@ -1744,7 +1744,7 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
-                    <div className="w-full min-h-[60vh] md:min-h-[70vh] bg-white rounded-lg border border-gray-200 overflow-auto map-zoom-container">
+                    <div className="w-full min-h-[60vh] md:min-h-[70vh] bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container">
                       <div className="p-4 inline-block min-w-max space-y-10 map-zoom-inner transition-transform duration-150 ease-out">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).sort((a, b) => {
