@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { ZoomIn, ZoomOut, Move, RotateCcw } from 'lucide-react';
 
-const ZOOM_STEP = 0.25;
-const MIN_ZOOM = 0.25;
+const ZOOM_STEP = 0.05;
+const MIN_ZOOM = 0.10;
 const MAX_ZOOM = 1;
 
 const MapControls = memo(function MapControls({ containerRef }) {
