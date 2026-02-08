@@ -7,7 +7,7 @@ const MAX_ZOOM = 1;
 
 const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10];
 
-const MapControls = memo(function MapControls({ containerRef, onZoomChange }) {
+const MapControls = memo(function MapControls({ containerRef }) {
   const [zoom, setZoom] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const [opacity, setOpacity] = useState(50);
@@ -30,22 +30,17 @@ const MapControls = memo(function MapControls({ containerRef, onZoomChange }) {
       inner.style.transform = `scale(${clampedZoom})`;
       inner.style.transformOrigin = 'top left';
       
-      // Notify parent of zoom change with scaled dimensions after transform settles
-      if (onZoomChange) {
-        // Double RAF to ensure layout recalc after transform
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            const intrinsicHeight = inner.scrollHeight;
-            onZoomChange({
-              zoom: clampedZoom,
-              scaledWidth: Math.ceil(inner.scrollWidth * clampedZoom),
-              scaledHeight: Math.ceil(intrinsicHeight * clampedZoom)
-            });
-          });
-        });
-      }
+      // Adjust container size to match scaled content (shrink-wrap)
+      requestAnimationFrame(() => {
+        const scaledWidth = inner.scrollWidth * clampedZoom;
+        const scaledHeight = inner.scrollHeight * clampedZoom;
+        container.style.width = `${Math.ceil(scaledWidth) + 32}px`; // +padding
+        container.style.height = `${Math.ceil(scaledHeight) + 32}px`;
+        container.style.maxWidth = '100%';
+        container.style.maxHeight = '85vh';
+      });
     }
-  }, [getMapContainer, onZoomChange]);
+  }, [getMapContainer]);
 
   const handleZoomIn = useCallback(() => {
     applyZoom(zoom + ZOOM_STEP);
