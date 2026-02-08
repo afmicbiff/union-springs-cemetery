@@ -49,6 +49,21 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       }
     };
 
+    // Handle search blink - match by plotId for precise matching across all fields
+    const handleSearchBlink = (e) => {
+      const { targetPlotNum, plotId } = e.detail || {};
+
+      // Match by plot ID if provided, otherwise by plot number
+      const isMatch = plotId 
+        ? (item._id === plotId)
+        : (Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum);
+
+      if (isMatch) {
+        hasInitializedBlink.current = true;
+        setIsBlinking(true);
+      }
+    };
+
     // Stop blink event for when user selects different plot
     const handleStopBlink = () => {
       if (isBlinking) {
@@ -58,10 +73,12 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
     };
 
     window.addEventListener('plot-start-blink', handleStartBlink);
+    window.addEventListener('plot-search-blink', handleSearchBlink);
     window.addEventListener('plot-stop-all-blink', handleStopBlink);
     
     return () => {
       window.removeEventListener('plot-start-blink', handleStartBlink);
+      window.removeEventListener('plot-search-blink', handleSearchBlink);
       window.removeEventListener('plot-stop-all-blink', handleStopBlink);
     };
   }, [plotNum, sectionKey, item, isBlinking]);
