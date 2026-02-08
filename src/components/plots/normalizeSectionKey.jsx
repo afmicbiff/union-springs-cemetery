@@ -16,6 +16,8 @@ export function normalizeSectionKey(sectionStr) {
   
   // Row A-D maps to Section 1
   if (/^row\s*[a-d]/i.test(s) || /^[a-d]$/i.test(s)) return '1';
+  // Row E-F maps to Section 2
+  if (/^row\s*[e-f]/i.test(s) || /^[e-f]$/i.test(s)) return '2';
   
   // Cardinal directions and common abbreviations
   // North/N -> 1, South/S -> 2, East/E -> 3, West/W -> 4
