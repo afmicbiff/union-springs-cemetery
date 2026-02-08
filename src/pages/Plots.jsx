@@ -215,22 +215,27 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const elementRef = useRef(null);
 
   // Listen for plot-start-blink event to trigger highlight animation
-  useEffect(() => {
-    if (data?.isSpacer || plotNum == null) return;
+      useEffect(() => {
+        if (data?.isSpacer || plotNum == null) return;
 
-    const handleBlink = (e) => {
-      const { targetPlotNum } = e.detail || {};
-      // Match by plot number only (ignore section)
-      if (targetPlotNum === plotNum) {
-        setIsBlinking(true);
-        // Stop blinking after 4 seconds
-        setTimeout(() => setIsBlinking(false), 4000);
-      }
-    };
+        const handleBlink = (e) => {
+          const { targetPlotNum, targetPlotId } = e.detail || {};
+          // Match by exact plot number AND optionally by ID for precision
+          // Only blink if this specific plot matches
+          if (targetPlotNum != null && targetPlotNum === plotNum) {
+            // If targetPlotId is provided, only blink if IDs match (for duplicate plot numbers)
+            if (targetPlotId && data?._id && targetPlotId !== data._id) {
+              return;
+            }
+            setIsBlinking(true);
+            // Stop blinking after 4 seconds
+            setTimeout(() => setIsBlinking(false), 4000);
+          }
+        };
 
-    window.addEventListener('plot-start-blink', handleBlink);
-    return () => window.removeEventListener('plot-start-blink', handleBlink);
-  }, [plotNum, data?.isSpacer]);
+        window.addEventListener('plot-start-blink', handleBlink);
+        return () => window.removeEventListener('plot-start-blink', handleBlink);
+      }, [plotNum, data?.isSpacer, data?._id]);
 
   // Early return for spacers
   if (data?.isSpacer) {
