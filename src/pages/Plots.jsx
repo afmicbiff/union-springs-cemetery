@@ -1653,8 +1653,8 @@ export default function PlotsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="text-center md:text-left">
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-1">
-                <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+              <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                 <Suspense fallback={null}>
                   <MapControls />
                 </Suspense>

@@ -155,7 +155,7 @@ const MapControls = memo(function MapControls({ containerRef }) {
   const zoomPercent = Math.round(zoom * 100);
 
   return (
-    <div className="inline-flex items-center gap-2 ml-3">
+    <div className="inline-flex flex-wrap items-center gap-2 ml-3">
       {/* Zoom & Pan Controls */}
       <div className="inline-flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
       {/* Zoom Out */}
