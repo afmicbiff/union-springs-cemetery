@@ -1656,7 +1656,7 @@ export default function PlotsPage() {
               <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-2">
                 <Suspense fallback={null}>
-                  <MapControls onZoomChange={handleZoomChange} />
+                  <MapControls />
                 </Suspense>
               </div>
             </div>
