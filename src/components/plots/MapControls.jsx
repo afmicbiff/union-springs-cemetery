@@ -152,7 +152,7 @@ const MapControls = memo(function MapControls({ containerRef }) {
         aria-label="Zoom out"
         title="Zoom out"
       >
-        <ZoomOut className="w-4 h-4 text-gray-600" />
+        <ZoomOut className="w-3.5 h-3.5 text-gray-600" />
       </button>
 
       {/* Zoom Level Display */}
@@ -169,7 +169,7 @@ const MapControls = memo(function MapControls({ containerRef }) {
         aria-label="Zoom in"
         title="Zoom in"
       >
-        <ZoomIn className="w-4 h-4 text-gray-600" />
+        <ZoomIn className="w-3.5 h-3.5 text-gray-600" />
       </button>
 
       {/* Divider */}
