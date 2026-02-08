@@ -1613,8 +1613,8 @@ export default function PlotsPage() {
             <div className="bg-white border-b border-gray-200 py-2 sm:py-3 px-4 sm:px-6 overflow-x-auto z-20">
                 <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3 justify-start">
                     <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center shrink-0">
-                        <Info size={12} className="mr-1 sm:mr-1.5" /> Status
-                    </span>
+                                              <Info size={12} className="mr-1 sm:mr-1.5" /> Status for all graves
+                                          </span>
                     <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? 'All' : 'Available' }))} active={filters.status === 'Available'} />
                     <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? 'All' : 'Reserved' }))} active={filters.status === 'Reserved'} />
                     <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? 'All' : 'Occupied' }))} active={filters.status === 'Occupied'} />
