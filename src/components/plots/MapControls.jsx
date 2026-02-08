@@ -62,27 +62,34 @@ const MapControls = memo(function MapControls({ containerRef, onZoomChange }) {
     }
   }, [applyZoom, getMapContainer]);
 
-  // Measure and report initial dimensions on mount
+  // Measure and report dimensions when content changes or on mount
   useEffect(() => {
     if (!onZoomChange) return;
-    const container = getMapContainer();
-    if (!container) return;
     
-    const inner = container.querySelector('.map-zoom-inner');
-    if (inner) {
-      // Delay measurement to ensure content is rendered
-      const timer = setTimeout(() => {
-        const intrinsicWidth = inner.scrollWidth;
-        const intrinsicHeight = inner.scrollHeight;
-        onZoomChange({
-          zoom: 1,
-          scaledWidth: intrinsicWidth,
-          scaledHeight: intrinsicHeight
-        });
-      }, 100);
-      return () => clearTimeout(timer);
+    const measureAndReport = () => {
+      const container = getMapContainer();
+      if (!container) return false;
+      
+      const inner = container.querySelector('.map-zoom-inner');
+      if (!inner || inner.scrollHeight < 50) return false; // Not ready yet
+      
+      const intrinsicHeight = inner.scrollHeight;
+      onZoomChange({
+        zoom,
+        scaledWidth: Math.ceil(inner.scrollWidth * zoom),
+        scaledHeight: Math.ceil(intrinsicHeight * zoom)
+      });
+      return true;
+    };
+    
+    // Try immediately, then with delays for lazy-loaded content
+    if (!measureAndReport()) {
+      const timers = [100, 300, 600, 1000].map(delay => 
+        setTimeout(measureAndReport, delay)
+      );
+      return () => timers.forEach(clearTimeout);
     }
-  }, [getMapContainer, onZoomChange]);
+  }, [getMapContainer, onZoomChange, zoom]);
 
   // Pan drag handlers
   useEffect(() => {
