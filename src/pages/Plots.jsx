@@ -207,10 +207,30 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
   document.head.appendChild(style);
 }
 
-// Simplified GravePlot - removed useState for hover, simplified classes
+// Simplified GravePlot - with blinking highlight support
 const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
   const plotNum = useMemo(() => parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null, [data?.Grave]);
   const sectionForId = computedSectionKey || String(data?.Section || '').replace(/Section\s/i, '').trim();
+  const [isBlinking, setIsBlinking] = useState(false);
+  const elementRef = useRef(null);
+
+  // Listen for plot-start-blink event to trigger highlight animation
+  useEffect(() => {
+    if (data?.isSpacer || plotNum == null) return;
+
+    const handleBlink = (e) => {
+      const { targetPlotNum } = e.detail || {};
+      // Match by plot number only (ignore section)
+      if (targetPlotNum === plotNum) {
+        setIsBlinking(true);
+        // Stop blinking after 4 seconds
+        setTimeout(() => setIsBlinking(false), 4000);
+      }
+    };
+
+    window.addEventListener('plot-start-blink', handleBlink);
+    return () => window.removeEventListener('plot-start-blink', handleBlink);
+  }, [plotNum, data?.isSpacer]);
 
   // Early return for spacers
   if (data?.isSpacer) {
@@ -231,13 +251,14 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   return (
     <div
+      ref={elementRef}
       id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined}
       data-plot-num={plotNum}
       data-section={sectionForId}
       onClick={(e) => { e.stopPropagation(); if (onEdit && data) onEdit(data); }}
       onMouseEnter={(e) => onHover?.(e, data)}
       onMouseLeave={() => onHover?.(null, null)}
-      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element`}
+      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element ${isBlinking ? 'animate-plot-blink' : ''}`}
       title={`${data.Grave} - ${data.Row}`}
     >
       <span className="text-[10px] font-black text-gray-800">{data.Grave}</span>
