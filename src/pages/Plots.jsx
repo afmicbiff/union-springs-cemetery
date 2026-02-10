@@ -1495,6 +1495,18 @@ export default function PlotsPage() {
     // Stop any existing blinks first
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
+    // Use quickIndex to find which section this plot belongs to
+    const match = quickIndex.find(it => it.plotNum === plotNum);
+    const targetSectionKey = match?.sectionKey || null;
+
+    // Expand the target section (and keep others as-is)
+    if (targetSectionKey) {
+      setCollapsedSections(prev => ({ ...prev, [targetSectionKey]: false }));
+    } else {
+      // If we can't determine the section, expand all
+      setCollapsedSections({ '1': false, '2': false, '3': false, '4': false, '5': false });
+    }
+
     let attempts = 0;
     const maxAttempts = 300;
     let hasCentered = false;
@@ -1502,30 +1514,37 @@ export default function PlotsPage() {
     const tryCenter = () => {
       attempts++;
       
-      // Search for the FIRST plot element by plot number only (across all sections)
-      // Use querySelector which returns only the first match
-      let el = document.querySelector(`[data-plot-num="${plotNum}"]`);
+      // Search precisely - try exact ID first, then data attribute
+      let el = null;
+      if (targetSectionKey) {
+        el = document.getElementById(`plot-${targetSectionKey}-${plotNum}`);
+      }
       if (!el) {
-        el = document.querySelector(`[id$="-${plotNum}"]`);
+        el = document.querySelector(`[data-plot-num="${plotNum}"]`);
       }
 
       if (el && !hasCentered) {
         hasCentered = true;
         
-        // Get the specific element's ID to use for precise blinking
-        const targetId = el.id || el.getAttribute('data-plot-id');
-        
-        // Scroll into view and blink only THIS specific element
+        // Scroll into view and blink
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        
+        // Also scroll horizontally within overflow containers
+        const hContainer = el.closest('[class*="overflow-x-auto"]') || el.closest('.map-zoom-container');
+        if (hContainer) {
+          setTimeout(() => {
+            const elRect = el.getBoundingClientRect();
+            const cRect = hContainer.getBoundingClientRect();
+            const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
+            hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+          }, 100);
+        }
+        
         setTimeout(() => {
-          // Add a unique identifier to only blink this specific element
-          el.setAttribute('data-blink-target', 'true');
           window.dispatchEvent(new CustomEvent('plot-start-blink', {
             detail: { targetPlotNum: plotNum, targetElementId: el.id }
           }));
           setHasLocated(true);
-          // Remove the marker after blink starts
-          setTimeout(() => el.removeAttribute('data-blink-target'), 100);
         }, 600);
         return;
       }
@@ -1535,8 +1554,9 @@ export default function PlotsPage() {
       }
     };
 
-    requestAnimationFrame(tryCenter);
-  }, []);
+    // Small delay to let React re-render expanded sections
+    setTimeout(() => requestAnimationFrame(tryCenter), 50);
+  }, [quickIndex]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
