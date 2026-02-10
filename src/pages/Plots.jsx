@@ -1679,10 +1679,21 @@ export default function PlotsPage() {
               height={56}
             />
             <div className="flex flex-col">
-              <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
-              <span className="text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
+                <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
+                <span className="text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
+              </div>
+              <div className="ml-auto hidden md:flex">
+                <Suspense fallback={null}>
+                  <MapControls />
+                </Suspense>
+              </div>
             </div>
-          </div>
+            {/* Mobile-only map controls below logo */}
+            <div className="flex md:hidden mt-2">
+              <Suspense fallback={null}>
+                <MapControls />
+              </Suspense>
+            </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-center md:text-left">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
