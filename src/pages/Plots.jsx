@@ -1656,16 +1656,25 @@ export default function PlotsPage() {
 
         
 
+  const [svgWidth, setSvgWidth] = useState(100); // percentage width of SVG image
+
   return (
-    <div className="min-h-screen flex flex-col font-sans relative" style={{ 
-      backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/9be70da29_SVGGraveyardPICadobe2.svg)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed'
-    }}>
-          
-       
+    <div className="min-h-screen flex flex-col font-sans relative bg-white">
+      
+      {/* Resizable SVG background image floating on top of white background */}
+      <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <img
+          src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/9be70da29_SVGGraveyardPICadobe2.svg"
+          alt="Cemetery map background"
+          className="opacity-15 select-none"
+          style={{ width: `${svgWidth}%`, maxWidth: '200%', height: 'auto' }}
+          draggable={false}
+        />
+      </div>
+
+      {/* All page content on top of the background */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto">
