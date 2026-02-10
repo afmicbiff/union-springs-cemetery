@@ -85,10 +85,12 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
 
     const saveMutation = useMutation({
         mutationFn: async (data) => {
+            // Strip system/read-only fields before sending to API
+            const { id, created_date, updated_date, created_by, created_by_id, is_sample, ...cleanData } = data;
             if (mode === 'create') {
-                return await base44.entities.Deceased.create(data);
+                return await base44.entities.Deceased.create(cleanData);
             } else {
-                return await base44.entities.Deceased.update(data.id, data);
+                return await base44.entities.Deceased.update(id, cleanData);
             }
         },
         onSuccess: () => {
