@@ -1,14 +1,12 @@
-import React, { memo, useCallback, useState, lazy, Suspense } from 'react';
-import { Search, X, SlidersHorizontal, Calendar, Loader2 } from 'lucide-react';
+import React, { memo, useCallback, useState } from 'react';
+import { Search, X, SlidersHorizontal, Loader2, ArrowLeft, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 
-const SavedSearchManager = lazy(() => import("@/components/common/SavedSearchManager"));
-
-const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions }) {
+const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions, backSearchUrl, showBackToSearch, showLocateButton, selectedPlotNum, onLocatePlot }) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     
