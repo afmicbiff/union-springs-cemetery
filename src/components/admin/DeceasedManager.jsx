@@ -389,8 +389,8 @@ export default function DeceasedManager() {
                                                 )}
                                             </td>
                                             <td className="p-4 text-right">
-                                                <Button size="sm" variant="ghost" onClick={() => handleEdit(record)}>
-                                                    <Pencil className="w-4 h-4" />
+                                                <Button size="sm" variant="ghost" onClick={() => handleEdit(record)} disabled={isLoadingRecord}>
+                                                    {isLoadingRecord ? <Loader2 className="w-4 h-4 animate-spin" /> : <Pencil className="w-4 h-4" />}
                                                 </Button>
                                             </td>
                                         </tr>
