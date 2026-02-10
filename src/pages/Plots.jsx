@@ -1684,25 +1684,7 @@ export default function PlotsPage() {
         </div>
       </header>
 
-      {showBackToSearch && (
-        <div className="bg-stone-100 border-b border-stone-200 px-4 sm:px-6 py-3">
-          <div className="max-w-7xl mx-auto flex items-center gap-3">
-            <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
-              <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
-            </Link>
-            
-            {showLocateButton && selectedPlotNum && (
-              <button
-                onClick={locatePlot}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2"
-              >
-                <MapPin className="w-4 h-4" />
-                <span>Click to Locate Grave #{selectedPlotNum}</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+
 
       {errorMessage && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
