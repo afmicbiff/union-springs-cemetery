@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 import debounce from 'lodash/debounce';
+import ResizableBackgroundImage from '@/components/plots/ResizableBackgroundImage';
 
 // Lazy load heavy components
 const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
