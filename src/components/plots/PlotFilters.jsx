@@ -39,33 +39,31 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
             <div className="max-w-7xl mx-auto space-y-3">
 
-                {/* Back to Search + Locate button row */}
-                {showBackToSearch && (
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
+                {/* Single row: Back to Search + Locate + Search bar + More Filters */}
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    {showBackToSearch && (
+                        <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm shrink-0">
                             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
                         </Link>
-                        {showLocateButton && selectedPlotNum && (
-                            <button
-                                onClick={onLocatePlot}
-                                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2"
-                            >
-                                <MapPin className="w-4 h-4" />
-                                <span>Click to Locate Grave #{selectedPlotNum}</span>
-                            </button>
-                        )}
-                    </div>
-                )}
+                    )}
 
-                {/* Search bar + More Filters + Clear All in one row */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    {showLocateButton && selectedPlotNum && (
+                        <button
+                            onClick={onLocatePlot}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2 shrink-0"
+                        >
+                            <MapPin className="w-4 h-4" />
+                            <span>Click to Locate Grave #{selectedPlotNum}</span>
+                        </button>
+                    )}
+
                     {/* Search input */}
-                    <div className="relative w-full sm:w-auto sm:min-w-[320px] sm:max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
+                    <div className="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-600" />
                         <Input
                             type="text"
                             placeholder="Search name, plot, row, family..."
-                            className="w-full h-10 pl-10 pr-28 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
+                            className="w-full h-10 pl-9 pr-24 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
                             value={filters.search}
                             onChange={(e) => handleChange('search', e.target.value)}
                             autoComplete="off"
@@ -114,7 +112,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     <Button 
                         variant="outline" 
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className={`h-10 px-3 text-sm font-medium border rounded-md transition-colors ${
+                        className={`h-10 px-3 text-sm font-medium border rounded-md transition-colors shrink-0 ${
                             showAdvanced || hasAdvancedFilters 
                                 ? 'border-teal-500 bg-teal-50 text-teal-700' 
                                 : 'border-gray-200 text-gray-600 hover:border-gray-300'
@@ -132,7 +130,7 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         <Button 
                             onClick={handleClear} 
                             variant="ghost"
-                            className="h-10 px-3 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
+                            className="h-10 px-3 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md shrink-0"
                         >
                             <X className="h-4 w-4 mr-1" />
                             Clear All
