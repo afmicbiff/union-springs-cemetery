@@ -1831,8 +1831,8 @@ export default function PlotsPage() {
 
       </div>
 
-      {/* SVG background size slider - fixed bottom-right */}
-      <div className="fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
+      {/* SVG background size slider - hidden on mobile */}
+      <div className="hidden md:flex fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 px-3 py-2 items-center gap-2">
         <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">BG Size</span>
         <input
           type="range"
