@@ -1669,42 +1669,17 @@ export default function PlotsPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-4">
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
-              alt="Union Springs Logo" 
-              className="h-12 w-12 sm:h-14 sm:w-auto rounded-full"
-              loading="eager"
-              width={56}
-              height={56}
-            />
-            <div className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
-                <span className="text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
-              </div>
-              <div className="ml-auto hidden md:flex">
-                <Suspense fallback={null}>
-                  <MapControls />
-                </Suspense>
-              </div>
-            </div>
-            {/* Mobile-only map controls below logo */}
-            <div className="flex md:hidden mt-2">
-              <Suspense fallback={null}>
-                <MapControls />
-              </Suspense>
-            </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-center md:text-left">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
                 <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
               </div>
           
-          <div className="flex items-center space-x-3">
-
-
-
-          </div>
+              <div className="flex items-center justify-center md:justify-end space-x-3">
+                <Suspense fallback={null}>
+                  <MapControls />
+                </Suspense>
+              </div>
           </div>
         </div>
       </header>
