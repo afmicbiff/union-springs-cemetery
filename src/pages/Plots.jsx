@@ -203,7 +203,7 @@ if (typeof document !== 'undefined' && !document.getElementById('plot-blink-styl
       }
     }
     .animate-plot-blink {
-      animation: plotBlink 0.7s ease-in-out infinite;
+      animation: plotBlink 1s ease-in-out infinite;
       position: relative;
       z-index: 9999 !important;
     }
