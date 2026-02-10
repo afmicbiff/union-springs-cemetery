@@ -1700,7 +1700,12 @@ export default function PlotsPage() {
           <PlotFilters 
               filters={filters} 
               onFilterChange={setFilters} 
-              statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')} 
+              statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')}
+              backSearchUrl={backSearchUrl}
+              showBackToSearch={showBackToSearch}
+              showLocateButton={showLocateButton}
+              selectedPlotNum={selectedPlotNum}
+              onLocatePlot={locatePlot}
           />
         </Suspense>
       </div>
