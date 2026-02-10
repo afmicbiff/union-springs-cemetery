@@ -43,6 +43,46 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    // Date validation helpers
+    const today = new Date().toISOString().split('T')[0];
+    const dateErrors = React.useMemo(() => {
+        const errors = {};
+        const { date_of_birth, date_of_death, interment_date } = formData;
+
+        const parseDateSafe = (v) => {
+            if (!v) return null;
+            const d = new Date(v);
+            return isNaN(d.getTime()) ? null : d;
+        };
+
+        const dob = parseDateSafe(date_of_birth);
+        const dod = parseDateSafe(date_of_death);
+        const doi = parseDateSafe(interment_date);
+        const todayDate = new Date();
+        const minDate = new Date('1700-01-01');
+
+        if (dob) {
+            if (dob > todayDate) errors.date_of_birth = 'Birth date is in the future';
+            else if (dob < minDate) errors.date_of_birth = 'Birth date seems too far in the past';
+        }
+        if (dod) {
+            if (dod > todayDate) errors.date_of_death = 'Death date is in the future';
+            else if (dod < minDate) errors.date_of_death = 'Death date seems too far in the past';
+        }
+        if (dob && dod && dod < dob) {
+            errors.date_of_death = 'Death date is before birth date';
+        }
+        if (dob && dod) {
+            const ageAtDeath = (dod - dob) / (365.25 * 24 * 60 * 60 * 1000);
+            if (ageAtDeath > 130) errors.date_of_death = `Age at death would be ${Math.round(ageAtDeath)} years — please verify`;
+        }
+        if (doi) {
+            if (doi > todayDate) errors.interment_date = 'Interment date is in the future';
+            if (dod && doi < dod) errors.interment_date = 'Interment date is before death date';
+        }
+        return errors;
+    }, [formData.date_of_birth, formData.date_of_death, formData.interment_date]);
+
     const saveMutation = useMutation({
         mutationFn: async (data) => {
             if (mode === 'create') {
@@ -151,32 +191,49 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <Label htmlFor="date_of_birth">Date of Birth</Label>
                             <Input 
                                 id="date_of_birth" 
                                 type="date"
+                                max={today}
                                 value={formData.date_of_birth || ''} 
-                                onChange={(e) => handleChange('date_of_birth', e.target.value)} 
+                                onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                                className={dateErrors.date_of_birth ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
                             />
+                            {dateErrors.date_of_birth && (
+                                <p className="text-xs text-red-600 font-medium">{dateErrors.date_of_birth}</p>
+                            )}
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                             <Label htmlFor="date_of_death">Date of Death</Label>
                             <Input 
                                 id="date_of_death" 
                                 type="date"
+                                max={today}
+                                min={formData.date_of_birth || undefined}
                                 value={formData.date_of_death || ''} 
-                                onChange={(e) => handleChange('date_of_death', e.target.value)} 
+                                onChange={(e) => handleChange('date_of_death', e.target.value)}
+                                className={dateErrors.date_of_death ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
                             />
+                            {dateErrors.date_of_death && (
+                                <p className="text-xs text-red-600 font-medium">{dateErrors.date_of_death}</p>
+                            )}
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-1">
                             <Label htmlFor="interment_date">Interment Date</Label>
                             <Input 
                                 id="interment_date" 
                                 type="date"
+                                max={today}
+                                min={formData.date_of_death || undefined}
                                 value={formData.interment_date || ''} 
-                                onChange={(e) => handleChange('interment_date', e.target.value)} 
+                                onChange={(e) => handleChange('interment_date', e.target.value)}
+                                className={dateErrors.interment_date ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
                             />
+                            {dateErrors.interment_date && (
+                                <p className="text-xs text-red-600 font-medium">{dateErrors.interment_date}</p>
+                            )}
                         </div>
                     </div>
 
