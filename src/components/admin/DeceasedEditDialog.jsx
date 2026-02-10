@@ -23,6 +23,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
         } else {
             setFormData({
                 first_name: '',
+                middle_name: '',
                 last_name: '',
                 family_name: '',
                 date_of_birth: '',
@@ -112,7 +113,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 py-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="first_name">First Name *</Label>
                             <Input 
@@ -120,6 +121,14 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                                 value={formData.first_name || ''} 
                                 onChange={(e) => handleChange('first_name', e.target.value)} 
                                 required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="middle_name">Middle Name</Label>
+                            <Input 
+                                id="middle_name" 
+                                value={formData.middle_name || ''} 
+                                onChange={(e) => handleChange('middle_name', e.target.value)} 
                             />
                         </div>
                         <div className="space-y-2">
