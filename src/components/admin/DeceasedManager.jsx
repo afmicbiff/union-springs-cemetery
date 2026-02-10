@@ -143,8 +143,28 @@ export default function DeceasedManager() {
         }
     }, [searchResults?.results]);
 
-    const handleEdit = (record) => {
-        setSelectedDeceased(record);
+    const [isLoadingRecord, setIsLoadingRecord] = useState(false);
+
+    const handleEdit = async (record) => {
+        if (!record?.id || record.entity_type === 'plot') {
+            // For plot records, open directly (no full fetch needed)
+            setSelectedDeceased(record);
+            setMode('edit');
+            setIsEditOpen(true);
+            return;
+        }
+        // Fetch the full deceased record from the database to ensure
+        // all fields (middle_name, notes, obituary, documents, etc.) are present
+        setIsLoadingRecord(true);
+        try {
+            const fullRecords = await base44.entities.Deceased.filter({ id: record.id }, '-created_date', 1);
+            const fullRecord = Array.isArray(fullRecords) ? fullRecords[0] : fullRecords;
+            setSelectedDeceased(fullRecord || record);
+        } catch {
+            // Fallback to the table record if fetch fails
+            setSelectedDeceased(record);
+        }
+        setIsLoadingRecord(false);
         setMode('edit');
         setIsEditOpen(true);
     };
