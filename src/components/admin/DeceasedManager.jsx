@@ -342,15 +342,23 @@ export default function DeceasedManager() {
                                                 <div className="text-sm whitespace-nowrap">
                                                     <span className="text-stone-400">Birth:</span> {(() => {
                                                         if (!record.date_of_birth) return '-';
-                                                        const d = new Date(record.date_of_birth);
-                                                        return isNaN(d.getTime()) ? record.date_of_birth : format(d, 'MMM d, yyyy');
+                                                        const parts = record.date_of_birth.split('-');
+                                                        if (parts.length === 3) {
+                                                            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+                                                            return isNaN(d.getTime()) ? record.date_of_birth : format(d, 'MMM d, yyyy');
+                                                        }
+                                                        return record.date_of_birth;
                                                     })()}
                                                 </div>
                                                 <div className="text-sm whitespace-nowrap">
                                                     <span className="text-stone-400">Death:</span> {(() => {
                                                         if (!record.date_of_death) return '-';
-                                                        const d = new Date(record.date_of_death);
-                                                        return isNaN(d.getTime()) ? record.date_of_death : format(d, 'MMM d, yyyy');
+                                                        const parts = record.date_of_death.split('-');
+                                                        if (parts.length === 3) {
+                                                            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+                                                            return isNaN(d.getTime()) ? record.date_of_death : format(d, 'MMM d, yyyy');
+                                                        }
+                                                        return record.date_of_death;
                                                     })()}
                                                 </div>
                                             </td>
