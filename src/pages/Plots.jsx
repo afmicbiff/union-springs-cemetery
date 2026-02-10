@@ -1656,19 +1656,21 @@ export default function PlotsPage() {
 
         
 
-  const [svgWidth, setSvgWidth] = useState(100); // percentage width of SVG image
+  const [svgWidth, setSvgWidth] = useState(100);
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative bg-white">
       
-      {/* Resizable SVG background image floating on top of white background */}
-      <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+      {/* Resizable SVG background image - hidden on mobile for performance */}
+      <div className="hidden md:flex fixed inset-0 z-0 items-center justify-center pointer-events-none overflow-hidden" style={{ willChange: 'auto' }}>
         <img
           src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/9be70da29_SVGGraveyardPICadobe2.svg"
-          alt="Cemetery map background"
-          className="opacity-15 select-none"
+          alt=""
+          className="select-none"
           style={{ width: `${svgWidth}%`, maxWidth: '200%', height: 'auto' }}
           draggable={false}
+          loading="lazy"
+          decoding="async"
         />
       </div>
 
