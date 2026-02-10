@@ -50,7 +50,8 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                     {showLocateButton && selectedPlotNum && (
                         <button
                             onClick={onLocatePlot}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2 shrink-0"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 ring-2 ring-teal-400 ring-offset-2 shrink-0"
+                            style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
                         >
                             <MapPin className="w-4 h-4" />
                             <span>Click to Locate Grave #{selectedPlotNum}</span>
