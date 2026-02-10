@@ -1,134 +1,94 @@
 import React, { useState, useRef, useCallback, useEffect, memo } from 'react';
 import { Move, RotateCcw } from 'lucide-react';
 
-const MIN_SIZE = 120;
-const HANDLE_SIZE = 12;
+const MIN_SIZE = 100;
 
 const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src }) {
-  const containerRef = useRef(null);
-  const imgRef = useRef(null);
   const dragState = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Image box state: position + size (pixels)
   const [box, setBox] = useState(() => {
     const saved = sessionStorage.getItem('bg_img_box');
     if (saved) {
       try { return JSON.parse(saved); } catch {}
     }
-    return { x: 60, y: 120, w: 500, h: 400 };
+    return { x: 40, y: 100, w: 600, h: 450 };
   });
 
-  // Persist on change
   useEffect(() => {
     sessionStorage.setItem('bg_img_box', JSON.stringify(box));
   }, [box]);
 
-  // Reset to defaults
   const handleReset = useCallback(() => {
-    setBox({ x: 60, y: 120, w: 500, h: 400 });
+    setBox({ x: 40, y: 100, w: 600, h: 450 });
   }, []);
 
-  // --- DRAG TO MOVE ---
-  const onMoveStart = useCallback((e) => {
+  // Shared drag logic
+  const startDrag = useCallback((e, type, handle) => {
     e.preventDefault();
     e.stopPropagation();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    dragState.current = { type: 'move', startX: clientX, startY: clientY, origBox: { ...box } };
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    dragState.current = { type, handle, startX: cx, startY: cy, origBox: { ...box } };
+    setIsDragging(true);
 
     const onMove = (ev) => {
-      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
-      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      const dx = cx - dragState.current.startX;
-      const dy = cy - dragState.current.startY;
-      setBox(prev => ({
-        ...prev,
-        x: dragState.current.origBox.x + dx,
-        y: dragState.current.origBox.y + dy,
-      }));
-    };
-    const onUp = () => {
-      dragState.current = null;
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    window.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onUp);
-  }, [box]);
-
-  // --- RESIZE HANDLES ---
-  const onResizeStart = useCallback((e, handle) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    dragState.current = { type: 'resize', handle, startX: clientX, startY: clientY, origBox: { ...box } };
-
-    const onMove = (ev) => {
-      const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
-      const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
-      const dx = cx - dragState.current.startX;
-      const dy = cy - dragState.current.startY;
+      ev.preventDefault();
+      const mx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const my = ev.touches ? ev.touches[0].clientY : ev.clientY;
+      const dx = mx - dragState.current.startX;
+      const dy = my - dragState.current.startY;
       const ob = dragState.current.origBox;
+
+      if (dragState.current.type === 'move') {
+        setBox({ ...ob, x: ob.x + dx, y: ob.y + dy });
+        return;
+      }
+
       const h = dragState.current.handle;
-      let { x, y, w, hh } = { x: ob.x, y: ob.y, w: ob.w, hh: ob.h };
+      let nx = ob.x, ny = ob.y, nw = ob.w, nh = ob.h;
 
-      // Corners
-      if (h.includes('r')) { w = Math.max(MIN_SIZE, ob.w + dx); }
-      if (h.includes('l')) { w = Math.max(MIN_SIZE, ob.w - dx); x = ob.x + (ob.w - w); }
-      if (h.includes('b')) { hh = Math.max(MIN_SIZE, ob.h + dy); }
-      if (h.includes('t')) { hh = Math.max(MIN_SIZE, ob.h - dy); y = ob.y + (ob.h - hh); }
+      if (h.includes('r')) nw = Math.max(MIN_SIZE, ob.w + dx);
+      if (h.includes('l')) { nw = Math.max(MIN_SIZE, ob.w - dx); nx = ob.x + (ob.w - nw); }
+      if (h.includes('b')) nh = Math.max(MIN_SIZE, ob.h + dy);
+      if (h.includes('t')) { nh = Math.max(MIN_SIZE, ob.h - dy); ny = ob.y + (ob.h - nh); }
 
-      setBox({ x, y, w, h: hh });
+      setBox({ x: nx, y: ny, w: nw, h: nh });
     };
+
     const onUp = () => {
       dragState.current = null;
+      setIsDragging(false);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
       window.removeEventListener('touchmove', onMove);
       window.removeEventListener('touchend', onUp);
     };
+
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
     window.addEventListener('touchmove', onMove, { passive: false });
     window.addEventListener('touchend', onUp);
   }, [box]);
 
-  // Handle definitions: position + cursor
-  const handles = [
-    { key: 'tl', cursor: 'nwse-resize', style: { top: -HANDLE_SIZE/2, left: -HANDLE_SIZE/2 } },
-    { key: 'tr', cursor: 'nesw-resize', style: { top: -HANDLE_SIZE/2, right: -HANDLE_SIZE/2 } },
-    { key: 'bl', cursor: 'nesw-resize', style: { bottom: -HANDLE_SIZE/2, left: -HANDLE_SIZE/2 } },
-    { key: 'br', cursor: 'nwse-resize', style: { bottom: -HANDLE_SIZE/2, right: -HANDLE_SIZE/2 } },
-    { key: 't',  cursor: 'ns-resize',   style: { top: -HANDLE_SIZE/2, left: '50%', transform: 'translateX(-50%)' } },
-    { key: 'b',  cursor: 'ns-resize',   style: { bottom: -HANDLE_SIZE/2, left: '50%', transform: 'translateX(-50%)' } },
-    { key: 'l',  cursor: 'ew-resize',   style: { top: '50%', left: -HANDLE_SIZE/2, transform: 'translateY(-50%)' } },
-    { key: 'r',  cursor: 'ew-resize',   style: { top: '50%', right: -HANDLE_SIZE/2, transform: 'translateY(-50%)' } },
-  ];
+  const active = isDragging || isHovered;
+
+  // Corner handle size
+  const CS = 14;
+  // Edge bar thickness (the grab zone)
+  const ET = 8;
 
   return (
-    <div
-      ref={containerRef}
-      className="absolute inset-0 z-[1] pointer-events-none overflow-hidden"
-      style={{ isolation: 'isolate' }}
-    >
-      {/* The resizable image frame */}
+    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden" style={{ isolation: 'isolate' }}>
       <div
-        className="absolute pointer-events-auto group"
-        style={{
-          left: box.x,
-          top: box.y,
-          width: box.w,
-          height: box.h,
-        }}
+        className="absolute pointer-events-auto"
+        style={{ left: box.x, top: box.y, width: box.w, height: box.h }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => { if (!isDragging) setIsHovered(false); }}
       >
         {/* Image */}
         <img
-          ref={imgRef}
           src={src}
           alt=""
           className="w-full h-full object-contain select-none"
@@ -137,54 +97,133 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
           decoding="async"
         />
 
-        {/* Selection border - visible on hover */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-teal-500/60 rounded transition-colors pointer-events-none" />
-
-        {/* Dashed guide lines on hover */}
-        <div className="absolute inset-0 border border-dashed border-transparent group-hover:border-teal-400/30 pointer-events-none" />
-
-        {/* Move handle - center top bar */}
+        {/* Selection border — always visible with teal, brighter when active */}
         <div
-          className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-md shadow-md border border-gray-200 px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-move pointer-events-auto"
-          onMouseDown={onMoveStart}
-          onTouchStart={onMoveStart}
+          className="absolute inset-0 pointer-events-none transition-all duration-150"
+          style={{
+            border: active ? '2px solid rgba(13,148,136,0.8)' : '2px solid rgba(13,148,136,0.25)',
+          }}
+        />
+
+        {/* ===== EDGE RESIZE BARS (the thick grabable bars on each side) ===== */}
+
+        {/* Top edge bar */}
+        <div
+          className="absolute pointer-events-auto"
+          style={{ top: -ET/2, left: CS, right: CS, height: ET, cursor: 'ns-resize' }}
+          onMouseDown={(e) => startDrag(e, 'resize', 't')}
+          onTouchStart={(e) => startDrag(e, 'resize', 't')}
         >
-          <Move className="w-3.5 h-3.5 text-gray-500" />
-          <span className="text-[10px] text-gray-500 font-medium select-none">Drag to move</span>
+          <div className="mx-auto h-1 rounded-full transition-all duration-150" 
+               style={{ 
+                 width: active ? '40%' : '20%', 
+                 marginTop: ET/2 - 2,
+                 background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+               }} />
+        </div>
+
+        {/* Bottom edge bar */}
+        <div
+          className="absolute pointer-events-auto"
+          style={{ bottom: -ET/2, left: CS, right: CS, height: ET, cursor: 'ns-resize' }}
+          onMouseDown={(e) => startDrag(e, 'resize', 'b')}
+          onTouchStart={(e) => startDrag(e, 'resize', 'b')}
+        >
+          <div className="mx-auto h-1 rounded-full transition-all duration-150" 
+               style={{ 
+                 width: active ? '40%' : '20%', 
+                 marginTop: ET/2 - 2,
+                 background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+               }} />
+        </div>
+
+        {/* Left edge bar */}
+        <div
+          className="absolute pointer-events-auto"
+          style={{ left: -ET/2, top: CS, bottom: CS, width: ET, cursor: 'ew-resize' }}
+          onMouseDown={(e) => startDrag(e, 'resize', 'l')}
+          onTouchStart={(e) => startDrag(e, 'resize', 'l')}
+        >
+          <div className="h-full flex items-center justify-center">
+            <div className="w-1 rounded-full transition-all duration-150"
+                 style={{ 
+                   height: active ? '40%' : '20%',
+                   background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                 }} />
+          </div>
+        </div>
+
+        {/* Right edge bar */}
+        <div
+          className="absolute pointer-events-auto"
+          style={{ right: -ET/2, top: CS, bottom: CS, width: ET, cursor: 'ew-resize' }}
+          onMouseDown={(e) => startDrag(e, 'resize', 'r')}
+          onTouchStart={(e) => startDrag(e, 'resize', 'r')}
+        >
+          <div className="h-full flex items-center justify-center">
+            <div className="w-1 rounded-full transition-all duration-150"
+                 style={{ 
+                   height: active ? '40%' : '20%',
+                   background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                 }} />
+          </div>
+        </div>
+
+        {/* ===== CORNER RESIZE HANDLES (solid white squares with teal border) ===== */}
+        {[
+          { key: 'tl', cursor: 'nwse-resize', pos: { top: -CS/2, left: -CS/2 } },
+          { key: 'tr', cursor: 'nesw-resize', pos: { top: -CS/2, right: -CS/2 } },
+          { key: 'bl', cursor: 'nesw-resize', pos: { bottom: -CS/2, left: -CS/2 } },
+          { key: 'br', cursor: 'nwse-resize', pos: { bottom: -CS/2, right: -CS/2 } },
+        ].map(({ key, cursor, pos }) => (
+          <div
+            key={key}
+            className="absolute pointer-events-auto z-20"
+            style={{ ...pos, width: CS, height: CS, cursor }}
+            onMouseDown={(e) => startDrag(e, 'resize', key)}
+            onTouchStart={(e) => startDrag(e, 'resize', key)}
+          >
+            <div
+              className="w-full h-full rounded-sm shadow-md transition-all duration-150"
+              style={{
+                background: active ? '#fff' : 'rgba(255,255,255,0.7)',
+                border: active ? '2.5px solid rgb(13,148,136)' : '2px solid rgba(13,148,136,0.4)',
+                transform: active ? 'scale(1.15)' : 'scale(1)',
+              }}
+            />
+          </div>
+        ))}
+
+        {/* ===== MOVE BAR (top center) ===== */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-md shadow-lg border px-2.5 py-1 cursor-move pointer-events-auto transition-all duration-200 select-none"
+          style={{
+            top: -32,
+            background: active ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.8)',
+            borderColor: active ? 'rgb(13,148,136)' : '#e5e7eb',
+            opacity: active ? 1 : 0.5,
+          }}
+          onMouseDown={(e) => startDrag(e, 'move')}
+          onTouchStart={(e) => startDrag(e, 'move')}
+        >
+          <Move className="w-3.5 h-3.5 text-teal-600" />
+          <span className="text-[10px] text-teal-700 font-semibold">Move</span>
           <button
-            className="ml-1 p-0.5 rounded hover:bg-gray-100 transition-colors"
-            onClick={handleReset}
+            className="ml-1 p-0.5 rounded hover:bg-teal-50 transition-colors"
+            onClick={(e) => { e.stopPropagation(); handleReset(); }}
             title="Reset position & size"
           >
-            <RotateCcw className="w-3 h-3 text-gray-400" />
+            <RotateCcw className="w-3 h-3 text-teal-500" />
           </button>
         </div>
 
-        {/* Size indicator */}
-        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+        {/* ===== SIZE LABEL (bottom center) ===== */}
+        <div
+          className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-[9px] px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap transition-opacity duration-200"
+          style={{ opacity: active ? 1 : 0 }}
+        >
           {Math.round(box.w)} × {Math.round(box.h)}
         </div>
-
-        {/* Resize handles */}
-        {handles.map(({ key, cursor, style }) => (
-          <div
-            key={key}
-            className="absolute opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto"
-            style={{
-              ...style,
-              width: HANDLE_SIZE,
-              height: HANDLE_SIZE,
-              cursor,
-              zIndex: 10,
-            }}
-            onMouseDown={(e) => onResizeStart(e, key)}
-            onTouchStart={(e) => onResizeStart(e, key)}
-          >
-            <div className={`w-full h-full rounded-full bg-white border-2 border-teal-500 shadow-sm ${
-              key.length === 2 ? 'scale-110' : 'scale-100'
-            }`} />
-          </div>
-        ))}
       </div>
     </div>
   );
