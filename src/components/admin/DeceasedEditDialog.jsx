@@ -96,28 +96,64 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
         onSuccess: async (result) => {
             queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
             
-            // Auto-sync deceased info to matching Plot entity
+            // Auto-sync deceased info to ALL matching Plot records
             const plotLoc = formData.plot_location;
             if (plotLoc) {
                 try {
-                    // Extract grave number from plot_location (e.g. "T-7-1081" → "1081")
-                    const parts = plotLoc.split('-');
-                    const graveNum = parts[parts.length - 1];
+                    // Extract grave number (last numeric segment, e.g. "T-7-1081" → "1081", "822" → "822")
+                    const numMatches = plotLoc.match(/\d+/g);
+                    const graveNum = numMatches ? numMatches[numMatches.length - 1] : null;
+
                     if (graveNum) {
-                        const plots = await base44.entities.Plot.filter({ plot_number: graveNum }, '-updated_date', 5);
+                        const plots = await base44.entities.Plot.filter({ plot_number: graveNum }, '-updated_date', 10);
                         if (plots && plots.length > 0) {
-                            const plot = plots[0];
                             const syncData = {};
                             if (formData.first_name) syncData.first_name = formData.first_name;
                             if (formData.last_name) syncData.last_name = formData.last_name;
                             if (formData.family_name) syncData.family_name = formData.family_name;
                             if (formData.date_of_birth) syncData.birth_date = formData.date_of_birth;
                             if (formData.date_of_death) syncData.death_date = formData.date_of_death;
-                            if (formData.veteran_status) syncData.status = 'Veteran';
-                            else if (plot.status !== 'Occupied' && plot.status !== 'Veteran') syncData.status = 'Occupied';
-                            await base44.entities.Plot.update(plot.id, syncData);
-                            queryClient.invalidateQueries({ queryKey: ['plots'] });
-                            queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
+
+                            let syncCount = 0;
+                            const skippedPlots = [];
+
+                            for (const plot of plots) {
+                                const plotSyncData = { ...syncData };
+
+                                // Determine status to set
+                                if (formData.veteran_status) {
+                                    plotSyncData.status = 'Veteran';
+                                } else if (plot.status === 'Available' || plot.status === 'Reserved' || plot.status === 'Unknown') {
+                                    plotSyncData.status = 'Occupied';
+                                }
+                                // If already Occupied or Veteran, check if it's a different person
+                                if ((plot.status === 'Occupied' || plot.status === 'Veteran') && plot.first_name && plot.last_name) {
+                                    const sameFirst = (plot.first_name || '').trim().toLowerCase() === (formData.first_name || '').trim().toLowerCase();
+                                    const sameLast = (plot.last_name || '').trim().toLowerCase() === (formData.last_name || '').trim().toLowerCase();
+                                    if (!sameFirst || !sameLast) {
+                                        // Different person already occupies this plot — skip but warn
+                                        skippedPlots.push(`#${plot.plot_number} (${plot.first_name} ${plot.last_name})`);
+                                        continue;
+                                    }
+                                }
+
+                                // Increment occupancy on create if plot was not already occupied by this person
+                                if (mode === 'create' && (plot.status === 'Available' || plot.status === 'Reserved' || plot.status === 'Unknown')) {
+                                    plotSyncData.current_occupancy = (plot.current_occupancy || 0) + 1;
+                                }
+
+                                await base44.entities.Plot.update(plot.id, plotSyncData);
+                                syncCount++;
+                            }
+
+                            if (skippedPlots.length > 0) {
+                                toast.warning(`Plot ${skippedPlots.join(', ')} already occupied by another person — not overwritten.`);
+                            }
+                            if (syncCount > 0) {
+                                toast.info(`Synced deceased info to ${syncCount} plot record${syncCount > 1 ? 's' : ''}.`);
+                                queryClient.invalidateQueries({ queryKey: ['plots'] });
+                                queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
+                            }
                         }
                     }
                 } catch (syncErr) {
