@@ -1495,81 +1495,81 @@ export default function PlotsPage() {
     // Stop any existing blinks first
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
-    // Use quickIndex to find which section this plot belongs to
+    // Determine target section from quickIndex OR from the already-computed selectedSectionKeyForPlot
     const match = quickIndex.find(it => it.plotNum === plotNum);
-    const targetSectionKey = match?.sectionKey || null;
+    const targetSectionKey = match?.sectionKey || selectedSectionKeyForPlot || null;
 
-    // Expand the target section (and keep others as-is)
+    // Expand the target section; if unknown, expand ALL so lazy content renders
     if (targetSectionKey) {
       setCollapsedSections(prev => ({ ...prev, [targetSectionKey]: false }));
     } else {
-      // If we can't determine the section, expand all
       setCollapsedSections({ '1': false, '2': false, '3': false, '4': false, '5': false });
     }
 
     let attempts = 0;
-    const maxAttempts = 60; // ~6 seconds with 100ms intervals
-    let hasCentered = false;
+    const maxAttempts = 80; // ~8 seconds with 100ms intervals - enough for lazy content
+    let found = false;
 
     const tryCenter = () => {
-      if (hasCentered) return;
+      if (found) return;
       attempts++;
-      
-      // Search precisely - try exact ID first, then data attribute, then broad search
+
+      // 1. Exact ID match (most reliable)
       let el = null;
       if (targetSectionKey) {
         el = document.getElementById(`plot-${targetSectionKey}-${plotNum}`);
       }
+      // 2. data-plot-num attribute (works across both GravePlot and GravePlotCell components)
       if (!el) {
         el = document.querySelector(`[data-plot-num="${plotNum}"]`);
       }
+      // 3. Try all five section prefixes explicitly (handles section mismatch between quickIndex and DOM)
       if (!el) {
-        // Broad fallback - search all plot elements by ID pattern
-        const allPlotEls = document.querySelectorAll(`[id^="plot-"]`);
-        for (const candidate of allPlotEls) {
-          if (candidate.getAttribute('data-plot-num') === String(plotNum)) {
-            el = candidate;
-            break;
-          }
+        for (const sk of ['1','2','3','4','5']) {
+          el = document.getElementById(`plot-${sk}-${plotNum}`);
+          if (el) break;
         }
       }
 
       if (el) {
-        hasCentered = true;
-        
-        // First scroll vertically to the element
+        found = true;
+
+        // Step 1: Vertical scroll to bring the element into viewport
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        
-        // Then handle horizontal scroll within overflow containers after vertical scroll settles
+
+        // Step 2: After vertical scroll settles, fix horizontal scroll in nested overflow containers
         setTimeout(() => {
-          const hContainer = el.closest('[class*="overflow-x-auto"]') || el.closest('.map-zoom-container');
-          if (hContainer) {
-            const elRect = el.getBoundingClientRect();
-            const cRect = hContainer.getBoundingClientRect();
-            const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
-            hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+          // Walk up to find ALL scrollable ancestors and center in each
+          let node = el.parentElement;
+          while (node && node !== document.body) {
+            if (node.scrollWidth > node.clientWidth + 10) {
+              const elRect = el.getBoundingClientRect();
+              const cRect = node.getBoundingClientRect();
+              const targetLeft = node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2);
+              node.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+            }
+            node = node.parentElement;
           }
-          
-          // Trigger blink after scrolling completes
+
+          // Step 3: Fire blink event after scroll animations complete
           setTimeout(() => {
             window.dispatchEvent(new CustomEvent('plot-start-blink', {
               detail: { targetPlotNum: plotNum, targetElementId: el.id }
             }));
             setHasLocated(true);
-          }, 400);
-        }, 300);
+          }, 500);
+        }, 400);
         return;
       }
 
       if (attempts < maxAttempts) {
-        // Use setTimeout instead of rAF - more reliable for waiting on lazy-loaded content
         setTimeout(tryCenter, 100);
       }
     };
 
-    // Give React time to re-render expanded sections and lazy-load content
-    setTimeout(tryCenter, 150);
-  }, [quickIndex]);
+    // Delay start to let React render expanded sections and Suspense boundaries resolve
+    setTimeout(tryCenter, 200);
+  }, [quickIndex, selectedSectionKeyForPlot]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
