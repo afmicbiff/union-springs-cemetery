@@ -31,10 +31,17 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
   const normalizedSection = React.useMemo(() => normalizeSectionKey(plotSection), [plotSection]);
   
   const dateRange = React.useMemo(() => {
-    const birthYear = person?.date_of_birth && isValid(new Date(person.date_of_birth)) 
-      ? format(new Date(person.date_of_birth), 'yyyy') : '';
-    const deathYear = person?.date_of_death && isValid(new Date(person.date_of_death)) 
-      ? format(new Date(person.date_of_death), 'yyyy') : '';
+    const parseLocal = (str) => {
+      if (!str) return null;
+      const parts = str.split('-');
+      if (parts.length === 3) return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+      const d = new Date(str);
+      return isValid(d) ? d : null;
+    };
+    const bd = parseLocal(person?.date_of_birth);
+    const dd = parseLocal(person?.date_of_death);
+    const birthYear = bd ? format(bd, 'yyyy') : '';
+    const deathYear = dd ? format(dd, 'yyyy') : '';
     return birthYear && deathYear ? `${birthYear} - ${deathYear}` : birthYear || deathYear || '';
   }, [person?.date_of_birth, person?.date_of_death]);
 
