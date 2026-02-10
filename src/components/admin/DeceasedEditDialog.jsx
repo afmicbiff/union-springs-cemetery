@@ -140,8 +140,14 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
         }
     };
 
+    const hasDateErrors = Object.keys(dateErrors).length > 0;
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (hasDateErrors) {
+            toast.error("Please fix the date errors before saving.");
+            return;
+        }
         saveMutation.mutate(formData);
     };
 
@@ -328,7 +334,7 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                     
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white" disabled={saveMutation.isPending}>
+                        <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white" disabled={saveMutation.isPending || hasDateErrors}>
                             {saveMutation.isPending ? "Saving..." : "Save Record"}
                         </Button>
                     </DialogFooter>
