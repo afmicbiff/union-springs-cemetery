@@ -1827,7 +1827,7 @@ export default function PlotsPage() {
         </Suspense>
       )}
 
-      </div>{/* end z-10 content wrapper */}
+      </div>
 
       {/* SVG background size slider - fixed bottom-right */}
       <div className="fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
