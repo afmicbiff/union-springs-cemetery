@@ -188,20 +188,55 @@ export default Deno.serve(async (req) => {
         // 2. Apply Fuzzy Search if query exists (guard for huge datasets)
         if (query && String(query).trim().length >= 2) {
             if (filtered.length <= 5000) {
-                const fuse = new Fuse(filtered, {
-                    keys: [
-                        { name: 'first_name', weight: 0.5 },
-                        { name: 'last_name', weight: 0.5 },
-                        { name: 'family_name', weight: 0.3 },
-                        { name: 'plot_location', weight: 0.2 }
-                    ],
-                    threshold: 0.2,
-                    distance: 100,
-                    ignoreLocation: true,
-                    minMatchCharLength: 2,
-                    includeScore: false
+                const q = String(query).trim().toLowerCase();
+
+                // Phase 1: Exact prefix/substring matches first (highest priority)
+                const exactMatches = [];
+                const rest = [];
+                for (const r of filtered) {
+                    const fn = (r.first_name || '').toLowerCase();
+                    const ln = (r.last_name || '').toLowerCase();
+                    const fam = (r.family_name || '').toLowerCase();
+                    const loc = (r.plot_location || '').toLowerCase();
+                    if (ln.startsWith(q) || fn.startsWith(q) || fam.startsWith(q) || loc.includes(q)) {
+                        exactMatches.push(r);
+                    } else if (ln.includes(q) || fn.includes(q) || fam.includes(q)) {
+                        exactMatches.push(r);
+                    } else {
+                        rest.push(r);
+                    }
+                }
+
+                // Phase 2: Fuzzy search on remaining records only
+                let fuzzyMatches = [];
+                if (rest.length > 0) {
+                    const fuse = new Fuse(rest, {
+                        keys: [
+                            { name: 'first_name', weight: 0.5 },
+                            { name: 'last_name', weight: 0.5 },
+                            { name: 'family_name', weight: 0.3 },
+                            { name: 'plot_location', weight: 0.2 }
+                        ],
+                        threshold: 0.15,
+                        distance: 80,
+                        ignoreLocation: true,
+                        minMatchCharLength: 2,
+                        includeScore: true
+                    });
+                    fuzzyMatches = fuse.search(q).map(r => r.item);
+                }
+
+                // Sort exact matches: startsWith first, then contains
+                exactMatches.sort((a, b) => {
+                    const aLn = (a.last_name || '').toLowerCase();
+                    const bLn = (b.last_name || '').toLowerCase();
+                    const aStarts = aLn.startsWith(q) ? 0 : 1;
+                    const bStarts = bLn.startsWith(q) ? 0 : 1;
+                    if (aStarts !== bStarts) return aStarts - bStarts;
+                    return aLn.localeCompare(bLn);
                 });
-                filtered = fuse.search(String(query)).map(r => r.item);
+
+                filtered = [...exactMatches, ...fuzzyMatches];
             } else {
                 const q = String(query).toLowerCase();
                 filtered = filtered.filter(r => (
