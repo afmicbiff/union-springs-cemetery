@@ -1508,13 +1508,14 @@ export default function PlotsPage() {
     }
 
     let attempts = 0;
-    const maxAttempts = 300;
+    const maxAttempts = 60; // ~6 seconds with 100ms intervals
     let hasCentered = false;
 
     const tryCenter = () => {
+      if (hasCentered) return;
       attempts++;
       
-      // Search precisely - try exact ID first, then data attribute
+      // Search precisely - try exact ID first, then data attribute, then broad search
       let el = null;
       if (targetSectionKey) {
         el = document.getElementById(`plot-${targetSectionKey}-${plotNum}`);
@@ -1522,40 +1523,52 @@ export default function PlotsPage() {
       if (!el) {
         el = document.querySelector(`[data-plot-num="${plotNum}"]`);
       }
+      if (!el) {
+        // Broad fallback - search all plot elements by ID pattern
+        const allPlotEls = document.querySelectorAll(`[id^="plot-"]`);
+        for (const candidate of allPlotEls) {
+          if (candidate.getAttribute('data-plot-num') === String(plotNum)) {
+            el = candidate;
+            break;
+          }
+        }
+      }
 
-      if (el && !hasCentered) {
+      if (el) {
         hasCentered = true;
         
-        // Scroll into view and blink
+        // First scroll vertically to the element
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
         
-        // Also scroll horizontally within overflow containers
-        const hContainer = el.closest('[class*="overflow-x-auto"]') || el.closest('.map-zoom-container');
-        if (hContainer) {
-          setTimeout(() => {
+        // Then handle horizontal scroll within overflow containers after vertical scroll settles
+        setTimeout(() => {
+          const hContainer = el.closest('[class*="overflow-x-auto"]') || el.closest('.map-zoom-container');
+          if (hContainer) {
             const elRect = el.getBoundingClientRect();
             const cRect = hContainer.getBoundingClientRect();
             const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
             hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
-          }, 100);
-        }
-        
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('plot-start-blink', {
-            detail: { targetPlotNum: plotNum, targetElementId: el.id }
-          }));
-          setHasLocated(true);
-        }, 600);
+          }
+          
+          // Trigger blink after scrolling completes
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('plot-start-blink', {
+              detail: { targetPlotNum: plotNum, targetElementId: el.id }
+            }));
+            setHasLocated(true);
+          }, 400);
+        }, 300);
         return;
       }
 
       if (attempts < maxAttempts) {
-        requestAnimationFrame(tryCenter);
+        // Use setTimeout instead of rAF - more reliable for waiting on lazy-loaded content
+        setTimeout(tryCenter, 100);
       }
     };
 
-    // Small delay to let React re-render expanded sections
-    setTimeout(() => requestAnimationFrame(tryCenter), 50);
+    // Give React time to re-render expanded sections and lazy-load content
+    setTimeout(tryCenter, 150);
   }, [quickIndex]);
 
   const debouncedSearchRef = useRef(null);
