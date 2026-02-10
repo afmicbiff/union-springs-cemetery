@@ -1826,6 +1826,22 @@ export default function PlotsPage() {
           />
         </Suspense>
       )}
+
+      </div>{/* end z-10 content wrapper */}
+
+      {/* SVG background size slider - fixed bottom-right */}
+      <div className="fixed bottom-4 right-4 z-50 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200 px-3 py-2 flex items-center gap-2">
+        <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap">BG Size</span>
+        <input
+          type="range"
+          min="20"
+          max="200"
+          value={svgWidth}
+          onChange={(e) => setSvgWidth(Number(e.target.value))}
+          className="w-20 h-1 accent-teal-600"
+        />
+        <span className="text-[10px] text-gray-400 w-8 text-right">{svgWidth}%</span>
+      </div>
     </div>
   );
 }
