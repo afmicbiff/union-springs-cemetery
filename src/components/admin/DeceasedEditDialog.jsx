@@ -93,8 +93,38 @@ export default function DeceasedEditDialog({ isOpen, onClose, deceased, mode = '
                 return await base44.entities.Deceased.update(id, cleanData);
             }
         },
-        onSuccess: () => {
+        onSuccess: async (result) => {
             queryClient.invalidateQueries({ queryKey: ['deceased-admin-search'] });
+            
+            // Auto-sync deceased info to matching Plot entity
+            const plotLoc = formData.plot_location;
+            if (plotLoc) {
+                try {
+                    // Extract grave number from plot_location (e.g. "T-7-1081" → "1081")
+                    const parts = plotLoc.split('-');
+                    const graveNum = parts[parts.length - 1];
+                    if (graveNum) {
+                        const plots = await base44.entities.Plot.filter({ plot_number: graveNum }, '-updated_date', 5);
+                        if (plots && plots.length > 0) {
+                            const plot = plots[0];
+                            const syncData = {};
+                            if (formData.first_name) syncData.first_name = formData.first_name;
+                            if (formData.last_name) syncData.last_name = formData.last_name;
+                            if (formData.family_name) syncData.family_name = formData.family_name;
+                            if (formData.date_of_birth) syncData.birth_date = formData.date_of_birth;
+                            if (formData.date_of_death) syncData.death_date = formData.date_of_death;
+                            if (formData.veteran_status) syncData.status = 'Veteran';
+                            else if (plot.status !== 'Occupied' && plot.status !== 'Veteran') syncData.status = 'Occupied';
+                            await base44.entities.Plot.update(plot.id, syncData);
+                            queryClient.invalidateQueries({ queryKey: ['plots'] });
+                            queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
+                        }
+                    }
+                } catch (syncErr) {
+                    console.warn('Plot sync skipped:', syncErr);
+                }
+            }
+
             toast.success(mode === 'create' ? "Record created" : "Record updated");
             onClose();
         },
