@@ -37,73 +37,84 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
 
     return (
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-            <div className="max-w-4xl mx-auto space-y-4">
-                
-                {/* Main Unified Search - Compact */}
-                <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
-                    <Input
-                        type="text"
-                        placeholder="Search name, plot, row, family..."
-                        className="w-full h-10 pl-10 pr-28 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
-                        value={filters.search}
-                        onChange={(e) => handleChange('search', e.target.value)}
-                        autoComplete="off"
-                        autoCorrect="off"
-                        spellCheck="false"
-                    />
-                    
-                    {/* Clear button inside search */}
-                    {filters.search && (
-                        <button
-                            onClick={() => handleChange('search', '')}
-                            className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
-                            aria-label="Clear search"
-                        >
-                            <X className="h-4 w-4" />
-                        </button>
-                    )}
-                    
-                    {/* Search button - triggers locate and blink */}
-                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
-                        <Button 
-                            className="h-8 px-3 bg-teal-700 hover:bg-teal-800 text-white font-medium rounded-md shadow-sm text-sm"
-                            disabled={isSearching}
-                            onClick={() => {
-                                if (filters.search) {
-                                    setIsSearching(true);
-                                    // Dispatch event to locate and blink matching plots
-                                    window.dispatchEvent(new CustomEvent('plot-locate-search', {
-                                        detail: { searchTerm: filters.search }
-                                    }));
-                                    // Reset searching state after a short delay
-                                    setTimeout(() => setIsSearching(false), 1500);
-                                }
-                            }}
-                        >
-                            {isSearching ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                                    <span>Searching...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Search className="h-4 w-4 mr-1" />
-                                    <span>Search</span>
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </div>
+            <div className="max-w-7xl mx-auto space-y-3">
 
-                {/* Quick Actions Row */}
+                {/* Back to Search + Locate button row */}
+                {showBackToSearch && (
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm">
+                            <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
+                        </Link>
+                        {showLocateButton && selectedPlotNum && (
+                            <button
+                                onClick={onLocatePlot}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transition-all duration-200 touch-manipulation bg-teal-600 text-white hover:bg-teal-700 animate-pulse ring-2 ring-teal-400 ring-offset-2"
+                            >
+                                <MapPin className="w-4 h-4" />
+                                <span>Click to Locate Grave #{selectedPlotNum}</span>
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* Search bar + More Filters + Clear All in one row */}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    {/* Search input */}
+                    <div className="relative w-full sm:w-auto sm:min-w-[320px] sm:max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
+                        <Input
+                            type="text"
+                            placeholder="Search name, plot, row, family..."
+                            className="w-full h-10 pl-10 pr-28 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500 focus:ring-teal-500 shadow-sm placeholder:text-gray-400"
+                            value={filters.search}
+                            onChange={(e) => handleChange('search', e.target.value)}
+                            autoComplete="off"
+                            autoCorrect="off"
+                            spellCheck="false"
+                        />
+                        {filters.search && (
+                            <button
+                                onClick={() => handleChange('search', '')}
+                                className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+                                aria-label="Clear search"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                            <Button 
+                                className="h-8 px-3 bg-teal-700 hover:bg-teal-800 text-white font-medium rounded-md shadow-sm text-sm"
+                                disabled={isSearching}
+                                onClick={() => {
+                                    if (filters.search) {
+                                        setIsSearching(true);
+                                        window.dispatchEvent(new CustomEvent('plot-locate-search', {
+                                            detail: { searchTerm: filters.search }
+                                        }));
+                                        setTimeout(() => setIsSearching(false), 1500);
+                                    }
+                                }}
+                            >
+                                {isSearching ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                                        <span>Searching...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Search className="h-4 w-4 mr-1" />
+                                        <span>Search</span>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
 
                     {/* More Filters Toggle */}
                     <Button 
                         variant="outline" 
                         onClick={() => setShowAdvanced(!showAdvanced)}
-                        className={`h-8 px-3 text-sm font-medium border rounded-md transition-colors ${
+                        className={`h-10 px-3 text-sm font-medium border rounded-md transition-colors ${
                             showAdvanced || hasAdvancedFilters 
                                 ? 'border-teal-500 bg-teal-50 text-teal-700' 
                                 : 'border-gray-200 text-gray-600 hover:border-gray-300'
@@ -116,23 +127,14 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         )}
                     </Button>
 
-                    {/* Saved Searches */}
-                    <Suspense fallback={null}>
-                        <SavedSearchManager 
-                            type="plot" 
-                            currentFilters={filters}
-                            onApplySearch={(saved) => onFilterChange(prev => ({ ...prev, ...saved }))}
-                        />
-                    </Suspense>
-
                     {/* Clear All - Only show when filters active */}
                     {hasActiveFilters && (
                         <Button 
                             onClick={handleClear} 
                             variant="ghost"
-                            className="h-11 sm:h-12 px-4 text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                            className="h-10 px-3 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md"
                         >
-                            <X className="h-5 w-5 mr-1" />
+                            <X className="h-4 w-4 mr-1" />
                             Clear All
                         </Button>
                     )}
