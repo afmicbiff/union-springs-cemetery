@@ -226,50 +226,43 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
   const elementRef = useRef(null);
 
   // Listen for plot-start-blink event to trigger highlight animation
-      // Blinks until user clicks the plot or navigates away
-      useEffect(() => {
-        if (data?.isSpacer || plotNum == null) return;
+  // PERF: stable deps — no `isBlinking` in deps to avoid re-registering per-blink-toggle
+  useEffect(() => {
+    if (data?.isSpacer || plotNum == null) return;
 
-        const handleBlink = (e) => {
-          const { targetPlotNum, targetElementId } = e.detail || {};
-          // Match by exact plot number
-          if (targetPlotNum != null && targetPlotNum === plotNum) {
-            // If targetElementId is provided, only blink if this element's ID matches
-            // This ensures only ONE plot blinks even if multiple have the same plot number
-            if (targetElementId && elementRef.current) {
-              const myId = elementRef.current.id;
-              if (myId && myId !== targetElementId) {
-                return; // Don't blink - this isn't the specific element that was targeted
-              }
-            }
-            setBlinkColor('green');
-            setIsBlinking(true);
-            // No timeout - keeps blinking until clicked or page changes
-          }
-        };
+    const handleBlink = (e) => {
+      const { targetPlotNum, targetElementId } = e.detail || {};
+      if (targetPlotNum != null && targetPlotNum === plotNum) {
+        if (targetElementId && elementRef.current) {
+          const myId = elementRef.current.id;
+          if (myId && myId !== targetElementId) return;
+        }
+        setBlinkColor('green');
+        setIsBlinking(true);
+      }
+    };
 
-        // Handle search-triggered blue blink
-        const handleSearchBlink = (e) => {
-          const { targetPlotNum } = e.detail || {};
-          if (targetPlotNum != null && targetPlotNum === plotNum) {
-            setBlinkColor('blue');
-            setIsBlinking(true);
-          }
-        };
+    const handleSearchBlink = (e) => {
+      const { targetPlotNum } = e.detail || {};
+      if (targetPlotNum != null && targetPlotNum === plotNum) {
+        setBlinkColor('blue');
+        setIsBlinking(true);
+      }
+    };
 
-        const handleStopBlink = () => {
-          setIsBlinking(false);
-        };
+    const handleStopBlink = () => {
+      setIsBlinking(false);
+    };
 
-        window.addEventListener('plot-start-blink', handleBlink);
-        window.addEventListener('plot-search-blink', handleSearchBlink);
-        window.addEventListener('plot-stop-all-blink', handleStopBlink);
-        return () => {
-          window.removeEventListener('plot-start-blink', handleBlink);
-          window.removeEventListener('plot-search-blink', handleSearchBlink);
-          window.removeEventListener('plot-stop-all-blink', handleStopBlink);
-        };
-      }, [plotNum, data?.isSpacer]);
+    window.addEventListener('plot-start-blink', handleBlink);
+    window.addEventListener('plot-search-blink', handleSearchBlink);
+    window.addEventListener('plot-stop-all-blink', handleStopBlink);
+    return () => {
+      window.removeEventListener('plot-start-blink', handleBlink);
+      window.removeEventListener('plot-search-blink', handleSearchBlink);
+      window.removeEventListener('plot-stop-all-blink', handleStopBlink);
+    };
+  }, [plotNum, data?.isSpacer]);
 
   // Early return for spacers
   if (data?.isSpacer) {

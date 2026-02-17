@@ -146,10 +146,9 @@ export default function Layout({ children }) {
     };
   }, []);
 
-  // On the Plots page, block third-party trackers and heavy CDNs to reduce JS cost
+  // Third-party script blocking: run once at app startup (not per route)
   useEffect(() => {
-    const isPlots = location.pathname.toLowerCase().startsWith('/plots');
-    if (!isPlots) return;
+    if (window.__thirdPartyBlocked) return;
     try {
       const selectors = [
         'script[src*="googletagmanager.com"]',
@@ -159,15 +158,14 @@ export default function Layout({ children }) {
         'script[src*="cdn.tailwindcss.com"]'
       ];
       const nodes = document.querySelectorAll(selectors.join(','));
-      nodes.forEach((n) => { try { n.parentNode && n.parentNode.removeChild(n); } catch {} });
-      // Prevent re-insertion during this session and stub common globals
+      nodes.forEach((n) => { try { n.parentNode?.removeChild(n); } catch {} });
       window.__thirdPartyBlocked = true;
       window.dataLayer = window.dataLayer || [];
       if (!window.fbq) {
         window.fbq = (...args) => { (window.__fbqQueue = window.__fbqQueue || []).push(args); };
       }
     } catch {}
-  }, [location.pathname]);
+  }, []);
 
   const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
 
