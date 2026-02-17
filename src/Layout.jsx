@@ -298,24 +298,25 @@ export default function Layout({ children }) {
         }
         /* Mobile performance optimizations */
         @media (max-width: 640px) {
-          /* Reduce paint complexity on mobile */
           .shadow-lg, .shadow-xl, .shadow-2xl {
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
           }
-          /* Optimize animations */
           .transition-all {
             transition-property: opacity, transform;
           }
         }
-        /* GPU acceleration for smooth scrolling */
+        /* Smooth touch scrolling */
         .overflow-y-auto, .overflow-x-auto {
           -webkit-overflow-scrolling: touch;
-          will-change: scroll-position;
         }
         /* Content visibility for off-screen sections */
         section {
           content-visibility: auto;
           contain-intrinsic-size: auto 500px;
+        }
+        /* Plot cell containment - prevents layout thrashing from thousands of cells */
+        .plot-element {
+          contain: layout style paint;
         }
         /* Prefers reduced motion */
         @media (prefers-reduced-motion: reduce) {
