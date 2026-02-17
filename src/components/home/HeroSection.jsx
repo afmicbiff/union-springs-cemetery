@@ -8,7 +8,7 @@ import { Search, MapPin, Map } from 'lucide-react';
 // Optimized with WebP, responsive srcSet, and proper aspect ratio
 const HeroImage = memo(function HeroImage({ index, src, webpSrc, alt, activeImage, onClick, positionClass, mobilePositionClass }) {
   const isActive = activeImage === index;
-  const isPriority = index <= 2;
+  const isPriority = index === 1;
   
   return (
     <div 
@@ -38,7 +38,7 @@ const HeroImage = memo(function HeroImage({ index, src, webpSrc, alt, activeImag
             alt={alt}
             className="w-full h-auto"
             loading={isPriority ? "eager" : "lazy"}
-            decoding={isPriority ? "sync" : "async"}
+            decoding="async"
             fetchpriority={isPriority ? "high" : "auto"}
             width={340}
             height={255}
