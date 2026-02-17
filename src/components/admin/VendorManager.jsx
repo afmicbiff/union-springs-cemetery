@@ -100,7 +100,7 @@ const VendorList = memo(function VendorList({ onSelect, onCreate, isCreateOpen, 
                 </div>
             </CardContent>
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
                     <VendorOnboardingForm onSuccess={() => setIsCreateOpen(false)}/>
                 </DialogContent>
             </Dialog>
@@ -224,7 +224,7 @@ const VendorProfile = memo(function VendorProfile({ vendor, onBack }) {
             </div>
 
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto"><VendorEditForm vendor={vendor} onSuccess={() => setIsEditOpen(false)}/></DialogContent>
+                <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto"><VendorEditForm vendor={vendor} onSuccess={() => setIsEditOpen(false)}/></DialogContent>
             </Dialog>
         </div>
     );
@@ -356,7 +356,7 @@ const InvoiceManager = memo(function InvoiceManager({ vendorId, vendorName, invo
                 <h3 className="font-semibold text-sm flex items-center gap-1"><DollarSign className="w-3.5 h-3.5"/>Invoices</h3>
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                     <DialogTrigger asChild><Button size="sm" className="h-7 text-xs bg-teal-700 hover:bg-teal-800 text-white">Add</Button></DialogTrigger>
-                    <DialogContent className="max-w-sm">
+                    <DialogContent className="max-w-[95vw] sm:max-w-sm">
                         <h3 className="font-bold text-sm mb-3">New Invoice</h3>
                         <form onSubmit={handleSubmit} className="space-y-3">
                             <div className="grid grid-cols-2 gap-2">

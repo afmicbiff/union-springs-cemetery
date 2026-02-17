@@ -167,7 +167,7 @@ export default function AdminSearch({ onNavigate }) {
     };
 
     return (
-        <div ref={wrapperRef} className="relative w-full md:w-[400px]">
+        <div ref={wrapperRef} className="relative w-full max-w-full md:w-[400px]">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
                 <Input 
@@ -198,7 +198,7 @@ export default function AdminSearch({ onNavigate }) {
             </div>
 
             {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-stone-200 z-50 overflow-hidden max-h-[80vh] flex flex-col">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-stone-200 z-50 overflow-hidden max-h-[70vh] sm:max-h-[80vh] flex flex-col">
                     
                     {/* Recent Searches */}
                     {query.length < 2 && recentSearches.length > 0 && (

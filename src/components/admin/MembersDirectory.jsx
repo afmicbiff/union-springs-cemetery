@@ -951,7 +951,7 @@ function MembersDirectory({ openMemberId }) {
 
             {/* Audit Log Dialog */}
             <Dialog open={isActivityLogOpen} onOpenChange={setIsActivityLogOpen}>
-                <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col">
+                <DialogContent className="max-w-[95vw] sm:max-w-[600px] h-[80vh] sm:h-[600px] flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <History className="w-5 h-5 text-teal-600" /> Member Directory Audit Log

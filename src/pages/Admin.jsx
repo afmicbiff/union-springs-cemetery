@@ -451,7 +451,7 @@ function AdminDashboard() {
                             )}
                         </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[90vw] sm:w-80 max-w-[360px] p-0" align="end">
+                    <PopoverContent className="w-[92vw] sm:w-80 max-w-[360px] p-0 mx-2 sm:mx-0" align="end" sideOffset={8}>
                         <div className="p-3 border-b bg-stone-50 flex items-center justify-between">
                             <h4 className="font-semibold text-stone-900 text-sm">
                                 Notifications {unreadCount > 0 && <span className="text-red-600">({unreadCount} unread)</span>}

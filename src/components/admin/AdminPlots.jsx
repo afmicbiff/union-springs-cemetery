@@ -257,7 +257,7 @@ export default function AdminPlots() {
 
                 {/* Quick View Dialog */}
                 <Dialog open={!!quickView} onOpenChange={(o) => { if (!o) setQuickView(null); }}>
-                    <DialogContent className="max-w-md">
+                    <DialogContent className="max-w-[95vw] sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>Plot Details</DialogTitle>
                         </DialogHeader>
