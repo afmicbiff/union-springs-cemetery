@@ -111,45 +111,54 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
         {/* Top edge bar */}
         <div
           className="absolute pointer-events-auto"
-          style={{ top: -ET/2, left: CS, right: CS, height: ET, cursor: 'ns-resize' }}
+          style={{ top: -ET/2, left: CS + 4, right: CS + 4, height: ET, cursor: 'ns-resize', zIndex: 15 }}
           onMouseDown={(e) => startDrag(e, 'resize', 't')}
           onTouchStart={(e) => startDrag(e, 'resize', 't')}
         >
-          <div className="mx-auto h-1 rounded-full transition-all duration-150" 
+          <div className="mx-auto rounded-full transition-all duration-150" 
                style={{ 
-                 width: active ? '40%' : '20%', 
-                 marginTop: ET/2 - 2,
-                 background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                 width: '50%', 
+                 height: 4,
+                 marginTop: (ET - 4) / 2,
+                 background: 'rgb(13,148,136)',
+                 opacity: active ? 1 : 0.6,
+                 boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                }} />
         </div>
 
         {/* Bottom edge bar */}
         <div
           className="absolute pointer-events-auto"
-          style={{ bottom: -ET/2, left: CS, right: CS, height: ET, cursor: 'ns-resize' }}
+          style={{ bottom: -ET/2, left: CS + 4, right: CS + 4, height: ET, cursor: 'ns-resize', zIndex: 15 }}
           onMouseDown={(e) => startDrag(e, 'resize', 'b')}
           onTouchStart={(e) => startDrag(e, 'resize', 'b')}
         >
-          <div className="mx-auto h-1 rounded-full transition-all duration-150" 
+          <div className="mx-auto rounded-full transition-all duration-150" 
                style={{ 
-                 width: active ? '40%' : '20%', 
-                 marginTop: ET/2 - 2,
-                 background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                 width: '50%', 
+                 height: 4,
+                 marginTop: (ET - 4) / 2,
+                 background: 'rgb(13,148,136)',
+                 opacity: active ? 1 : 0.6,
+                 boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                }} />
         </div>
 
         {/* Left edge bar */}
         <div
           className="absolute pointer-events-auto"
-          style={{ left: -ET/2, top: CS, bottom: CS, width: ET, cursor: 'ew-resize' }}
+          style={{ left: -ET/2, top: CS + 4, bottom: CS + 4, width: ET, cursor: 'ew-resize', zIndex: 15 }}
           onMouseDown={(e) => startDrag(e, 'resize', 'l')}
           onTouchStart={(e) => startDrag(e, 'resize', 'l')}
         >
           <div className="h-full flex items-center justify-center">
-            <div className="w-1 rounded-full transition-all duration-150"
+            <div className="rounded-full transition-all duration-150"
                  style={{ 
-                   height: active ? '40%' : '20%',
-                   background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                   width: 4,
+                   height: '50%',
+                   background: 'rgb(13,148,136)',
+                   opacity: active ? 1 : 0.6,
+                   boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                  }} />
           </div>
         </div>
@@ -157,15 +166,18 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
         {/* Right edge bar */}
         <div
           className="absolute pointer-events-auto"
-          style={{ right: -ET/2, top: CS, bottom: CS, width: ET, cursor: 'ew-resize' }}
+          style={{ right: -ET/2, top: CS + 4, bottom: CS + 4, width: ET, cursor: 'ew-resize', zIndex: 15 }}
           onMouseDown={(e) => startDrag(e, 'resize', 'r')}
           onTouchStart={(e) => startDrag(e, 'resize', 'r')}
         >
           <div className="h-full flex items-center justify-center">
-            <div className="w-1 rounded-full transition-all duration-150"
+            <div className="rounded-full transition-all duration-150"
                  style={{ 
-                   height: active ? '40%' : '20%',
-                   background: active ? 'rgba(13,148,136,0.9)' : 'rgba(13,148,136,0.35)',
+                   width: 4,
+                   height: '50%',
+                   background: 'rgb(13,148,136)',
+                   opacity: active ? 1 : 0.6,
+                   boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                  }} />
           </div>
         </div>
