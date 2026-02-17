@@ -208,26 +208,26 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
           </div>
         ))}
 
-        {/* ===== MOVE BAR (top center) ===== */}
+        {/* ===== MOVE BAR (top center) — always visible ===== */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-md shadow-lg border px-2.5 py-1 cursor-move pointer-events-auto transition-all duration-200 select-none"
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-md shadow-lg border px-2.5 py-1.5 cursor-move pointer-events-auto transition-all duration-200 select-none"
           style={{
-            top: -32,
-            background: active ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.8)',
-            borderColor: active ? 'rgb(13,148,136)' : '#e5e7eb',
-            opacity: active ? 1 : 0.5,
+            top: -36,
+            background: 'rgba(255,255,255,0.95)',
+            borderColor: 'rgb(13,148,136)',
+            zIndex: 30,
           }}
           onMouseDown={(e) => startDrag(e, 'move')}
           onTouchStart={(e) => startDrag(e, 'move')}
         >
-          <Move className="w-3.5 h-3.5 text-teal-600" />
-          <span className="text-[10px] text-teal-700 font-semibold">Move</span>
+          <Move className="w-4 h-4 text-teal-600" />
+          <span className="text-xs text-teal-700 font-semibold">Move</span>
           <button
-            className="ml-1 p-0.5 rounded hover:bg-teal-50 transition-colors"
+            className="ml-1.5 p-1 rounded hover:bg-teal-50 transition-colors"
             onClick={(e) => { e.stopPropagation(); handleReset(); }}
             title="Reset position & size"
           >
-            <RotateCcw className="w-3 h-3 text-teal-500" />
+            <RotateCcw className="w-3.5 h-3.5 text-teal-500" />
           </button>
         </div>
 
