@@ -80,10 +80,10 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
   const ET = 8;
 
   return (
-    <div className="absolute inset-0 z-[1] pointer-events-none overflow-hidden" style={{ isolation: 'isolate' }}>
+    <div className="fixed inset-0 z-[5] pointer-events-none overflow-visible" style={{ isolation: 'isolate' }}>
       <div
         className="absolute pointer-events-auto"
-        style={{ left: box.x, top: box.y, width: box.w, height: box.h }}
+        style={{ left: box.x, top: box.y, width: box.w, height: box.h, zIndex: isDragging ? 9999 : 5 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => { if (!isDragging) setIsHovered(false); }}
       >
