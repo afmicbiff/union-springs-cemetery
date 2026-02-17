@@ -191,17 +191,18 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
         ].map(({ key, cursor, pos }) => (
           <div
             key={key}
-            className="absolute pointer-events-auto z-20"
-            style={{ ...pos, width: CS, height: CS, cursor }}
+            className="absolute pointer-events-auto"
+            style={{ ...pos, width: CS, height: CS, cursor, zIndex: 25 }}
             onMouseDown={(e) => startDrag(e, 'resize', key)}
             onTouchStart={(e) => startDrag(e, 'resize', key)}
           >
             <div
-              className="w-full h-full rounded-sm shadow-md transition-all duration-150"
+              className="w-full h-full rounded-sm transition-all duration-150"
               style={{
-                background: active ? '#fff' : 'rgba(255,255,255,0.7)',
-                border: active ? '2.5px solid rgb(13,148,136)' : '2px solid rgba(13,148,136,0.4)',
-                transform: active ? 'scale(1.15)' : 'scale(1)',
+                background: '#fff',
+                border: '2.5px solid rgb(13,148,136)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.3), 0 0 0 1px rgba(13,148,136,0.2)',
+                transform: active ? 'scale(1.2)' : 'scale(1)',
               }}
             />
           </div>
