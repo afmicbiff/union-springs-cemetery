@@ -58,15 +58,14 @@ const MapControls = memo(function MapControls({ containerRef }) {
     }
   }, [applyZoom, getMapContainer]);
 
-  // Apply initial sizing when content loads
+  // Apply initial sizing when content loads — use ResizeObserver instead of polling timeouts
   useEffect(() => {
+    const container = getMapContainer();
+    if (!container) return;
+
     const fitContainer = () => {
-      const container = getMapContainer();
-      if (!container) return false;
-      
       const inner = container.querySelector('.map-zoom-inner');
       if (!inner || inner.scrollHeight < 50) return false;
-      
       const scaledWidth = inner.scrollWidth * zoom;
       const scaledHeight = inner.scrollHeight * zoom;
       container.style.width = `${Math.ceil(scaledWidth) + 32}px`;
@@ -75,13 +74,21 @@ const MapControls = memo(function MapControls({ containerRef }) {
       container.style.maxHeight = '85vh';
       return true;
     };
-    
-    if (!fitContainer()) {
-      const timers = [100, 300, 600, 1000].map(delay => 
-        setTimeout(fitContainer, delay)
-      );
-      return () => timers.forEach(clearTimeout);
+
+    if (fitContainer()) return;
+
+    // Fallback: observe inner element for size changes (replaces 4 setTimeout retries)
+    const inner = container.querySelector('.map-zoom-inner');
+    if (inner && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => {
+        if (fitContainer()) ro.disconnect();
+      });
+      ro.observe(inner);
+      return () => ro.disconnect();
     }
+    // Final fallback for browsers without ResizeObserver
+    const timer = setTimeout(fitContainer, 500);
+    return () => clearTimeout(timer);
   }, [getMapContainer, zoom]);
 
   // Pan drag handlers

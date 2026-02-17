@@ -10,14 +10,14 @@ export default function ImageContextMenu() {
   const [pictureEl, setPictureEl] = React.useState(null);
   const [busy, setBusy] = React.useState(false);
 
+  // PERF: Only add click/escape listeners when menu is visible to reduce global listener count
   React.useEffect(() => {
     const onContextMenu = (e) => {
-      // Only handle images/picture elements
       const img = e.target.closest('img');
       const pic = e.target.closest('picture');
       if (!img) {
         setVisible(false);
-        return; // allow default browser menu
+        return;
       }
       e.preventDefault();
       setTargetImg(img);
@@ -28,18 +28,24 @@ export default function ImageContextMenu() {
       setVisible(true);
     };
 
+    document.addEventListener('contextmenu', onContextMenu);
+    return () => {
+      document.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, []);
+
+  // Dismiss listeners - only active when menu is visible
+  React.useEffect(() => {
+    if (!visible) return;
     const onClick = () => setVisible(false);
     const onEscape = (e) => { if (e.key === 'Escape') setVisible(false); };
-
-    document.addEventListener('contextmenu', onContextMenu);
     document.addEventListener('click', onClick);
     document.addEventListener('keydown', onEscape);
     return () => {
-      document.removeEventListener('contextmenu', onContextMenu);
       document.removeEventListener('click', onClick);
       document.removeEventListener('keydown', onEscape);
     };
-  }, []);
+  }, [visible]);
 
   const compressHere = async () => {
     if (!targetImg) return;

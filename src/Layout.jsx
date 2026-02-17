@@ -224,7 +224,8 @@ export default function Layout({ children }) {
     }
   };
 
-  const navItems = [
+  // PERF: navItems is static — define outside render or useMemo to avoid recreating on every render
+  const navItems = useMemo(() => [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
     { label: 'Deceased Search', path: '/search', icon: Search },
@@ -249,14 +250,14 @@ export default function Layout({ children }) {
     { label: 'Employee Portal', path: '/Employees', icon: Users },
     { label: 'Member Portal', path: '/MemberPortal', icon: UserCircle },
     { label: 'Principle Portal', path: '/PrinciplePortal', icon: UserCircle },
-    
+
     { label: 'Advanced Reports', path: '/Reports', icon: BarChart2 },
     { label: 'Security Dashboard', path: '/SecurityDashboard', icon: Activity },
 
     { label: 'Image Management', path: '/ImageManager', icon: Image }
     ]
     }
-  ];
+  ], []);
 
   const navItemsFiltered = useMemo(() => navItems.map((item) => {
     if (item.label === 'Admin Dashboard' && item.items) {

@@ -132,7 +132,7 @@ const HeroSection = memo(function HeroSection() {
                     src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/ffe750753_img-1767267602235.jpg"
                     alt="Union Springs Cemetery Gate"
                     className="w-full h-auto"
-                    loading="eager"
+                    loading="lazy"
                     width={130}
                     height={98}
                   />
@@ -157,6 +157,7 @@ const HeroSection = memo(function HeroSection() {
                     alt="Union Springs History"
                     className="w-full h-auto"
                     loading="lazy"
+                    decoding="async"
                     width={130}
                     height={98}
                   />
@@ -181,6 +182,7 @@ const HeroSection = memo(function HeroSection() {
                     alt="Union Springs Church"
                     className="w-full h-auto"
                     loading="lazy"
+                    decoding="async"
                     width={130}
                     height={98}
                   />
