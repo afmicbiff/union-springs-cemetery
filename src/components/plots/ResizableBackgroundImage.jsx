@@ -101,7 +101,8 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
         <div
           className="absolute inset-0 pointer-events-none transition-all duration-150"
           style={{
-            border: active ? '2px solid rgba(13,148,136,0.8)' : '2px solid rgba(13,148,136,0.25)',
+            border: active ? '3px solid rgba(13,148,136,0.9)' : '2px dashed rgba(13,148,136,0.5)',
+            boxShadow: active ? '0 0 0 1px rgba(13,148,136,0.2)' : 'none',
           }}
         />
 
