@@ -892,20 +892,20 @@ export default function PlotsPage() {
       const existing = Array.isArray(existingArr) ? existingArr[0] : existingArr?.[0];
       if (existing?.id) {
         if (existing.status !== t.status) {
-          await base44.entities.Plot.update(existing.id, { status: t.status });
-        }
-      } else {
-        await base44.entities.Plot.create(t);
-      }
-    }));
+                  await base44.entities.Plot.update(existing.id, { status: t.status });
+                }
+              } else {
+                await base44.entities.Plot.create(t);
+              }
+            }));
 
-    clearEntityCache('Plot');
-    queryClient.invalidateQueries({ queryKey: ['plots'] });
-    invalidatePlotsMap();
-    toast.success('Added/updated plots 227 and 302 as Not Usable in Section 5');
-    };
+            clearEntityCache('Plot');
+            queryClient.invalidateQueries({ queryKey: ['plots'] });
+            invalidatePlotsMap();
+            toast.success('Added/updated plots 227 and 302 as Not Usable in Section 5');
+          };
 
-    const relocatePlot227ToSection2 = async () => {
+          const relocatePlot227ToSection2 = async () => {
     const target = { section: '2', plot_number: '228-A', status: 'Not Usable' };
     const originalArr = await base44.entities.Plot.filter(
       { $and: [
@@ -1263,11 +1263,9 @@ export default function PlotsPage() {
     
     try {
       const plotNumber = plot.Grave || plot.plot_number;
-      const section = plot.Section || plot.section || 'Section 5';
-      const row = plot.Row || plot.row_number || '';
-      
-      // Create a new blank plot with a unique plot number (add 'A' suffix or increment)
-      const newPlotNumber = `${plotNumber}-NEW`;
+              const section = plot.Section || plot.section || 'Section 5';
+              const row = plot.Row || plot.row_number || '';
+              const newPlotNumber = `${plotNumber}-NEW`;
       
       await base44.entities.Plot.create({
         section: section,
@@ -1284,8 +1282,7 @@ export default function PlotsPage() {
       
       toast.success(`Added blank plot above #${plotNumber}`);
     } catch (err) {
-      console.error('Add blank plot error:', err);
-      toast.error(`Failed to add plot: ${err.message}`);
+    toast.error(`Failed to add plot: ${err.message}`);
     }
   }, [queryClient]);
 
@@ -1293,10 +1290,8 @@ export default function PlotsPage() {
     if (!plot || !plot._id) return;
     
     try {
-      const plotNumber = plot.Grave || plot.plot_number;
-      
-      // Check if plot has occupant data
-      const hasOccupant = plot.first_name || plot.last_name || plot['First Name'] || plot['Last Name'];
+            const plotNumber = plot.Grave || plot.plot_number;
+            const hasOccupant = plot.first_name || plot.last_name || plot['First Name'] || plot['Last Name'];
       if (hasOccupant) {
         toast.error("Cannot delete plot with occupant data");
         return;
@@ -1312,8 +1307,7 @@ export default function PlotsPage() {
       
       toast.success(`Deleted plot #${plotNumber} and shifted others`);
     } catch (err) {
-      console.error('Delete plot error:', err);
-      toast.error(`Failed to delete plot: ${err.message}`);
+    toast.error(`Failed to delete plot: ${err.message}`);
     }
   }, [queryClient]);
 
@@ -1322,23 +1316,17 @@ export default function PlotsPage() {
 
     try {
       const plotToMove = plot || parsedData.find(p => p._id === plotId);
-      if (!plotToMove) {
-        toast.error("Could not find plot to move");
-        return;
-      }
+          if (!plotToMove) {
+            toast.error("Could not find plot to move");
+            return;
+          }
 
-      const plotNumber = plotToMove.Grave || plotToMove.plot_number;
-      
-      console.log('handleMovePlot called:', plotId, 'to section:', targetSection);
-      
-      // Only update section - plot keeps its original plot_number
-      await base44.entities.Plot.update(plotId, {
+          const plotNumber = plotToMove.Grave || plotToMove.plot_number;
+
+          await base44.entities.Plot.update(plotId, {
         section: `Section ${targetSection}`
       });
 
-      console.log('Plot updated, invalidating caches...');
-      
-      // Clear all caches aggressively
       clearEntityCache('Plot');
       
       // Remove all plot-related queries from cache
@@ -1354,8 +1342,7 @@ export default function PlotsPage() {
       
       toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
     } catch (err) {
-      console.error('Move plot error:', err);
-      toast.error(`Failed to move plot: ${err.message}`);
+        toast.error(`Failed to move plot: ${err.message}`);
     }
   }, [parsedData, queryClient]);
 
