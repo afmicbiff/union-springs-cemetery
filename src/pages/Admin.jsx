@@ -424,7 +424,7 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 w-full max-w-[1600px] mx-auto">
+    <div className="p-2 sm:p-4 md:p-6 w-full max-w-[1600px] mx-auto overflow-x-hidden">
       <div className="space-y-4 sm:space-y-6 md:space-y-8">
         
         {/* Header */}
@@ -434,7 +434,7 @@ function AdminDashboard() {
                 <p className="text-stone-600 text-xs sm:text-sm md:text-base">Administrative Overview & Management</p>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end flex-wrap">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end flex-wrap min-w-0">
                 <AdminSearch onNavigate={handleSearchNavigate} />
                 
                 {/* Notifications */}
@@ -484,8 +484,8 @@ function AdminDashboard() {
 
         {/* Navigation & Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-            <div className="w-full overflow-x-auto pb-2 -mx-3 px-3 sm:-mx-4 sm:px-4 md:mx-0 md:px-0 scrollbar-hide overscroll-x-contain">
-                <TabsList className="bg-white p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-0.5 sm:gap-1">
+            <div className="w-full overflow-x-auto pb-2 -mx-2 px-2 sm:-mx-4 sm:px-4 md:mx-0 md:px-0 scrollbar-hide overscroll-x-contain">
+                <TabsList className="bg-white p-0.5 sm:p-1 shadow-sm border border-stone-200 flex flex-wrap h-auto w-full gap-0.5 sm:gap-1">
                     {tabs.map(tab => {
                       // Keep invisible triggers for tabs that are in dropdowns to maintain Tabs structure
                       if (tab.id === 'archives' || tab.id === 'onboarding' || tab.id === 'documents') {
