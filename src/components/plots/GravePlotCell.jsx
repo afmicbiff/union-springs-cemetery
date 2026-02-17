@@ -24,51 +24,53 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
 
   // Blinking logic - triggered by custom event after centering completes
   // Blinks until user clicks on the plot
+  // PERF: use refs for mutable state to avoid re-registering listeners on every blink toggle
+  const isBlinkingRef = useRef(false);
+  const itemRef = useRef(item);
+  itemRef.current = item;
+
   useEffect(() => {
     if (!item) return;
 
     const handleStartBlink = (e) => {
       const { targetPlotNum } = e.detail || {};
-
-      // Match by plot number ONLY (ignore section for cross-section searching)
       const isMatch = Number.isFinite(targetPlotNum)
         && Number.isFinite(plotNum)
         && plotNum === targetPlotNum;
 
-      // Stop blinking on non-matching plots when a new plot is selected
-      if (!isMatch && isBlinking) {
-        setIsBlinking(false);
+      if (!isMatch && isBlinkingRef.current) {
+        isBlinkingRef.current = false;
         hasInitializedBlink.current = false;
+        setIsBlinking(false);
         return;
       }
 
       if (isMatch && !hasInitializedBlink.current) {
         hasInitializedBlink.current = true;
+        isBlinkingRef.current = true;
         setIsBlinking(true);
-        // Keep blinking until user clicks the plot - no auto-stop timeout
       }
     };
 
-    // Handle search blink - match by plotId for precise matching across all fields
     const handleSearchBlink = (e) => {
       const { targetPlotNum, plotId } = e.detail || {};
-
-      // Match by plot ID if provided, otherwise by plot number
+      const curItem = itemRef.current;
       const isMatch = plotId 
-        ? (item._id === plotId)
+        ? (curItem?._id === plotId)
         : (Number.isFinite(targetPlotNum) && Number.isFinite(plotNum) && plotNum === targetPlotNum);
 
       if (isMatch) {
         hasInitializedBlink.current = true;
+        isBlinkingRef.current = true;
         setIsBlinking(true);
       }
     };
 
-    // Stop blink event for when user selects different plot
     const handleStopBlink = () => {
-      if (isBlinking) {
-        setIsBlinking(false);
+      if (isBlinkingRef.current) {
+        isBlinkingRef.current = false;
         hasInitializedBlink.current = false;
+        setIsBlinking(false);
       }
     };
 
@@ -81,7 +83,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       window.removeEventListener('plot-search-blink', handleSearchBlink);
       window.removeEventListener('plot-stop-all-blink', handleStopBlink);
     };
-  }, [plotNum, sectionKey, item, isBlinking]);
+  }, [plotNum, sectionKey]);
 
   // Cleanup blink state on unmount (page navigation)
   useEffect(() => {
@@ -93,14 +95,14 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const handleClick = useCallback((e) => {
     e.stopPropagation();
     // Stop blinking when user clicks on this plot
-    if (isBlinking) {
-      setIsBlinking(false);
+    if (isBlinkingRef.current) {
+      isBlinkingRef.current = false;
       hasInitializedBlink.current = false;
+      setIsBlinking(false);
     }
-    // Stop any existing blinks when clicking a new plot
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
     if (isAdmin && onEdit && item?._entity === 'Plot') onEdit(item);
-  }, [isAdmin, onEdit, item, isBlinking]);
+  }, [isAdmin, onEdit, item]);
 
   const handleMouseEnter = useCallback((e) => {
     if (onHover) onHover(e, item);

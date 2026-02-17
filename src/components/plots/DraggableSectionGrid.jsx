@@ -48,7 +48,6 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
     e.stopPropagation();
     e.preventDefault();
     
-    // Ctrl+Click or Cmd+Click opens context menu (do NOT open edit dialog)
     if (e.ctrlKey || e.metaKey) {
       if (isAdmin && onCtrlClick) {
         onCtrlClick(plot);
@@ -56,9 +55,7 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       return;
     }
     
-    // Regular click opens edit dialog
     if (onEdit && plot) {
-      console.log('PlotCell click - opening edit dialog for:', plot.Grave || plot._id);
       onEdit(plot);
     }
   };
@@ -90,10 +87,8 @@ const PlotCell = React.memo(({ plot, isAdmin, onHover, onEdit, baseColorClass, s
       `}
       onClick={handleClick}
       onPointerUp={(e) => {
-        // Backup handler in case ZoomPan intercepts click
         if (!e.ctrlKey && !e.metaKey && onEdit && plot) {
           e.stopPropagation();
-          console.log('PlotCell pointerUp - opening edit dialog for:', plot.Grave || plot._id);
           onEdit(plot);
         }
       }}
@@ -123,7 +118,6 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
     e.preventDefault();
     
     if (hasSelection && onMovePlot && selectedPlot) {
-      // Move the selected plot to this section (keep its plot_number)
       onMovePlot({
         plotId: selectedPlot._id,
         targetSection: sectionKey,
@@ -131,18 +125,13 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
         plot: selectedPlot
       });
     } else if (isAdmin && onEdit) {
-      // Create new plot - open edit dialog with spacer data
-      console.log('EmptyCell click - opening create dialog for section:', sectionKey);
       onEdit({ isSpacer: true, Section: `Section ${sectionKey}`, suggestedSection: sectionKey });
     }
   };
 
   const handlePointerUp = (e) => {
-    // Use pointerup as backup since ZoomPan may intercept clicks
     e.stopPropagation();
-    console.log('EmptyCell pointerUp:', { hasSelection, selectedPlot: selectedPlot?._id });
     if (hasSelection && onMovePlot && selectedPlot) {
-      console.log('EmptyCell pointerUp calling onMovePlot');
       onMovePlot({
         plotId: selectedPlot._id,
         targetSection: sectionKey,
@@ -153,10 +142,8 @@ const EmptyCell = React.memo(({ isAdmin, sectionKey, gridIndex, selectedPlot, on
   };
 
   const handlePointerUpCreate = (e) => {
-    // Backup handler for creating new plot
     if (!hasSelection && isAdmin && onEdit) {
       e.stopPropagation();
-      console.log('EmptyCell pointerUp - opening create dialog');
       onEdit({ isSpacer: true, Section: `Section ${sectionKey}`, suggestedSection: sectionKey });
     }
   };
@@ -208,17 +195,8 @@ export default function DraggableSectionGrid({
   }, []);
 
   const handleMovePlot = useCallback((moveData) => {
-    console.log('DraggableSectionGrid handleMovePlot called:', moveData, 'onMovePlot exists:', !!onMovePlot);
-    if (!onMovePlot) {
-      console.error('onMovePlot is not defined!');
-      return;
-    }
-    
-    // Clear selection first
+    if (!onMovePlot) return;
     setSelectedPlot(null);
-    
-    // Move plot - only update section, keep plot_number the same
-    console.log('Calling parent onMovePlot...');
     onMovePlot({
       plotId: moveData.plotId,
       targetSection: moveData.targetSection,
