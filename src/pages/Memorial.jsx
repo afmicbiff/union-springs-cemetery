@@ -133,8 +133,8 @@ export default function MemorialPage() {
     return (
         <div className="min-h-screen bg-stone-50 font-serif">
             {/* Hero / Header */}
-            <div className="bg-stone-900 text-stone-100 min-h-[60vh] flex flex-col justify-end py-12 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=2525&auto=format&fit=crop')] bg-cover bg-center" />
+            <div className="bg-stone-900 text-stone-100 min-h-[50vh] sm:min-h-[60vh] flex flex-col justify-end py-8 sm:py-12 relative overflow-hidden">
+                <div className="absolute inset-0 opacity-40 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=60&w=800&auto=format&fit=crop')" }} />
                 <div className="max-w-[1240px] mx-auto px-4 w-full relative z-10 text-left">
                     <Link to={backSearchUrl} className="md:hidden inline-flex items-center gap-2 text-stone-100/90 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-2 rounded-md w-fit mb-4">
                         <ArrowLeft className="w-4 h-4" /> <span>Back to Search</span>
@@ -147,9 +147,9 @@ export default function MemorialPage() {
                         />
                     )}
 
-                    <h1 className="text-4xl md:text-6xl font-bold mb-2">{deceased.first_name} {deceased.last_name}</h1>
+                    <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-2 break-words">{deceased.first_name} {deceased.last_name}</h1>
                     {(deceased.date_of_birth || deceased.date_of_death) && (
-                        <p className="text-xl md:text-2xl text-white mb-6 font-bold">
+                        <p className="text-base sm:text-xl md:text-2xl text-white mb-4 sm:mb-6 font-bold">
                             {deceased.date_of_birth ? format(new Date(deceased.date_of_birth), 'MMMM d, yyyy') : 'Unknown'} – {deceased.date_of_death ? format(new Date(deceased.date_of_death), 'MMMM d, yyyy') : 'Unknown'}
                         </p>
                     )}
@@ -174,14 +174,14 @@ export default function MemorialPage() {
                         <Link to={backSearchUrl} className="hidden md:flex absolute left-0 text-stone-500 hover:text-teal-700 transition-colors items-center gap-2">
                             <ArrowLeft className="w-4 h-4" /> <span className="hidden md:inline">Back to Search</span>
                         </Link>
-                        <TabsList className="bg-transparent border-none rounded-none h-auto p-0 gap-8">
-                            <TabsTrigger value="obituary" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                        <TabsList className="bg-transparent border-none rounded-none h-auto p-0 gap-4 sm:gap-8 w-full justify-center">
+                            <TabsTrigger value="obituary" className="text-sm sm:text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
                                 Obituary
                             </TabsTrigger>
-                            <TabsTrigger value="gallery" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                            <TabsTrigger value="gallery" className="text-sm sm:text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
                                 Gallery ({mediaList.length})
                             </TabsTrigger>
-                            <TabsTrigger value="tributes" className="text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
+                            <TabsTrigger value="tributes" className="text-sm sm:text-lg px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-teal-600 data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-teal-800">
                                 Tributes ({condolences.length})
                             </TabsTrigger>
                         </TabsList>
@@ -190,7 +190,7 @@ export default function MemorialPage() {
                     {/* Obituary Tab */}
                     <TabsContent value="obituary" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <Card className="bg-white shadow-sm border-stone-200">
-                            <CardContent className="p-8 md:p-12">
+                            <CardContent className="p-4 sm:p-8 md:p-12">
                                 <div className="prose prose-stone max-w-none prose-lg leading-relaxed">
                                     {deceased.obituary ? (
                                         <div dangerouslySetInnerHTML={{ __html: deceased.obituary.replace(/\n/g, '<br/>') }} />
@@ -212,8 +212,8 @@ export default function MemorialPage() {
 
                     {/* Gallery Tab */}
                     <TabsContent value="gallery" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-stone-800">Photo & Video Gallery</h2>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+                            <h2 className="text-xl sm:text-2xl font-bold text-stone-800">Photo & Video Gallery</h2>
                             <div className="relative">
                                 <input 
                                     type="file" 
@@ -262,12 +262,12 @@ export default function MemorialPage() {
                                                 )}
                                             </div>
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-black border-none">
+                                        <DialogContent className="max-w-[95vw] sm:max-w-4xl p-0 overflow-hidden bg-black border-none">
                                             <div className="w-full h-full flex items-center justify-center bg-black">
                                                 {media.type === 'video' ? (
-                                                    <video src={media.url} controls className="max-h-[80vh] w-auto" />
+                                                    <video src={media.url} controls className="max-h-[70vh] sm:max-h-[80vh] max-w-full" />
                                                 ) : (
-                                                    <img src={media.url} alt="Memory" className="max-h-[80vh] w-auto object-contain" />
+                                                    <img src={media.url} alt="Memory" className="max-h-[70vh] sm:max-h-[80vh] max-w-full object-contain" />
                                                 )}
                                             </div>
                                         </DialogContent>
@@ -279,9 +279,9 @@ export default function MemorialPage() {
 
                     {/* Tributes Tab */}
                     <TabsContent value="tributes" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="md:col-span-1">
-                                <Card className="bg-teal-50 border-teal-100 sticky top-24">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                            <div className="md:col-span-1 order-2 md:order-1">
+                                <Card className="bg-teal-50 border-teal-100 md:sticky md:top-24">
                                     <CardHeader>
                                         <CardTitle className="text-teal-800 flex items-center gap-2">
                                             <Heart className="w-5 h-5" /> Leave a Condolence
@@ -324,7 +324,7 @@ export default function MemorialPage() {
                                 </Card>
                             </div>
                             
-                            <div className="md:col-span-2 space-y-6">
+                            <div className="md:col-span-2 space-y-4 sm:space-y-6 order-1 md:order-2">
                                 {condolences.length === 0 ? (
                                     <div className="text-center py-12 bg-white rounded-lg border border-stone-200">
                                         <MessageCircle className="w-12 h-12 text-stone-300 mx-auto mb-4" />

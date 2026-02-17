@@ -287,6 +287,12 @@ export default function Layout({ children }) {
         .app-font-scope h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); line-height: 1.25; }
         .app-font-scope h3 { font-size: clamp(1.125rem, 1.5vw, 1.375rem); line-height: 1.3; }
         .app-font-scope :where(p, li) { line-height: 1.6; }
+        /* Prevent iOS zoom on focus — ensure inputs render at 16px min */
+        .app-font-scope input,
+        .app-font-scope select,
+        .app-font-scope textarea {
+          font-size: max(16px, 1em);
+        }
         /* Hide number input spinners cross-browser */
         input[type='number'] {
           -moz-appearance: textfield;
