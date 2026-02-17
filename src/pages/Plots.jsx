@@ -283,10 +283,7 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedS
 
   const handleClick = (e) => {
     e.stopPropagation();
-    // Stop blinking when user clicks on this plot
-    if (isBlinking) {
-      setIsBlinking(false);
-    }
+    if (isBlinking) setIsBlinking(false);
     if (onEdit && data) onEdit(data);
   };
 
@@ -1322,15 +1319,8 @@ export default function PlotsPage() {
 
       clearEntityCache('Plot');
       
-      // Remove all plot-related queries from cache
       queryClient.removeQueries({ queryKey: ['plots'] });
       queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
-      
-      // Invalidate and refetch
-      await queryClient.invalidateQueries({ queryKey: ['plots'] });
-      await queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
-      
-      // Force immediate refetch
       await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
       
       toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
