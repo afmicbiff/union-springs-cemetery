@@ -58,17 +58,20 @@ export default function NewPlotsAndMap() {
   };
   return (
     <div className="min-h-screen bg-gray-50 w-full">
-      <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm">
+      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/44a8ffe54_Gemini_Generated_Image_mbje5gmbje5gmbje.png" 
               alt="Union Springs Logo" 
-              className="h-14 w-auto rounded-full"
+              className="h-10 sm:h-14 w-auto rounded-full"
+              loading="eager"
+              width={56}
+              height={56}
             />
-            <div className="flex flex-col">
-              <span className="text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600">Union Springs</span>
-              <span className="text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xl sm:text-2xl md:text-3xl font-serif tracking-wider uppercase text-teal-600 truncate">Union Springs</span>
+              <span className="text-[0.6rem] sm:text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
             </div>
           </div>
           <div className="mt-4 flex flex-col md:flex-row items-center md:justify-between gap-4">
@@ -83,7 +86,7 @@ export default function NewPlotsAndMap() {
 
       {/* Filters bar similar to old Plots & Map */}
       <div className="border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <PlotFilters 
             filters={filters} 
             onFilterChange={setFilters}
@@ -92,7 +95,7 @@ export default function NewPlotsAndMap() {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-7xl mx-auto p-3 sm:p-6">
         <div className="space-y-6">
           {activeTab === 'reservation1' ? (
             <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />

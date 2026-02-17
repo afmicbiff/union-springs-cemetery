@@ -1639,12 +1639,12 @@ export default function PlotsPage() {
       <div className="relative z-[2] flex flex-col min-h-screen">
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm sticky top-0 z-30">
+      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm sticky top-0 z-30">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
               <div className="text-center md:text-left">
-                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
-                <p className="text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
               </div>
           
               <div className="flex items-center justify-center md:justify-end space-x-3">
