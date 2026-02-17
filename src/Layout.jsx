@@ -287,6 +287,14 @@ export default function Layout({ children }) {
         .app-font-scope h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); line-height: 1.25; }
         .app-font-scope h3 { font-size: clamp(1.125rem, 1.5vw, 1.375rem); line-height: 1.3; }
         .app-font-scope :where(p, li) { line-height: 1.6; }
+        /* Prevent iOS zoom on focus — 16px minimum */
+        @supports (-webkit-touch-callout: none) {
+          .app-font-scope input,
+          .app-font-scope select,
+          .app-font-scope textarea {
+            font-size: max(16px, 1em);
+          }
+        }
         /* Hide number input spinners cross-browser */
         input[type='number'] {
           -moz-appearance: textfield;
@@ -340,7 +348,7 @@ export default function Layout({ children }) {
       {/* Header */}
       <header className="bg-stone-900 text-stone-100 shadow-md sticky top-0 z-50 border-b-4 border-teal-700">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16 sm:h-20">
             {/* Logo / Title */}
             <Link to={createPageUrl('Home')} className="flex items-center gap-3">
 
@@ -349,9 +357,9 @@ export default function Layout({ children }) {
                 <img src="https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/308ce6802_img-1767265605524.jpg" alt="logo" className="h-10 w-auto md:h-12" />
               </picture>
 
-              <div className="flex flex-col">
-                <span className="text-xl md:text-2xl font-serif tracking-wider uppercase text-teal-500">Union Springs</span>
-                <span className="text-[0.65rem] md:text-xs text-stone-400 tracking-[0.2em] uppercase text-center">Cemetery - Shongaloo, LA</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-lg sm:text-xl md:text-2xl font-serif tracking-wider uppercase text-teal-500 truncate">Union Springs</span>
+                <span className="text-[0.6rem] sm:text-[0.65rem] md:text-xs text-stone-400 tracking-[0.15em] sm:tracking-[0.2em] uppercase text-center">Cemetery - Shongaloo, LA</span>
               </div>
             </Link>
 
@@ -436,8 +444,8 @@ export default function Layout({ children }) {
       <Toaster />
       <ImageContextMenu />
       {/* Footer */}
-      <footer className="bg-stone-900 text-stone-400 py-12 border-t border-stone-800 mt-auto">
-        <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
+      <footer className="bg-stone-900 text-stone-400 py-8 sm:py-12 border-t border-stone-800 mt-auto">
+        <div className="max-w-[1240px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-sm">
           <div>
             <h3 className="text-teal-500 text-xl md:text-2xl font-serif tracking-wider uppercase mb-4">Union Springs</h3>
             <p className="mb-4">Ideally located in a granite setting, providing a peaceful final resting place with dignity and respect.</p>
