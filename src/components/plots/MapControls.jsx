@@ -3,7 +3,7 @@ import { ZoomIn, ZoomOut, Move, RotateCcw, Eye } from 'lucide-react';
 
 const ZOOM_STEP = 0.05;
 const MIN_ZOOM = 0.10;
-const MAX_ZOOM = 1;
+const MAX_ZOOM = 1.5;
 
 const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10];
 
