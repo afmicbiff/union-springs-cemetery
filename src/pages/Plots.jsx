@@ -1630,8 +1630,8 @@ export default function PlotsPage() {
   return (
     <div className="min-h-screen flex flex-col font-sans relative bg-white">
       
-      {/* Resizable SVG background image - hidden on mobile for performance, drag corners to resize like Canva */}
-      <div className="hidden md:block" style={{ position: 'fixed', inset: 0, zIndex: 5, pointerEvents: 'none' }}>
+      {/* Resizable SVG background image */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 5, pointerEvents: 'none' }}>
         <ResizableBackgroundImage src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/9be70da29_SVGGraveyardPICadobe2.svg" />
       </div>
 
