@@ -74,10 +74,10 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src })
 
   const active = isDragging || isHovered;
 
-  // Corner handle size
-  const CS = 14;
-  // Edge bar thickness (the grab zone)
-  const ET = 8;
+  // Corner handle size - large enough to see and grab easily
+  const CS = 18;
+  // Edge bar thickness (the grab zone) - wider for easier grabbing
+  const ET = 14;
 
   return (
     <div className="fixed inset-0 z-[5] pointer-events-none overflow-visible" style={{ isolation: 'isolate' }}>
