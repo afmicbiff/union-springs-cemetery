@@ -689,7 +689,12 @@ export default function PlotsPage() {
             }
           }
         }, []);
-  const openSections = useMemo(() => Object.keys(collapsedSections).filter((k) => !collapsedSections[k]), [collapsedSections]);
+  const openSections = useMemo(() => {
+    const open = Object.keys(collapsedSections).filter((k) => !collapsedSections[k]);
+    // Always include '1' so its data is fetched (merged into Section 2 display)
+    if (!open.includes('1')) open.push('1');
+    return open;
+  }, [collapsedSections]);
   const [expandedSections, setExpandedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
