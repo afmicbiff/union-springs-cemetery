@@ -13,7 +13,7 @@ const COLUMN_RANGES = [
   { start: 186, end: 207, shiftDown: false },
   { start: 228, end: 250, shiftDown: false },
   { start: 303, end: 325, shiftDown: false },
-  { start: 383, end: 404, shiftDown: false },
+  { start: 383, end: 405, shiftDown: false },
   { start: 466, end: 488, shiftDown: true },
   { start: 582, end: 604, shiftDown: true },
   { start: 665, end: 687, shiftDown: false },

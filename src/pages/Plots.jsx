@@ -125,6 +125,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
         case '3':
             [
                 [251,268],[326,348],[406,430],[489,512],[605,633],[688,711],[765,788],[821,843],[898,930]
+                // Note: plot 405 moved to Section 2
             ].forEach(([s,e]) => addRange(s,e));
             break;
         case '4':
@@ -398,7 +399,7 @@ const SectionRenderer = React.memo(({
                                 const ranges = [
                                     { start: 251, end: 268 },
                                     { start: 326, end: 348 },
-                                    { start: 405, end: 430 },
+                                    { start: 406, end: 430 },
                                     { start: 489, end: 512 },
                                     { start: 605, end: 633 },
                                     { start: 688, end: 711 },
