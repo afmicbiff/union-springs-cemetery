@@ -1020,7 +1020,6 @@ export default function PlotsPage() {
         ) {
             sectionKey = '2';
         } else if (graveNum === 547 ||
-            (graveNum >= 513 && graveNum <= 545) ||
             (graveNum >= 548 && graveNum <= 559) ||
             (graveNum >= 560 && graveNum <= 562) ||
             (graveNum >= 564 && graveNum <= 576)) {
