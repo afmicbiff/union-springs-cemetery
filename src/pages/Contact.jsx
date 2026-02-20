@@ -89,6 +89,10 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8">
+            <SEOHead
+              title="Contact Us – Union Springs Cemetery"
+              description="Contact Union Springs Cemetery in Shongaloo, Louisiana. Reach us for plot reservations, genealogy questions, and memorial planning. Phone: (540) 760-8863."
+            />
             <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
                 <Breadcrumbs items={[{ label: 'Contact Us' }]} />
 
