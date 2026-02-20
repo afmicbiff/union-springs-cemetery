@@ -453,6 +453,9 @@ export default function Layout({ children }) {
             <p className="mt-4 text-xs opacity-70">
               Regulated by the Louisiana Cemetery Board. Complaints may be directed to: 3445 N. Causeway Blvd, Suite 700, Metairie, LA 70002.
             </p>
+            <Link to={createPageUrl('Privacy')} className="inline-block mt-3 text-xs text-teal-400 hover:text-teal-300 underline underline-offset-2">
+              Privacy Policy
+            </Link>
             </div>
           <div>
             <h3 className="text-stone-100 font-serif text-lg mb-4">Contact</h3>
