@@ -46,10 +46,13 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
       if (n != null) plotByNum.set(n, p);
     });
 
-    return S1_COL_RANGES.map(({ start, end }) => {
+    return S1_COL_RANGES.map(({ start, end, tail }) => {
       const colPlots = [];
       for (let num = start; num <= end; num++) {
         colPlots.push(plotByNum.get(num) || null);
+      }
+      if (tail) {
+        tail.forEach(num => colPlots.push(plotByNum.get(num) || null));
       }
       return colPlots;
     });
