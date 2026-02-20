@@ -330,6 +330,7 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
 const SectionRenderer = React.memo(({ 
           sectionKey, 
           plots, 
+          section1PlotsForS2,
           palette, 
           isCollapsed, 
           onToggle, 
