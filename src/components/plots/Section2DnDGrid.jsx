@@ -61,9 +61,10 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     }
 
     // Fill regular columns (1-10) with remaining plots
+    // Row 0 = bottom (lowest number), ascending upward — matches Section 1 layout
     let i = 0;
     for (let c = 1; c < dataCols && i < pivoted.length; c++) {
-      for (let r = perCol - 1; r >= 0 && i < pivoted.length; r--) {
+      for (let r = 0; r < perCol && i < pivoted.length; r++) {
         baseColumns[c][r] = pivoted[i++];
       }
     }
