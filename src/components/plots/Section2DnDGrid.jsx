@@ -25,8 +25,8 @@ const S1_BOTTOM_OFFSET = 0;
 // s4Top = Section 4 plots stacked on top of s3Top (amber/yellow)
 const COLUMN_RANGES = [
   { start: 186, end: 207, shiftDown: false, s3Top: null, s4Top: null },
-  { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 }, s4Top: null },
-  { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 }, s4Top: null },
+  { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 }, s4Top: { start: 269, end: 298 } },
+  { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 }, s4Top: { start: 349, end: 378 } },
   { start: 383, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 }, s4Top: { start: 431, end: 461 } },
   { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 }, s4Top: { start: 513, end: 545 } },
   { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 }, s4Top: { start: 630, end: 658 } },
