@@ -515,7 +515,7 @@ const SectionRenderer = React.memo(({
                                         const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                         const r1PartA = r1.filter(p => parseInt(p.Grave) <= 798);
                                         const r1PartB = r1.filter(p => parseInt(p.Grave) > 798);
-                                        const sixBlanks = Array(6).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-6b-${i}`, Section: '4' }));
+                                        const sixBlanks = Array(3).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-6b-${i}`, Section: '4' }));
                                         const r2WithSpacer = [];
                                         r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720', Section: '4' }); });
                                         plotsArr = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
