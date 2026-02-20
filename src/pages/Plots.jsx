@@ -446,72 +446,9 @@ const SectionRenderer = React.memo(({
                                 return [...cols, fallbackCol];
                             })()}
                         </div>
-                    ) : sectionKey === '4' ? (
+                    ) : sectionKey === '4_REMOVED' ? (
                         <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                            {(() => {
-                                const columnsConfig = [
-                                    { ranges: [{ start: 208, end: 223 }], blanksStart: 14 },
-                                    { ranges: [{ start: 269, end: 298 }] },
-                                    { ranges: [{ start: 349, end: 378 }] },
-                                    { ranges: [{ start: 431, end: 461 }], blanksEnd: 1 },
-                                    { ranges: [{ start: 513, end: 545 }], blanksStart: 1 },
-                                    { ranges: [{ start: 548, end: 559 }, { start: 560, end: 562 }, { start: 564, end: 576 }], spacers: [{ target: 559, position: 'after' }, { target: 562, position: 'after' }], extraBottom: [547], topPaddingAdjust: -1 },
-                                    { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
-                                    { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
-                                    { ranges: [{ start: 789, end: 798 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
-                                    { ranges: [{ start: 844, end: 870 }], blanksStart: 1, spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }] },
-                                    { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
-                                ];
-
-                                const TARGET_HEIGHT = 35; // Target rows for uniform square border
-
-                                const pushBlanks = (arr, count, prefix) => { 
-                                  for(let i=0;i<count;i++){ 
-                                    arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '4' }); 
-                                  } 
-                                };
-
-                                // Leading spacer column removed per layout update
-
-                                const cols = columnsConfig.map((col, idx) => {
-                                    let plotsArr = [];
-                                    
-                                    // Add extraBottom plots first (appear at bottom in flex-col-reverse)
-                                    if (col.extraBottom) {
-                                        col.extraBottom.forEach(num => {
-                                            const found = plots.find(p => (parseInt(String(p.Grave).replace(/\D/g, '')) || 0) === num);
-                                            if (found) plotsArr.push(found);
-                                        });
-                                    }
-                                    
-                                    col.ranges.forEach(r => {
-                                        const rangePlots = plots.filter(p => {
-                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                            return num >= r.start && num <= r.end;
-                                        });
-                                        rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
-                                        plotsArr = [...plotsArr, ...rangePlots];
-                                    });
-
-                                    if (col.customLayout) {
-                                        const r1 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 798; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
-                                        const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
-                                        const r1PartA = r1.filter(p => parseInt(p.Grave) <= 798);
-                                        const r1PartB = r1.filter(p => parseInt(p.Grave) > 798);
-                                        const sixBlanks = Array(3).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-6b-${i}`, Section: '4' }));
-                                        const r2WithSpacer = [];
-                                        r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720', Section: '4' }); });
-                                        plotsArr = [...r1PartA, ...sixBlanks, ...r1PartB, ...r2WithSpacer];
-                                    } else if (col.spacers) {
-                                        const withSpacers = [];
-                                        plotsArr.forEach(p => {
-                                            const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                            if (col.spacers.some(s => s.target === num && s.position === 'before')) withSpacers.push({ isSpacer: true, _id: `sp-b-${num}`, Section: '4' });
-                                            withSpacers.push(p);
-                                            if (col.spacers.some(s => s.target === num && s.position === 'after')) withSpacers.push({ isSpacer: true, _id: `sp-a-${num}`, Section: '4' });
-                                        });
-                                        plotsArr = withSpacers;
-                                    }
+                            {/* Section 4 removed - all plots merged into Section 2 */}
 
                                     if (col.blanksStart) plotsArr = [...Array(col.blanksStart).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-start-${idx}-${i}`, Section: '4' })), ...plotsArr];
                                     if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-end-${idx}-${i}`, Section: '4' }))];
