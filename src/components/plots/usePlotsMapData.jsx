@@ -40,7 +40,7 @@ function buildSectionFilter(sectionsToLoad) {
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {
   const sectionsToLoad = useMemo(() => {
     if (activeTab !== "map") return [];
-    const fallback = ["1", "2", "3", "4", "5"];
+    const fallback = ["1", "2", "3", "5"];
     return openSections && openSections.length ? openSections : fallback;
   }, [openSections, activeTab]);
 
