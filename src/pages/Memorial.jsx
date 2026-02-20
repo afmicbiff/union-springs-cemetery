@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from 
 import { Heart, Image as ImageIcon, MessageCircle, Share2, Upload, Facebook, Twitter, Link as LinkIcon, PlayCircle, Loader2, ArrowLeft, UserCircle } from 'lucide-react';
 import { toast } from "sonner";
 import { createPageUrl } from '@/utils';
+import SEOHead from '@/components/common/SEOHead';
+import StructuredData from '@/components/common/StructuredData';
 
 export default function MemorialPage() {
     const [searchParams] = useSearchParams();
