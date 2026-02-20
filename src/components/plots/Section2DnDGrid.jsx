@@ -19,7 +19,7 @@ const COLUMN_RANGES = [
   { start: 665, end: 687, shiftDown: false },
   { start: 743, end: 764, shiftDown: false },
   { start: 799, end: 820, shiftDown: false },
-  { start: 875, end: 895, shiftDown: false, extraOffset: 1 },
+  { start: 875, end: 897, shiftDown: false, bottomSpacer: 1 },
 ];
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
