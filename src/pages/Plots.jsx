@@ -131,7 +131,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
         case '4':
             [
                 [208,223],[269,298],[349,378],[431,461],[513,545],[546,576],[630,658],[712,719],
-                [720,737],[789,795],[844,870],[923,945]
+                [720,737],[789,798],[844,870],[923,945]
             ].forEach(([s,e]) => addRange(s,e));
             break;
         case '5':
@@ -467,7 +467,7 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 548, end: 559 }, { start: 560, end: 562 }, { start: 564, end: 576 }], spacers: [{ target: 559, position: 'after' }, { target: 562, position: 'after' }], extraBottom: [547], topPaddingAdjust: -1 },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
-                                    { ranges: [{ start: 789, end: 795 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
+                                    { ranges: [{ start: 789, end: 798 }, { start: 720, end: 737 }], spacers: [{ target: 720, position: 'after' }], customLayout: true },
                                     { ranges: [{ start: 844, end: 870 }], blanksStart: 1, spacers: [{ target: 854, position: 'after' }, { target: 861, position: 'after' }] },
                                     { ranges: [{ start: 923, end: 945 }], spacers: [{ target: 935, position: 'after' }], blanksEnd: 7 }
                                 ];
@@ -511,10 +511,10 @@ const SectionRenderer = React.memo(({
                                     });
 
                                     if (col.customLayout) {
-                                        const r1 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 795; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
+                                        const r1 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 789 && n <= 798; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
                                         const r2 = plots.filter(p => { const n = parseInt(String(p.Grave)); return n >= 720 && n <= 737; }).sort((a,b)=>parseInt(a.Grave)-parseInt(b.Grave));
-                                        const r1PartA = r1.filter(p => parseInt(p.Grave) <= 795);
-                                        const r1PartB = r1.filter(p => parseInt(p.Grave) > 795);
+                                        const r1PartA = r1.filter(p => parseInt(p.Grave) <= 798);
+                                        const r1PartB = r1.filter(p => parseInt(p.Grave) > 798);
                                         const sixBlanks = Array(6).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-6b-${i}`, Section: '4' }));
                                         const r2WithSpacer = [];
                                         r2.forEach(p => { r2WithSpacer.push(p); if (parseInt(p.Grave) === 720) r2WithSpacer.push({ isSpacer: true, _id: 'sp-720', Section: '4' }); });
