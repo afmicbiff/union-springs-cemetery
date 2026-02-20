@@ -1415,10 +1415,12 @@ export default function PlotsPage() {
     const targetSectionKey = match?.sectionKey || selectedSectionKeyForPlot || null;
 
     // Expand the target section; if unknown, expand ALL so lazy content renders
-    if (targetSectionKey) {
-      setCollapsedSections(prev => ({ ...prev, [targetSectionKey]: false }));
+    // Section 1 plots are now rendered inside Section 2
+    const expandKey = targetSectionKey === '1' ? '2' : targetSectionKey;
+    if (expandKey) {
+      setCollapsedSections(prev => ({ ...prev, [expandKey]: false }));
     } else {
-      setCollapsedSections({ '1': false, '2': false, '3': false, '4': false, '5': false });
+      setCollapsedSections({ '2': false, '3': false, '4': false, '5': false });
     }
 
     let attempts = 0;
