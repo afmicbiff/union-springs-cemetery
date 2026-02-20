@@ -1647,13 +1647,13 @@ export default function PlotsPage() {
 
             {/* Map Canvas */}
             <main className="flex-grow p-6 overflow-y-auto">
-                <div className="max-w-[1600px] mx-auto space-y-10 pb-20">
+                <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
                     <div 
                       className="bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-all duration-200 ease-out inline-block max-w-full"
                     >
-                      <div className="p-4 inline-block space-y-10 map-zoom-inner transition-transform duration-150 ease-out origin-top-left min-w-[1500px]">
+                      <div className="p-4 inline-block space-y-10 map-zoom-inner transition-transform duration-150 ease-out origin-top-left">
                         {/* Always show all plots, scroll/center to target if from search */}
                         {Object.keys(sections).filter(k => k !== '1').sort((a, b) => {
                             const numA = parseInt(a);

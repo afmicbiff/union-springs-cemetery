@@ -6,56 +6,82 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
-// Column ranges matching Section2DnDGrid's S1 layout
-const S1_COL_RANGES = [
-  { start: 1, end: 25 },
-  { start: 26, end: 49 },
-  { start: 50, end: 73 },
-  { start: 74, end: 97 },
-  { start: 98, end: 121 },
-  { start: 122, end: 145 },
-  { start: 146, end: 169 },
-  { start: 170, end: 185 },
-];
-
 const Section1DnDGrid = memo(function Section1DnDGrid({ plots, baseColorClass, isAdmin, onHover, onEdit, statusColors }) {
-  const columns = React.useMemo(() => {
-    if (!plots || !plots.length) return S1_COL_RANGES.map(() => []);
+  const TARGET_HEIGHT = 12; // Target rows for uniform square border
+  
+  // Build grid dimensions from numeric graves
+  const nums = React.useMemo(() => (
+    (plots || [])
+      .map((p) => parseNum(p.Grave))
+      .filter((n) => Number.isFinite(n) && n > 0)
+  ), [plots]);
 
-    const plotByNum = new Map();
-    plots.forEach(p => {
-      const n = parseNum(p.Grave);
-      if (n != null) plotByNum.set(n, p);
-    });
+  const maxNum = React.useMemo(() => (nums.length ? Math.max(...nums) : 0), [nums]);
+  const dataCols = 8;
+  const perCol = Math.max(1, Math.ceil(maxNum / dataCols));
+  const targetRows = Math.max(perCol, TARGET_HEIGHT);
+  const total = dataCols * targetRows;
 
-    return S1_COL_RANGES.map(({ start, end }) => {
-      const colPlots = [];
-      for (let num = start; num <= end; num++) {
-        colPlots.push(plotByNum.get(num) || null);
-      }
-      return colPlots;
-    });
-  }, [plots]);
+  // Build cells layout with spacers for uniform height
+  const cells = React.useMemo(() => {
+    if (!plots || !plots.length) return Array(total).fill(null);
+
+    const nextCells = Array(total).fill(null);
+
+    for (let c = 0; c < dataCols; c++) {
+      const start = c * perCol + 1;
+      const end = Math.min((c + 1) * perCol, maxNum);
+      const colPlots = plots
+        .filter((p) => {
+          const n = parseNum(p.Grave);
+          return n && n >= start && n <= end;
+        })
+        // Sort ascending - lowest number first
+        .sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
+
+      // Place plots: row 0 = bottom (lowest number), higher rows = higher numbers
+      // Spacers go at the top (higher row indices)
+      colPlots.forEach((plot, idx) => {
+        if (idx < targetRows) {
+          const cellIndex = c * targetRows + idx;
+          nextCells[cellIndex] = plot;
+        }
+      });
+    }
+
+    return nextCells;
+  }, [plots, dataCols, perCol, maxNum, total, targetRows]);
+
+  const renderCell = (c, r, isLeadOrTrail = false) => {
+    const idx = isLeadOrTrail ? -1 : c * targetRows + r;
+    const item = isLeadOrTrail ? null : cells[idx];
+
+    return (
+      <div key={`s1-c${c}-r${r}${isLeadOrTrail ? '-sp' : ''}`} className="w-16 h-8 m-0.5 rounded-[1px] relative">
+        <GravePlotCell
+          item={item}
+          baseColorClass={baseColorClass}
+          statusColors={statusColors}
+          isAdmin={isAdmin}
+          onHover={onHover}
+          onEdit={onEdit}
+          sectionKey="1"
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="flex gap-4 justify-center overflow-x-auto pb-2">
-      {columns.map((colPlots, colIdx) => (
-        <div key={colIdx} className="flex flex-col-reverse gap-1 justify-start">
-          {colPlots.map((item, rowIdx) => (
-            <div key={`s1-c${colIdx}-r${rowIdx}`} className="w-16 h-8 m-0.5 rounded-[1px] relative">
-              <GravePlotCell
-                item={item}
-                baseColorClass={baseColorClass}
-                statusColors={statusColors}
-                isAdmin={isAdmin}
-                onHover={onHover}
-                onEdit={onEdit}
-                sectionKey="1"
-              />
-            </div>
-          ))}
-        </div>
-      ))}
+      {Array.from({ length: dataCols }).map((_, colIdx) => {
+        return (
+          <div key={colIdx} className="flex flex-col-reverse gap-1 justify-start">
+            {Array.from({ length: targetRows }).map((__, r) => 
+              renderCell(colIdx, r, false)
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 });
