@@ -1049,7 +1049,8 @@ export default function PlotsPage() {
 
         // Force key ranges into Section 4 to ensure proper rendering
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
-        if ((graveNum >= 513 && graveNum <= 542) ||
+        if (graveNum === 547 ||
+            (graveNum >= 513 && graveNum <= 542) ||
             (graveNum >= 548 && graveNum <= 559) ||
             (graveNum >= 560 && graveNum <= 562) ||
             (graveNum >= 564 && graveNum <= 576)) {
