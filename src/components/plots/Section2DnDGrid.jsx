@@ -7,8 +7,16 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
-// Define the exact column ranges for Section 2
-// Columns 466 and 582 are shifted down 1 extra row (no bottom offset)
+// Section 1 column definitions (plots 1-185, 8 columns of ~24 each)
+const S1_COLS = 8;
+const S1_PER_COL = 24; // ceil(185/8) = ~24
+const S1_MAX = 185;
+// Vertical offset: plot 162 is in S1 col 6, position 17 from bottom (0-indexed).
+// It should align with plot 466 (S2 col 4, position 0 from bottom, shifted).
+// So we need 17 spacer rows at the bottom of S1 columns.
+const S1_BOTTOM_OFFSET = 17;
+
+// Section 2 column ranges
 const COLUMN_RANGES = [
   { start: 186, end: 207, shiftDown: false },
   { start: 228, end: 250, shiftDown: false },
@@ -22,8 +30,33 @@ const COLUMN_RANGES = [
   { start: 875, end: 897, shiftDown: true },
 ];
 
-const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
-  const columns = useMemo(() => {
+const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
+
+  // Build Section 1 columns
+  const s1Columns = useMemo(() => {
+    if (!section1Plots || section1Plots.length === 0) return [];
+
+    const plotByNum = new Map();
+    section1Plots.forEach(p => {
+      const n = parseNum(p.Grave || p.plot_number);
+      if (n != null) plotByNum.set(n, p);
+    });
+
+    const cols = [];
+    for (let c = 0; c < S1_COLS; c++) {
+      const start = c * S1_PER_COL + 1;
+      const end = Math.min((c + 1) * S1_PER_COL, S1_MAX);
+      const colPlots = [];
+      for (let num = start; num <= end; num++) {
+        colPlots.push(plotByNum.get(num) || null);
+      }
+      cols.push(colPlots);
+    }
+    return cols;
+  }, [section1Plots]);
+
+  // Build Section 2 columns  
+  const s2Columns = useMemo(() => {
     const plotByNum = new Map();
     const sorted = [...(plots || [])].sort((a, b) => {
       const da = new Date(a.created_date || 0).getTime();
@@ -58,23 +91,45 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
     });
   }, [plots]);
 
+  const hasSection1 = s1Columns.length > 0;
+
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
       <div className="flex gap-2 sm:gap-3">
-        {columns.map((colPlots, colIdx) => {
+        {/* Section 1 columns on the left */}
+        {hasSection1 && s1Columns.map((colPlots, colIdx) => (
+          <div key={`s1-${colIdx}`} className="flex flex-col-reverse gap-0.5">
+            {/* Bottom spacers to align with Section 2 */}
+            {Array.from({ length: S1_BOTTOM_OFFSET }).map((_, i) => (
+              <div key={`s1-bpad-${i}`} className="w-16 h-8 m-0.5" />
+            ))}
+            {/* Section 1 plot cells */}
+            {colPlots.map((item, rowIdx) => (
+              <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+                <GravePlotCell
+                  item={item}
+                  baseColorClass=""
+                  statusColors={statusColors}
+                  isAdmin={isAdmin}
+                  onHover={onHover}
+                  onEdit={onEdit}
+                  sectionKey="1"
+                />
+              </div>
+            ))}
+          </div>
+        ))}
+
+        {/* Small gap/separator between S1 and S2 */}
+        {hasSection1 && <div className="w-1" />}
+
+        {/* Section 2 columns */}
+        {s2Columns.map((colPlots, colIdx) => {
           const colDef = COLUMN_RANGES[colIdx];
           const isShifted = colDef.shiftDown;
-          const extraOffset = colDef.extraOffset || 0;
-          const bottomSpacer = colDef.bottomSpacer || 0;
           return (
-            <div key={colIdx} className="flex flex-col-reverse gap-0.5">
+            <div key={`s2-${colIdx}`} className="flex flex-col-reverse gap-0.5">
               {!isShifted && <div className="w-16 h-8 m-0.5" />}
-              {Array.from({ length: extraOffset }).map((_, i) => (
-                <div key={`offset-${i}`} className="w-16 h-8 m-0.5" />
-              ))}
-              {Array.from({ length: bottomSpacer }).map((_, i) => (
-                <div key={`boffset-${i}`} className="w-16 h-8 m-0.5" />
-              ))}
               {colPlots.map((item, rowIdx) => (
                 <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
                   <GravePlotCell
