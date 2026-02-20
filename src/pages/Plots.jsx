@@ -369,22 +369,12 @@ const SectionRenderer = React.memo(({
                     ${borderColor} ${bgColor} bg-opacity-30
                     overflow-x-auto
                 `}>
-                    {sectionKey === '1' ? (
-                          <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
-                            <Section1DnDGrid
-                              plots={plots}
-                              baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                              isAdmin={isAdmin}
-                              onHover={onHover}
-                              onEdit={onEdit}
-                              statusColors={STATUS_COLORS}
-                            />
-                          </React.Suspense>
-                    ) : sectionKey === '2' ? (
+                    {sectionKey === '2' ? (
                           <div className="flex justify-center">
                             <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
                               <Section2DnDGrid
                                 plots={plots}
+                                section1Plots={section1PlotsForS2}
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                 isAdmin={isAdmin}
                                 onHover={onHover}
