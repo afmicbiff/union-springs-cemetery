@@ -667,6 +667,7 @@ export default function PlotsPage() {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '4': false, '5': false });
+  // Section 1 is always "open" for data fetching since it's merged into Section 2 visually
   const [isTourOpen, setIsTourOpen] = useState(false);
   // When coming from search, expand all sections so user can see all plots, but scroll to target
         useEffect(() => {
