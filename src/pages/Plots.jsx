@@ -463,7 +463,7 @@ const SectionRenderer = React.memo(({
                                     { ranges: [{ start: 269, end: 298 }] },
                                     { ranges: [{ start: 349, end: 378 }] },
                                     { ranges: [{ start: 431, end: 461 }], blanksEnd: 1 },
-                                    { ranges: [{ start: 513, end: 542 }], blanksStart: 1 },
+                                    { ranges: [{ start: 513, end: 545 }], blanksStart: 1 },
                                     { ranges: [{ start: 548, end: 559 }, { start: 560, end: 562 }, { start: 564, end: 576 }], spacers: [{ target: 559, position: 'after' }, { target: 562, position: 'after' }], extraBottom: [547], topPaddingAdjust: -1 },
                                     { ranges: [{ start: 630, end: 658 }], spacers: [{ target: 641, position: 'after' }] },
                                     { ranges: [{ start: 712, end: 719 }], spacers: [{ target: 712, position: 'before' }, { target: 713, position: 'after' }, { target: 716, position: 'after' }], blanksEnd: 19 },
@@ -1024,7 +1024,7 @@ export default function PlotsPage() {
         if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
             sectionKey = '2';
         } else if (graveNum === 547 ||
-            (graveNum >= 513 && graveNum <= 542) ||
+            (graveNum >= 513 && graveNum <= 545) ||
             (graveNum >= 548 && graveNum <= 559) ||
             (graveNum >= 560 && graveNum <= 562) ||
             (graveNum >= 564 && graveNum <= 576)) {
