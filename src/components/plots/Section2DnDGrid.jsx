@@ -7,175 +7,87 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
-// Plots that should have +New button below them - defined outside component for stable reference
-const NEW_PLOT_TARGETS = new Set([186, 217, 236, 248, 271, 309, 391, 477, 595]);
-
-// Special column for plots 186-207 (first column in Section 2)
-const SPECIAL_COL_RANGE = { start: 186, end: 207 };
+// Define the exact column ranges for Section 2
+// Each column starts 1 row up from the bottom, numbers go up
+const COLUMN_RANGES = [
+  { start: 186, end: 207 },  // Column 1 (bottom left)
+  { start: 228, end: 250 },  // Column 2
+  { start: 303, end: 325 },  // Column 3
+  { start: 383, end: 404 },  // Column 4
+  { start: 466, end: 488 },  // Column 5
+  { start: 582, end: 604 },  // Column 6
+  { start: 665, end: 687 },  // Column 7
+  { start: 743, end: 764 },  // Column 8
+  { start: 799, end: 820 },  // Column 9
+  { start: 875, end: 895 },  // Column 10
+];
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
-  const perCol = 25;
-  const extraBottomRow = 1; // Extra row for +New under specific plots
-  const totalRows = perCol + extraBottomRow;
-  const dataCols = 11; // Increased to 11 to add the special column
+  // Find max column height (including 1 empty row at bottom for offset)
+  const maxRows = Math.max(...COLUMN_RANGES.map(r => r.end - r.start + 1)) + 1; // +1 for the offset row at bottom
 
-  const { cells, bottomRowMarkers } = React.useMemo(() => {
-    const sorted = [...(plots || [])].sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
-    
-    // Build a map to deduplicate by plot number - keep the most recent one
+  const columns = useMemo(() => {
+    // Build lookup map: plot_number -> plot data (deduplicated, prefer newer records with row_number matching spreadsheet)
     const plotByNum = new Map();
+    const sorted = [...(plots || [])].sort((a, b) => {
+      // Sort by created_date ascending so newer entries overwrite older ones
+      const da = new Date(a.created_date || 0).getTime();
+      const db = new Date(b.created_date || 0).getTime();
+      return da - db;
+    });
+    
     sorted.forEach(p => {
-      const n = parseNum(p.Grave);
+      const n = parseNum(p.Grave || p.plot_number);
       if (n != null) {
-        plotByNum.set(n, p); // Later entries (same plot #) will overwrite
-      }
-    });
-    
-    // Separate special range plots (186-207) from regular plots - NO DUPLICATES
-    const specialPlots = [];
-    const regularPlots = [];
-    
-    plotByNum.forEach((p, n) => {
-      if (n >= SPECIAL_COL_RANGE.start && n <= SPECIAL_COL_RANGE.end) {
-        specialPlots.push(p);
-      } else {
-        regularPlots.push(p);
-      }
-    });
-    
-    // Sort special plots by plot number ascending
-    specialPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
-    regularPlots.sort((a, b) => (parseNum(a.Grave) || 0) - (parseNum(b.Grave) || 0));
-    
-    // For regular plots, pivot starting from 208 (since 186-207 are in the special column)
-    const idx208 = regularPlots.findIndex(p => parseNum(p.Grave) === 208);
-    const pivoted = idx208 > -1 ? [...regularPlots.slice(idx208), ...regularPlots.slice(0, idx208)] : regularPlots;
-
-    // 11 columns: column 0 is special (186-207), columns 1-10 are regular
-    const baseColumns = Array.from({ length: dataCols }, () => Array(perCol).fill(null));
-
-    // Fill special column (column 0) with plots 186-207
-    // 186 at row 0 (bottom), 207 at row 21 (top) - exactly 22 plots
-    for (let i = 0; i < specialPlots.length && i < perCol; i++) {
-      baseColumns[0][i] = specialPlots[i];
-    }
-
-    // Fill regular columns (1-10) with remaining plots
-    // Row 0 = bottom (lowest number), ascending upward — matches Section 1 layout
-    let i = 0;
-    for (let c = 1; c < dataCols && i < pivoted.length; c++) {
-      for (let r = 0; r < perCol && i < pivoted.length; r++) {
-        baseColumns[c][r] = pivoted[i++];
-      }
-    }
-
-    // Custom sequence 326–348
-    const seqStart = 326;
-    const seqEnd = 348;
-    const anchorNum = 268;
-
-    const byNum = new Map();
-    pivoted.forEach((p) => {
-      const n = parseNum(p?.Grave);
-      if (n != null) byNum.set(n, p);
-    });
-
-    let hasAnySeq = false;
-    for (let n = seqStart; n <= seqEnd; n++) { if (byNum.has(n)) { hasAnySeq = true; break; } }
-
-    if (hasAnySeq) {
-      for (let c = 1; c < dataCols; c++) { // Skip column 0 (special)
-        for (let r = 0; r < perCol; r++) {
-          const cell = baseColumns[c][r];
-          const n = parseNum(cell?.Grave);
-          if (n != null && n >= seqStart && n <= seqEnd) {
-            baseColumns[c][r] = null;
+        // Keep the version that has more data (row_number, names, etc.)
+        const existing = plotByNum.get(n);
+        if (!existing) {
+          plotByNum.set(n, p);
+        } else {
+          // Prefer the one with row_number set, or with more fields filled
+          const hasRow = p.Row || p.row_number;
+          const existingHasRow = existing.Row || existing.row_number;
+          if (hasRow && !existingHasRow) {
+            plotByNum.set(n, p);
+          } else if (hasRow === existingHasRow) {
+            // Prefer the newer one
+            plotByNum.set(n, p);
           }
         }
       }
+    });
 
-      const seqCol = Array(perCol).fill(null);
-      let rPtr = 0;
-      for (let n = seqStart; n <= seqEnd && rPtr < perCol; n++, rPtr++) {
-        const p = byNum.get(n);
-        if (p) seqCol[rPtr] = p;
+    // Build columns based on defined ranges
+    return COLUMN_RANGES.map(({ start, end }) => {
+      const colPlots = [];
+      for (let num = start; num <= end; num++) {
+        colPlots.push(plotByNum.get(num) || null);
       }
+      return colPlots;
+    });
+  }, [plots]);
 
-      let anchorIdx = baseColumns.findIndex((col, idx) => idx > 0 && col.some((cell) => parseNum(cell?.Grave) === anchorNum));
-      if (anchorIdx < 1) anchorIdx = 1;
-      const targetIdx = Math.min(anchorIdx + 1, dataCols - 1);
-
-      for (let r = 0; r < perCol; r++) {
-        if (seqCol[r]) baseColumns[targetIdx][r] = seqCol[r];
-      }
-    }
-
-    // Build output - just data columns, no spacers
-    const out = Array(dataCols * totalRows).fill(null);
-    const markers = Array(dataCols).fill(false);
-    
-    // Mark column 0 for +New since it starts with 186
-    markers[0] = true;
-    
-    for (let c = 0; c < dataCols; c++) {
-      // For other columns, find the bottom-most plot
-      if (c > 0) {
-        let bottomPlot = null;
-        for (let r = 0; r < perCol; r++) {
-          if (baseColumns[c][r]) {
-            bottomPlot = baseColumns[c][r];
-            break;
-          }
-        }
-        const bottomNum = parseNum(bottomPlot?.Grave);
-        if (bottomNum && NEW_PLOT_TARGETS.has(bottomNum)) {
-          markers[c] = true;
-        }
-      }
-      
-      // Fill data rows (rows 1 to perCol)
-      for (let r = 0; r < perCol; r++) {
-        out[c * totalRows + r + extraBottomRow] = baseColumns[c][r];
-      }
-      // Row 0 is the extra bottom row - leave as null, will render +New if markers[c]
-    }
-    
-    return { cells: out, bottomRowMarkers: markers };
-  }, [plots, dataCols, perCol, totalRows, extraBottomRow]);
-
-  // Render columns in reverse row order so +New appears at the bottom visually
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
       <div className="flex gap-2 sm:gap-3">
-        {Array.from({ length: dataCols }).map((_, col) => (
-          <div key={col} className="flex flex-col-reverse gap-0.5">
-            {/* Bottom row for +New button */}
-            <div className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-              {bottomRowMarkers[col] ? (
-                <div className="w-full h-full flex items-center justify-center text-[10px] text-teal-600 font-medium cursor-pointer hover:bg-teal-50 border border-dashed border-teal-300 rounded-[1px]">
-                  + New
-                </div>
-              ) : (
-                <div className="w-full h-full" />
-              )}
-            </div>
-            {/* Data rows - render bottom to top */}
-            {Array.from({ length: perCol }).map((_, row) => {
-              const item = cells[col * totalRows + row + extraBottomRow];
-              return (
-                <div key={row} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
-                  <GravePlotCell
-                    item={item}
-                    baseColorClass=""
-                    statusColors={statusColors}
-                    isAdmin={isAdmin}
-                    onHover={onHover}
-                    onEdit={onEdit}
-                    sectionKey="2"
-                  />
-                </div>
-              );
-            })}
+        {columns.map((colPlots, colIdx) => (
+          <div key={colIdx} className="flex flex-col-reverse gap-0.5">
+            {/* Empty bottom offset row */}
+            <div className="w-16 h-8 m-0.5" />
+            {/* Data rows - bottom to top (lowest number at bottom) */}
+            {colPlots.map((item, rowIdx) => (
+              <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+                <GravePlotCell
+                  item={item}
+                  baseColorClass=""
+                  statusColors={statusColors}
+                  isAdmin={isAdmin}
+                  onHover={onHover}
+                  onEdit={onEdit}
+                  sectionKey="2"
+                />
+              </div>
+            ))}
           </div>
         ))}
       </div>
