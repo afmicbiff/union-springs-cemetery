@@ -11,6 +11,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
+import SEOHead from '@/components/common/SEOHead';
 
 // Memoized contact card for performance
 const ContactCard = memo(function ContactCard({ icon: Icon, iconBg, title, children }) {
