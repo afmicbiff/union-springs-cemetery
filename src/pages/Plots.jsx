@@ -419,14 +419,28 @@ const SectionRenderer = React.memo(({
                                       })
                                       .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                     const plotsWithSpacers = (() => {
-                                      // Special handling for 326-348: ensure continuous sequence from 326 (bottom) up to 348 (top)
+                                      // Special handling for 326-348 + extraBottom plots (e.g. 405)
                                       if (range.start === 326 && range.end === 348) {
                                         const byNum = new Map();
                                         colPlots.forEach(p => {
                                           const n = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                           byNum.set(n, p);
                                         });
+                                        // Also grab any extraBottom plots from the full plots array
+                                        const extras = (range.extraBottom || []);
+                                        extras.forEach(num => {
+                                          const found = plots.find(p => (parseInt(String(p.Grave).replace(/\D/g, '')) || 0) === num);
+                                          if (found) byNum.set(num, found);
+                                        });
                                         const seq = [];
+                                        // Add extraBottom plots first (they appear at bottom since column is flex-col-reverse)
+                                        extras.forEach(num => {
+                                          const p = byNum.get(num);
+                                          if (p) {
+                                            seq.push(p);
+                                            renderedKeys.add(`${num}|${p._id}`);
+                                          }
+                                        });
                                         for (let n = 326; n <= 348; n++) {
                                           const p = byNum.get(n);
                                           if (p) {
