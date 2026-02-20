@@ -25,13 +25,13 @@ const COLUMN_RANGES = [
   { start: 186, end: 207, shiftDown: false, s3Top: null },
   { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 } },
   { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 } },
-  { start: 383, end: 405, shiftDown: false, s3Top: { start: 406, end: 430 } },
+  { start: 383, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 } },
   { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 } },
-  { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 633 } },
+  { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 } },
   { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 } },
-  { start: 743, end: 764, shiftDown: false, s3Top: { start: 765, end: 788 } },
+  { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 } },
   { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 } },
-  { start: 875, end: 897, shiftDown: true, s3Top: { start: 898, end: 930 } },
+  { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 } },
 ];
 
 // Section 3 rose/pink color class
