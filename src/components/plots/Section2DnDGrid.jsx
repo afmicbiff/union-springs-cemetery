@@ -7,13 +7,21 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
-// Section 1 column definitions (plots 1-185, 8 columns of ~24 each)
-const S1_COLS = 8;
-const S1_PER_COL = 24; // ceil(185/8) = ~24
-const S1_MAX = 185;
-// Vertical offset: plot 162 is in S1 col 6, position 17 from bottom (0-indexed).
-// It should align with plot 466 (S2 col 4, position 0 from bottom, shifted).
-// So we need 17 spacer rows at the bottom of S1 columns.
+// Section 1 column definitions — each column ends at the "anchor" plot
+// and the preceding plots stack below it.
+// Col 1: 1-25, Col 2: 26-49, Col 3: 50-73, Col 4: 74-97,
+// Col 5: 98-121, Col 6: 122-145, Col 7: 146-169, Col 8: 170-185
+const S1_COL_RANGES = [
+  { start: 1, end: 25 },
+  { start: 26, end: 49 },
+  { start: 50, end: 73 },
+  { start: 74, end: 97 },
+  { start: 98, end: 121 },
+  { start: 122, end: 145 },
+  { start: 146, end: 169 },
+  { start: 170, end: 185 },
+];
+const S1_COLS = S1_COL_RANGES.length;
 const S1_BOTTOM_OFFSET = 17;
 
 // Section 2 column ranges
