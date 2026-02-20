@@ -2,6 +2,8 @@ import React, { useState, useEffect, memo, useMemo, useCallback, lazy, Suspense 
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { X, Megaphone } from 'lucide-react';
+import SEOHead from '@/components/common/SEOHead';
+import StructuredData from '@/components/common/StructuredData';
 
 // Critical above-the-fold component loaded immediately
 import HeroSection from '@/components/home/HeroSection';
