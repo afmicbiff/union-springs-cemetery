@@ -455,7 +455,7 @@ const SectionRenderer = React.memo(({
                               for(let i=0;i<count;i++){ 
                                 arr.push({ 
                                   isSpacer: true, 
-                                  _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, 
+                                  _id: `${prefix||'sp'}-${i}`, 
                                   Section: '5',
                                   expectedPlotNumber: startNum ? startNum + i : null
                                 }); 
