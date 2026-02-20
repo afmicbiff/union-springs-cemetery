@@ -11,7 +11,7 @@ function parseNum(v) {
 const S1_MAX = 185;
 const S1_COLS = 8;
 const S1_PER_COL = Math.ceil(S1_MAX / S1_COLS); // ~24
-const S1_BOTTOM_OFFSET = 17;
+const S1_BOTTOM_OFFSET = 0;
 
 // Section 2 column ranges
 const COLUMN_RANGES = [
