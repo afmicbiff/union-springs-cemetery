@@ -10,6 +10,7 @@ import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 import debounce from 'lodash/debounce';
 import ResizableBackgroundImage from '@/components/plots/ResizableBackgroundImage';
+import SEOHead from '@/components/common/SEOHead';
 
 // Lazy load heavy components
 const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
