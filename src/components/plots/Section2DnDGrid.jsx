@@ -65,11 +65,15 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
           const colDef = COLUMN_RANGES[colIdx];
           const isShifted = colDef.shiftDown;
           const extraOffset = colDef.extraOffset || 0;
+          const bottomSpacer = colDef.bottomSpacer || 0;
           return (
             <div key={colIdx} className="flex flex-col-reverse gap-0.5">
               {!isShifted && <div className="w-16 h-8 m-0.5" />}
               {Array.from({ length: extraOffset }).map((_, i) => (
                 <div key={`offset-${i}`} className="w-16 h-8 m-0.5" />
+              ))}
+              {Array.from({ length: bottomSpacer }).map((_, i) => (
+                <div key={`boffset-${i}`} className="w-16 h-8 m-0.5" />
               ))}
               {colPlots.map((item, rowIdx) => (
                 <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
