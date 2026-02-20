@@ -92,7 +92,8 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
               </div>
             ))}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
