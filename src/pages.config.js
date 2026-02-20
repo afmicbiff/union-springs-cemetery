@@ -72,6 +72,7 @@ import SecurityDashboard from './pages/SecurityDashboard';
 import SendEmail from './pages/SendEmail';
 import Services from './pages/Services';
 import Visitor from './pages/Visitor';
+import Privacy from './pages/Privacy';
 import __Layout from './Layout.jsx';
 
 
@@ -101,6 +102,7 @@ export const PAGES = {
     "SendEmail": SendEmail,
     "Services": Services,
     "Visitor": Visitor,
+    "Privacy": Privacy,
 }
 
 export const pagesConfig = {
