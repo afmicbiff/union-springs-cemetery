@@ -10,7 +10,7 @@ function parseNum(v) {
 // Section 1 explicit column ranges
 const S1_COL_RANGES = [
   { start: 1, end: 23 },
-  { start: 24, end: 45 },
+  { start: 24, end: 46 },
   { start: 47, end: 66 },
   { start: 70, end: 92 },
   { start: 93, end: 115 },
