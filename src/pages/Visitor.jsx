@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Clock, Phone } from 'lucide-react';
 import Breadcrumbs from "@/components/Breadcrumbs";
+import SEOHead from '@/components/common/SEOHead';
 
 // Memoized card component for better performance
 const VisitorCard = memo(function VisitorCard({ icon: Icon, iconBgClass, iconColorClass, title, children, footer }) {
