@@ -9,17 +9,18 @@ function parseNum(v) {
 
 // Define the exact column ranges for Section 2
 // Each column starts 1 row up from the bottom, numbers go up
+// Columns 466 and 582 are shifted down 1 extra row (no bottom offset)
 const COLUMN_RANGES = [
-  { start: 186, end: 207 },  // Column 1 (bottom left)
-  { start: 228, end: 250 },  // Column 2
-  { start: 303, end: 325 },  // Column 3
-  { start: 383, end: 404 },  // Column 4
-  { start: 466, end: 488 },  // Column 5
-  { start: 582, end: 604 },  // Column 6
-  { start: 665, end: 687 },  // Column 7
-  { start: 743, end: 764 },  // Column 8
-  { start: 799, end: 820 },  // Column 9
-  { start: 875, end: 895 },  // Column 10
+  { start: 186, end: 207, shiftDown: false },  // Column 1 (bottom left)
+  { start: 228, end: 250, shiftDown: false },  // Column 2
+  { start: 303, end: 325, shiftDown: false },  // Column 3
+  { start: 383, end: 404, shiftDown: false },  // Column 4
+  { start: 466, end: 488, shiftDown: true },   // Column 5 - shifted down 1
+  { start: 582, end: 604, shiftDown: true },   // Column 6 - shifted down 1
+  { start: 665, end: 687, shiftDown: false },  // Column 7
+  { start: 743, end: 764, shiftDown: false },  // Column 8
+  { start: 799, end: 820, shiftDown: false },  // Column 9
+  { start: 875, end: 895, shiftDown: false },  // Column 10
 ];
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
