@@ -567,7 +567,8 @@ const SectionRenderer = React.memo(({
                                     if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-end-${idx}-${i}`, Section: '4' }))];
 
                                     // Add top padding to reach TARGET_HEIGHT
-                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsArr.length);
+                                    const adjust = col.topPaddingAdjust || 0;
+                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsArr.length + adjust);
                                     pushBlanks(plotsArr, topPadding, `c4-${idx}-top`);
 
                                     return (
