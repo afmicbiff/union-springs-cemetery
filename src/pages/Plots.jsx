@@ -480,15 +480,7 @@ const SectionRenderer = React.memo(({
                                   } 
                                 };
 
-                                // Leading spacer column
-                                const leadingCol = (
-                                  <div key="leading4" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-amber-200 pr-2">
-                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
-                                      <GravePlot key={`lead4-${i}`} data={{ isSpacer: true, _id: `lead4-${i}`, Section: '4' }}
-                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                    ))}
-                                  </div>
-                                );
+                                // Leading spacer column removed per layout update
 
                                 const cols = columnsConfig.map((col, idx) => {
                                     let plotsArr = [];
