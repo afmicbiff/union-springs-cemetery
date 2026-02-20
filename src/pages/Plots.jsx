@@ -397,8 +397,8 @@ const SectionRenderer = React.memo(({
                             {(() => {
                                 const ranges = [
                                     { start: 251, end: 268 },
-                                    { start: 326, end: 348, extraBottom: [405] },
-                                    { start: 405, end: 430, exclude: [405] },
+                                    { start: 326, end: 348 },
+                                    { start: 405, end: 430 },
                                     { start: 489, end: 512 },
                                     { start: 605, end: 633 },
                                     { start: 688, end: 711 },
