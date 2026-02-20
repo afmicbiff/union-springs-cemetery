@@ -1002,7 +1002,10 @@ export default function PlotsPage() {
 
         // Force key ranges into correct sections for proper rendering
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
-        if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
+        // Section 3 plots are now rendered as part of Section 2
+        if (sectionKey === '3' || rawSection === 'Section 3') {
+            sectionKey = '2';
+        } else if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
             sectionKey = '2';
         } else if (graveNum === 547 ||
             (graveNum >= 513 && graveNum <= 545) ||
