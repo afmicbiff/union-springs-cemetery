@@ -25,7 +25,10 @@ const VisitorCard = memo(function VisitorCard({ icon: Icon, iconBgClass, iconCol
 const VisitorPage = memo(function VisitorPage() {
   return (
     <div className="space-y-0">
-      
+      <SEOHead
+        title="Plan Your Visit – Union Springs Cemetery"
+        description="Plan your visit to Union Springs Cemetery in Shongaloo, Louisiana. Gate hours, directions, parking, and what to expect when visiting."
+      />
       {/* Hero Section - Optimized with proper image loading */}
       <section className="relative min-h-[50vh] md:h-[386px] flex items-center justify-center bg-[#0c0a09] text-center px-4 overflow-hidden py-12 md:py-0">
         {/* Optimized Background Image */}
