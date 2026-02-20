@@ -95,8 +95,8 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
       }
 
       const seqCol = Array(perCol).fill(null);
-      let rPtr = perCol - 1;
-      for (let n = seqStart; n <= seqEnd && rPtr >= 0; n++, rPtr--) {
+      let rPtr = 0;
+      for (let n = seqStart; n <= seqEnd && rPtr < perCol; n++, rPtr++) {
         const p = byNum.get(n);
         if (p) seqCol[rPtr] = p;
       }
