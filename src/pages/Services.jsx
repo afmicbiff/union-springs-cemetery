@@ -56,6 +56,10 @@ export default function ServicesPage() {
             className="min-h-screen bg-stone-200 py-6 sm:py-8 md:py-12 px-4 sm:px-6 lg:px-8"
             style={{ WebkitOverflowScrolling: 'touch' }}
         >
+            <SEOHead
+              title="Cemetery Services – Union Springs Cemetery"
+              description="Burial services, plot reservations, grave care, and monument coordination at Union Springs Cemetery in Shongaloo, Louisiana."
+            />
             <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 md:space-y-12">
                 <Breadcrumbs items={BREADCRUMB_ITEMS} />
                 
