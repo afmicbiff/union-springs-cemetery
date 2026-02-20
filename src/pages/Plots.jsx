@@ -412,10 +412,11 @@ const SectionRenderer = React.memo(({
 
 
                                 const cols = ranges.map((range, idx) => {
+                                    const excludeNums = range.exclude || [];
                                     const colPlots = plots
                                       .filter(p => {
                                         const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                        return num >= range.start && num <= range.end;
+                                        return num >= range.start && num <= range.end && !excludeNums.includes(num);
                                       })
                                       .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                     const plotsWithSpacers = (() => {
