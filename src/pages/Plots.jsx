@@ -584,8 +584,8 @@ export default function PlotsPage() {
             // Direct deep link - collapse other sections
             const rawNorm = rawSection.replace(/Section\s/i, '').trim();
             const targetKey = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : (rawNorm || '');
-            if (targetKey && ['1','2','3','4','5'].includes(targetKey)) {
-              setCollapsedSections({ '1': true, '2': true, '3': true, '4': true, '5': true, [targetKey]: false });
+            if (targetKey && ['1','2','3','5'].includes(targetKey)) {
+              setCollapsedSections({ '1': true, '2': true, '3': true, '5': true, [targetKey]: false });
             }
           }
         }, []);
