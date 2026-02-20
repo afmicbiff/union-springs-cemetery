@@ -525,17 +525,21 @@ const SectionRenderer = React.memo(({
 
                                 const cols = columnsConfig.map((col, idx) => {
                                     let plotsArr = [];
+                                    
+                                    // Add extraBottom plots first (appear at bottom in flex-col-reverse)
+                                    if (col.extraBottom) {
+                                        col.extraBottom.forEach(num => {
+                                            const found = plots.find(p => (parseInt(String(p.Grave).replace(/\D/g, '')) || 0) === num);
+                                            if (found) plotsArr.push(found);
+                                        });
+                                    }
+                                    
                                     col.ranges.forEach(r => {
                                         const rangePlots = plots.filter(p => {
                                             const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
                                             return num >= r.start && num <= r.end;
                                         });
-                                        // For 513–542, sort ascending then reverse the column (flex-col-reverse) so 513 starts at the bottom next to 432
-                                        if (r.start === 513 && r.end === 542) {
-                                            rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
-                                        } else {
-                                            rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
-                                        }
+                                        rangePlots.sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
                                         plotsArr = [...plotsArr, ...rangePlots];
                                     });
 
