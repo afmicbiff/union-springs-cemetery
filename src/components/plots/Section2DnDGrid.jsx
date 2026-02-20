@@ -71,10 +71,12 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], baseColorCla
   return (
     <div className="flex flex-col items-stretch overflow-x-auto pb-2">
       <div className="flex gap-2 sm:gap-3">
-        {columns.map((colPlots, colIdx) => (
+        {columns.map((colPlots, colIdx) => {
+          const isShifted = COLUMN_RANGES[colIdx]?.shiftDown;
+          return (
           <div key={colIdx} className="flex flex-col-reverse gap-0.5">
-            {/* Empty bottom offset row */}
-            <div className="w-16 h-8 m-0.5" />
+            {/* Empty bottom offset row - not shown for shifted columns (they sit at the very bottom) */}
+            {!isShifted && <div className="w-16 h-8 m-0.5" />}
             {/* Data rows - bottom to top (lowest number at bottom) */}
             {colPlots.map((item, rowIdx) => (
               <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
