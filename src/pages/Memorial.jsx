@@ -132,8 +132,24 @@ export default function MemorialPage() {
     if (isLoading) return <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-teal-600"/></div>;
     if (!deceased) return <div className="p-12 text-center text-stone-500">Memorial not found.</div>;
 
+    const fullName = `${deceased.first_name || ''} ${deceased.last_name || ''}`.trim();
+    const personSchema = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": fullName,
+      ...(deceased.date_of_birth && { "birthDate": deceased.date_of_birth }),
+      ...(deceased.date_of_death && { "deathDate": deceased.date_of_death }),
+      ...(deceased.image_url && { "image": deceased.image_url }),
+      "description": deceased.obituary || `Memorial page for ${fullName} at Union Springs Cemetery, Shongaloo, Louisiana.`
+    };
+
     return (
         <div className="min-h-screen bg-stone-50 font-serif">
+            <SEOHead
+              title={`${fullName} – Memorial | Union Springs Cemetery`}
+              description={deceased.obituary ? deceased.obituary.substring(0, 150) : `Memorial page for ${fullName} at Union Springs Cemetery, Shongaloo, Louisiana.`}
+            />
+            <StructuredData id="person" data={personSchema} />
             {/* Hero / Header */}
             <div className="bg-stone-900 text-stone-100 min-h-[50vh] sm:min-h-[60vh] flex flex-col justify-end py-8 sm:py-12 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-40 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=60&w=800&auto=format&fit=crop')" }} />
