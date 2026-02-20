@@ -1373,9 +1373,11 @@ export default function PlotsPage() {
                     match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
                   }
                   if (match && match.sectionKey && match.plotNum) {
+                    // Section 1 plots are now rendered inside Section 2
+                    const expandKey = match.sectionKey === '1' ? '2' : match.sectionKey;
                     setCollapsedSections(prev => ({
                       ...prev,
-                      [match.sectionKey]: false,
+                      [expandKey]: false,
                     }));
                     let attempts = 0;
                     const maxAttempts = 240;
