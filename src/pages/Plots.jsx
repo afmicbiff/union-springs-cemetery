@@ -1551,7 +1551,7 @@ export default function PlotsPage() {
                     >
                       <div className="p-4 inline-block space-y-10 map-zoom-inner transition-transform duration-150 ease-out origin-top-left">
                         {/* Always show all plots, scroll/center to target if from search */}
-                        {Object.keys(sections).filter(k => k !== '1' && k !== '3').sort((a, b) => {
+                        {Object.keys(sections).filter(k => k !== '1' && k !== '3' && k !== '4').sort((a, b) => {
                             const numA = parseInt(a);
                             const numB = parseInt(b);
                             if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
