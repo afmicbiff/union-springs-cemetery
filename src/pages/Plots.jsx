@@ -1013,7 +1013,7 @@ export default function PlotsPage() {
             (graveNum >= 269 && graveNum <= 298) ||
             (graveNum >= 349 && graveNum <= 378) ||
             (graveNum >= 431 && graveNum <= 461) ||
-            (graveNum >= 513 && graveNum <= 545) ||
+            (graveNum >= 513 && graveNum <= 546) ||
             (graveNum >= 630 && graveNum <= 658) ||
             (graveNum >= 712 && graveNum <= 737) ||
             (graveNum >= 789 && graveNum <= 798) ||
