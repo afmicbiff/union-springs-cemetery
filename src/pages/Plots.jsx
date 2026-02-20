@@ -1007,6 +1007,16 @@ export default function PlotsPage() {
             sectionKey = '2';
         } else if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
             sectionKey = '2';
+        }
+        // Section 4 plots that are now displayed in Section 2 columns
+        if (
+            (graveNum >= 630 && graveNum <= 658) ||
+            (graveNum >= 712 && graveNum <= 719) ||
+            (graveNum === 789) ||
+            (graveNum >= 844 && graveNum <= 870) ||
+            (graveNum >= 923 && graveNum <= 942)
+        ) {
+            sectionKey = '2';
         } else if (graveNum === 547 ||
             (graveNum >= 513 && graveNum <= 545) ||
             (graveNum >= 548 && graveNum <= 559) ||
