@@ -482,17 +482,7 @@ const SectionRenderer = React.memo(({
                                   </div>
                                 );
 
-                                // Trailing spacer column
-                                const trailingCol = (
-                                  <div key="trailing" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-dashed border-rose-200 pl-2">
-                                    {Array.from({ length: TARGET_HEIGHT }).map((_, i) => (
-                                      <GravePlot key={`trail-${i}`} data={{ isSpacer: true, _id: `trail-${i}`, Section: '3' }}
-                                      computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                    ))}
-                                  </div>
-                                );
-
-                                return [leadingCol, ...cols, fallbackCol, trailingCol];
+                                return [...cols, fallbackCol];
                             })()}
                         </div>
                     ) : sectionKey === '4' ? (
