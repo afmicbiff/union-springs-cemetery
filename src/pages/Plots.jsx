@@ -408,13 +408,6 @@ const SectionRenderer = React.memo(({
                                 ];
                                 const spacers = [507,709,773,786,633,840,841,930];
                                 const renderedKeys = new Set();
-                                const TARGET_HEIGHT = 35; // Target rows for uniform square border
-
-                                const pushBlanks = (arr, count, prefix) => { 
-                                  for(let i=0;i<count;i++){ 
-                                    arr.push({ isSpacer: true, _id: `${prefix||'sp'}-${i}-${Math.random().toString(36).slice(2,7)}`, Section: '3' }); 
-                                  } 
-                                };
 
 
 
