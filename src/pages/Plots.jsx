@@ -579,7 +579,7 @@ export default function PlotsPage() {
           
           // If coming from search, expand all sections so all plots are visible
           if (fromSearch) {
-            setCollapsedSections({ '1': false, '2': false, '3': false, '4': false, '5': false });
+            setCollapsedSections({ '1': false, '2': false, '3': false, '5': false });
           } else {
             // Direct deep link - collapse other sections
             const rawNorm = rawSection.replace(/Section\s/i, '').trim();
