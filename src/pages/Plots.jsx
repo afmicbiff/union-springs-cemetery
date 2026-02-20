@@ -446,43 +446,6 @@ const SectionRenderer = React.memo(({
                                 return [...cols, fallbackCol];
                             })()}
                         </div>
-                    ) : sectionKey === '4_REMOVED' ? (
-                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                            {/* Section 4 removed - all plots merged into Section 2 */}
-
-                                    if (col.blanksStart) plotsArr = [...Array(col.blanksStart).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-start-${idx}-${i}`, Section: '4' })), ...plotsArr];
-                                    if (col.blanksEnd) plotsArr = [...plotsArr, ...Array(col.blanksEnd).fill(null).map((_, i) => ({ isSpacer: true, _id: `sp-end-${idx}-${i}`, Section: '4' }))];
-
-                                    // Add top padding to reach TARGET_HEIGHT
-                                    const adjust = col.topPaddingAdjust || 0;
-                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsArr.length + adjust);
-                                    pushBlanks(plotsArr, topPadding, `c4-${idx}-top`);
-
-                                    return (
-                                        <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-amber-200 last:border-0 pr-2">
-                                            {plotsArr.map((plot, pIdx) => (
-                                                <GravePlot key={plot._id || `plot-${idx}-${pIdx}`} data={plot}
-                                                computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                            ))}
-                                        </div>
-                                    );
-                                });
-
-                                const { unplaced } = getUnplacedForSection('4', plots);
-                                const fallbackCol = (
-                                  <div key="fallback4" className="flex flex-col-reverse gap-1 justify-start min-w-[4rem] border-r border-dashed border-amber-200 pr-2">
-                                    {unplaced.map((plot, pIdx) => (
-                                        <GravePlot key={plot._id || `u4-${pIdx}`} data={plot}
-                                    computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                    ))}
-                                  </div>
-                                );
-
-                                // Trailing spacer column removed per layout update
-
-                                return [...cols, fallbackCol];
-                            })()}
-                        </div>
                     ) : sectionKey === '5' ? (
                         <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
                         {(() => {
