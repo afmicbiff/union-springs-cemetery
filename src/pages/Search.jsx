@@ -405,6 +405,10 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-stone-200 py-6 sm:py-12 px-3 sm:px-6 lg:px-8">
+      <SEOHead
+        title="Deceased Search – Union Springs Cemetery"
+        description="Search burial records at Union Springs Cemetery in Shongaloo, Louisiana. Find resting places, obituaries, and memorials by name, date, or plot location."
+      />
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         <Breadcrumbs items={[{ label: 'Deceased Search' }]} />
         
