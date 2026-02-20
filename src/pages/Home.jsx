@@ -84,8 +84,88 @@ const Home = memo(function Home() {
     });
   }, []);
 
+  const cemeterySchema = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "Cemetery",
+    "name": "Union Springs Cemetery",
+    "description": "Historic cemetery established in 1892 in Shongaloo, Webster Parish, Louisiana. Offering burial plots, memorial services, and deceased record searches.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "1311 Fire Tower Road",
+      "addressLocality": "Shongaloo",
+      "addressRegion": "LA",
+      "postalCode": "71072",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 32.9868,
+      "longitude": -93.3065
+    },
+    "telephone": "(540) 760-8863",
+    "openingHours": "Mo-Su sunrise-sunset",
+    "foundingDate": "1892",
+    "image": "https://base44.app/api/apps/693cd1f0c20a0662b5f281d5/files/public/693cd1f0c20a0662b5f281d5/dfd4d861f_img-1767265605524.webp",
+    "sameAs": [
+      "https://www.facebook.com/LTHPreservation/posts/union-springs-school-church-cemetery-near-shongaloo-webster-parish/4371242156248213/"
+    ]
+  }), []);
+
+  const faqSchema = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Where is Union Springs Cemetery located?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Union Springs Cemetery is located at 1311 Fire Tower Road, Shongaloo, Webster Parish, Louisiana 71072."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the visiting hours for Union Springs Cemetery?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The cemetery gates are open from sunrise to sunset, every day of the week."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I search for a deceased person at Union Springs Cemetery?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can search our online deceased records database on our website by name, date, or plot location. Visit the Deceased Search page to get started."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I reserve a burial plot at Union Springs Cemetery?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To reserve a plot, contact our office by phone at (540) 760-8863 or email clencsm@yahoo.com. You can also browse available plots on our website."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Union Springs Cemetery regulated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Union Springs Cemetery is regulated by the Louisiana Cemetery Board. Complaints may be directed to 3445 N. Causeway Blvd, Suite 700, Metairie, LA 70002."
+        }
+      }
+    ]
+  }), []);
+
   return (
     <div className="flex flex-col w-full">
+      <SEOHead
+        title="Union Springs Cemetery – Shongaloo, LA | Since 1892"
+        description="Union Springs Cemetery in Shongaloo, Louisiana. Search deceased records, view burial plots, plan your visit. Serving Webster Parish families since 1892."
+      />
+      <StructuredData id="cemetery" data={cemeterySchema} />
+      <StructuredData id="faq" data={faqSchema} />
       <NotificationBanner notification={activeNotification} onDismiss={handleDismiss} />
       <HeroSection />
       <Suspense fallback={<SectionLoader />}>
