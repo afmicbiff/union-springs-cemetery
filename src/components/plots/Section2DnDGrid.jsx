@@ -9,14 +9,14 @@ function parseNum(v) {
 
 // Section 1 explicit column ranges
 const S1_COL_RANGES = [
-  { start: 1, end: 25 },
-  { start: 26, end: 49 },
-  { start: 50, end: 73 },
-  { start: 74, end: 97 },
-  { start: 98, end: 121 },
-  { start: 122, end: 145 },
-  { start: 146, end: 168 },
-  { start: 170, end: 185, tail: [169] },
+  { start: 1, end: 23 },
+  { start: 24, end: 45 },
+  { start: 47, end: 66 },
+  { start: 70, end: 92 },
+  { start: 93, end: 115 },
+  { start: 116, end: 138 },
+  { start: 139, end: 161 },
+  { start: 162, end: 184 },
 ];
 const S1_BOTTOM_OFFSET = 0;
 
