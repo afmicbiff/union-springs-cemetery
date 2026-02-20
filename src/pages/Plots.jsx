@@ -359,7 +359,7 @@ const SectionRenderer = React.memo(({
                 </h2>
                 <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
                 <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
-                    {plots.length}{sectionKey === '2' && section1PlotsForS2 && section1PlotsForS2.length > 0 ? ` + ${section1PlotsForS2.length} (Sec 1)` : ''} Plots
+                    {plots.length}{sectionKey === '2' && section1PlotsForS2 && section1PlotsForS2.length > 0 ? ` + ${section1PlotsForS2.length} (Sec 1)` : ''}{sectionKey === '2' ? ' (includes Sec 3)' : ''} Plots
                 </span>
                 {(['4','5'].includes(sectionKey)) && (() => { const c = getUnplacedForSection(sectionKey, plots); return (<span className="mb-1 text-xs text-gray-400 ml-2">• {c.placedCount} placed, {c.unplaced.length} fallback</span>); })()}
             </div>
