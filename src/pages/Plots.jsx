@@ -129,10 +129,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
             ].forEach(([s,e]) => addRange(s,e));
             break;
         case '4':
-            [
-                [208,223],[269,298],[349,378],[431,461],[513,545],[546,576],[630,658],[712,719],
-                [720,737],[789,798],[844,870],[923,945]
-            ].forEach(([s,e]) => addRange(s,e));
+            // Section 4 removed — all plots merged into Section 2
             break;
         case '5':
             [
