@@ -20,22 +20,26 @@ const S1_COL_RANGES = [
 ];
 const S1_BOTTOM_OFFSET = 0;
 
-// Section 2 column ranges - each S2 column can have an optional s3Top for Section 3 plots stacked on top
+// Section 2 column ranges
+// s3Top = Section 3 plots stacked on top (rose/pink)
+// s4Top = Section 4 plots stacked on top of s3Top (amber/yellow)
 const COLUMN_RANGES = [
-  { start: 186, end: 207, shiftDown: false, s3Top: null },
-  { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 } },
-  { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 } },
-  { start: 383, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 } },
-  { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 } },
-  { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 } },
-  { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 } },
-  { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 } },
-  { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 } },
-  { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 } },
+  { start: 186, end: 207, shiftDown: false, s3Top: null, s4Top: null },
+  { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 }, s4Top: null },
+  { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 }, s4Top: null },
+  { start: 383, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 }, s4Top: null },
+  { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 }, s4Top: null },
+  { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 }, s4Top: { start: 630, end: 658 } },
+  { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 }, s4Top: { start: 712, end: 719 } },
+  { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 }, s4Top: { start: 789, end: 789 } },
+  { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 }, s4Top: { start: 844, end: 870 } },
+  { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 }, s4Top: { start: 923, end: 942 } },
 ];
 
 // Section 3 rose/pink color class
 const S3_COLOR_CLASS = "bg-rose-100 border-rose-300";
+// Section 4 amber/yellow color class
+const S4_COLOR_CLASS = "bg-amber-100 border-amber-300";
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
 
