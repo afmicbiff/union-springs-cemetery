@@ -7,10 +7,17 @@ function parseNum(v) {
   return m ? parseInt(m[0], 10) : null;
 }
 
-// Section 1 layout constants
-const S1_MAX = 185;
-const S1_COLS = 8;
-const S1_PER_COL = Math.ceil(S1_MAX / S1_COLS); // ~24
+// Section 1 explicit column ranges
+const S1_COL_RANGES = [
+  { start: 1, end: 25 },
+  { start: 26, end: 49 },
+  { start: 50, end: 73 },
+  { start: 74, end: 97 },
+  { start: 98, end: 121 },
+  { start: 122, end: 145 },
+  { start: 146, end: 169 },
+  { start: 170, end: 185 },
+];
 const S1_BOTTOM_OFFSET = 0;
 
 // Section 2 column ranges
