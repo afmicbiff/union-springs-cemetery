@@ -20,47 +20,28 @@ const S1_COL_RANGES = [
 ];
 const S1_BOTTOM_OFFSET = 0;
 
-// Section 2 column ranges
+// Section 2 column ranges - each S2 column can have an optional s3Top for Section 3 plots stacked on top
 const COLUMN_RANGES = [
-  { start: 186, end: 207, shiftDown: false },
+  { start: 186, end: 207, shiftDown: false, s3Top: null },
   { start: 228, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 } },
-  { start: 303, end: 325, shiftDown: false },
-  { start: 383, end: 405, shiftDown: false },
-  { start: 466, end: 488, shiftDown: true },
-  { start: 582, end: 604, shiftDown: true },
-  { start: 665, end: 687, shiftDown: false },
-  { start: 743, end: 764, shiftDown: false },
-  { start: 799, end: 820, shiftDown: false },
-  { start: 875, end: 897, shiftDown: true },
+  { start: 303, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 } },
+  { start: 383, end: 405, shiftDown: false, s3Top: { start: 406, end: 430 } },
+  { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 } },
+  { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 633 } },
+  { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 } },
+  { start: 743, end: 764, shiftDown: false, s3Top: { start: 765, end: 788 } },
+  { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 } },
+  { start: 875, end: 897, shiftDown: true, s3Top: { start: 898, end: 930 } },
 ];
+
+// Section 3 rose/pink color class
+const S3_COLOR_CLASS = "bg-rose-100 border-rose-300";
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
 
-  // Build Section 1 columns using explicit ranges
-  const s1Columns = useMemo(() => {
-    if (!section1Plots || section1Plots.length === 0) return [];
-
-    const plotByNum = new Map();
-    section1Plots.forEach(p => {
-      const n = parseNum(p.Grave || p.plot_number);
-      if (n != null) plotByNum.set(n, p);
-    });
-
-    return S1_COL_RANGES.map(({ start, end, tail }) => {
-      const colPlots = [];
-      for (let num = start; num <= end; num++) {
-        colPlots.push(plotByNum.get(num) || null);
-      }
-      if (tail) {
-        tail.forEach(num => colPlots.push(plotByNum.get(num) || null));
-      }
-      return colPlots;
-    });
-  }, [section1Plots]);
-
-  // Build Section 2 columns  
-  const s2Columns = useMemo(() => {
-    const plotByNum = new Map();
+  // Build plot lookup map from all plots (includes both S2 and S3 plots now)
+  const plotByNum = useMemo(() => {
+    const map = new Map();
     const sorted = [...(plots || [])].sort((a, b) => {
       const da = new Date(a.created_date || 0).getTime();
       const db = new Date(b.created_date || 0).getTime();
@@ -70,29 +51,63 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
     sorted.forEach(p => {
       const n = parseNum(p.Grave || p.plot_number);
       if (n != null) {
-        const existing = plotByNum.get(n);
+        const existing = map.get(n);
         if (!existing) {
-          plotByNum.set(n, p);
+          map.set(n, p);
         } else {
           const hasRow = p.Row || p.row_number;
           const existingHasRow = existing.Row || existing.row_number;
           if (hasRow && !existingHasRow) {
-            plotByNum.set(n, p);
+            map.set(n, p);
           } else if (hasRow === existingHasRow) {
-            plotByNum.set(n, p);
+            map.set(n, p);
           }
         }
       }
     });
+    return map;
+  }, [plots]);
 
-    return COLUMN_RANGES.map(({ start, end }) => {
+  // Build Section 1 columns using explicit ranges
+  const s1Columns = useMemo(() => {
+    if (!section1Plots || section1Plots.length === 0) return [];
+
+    const s1Map = new Map();
+    section1Plots.forEach(p => {
+      const n = parseNum(p.Grave || p.plot_number);
+      if (n != null) s1Map.set(n, p);
+    });
+
+    return S1_COL_RANGES.map(({ start, end, tail }) => {
+      const colPlots = [];
+      for (let num = start; num <= end; num++) {
+        colPlots.push(s1Map.get(num) || null);
+      }
+      if (tail) {
+        tail.forEach(num => colPlots.push(s1Map.get(num) || null));
+      }
+      return colPlots;
+    });
+  }, [section1Plots]);
+
+  // Build Section 2 columns (with S3 top segments)
+  const s2Columns = useMemo(() => {
+    return COLUMN_RANGES.map(({ start, end, s3Top }) => {
       const colPlots = [];
       for (let num = start; num <= end; num++) {
         colPlots.push(plotByNum.get(num) || null);
       }
-      return colPlots;
+      // Build S3 top plots if defined
+      let s3Plots = null;
+      if (s3Top) {
+        s3Plots = [];
+        for (let num = s3Top.start; num <= s3Top.end; num++) {
+          s3Plots.push(plotByNum.get(num) || null);
+        }
+      }
+      return { colPlots, s3Plots };
     });
-  }, [plots]);
+  }, [plotByNum]);
 
   const hasSection1 = s1Columns.length > 0;
 
@@ -126,13 +141,14 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
         {/* Small gap/separator between S1 and S2 */}
         {hasSection1 && <div className="w-1" />}
 
-        {/* Section 2 columns */}
-        {s2Columns.map((colPlots, colIdx) => {
+        {/* Section 2 columns with optional Section 3 plots on top */}
+        {s2Columns.map(({ colPlots, s3Plots }, colIdx) => {
           const colDef = COLUMN_RANGES[colIdx];
           const isShifted = colDef.shiftDown;
           return (
             <div key={`s2-${colIdx}`} className="flex flex-col-reverse gap-0.5">
               {!isShifted && <div className="w-16 h-8 m-0.5" />}
+              {/* Section 2 plots */}
               {colPlots.map((item, rowIdx) => (
                 <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
                   <GravePlotCell
@@ -143,6 +159,20 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
                     onHover={onHover}
                     onEdit={onEdit}
                     sectionKey="2"
+                  />
+                </div>
+              ))}
+              {/* Section 3 plots stacked on top (rose/pink) */}
+              {s3Plots && s3Plots.map((item, rowIdx) => (
+                <div key={`s3-${rowIdx}`} className={`relative transition-opacity ${S3_COLOR_CLASS} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+                  <GravePlotCell
+                    item={item}
+                    baseColorClass=""
+                    statusColors={statusColors}
+                    isAdmin={isAdmin}
+                    onHover={onHover}
+                    onEdit={onEdit}
+                    sectionKey="3"
                   />
                 </div>
               ))}
