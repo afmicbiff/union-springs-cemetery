@@ -1011,7 +1011,7 @@ export default function PlotsPage() {
         // Section 4 plots that are now displayed in Section 2 columns
         if (
             (graveNum >= 630 && graveNum <= 658) ||
-            (graveNum >= 712 && graveNum <= 719) ||
+            (graveNum >= 712 && graveNum <= 737) ||
             (graveNum >= 789 && graveNum <= 798) ||
             (graveNum >= 844 && graveNum <= 870) ||
             (graveNum >= 923 && graveNum <= 942)
