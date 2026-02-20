@@ -375,7 +375,7 @@ const SectionRenderer = React.memo(({
                             <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
                               <Section2DnDGrid
                                 plots={plots}
-                                section1Plots={section1PlotsForS2}
+                                section1Plots={section1PlotsForS2 || []}
                                 baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
                                 isAdmin={isAdmin}
                                 onHover={onHover}
