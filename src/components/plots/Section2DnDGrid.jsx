@@ -94,14 +94,13 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
     });
   }, [section1Plots]);
 
-  // Build Section 2 columns (with S3 top segments)
+  // Build Section 2 columns (with S3 and S4 top segments)
   const s2Columns = useMemo(() => {
-    return COLUMN_RANGES.map(({ start, end, s3Top }) => {
+    return COLUMN_RANGES.map(({ start, end, s3Top, s4Top }) => {
       const colPlots = [];
       for (let num = start; num <= end; num++) {
         colPlots.push(plotByNum.get(num) || null);
       }
-      // Build S3 top plots if defined
       let s3Plots = null;
       if (s3Top) {
         s3Plots = [];
@@ -109,7 +108,14 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
           s3Plots.push(plotByNum.get(num) || null);
         }
       }
-      return { colPlots, s3Plots };
+      let s4Plots = null;
+      if (s4Top) {
+        s4Plots = [];
+        for (let num = s4Top.start; num <= s4Top.end; num++) {
+          s4Plots.push(plotByNum.get(num) || null);
+        }
+      }
+      return { colPlots, s3Plots, s4Plots };
     });
   }, [plotByNum]);
 
