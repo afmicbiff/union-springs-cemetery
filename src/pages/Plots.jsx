@@ -1316,7 +1316,7 @@ export default function PlotsPage() {
     if (expandKey) {
       setCollapsedSections(prev => ({ ...prev, [expandKey]: false }));
     } else {
-      setCollapsedSections({ '2': false, '3': false, '4': false, '5': false });
+      setCollapsedSections({ '2': false, '3': false, '5': false });
     }
 
     let attempts = 0;
