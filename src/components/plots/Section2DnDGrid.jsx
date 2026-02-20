@@ -151,8 +151,8 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
         {/* Small gap/separator between S1 and S2 */}
         {hasSection1 && <div className="w-1" />}
 
-        {/* Section 2 columns with optional Section 3 plots on top */}
-        {s2Columns.map(({ colPlots, s3Plots }, colIdx) => {
+        {/* Section 2 columns with optional Section 3 and Section 4 plots on top */}
+        {s2Columns.map(({ colPlots, s3Plots, s4Plots }, colIdx) => {
           const colDef = COLUMN_RANGES[colIdx];
           const isShifted = colDef.shiftDown;
           return (
@@ -183,6 +183,20 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
                     onHover={onHover}
                     onEdit={onEdit}
                     sectionKey="3"
+                  />
+                </div>
+              ))}
+              {/* Section 4 plots stacked on top of Section 3 (amber/yellow) */}
+              {s4Plots && s4Plots.map((item, rowIdx) => (
+                <div key={`s4-${rowIdx}`} className={`relative transition-opacity ${S4_COLOR_CLASS} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
+                  <GravePlotCell
+                    item={item}
+                    baseColorClass=""
+                    statusColors={statusColors}
+                    isAdmin={isAdmin}
+                    onHover={onHover}
+                    onEdit={onEdit}
+                    sectionKey="4"
                   />
                 </div>
               ))}
