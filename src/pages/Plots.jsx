@@ -449,14 +449,9 @@ const SectionRenderer = React.memo(({
                                       return arr;
                                     })();
 
-                                    // Add top padding to reach TARGET_HEIGHT
-                                    const topPadding = Math.max(0, TARGET_HEIGHT - plotsWithSpacers.length);
-                                    const paddedPlots = [...plotsWithSpacers];
-                                    pushBlanks(paddedPlots, topPadding, `c3-${idx}-top`);
-
                                     return (
                                       <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
-                                        {paddedPlots.map((plot, pIdx) => (
+                                        {plotsWithSpacers.map((plot, pIdx) => (
                                           <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
                                           computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
                                         ))}
