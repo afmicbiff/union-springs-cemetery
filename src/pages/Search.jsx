@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
+import SEOHead from '@/components/common/SEOHead';
 
 // Memoized result card for performance - production-ready with error handling
 const ResultCard = memo(function ResultCard({ person, locationSearch }) {
