@@ -15,8 +15,8 @@ const S1_COL_RANGES = [
   { start: 74, end: 97 },
   { start: 98, end: 121 },
   { start: 122, end: 145 },
-  { start: 146, end: 169 },
-  { start: 170, end: 185 },
+  { start: 146, end: 161 },
+  { start: 170, end: 185, tail: [169,168,167,166,165,164,163,162] },
 ];
 const S1_BOTTOM_OFFSET = 0;
 
