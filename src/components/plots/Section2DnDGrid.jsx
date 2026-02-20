@@ -40,7 +40,7 @@ const COLUMN_RANGES = [
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
 
-  // Build Section 1 columns
+  // Build Section 1 columns using explicit ranges
   const s1Columns = useMemo(() => {
     if (!section1Plots || section1Plots.length === 0) return [];
 
@@ -50,17 +50,13 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
       if (n != null) plotByNum.set(n, p);
     });
 
-    const cols = [];
-    for (let c = 0; c < S1_COLS; c++) {
-      const start = c * S1_PER_COL + 1;
-      const end = Math.min((c + 1) * S1_PER_COL, S1_MAX);
+    return S1_COL_RANGES.map(({ start, end }) => {
       const colPlots = [];
       for (let num = start; num <= end; num++) {
         colPlots.push(plotByNum.get(num) || null);
       }
-      cols.push(colPlots);
-    }
-    return cols;
+      return colPlots;
+    });
   }, [section1Plots]);
 
   // Build Section 2 columns  
