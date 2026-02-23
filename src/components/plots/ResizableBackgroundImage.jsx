@@ -17,16 +17,17 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, c
           loading="lazy"
           decoding="async"
         />
-        {/* Expand button */}
-        <button
-          onClick={() => setIsFullscreen(true)}
-          className="pointer-events-auto absolute bottom-4 right-4 bg-white/90 hover:bg-white border border-gray-300 shadow-lg rounded-lg px-3 py-2 flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors z-10"
-          title="Expand aerial view"
-        >
-          <Maximize2 className="w-4 h-4" />
-          Expand Image
-        </button>
       </div>
+      {/* Expand button — outside the pointer-events-none container */}
+      <button
+        onClick={() => setIsFullscreen(true)}
+        className="fixed bottom-6 right-6 bg-white/95 hover:bg-white border border-gray-300 shadow-xl rounded-lg px-4 py-2.5 flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+        style={{ zIndex: 50 }}
+        title="Expand aerial view"
+      >
+        <Maximize2 className="w-4 h-4" />
+        Expand Image
+      </button>
 
       <FullscreenImageViewer
         src={src}
