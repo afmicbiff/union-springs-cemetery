@@ -32,9 +32,9 @@ const COLUMN_RANGES = [
   { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 }, s4Top: { start: 630, end: 658 } },
   { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 }, s4Top: { start: 712, end: 737 } },
   { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 }, s4Top: { start: 789, end: 798 } },
-  { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 }, s4Top: { start: 844, end: 870 } },
+  { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 }, s4Top: { start: 844, end: 874 } },
   { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 }, s4Top: { start: 923, end: 942 } },
-  // Note: Plots 871-874 are in Section 4 s4Top of column index 4 (466-488 column)
+  // Note: Plots 871-874 are in Section 4 s4Top of column index 8 (799-820 column, on top of 870)
 ];
 
 // Section 3 rose/pink color class
