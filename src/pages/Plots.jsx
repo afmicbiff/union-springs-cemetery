@@ -134,8 +134,8 @@ const getUnplacedForSection = (sectionKey, plots) => {
             break;
         case '5':
             [
-                                  [228,236],[1001,1014],[1015,1026],[1029,1042],
-                [546,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
+                                  [228,236],[1001,1014],[1015,1026],
+                                      [543,546],[1029,1042],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
                 [738,738],[739,742],[871,874]
             ].forEach(([s,e]) => addRange(s,e));
             // All other plots in Section 5 that don't match these ranges will go to unplaced/fallback
@@ -473,12 +473,12 @@ const SectionRenderer = React.memo(({
                             // Col 1b: skip - 299-302 moved to Section 4
                             // Col 1.5: Full spacer column
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c1half'); columns.push(col); })();
-                            // Col 2: 299-302, 4 blanks, 1001-1014
-                            (() => { const col=[]; pushRange(col,299,302); pushBlanks(col,4,'c2'); pushRange(col,1001,1014); pushBlanks(col, TARGET_HEIGHT - 22, 'c2-top'); columns.push(col); })();
-                            // Col 3: 379-382, 4 blanks, 1015-1026
-                            (() => { const col=[]; pushRange(col,379,382); pushBlanks(col,4,'c3'); pushRange(col,1015,1026); pushBlanks(col, TARGET_HEIGHT - 20, 'c3-top'); columns.push(col); })();
-                            // Col 4: 462-465, 4 blanks, 1029-1042
-                            (() => { const col=[]; pushRange(col,462,465); pushBlanks(col,4,'c4'); pushRange(col,1029,1042); pushBlanks(col, TARGET_HEIGHT - 22, 'c4-top'); columns.push(col); })();
+                            // Col 2: 1001-1014
+                            (() => { const col=[]; pushRange(col,1001,1014); pushBlanks(col, TARGET_HEIGHT - 14, 'c2-top'); columns.push(col); })();
+                            // Col 3: 1015-1026
+                            (() => { const col=[]; pushRange(col,1015,1026); pushBlanks(col, TARGET_HEIGHT - 12, 'c3-top'); columns.push(col); })();
+                            // Col 4: 1029-1042
+                            (() => { const col=[]; pushRange(col,1029,1042); pushBlanks(col, TARGET_HEIGHT - 14, 'c4-top'); columns.push(col); })();
                             // Col 5: 543-546, 4 blanks, 1043-1056
                             (() => { const col=[]; pushRange(col,543,546); pushBlanks(col,4,'c5'); pushRange(col,1043,1056); pushBlanks(col, TARGET_HEIGHT - 22, 'c5-top'); columns.push(col); })();
                             // Col 6: 577-580, 4 blanks, 1057-1070, labels
