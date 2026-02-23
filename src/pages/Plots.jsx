@@ -1567,7 +1567,7 @@ export default function PlotsPage() {
                                 })}
                       </div>
                       </div>
-                      </DraggableMapContainer>
+                    </DraggableMapContainer>
 
                       {Object.keys(sections).length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
