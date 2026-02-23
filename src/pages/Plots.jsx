@@ -135,8 +135,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
         case '5':
             [
                                   [228,236],[1001,1014],[1015,1026],
-                                      [1029,1042],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
-                [738,738],[739,742]
+                                      [1029,1042],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102]
             ].forEach(([s,e]) => addRange(s,e));
             // All other plots in Section 5 that don't match these ranges will go to unplaced/fallback
             break;
@@ -489,8 +488,8 @@ const SectionRenderer = React.memo(({
                             (() => { const col=[]; pushBlanks(col,7,'c8'); pushRange(col,1085,1102); pushBlanks(col, TARGET_HEIGHT - 25, 'c8-top'); columns.push(col); })();
                             // Col 8.5: Full spacer column
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8half'); columns.push(col); })();
-                            // Col 9: 738, 1 blank, 739-742, 20 blanks
-                            (() => { const col=[]; col.push(...byNum(738)); pushBlanks(col,1,'c9'); pushRange(col,739,742); pushBlanks(col,20,'c9e'); pushBlanks(col, TARGET_HEIGHT - 26, 'c9-top'); columns.push(col); })();
+                            // Col 9: (738-742 moved to Section 4) - just spacer now
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c9'); columns.push(col); })();
                             // Col 10: (871-874 moved to Section 4) - just spacer now
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c10'); columns.push(col); })();
                             // Col 11: spacer column

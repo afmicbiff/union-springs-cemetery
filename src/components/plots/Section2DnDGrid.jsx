@@ -30,7 +30,7 @@ const COLUMN_RANGES = [
   { start: 383, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 }, s4Top: { start: 431, end: 465 } },
   { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 }, s4Top: { start: 513, end: 576 } },
   { start: 582, end: 604, shiftDown: true, s3Top: { start: 605, end: 629 }, s4Top: { start: 630, end: 658 } },
-  { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 }, s4Top: { start: 712, end: 737 } },
+  { start: 665, end: 687, shiftDown: false, s3Top: { start: 688, end: 711 }, s4Top: { start: 712, end: 742 } },
   { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 }, s4Top: { start: 789, end: 798 } },
   { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 }, s4Top: { start: 844, end: 874 } },
   { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 }, s4Top: { start: 923, end: 942 } },
