@@ -29,7 +29,7 @@ const FullscreenPlotsOverlay = memo(function FullscreenPlotsOverlay({ sections }
   if (!sections || Object.keys(sections).length === 0) return null;
 
   return (
-    <div className="p-4 space-y-6 bg-stone-100 border border-stone-300 shadow-lg rounded-lg max-w-full overflow-auto">
+    <div className="p-4 space-y-6 border border-stone-300 shadow-lg rounded-lg max-w-full overflow-auto" style={{ backgroundColor: 'rgba(231, 229, 228, 0.99)' }}>
       <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
         Plot Overlay
       </div>
