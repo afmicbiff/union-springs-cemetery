@@ -1526,22 +1526,6 @@ export default function PlotsPage() {
       {/* Main Area - Map only, table removed */}
       <Suspense fallback={<div className="p-6 text-sm text-gray-500 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin mr-2" />Loading map…</div>}>
 
-            {/* Legend - stacked on mobile */}
-            <div className="bg-white border-b border-gray-200 py-2 sm:py-3 px-4 sm:px-6 z-20">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center shrink-0">
-                        <Info size={12} className="mr-1 sm:mr-1.5" /> Status for all graves
-                    </span>
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 overflow-x-auto">
-                        <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Available' ? '' : 'Available' }))} active={filters.status === 'Available'} />
-                        <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Reserved' ? '' : 'Reserved' }))} active={filters.status === 'Reserved'} />
-                        <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Occupied' ? '' : 'Occupied' }))} active={filters.status === 'Occupied'} />
-                        <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Veteran' ? '' : 'Veteran' }))} active={filters.status === 'Veteran'} />
-                        <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => setFilters(prev => ({ ...prev, status: prev.status === 'Unavailable' ? '' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
-                    </div>
-                </div>
-            </div>
-
             {/* Map Canvas */}
             <main className="flex-grow p-6 overflow-y-auto">
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
