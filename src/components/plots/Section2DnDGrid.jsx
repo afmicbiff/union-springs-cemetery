@@ -24,8 +24,8 @@ const S1_BOTTOM_OFFSET = 0;
 // s3Top = Section 3 plots stacked on top (rose/pink)
 // s4Top = Section 4 plots stacked on top of s3Top (amber/yellow)
 const COLUMN_RANGES = [
-  { start: 185, end: 207, shiftDown: false, s3Top: null, s4Top: { start: 208, end: 227 } },
-  { start: 227, end: 250, shiftDown: false, s3Top: { start: 251, end: 268 }, s4Top: { start: 269, end: 302 } },
+  { start: 185, end: 207, shiftDown: false, bottomPad: 1, s3Top: null, s4Top: { start: 208, end: 227 } },
+  { start: 227, end: 250, shiftDown: false, bottomPad: 1, s3Top: { start: 251, end: 268 }, s4Top: { start: 269, end: 302 } },
   { start: 302, end: 325, shiftDown: false, s3Top: { start: 326, end: 348 }, s4Top: { start: 349, end: 382 } },
   { start: 382, end: 404, shiftDown: false, s3Top: { start: 405, end: 430 }, s4Top: { start: 431, end: 465 } },
   { start: 466, end: 488, shiftDown: true, s3Top: { start: 489, end: 512 }, s4Top: { start: 513, end: 576 } },
@@ -97,7 +97,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
 
   // Build Section 2 columns (with S3 and S4 top segments)
   const s2Columns = useMemo(() => {
-    return COLUMN_RANGES.map(({ start, end, s3Top, s4Top }) => {
+    return COLUMN_RANGES.map(({ start, end, s3Top, s4Top, bottomPad }) => {
       const colPlots = [];
       for (let num = start; num <= end; num++) {
         colPlots.push(plotByNum.get(num) || null);
@@ -116,7 +116,7 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
           s4Plots.push(plotByNum.get(num) || null);
         }
       }
-      return { colPlots, s3Plots, s4Plots };
+      return { colPlots, s3Plots, s4Plots, bottomPad: bottomPad || 0 };
     });
   }, [plotByNum]);
 
@@ -153,12 +153,16 @@ const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plot
         {hasSection1 && <div className="w-1" />}
 
         {/* Section 2 columns with optional Section 3 and Section 4 plots on top */}
-        {s2Columns.map(({ colPlots, s3Plots, s4Plots }, colIdx) => {
+        {s2Columns.map(({ colPlots, s3Plots, s4Plots, bottomPad }, colIdx) => {
           const colDef = COLUMN_RANGES[colIdx];
           const isShifted = colDef.shiftDown;
           return (
             <div key={`s2-${colIdx}`} className="flex flex-col-reverse gap-0.5">
               {!isShifted && <div className="w-16 h-8 m-0.5" />}
+              {/* Extra bottom padding to align columns */}
+              {Array.from({ length: bottomPad || 0 }).map((_, i) => (
+                <div key={`bpad-${i}`} className="w-16 h-8 m-0.5" />
+              ))}
               {/* Section 2 plots */}
               {colPlots.map((item, rowIdx) => (
                 <div key={rowIdx} className={`relative transition-opacity ${baseColorClass} opacity-90 hover:opacity-100 border rounded-[1px] w-16 h-8 m-0.5`}>
