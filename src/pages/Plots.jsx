@@ -134,7 +134,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
             break;
         case '5':
             [
-                [228,236],[299,302],[1001,1014],[379,382],[1015,1026],[462,465],[1029,1042],
+                [228,236],[1001,1014],[379,382],[1015,1026],[462,465],[1029,1042],
                 [546,546],[1043,1056],[577,580],[1057,1070],[659,664],[1071,1084],[1085,1102],
                 [738,738],[739,742],[871,874]
             ].forEach(([s,e]) => addRange(s,e));
@@ -470,6 +470,7 @@ const SectionRenderer = React.memo(({
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c0-lead'); columns.push(col); })();
                             // Col 1: 228-236 + top padding (224-227 moved to Section 4)
                             (() => { const col=[]; pushRange(col,228,236); pushBlanks(col, TARGET_HEIGHT - 9, 'c1-top'); columns.push(col); })();
+                            // Col 1b: skip - 299-302 moved to Section 4
                             // Col 1.5: Full spacer column
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c1half'); columns.push(col); })();
                             // Col 2: 299-302, 4 blanks, 1001-1014
