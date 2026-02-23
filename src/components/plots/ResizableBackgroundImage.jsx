@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 
 const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain }) {
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none bg-white flex items-center justify-center" style={{ zIndex: 0 }}>
+    <div className="absolute inset-0 w-full h-full pointer-events-none bg-white flex items-end justify-center" style={{ zIndex: 0 }}>
       <img
         src={src}
         alt=""
