@@ -479,8 +479,8 @@ const SectionRenderer = React.memo(({
                             (() => { const col=[]; pushRange(col,1015,1026); pushBlanks(col, TARGET_HEIGHT - 12, 'c3-top'); columns.push(col); })();
                             // Col 4: 1029-1042
                             (() => { const col=[]; pushRange(col,1029,1042); pushBlanks(col, TARGET_HEIGHT - 14, 'c4-top'); columns.push(col); })();
-                            // Col 5: 543-546, 4 blanks, 1043-1056
-                            (() => { const col=[]; pushRange(col,543,546); pushBlanks(col,4,'c5'); pushRange(col,1043,1056); pushBlanks(col, TARGET_HEIGHT - 22, 'c5-top'); columns.push(col); })();
+                            // Col 5: 1043-1056 (543-546 moved to Section 4)
+                            (() => { const col=[]; pushRange(col,1043,1056); pushBlanks(col, TARGET_HEIGHT - 14, 'c5-top'); columns.push(col); })();
                             // Col 6: 577-580, 4 blanks, 1057-1070, labels
                             (() => { const col=[]; pushRange(col,577,580); pushBlanks(col,4,'c6'); pushRange(col,1057,1070); pushLabels(col,["1070-A U-7","1070-B U-7"]); pushBlanks(col, TARGET_HEIGHT - 22, 'c6-top'); columns.push(col); })();
                             // Col 7: 659-664, 2 blanks, 1071-1084, labels
@@ -491,8 +491,8 @@ const SectionRenderer = React.memo(({
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8half'); columns.push(col); })();
                             // Col 9: 738, 1 blank, 739-742, 20 blanks
                             (() => { const col=[]; col.push(...byNum(738)); pushBlanks(col,1,'c9'); pushRange(col,739,742); pushBlanks(col,20,'c9e'); pushBlanks(col, TARGET_HEIGHT - 26, 'c9-top'); columns.push(col); })();
-                            // Col 10: 871-874, 11 blanks
-                            (() => { const col=[]; pushRange(col,871,874); pushBlanks(col,11,'c10'); pushBlanks(col, TARGET_HEIGHT - 15, 'c10-top'); columns.push(col); })();
+                            // Col 10: (871-874 moved to Section 4) - just spacer now
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c10'); columns.push(col); })();
                             // Col 11: spacer column
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c11'); columns.push(col); })();
                             // Col 12: Trailing empty column
