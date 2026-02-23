@@ -1567,8 +1567,9 @@ export default function PlotsPage() {
                                 })}
                       </div>
                       </div>
+                      </DraggableMapContainer>
 
-                    {Object.keys(sections).length === 0 && !isLoading && (
+                      {Object.keys(sections).length === 0 && !isLoading && (
                         <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
                             <Database size={48} className="mb-4 opacity-50" />
                             <p className="text-lg font-medium">No plots found in database</p>
