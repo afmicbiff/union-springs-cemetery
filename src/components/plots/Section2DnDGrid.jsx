@@ -34,6 +34,7 @@ const COLUMN_RANGES = [
   { start: 743, end: 769, shiftDown: false, s3Top: { start: 770, end: 788 }, s4Top: { start: 789, end: 798 } },
   { start: 799, end: 820, shiftDown: false, s3Top: { start: 821, end: 843 }, s4Top: { start: 844, end: 870 } },
   { start: 875, end: 895, shiftDown: true, s3Top: { start: 896, end: 922 }, s4Top: { start: 923, end: 942 } },
+  // Note: Plots 871-874 are in Section 4 s4Top of column index 4 (466-488 column)
 ];
 
 // Section 3 rose/pink color class
