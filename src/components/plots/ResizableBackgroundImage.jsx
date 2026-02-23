@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 import FullscreenImageViewer from './FullscreenImageViewer';
 
-const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain }) {
+const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain, children }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   return (
@@ -33,7 +33,9 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, c
         src={src}
         isOpen={isFullscreen}
         onClose={() => setIsFullscreen(false)}
-      />
+      >
+        {children}
+      </FullscreenImageViewer>
     </>
   );
 });
