@@ -23,6 +23,7 @@ const MapControls = lazy(() => import("@/components/plots/MapControls"));
 const Section1DnDGrid = lazy(() => import("@/components/plots/Section1DnDGrid"));
 const Section2DnDGrid = lazy(() => import("@/components/plots/Section2DnDGrid"));
 const DraggableSectionGrid = lazy(() => import("@/components/plots/DraggableSectionGrid"));
+import DraggableMapContainer from "@/components/plots/DraggableMapContainer";
 import { toast } from "sonner";
 
 class ErrorBoundary extends React.Component {
