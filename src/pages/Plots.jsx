@@ -1532,6 +1532,7 @@ export default function PlotsPage() {
                 <div className="max-w-7xl mx-auto space-y-10 pb-20">
                     {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
 
+                    <DraggableMapContainer>
                     <div 
                       className="bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-all duration-200 ease-out inline-block max-w-full"
                     >
