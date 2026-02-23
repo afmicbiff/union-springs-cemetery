@@ -115,7 +115,7 @@ const FullscreenImageViewer = memo(function FullscreenImageViewer({ src, isOpen,
       {/* Image area */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+        className="flex-1 overflow-hidden cursor-grab active:cursor-grabbing touch-none flex items-center justify-center"
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -142,8 +142,8 @@ const FullscreenImageViewer = memo(function FullscreenImageViewer({ src, isOpen,
           />
           {/* Plot overlay on top of image */}
           {children && (
-            <div className="absolute inset-0 overflow-auto pointer-events-none">
-              <div className="pointer-events-auto">
+            <div className="absolute inset-0 flex items-center justify-center overflow-visible pointer-events-none">
+              <div className="pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">
                 {children}
               </div>
             </div>
