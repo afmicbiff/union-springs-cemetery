@@ -5,7 +5,7 @@ const ZOOM_STEP = 0.05;
 const MIN_ZOOM = 0.10;
 const MAX_ZOOM = 1.5;
 
-const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10];
+const OPACITY_OPTIONS = [100, 75, 50, 25, 15, 10, 0];
 
 const MapControls = memo(function MapControls({ containerRef }) {
   const [zoom, setZoom] = useState(1);
