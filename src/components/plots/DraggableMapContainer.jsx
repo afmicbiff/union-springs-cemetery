@@ -51,7 +51,7 @@ const DraggableMapContainer = memo(function DraggableMapContainer({ children }) 
   return (
     <div
       ref={containerRef}
-      className="relative"
+      className="relative inline-block"
       style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
     >
       {/* Top handle */}
