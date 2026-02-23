@@ -122,7 +122,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
 
     return (
       <div 
-        className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] transition-colors flex items-center justify-center plot-element ${isAdmin ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
+        className={`w-16 h-8 m-0.5 border border-transparent bg-transparent rounded-[1px] transition-colors flex items-center justify-center plot-element ${isAdmin ? 'hover:bg-green-100 hover:border-green-400 cursor-pointer' : ''}`}
         onClick={handleSpacerClick}
         title={isAdmin ? "Click to create a new plot here" : ""}
       >
