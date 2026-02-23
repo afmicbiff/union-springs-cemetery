@@ -1,8 +1,9 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, lazy, Suspense } from 'react';
 import { Maximize2 } from 'lucide-react';
 import FullscreenImageViewer from './FullscreenImageViewer';
+const FullscreenPlotsOverlay = lazy(() => import('./FullscreenPlotsOverlay'));
 
-const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain, children }) {
+const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain, children, sections }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   return (
@@ -34,7 +35,11 @@ const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, c
         isOpen={isFullscreen}
         onClose={() => setIsFullscreen(false)}
       >
-        {children}
+        {sections && Object.keys(sections).length > 0 && (
+          <Suspense fallback={null}>
+            <FullscreenPlotsOverlay sections={sections} />
+          </Suspense>
+        )}
       </FullscreenImageViewer>
     </>
   );
