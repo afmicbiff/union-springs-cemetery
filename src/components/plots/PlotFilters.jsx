@@ -150,6 +150,16 @@ const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusO
                         )}
                     </Button>
 
+                    {/* Graves Legend */}
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap ml-auto">
+                        <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">Graves</span>
+                        <LegendItem label="Available" colorClass={STATUS_COLORS.Available} onClick={() => onFilterChange(prev => ({ ...prev, status: prev.status === 'Available' ? '' : 'Available' }))} active={filters.status === 'Available'} />
+                        <LegendItem label="Reserved" colorClass={STATUS_COLORS.Reserved} onClick={() => onFilterChange(prev => ({ ...prev, status: prev.status === 'Reserved' ? '' : 'Reserved' }))} active={filters.status === 'Reserved'} />
+                        <LegendItem label="Occupied" colorClass={STATUS_COLORS.Occupied} onClick={() => onFilterChange(prev => ({ ...prev, status: prev.status === 'Occupied' ? '' : 'Occupied' }))} active={filters.status === 'Occupied'} />
+                        <LegendItem label="Veteran" colorClass={STATUS_COLORS.Veteran} onClick={() => onFilterChange(prev => ({ ...prev, status: prev.status === 'Veteran' ? '' : 'Veteran' }))} active={filters.status === 'Veteran'} />
+                        <LegendItem label="Unavailable" colorClass={STATUS_COLORS.Unavailable} onClick={() => onFilterChange(prev => ({ ...prev, status: prev.status === 'Unavailable' ? '' : 'Unavailable' }))} active={filters.status === 'Unavailable'} />
+                    </div>
+
                     {/* Clear All - Only show when filters active */}
                     {hasActiveFilters && (
                         <Button 
