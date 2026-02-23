@@ -364,8 +364,7 @@ const SectionRenderer = React.memo(({
             
             {!isCollapsed && (
                 <div className={`
-                    rounded-xl border-2 border-dashed p-6 transition-colors duration-500
-                    ${borderColor} ${bgColor} bg-opacity-30
+                    rounded-xl p-6 transition-colors duration-500
                     overflow-x-auto
                 `}>
                     {sectionKey === '2' ? (
