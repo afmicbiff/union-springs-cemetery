@@ -6,6 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
+const STATUS_COLORS = {
+    'Available': 'bg-green-500 border-green-700',
+    'Reserved': 'bg-yellow-400 border-yellow-600',
+    'Occupied': 'bg-red-500 border-red-700',
+    'Veteran': 'bg-blue-600 border-blue-800',
+    'Unavailable': 'bg-gray-600 border-gray-800',
+};
+
+const LegendItem = memo(function LegendItem({ label, colorClass, onClick, active }) {
+    const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={!!active}
+        className={`flex items-center gap-1 sm:gap-1.5 bg-white h-8 sm:h-10 px-2 sm:px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-50 active:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} shrink-0 touch-manipulation`}
+        data-legend={label}
+      >
+        <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ${bgClass}`}></div>
+        <span className="text-[10px] sm:text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
+      </button>
+    );
+});
+
 const PlotFilters = memo(function PlotFilters({ filters, onFilterChange, statusOptions, backSearchUrl, showBackToSearch, showLocateButton, selectedPlotNum, onLocatePlot }) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
