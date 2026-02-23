@@ -1,18 +1,39 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
+import { Maximize2 } from 'lucide-react';
+import FullscreenImageViewer from './FullscreenImageViewer';
 
 const ResizableBackgroundImage = memo(function ResizableBackgroundImage({ src, contain }) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none bg-white flex items-end justify-center" style={{ zIndex: 0 }}>
-      <img
+    <>
+      <div className="absolute inset-0 w-full h-full pointer-events-none bg-white flex items-end justify-center" style={{ zIndex: 0 }}>
+        <img
+          src={src}
+          alt=""
+          className={`select-none ${contain ? 'object-contain' : 'object-cover'}`}
+          style={{ width: '65%', height: '65%', objectFit: contain ? 'contain' : 'cover' }}
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+        />
+        {/* Expand button */}
+        <button
+          onClick={() => setIsFullscreen(true)}
+          className="pointer-events-auto absolute bottom-4 right-4 bg-white/90 hover:bg-white border border-gray-300 shadow-lg rounded-lg px-3 py-2 flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors z-10"
+          title="Expand aerial view"
+        >
+          <Maximize2 className="w-4 h-4" />
+          Expand Image
+        </button>
+      </div>
+
+      <FullscreenImageViewer
         src={src}
-        alt=""
-        className={`select-none ${contain ? 'object-contain' : 'object-cover'}`}
-        style={{ width: '65%', height: '65%', objectFit: contain ? 'contain' : 'cover' }}
-        draggable={false}
-        loading="lazy"
-        decoding="async"
+        isOpen={isFullscreen}
+        onClose={() => setIsFullscreen(false)}
       />
-    </div>
+    </>
   );
 });
 
