@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect, memo } from 'react';
 import { X, Maximize2, RotateCcw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-const FullscreenImageViewer = memo(function FullscreenImageViewer({ src, isOpen, onClose }) {
+const FullscreenImageViewer = memo(function FullscreenImageViewer({ src, isOpen, onClose, children }) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -126,19 +126,28 @@ const FullscreenImageViewer = memo(function FullscreenImageViewer({ src, isOpen,
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className="w-full h-full flex items-center justify-center"
+          className="relative"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
             transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.15s ease-out',
           }}
         >
+          {/* Background aerial image */}
           <img
             src={src}
             alt="Cemetery aerial view"
             className="max-w-[90vw] max-h-[85vh] object-contain select-none pointer-events-none"
             draggable={false}
           />
+          {/* Plot overlay on top of image */}
+          {children && (
+            <div className="absolute inset-0 overflow-auto pointer-events-none">
+              <div className="pointer-events-auto">
+                {children}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
