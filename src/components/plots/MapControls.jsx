@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import { ZoomIn, ZoomOut, Move, RotateCcw, Eye } from 'lucide-react';
 
+// v2 - cache bust
 const ZOOM_STEP = 0.05;
 const MIN_ZOOM = 0.10;
 const MAX_ZOOM = 1.5;
