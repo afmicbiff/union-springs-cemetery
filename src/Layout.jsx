@@ -147,23 +147,24 @@ export default function Layout({ children }) {
 
   // Third-party script blocking: run once at app startup (not per route)
   useEffect(() => {
-    if (window.__thirdPartyBlocked) return;
-    try {
-      const selectors = [
-        'script[src*="googletagmanager.com"]',
-        'script[src*="gtm.js"]',
-        'script[src*="connect.facebook.net"]',
-        'script[src*="js.stripe.com"]',
-        'script[src*="cdn.tailwindcss.com"]'
-      ];
-      const nodes = document.querySelectorAll(selectors.join(','));
-      nodes.forEach((n) => { try { n.parentNode?.removeChild(n); } catch {} });
-      window.__thirdPartyBlocked = true;
-      window.dataLayer = window.dataLayer || [];
-      if (!window.fbq) {
-        window.fbq = (...args) => { (window.__fbqQueue = window.__fbqQueue || []).push(args); };
-      }
-    } catch {}
+  if (window.__thirdPartyBlocked) return;
+  try {
+    const selectors = [
+      'script[src*="googletagmanager.com"]',
+      'script[src*="gtm.js"]',
+      'script[src*="connect.facebook.net"]',
+      'script[src*="js.stripe.com"]',
+      'script[src*="cdn.tailwindcss.com"]'
+    ];
+    const nodes = document.querySelectorAll(selectors.join(','));
+    nodes.forEach((n) => { try { n.parentNode?.removeChild(n); } catch {} });
+    window.__thirdPartyBlocked = true;
+    // Stub analytics to prevent errors — fail open
+    window.dataLayer = window.dataLayer || [];
+    if (!window.fbq) {
+      window.fbq = () => {};
+    }
+  } catch {}
   }, []);
 
   const pageBackground = isAdmin ? 'bg-stone-100' : colors.background;
@@ -317,8 +318,8 @@ export default function Layout({ children }) {
         .overflow-y-auto, .overflow-x-auto {
           -webkit-overflow-scrolling: touch;
         }
-        /* Content visibility for off-screen sections */
-        section {
+        /* Content visibility for off-screen sections — skip hero to avoid LCP delay */
+        main section:not(:first-child) {
           content-visibility: auto;
           contain-intrinsic-size: auto 500px;
         }

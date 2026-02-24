@@ -79,8 +79,8 @@ const CriticalCSS = memo(function CriticalCSS() {
       /* Mobile touch targets */
       .touch-manipulation{touch-action:manipulation}
       
-      /* Reduce CLS for images */
-      img{content-visibility:auto}
+      /* Reduce CLS for images — exclude hero LCP candidates */
+      img:not([fetchpriority="high"]){content-visibility:auto}
       
       /* GPU acceleration hints */
       .will-change-transform{will-change:transform}

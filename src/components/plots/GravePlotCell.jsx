@@ -104,6 +104,7 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
     if (isAdmin && onEdit && item?._entity === 'Plot') onEdit(item);
   }, [isAdmin, onEdit, item]);
 
+  // PERF: avoid creating new callbacks per render for thousands of cells
   const handleMouseEnter = useCallback((e) => {
     if (onHover) onHover(e, item);
   }, [onHover, item]);
@@ -111,6 +112,9 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
   const handleMouseLeave = useCallback(() => {
     if (onHover) onHover(null, null);
   }, [onHover]);
+
+  // PERF: skip attaching hover handlers on touch devices (no hover events)
+  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
 
   if (!item || item.isSpacer) {
     const handleSpacerClick = (e) => {
@@ -146,8 +150,8 @@ const GravePlotCell = memo(function GravePlotCell({ item, baseColorClass, status
       data-section={sectionKey}
       data-plot-num={plotNum}
       className={`border ${baseColorClass} w-16 h-8 px-1.5 text-[8px] m-0.5 rounded-[1px] flex items-center justify-between bg-opacity-90 plot-element cursor-pointer hover:opacity-100 transition-opacity ${isBlinking ? blinkingClass : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={isTouchDevice ? undefined : handleMouseEnter}
+      onMouseLeave={isTouchDevice ? undefined : handleMouseLeave}
       onClick={handleClick}
       title={`Row: ${item.Row}, Grave: ${item.Grave}`}
     >
