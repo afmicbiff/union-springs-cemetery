@@ -2,7 +2,7 @@
 // Also tracks lightweight network stats on window.__perfNetStats
 
 const inflight = new Map();
-const LARGE_BYTES = 38_100; // ~37.2KB
+const MAX_DURATIONS = 100;
 
 export async function apiFetch(url, options = {}, originalFetch) {
   const method = (options.method || 'GET').toUpperCase();
@@ -17,45 +17,28 @@ export async function apiFetch(url, options = {}, originalFetch) {
     try {
       const res = await fetchImpl(url, options);
 
-      const ct = (res.headers.get('content-type') || '').toLowerCase();
-      const cl = Number(res.headers.get('content-length') || '0');
-
-      if (cl && cl > LARGE_BYTES) {
-        console.warn('Large payload detected', { url, bytes: cl });
-      }
-
-      // Initialize stats bucket
+      // Lightweight stats — NO response cloning to avoid double-parse overhead
       if (typeof window !== 'undefined') {
-        window.__perfNetStats = window.__perfNetStats || { requests: 0, bytes: 0, durations: [] };
-      }
-
-      // If JSON and content-length missing or unreliable, estimate by cloning
-      if (ct.includes('application/json')) {
-        const data = await res.clone().json().catch(() => null);
-        if (data) {
-          const bytes = new Blob([JSON.stringify(data)]).size;
-          if (bytes > LARGE_BYTES) console.warn('Large JSON detected', { url, bytes });
-          if (typeof window !== 'undefined') {
-            window.__perfNetStats.bytes = (window.__perfNetStats.bytes || 0) + (cl || bytes);
-          }
-        }
-      } else if (cl && typeof window !== 'undefined') {
-        window.__perfNetStats.bytes = (window.__perfNetStats.bytes || 0) + cl;
-      }
-
-      if (typeof window !== 'undefined') {
-        const s = window.__perfNetStats;
+        const s = window.__perfNetStats = window.__perfNetStats || { requests: 0, bytes: 0, durations: [] };
+        const cl = Number(res.headers.get('content-length') || '0');
         s.requests += 1;
-        if (t0) s.durations.push(((performance.now && performance.now()) || Date.now()) - t0);
+        if (cl) s.bytes += cl;
+        if (t0) {
+          s.durations.push(((performance.now && performance.now()) || Date.now()) - t0);
+          // Cap array to prevent unbounded memory growth
+          if (s.durations.length > MAX_DURATIONS) s.durations = s.durations.slice(-MAX_DURATIONS);
+        }
       }
 
       return res;
     } catch (err) {
       if (typeof window !== 'undefined') {
-        window.__perfNetStats = window.__perfNetStats || { requests: 0, bytes: 0, durations: [] };
-        const s = window.__perfNetStats;
+        const s = window.__perfNetStats = window.__perfNetStats || { requests: 0, bytes: 0, durations: [] };
         s.requests += 1;
-        if (t0) s.durations.push(-(((performance.now && performance.now()) || Date.now()) - t0));
+        if (t0) {
+          s.durations.push(-(((performance.now && performance.now()) || Date.now()) - t0));
+          if (s.durations.length > MAX_DURATIONS) s.durations = s.durations.slice(-MAX_DURATIONS);
+        }
       }
       throw err;
     }

@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import GovernanceProvider from '@/components/gov/GovernanceProvider';
 import ImageContextMenu from '@/components/common/ImageContextMenu';
 import { base44 } from '@/api/base44Client';
 
@@ -435,9 +434,7 @@ export default function Layout({ children }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
         <div className="max-w-[1240px] mx-auto w-full flex-1 flex flex-col">
-          <GovernanceProvider>
-            {children}
-          </GovernanceProvider>
+          {children}
         </div>
       </main>
 

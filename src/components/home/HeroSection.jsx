@@ -81,7 +81,7 @@ const HeroSection = memo(function HeroSection() {
           className="w-full h-full object-cover opacity-30"
           loading="eager"
           decoding="async"
-          fetchpriority="low"
+          fetchpriority="high"
         />
       </picture>
       <div className="bg-gradient-to-b from-stone-900/90 via-stone-900/60 to-stone-900/90 absolute inset-0"></div>
