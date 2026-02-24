@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo, useDeferredValue, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload, Info, Map as MapIcon, Database, Loader2, ChevronDown, ChevronRight, ArrowLeft, MapPin } from 'lucide-react';
+import { Database, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
 import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
@@ -65,15 +65,7 @@ const STATUS_COLORS = {
   'Default': 'bg-gray-300 border-gray-500'
 };
 
-// Distinct colors for different Sections
-const SECTION_PALETTES = [
-  'bg-blue-100 border-blue-300 text-blue-900',         // Section 1 / Row D
-  'bg-green-100 border-green-300 text-green-900',         // Section 2
-  'bg-rose-100 border-rose-300 text-rose-900',      // Section 3
-  'bg-amber-100 border-amber-300 text-amber-900',   // Section 4
-  'bg-purple-100 border-purple-300 text-purple-900',// Section 5 (purple)
-  'bg-lime-100 border-lime-300 text-lime-900',
-];
+// SECTION_PALETTES unused — use getSectionPalette() instead
 
 // Stable palette by section key
 const getSectionPalette = (key) => {
@@ -596,7 +588,6 @@ export default function PlotsPage() {
   const [expandedSections, setExpandedSections] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
-  const deferredSearch = useDeferredValue(searchQuery);
 
   const location = useLocation();
 
@@ -812,12 +803,7 @@ export default function PlotsPage() {
       return arr;
   }, [plotEntities]);
 
-  // Index for instant hover lookups
-  const plotIndex = useMemo(() => {
-      const m = new Map();
-      (parsedData || []).forEach((p) => { if (p?._id) m.set(p._id, p); });
-      return m;
-  }, [parsedData]);
+  // plotIndex removed — unused (hover uses data directly)
 
   // Filtered Data Computation - NO LONGER FILTERS BY SEARCH (all plots always shown)
   // Search is now used only for locating and highlighting plots
