@@ -1,12 +1,16 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 async function queryThreatFox(indicator) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     const res = await fetch('https://threatfox-api.abuse.ch/api/v1/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: 'search_ioc', search_term: indicator })
+      body: JSON.stringify({ query: 'search_ioc', search_term: indicator }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
     const data = await res.json().catch(() => ({}));
     if (!data || data.query_status !== 'ok' || !Array.isArray(data.data) || data.data.length === 0) {
       return { matched: false };
@@ -73,31 +77,39 @@ Deno.serve(async (req) => {
       return Response.json({ status: 'disabled' });
     }
 
-    // Pull recent security events
-    const events = await base44.asServiceRole.entities.SecurityEvent.list('-created_date', 500);
+    // Pull recent security events — limit to 50 to avoid timeout
+    const events = await base44.asServiceRole.entities.SecurityEvent.list('-created_date', 50);
     const now = Date.now();
-    const windowMs = Math.max(5, Number(cfg.window_minutes || 60)) * 60 * 1000; // use same window setting, default 60m
+    const windowMs = Math.max(5, Number(cfg.window_minutes || 60)) * 60 * 1000;
 
     const candidates = (events || []).filter((e) => {
       if (!e?.ip_address) return false;
       const t = new Date(e.created_date).getTime();
       if (!Number.isFinite(t) || (now - t) > windowMs) return false;
       const details = e.details || {};
-      if (details.auto_response_executed) return false; // already handled
+      if (details.auto_response_executed) return false;
       return true;
     });
 
-    // Deduplicate by IP
-    const ips = Array.from(new Set(candidates.map((e) => e.ip_address))).slice(0, 100);
+    // Deduplicate by IP — cap at 20 to stay within timeout budget
+    const ips = Array.from(new Set(candidates.map((e) => e.ip_address))).slice(0, 20);
 
+    // Batch ThreatFox lookups 5 at a time to avoid overwhelming the API / timing out
     const intelByIp = {};
-    await Promise.all(ips.map(async (ip) => { intelByIp[ip] = await queryThreatFox(ip); }));
+    for (let i = 0; i < ips.length; i += 5) {
+      const batch = ips.slice(i, i + 5);
+      const results = await Promise.all(batch.map((ip) => queryThreatFox(ip)));
+      batch.forEach((ip, idx) => { intelByIp[ip] = results[idx]; });
+    }
 
     let matchedCount = 0;
     let blockedCount = 0;
     const processedEvents = [];
 
+    // Cap processing to 10 matched IPs to stay within function timeout
+    const MAX_PROCESS = 10;
     for (const ev of candidates) {
+      if (matchedCount >= MAX_PROCESS) break;
       const ip = ev.ip_address;
       const intel = intelByIp[ip];
       if (!intel?.matched) continue;
