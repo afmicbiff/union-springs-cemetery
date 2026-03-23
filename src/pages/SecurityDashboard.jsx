@@ -29,6 +29,7 @@ const ThreatHuntingDashboard = lazy(() => import('@/components/security/ThreatHu
 const SIEMCorrelationEngine = lazy(() => import('@/components/security/SIEMCorrelationEngine'));
 const IOCSweepPanel = lazy(() => import('@/components/security/IOCSweepPanel'));
 const InvestigationPlaybooks = lazy(() => import('@/components/security/InvestigationPlaybooks'));
+const SystemIssueMonitorPanel = lazy(() => import('@/components/security/SystemIssueMonitorPanel'));
 
 // Minimal skeleton loader
 const CardSkeleton = memo(() => (
@@ -85,6 +86,7 @@ function SecurityDashboard() {
   const [showThreatIntel, setShowThreatIntel] = useState(false);
   const [showIncidentTriage, setShowIncidentTriage] = useState(false);
   const [showAutoResponse, setShowAutoResponse] = useState(false);
+  const [showSystemIssues, setShowSystemIssues] = useState(false);
 
   // Auth check - high priority
   const { data: user, isLoading: userLoading } = useQuery({
@@ -244,6 +246,7 @@ function SecurityDashboard() {
   const toggleThreatIntel = useCallback(() => setShowThreatIntel(p => !p), []);
   const toggleIncidentTriage = useCallback(() => setShowIncidentTriage(p => !p), []);
   const toggleAutoResponse = useCallback(() => setShowAutoResponse(p => !p), []);
+  const toggleSystemIssues = useCallback(() => setShowSystemIssues(p => !p), []);
 
   // Loading state
   if (userLoading) {
@@ -379,6 +382,11 @@ function SecurityDashboard() {
           {/* Auto-Response */}
           <CollapsibleSection title={showAutoResponse ? 'Hide Auto-Response' : 'Auto-Response Rules'} isOpen={showAutoResponse} onToggle={toggleAutoResponse}>
             <AutoResponseManager />
+          </CollapsibleSection>
+
+          {/* System Issues */}
+          <CollapsibleSection title={showSystemIssues ? 'Hide System Issue Monitor' : 'System Issue Monitor'} isOpen={showSystemIssues} onToggle={toggleSystemIssues}>
+            <SystemIssueMonitorPanel />
           </CollapsibleSection>
 
           {/* Alert Config */}
