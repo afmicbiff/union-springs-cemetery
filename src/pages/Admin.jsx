@@ -204,13 +204,23 @@ function AdminDashboard() {
   // Count unread for badge - memoized
   const unreadCount = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
 
-  const dismissibleNotes = useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
+  const dismissibleNotes = useMemo(() => notifications.filter(note => !(note?.related_entity_type === 'task' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))), [notifications]);
 
   const dismissAllNotifications = useCallback(async () => {
     try {
       const user = await base44.auth.me().catch(() => null);
       await Promise.all(dismissibleNotes.map(async (note) => {
-        await base44.entities.Notification.delete(note.id);
+        if (note?.related_entity_type === 'message' || note?.type === 'message') {
+          const res = await base44.functions.invoke('communication', {
+            action: 'dismissMessageNotification',
+            notification_id: note.id,
+            message_id: note.related_entity_id,
+          });
+          if (res.data?.error) throw new Error(res.data.error);
+        } else {
+          await base44.entities.Notification.delete(note.id);
+        }
+
         if (user?.email) {
           await base44.entities.AuditLog.create({
             action: 'dismiss',
@@ -223,6 +233,8 @@ function AdminDashboard() {
         }
       }));
       queryClient.invalidateQueries(['notifications']);
+      queryClient.invalidateQueries(['admin-notifications-panel']);
+      queryClient.invalidateQueries(['admin-conversations']);
       toast.success('Dismissed all notifications');
     } catch (err) {
       toast.error('Failed to dismiss all');
@@ -263,14 +275,28 @@ function AdminDashboard() {
   }, [queryClient]);
 
   const handleMessageAction = useCallback(async (note, action) => {
-    await base44.entities.Notification.update(note.id, { is_read: true });
-    queryClient.invalidateQueries(['notifications']);
     if (action === 'view') {
+      await base44.entities.Notification.update(note.id, { is_read: true });
+      queryClient.invalidateQueries(['notifications']);
       setActiveTab('communication');
       setNotifPopoverOpen(false);
-    } else {
-      toast.success("Message notification dismissed");
+      return;
     }
+
+    const res = await base44.functions.invoke('communication', {
+      action: 'dismissMessageNotification',
+      notification_id: note.id,
+      message_id: note.related_entity_id,
+    });
+
+    if (res.data?.error) {
+      throw new Error(res.data.error);
+    }
+
+    queryClient.invalidateQueries(['notifications']);
+    queryClient.invalidateQueries(['admin-notifications-panel']);
+    queryClient.invalidateQueries(['admin-conversations']);
+    toast.success("Message notification dismissed");
   }, [queryClient]);
 
   const handleDismiss = useCallback(async (note) => {

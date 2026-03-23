@@ -109,14 +109,24 @@ const NotificationsPanel = memo(function NotificationsPanel({ onNavigate }) {
   const unreadCount = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
 
   const dismissibleNotes = useMemo(() => notifications.filter(note => 
-    !(note?.related_entity_type === 'task' || note?.related_entity_type === 'message' || note?.type === 'message' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))
+    !(note?.related_entity_type === 'task' || note?.related_entity_type === 'event' || (note?.message && note.message.toLowerCase().includes('event')))
   ), [notifications]);
 
   const dismissAllNotifications = useCallback(async () => {
     try {
       const user = await base44.auth.me().catch(() => null);
       await Promise.all(dismissibleNotes.map(async (note) => {
-        await base44.entities.Notification.delete(note.id);
+        if (note?.related_entity_type === 'message' || note?.type === 'message') {
+          const res = await base44.functions.invoke('communication', {
+            action: 'dismissMessageNotification',
+            notification_id: note.id,
+            message_id: note.related_entity_id,
+          });
+          if (res.data?.error) throw new Error(res.data.error);
+        } else {
+          await base44.entities.Notification.delete(note.id);
+        }
+
         if (user?.email) {
           await base44.entities.AuditLog.create({
             action: 'dismiss',
@@ -129,6 +139,8 @@ const NotificationsPanel = memo(function NotificationsPanel({ onNavigate }) {
         }
       }));
       queryClient.invalidateQueries(['admin-notifications-panel']);
+      queryClient.invalidateQueries(['notifications']);
+      queryClient.invalidateQueries(['admin-conversations']);
       toast.success('Dismissed all notifications');
     } catch (err) {
       toast.error('Failed to dismiss all');
@@ -149,6 +161,14 @@ const NotificationsPanel = memo(function NotificationsPanel({ onNavigate }) {
           timestamp: new Date().toISOString()
         });
         toast.success("Notification dismissed");
+      } else if (action === 'dismissMessage') {
+        const res = await base44.functions.invoke('communication', {
+          action: 'dismissMessageNotification',
+          notification_id: note.id,
+          message_id: note.related_entity_id,
+        });
+        if (res.data?.error) throw new Error(res.data.error);
+        toast.success("Message notification dismissed");
       } else if (action === 'markRead') {
         await base44.entities.Notification.update(note.id, { is_read: true });
         toast.success("Marked as read");
@@ -260,7 +280,7 @@ const NotificationsPanel = memo(function NotificationsPanel({ onNavigate }) {
                         <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100" onClick={() => { handleNotificationAction(note, 'markRead'); handleNavigate(note); }}>
                           <Mail className="w-3 h-3 mr-1" /> View Message
                         </Button>
-                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => handleNotificationAction(note, 'markRead')}>
+                        <Button size="sm" variant="outline" className="h-7 text-[11px] px-2 text-green-700 bg-green-50 border-green-200 hover:bg-green-100" onClick={() => handleNotificationAction(note, 'dismissMessage')}>
                           <Check className="w-3 h-3 mr-1" /> Dismiss
                         </Button>
                       </>

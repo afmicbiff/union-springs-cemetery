@@ -213,6 +213,57 @@ export default Deno.serve(async (req) => {
             return Response.json({ success: true });
         }
 
+        // --- ACTION: DISMISS MESSAGE NOTIFICATION ---
+        if (action === 'dismissMessageNotification') {
+            if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+
+            const { notification_id, message_id } = payload;
+            if (!notification_id && !message_id) {
+                return Response.json({ error: 'notification_id or message_id is required' }, { status: 400 });
+            }
+
+            let targetMessage = null;
+
+            if (message_id) {
+                const messages = await base44.asServiceRole.entities.Message.filter({ id: message_id }, null, 1);
+                targetMessage = messages?.[0] || null;
+            }
+
+            if (!targetMessage && notification_id) {
+                const notifications = await base44.asServiceRole.entities.Notification.filter({ id: notification_id }, null, 1);
+                const notification = notifications?.[0] || null;
+                if (notification?.related_entity_id) {
+                    const messages = await base44.asServiceRole.entities.Message.filter({ id: notification.related_entity_id }, null, 1);
+                    targetMessage = messages?.[0] || null;
+                }
+            }
+
+            if (targetMessage?.thread_id) {
+                const threadMessages = await base44.asServiceRole.entities.Message.filter({ thread_id: targetMessage.thread_id }, null, 100);
+
+                await Promise.all(threadMessages.map((msg) =>
+                    base44.asServiceRole.entities.Message.update(msg.id, { is_read: true, is_archived: true })
+                ));
+
+                await Promise.all(threadMessages.map(async (msg) => {
+                    const relatedNotifications = await base44.asServiceRole.entities.Notification.filter({ related_entity_id: msg.id }, '-created_at', 50);
+                    await Promise.all((relatedNotifications || []).map((note) =>
+                        base44.asServiceRole.entities.Notification.delete(note.id)
+                    ));
+                }));
+            }
+
+            if (notification_id) {
+                const notifications = await base44.asServiceRole.entities.Notification.filter({ id: notification_id }, null, 1);
+                const directNotification = notifications?.[0] || null;
+                if (directNotification?.id) {
+                    await base44.asServiceRole.entities.Notification.delete(directNotification.id);
+                }
+            }
+
+            return Response.json({ success: true });
+        }
+
         return Response.json({ error: 'Invalid action' }, { status: 400 });
 
     } catch (error) {
