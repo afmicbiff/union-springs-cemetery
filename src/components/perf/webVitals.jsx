@@ -1,4 +1,4 @@
-import { onCLS, onINP, onLCP } from 'web-vitals';
+import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
 
 const ENDPOINT = '/functions/vitals';
 
@@ -30,6 +30,25 @@ export function initWebVitals() {
   if (window.__perfVitalsInitialized) return;
   window.__perfVitalsInitialized = true;
   onCLS(send);
+  onFCP(send);
   onINP(send);
   onLCP(send);
+  onTTFB(send);
+
+  if ('PerformanceObserver' in window) {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          send({
+            name: 'LONGTASK',
+            value: entry.duration,
+            rating: entry.duration > 50 ? 'poor' : 'good',
+            id: `longtask-${Math.round(entry.startTime)}-${Math.round(entry.duration)}`,
+            navigationType: 'navigate'
+          });
+        });
+      });
+      observer.observe({ type: 'longtask', buffered: true });
+    } catch (_) {}
+  }
 }

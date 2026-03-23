@@ -1,4 +1,5 @@
 import './App.css'
+import { Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -14,11 +15,17 @@ import ScaleReadiness from './pages/ScaleReadiness';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+const MainPage = mainPageKey ? Pages[mainPageKey] : () => null;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
+
+const RouteLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -48,7 +55,9 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
+          <Suspense fallback={<RouteLoader />}>
+            <MainPage />
+          </Suspense>
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
@@ -57,7 +66,9 @@ const AuthenticatedApp = () => {
           path={`/${path}`}
           element={
             <LayoutWrapper currentPageName={path}>
-              <Page />
+              <Suspense fallback={<RouteLoader />}>
+                <Page />
+              </Suspense>
             </LayoutWrapper>
           }
         />
@@ -66,7 +77,9 @@ const AuthenticatedApp = () => {
         path="/ScaleReadiness"
         element={
           <LayoutWrapper currentPageName="ScaleReadiness">
-            <ScaleReadiness />
+            <Suspense fallback={<RouteLoader />}>
+              <ScaleReadiness />
+            </Suspense>
           </LayoutWrapper>
         }
       />

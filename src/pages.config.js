@@ -47,33 +47,35 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Admin from './pages/Admin';
-import Bylaws from './pages/Bylaws';
-import Contact from './pages/Contact';
-import EmployeeProfile from './pages/EmployeeProfile';
-import Employees from './pages/Employees';
-import History from './pages/History';
-import Home from './pages/Home';
-import ImageGallery from './pages/ImageGallery';
-import ImageManager from './pages/ImageManager';
-import MemberPortal from './pages/MemberPortal';
-import Memorial from './pages/Memorial';
-import NewPlotDetails from './pages/NewPlotDetails';
-import NewPlotReservations from './pages/NewPlotReservations';
-import NewPlotsAndMap from './pages/NewPlotsAndMap';
-import NotificationSettings from './pages/NotificationSettings';
-import Plots from './pages/Plots';
-import Privacy from './pages/Privacy';
-import Profile from './pages/Profile';
-import Reports from './pages/Reports';
-import ResendAck from './pages/ResendAck';
-import ReservePlot from './pages/ReservePlot';
-import Search from './pages/Search';
-import SecurityDashboard from './pages/SecurityDashboard';
-import SendEmail from './pages/SendEmail';
-import Services from './pages/Services';
-import Visitor from './pages/Visitor';
+import { lazy } from 'react';
 import __Layout from './Layout.jsx';
+
+const Admin = lazy(() => import('./pages/Admin'));
+const Bylaws = lazy(() => import('./pages/Bylaws'));
+const Contact = lazy(() => import('./pages/Contact'));
+const EmployeeProfile = lazy(() => import('./pages/EmployeeProfile'));
+const Employees = lazy(() => import('./pages/Employees'));
+const History = lazy(() => import('./pages/History'));
+const Home = lazy(() => import('./pages/Home'));
+const ImageGallery = lazy(() => import('./pages/ImageGallery'));
+const ImageManager = lazy(() => import('./pages/ImageManager'));
+const MemberPortal = lazy(() => import('./pages/MemberPortal'));
+const Memorial = lazy(() => import('./pages/Memorial'));
+const NewPlotDetails = lazy(() => import('./pages/NewPlotDetails'));
+const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
+const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
+const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
+const Plots = lazy(() => import('./pages/Plots'));
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Reports = lazy(() => import('./pages/Reports'));
+const ResendAck = lazy(() => import('./pages/ResendAck'));
+const ReservePlot = lazy(() => import('./pages/ReservePlot'));
+const Search = lazy(() => import('./pages/Search'));
+const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard'));
+const SendEmail = lazy(() => import('./pages/SendEmail'));
+const Services = lazy(() => import('./pages/Services'));
+const Visitor = lazy(() => import('./pages/Visitor'));
 
 
 export const PAGES = {

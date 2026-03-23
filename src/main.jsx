@@ -2,12 +2,17 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
+import { initWebVitals } from '@/components/perf/webVitals';
+import { installFetchGuards } from '@/components/perf/netGuard';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
   <App />
   // </React.StrictMode>,
 )
+
+installFetchGuards();
+initWebVitals();
 
 if (import.meta.hot) {
   import.meta.hot.on('vite:beforeUpdate', () => {
@@ -17,6 +22,3 @@ if (import.meta.hot) {
     window.parent?.postMessage({ type: 'sandbox:afterUpdate' }, '*');
   });
 }
-
-
-

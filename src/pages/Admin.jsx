@@ -142,6 +142,7 @@ function AdminDashboard() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [initialParams, setInitialParams] = useState({});
   const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
+  const [enableBackgroundPolling, setEnableBackgroundPolling] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -180,6 +181,20 @@ function AdminDashboard() {
     };
     checkAuth();
     return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    const id = window.requestIdleCallback
+      ? window.requestIdleCallback(() => setEnableBackgroundPolling(true), { timeout: 4000 })
+      : setTimeout(() => setEnableBackgroundPolling(true), 4000);
+
+    return () => {
+      if (window.cancelIdleCallback && typeof id === 'number') {
+        window.cancelIdleCallback(id);
+      } else {
+        clearTimeout(id);
+      }
+    };
   }, []);
 
 
@@ -348,30 +363,35 @@ function AdminDashboard() {
       {
         queryKey: ['check-reminders'],
         queryFn: () => base44.functions.invoke('checkEventReminders'),
+        enabled: enableBackgroundPolling,
         refetchInterval: 300_000, // 5 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-doc-expirations'],
         queryFn: () => base44.functions.invoke('checkDocumentExpirations'),
+        enabled: enableBackgroundPolling,
         refetchInterval: 900_000, // 15 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-member-reminders'],
         queryFn: () => base44.functions.invoke('checkMemberReminders'),
+        enabled: enableBackgroundPolling,
         refetchInterval: 600_000, // 10 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['check-task-due-dates'],
         queryFn: () => base44.functions.invoke('checkTaskDueDates'),
+        enabled: enableBackgroundPolling,
         refetchInterval: 600_000, // 10 minutes
         refetchOnWindowFocus: false,
       },
       {
         queryKey: ['run-crm-automations'],
         queryFn: () => base44.functions.invoke('runCrmAutomations'),
+        enabled: enableBackgroundPolling,
         refetchInterval: 900_000, // 15 minutes
         refetchOnWindowFocus: false,
       },
@@ -450,7 +470,7 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="p-2 sm:p-4 md:p-6 w-full max-w-[1600px] mx-auto overflow-x-hidden">
+    <div className="p-2 sm:p-4 md:p-6 w-full max-w-[1600px] mx-auto overflow-x-hidden min-h-[720px]">
       <div className="space-y-4 sm:space-y-6 md:space-y-8">
         
         {/* Header */}
