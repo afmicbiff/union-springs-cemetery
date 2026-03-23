@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import ScaleReadiness from './pages/ScaleReadiness';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -61,6 +62,14 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route
+        path="/ScaleReadiness"
+        element={
+          <LayoutWrapper currentPageName="ScaleReadiness">
+            <ScaleReadiness />
+          </LayoutWrapper>
+        }
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

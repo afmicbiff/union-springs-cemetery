@@ -90,6 +90,7 @@ export default function AdminSearch({ onNavigate }) {
         { label: "Employees", type: "navigation", link: { type: "employees" }, subLabel: "Staff directory" },
         { label: "Vendors", type: "navigation", link: { type: "vendors" }, subLabel: "External partners" },
         { label: "Security", type: "navigation", link: { type: "security" }, subLabel: "Access control" },
+        { label: "Scale Readiness", type: "navigation", link: { path: '/ScaleReadiness' }, subLabel: "Capacity plan & cache design" },
         { label: "Bylaws", type: "navigation", link: { type: "bylaws" }, subLabel: "Rules & Regulations" },
         { label: "Calendar", type: "navigation", link: { type: "calendar" }, subLabel: "Events & Scheduling" },
         { label: "News & Announcements", type: "navigation", link: { type: "announcements" }, subLabel: "Public notices" },

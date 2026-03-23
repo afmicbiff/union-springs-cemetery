@@ -1,4 +1,6 @@
 import { base44 } from "@/api/base44Client";
+import { clearMemoryCacheByEntity, readMemoryCache, readStaleMemoryCache, writeMemoryCache } from '@/lib/cacheStore';
+import { withTimeout } from '@/lib/withTimeout';
 
 // Persistent cache helpers
 const CACHE_PREFIX = 'pcache:v1:';
@@ -11,19 +13,38 @@ function makeKey(op, entityName, args) {
   }
 }
 function readCache(key) {
+  const hot = readMemoryCache(key);
+  if (hot) return hot;
   if (typeof window === 'undefined' || !window.localStorage) return null;
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
     const { data, expiresAt } = JSON.parse(raw);
-    if (expiresAt && nowMs() < expiresAt) return data;
+    if (expiresAt && nowMs() < expiresAt) {
+      writeMemoryCache(key, data, Math.max(1000, expiresAt - nowMs()));
+      return data;
+    }
     window.localStorage.removeItem(key);
     return null;
   } catch {
     return null;
   }
 }
+function readStaleCache(key) {
+  const hot = readStaleMemoryCache(key);
+  if (hot) return hot;
+  if (typeof window === 'undefined' || !window.localStorage) return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const { data } = JSON.parse(raw);
+    return data || null;
+  } catch {
+    return null;
+  }
+}
 function writeCache(key, data, ttlMs) {
+  writeMemoryCache(key, data, ttlMs);
   if (typeof window === 'undefined' || !window.localStorage) return;
   try {
     const expiresAt = ttlMs ? nowMs() + Number(ttlMs) : null;
@@ -52,11 +73,17 @@ export async function listEntity(entityName, { limit = 50, sort = "-updated_date
   const reqKey = makeKey('list', entityName, { limit, sort, select });
   if (inFlight.has(reqKey)) return inFlight.get(reqKey);
   const p = (async () => {
-    const data = await base44.entities[entityName].list(sort, limit);
-    const arr = Array.isArray(data) ? data : [];
-    const result = select ? arr.map((r) => pick(r, select)) : arr;
-    if (cacheKey) writeCache(cacheKey, result, ttlMs);
-    return result;
+    try {
+      const data = await withTimeout(base44.entities[entityName].list(sort, limit), 8000, `${entityName} list timed out`);
+      const arr = Array.isArray(data) ? data : [];
+      const result = select ? arr.map((r) => pick(r, select)) : arr;
+      if (cacheKey) writeCache(cacheKey, result, ttlMs);
+      return result;
+    } catch (error) {
+      const stale = cacheKey ? readStaleCache(cacheKey) : null;
+      if (stale) return stale;
+      throw error;
+    }
   })();
   inFlight.set(reqKey, p);
   try {
@@ -76,11 +103,17 @@ export async function filterEntity(entityName, filter, { limit = 50, sort = "-up
   const reqKey = makeKey('filter', entityName, { filter, limit, sort, select });
   if (inFlight.has(reqKey)) return inFlight.get(reqKey);
   const p = (async () => {
-    const data = await base44.entities[entityName].filter(filter || {}, sort, limit);
-    const arr = Array.isArray(data) ? data : [];
-    const result = select ? arr.map((r) => pick(r, select)) : arr;
-    if (cacheKey) writeCache(cacheKey, result, ttlMs);
-    return result;
+    try {
+      const data = await withTimeout(base44.entities[entityName].filter(filter || {}, sort, limit), 8000, `${entityName} filter timed out`);
+      const arr = Array.isArray(data) ? data : [];
+      const result = select ? arr.map((r) => pick(r, select)) : arr;
+      if (cacheKey) writeCache(cacheKey, result, ttlMs);
+      return result;
+    } catch (error) {
+      const stale = cacheKey ? readStaleCache(cacheKey) : null;
+      if (stale) return stale;
+      throw error;
+    }
   })();
   inFlight.set(reqKey, p);
   try {
@@ -91,7 +124,7 @@ export async function filterEntity(entityName, filter, { limit = 50, sort = "-up
 }
 
 export function clearEntityCache(entityName) {
-  // Clear persisted cache entries for this entity
+  clearMemoryCacheByEntity(entityName);
   if (typeof window !== 'undefined' && window.localStorage) {
     try {
       for (let i = window.localStorage.length - 1; i >= 0; i--) {
@@ -105,7 +138,6 @@ export function clearEntityCache(entityName) {
       // ignore
     }
   }
-  // Clear any in-flight deduped requests for this entity
   try {
     for (const key of Array.from(inFlight.keys())) {
       if (key.includes(`:${entityName}:`)) {

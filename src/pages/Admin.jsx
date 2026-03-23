@@ -435,6 +435,9 @@ function AdminDashboard() {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 self-end md:self-auto w-full md:w-auto justify-end flex-wrap min-w-0">
+                <Link to={createPageUrl('ScaleReadiness')}>
+                  <Button variant="outline" className="h-9 text-xs sm:text-sm">Scale Readiness</Button>
+                </Link>
                 <AdminSearch onNavigate={handleSearchNavigate} />
                 
                 {/* Notifications */}
