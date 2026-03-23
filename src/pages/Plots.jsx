@@ -1234,16 +1234,41 @@ export default function PlotsPage() {
   const centerElement = useCallback((el, callback) => {
     if (!el) return;
     try {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-      const hContainer = el.closest('[class*="overflow-x-auto"]');
-      if (hContainer) {
-        const elRect = el.getBoundingClientRect();
-        const cRect = hContainer.getBoundingClientRect();
-        const targetLeft = hContainer.scrollLeft + (elRect.left - cRect.left) - (hContainer.clientWidth / 2) + (elRect.width / 2);
-        hContainer.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+      const isCoarsePointer = typeof window !== 'undefined' && (
+        ('ontouchstart' in window) ||
+        window.matchMedia?.('(pointer: coarse)')?.matches
+      );
+      const behavior = isCoarsePointer ? 'auto' : 'smooth';
+
+      el.scrollIntoView({ behavior, block: 'center', inline: 'center' });
+
+      let node = el.parentElement;
+      while (node && node !== document.body) {
+        const canScrollX = node.scrollWidth > node.clientWidth + 10;
+        const canScrollY = node.scrollHeight > node.clientHeight + 10;
+
+        if (canScrollX || canScrollY) {
+          const elRect = el.getBoundingClientRect();
+          const cRect = node.getBoundingClientRect();
+          const nextLeft = canScrollX
+            ? node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2)
+            : node.scrollLeft;
+          const nextTop = canScrollY
+            ? node.scrollTop + (elRect.top - cRect.top) - (node.clientHeight / 2) + (elRect.height / 2)
+            : node.scrollTop;
+
+          node.scrollTo({
+            left: Math.max(0, nextLeft),
+            top: Math.max(0, nextTop),
+            behavior,
+          });
+        }
+
+        node = node.parentElement;
       }
+
       if (typeof callback === 'function') {
-        setTimeout(callback, 500);
+        setTimeout(callback, isCoarsePointer ? 80 : 350);
       }
     } catch (err) {
       console.warn('centerElement error:', err);
