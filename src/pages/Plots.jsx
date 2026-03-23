@@ -1194,6 +1194,22 @@ export default function PlotsPage() {
 
   const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
 
+  // O(1) lookup map: plotNum → { sectionKey, p }
+  const plotNumMap = useMemo(() => {
+    const map = new Map();
+    (parsedData || []).forEach((p) => {
+      let sectionKey = String(p.Section || '').replace(/Section\s/i, '').trim();
+      const raw = String(p.Section || '');
+      if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
+      const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
+      if (plotNum != null && !map.has(plotNum)) {
+        map.set(plotNum, { sectionKey, plotNum, p });
+      }
+    });
+    return map;
+  }, [parsedData]);
+
+  // Text search index for search bar (kept for name/family search)
   const quickIndex = useMemo(() => {
     return (parsedData || []).map((p) => {
       let sectionKey = String(p.Section || '').replace(/Section\s/i, '').trim();
@@ -1235,16 +1251,9 @@ export default function PlotsPage() {
     }
   }, []);
 
-  const findPlotElement = useCallback((sectionKey, plotNum) => {
-    if (!sectionKey || !plotNum) return null;
-    let el = document.getElementById(`plot-${sectionKey}-${plotNum}`);
-    if (!el) {
-      el = document.querySelector(`[data-section="${sectionKey}"][data-plot-num="${plotNum}"]`);
-    }
-    if (!el) {
-      el = document.querySelector(`[id^="plot-${sectionKey}-"][id$="-${plotNum}"]`) || document.querySelector(`[id^="plot-"][id$="-${plotNum}"]`);
-    }
-    return el;
+  const findPlotElement = useCallback((plotNum) => {
+    // Fast: single query by data attribute (works across all components)
+    return document.querySelector(`[data-plot-num="${plotNum}"]`);
   }, []);
 
   const doQuickSearch = useCallback((q) => {
@@ -1256,30 +1265,41 @@ export default function PlotsPage() {
                     match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
                   }
                   if (match && match.sectionKey && match.plotNum) {
-                    // Section 1 plots are now rendered inside Section 2
                     const expandKey = match.sectionKey === '1' ? '2' : match.sectionKey;
                     setCollapsedSections(prev => ({
                       ...prev,
                       [expandKey]: false,
                     }));
-                    let attempts = 0;
-                    const maxAttempts = 240;
-                    const tryFind = () => {
-                      attempts++;
-                      const el = findPlotElement(match.sectionKey, match.plotNum);
-                      if (el) {
-                        centerElement(el);
-                        return;
-                      }
-                      if (attempts < maxAttempts) {
-                        requestAnimationFrame(tryFind);
-                      }
-                    };
-                    requestAnimationFrame(tryFind);
+                    waitForPlotElement(match.plotNum, (el) => {
+                      centerElement(el);
+                    });
                   }
-                }, [quickIndex, normalize, findPlotElement, centerElement]);
+                }, [quickIndex, normalize, centerElement]);
 
   // Removed auto-center on search input - only search when user clicks the Search button
+
+  // MutationObserver-based element finder — resolves as soon as the element appears in DOM
+  const waitForPlotElement = useCallback((plotNum, callback) => {
+    // Try immediately first
+    const existing = document.querySelector(`[data-plot-num="${plotNum}"]`);
+    if (existing) { callback(existing); return; }
+
+    // Use MutationObserver to detect when the element appears (much faster than polling)
+    const observer = new MutationObserver(() => {
+      const el = document.querySelector(`[data-plot-num="${plotNum}"]`);
+      if (el) {
+        observer.disconnect();
+        clearTimeout(timeout);
+        callback(el);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Safety timeout — 6s max, then give up
+    const timeout = setTimeout(() => {
+      observer.disconnect();
+    }, 6000);
+  }, []);
 
   // Locate plot function - called when user clicks the locate button
   const locatePlot = useCallback(() => {
@@ -1293,12 +1313,11 @@ export default function PlotsPage() {
     // Stop any existing blinks first
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
-    // Determine target section from quickIndex OR from the already-computed selectedSectionKeyForPlot
-    const match = quickIndex.find(it => it.plotNum === plotNum);
+    // O(1) lookup from map
+    const match = plotNumMap.get(plotNum);
     const targetSectionKey = match?.sectionKey || selectedSectionKeyForPlot || null;
 
-    // Expand the target section; if unknown, expand ALL so lazy content renders
-    // Section 1 plots are now rendered inside Section 2
+    // Expand the target section
     const expandKey = targetSectionKey === '1' ? '2' : targetSectionKey;
     if (expandKey) {
       setCollapsedSections(prev => ({ ...prev, [expandKey]: false }));
@@ -1306,70 +1325,31 @@ export default function PlotsPage() {
       setCollapsedSections({ '2': false, '3': false, '5': false });
     }
 
-    let attempts = 0;
-    const maxAttempts = 80; // ~8 seconds with 100ms intervals - enough for lazy content
-    let found = false;
+    // Use MutationObserver — fires as soon as element appears
+    waitForPlotElement(plotNum, (el) => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 
-    const tryCenter = () => {
-      if (found) return;
-      attempts++;
-
-      // 1. Exact ID match (most reliable)
-      let el = null;
-      if (targetSectionKey) {
-        el = document.getElementById(`plot-${targetSectionKey}-${plotNum}`);
-      }
-      // 2. data-plot-num attribute (works across both GravePlot and GravePlotCell components)
-      if (!el) {
-        el = document.querySelector(`[data-plot-num="${plotNum}"]`);
-      }
-      // 3. Try all five section prefixes explicitly (handles section mismatch between quickIndex and DOM)
-      if (!el) {
-        for (const sk of ['1','2','3','4','5']) {
-          el = document.getElementById(`plot-${sk}-${plotNum}`);
-          if (el) break;
+      // Fix horizontal scroll in overflow containers
+      let node = el.parentElement;
+      while (node && node !== document.body) {
+        if (node.scrollWidth > node.clientWidth + 10) {
+          const elRect = el.getBoundingClientRect();
+          const cRect = node.getBoundingClientRect();
+          const targetLeft = node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2);
+          node.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
         }
+        node = node.parentElement;
       }
 
-      if (el) {
-        found = true;
-
-        // Step 1: Vertical scroll to bring the element into viewport
-        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-
-        // Step 2: After vertical scroll settles, fix horizontal scroll in nested overflow containers
-        setTimeout(() => {
-          // Walk up to find ALL scrollable ancestors and center in each
-          let node = el.parentElement;
-          while (node && node !== document.body) {
-            if (node.scrollWidth > node.clientWidth + 10) {
-              const elRect = el.getBoundingClientRect();
-              const cRect = node.getBoundingClientRect();
-              const targetLeft = node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2);
-              node.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
-            }
-            node = node.parentElement;
-          }
-
-          // Step 3: Fire blink event after scroll animations complete
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('plot-start-blink', {
-              detail: { targetPlotNum: plotNum, targetElementId: el.id }
-            }));
-            setHasLocated(true);
-          }, 500);
-        }, 400);
-        return;
-      }
-
-      if (attempts < maxAttempts) {
-        setTimeout(tryCenter, 100);
-      }
-    };
-
-    // Delay start to let React render expanded sections and Suspense boundaries resolve
-    setTimeout(tryCenter, 200);
-  }, [quickIndex, selectedSectionKeyForPlot]);
+      // Blink after short scroll settle
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('plot-start-blink', {
+          detail: { targetPlotNum: plotNum, targetElementId: el.id }
+        }));
+        setHasLocated(true);
+      }, 300);
+    });
+  }, [plotNumMap, selectedSectionKeyForPlot, waitForPlotElement]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
@@ -1391,7 +1371,7 @@ export default function PlotsPage() {
       const term = searchTerm.toLowerCase().trim();
       const terms = term.split(/\s+/).filter(Boolean);
 
-      // Find all matching plots - match if ANY term appears in plot text
+      // Find all matching plots
       const matches = quickIndex.filter((it) => {
         return terms.some(t => it.text.includes(t));
       });
@@ -1412,45 +1392,28 @@ export default function PlotsPage() {
         return updated;
       });
 
-      // Show toast with match count
       toast.success(`Found ${matches.length} plot${matches.length > 1 ? 's' : ''} matching "${searchTerm}"`);
 
-      // Collect all matching plot IDs for highlighting
-      const matchingPlotIds = new Set(matches.map(m => m.p?._id).filter(Boolean));
-
-      // Find the first match to scroll to
+      // Scroll to first match using MutationObserver
       const firstMatch = matches[0];
-      if (firstMatch && firstMatch.sectionKey) {
-        // Wait for sections to expand, then scroll and blink ALL matches
-        let attempts = 0;
-        const maxAttempts = 240;
-        const tryFind = () => {
-          attempts++;
-          const el = findPlotElement(firstMatch.sectionKey, firstMatch.plotNum);
-          if (el) {
-            centerElement(el, () => {
-              // Dispatch blink event for ALL matching plots with slight delay to ensure DOM is ready
-              setTimeout(() => {
-                matches.forEach((match) => {
-                  window.dispatchEvent(new CustomEvent('plot-search-blink', {
-                    detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
-                  }));
-                });
-              }, 100);
-            });
-            return;
-          }
-          if (attempts < maxAttempts) {
-            requestAnimationFrame(tryFind);
-          }
-        };
-        requestAnimationFrame(tryFind);
+      if (firstMatch && firstMatch.plotNum) {
+        waitForPlotElement(firstMatch.plotNum, (el) => {
+          centerElement(el, () => {
+            setTimeout(() => {
+              matches.forEach((match) => {
+                window.dispatchEvent(new CustomEvent('plot-search-blink', {
+                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
+                }));
+              });
+            }, 100);
+          });
+        });
       }
     };
 
     window.addEventListener('plot-locate-search', handleLocateSearch);
     return () => window.removeEventListener('plot-locate-search', handleLocateSearch);
-  }, [quickIndex, findPlotElement, centerElement]);
+  }, [quickIndex, centerElement, waitForPlotElement]);
 
 
 
