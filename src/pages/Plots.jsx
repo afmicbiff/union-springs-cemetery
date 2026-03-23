@@ -1335,6 +1335,11 @@ export default function PlotsPage() {
     const plotNum = parseInt(targetPlot, 10);
     if (!Number.isFinite(plotNum)) return;
 
+    const isCoarsePointer = typeof window !== 'undefined' && (
+      ('ontouchstart' in window) ||
+      window.matchMedia?.('(pointer: coarse)')?.matches
+    );
+
     // Stop any existing blinks first
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
@@ -1352,29 +1357,26 @@ export default function PlotsPage() {
 
     // Use MutationObserver — fires as soon as element appears
     waitForPlotElement(plotNum, (el) => {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      centerElement(el, () => {
+        requestAnimationFrame(() => {
+          window.dispatchEvent(new CustomEvent('plot-start-blink', {
+            detail: { targetPlotNum: plotNum, targetElementId: el.id }
+          }));
+          setHasLocated(true);
+        });
+      });
 
-      // Fix horizontal scroll in overflow containers
-      let node = el.parentElement;
-      while (node && node !== document.body) {
-        if (node.scrollWidth > node.clientWidth + 10) {
-          const elRect = el.getBoundingClientRect();
-          const cRect = node.getBoundingClientRect();
-          const targetLeft = node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2);
-          node.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+      if (isCoarsePointer) {
+        const mapContainer = document.querySelector('.map-zoom-container');
+        if (mapContainer) {
+          mapContainer.style.scrollBehavior = 'auto';
+          requestAnimationFrame(() => {
+            mapContainer.style.scrollBehavior = '';
+          });
         }
-        node = node.parentElement;
       }
-
-      // Blink after short scroll settle
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('plot-start-blink', {
-          detail: { targetPlotNum: plotNum, targetElementId: el.id }
-        }));
-        setHasLocated(true);
-      }, 300);
     });
-  }, [plotNumMap, selectedSectionKeyForPlot, waitForPlotElement]);
+  }, [plotNumMap, selectedSectionKeyForPlot, waitForPlotElement, centerElement]);
 
   const debouncedSearchRef = useRef(null);
   useEffect(() => {
