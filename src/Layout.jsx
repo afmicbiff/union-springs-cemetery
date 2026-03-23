@@ -154,7 +154,10 @@ export default function Layout({ children }) {
       'script[src*="gtm.js"]',
       'script[src*="connect.facebook.net"]',
       'script[src*="js.stripe.com"]',
-      'script[src*="cdn.tailwindcss.com"]'
+      'script[src*="cdn.tailwindcss.com"]',
+      'script[src*="datadoghq-browser-agent"]',
+      'script[src*="datadoghq"]',
+      'script[src*="dd-rum"]'
     ];
     const nodes = document.querySelectorAll(selectors.join(','));
     nodes.forEach((n) => { try { n.parentNode?.removeChild(n); } catch {} });
@@ -163,6 +166,12 @@ export default function Layout({ children }) {
     window.dataLayer = window.dataLayer || [];
     if (!window.fbq) {
       window.fbq = () => {};
+    }
+    if (!window.DD_RUM) {
+      window.DD_RUM = { init: () => {}, addError: () => {}, addAction: () => {}, startSessionReplayRecording: () => {} };
+    }
+    if (!window.DD_LOGS) {
+      window.DD_LOGS = { init: () => {}, logger: { info: () => {}, warn: () => {}, error: () => {} } };
     }
   } catch {}
   }, []);

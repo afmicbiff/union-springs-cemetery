@@ -9,19 +9,18 @@ import { Search, MapPin, Map } from 'lucide-react';
 const HeroImage = memo(function HeroImage({ index, src, webpSrc, alt, activeImage, onClick, positionClass, mobilePositionClass }) {
   const isActive = activeImage === index;
   const isPriority = index === 1;
+  const zClass = { 1: 'z-10', 2: 'z-20', 3: 'z-30', 4: 'z-40' }[index] || 'z-10';
   
   return (
     <div 
       onClick={() => onClick(index)}
-      className={`absolute transform cursor-pointer transition-all duration-500 ease-out  ${
+      className={`absolute transform cursor-pointer transition-all duration-500 ease-out ${
         isActive 
           ? 'rotate-0 scale-125 md:scale-110 z-50 translate-x-0 translate-y-0' 
-          : `${mobilePositionClass} md:${positionClass} active:scale-105 z-${index * 10}`
+          : `${mobilePositionClass} md:${positionClass} active:scale-105 ${zClass}`
       }`}
       style={{ 
-        transitionTimingFunction: isActive ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out',
-        contentVisibility: 'auto',
-        containIntrinsicSize: '340px 255px'
+        transitionTimingFunction: isActive ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out'
       }}
       role="button"
       tabIndex={0}
@@ -87,11 +86,11 @@ const HeroSection = memo(function HeroSection() {
           type="image/webp"
         />
         <source 
-          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=50&w=1200&auto=format&fit=crop&fm=webp"
+          srcSet="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=45&w=1000&auto=format&fit=crop&fm=webp"
           type="image/webp"
         />
         <img 
-          src="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=50&w=800&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=45&w=640&auto=format&fit=crop"
           alt=""
           className="w-full h-full object-cover opacity-30"
           loading="eager"

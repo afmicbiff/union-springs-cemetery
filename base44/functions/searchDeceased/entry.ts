@@ -5,19 +5,20 @@ const CACHE_TTL_MS = 60_000;
 const DATASET_TTL_MS = 5 * 60_000;
 const __cache = new Map();
 const datasetCache = {
-  deceased: { t: 0, data: null },
-  plots: { t: 0, data: null }
+  deceased: { t: 0, raw: null, mapped: null },
+  plots: { t: 0, raw: null, mapped: null }
 };
 
-async function getCachedDataset(key, loader) {
+async function getPreparedDataset(key, loader, mapper) {
   const now = Date.now();
   const cached = datasetCache[key];
-  if (cached?.data && (now - cached.t) < DATASET_TTL_MS) {
-    return cached.data;
+  if (cached?.mapped && (now - cached.t) < DATASET_TTL_MS) {
+    return cached;
   }
-  const data = await loader();
-  datasetCache[key] = { t: now, data };
-  return data;
+  const raw = await loader();
+  const mapped = raw.map(mapper);
+  datasetCache[key] = { t: now, raw, mapped };
+  return datasetCache[key];
 }
 
 export default Deno.serve(async (req) => {
@@ -55,14 +56,6 @@ export default Deno.serve(async (req) => {
         const needsDeceased = !status_filter || ['Deceased', 'Veteran', 'All'].includes(status_filter);
         const needsPlots = ['Reserved', 'Available', 'Unknown', 'Not Usable', 'Veteran', 'All'].includes(status_filter);
 
-        if (needsDeceased) {
-            allDeceased = await getCachedDataset('deceased', () => base44.entities.Deceased.list('-created_date', 10000));
-        }
-
-        if (needsPlots) {
-            allPlots = await getCachedDataset('plots', () => base44.entities.Plot.list('-created_date', 10000));
-        }
-
         // Helper to format plot location
         const formatPlotLoc = (p) => {
             const parts = [];
@@ -73,29 +66,46 @@ export default Deno.serve(async (req) => {
         };
 
         // Map Plots to Unified Record Schema
-        const mapPlotToRecord = (p) => ({
-            id: p.id,
-            entity_type: 'plot',
-            first_name: p.first_name, // Might be empty for Available
-            last_name: p.last_name,
-            family_name: p.family_name,
-            date_of_birth: p.birth_date,
-            date_of_death: p.death_date,
-            plot_location: formatPlotLoc(p),
-            status: p.status, // Available, Reserved, etc.
-            veteran_status: p.status === 'Veteran' || (p.notes && p.notes.toLowerCase().includes('vet')),
-            notes: p.notes,
-            // Fields that exist on Deceased but maybe not Plot
-            burial_type: null,
-            obituary: null
-        });
+        const mapPlotToRecord = (p) => {
+            const record = {
+                id: p.id,
+                entity_type: 'plot',
+                first_name: p.first_name,
+                last_name: p.last_name,
+                family_name: p.family_name,
+                date_of_birth: p.birth_date,
+                date_of_death: p.death_date,
+                plot_location: formatPlotLoc(p),
+                status: p.status,
+                veteran_status: p.status === 'Veteran' || (p.notes && p.notes.toLowerCase().includes('vet')),
+                notes: p.notes,
+                burial_type: null,
+                obituary: null
+            };
+            record._search = `${record.first_name || ''} ${record.last_name || ''} ${record.family_name || ''} ${record.plot_location || ''} ${record.notes || ''}`.toLowerCase();
+            return record;
+        };
 
         // Map Deceased to Unified Record Schema
-        const mapDeceasedToRecord = (d) => ({
-            ...d,
-            entity_type: 'deceased',
-            status: 'Occupied' // Implicit
-        });
+        const mapDeceasedToRecord = (d) => {
+            const record = {
+                ...d,
+                entity_type: 'deceased',
+                status: 'Occupied'
+            };
+            record._search = `${record.first_name || ''} ${record.last_name || ''} ${record.family_name || ''} ${record.plot_location || ''} ${record.obituary || ''} ${record.notes || ''}`.toLowerCase();
+            return record;
+        };
+
+        if (needsDeceased) {
+            const preparedDeceased = await getPreparedDataset('deceased', () => base44.entities.Deceased.list('-created_date', 10000), mapDeceasedToRecord);
+            allDeceased = preparedDeceased.mapped;
+        }
+
+        if (needsPlots) {
+            const preparedPlots = await getPreparedDataset('plots', () => base44.entities.Plot.list('-created_date', 10000), mapPlotToRecord);
+            allPlots = preparedPlots.mapped;
+        }
 
         // Determine Base Set based on Status Filter
         let baseRecords = [];
@@ -209,7 +219,8 @@ export default Deno.serve(async (req) => {
                     const ln = (r.last_name || '').toLowerCase();
                     const fam = (r.family_name || '').toLowerCase();
                     const loc = (r.plot_location || '').toLowerCase();
-                    if (ln.startsWith(q) || fn.startsWith(q) || fam.startsWith(q) || loc.includes(q)) {
+                    const searchText = r._search || '';
+                    if (ln.startsWith(q) || fn.startsWith(q) || fam.startsWith(q) || loc.includes(q) || searchText.includes(q)) {
                         exactMatches.push(r);
                     } else if (ln.includes(q) || fn.includes(q) || fam.includes(q)) {
                         exactMatches.push(r);
@@ -251,10 +262,7 @@ export default Deno.serve(async (req) => {
             } else {
                 const q = String(query).toLowerCase();
                 filtered = filtered.filter(r => (
-                    (r.first_name && r.first_name.toLowerCase().includes(q)) ||
-                    (r.last_name && r.last_name.toLowerCase().includes(q)) ||
-                    (r.family_name && r.family_name.toLowerCase().includes(q)) ||
-                    (r.plot_location && r.plot_location.toLowerCase().includes(q)) ||
+                    (r._search && r._search.includes(q)) ||
                     ((r.obituary && r.obituary.toLowerCase().includes(q)) && (family_name || section || veteran_status === 'true')) ||
                     ((r.notes && String(r.notes).toLowerCase().includes(q)) && (family_name || section || veteran_status === 'true'))
                 ));
@@ -275,7 +283,7 @@ export default Deno.serve(async (req) => {
         const paginatedResults = filtered.slice(startIndex, startIndex + limitNum);
 
         const payload = { 
-            results: paginatedResults,
+            results: paginatedResults.map(({ _search, ...record }) => record),
             pagination: {
                 total,
                 page: pageNum,
@@ -283,7 +291,7 @@ export default Deno.serve(async (req) => {
                 totalPages
             },
             stats: {
-                total_records: uniqueKeys.size, // Deceased count
+                total_records: uniqueKeys.size,
                 total_obituaries: uniqueObituaries.size,
                 total_veterans: totalVeteransCount,
                 total_reserved: reservedPlots.length,
@@ -291,6 +299,11 @@ export default Deno.serve(async (req) => {
                 total_not_usable: notUsablePlots.length,
                 total_unknown: unknownPlots.length,
                 raw_total: allDeceased.length
+            },
+            timings: {
+                generated_at: new Date().toISOString(),
+                dataset_cache_ttl_ms: DATASET_TTL_MS,
+                response_cache_ttl_ms: CACHE_TTL_MS
             }
         };
         __cache.set(cacheKey, { t: now, data: payload });
