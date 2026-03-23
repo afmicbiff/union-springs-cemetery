@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
             is_read: false,
             user_email: null,
             related_entity_id: pendingReservation.id,
-            related_entity_type: 'NewPlotReservation',
+            related_entity_type: 'other',
             link: `/NewPlotDetails?id=${plot.id}`,
             created_at: new Date().toISOString(),
           });
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
             is_read: false,
             user_email: null,
             related_entity_id: plot.id,
-            related_entity_type: 'Plot',
+            related_entity_type: 'other',
             link: `/NewPlotDetails?id=${plot.id}`,
             created_at: new Date().toISOString(),
           });
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
             is_read: false,
             user_email: targetEmail,
             related_entity_id: pendingReservation.id,
-            related_entity_type: 'NewPlotReservation',
+            related_entity_type: 'other',
             link: `/NewPlotDetails?id=${plot.id}`,
             created_at: new Date().toISOString(),
           });

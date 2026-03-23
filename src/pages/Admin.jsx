@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, memo, Fragment, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -574,7 +574,7 @@ function AdminDashboard() {
                         if (tab.id === 'communication') {
                           const isCommActive = activeTab === 'communication';
                           return (
-                            <Fragment key="email-comm-group">
+                            <div key="email-comm-group" className="contents">
                               {/* Email Tool - moved to left of Communications */}
                               <div className="hidden sm:flex items-stretch">
                                 <Link
@@ -643,7 +643,7 @@ function AdminDashboard() {
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
-                            </Fragment>
+                            </div>
                           );
                         }
 
