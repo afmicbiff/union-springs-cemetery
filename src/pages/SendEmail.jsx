@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Mail, Send, ArrowLeft } from "lucide-react";
 import TemplateApply from "../components/email/TemplateApply";
 import TemplatesManager from "../components/email/TemplatesManager";
+import { ADMIN_ROLES } from "@/components/auth/adminRoles";
 
 export default function SendEmail() {
   const [form, setForm] = React.useState({ to: "", subject: "", body: "", from_name: "" });
@@ -22,7 +23,7 @@ export default function SendEmail() {
         base44.auth.redirectToLogin(window.location.pathname);
         return;
       }
-      if (user.role !== "admin") {
+      if (!ADMIN_ROLES.includes(user.role)) {
         window.location.href = "/";
         return;
       }

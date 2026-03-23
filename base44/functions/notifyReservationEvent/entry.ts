@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
 async function getAdminRecipients(base44) {
   // Prefer NotificationSettings.email_recipients
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       const adminEmail = makeEmail('admin_new_submission', reservation);
       const admins = await getAdminRecipients(base44);
       await Promise.all(
-        (admins || []).map((to) => base44.integrations.Core.SendEmail({ to, subject: adminEmail.subject, body: adminEmail.body }))
+        (admins || []).map((to) => base44.asServiceRole.integrations.Core.SendEmail({ to, subject: adminEmail.subject, body: adminEmail.body }))
       );
     }
 
@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
     if (event === 'status_change') {
       const admins = await getAdminRecipients(base44);
       await Promise.all(
-        (admins || []).map((to) => base44.integrations.Core.SendEmail({ to, subject: `Reservation ${status} (Admin Notice)`, body: `Reservation ${reservation.id} is now ${status}. Requester: ${reservation.requester_name} (${reservation.requester_email})` }))
+        (admins || []).map((to) => base44.asServiceRole.integrations.Core.SendEmail({ to, subject: `Reservation ${status} (Admin Notice)`, body: `Reservation ${reservation.id} is now ${status}. Requester: ${reservation.requester_name} (${reservation.requester_email})` }))
       );
     }
 

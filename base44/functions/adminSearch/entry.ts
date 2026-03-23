@@ -1,4 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+
+const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
 
 export default Deno.serve(async (req) => {
     try {
@@ -7,6 +9,9 @@ export default Deno.serve(async (req) => {
         
         if (!user) {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        if (!ADMIN_ROLES.includes(user.role)) {
+            return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
 
         const body = await req.json();

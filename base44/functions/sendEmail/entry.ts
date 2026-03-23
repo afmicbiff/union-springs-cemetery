@@ -1,4 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+
+const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
 
 Deno.serve(async (req) => {
   try {
@@ -11,7 +13,7 @@ Deno.serve(async (req) => {
     const providedSecret = req.headers.get('x-job-secret') || new URL(req.url).searchParams.get('job_secret') || '';
     const authorizedBySecret = expectedSecret && providedSecret && providedSecret === expectedSecret;
     if (!user && !authorizedBySecret) { return Response.json({ error: 'Unauthorized' }, { status: 401 }); }
-    if (user && user.role !== 'admin') { return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 }); }
+    if (user && !ADMIN_ROLES.includes(user.role)) { return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 }); }
     
 
     function renderTemplate(str, vars) {
