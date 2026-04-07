@@ -3,12 +3,14 @@
 
 const inflight = new Map();
 const MAX_DURATIONS = 100;
+const DEDUPE_METHODS = new Set(['GET', 'HEAD']);
 
 export async function apiFetch(url, options = {}, originalFetch) {
   const method = (options.method || 'GET').toUpperCase();
   const key = `${method}::${url}::${options.body || ''}`;
+  const shouldDedupe = DEDUPE_METHODS.has(method);
 
-  if (inflight.has(key)) return inflight.get(key);
+  if (shouldDedupe && inflight.has(key)) return inflight.get(key);
 
   const fetchImpl = originalFetch || (typeof window !== 'undefined' ? window.fetch.bind(window) : fetch);
 
@@ -44,11 +46,11 @@ export async function apiFetch(url, options = {}, originalFetch) {
     }
   })();
 
-  inflight.set(key, p);
+  if (shouldDedupe) inflight.set(key, p);
   try {
     return await p;
   } finally {
-    inflight.delete(key);
+    if (shouldDedupe) inflight.delete(key);
   }
 }
 
