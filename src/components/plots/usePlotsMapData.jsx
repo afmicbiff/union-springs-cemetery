@@ -13,26 +13,8 @@ function normalizeSectionsKey(sections) {
 
 // Choose one filter style that matches Base44
 function buildSectionFilter(sectionsToLoad) {
-  const normalized = (sectionsToLoad || [])
-    .map((s) => String(s).replace(/Section\s*/i, "").trim())
-    .filter(Boolean);
-  // Support both raw numbers ("5") and prefixed values ("Section 5")
-  const withPrefixes = normalized.map((n) => `Section ${n}`);
-
-  const orClauses = [
-    { section: { $in: normalized } },
-    { section: { $in: withPrefixes } },
-    // Fetch plots with null/empty section — they'll be routed by plot number
-    { section: null },
-    { section: '' },
-  ];
-
-  // Also fetch Section 4 plots (they're routed to Section 2 in the UI)
-  if (!normalized.includes('4')) {
-    orClauses.push({ section: { $in: ['4', 'Section 4'] } });
-  }
-
-  return { $or: orClauses };
+  // Fetch ALL plots regardless of section — the grid positions them by row_number
+  return {};
 }
 
 export function usePlotsMapData({ activeTab, openSections, filterEntity }) {

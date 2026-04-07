@@ -4,1610 +4,437 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Database, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, Search, X, SlidersHorizontal } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
-import { normalizeSectionKey } from "@/components/plots/normalizeSectionKey";
 import debounce from 'lodash/debounce';
 import ResizableBackgroundImage from '@/components/plots/ResizableBackgroundImage';
 import SEOHead from '@/components/common/SEOHead';
-
-// Lazy load heavy components
-const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
-const PlotFilters = lazy(() => import("@/components/plots/PlotFilters"));
-
-const PlotsTour = lazy(() => import("@/components/plots/PlotsTour"));
-const MapControls = lazy(() => import("@/components/plots/MapControls"));
-
-
-const Section1DnDGrid = lazy(() => import("@/components/plots/Section1DnDGrid"));
-const Section2DnDGrid = lazy(() => import("@/components/plots/Section2DnDGrid"));
-const DraggableSectionGrid = lazy(() => import("@/components/plots/DraggableSectionGrid"));
 import DraggableMapContainer from "@/components/plots/DraggableMapContainer";
 import { toast } from "sonner";
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error, info) {
-    try { console.error('Plots page runtime error:', error, info); } catch {}
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-red-50 text-red-800 p-6">
-          <div className="max-w-3xl mx-auto bg-white border border-red-200 rounded-md p-4">
-            <h2 className="text-lg font-semibold mb-2">There was a problem loading the Plots map</h2>
-            <p className="text-sm mb-3">{String(this.state.error?.message || 'Unknown error')}</p>
-            <button className="px-3 py-1.5 bg-red-600 text-white rounded" onClick={() => window.location.reload()}>Reload</button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
+const MapControls = lazy(() => import("@/components/plots/MapControls"));
+const ExcelGrid = lazy(() => import("@/components/plots/ExcelGrid"));
 
-// --- CONFIGURATION ---
-
+// Status legend colors
 const STATUS_COLORS = {
-  'Available': 'bg-green-500 border-green-700',
-  'Reserved': 'bg-yellow-400 border-yellow-600',
-  'Occupied': 'bg-red-500 border-red-700',
-  'Veteran': 'bg-blue-600 border-blue-800',
-  'Unavailable': 'bg-gray-600 border-gray-800',
-  'Unknown': 'bg-purple-500 border-purple-700',
-  'Default': 'bg-gray-300 border-gray-500'
+  Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',
+  Veteran: 'bg-blue-600', Unavailable: 'bg-gray-500', Unknown: 'bg-purple-500',
+  'Not Usable': 'bg-gray-400',
 };
 
-// SECTION_PALETTES unused — use getSectionPalette() instead
-
-// Stable palette by section key
-const getSectionPalette = (key) => {
-  switch (String(key)) {
-    case '1': return 'bg-blue-100 border-blue-300 text-blue-900';
-    case '2': return 'bg-green-100 border-green-300 text-green-900';
-    case '3': return 'bg-rose-100 border-rose-300 text-rose-900';
-    case '4': return 'bg-amber-100 border-amber-300 text-amber-900';
-    case '5': return 'bg-purple-100 border-purple-300 text-purple-900';
-    default:  return 'bg-lime-100 border-lime-300 text-lime-900';
-  }
-};
-
-const INITIAL_CSV = `Grave,Row,Status,Last Name,First Name,Birth,Death,Family Name,Notes,Find A Grave,Section
-1,A-1,Available,,,,,,,,Section 1
-2,A-1,Occupied,Boutwell,Paul Marshall,5/25/1901,9/3/1982,Boutwell,,Find a Grave,Section 1
-3,A-1,Occupied,Boutwell,Clara Martin,11/15/1907,1/31/1995,Boutwell,,Find a Grave,Section 1
-4,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-5,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-6,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-7,B-1,Reserved,,,,,"Slack, Hoyt",,,Section 1
-8,B-1,Occupied,Slack,Zachary Neal,11/11/1984,4/9/1999,Slack,,Find a Grave,Section 1
-9,C-1,Reserved,Slack,Tom L.,7/6/1941,,Slack,,,Section 1
-10,C-1,Occupied,Slack,Pamela D.,12/29/1940,4/2/1999,Slack,,Find a Grave,Section 1
-11,C-1,Occupied,Slack,Hoyt,12/27/1907,1/30/1998,Slack,,Find a Grave,Section 1
-12,C-1,Reserved,Slack,Barbara,,,"Slack, Hoyt",,,Section 1
-13,C-1,Available,,,,,,,,Section 1
-14,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
-15,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
-16,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
-17,D-1,Occupied,Roach,Pauline Dollar,,,,,,,Row D
-18,D-1,Occupied,Roach,Magee,,,,,,,Row D
-19,D-1,Occupied,Dollar,Pauline,,,,,,,Row D
-20,D-1,Occupied,Mills,Ronald Edward,,,,,,,Row D
-21,D-1,Occupied,Dollar,Pauline,,,,,,,Row D
-22,D-1,Occupied,Rives,"Francis C. ""Jack""",,,,,,,Row D
-23,D-1,Occupied,Rives,Treable,,,,,,,Row D
-`;
-
-// --- HELPERS ---
-
-const getUnplacedForSection = (sectionKey, plots) => {
-    const toNum = (g) => {
-        const n = parseInt(String(g || '').replace(/\D/g, ''));
-        return Number.isFinite(n) && n > 0 ? n : null;
-    };
-    const included = new Set();
-    const addRange = (start, end) => { for (let i = start; i <= end; i++) included.add(i); };
-
-    switch (String(sectionKey)) {
-        case '3':
-            [
-                [251,268],[326,348],[406,430],[489,512],[605,629],[689,711],[770,788],[822,843],[899,922]
-            ].forEach(([s,e]) => addRange(s,e));
-            break;
-        case '4':
-            // Section 4 removed — all plots merged into Section 2
-            break;
-        case '5':
-            [
-                [1001,1014],[1015,1028],
-                [1029,1042],[1043,1056],[1057,1070],[1071,1084],[1085,1100]
-            ].forEach(([s,e]) => addRange(s,e));
-            // All other plots in Section 5 that don't match these ranges will go to unplaced/fallback
-            break;
-        default:
-            plots.forEach(p => { const n = toNum(p.Grave); if (n) included.add(n); });
-    }
-
-    const unplaced = (plots || []).filter(p => {
-        const n = toNum(p.Grave);
-        if (!n) return true;
-        return !included.has(n);
-    });
-    return { included, unplaced, placedCount: (plots || []).length - unplaced.length };
-};
-
-// --- COMPONENTS ---
-
-// Simplified tooltip - removed SmartImage for performance
+// ---- TOOLTIP ----
 const Tooltip = React.memo(({ data, visible }) => {
   if (!visible || !data) return null;
-
-  const isVeteran = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
-  const statusKey = isVeteran ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
-  const bgClass = STATUS_COLORS[statusKey]?.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-400';
+  const isVet = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
+  const statusKey = isVet ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
+  const bgClass = STATUS_COLORS[statusKey] || 'bg-gray-400';
 
   return (
     <div className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none">
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-72 max-w-[85vw] pointer-events-none p-4">
         <div className="flex items-center gap-2 mb-2">
-          <span className={`w-3 h-3 rounded-full ${bgClass}`}></span>
+          <span className={`w-3 h-3 rounded-full ${bgClass}`} />
           <span className="font-bold text-gray-900">Plot {data.Grave}</span>
           <span className="text-xs text-gray-500 ml-auto">{statusKey}</span>
         </div>
-        <p className="text-sm text-gray-600">Row {data.Row} • {data.Section || 'Section'}</p>
-        {data['Family Name'] && (
-          <p className="text-sm font-medium mt-2 text-teal-700">Family: {data['Family Name']}</p>
-        )}
-        {(data['First Name'] || data['Last Name']) && (
-          <p className="text-sm font-medium mt-1">{data['First Name']} {data['Last Name']}</p>
-        )}
-        {data.Birth && data.Death && (
-          <p className="text-xs text-gray-500">{data.Birth} - {data.Death}</p>
-        )}
+        <p className="text-sm text-gray-600">Row {data.Row}</p>
+        {data['Family Name'] && <p className="text-sm font-medium mt-2 text-teal-700">Family: {data['Family Name']}</p>}
+        {(data['First Name'] || data['Last Name']) && <p className="text-sm font-medium mt-1">{data['First Name']} {data['Last Name']}</p>}
+        {data.Birth && data.Death && <p className="text-xs text-gray-500">{data.Birth} - {data.Death}</p>}
       </div>
     </div>
   );
 });
 
-// Inject CSS for blinking animation once at module level
-if (typeof document !== 'undefined' && !document.getElementById('plot-blink-style')) {
-  const style = document.createElement('style');
-  style.id = 'plot-blink-style';
-  style.textContent = `
-    @keyframes plotBlink {
-      0%, 100% { 
-        background-color: #22c55e; 
-        border-color: #15803d; 
-        box-shadow: 0 0 4px 2px rgba(34, 197, 94, 0.4); 
-      }
-      50% { 
-        background-color: #4ade80; 
-        border-color: #22c55e; 
-        box-shadow: 0 0 6px 3px rgba(74, 222, 128, 0.5); 
-      }
-    }
-    .animate-plot-blink {
-      animation: plotBlink 1s ease-in-out infinite;
-      position: relative;
-      z-index: 9999 !important;
-    }
-    .animate-plot-blink-blue {
-      animation: plotBlink 1s ease-in-out infinite;
-      position: relative;
-      z-index: 9999 !important;
-    }
-  `;
-  document.head.appendChild(style);
-}
+// ---- LEGEND ITEM ----
+const LegendItem = React.memo(({ label, colorClass, onClick, active }) => (
+  <button
+    type="button" onClick={onClick} aria-pressed={!!active}
+    className={`flex items-center gap-1.5 bg-white h-9 px-3 rounded-full border border-gray-200 shadow-sm hover:bg-green-50 shrink-0 touch-manipulation ${active ? 'ring-2 ring-green-500' : ''}`}
+  >
+    <div className={`w-3 h-3 rounded-full ${colorClass}`} />
+    <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
+  </button>
+));
 
-// Simplified GravePlot - with blinking highlight support
-const GravePlot = React.memo(({ data, baseColorClass, onHover, onEdit, computedSectionKey }) => {
-  const plotNum = useMemo(() => parseInt(String(data?.Grave || '').replace(/\D/g, '')) || null, [data?.Grave]);
-  const sectionForId = computedSectionKey || String(data?.Section || '').replace(/Section\s/i, '').trim();
-  const [isBlinking, setIsBlinking] = useState(false);
-  const [blinkColor, setBlinkColor] = useState('green'); // 'green' or 'blue'
-  const elementRef = useRef(null);
-
-  // Listen for plot-start-blink event to trigger highlight animation
-  // PERF: stable deps — no `isBlinking` in deps to avoid re-registering per-blink-toggle
-  useEffect(() => {
-    if (data?.isSpacer || plotNum == null) return;
-
-    const handleBlink = (e) => {
-      const { targetPlotNum, targetElementId } = e.detail || {};
-      if (targetPlotNum != null && targetPlotNum === plotNum) {
-        if (targetElementId && elementRef.current) {
-          const myId = elementRef.current.id;
-          if (myId && myId !== targetElementId) return;
-        }
-        setBlinkColor('green');
-        setIsBlinking(true);
-      }
-    };
-
-    const handleSearchBlink = (e) => {
-      const { targetPlotNum } = e.detail || {};
-      if (targetPlotNum != null && targetPlotNum === plotNum) {
-        setBlinkColor('blue');
-        setIsBlinking(true);
-      }
-    };
-
-    const handleStopBlink = () => {
-      setIsBlinking(false);
-    };
-
-    window.addEventListener('plot-start-blink', handleBlink);
-    window.addEventListener('plot-search-blink', handleSearchBlink);
-    window.addEventListener('plot-stop-all-blink', handleStopBlink);
-    return () => {
-      window.removeEventListener('plot-start-blink', handleBlink);
-      window.removeEventListener('plot-search-blink', handleSearchBlink);
-      window.removeEventListener('plot-stop-all-blink', handleStopBlink);
-    };
-  }, [plotNum, data?.isSpacer]);
-
-  // Early return for spacers
-  if (data?.isSpacer) {
-    const hasEditHandler = typeof onEdit === 'function';
-    return (
-      <div 
-        className={`w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px] flex items-center justify-center plot-element ${hasEditHandler ? 'hover:bg-green-100 cursor-pointer' : ''}`}
-        onClick={hasEditHandler ? (e) => { e.stopPropagation(); onEdit({ isSpacer: true, Section: data.Section || computedSectionKey, suggestedSection: computedSectionKey }); } : undefined}
-      >
-        {hasEditHandler && <span className="text-[8px] text-gray-400">+</span>}
-      </div>
-    );
-  }
-
-  const isVet = data.Notes?.toLowerCase().includes('vet') && data.Status === 'Occupied';
-  const displayStatus = isVet ? 'Veteran' : data.Status;
-  const statusBg = STATUS_COLORS[displayStatus]?.split(' ').find(cls => cls.startsWith('bg-')) || 'bg-gray-400';
-
-  const handleClick = (e) => {
-    e.stopPropagation();
-    if (isBlinking) setIsBlinking(false);
-    if (onEdit && data) onEdit(data);
-  };
-
-  const blinkClass = isBlinking ? (blinkColor === 'blue' ? 'animate-plot-blink-blue' : 'animate-plot-blink') : '';
-
-  return (
-    <div
-      ref={elementRef}
-      id={plotNum != null ? `plot-${sectionForId}-${plotNum}` : undefined}
-      data-plot-num={plotNum}
-      data-section={sectionForId}
-      onClick={handleClick}
-      onMouseEnter={(e) => onHover?.(e, data)}
-      onMouseLeave={() => onHover?.(null, null)}
-      className={`${baseColorClass} border rounded-[1px] flex items-center justify-between px-1.5 w-16 h-8 m-0.5 text-[8px] cursor-pointer hover:opacity-100 opacity-90 plot-element ${blinkClass}`}
-      title={`${data.Grave} - ${data.Row}`}
-    >
-      <span className="text-[10px] font-black text-gray-800">{data.Grave}</span>
-      <span className="text-[8px] text-gray-600 font-mono truncate">{data.Row}</span>
-      <div className={`w-2.5 h-2.5 rounded-full ${statusBg}`}></div>
-    </div>
-  );
-});
-
-const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
-    const bgClass = colorClass.split(' ').find(c => c.startsWith('bg-'));
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        aria-pressed={!!active}
-        className={`flex items-center gap-1 sm:gap-1.5 bg-white h-8 sm:h-10 px-2 sm:px-3 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-50 active:bg-green-100 ${active ? 'ring-2 ring-green-500' : ''} shrink-0 touch-manipulation`}
-        data-legend={label}
-      >
-        <div className={`w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full ${bgClass}`}></div>
-        <span className="text-[10px] sm:text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
-      </button>
-    );
-});
-
-// Removed - Table view not used in production
-
-const SectionRenderer = React.memo(({ 
-          sectionKey, 
-          plots, 
-          section1PlotsForS2,
-          palette, 
-          isCollapsed, 
-          onToggle, 
-          isExpanded, 
-          onExpand, 
-          isAdmin, 
-          onEdit, 
-          onHover,
-          onMovePlot,
-          onAddBlankAbove,
-          onDeleteAndShift
-      }) => {
-    const [bgColor, borderColor, textColor] = palette.split(' ');
-
-          return (
-        <div id={`section-${sectionKey}`} className="relative">
-            <div 
-                className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
-                onClick={() => onToggle(sectionKey)}
-            >
-                <div className={`mr-2 mb-1 p-1 rounded-full transition-colors ${isCollapsed ? 'bg-gray-200 text-gray-600' : `bg-white text-${textColor.split('-')[1]}-600 shadow-sm`}`}>
-                    {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
-                </div>
-                <h2 className={`text-2xl font-bold ${textColor.replace('text', 'text-opacity-80 text')}`}>
-                    {sectionKey === 'Unassigned' ? 'Unassigned Plots' : `Section ${sectionKey.replace('Section', '').trim()}`}
-                </h2>
-                <div className="ml-4 h-px flex-grow bg-gray-200 mb-2 group-hover:bg-gray-300 transition-colors"></div>
-                <span className="mb-1 text-xs font-mono text-gray-400 ml-2">
-                    {plots.length}{sectionKey === '2' && section1PlotsForS2 && section1PlotsForS2.length > 0 ? ` + ${section1PlotsForS2.length} (Sec 1)` : ''}{sectionKey === '2' ? ' (includes Sec 3)' : ''} Plots
-                </span>
-                {sectionKey === '5' && (() => { const c = getUnplacedForSection(sectionKey, plots); return (<span className="mb-1 text-xs text-gray-400 ml-2">• {c.placedCount} placed, {c.unplaced.length} fallback</span>); })()}
-            </div>
-            
-            {!isCollapsed && (
-                <div className={`
-                    rounded-xl p-6 transition-colors duration-500
-                    overflow-x-auto
-                `}>
-                    {sectionKey === '2' ? (
-                          <div className="flex justify-center">
-                            <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
-                              <Section2DnDGrid
-                                plots={plots}
-                                section1Plots={section1PlotsForS2 || []}
-                                baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                isAdmin={isAdmin}
-                                onHover={onHover}
-                                onEdit={onEdit}
-                                statusColors={STATUS_COLORS}
-                              />
-                            </React.Suspense>
-                          </div>
-                    ) : sectionKey === '3' ? (
-                        <div className="flex gap-4 justify-center overflow-x-auto pb-4">
-                            {(() => {
-                                const ranges = [
-                                    { start: 251, end: 268 },
-                                    { start: 326, end: 348 },
-                                    { start: 406, end: 430 },
-                                    { start: 489, end: 512 },
-                                    { start: 605, end: 629 },
-                                    { start: 689, end: 711 },
-                                    { start: 770, end: 788 },
-                                    { start: 822, end: 843 },
-                                    { start: 899, end: 922 }
-                                ];
-                                const spacers = [507,709,773,786,633,840,841,930];
-                                const renderedKeys = new Set();
-
-
-
-                                const cols = ranges.map((range, idx) => {
-                                    const excludeNums = range.exclude || [];
-                                    const colPlots = plots
-                                      .filter(p => {
-                                        const num = parseInt(String(p.Grave).replace(/\D/g, '')) || 0;
-                                        return num >= range.start && num <= range.end && !excludeNums.includes(num);
-                                      })
-                                      .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0));
-                                    const plotsWithSpacers = (() => {
-                                      const arr = [];
-                                      colPlots.forEach(plot => {
-                                        const num = parseInt(String(plot.Grave).replace(/\D/g, '')) || 0;
-                                        if (spacers.includes(num)) arr.push({ isSpacer: true, _id: `sp-${num}`, Section: '3' });
-                                        arr.push(plot);
-                                        renderedKeys.add(`${num}|${plot._id}`);
-                                      });
-                                      return arr;
-                                    })();
-
-                                    return (
-                                      <div key={idx} className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 last:border-0 pr-2">
-                                        {plotsWithSpacers.map((plot, pIdx) => (
-                                          <GravePlot key={plot._id || `plot-${pIdx}`} data={plot}
-                                          computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                        ))}
-                                      </div>
-                                    );
-                                });
-                                const { unplaced } = getUnplacedForSection('3', plots);
-                                const fallbackCol = (
-                                  <div key="fallback" className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-rose-200 pr-2">
-                                    {unplaced
-                                      .sort((a,b) => (parseInt(String(a.Grave).replace(/\D/g, ''))||0) - (parseInt(String(b.Grave).replace(/\D/g, ''))||0))
-                                      .map((plot, pIdx) => (
-                                        <GravePlot key={plot._id || `u3-${pIdx}`} data={plot}
-                                  computedSectionKey={sectionKey} baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`} onHover={onHover} onEdit={onEdit} />
-                                      ))}
-                                  </div>
-                                );
-
-                                return [...cols, fallbackCol];
-                            })()}
-                        </div>
-                    ) : sectionKey === '5' ? (
-                        <React.Suspense fallback={<div className="text-xs text-gray-500">Loading layout…</div>}>
-                        {(() => {
-                            const sectionPlots = plots;
-                            const byExact = (label) => sectionPlots.find(p => String(p.Grave).trim() === String(label).trim());
-                            const byNum = (n) => sectionPlots.filter(p => parseInt(String(p.Grave).replace(/\D/g, '')) === n).sort((a,b)=>String(a.Grave).localeCompare(String(b.Grave)));
-                            const pushRange = (arr, start, end) => { for (let i=start;i<=end;i++){ const found = byNum(i); if (found.length>0) arr.push(...found); } };
-                            const pushLabels = (arr, labels) => { labels.forEach(lbl => { const f = byExact(lbl); if (f) arr.push(f); }); };
-                            const pushBlanks = (arr, count, prefix, startNum) => { 
-                              for(let i=0;i<count;i++){ 
-                                arr.push({ 
-                                  isSpacer: true, 
-                                  _id: `${prefix||'sp'}-${i}`, 
-                                  Section: '5',
-                                  expectedPlotNumber: startNum ? startNum + i : null
-                                }); 
-                              } 
-                            };
-
-                            const TARGET_HEIGHT = 20;
-                            const columns = [];
-
-                            // Col 0: Leading empty column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c0-lead'); columns.push(col); })();
-                            // Col 1: 1001-1014 (rows R-U, column 5)
-                            (() => { const col=[]; pushRange(col,1001,1014); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c1-top'); columns.push(col); })();
-                            // Col 2: 1015-1027 (rows R-U, column 5)
-                            (() => { const col=[]; pushRange(col,1015,1028); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c2-top'); columns.push(col); })();
-                            // Col 3: 1029-1042 (rows R-U, column 6)
-                            (() => { const col=[]; pushRange(col,1029,1042); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c3-top'); columns.push(col); })();
-                            // Col 4: 1043-1056 (rows R-U, column 6)
-                            (() => { const col=[]; pushRange(col,1043,1056); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c4-top'); columns.push(col); })();
-                            // Col 5: 1057-1070 + labels (rows R-U, column 7)
-                            (() => { const col=[]; pushRange(col,1057,1070); pushLabels(col,["1070-A","1070-B"]); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c5-top'); columns.push(col); })();
-                            // Col 6: 1071-1084 + labels (rows R-U, column 7)
-                            (() => { const col=[]; pushRange(col,1071,1084); pushLabels(col,["1084-A","1084-B"]); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c6-top'); columns.push(col); })();
-                            // Col 7: 1085-1100 (rows R-U, column 8)
-                            (() => { const col=[]; pushRange(col,1085,1100); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c7-top'); columns.push(col); })();
-                            // Col 8: Trailing empty column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8-trail'); columns.push(col); })();
-
-                            // Add unplaced plots as final column
-                            const { unplaced } = getUnplacedForSection('5', plots);
-                            if (unplaced.length > 0) {
-                                columns.push(unplaced);
-                            }
-
-                            return (
-                                <DraggableSectionGrid
-                                    sectionKey="5"
-                                    columns={columns}
-                                    baseColorClass={`${bgColor.replace('100','100')} ${borderColor}`}
-                                    statusColors={STATUS_COLORS}
-                                    isAdmin={isAdmin}
-                                    onHover={onHover}
-                                    onEdit={onEdit}
-                                    onMovePlot={onMovePlot}
-                                    onAddBlankAbove={onAddBlankAbove}
-                                    onDeleteAndShift={onDeleteAndShift}
-                                />
-                            );
-                        })()}
-                        </React.Suspense>
-                    ) : (
-                        <>
-                            <div className="flex flex-col-reverse gap-2 content-center items-center">
-                                {(isExpanded ? (plots || []) : (plots || []).slice(0, 120)).map((plot) => (
-                                    <GravePlot 
-                                        key={`${plot.Section}-${plot.Row}-${plot.Grave}`} 
-                                        data={plot}
-                                  computedSectionKey={sectionKey} 
-                                        baseColorClass={`${bgColor.replace('100', '100')} ${borderColor}`}
-                                        onHover={onHover}
-                                        onEdit={onEdit}
-                                    />
-                                ))}
-                            </div>
-                            {!isExpanded && ((plots?.length || 0) > 120) && (
-                                <div className="mt-3">
-                                    <button
-                                        type="button"
-                                        onClick={onExpand}
-                                        className="text-sm text-teal-700 hover:underline"
-                                    >
-                                        Show more ({(plots?.length || 0) - 120} more)
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-});
-
-// --- MAIN APP COMPONENT ---
-
+// ---- MAIN PAGE ----
 export default function PlotsPage() {
   const queryClient = useQueryClient();
-        
+  const location = useLocation();
+
   const invalidatePlotsMap = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
   }, [queryClient]);
 
+  // State
   const [hoverData, setHoverData] = useState(null);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [collapsedSections, setCollapsedSections] = useState({ '1': false, '2': false, '3': false, '5': false });
-  // Section 1 is always "open" for data fetching since it's merged into Section 2 visually
-  const [isTourOpen, setIsTourOpen] = useState(false);
-  // When coming from search, expand all sections so user can see all plots, but scroll to target
-        useEffect(() => {
-          const params = new URLSearchParams(window.location.search);
-          const rawSection = params.get('section') || '';
-          const rawPlot = params.get('plot') || '';
-          const fromSearch = params.get('from') === 'search';
-          if (!rawSection && !rawPlot) return;
-          
-          // If coming from search, expand all sections so all plots are visible
-          if (fromSearch) {
-            setCollapsedSections({ '1': false, '2': false, '3': false, '5': false });
-          } else {
-            // Direct deep link - collapse other sections
-            const rawNorm = rawSection.replace(/Section\s/i, '').trim();
-            const targetKey = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : (rawNorm || '');
-            if (targetKey && ['1','2','3','5'].includes(targetKey)) {
-              setCollapsedSections({ '1': true, '2': true, '3': true, '5': true, [targetKey]: false });
-            }
-          }
-        }, []);
-  const openSections = useMemo(() => {
-    const open = Object.keys(collapsedSections).filter((k) => !collapsedSections[k]);
-    // Always include '1' so its data is fetched (merged into Section 2 display)
-    if (!open.includes('1')) open.push('1');
-    return open;
-  }, [collapsedSections]);
-  const [expandedSections, setExpandedSections] = useState({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSetSearchQuery = useMemo(() => debounce((v) => setSearchQuery(v || ''), 250), []);
-
-  const location = useLocation();
-
-  const backSearchUrl = location.state?.search ? `${createPageUrl('Search')}${location.state.search}` : createPageUrl('Search');
-  const showBackToSearch = (new URLSearchParams(window.location.search)).get('from') === 'search';
-  
-  // Target plot button state - shows grave number from search, user clicks to locate
-  const [showLocateButton, setShowLocateButton] = useState(false);
-  const [hasLocated, setHasLocated] = useState(false);
-  
-  // Initialize locate button when coming from search and scroll to top
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const fromSearch = params.get('from') === 'search';
-    const targetPlot = params.get('plot');
-    if (fromSearch && targetPlot) {
-      setShowLocateButton(true);
-      setHasLocated(false);
-      // Scroll to top so user sees the page title and locate button
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, []);
-
-
-  
-  // Filtering State
-  const [filters, setFilters] = useState({
-          search: '',
-          status: '',
-          birthYearStart: '',
-          birthYearEnd: '',
-          deathYearStart: '',
-          deathYearEnd: '',
-          owner: '',
-          plot: ''
-      });
-
-
-
-  // Editing State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedPlotForModal, setSelectedPlotForModal] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [ownerFilter, setOwnerFilter] = useState('');
+  const [plotFilter, setPlotFilter] = useState('');
 
+  // URL params (from Deceased Search)
+  const params = useMemo(() => new URLSearchParams(window.location.search), [location.search]);
+  const fromSearch = params.get('from') === 'search';
+  const targetPlotNum = useMemo(() => {
+    const p = parseInt(params.get('plot') || '', 10);
+    return Number.isFinite(p) ? p : null;
+  }, [params]);
+  const backSearchUrl = location.state?.search
+    ? `${createPageUrl('Search')}${location.state.search}`
+    : createPageUrl('Search');
 
-  // DATA FETCHING - with caching
+  // Auth
   const { data: user } = useQuery({
-      queryKey: ['currentUser'],
-      queryFn: () => base44.auth.me().catch(() => null),
-      staleTime: 5 * 60_000,
-      gcTime: 30 * 60_000,
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me().catch(() => null),
+    staleTime: 5 * 60_000,
   });
-  
   const isAdmin = user?.role === 'admin';
 
+  // All sections open so we fetch everything
+  const openSections = useMemo(() => ['1', '2', '3', '5'], []);
   const { data: plotEntities = [], isLoading } = usePlotsMapData({
-            activeTab: 'map',
-            openSections,
-            filterEntity,
-          });
+    activeTab: 'map',
+    openSections,
+    filterEntity,
+  });
 
+  // Transform entities to UI format, deduplicate
+  const parsedData = useMemo(() => {
+    const raw = (plotEntities || []).map((p) => ({
+      _id: p.id,
+      _entity: 'Plot',
+      Section: p.section,
+      Row: p.row_number,
+      Grave: p.plot_number,
+      Status: p.status || 'Unknown',
+      'First Name': p.first_name,
+      'Last Name': p.last_name,
+      'Family Name': p.family_name,
+      Birth: p.birth_date,
+      Death: p.death_date,
+      Notes: p.notes || '',
+      _updated: p.updated_date,
+      ...p,
+    })).filter(r => r.Grave);
 
+    // Deduplicate by plot_number: keep most recently updated
+    const byNum = new Map();
+    raw.forEach(item => {
+      const num = String(item.Grave || '').trim();
+      if (!num) return;
+      const existing = byNum.get(num);
+      if (!existing || new Date(item._updated || 0) > new Date(existing._updated || 0)) {
+        byNum.set(num, item);
+      }
+    });
+    return Array.from(byNum.values());
+  }, [plotEntities]);
 
-  // MUTATIONS
+  // Filter
+  const filteredData = useMemo(() => {
+    return parsedData.filter(item => {
+      if (statusFilter && statusFilter !== 'All') {
+        const isVet = item.Status === 'Veteran' || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied');
+        if (statusFilter === 'Veteran' && !isVet) return false;
+        if (statusFilter !== 'Veteran' && item.Status !== statusFilter) return false;
+      }
+      if (ownerFilter) {
+        const owner = String(item['Family Name'] || '').toLowerCase();
+        if (!owner.includes(ownerFilter.toLowerCase())) return false;
+      }
+      if (plotFilter) {
+        const plotStr = String(item.Grave || '').toLowerCase();
+        if (!plotStr.includes(plotFilter.toLowerCase())) return false;
+      }
+      return true;
+    });
+  }, [parsedData, statusFilter, ownerFilter, plotFilter]);
+
+  // Mutations
   const updatePlotMutation = useMutation({
-      mutationFn: async ({ id, data }) => {
-          const response = await base44.functions.invoke('updatePlot', { id, data });
-          if (response.data && response.data.error) {
-              throw new Error(response.data.error);
-          }
-          return response.data;
-      },
-      onSuccess: () => {
-                      clearEntityCache('Plot');
-                      
-                      queryClient.invalidateQueries({ queryKey: ['plots'] });
-                      invalidatePlotsMap();
-                      toast.success("Plot updated successfully");
-                  },
-      onError: (err) => {
-          toast.error(`Update failed: ${err.message}`);
-      }
-  });
-
-  const createPlotsMutation = useMutation({
-      mutationFn: async (plots) => {
-          const response = await base44.functions.invoke('importPlots', { plots });
-          if (response.data && response.data.error) {
-              throw new Error(response.data.error);
-          }
-          return response.data;
-      },
-      onSuccess: (data) => {
-                      clearEntityCache('Plot');
-                      
-                      queryClient.invalidateQueries({ queryKey: ['plots'] });
-                      invalidatePlotsMap();
-                      toast.success(data.message || "Imported plots successfully");
-                  },
-      onError: (err) => {
-          toast.error(`Import failed: ${err.message}`);
-      }
-  });
-
-  const addNotUsablePlots = async () => {
-    const targets = [
-      { section: '5', plot_number: '227', status: 'Not Usable' },
-      { section: '5', plot_number: '302', status: 'Not Usable' },
-    ];
-
-    await Promise.all(targets.map(async (t) => {
-      const existingArr = await base44.entities.Plot.filter(
-        { $and: [
-            { plot_number: t.plot_number },
-            { $or: [ { section: '5' }, { section: 'Section 5' } ] }
-          ] },
-        '-updated_date',
-        1
-      );
-      const existing = Array.isArray(existingArr) ? existingArr[0] : existingArr?.[0];
-      if (existing?.id) {
-        if (existing.status !== t.status) {
-                  await base44.entities.Plot.update(existing.id, { status: t.status });
-                }
-              } else {
-                await base44.entities.Plot.create(t);
-              }
-            }));
-
-            clearEntityCache('Plot');
-            queryClient.invalidateQueries({ queryKey: ['plots'] });
-            invalidatePlotsMap();
-            toast.success('Added/updated plots 227 and 302 as Not Usable in Section 5');
-          };
-
-          const relocatePlot227ToSection2 = async () => {
-    const target = { section: '2', plot_number: '228-A', status: 'Not Usable' };
-    const originalArr = await base44.entities.Plot.filter(
-      { $and: [
-          { plot_number: '227' },
-          { $or: [ { section: '5' }, { section: 'Section 5' } ] }
-        ] },
-      '-updated_date',
-      1
-    );
-    const original = Array.isArray(originalArr) ? originalArr[0] : originalArr?.[0];
-    if (original?.id) {
-      await base44.entities.Plot.update(original.id, target);
-    } else {
-      const existingArr = await base44.entities.Plot.filter(
-        { $and: [
-            { plot_number: target.plot_number },
-            { $or: [ { section: '2' }, { section: 'Section 2' } ] }
-          ] },
-        '-updated_date',
-        1
-      );
-      const existing = Array.isArray(existingArr) ? existingArr[0] : existingArr?.[0];
-      if (existing?.id) {
-        if (existing.status !== target.status) {
-          await base44.entities.Plot.update(existing.id, { status: target.status });
-        }
-      } else {
-        await base44.entities.Plot.create(target);
-      }
-    }
-    clearEntityCache('Plot');
-    queryClient.invalidateQueries({ queryKey: ['plots'] });
-    invalidatePlotsMap();
-    toast.success('Moved 227 to Section 2 as 228-A (Not Usable)');
-    };
-
-    const fix326to348ToSection3 = async () => {
-      const nums = Array.from({ length: (348 - 326 + 1) }, (_, i) => String(326 + i));
-      const results = await base44.entities.Plot.filter({ plot_number: { $in: nums } }, '-updated_date', 1000);
-      const arr = Array.isArray(results) ? results : (results || []);
-
-      await Promise.all(
-        arr.map(async (p) => {
-          const sect = String(p.section || '').replace(/Section\s/i, '').trim();
-          if (sect !== '3') {
-            await base44.entities.Plot.update(p.id, { section: 'Section 3' });
-          }
-        })
-      );
-
+    mutationFn: async ({ id, data }) => {
+      const response = await base44.functions.invoke('updatePlot', { id, data });
+      if (response.data?.error) throw new Error(response.data.error);
+      return response.data;
+    },
+    onSuccess: () => {
       clearEntityCache('Plot');
       queryClient.invalidateQueries({ queryKey: ['plots'] });
       invalidatePlotsMap();
-      toast.success('Updated plots 326–348 to Section 3');
-    };
+      toast.success("Plot updated");
+    },
+    onError: (err) => toast.error(`Update failed: ${err.message}`),
+  });
 
-    // MAP ENTITIES TO UI FORMAT — deduplicate by plot_number + section
-  const parsedData = useMemo(() => {
-      const raw = (plotEntities || []).map((p) => ({
-        _id: p.id,
-        _entity: 'Plot',
-        Section: p.section,
-        Row: p.row_number,
-        Grave: p.plot_number,
-        Status: p.status || 'Unknown',
-        'First Name': p.first_name,
-        'Last Name': p.last_name,
-        'Family Name': p.family_name,
-        Birth: p.birth_date,
-        Death: p.death_date,
-        Notes: p.notes || '',
-        photo_url: p.photo_url,
-        photo_url_small: p.photo_url_small,
-        photo_url_medium: p.photo_url_medium,
-        photo_url_large: p.photo_url_large,
-        _updated: p.updated_date,
-        ...p,
-      })).filter(r => r.Grave);
-
-      // Deduplicate: keep most recently updated record per plot_number
-      const byPlotNum = new Map();
-      raw.forEach(item => {
-        const num = String(item.Grave || '').trim();
-        if (!num) return;
-        const existing = byPlotNum.get(num);
-        if (!existing) {
-          byPlotNum.set(num, item);
-        } else {
-          // Keep the one with the most recent updated_date
-          const existingDate = new Date(existing._updated || 0).getTime();
-          const newDate = new Date(item._updated || 0).getTime();
-          if (newDate > existingDate) {
-            byPlotNum.set(num, item);
-          }
-        }
-      });
-      return Array.from(byPlotNum.values());
-  }, [plotEntities]);
-
-  // plotIndex removed — unused (hover uses data directly)
-
-  // Filtered Data Computation - NO LONGER FILTERS BY SEARCH (all plots always shown)
-  // Search is now used only for locating and highlighting plots
-  const filteredData = useMemo(() => {
-      return parsedData.filter(item => {
-          // 1. Owner Name (Family) - still filters
-          if (filters.owner) {
-              const owner = String(item['Family Name'] || '').toLowerCase();
-              if (!owner.includes(filters.owner.toLowerCase())) return false;
-          }
-
-          // 2. Plot Number - still filters
-          if (filters.plot) {
-              const plotStr = String(item.Grave || '').toLowerCase();
-              const wanted = filters.plot.toLowerCase();
-              const numItem = parseInt(plotStr.replace(/\D/g, '')) || 0;
-              const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
-              if (numWanted != null) {
-                  if (numItem !== numWanted) return false;
-              } else if (!plotStr.includes(wanted)) {
-                  return false;
-              }
-          }
-
-          // 3. Status Filter
-          if (filters.status && filters.status !== 'All' && item.Status !== filters.status) {
-              const isVeteran = item.Status === 'Veteran' || (item.Notes && item.Notes.toLowerCase().includes('vet') && item.Status === 'Occupied');
-              if (filters.status === 'Veteran' && !isVeteran) return false;
-              if (filters.status !== 'Veteran' && item.Status !== filters.status) return false;
-          }
-
-          // 4. Date Filters (Year)
-          const getYear = (dateStr) => {
-              if (!dateStr) return null;
-              const date = new Date(dateStr);
-              return isNaN(date.getFullYear()) ? null : date.getFullYear();
-          };
-
-          if (filters.birthYearStart || filters.birthYearEnd) {
-              const birthYear = getYear(item.Birth);
-              if (!birthYear) return false;
-              if (filters.birthYearStart && birthYear < parseInt(filters.birthYearStart)) return false;
-              if (filters.birthYearEnd && birthYear > parseInt(filters.birthYearEnd)) return false;
-          }
-
-          if (filters.deathYearStart || filters.deathYearEnd) {
-              const deathYear = getYear(item.Death);
-              if (!deathYear) return false;
-              if (filters.deathYearStart && deathYear < parseInt(filters.deathYearStart)) return false;
-              if (filters.deathYearEnd && deathYear > parseInt(filters.deathYearEnd)) return false;
-          }
-
-          return true;
-      });
-  }, [parsedData, filters.owner, filters.plot, filters.status, filters.birthYearStart, filters.birthYearEnd, filters.deathYearStart, filters.deathYearEnd]);
-
-  // Sync debounced search with filters.search
-  useEffect(() => {
-    debouncedSetSearchQuery((filters.search || '').toString());
-    return () => { if (debouncedSetSearchQuery.cancel) debouncedSetSearchQuery.cancel(); };
-  }, [filters.search, debouncedSetSearchQuery]);
-
-
-
-
-
-  const sections = useMemo(() => {
-    const grouped = {
-        '1': [],
-        '2': [],
-        '3': [],
-        '5': []
-    };
-
-    filteredData.forEach(item => {
-        const rawSection = (item.Section || '').trim();
-        const rowVal = String(item.Row || '');
-        let sectionKey = rawSection ? rawSection.replace(/Section\s/i, '').trim() : '';
-
-        // If section is empty/null, derive from plot number
-        const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
-        if (!sectionKey && graveNum > 0) {
-            if (graveNum >= 1 && graveNum <= 184) sectionKey = '1';
-            else if (graveNum >= 1001 && graveNum <= 1200) sectionKey = '5';
-            else sectionKey = '2'; // S2/S3/S4 all route to '2'
-        }
-
-        // Section 3 plots are rendered as part of Section 2
-        if (sectionKey === '3' || rawSection === 'Section 3') {
-            sectionKey = '2';
-        } else if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
-            sectionKey = '2';
-        }
-        // All Section 4 plots are displayed in Section 2
-        if (sectionKey === '4' || rawSection === 'Section 4') {
-            sectionKey = '2';
-        }
-
-        // Handle plots with just numeric section (e.g., "5" instead of "Section 5")
-        if (!grouped[sectionKey] && /^\d+$/.test(sectionKey)) {
-            // Already a number, keep it
-        } else if (!grouped[sectionKey]) {
-            if (/^Row\s+[A-D]\b/i.test(rawSection) || (/^Row\s+/i.test(rawSection) && /-1\b/.test(rowVal))) {
-                sectionKey = '1';
-            }
-        }
-
-        if (grouped[sectionKey]) {
-            grouped[sectionKey].push(item);
-        }
+  const handleUpdatePlot = useCallback((updatedPlot) => {
+    updatePlotMutation.mutate({
+      id: updatedPlot._id,
+      data: {
+        section: updatedPlot.Section, row_number: updatedPlot.Row, plot_number: updatedPlot.Grave,
+        status: updatedPlot.Status, first_name: updatedPlot['First Name'], last_name: updatedPlot['Last Name'],
+        family_name: updatedPlot['Family Name'], birth_date: updatedPlot.Birth, death_date: updatedPlot.Death,
+        notes: updatedPlot.Notes, capacity: updatedPlot.capacity, current_occupancy: updatedPlot.current_occupancy,
+        burial_type: updatedPlot.burial_type, burial_type_options: updatedPlot.burial_type_options,
+        container_type: updatedPlot.container_type, liner_vault_options: updatedPlot.liner_vault_options,
+      },
     });
+  }, [updatePlotMutation]);
 
-    Object.keys(grouped).forEach(key => {
-        grouped[key].sort((a, b) => {
-            const numA = parseInt(String(a.Grave).replace(/\D/g, '')) || 0;
-            const numB = parseInt(String(b.Grave).replace(/\D/g, '')) || 0;
-            if (numA !== numB) return numA - numB;
-            return String(a.Grave).localeCompare(String(b.Grave));
-        });
-    });
-
-    return grouped;
-  }, [filteredData]);
-
-  // Target plot from Deceased Search (?from=search&plot=...)
-  const selectedPlotNum = React.useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    const p = parseInt(params.get('plot') || '', 10);
-    return Number.isFinite(p) ? p : null;
-  }, [location.search]);
-
-  // No longer use single plot mode - always show all plots
-  const singlePlotMode = false;
-
-  const selectedSectionKeyForPlot = React.useMemo(() => {
-    if (selectedPlotNum == null) return null;
-    for (const key of Object.keys(sections)) {
-      const items = sections[key] || [];
-      if (items.some(it => {
-        const n = parseInt(String(it.Grave).replace(/\D/g, '')) || 0;
-        return n === selectedPlotNum;
-      })) return key;
+  const handleCreatePlot = useCallback(async (newPlotData) => {
+    try {
+      await base44.entities.Plot.create({
+        section: newPlotData.Section, row_number: newPlotData.Row, plot_number: newPlotData.Grave,
+        status: newPlotData.Status, first_name: newPlotData['First Name'], last_name: newPlotData['Last Name'],
+        family_name: newPlotData['Family Name'], birth_date: newPlotData.Birth, death_date: newPlotData.Death,
+        notes: newPlotData.Notes,
+      });
+      clearEntityCache('Plot');
+      queryClient.invalidateQueries({ queryKey: ['plots'] });
+      invalidatePlotsMap();
+      toast.success("Plot created");
+    } catch (err) {
+      toast.error(`Failed: ${err.message}`);
     }
-    return null;
-  }, [selectedPlotNum, sections]);
+  }, [queryClient, invalidatePlotsMap]);
 
-  // Expand target section when coming from search
-  useEffect(() => {
-      const params = new URLSearchParams(window.location.search);
-      const rawSection = params.get('section') || '';
-      const rawPlot = params.get('plot') || '';
-      if (!rawSection && !rawPlot) return;
-
-      const rawNorm = rawSection.replace(/Section\s/i, '').trim();
-      const sectionNorm = (/^Row\s*[A-D]/i.test(rawSection) || /^[A-D]$/i.test(rawNorm)) ? '1' : rawNorm;
-      if (sectionNorm) {
-        setCollapsedSections(prev => ({ ...prev, [sectionNorm]: false }));
-      }
-  }, []);
-
-  // CSV Parser
-  const parseCSV = useCallback((text) => {
-    const lines = text.trim().split(/\r?\n/);
-    
-    let headerIndex = -1;
-    for(let i=0; i<lines.length && i<10; i++) {
-        if(lines[i].toLowerCase().includes('grave') && lines[i].toLowerCase().includes('status')) {
-            headerIndex = i;
-            break;
-        }
-    }
-
-    if (headerIndex === -1) {
-        setErrorMessage("Could not find a valid header row containing 'Grave' and 'Status'.");
-        return [];
-    }
-
-    setErrorMessage('');
-    const headers = lines[headerIndex].split(',').map(h => h.trim());
-    
-    return lines.slice(headerIndex + 1).map((line, idx) => {
-        const values = [];
-        let current = '';
-        let inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '"') { inQuotes = !inQuotes; }
-            else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/^"|"$/g, '')); current = ''; }
-            else { current += char; }
-        }
-        values.push(current.trim().replace(/^"|"$/g, ''));
-        
-        const entry = {};
-        headers.forEach((h, index) => { entry[h] = values[index] || ''; });
-        
-        return {
-            section: entry['Section'],
-            row_number: entry['Row'],
-            plot_number: entry['Grave'],
-            status: entry['Status'],
-            first_name: entry['First Name'],
-            last_name: entry['Last Name'],
-            family_name: entry['Family Name'],
-            birth_date: entry['Birth'],
-            death_date: entry['Death'],
-            notes: entry['Notes']
-        };
-    }).filter(row => row.plot_number);
-  }, []);
-
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-        const data = parseCSV(evt.target.result);
-        if(data && data.length > 0) {
-            createPlotsMutation.mutate(data);
-        }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleSeedData = () => {
-    const data = parseCSV(INITIAL_CSV);
-    if(data && data.length > 0) {
-        createPlotsMutation.mutate(data);
-    }
-  };
-
-  // Optimized hover - throttled for performance
+  // Hover
   const handleHover = useCallback((e, data) => {
-    if (!data) {
-      setIsTooltipVisible(false);
-      return;
-    }
+    if (!data) { setIsTooltipVisible(false); return; }
     setHoverData(data);
     setIsTooltipVisible(true);
   }, []);
 
+  // Edit
   const handleEditClick = useCallback((plot) => {
     setSelectedPlotForModal(plot);
     setIsEditModalOpen(true);
   }, []);
 
-  const handleCreatePlot = useCallback(async (newPlotData) => {
-    const entityData = {
-      section: newPlotData.Section,
-      row_number: newPlotData.Row,
-      plot_number: newPlotData.Grave,
-      status: newPlotData.Status,
-      first_name: newPlotData['First Name'],
-      last_name: newPlotData['Last Name'],
-      family_name: newPlotData['Family Name'],
-      birth_date: newPlotData.Birth,
-      death_date: newPlotData.Death,
-      notes: newPlotData.Notes,
-      capacity: newPlotData.capacity,
-      current_occupancy: newPlotData.current_occupancy,
-      burial_type: newPlotData.burial_type,
-      burial_type_options: newPlotData.burial_type_options,
-      container_type: newPlotData.container_type,
-      liner_vault_options: newPlotData.liner_vault_options
-    };
-    try {
-      await base44.entities.Plot.create(entityData);
-      clearEntityCache('Plot');
-      queryClient.invalidateQueries({ queryKey: ['plots'] });
-      invalidatePlotsMap();
-      toast.success("Plot created successfully");
-    } catch (err) {
-      toast.error(`Failed to create plot: ${err.message}`);
-    }
-  }, [queryClient, invalidatePlotsMap]);
-
-  const handleAddBlankAbove = useCallback(async (plot) => {
-    if (!plot) return;
-    
-    try {
-      const plotNumber = plot.Grave || plot.plot_number;
-              const section = plot.Section || plot.section || 'Section 5';
-              const row = plot.Row || plot.row_number || '';
-              const newPlotNumber = `${plotNumber}-NEW`;
-      
-      await base44.entities.Plot.create({
-        section: section,
-        row_number: row,
-        plot_number: newPlotNumber,
-        status: 'Available',
-        notes: `Blank plot added above ${plotNumber}`
-      });
-      
-      clearEntityCache('Plot');
-      queryClient.removeQueries({ queryKey: ['plots'] });
-      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
-      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
-      
-      toast.success(`Added blank plot above #${plotNumber}`);
-    } catch (err) {
-    toast.error(`Failed to add plot: ${err.message}`);
-    }
-  }, [queryClient]);
-
-  const handleDeleteAndShift = useCallback(async (plot) => {
-    if (!plot || !plot._id) return;
-    
-    try {
-            const plotNumber = plot.Grave || plot.plot_number;
-            const hasOccupant = plot.first_name || plot.last_name || plot['First Name'] || plot['Last Name'];
-      if (hasOccupant) {
-        toast.error("Cannot delete plot with occupant data");
-        return;
-      }
-      
-      // Delete the plot
-      await base44.entities.Plot.delete(plot._id);
-      
-      clearEntityCache('Plot');
-      queryClient.removeQueries({ queryKey: ['plots'] });
-      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
-      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
-      
-      toast.success(`Deleted plot #${plotNumber} and shifted others`);
-    } catch (err) {
-    toast.error(`Failed to delete plot: ${err.message}`);
-    }
-  }, [queryClient]);
-
-  const handleMovePlot = useCallback(async ({ plotId, targetSection, plot }) => {
-    if (!plotId || !targetSection) return;
-
-    try {
-      const plotToMove = plot || parsedData.find(p => p._id === plotId);
-          if (!plotToMove) {
-            toast.error("Could not find plot to move");
-            return;
-          }
-
-          const plotNumber = plotToMove.Grave || plotToMove.plot_number;
-
-          await base44.entities.Plot.update(plotId, {
-        section: `Section ${targetSection}`
-      });
-
-      clearEntityCache('Plot');
-      
-      queryClient.removeQueries({ queryKey: ['plots'] });
-      queryClient.removeQueries({ queryKey: ['plotsMap_v3_all'] });
-      await queryClient.refetchQueries({ queryKey: ['plotsMap_v3_all'], type: 'active' });
-      
-      toast.success(`Moved plot #${plotNumber} to Section ${targetSection}`);
-    } catch (err) {
-        toast.error(`Failed to move plot: ${err.message}`);
-    }
-  }, [parsedData, queryClient]);
-
-
-
-  const handleUpdatePlot = useCallback((updatedPlot) => {
-      const entityData = {
-          section: updatedPlot.Section,
-          row_number: updatedPlot.Row,
-          plot_number: updatedPlot.Grave,
-          status: updatedPlot.Status,
-          first_name: updatedPlot['First Name'],
-          last_name: updatedPlot['Last Name'],
-          family_name: updatedPlot['Family Name'],
-          birth_date: updatedPlot.Birth,
-          death_date: updatedPlot.Death,
-          notes: updatedPlot.Notes,
-          capacity: updatedPlot.capacity,
-          current_occupancy: updatedPlot.current_occupancy,
-          burial_type: updatedPlot.burial_type,
-          burial_type_options: updatedPlot.burial_type_options,
-          container_type: updatedPlot.container_type,
-          liner_vault_options: updatedPlot.liner_vault_options
-      };
-      updatePlotMutation.mutate({ id: updatedPlot._id, data: entityData });
-  }, [updatePlotMutation]);
-
-  const toggleSection = useCallback((sectionKey) => {
-    setCollapsedSections(prev => ({
-        ...prev,
-        [sectionKey]: !prev[sectionKey]
-    }));
-  }, []);
-
-  const handleExpandSection = useCallback((sectionKey) => {
-     setExpandedSections(prev => ({ ...prev, [sectionKey]: true }));
-   }, []);
-
-  // Quick Locate (in-memory) -------------------------------------------------
-  
-
-  const normalize = useCallback((s) => (s ? String(s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() : ''), []);
-
-  // O(1) lookup map: plotNum → { sectionKey, p }
-  const plotNumMap = useMemo(() => {
-    const map = new Map();
-    (parsedData || []).forEach((p) => {
-      let sectionKey = String(p.Section || '').replace(/Section\s/i, '').trim();
-      const raw = String(p.Section || '');
-      if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
-      const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
-      if (plotNum != null && !map.has(plotNum)) {
-        map.set(plotNum, { sectionKey, plotNum, p });
-      }
-    });
-    return map;
-  }, [parsedData]);
-
-  // Text search index for search bar (kept for name/family search)
-  const quickIndex = useMemo(() => {
-    return (parsedData || []).map((p) => {
-      let sectionKey = String(p.Section || '').replace(/Section\s/i, '').trim();
-      const raw = String(p.Section || '');
-      if (/^Row\s*[A-D]/i.test(raw) || /^[A-D]$/i.test(sectionKey)) sectionKey = '1';
-      const plotNum = parseInt(String(p.Grave).replace(/\D/g, '')) || null;
-      const text = normalize([
-        p.Grave,
-        p.Row,
-        p.Section,
-        p['First Name'],
-        p['Last Name'],
-        p['Family Name'],
-        p._id,
-      ].filter(Boolean).join(' '));
-      return { sectionKey, plotNum, text, p };
-    });
-  }, [parsedData, normalize]);
-
-  
-
-  const centerElement = useCallback((el, callback) => {
-    if (!el) return;
-    try {
-      const isCoarsePointer = typeof window !== 'undefined' && (
-        ('ontouchstart' in window) ||
-        window.matchMedia?.('(pointer: coarse)')?.matches
-      );
-      const behavior = isCoarsePointer ? 'auto' : 'smooth';
-
-      el.scrollIntoView({ behavior, block: 'center', inline: 'center' });
-
-      let node = el.parentElement;
-      while (node && node !== document.body) {
-        const canScrollX = node.scrollWidth > node.clientWidth + 10;
-        const canScrollY = node.scrollHeight > node.clientHeight + 10;
-
-        if (canScrollX || canScrollY) {
-          const elRect = el.getBoundingClientRect();
-          const cRect = node.getBoundingClientRect();
-          const nextLeft = canScrollX
-            ? node.scrollLeft + (elRect.left - cRect.left) - (node.clientWidth / 2) + (elRect.width / 2)
-            : node.scrollLeft;
-          const nextTop = canScrollY
-            ? node.scrollTop + (elRect.top - cRect.top) - (node.clientHeight / 2) + (elRect.height / 2)
-            : node.scrollTop;
-
-          node.scrollTo({
-            left: Math.max(0, nextLeft),
-            top: Math.max(0, nextTop),
-            behavior,
-          });
-        }
-
-        node = node.parentElement;
-      }
-
-      if (typeof callback === 'function') {
-        setTimeout(callback, isCoarsePointer ? 80 : 350);
-      }
-    } catch (err) {
-      console.warn('centerElement error:', err);
-      if (typeof callback === 'function') callback();
-    }
-  }, []);
-
-  const findPlotElement = useCallback((plotNum) => {
-    // Fast: single query by data attribute (works across all components)
-    return document.querySelector(`[data-plot-num="${plotNum}"]`);
-  }, []);
-
-  const doQuickSearch = useCallback((q) => {
-                  const nq = normalize(q);
-                  if (!nq) return;
-                  let match = quickIndex.find((it) => it.text.includes(nq));
-                  if (!match) {
-                    const tokens = nq.split(' ').filter(Boolean);
-                    match = quickIndex.find((it) => tokens.every((t) => it.text.includes(t)));
-                  }
-                  if (match && match.sectionKey && match.plotNum) {
-                    const expandKey = match.sectionKey === '1' ? '2' : match.sectionKey;
-                    setCollapsedSections(prev => ({
-                      ...prev,
-                      [expandKey]: false,
-                    }));
-                    waitForPlotElement(match.plotNum, (el) => {
-                      centerElement(el);
-                    });
-                  }
-                }, [quickIndex, normalize, centerElement]);
-
-  // Removed auto-center on search input - only search when user clicks the Search button
-
-  // MutationObserver-based element finder — resolves as soon as the element appears in DOM
-  const waitForPlotElement = useCallback((plotNum, callback) => {
-    // Try immediately first
-    const existing = document.querySelector(`[data-plot-num="${plotNum}"]`);
-    if (existing) { callback(existing); return; }
-
-    // Use MutationObserver to detect when the element appears (much faster than polling)
-    const observer = new MutationObserver(() => {
-      const el = document.querySelector(`[data-plot-num="${plotNum}"]`);
-      if (el) {
-        observer.disconnect();
-        clearTimeout(timeout);
-        callback(el);
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // Safety timeout — 6s max, then give up
-    const timeout = setTimeout(() => {
-      observer.disconnect();
-    }, 6000);
-  }, []);
-
-  // Locate plot function - called when user clicks the locate button
+  // Locate plot from search
   const locatePlot = useCallback(() => {
-    const params = new URLSearchParams(window.location.search);
-    const targetPlot = params.get('plot');
-    if (!targetPlot) return;
+    if (!targetPlotNum) return;
+    window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
+    const el = document.querySelector(`[data-plot-num="${targetPlotNum}"]`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } }));
+      }, 400);
+    } else {
+      toast.info(`Plot #${targetPlotNum} not found in the grid`);
+    }
+  }, [targetPlotNum]);
 
-    const plotNum = parseInt(targetPlot, 10);
-    if (!Number.isFinite(plotNum)) return;
-
-    const isCoarsePointer = typeof window !== 'undefined' && (
-      ('ontouchstart' in window) ||
-      window.matchMedia?.('(pointer: coarse)')?.matches
-    );
-
-    // Stop any existing blinks first
+  // Search button handler
+  const handleSearchLocate = useCallback(() => {
+    if (!searchQuery.trim()) return;
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
 
-    // O(1) lookup from map
-    const match = plotNumMap.get(plotNum);
-    const targetSectionKey = match?.sectionKey || selectedSectionKeyForPlot || null;
+    const term = searchQuery.toLowerCase().trim();
+    const matches = parsedData.filter(p => {
+      const text = [p.Grave, p.Row, p['First Name'], p['Last Name'], p['Family Name']].filter(Boolean).join(' ').toLowerCase();
+      return text.includes(term);
+    });
 
-    // Expand the target section
-    const expandKey = targetSectionKey === '1' ? '2' : targetSectionKey;
-    if (expandKey) {
-      setCollapsedSections(prev => ({ ...prev, [expandKey]: false }));
-    } else {
-      setCollapsedSections({ '2': false, '3': false, '5': false });
+    if (matches.length === 0) {
+      toast.info('No plots found matching your search');
+      return;
     }
 
-    // Use MutationObserver — fires as soon as element appears
-    waitForPlotElement(plotNum, (el) => {
-      centerElement(el, () => {
-        requestAnimationFrame(() => {
-          window.dispatchEvent(new CustomEvent('plot-start-blink', {
-            detail: { targetPlotNum: plotNum, targetElementId: el.id }
-          }));
-          setHasLocated(true);
-        });
-      });
+    toast.success(`Found ${matches.length} plot(s)`);
 
-      if (isCoarsePointer) {
-        const mapContainer = document.querySelector('.map-zoom-container');
-        if (mapContainer) {
-          mapContainer.style.scrollBehavior = 'auto';
-          requestAnimationFrame(() => {
-            mapContainer.style.scrollBehavior = '';
+    const firstNum = parseInt(String(matches[0].Grave || '').replace(/\D/g, '')) || null;
+    if (firstNum) {
+      const el = document.querySelector(`[data-plot-num="${firstNum}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        setTimeout(() => {
+          matches.forEach(m => {
+            const n = parseInt(String(m.Grave || '').replace(/\D/g, '')) || null;
+            if (n) window.dispatchEvent(new CustomEvent('plot-search-blink', { detail: { targetPlotNum: n } }));
           });
-        }
+        }, 400);
       }
-    });
-  }, [plotNumMap, selectedSectionKeyForPlot, waitForPlotElement, centerElement]);
+    }
+  }, [searchQuery, parsedData]);
 
-  const debouncedSearchRef = useRef(null);
+  // Scroll to top on load from search
   useEffect(() => {
-    debouncedSearchRef.current = debounce((val) => doQuickSearch(val), 200);
-    return () => { if (debouncedSearchRef.current?.cancel) debouncedSearchRef.current.cancel(); };
-  }, [doQuickSearch]);
+    if (fromSearch) window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [fromSearch]);
 
-  const onQuickLocateChange = useCallback((e) => {
-          const v = e.target.value || '';
-          if (debouncedSearchRef.current) debouncedSearchRef.current(v);
-        }, []);
+  const clearFilters = useCallback(() => {
+    setStatusFilter('');
+    setOwnerFilter('');
+    setPlotFilter('');
+    setSearchQuery('');
+  }, []);
 
-  // Listen for search button click to locate and blink matching plots
-  useEffect(() => {
-    const handleLocateSearch = (e) => {
-      const { searchTerm } = e.detail || {};
-      if (!searchTerm) return;
-
-      const term = searchTerm.toLowerCase().trim();
-      const terms = term.split(/\s+/).filter(Boolean);
-
-      // Find all matching plots
-      const matches = quickIndex.filter((it) => {
-        return terms.some(t => it.text.includes(t));
-      });
-
-      if (matches.length === 0) {
-        toast.info('No plots found matching your search');
-        return;
-      }
-
-      // Stop any existing blinks
-      window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
-
-      // Expand ALL sections that contain matches
-      const sectionsToExpand = [...new Set(matches.map(m => m.sectionKey).filter(Boolean))];
-      setCollapsedSections(prev => {
-        const updated = { ...prev };
-        sectionsToExpand.forEach(key => { updated[key] = false; });
-        return updated;
-      });
-
-      toast.success(`Found ${matches.length} plot${matches.length > 1 ? 's' : ''} matching "${searchTerm}"`);
-
-      // Scroll to first match using MutationObserver
-      const firstMatch = matches[0];
-      if (firstMatch && firstMatch.plotNum) {
-        waitForPlotElement(firstMatch.plotNum, (el) => {
-          centerElement(el, () => {
-            setTimeout(() => {
-              matches.forEach((match) => {
-                window.dispatchEvent(new CustomEvent('plot-search-blink', {
-                  detail: { targetPlotNum: match.plotNum, sectionKey: match.sectionKey, plotId: match.p?._id }
-                }));
-              });
-            }, 100);
-          });
-        });
-      }
-    };
-
-    window.addEventListener('plot-locate-search', handleLocateSearch);
-    return () => window.removeEventListener('plot-locate-search', handleLocateSearch);
-  }, [quickIndex, centerElement, waitForPlotElement]);
-
-
-
-        
+  const hasFilters = statusFilter || ownerFilter || plotFilter;
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative bg-white">
-      
-      {/* Full-canvas SVG background image — scales with the page */}
-      <ResizableBackgroundImage src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/7901d9501_GraveyardPICadobe2.jpg" contain sections={sections} />
+      <ResizableBackgroundImage
+        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/7901d9501_GraveyardPICadobe2.jpg"
+        contain
+      />
 
-      {/* All page content on top of the background */}
       <div className="relative z-[2] flex flex-col min-h-screen">
-
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="text-center md:text-left">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Old Plots and Maps</h1>
-                <p className="text-xs sm:text-sm text-gray-500">Explore our historic cemetery plots and their locations.</p>
+                <p className="text-xs sm:text-sm text-gray-500">Explore our historic cemetery plots — layout matches the official spreadsheet.</p>
               </div>
-          
               <div className="flex items-center justify-center md:justify-end space-x-3">
                 <Suspense fallback={null}>
                   <MapControls />
                 </Suspense>
               </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Filters */}
+        <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
+          <div className="max-w-7xl mx-auto space-y-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {fromSearch && (
+                <Link to={backSearchUrl} className="inline-flex items-center text-teal-800 hover:text-teal-900 font-medium text-sm shrink-0">
+                  <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
+                </Link>
+              )}
+
+              {fromSearch && targetPlotNum && (
+                <button onClick={locatePlot}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg bg-teal-600 text-white hover:bg-teal-700 ring-2 ring-teal-400 ring-offset-2 shrink-0 touch-manipulation"
+                  style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+                  <MapPin className="w-4 h-4" />
+                  <span>Locate Grave #{targetPlotNum}</span>
+                </button>
+              )}
+
+              {/* Search input */}
+              <div className="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-600" />
+                <Input
+                  placeholder="Search name, plot #, family..."
+                  className="w-full h-10 pl-9 pr-24 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearchLocate()}
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')}
+                    className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+                <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                  <Button className="h-8 px-3 bg-teal-700 hover:bg-teal-800 text-white text-sm" onClick={handleSearchLocate}>
+                    <Search className="h-4 w-4 mr-1" /> Search
+                  </Button>
+                </div>
+              </div>
+
+              <Button variant="outline" onClick={() => setShowAdvanced(!showAdvanced)}
+                className={`h-10 px-3 text-sm font-medium shrink-0 ${showAdvanced ? 'border-teal-500 bg-teal-50 text-teal-700' : ''}`}>
+                <SlidersHorizontal className="h-4 w-4 mr-1" /> Filters
+              </Button>
+
+              {/* Status legend */}
+              <div className="flex items-center gap-1.5 flex-wrap ml-auto">
+                {Object.entries(STATUS_COLORS).map(([label, bgClass]) => (
+                  <LegendItem key={label} label={label} colorClass={bgClass}
+                    onClick={() => setStatusFilter(prev => prev === label ? '' : label)}
+                    active={statusFilter === label} />
+                ))}
+              </div>
+
+              {hasFilters && (
+                <Button onClick={clearFilters} variant="ghost" className="h-10 px-3 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0">
+                  <X className="h-4 w-4 mr-1" /> Clear
+                </Button>
+              )}
+            </div>
+
+            {showAdvanced && (
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Family Name</Label>
+                  <Input placeholder="e.g. Smith" value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} className="h-11" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Plot Number</Label>
+                  <Input placeholder="e.g. 123" value={plotFilter} onChange={(e) => setPlotFilter(e.target.value)} className="h-11" inputMode="numeric" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </header>
 
-
-
-      {errorMessage && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
-            <p className="font-bold">Error Loading File</p>
-            <p>{errorMessage}</p>
-        </div>
-      )}
-
-
-      {/* Filter Bar - lazy loaded */}
-      <div id="plots-filters">
-        <Suspense fallback={<div className="bg-white border-b border-gray-200 px-6 py-4 h-16" />}>
-          <PlotFilters 
-              filters={filters} 
-              onFilterChange={setFilters} 
-              statusOptions={Object.keys(STATUS_COLORS).filter(k => k !== 'Default')}
-              backSearchUrl={backSearchUrl}
-              showBackToSearch={showBackToSearch}
-              showLocateButton={showLocateButton}
-              selectedPlotNum={selectedPlotNum}
-              onLocatePlot={locatePlot}
-          />
-        </Suspense>
-      </div>
-
-      {/* Main Area - Map only, table removed */}
-      <Suspense fallback={<div className="p-6 text-sm text-gray-500 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin mr-2" />Loading map…</div>}>
-
-            {/* Map Canvas */}
-            <main className="flex-grow p-6 overflow-y-auto">
-                <div className="max-w-7xl mx-auto space-y-10 pb-20">
-                    {/* Sections 1-5 Sorted Descending with Zoom/Pan */}
-
-                    <DraggableMapContainer>
-                    <div 
-                      className="bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container transition-all duration-200 ease-out inline-block max-w-full"
-                    >
-                      <div className="p-4 inline-block space-y-10 map-zoom-inner transition-transform duration-150 ease-out origin-top-left">
-                        {/* Always show all plots, scroll/center to target if from search */}
-                        {Object.keys(sections).filter(k => k !== '1' && k !== '3' && k !== '4').sort((a, b) => {
-                            const numA = parseInt(a);
-                            const numB = parseInt(b);
-                            if (!isNaN(numA) && !isNaN(numB)) return numB - numA; // DESCENDING order (5 -> 1)
-                            return b.localeCompare(a);
-                          }).map((sectionKey) => {
-                            const palette = getSectionPalette(sectionKey);
-                            return (
-                              <SectionRenderer
-                                key={sectionKey}
-                                sectionKey={sectionKey}
-                                plots={sections[sectionKey]}
-                                section1PlotsForS2={sectionKey === '2' ? sections['1'] || [] : undefined}
-                                palette={palette}
-                                isCollapsed={collapsedSections[sectionKey]}
-                                onToggle={toggleSection}
-                                isExpanded={expandedSections[sectionKey]}
-                                onExpand={() => handleExpandSection(sectionKey)}
-                                isAdmin={isAdmin}
-                                onEdit={isAdmin ? handleEditClick : undefined}
-                                onHover={handleHover}
-                                onMovePlot={isAdmin ? handleMovePlot : undefined}
-                                onAddBlankAbove={isAdmin ? handleAddBlankAbove : undefined}
-                                onDeleteAndShift={isAdmin ? handleDeleteAndShift : undefined}
-                                />
-                                );
-                                })}
-                      </div>
-                      </div>
-                    </DraggableMapContainer>
-
-                      {Object.keys(sections).length === 0 && !isLoading && (
-                        <div className="flex flex-col items-center justify-center h-64 text-gray-400 border-2 border-dashed border-gray-300 rounded-xl">
-                            <Database size={48} className="mb-4 opacity-50" />
-                            <p className="text-lg font-medium">No plots found in database</p>
-                            <p className="text-sm mb-4">Import a CSV or initialize with sample data</p>
-                            {isAdmin && (
-                            <Button variant="outline" onClick={handleSeedData} disabled={createPlotsMutation.isPending}>
-                                {createPlotsMutation.isPending ? <Loader2 className="animate-spin mr-2 h-4 w-4"/> : null}
-                                Load Sample Data
-                            </Button>
-                            )}
-                        </div>
-                    )}
-                    {isLoading && (
-                        <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                            <Loader2 size={48} className="mb-4 animate-spin text-blue-500" />
-                            <p className="text-lg font-medium">Loading Plots...</p>
-                        </div>
-                    )}
+        {/* Main Grid Area */}
+        <main className="flex-grow p-4 sm:p-6 overflow-y-auto">
+          <div className="max-w-full mx-auto pb-20">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                <Loader2 size={48} className="mb-4 animate-spin text-blue-500" />
+                <p className="text-lg font-medium">Loading Plots...</p>
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+                <p className="text-lg font-medium">No plots match your filters</p>
+                {hasFilters && (
+                  <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>
+                )}
+              </div>
+            ) : (
+              <DraggableMapContainer>
+                <div className="bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container inline-block max-w-full">
+                  <div className="p-4 inline-block map-zoom-inner origin-top-left">
+                    <Suspense fallback={<div className="text-sm text-gray-500 flex items-center"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
+                      <ExcelGrid
+                        plots={filteredData}
+                        isAdmin={isAdmin}
+                        onHover={handleHover}
+                        onEdit={isAdmin ? handleEditClick : undefined}
+                      />
+                    </Suspense>
+                  </div>
                 </div>
-            </main>
-      </Suspense>
+              </DraggableMapContainer>
+            )}
+          </div>
+        </main>
 
+        {/* Tooltip */}
+        {isTooltipVisible && hoverData && <Tooltip data={hoverData} visible={isTooltipVisible} />}
 
-
-      {/* Tooltip Portal - conditionally rendered */}
-      {isTooltipVisible && hoverData && <Tooltip data={hoverData} visible={isTooltipVisible} />}
-
-
-
-      {/* Guided Tour - only render when open */}
-      {isTourOpen && (
-        <Suspense fallback={null}>
-          <PlotsTour open={isTourOpen} onClose={() => setIsTourOpen(false)} />
-        </Suspense>
-      )}
-      
-      {/* Edit Dialog - only render when open */}
-      {isEditModalOpen && (
-        <Suspense fallback={null}>
-          <PlotEditDialog 
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            plot={selectedPlotForModal}
-            onSave={handleUpdatePlot}
-            onCreate={handleCreatePlot}
-          />
-        </Suspense>
-      )}
-
+        {/* Edit Dialog */}
+        {isEditModalOpen && (
+          <Suspense fallback={null}>
+            <PlotEditDialog
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              plot={selectedPlotForModal}
+              onSave={handleUpdatePlot}
+              onCreate={handleCreatePlot}
+            />
+          </Suspense>
+        )}
       </div>
-
-
     </div>
   );
 }
