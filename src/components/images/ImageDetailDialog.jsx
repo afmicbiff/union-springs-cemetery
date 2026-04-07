@@ -55,9 +55,6 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
     }).catch(() => {});
   }, [imageId]);
 
-  // Early return after hooks
-  if (!image) return null;
-
   const handleCopy = useCallback(async (text, action) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -127,6 +124,9 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
 
   // Memoize quality change handler
   const handleQualityChange = useCallback((v) => setQuality(v[0]), []);
+
+  // Early return after all hooks
+  if (!image) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

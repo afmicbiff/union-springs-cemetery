@@ -11,9 +11,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   // </React.StrictMode>,
 )
 
-installFetchGuards();
-initWebVitals();
-
 const originalWarn = console.warn.bind(console);
 console.warn = (...args) => {
   const message = args.map((arg) => String(arg)).join(' ');
@@ -22,6 +19,9 @@ console.warn = (...args) => {
   }
   originalWarn(...args);
 };
+
+installFetchGuards();
+initWebVitals();
 
 if (import.meta.hot) {
   import.meta.hot.on('vite:beforeUpdate', () => {
