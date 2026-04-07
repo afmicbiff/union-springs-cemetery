@@ -5,6 +5,7 @@ import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
+import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
 
 
 export default function NewPlotsAndMap() {

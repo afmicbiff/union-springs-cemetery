@@ -41,19 +41,22 @@ function ImageDetailDialog({ image, open, onOpenChange, onOptimized }) {
     }
   }, [image?.original_url]);
 
-  // Early return after hooks
-  if (!image) return null;
+  const imageId = image?.id;
 
   const logUsage = useCallback(async (action) => {
+    if (!imageId) return;
     base44.entities.ImageUsage.create({
-      image_id: image.id,
+      image_id: imageId,
       source: 'ImageDetailDialog',
       action,
       page_or_component: 'ImageDetailDialog',
       referrer: window.location.pathname,
       timestamp: new Date().toISOString(),
     }).catch(() => {});
-  }, [image.id]);
+  }, [imageId]);
+
+  // Early return after hooks
+  if (!image) return null;
 
   const handleCopy = useCallback(async (text, action) => {
     try {

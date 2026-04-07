@@ -68,6 +68,7 @@ export default function AppIssueReporter() {
     const onError = (event) => {
       const message = trim(event?.error?.message || event?.message || 'Unknown runtime error');
       const stack = trim(event?.error?.stack || `${event?.filename || ''}:${event?.lineno || ''}:${event?.colno || ''}`, 6000);
+      if (message.includes('Authentication required to view users') || message.includes('No storage available for session')) return;
       handleRuntimeIssue('client_runtime_error', message, stack, {
         filename: trim(event?.filename, 500),
         line: event?.lineno || null,
@@ -80,6 +81,7 @@ export default function AppIssueReporter() {
       const reason = event?.reason;
       const message = trim(reason?.message || reason || 'Unhandled promise rejection');
       const stack = trim(reason?.stack, 6000);
+      if (message.includes('Authentication required to view users') || message.includes('No storage available for session')) return;
       handleRuntimeIssue('unhandled_rejection', message, stack, { path });
     };
 

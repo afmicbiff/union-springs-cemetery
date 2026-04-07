@@ -8,6 +8,12 @@ import {
 const COLORS = ["#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"]; 
 
 const ReportCharts = memo(function ReportCharts({ type, data = [], predicted = [] }) {
+  // Memoize merged data for sales/predictive
+  const mergedData = useMemo(() => {
+    if (type !== 'sales' && type !== 'predictive') return data;
+    return data.map((d, i) => ({ ...d, forecast: predicted[i]?.value }));
+  }, [type, data, predicted]);
+
   if (!data || data.length === 0) {
     return (
       <div className="text-sm text-stone-500 p-4 text-center border-2 border-dashed rounded-lg">
@@ -15,12 +21,6 @@ const ReportCharts = memo(function ReportCharts({ type, data = [], predicted = [
       </div>
     );
   }
-
-  // Memoize merged data for sales/predictive
-  const mergedData = useMemo(() => {
-    if (type !== 'sales' && type !== 'predictive') return data;
-    return data.map((d, i) => ({ ...d, forecast: predicted[i]?.value }));
-  }, [type, data, predicted]);
 
   if (type === "sales" || type === "predictive") {
     return (

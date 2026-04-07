@@ -47,8 +47,8 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const payload = await req.json().catch(() => ({}));
-    const user = await base44.auth.me().catch(() => null);
     const nowIso = new Date().toISOString();
+    const user = await base44.auth.me().catch(() => null);
     const sourceIp = trimString(req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip') || '', 120).split(',')[0].trim();
 
     const category = ALLOWED_CATEGORIES.has(payload?.category) ? payload.category : 'system_issue';
