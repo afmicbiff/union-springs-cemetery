@@ -65,7 +65,8 @@ const NewPlotDetails = lazy(() => import('./pages/NewPlotDetails'));
 const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
 const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
 const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
-const Plots = lazy(() => import('./pages/PlotsView'));
+import PlotsView from './pages/PlotsView';
+const Plots = PlotsView;
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Reports = lazy(() => import('./pages/Reports'));
@@ -95,7 +96,6 @@ export const PAGES = {
     "NewPlotsAndMap": NewPlotsAndMap,
     "NotificationSettings": NotificationSettings,
     "Plots": Plots,
-    "plots": Plots,
     "Privacy": Privacy,
     "Profile": Profile,
     "Reports": Reports,
