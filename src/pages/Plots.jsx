@@ -19,14 +19,12 @@ const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
 const MapControls = lazy(() => import("@/components/plots/MapControls"));
 const ExcelGrid = lazy(() => import("@/components/plots/ExcelGrid"));
 
-// Status legend colors
 const STATUS_COLORS = {
   Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',
   Veteran: 'bg-blue-600', Unavailable: 'bg-gray-500', Unknown: 'bg-purple-500',
   'Not Usable': 'bg-gray-400',
 };
 
-// ---- TOOLTIP ----
 const Tooltip = React.memo(({ data, visible }) => {
   if (!visible || !data) return null;
   const isVet = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
@@ -50,7 +48,6 @@ const Tooltip = React.memo(({ data, visible }) => {
   );
 });
 
-// ---- LEGEND ITEM ----
 const LegendItem = React.memo(({ label, colorClass, onClick, active }) => (
   <button
     type="button" onClick={onClick} aria-pressed={!!active}
@@ -61,7 +58,6 @@ const LegendItem = React.memo(({ label, colorClass, onClick, active }) => (
   </button>
 ));
 
-// ---- MAIN PAGE ----
 export default function PlotsPage() {
   const queryClient = useQueryClient();
   const location = useLocation();
@@ -70,7 +66,6 @@ export default function PlotsPage() {
     queryClient.invalidateQueries({ queryKey: ['plotsMap_v3_all'] });
   }, [queryClient]);
 
-  // State
   const [hoverData, setHoverData] = useState(null);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -81,7 +76,6 @@ export default function PlotsPage() {
   const [ownerFilter, setOwnerFilter] = useState('');
   const [plotFilter, setPlotFilter] = useState('');
 
-  // URL params (from Deceased Search)
   const params = useMemo(() => new URLSearchParams(window.location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
   const targetPlotNum = useMemo(() => {
@@ -92,7 +86,6 @@ export default function PlotsPage() {
     ? `${createPageUrl('Search')}${location.state.search}`
     : createPageUrl('Search');
 
-  // Auth
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me().catch(() => null),
@@ -100,7 +93,6 @@ export default function PlotsPage() {
   });
   const isAdmin = user?.role === 'admin';
 
-  // All sections open so we fetch everything
   const openSections = useMemo(() => ['1', '2', '3', '5'], []);
   const { data: plotEntities = [], isLoading } = usePlotsMapData({
     activeTab: 'map',
@@ -108,7 +100,6 @@ export default function PlotsPage() {
     filterEntity,
   });
 
-  // Transform entities to UI format, deduplicate
   const parsedData = useMemo(() => {
     const raw = (plotEntities || []).map((p) => ({
       _id: p.id,
@@ -127,7 +118,6 @@ export default function PlotsPage() {
       ...p,
     })).filter(r => r.Grave);
 
-    // Deduplicate by plot_number: keep most recently updated
     const byNum = new Map();
     raw.forEach(item => {
       const num = String(item.Grave || '').trim();
@@ -140,7 +130,6 @@ export default function PlotsPage() {
     return Array.from(byNum.values());
   }, [plotEntities]);
 
-  // Filter
   const filteredData = useMemo(() => {
     return parsedData.filter(item => {
       if (statusFilter && statusFilter !== 'All') {
@@ -160,7 +149,6 @@ export default function PlotsPage() {
     });
   }, [parsedData, statusFilter, ownerFilter, plotFilter]);
 
-  // Mutations
   const updatePlotMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       const response = await base44.functions.invoke('updatePlot', { id, data });
@@ -207,20 +195,17 @@ export default function PlotsPage() {
     }
   }, [queryClient, invalidatePlotsMap]);
 
-  // Hover
   const handleHover = useCallback((e, data) => {
     if (!data) { setIsTooltipVisible(false); return; }
     setHoverData(data);
     setIsTooltipVisible(true);
   }, []);
 
-  // Edit
   const handleEditClick = useCallback((plot) => {
     setSelectedPlotForModal(plot);
     setIsEditModalOpen(true);
   }, []);
 
-  // Locate plot from search
   const locatePlot = useCallback(() => {
     if (!targetPlotNum) return;
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
@@ -235,7 +220,6 @@ export default function PlotsPage() {
     }
   }, [targetPlotNum]);
 
-  // Search button handler
   const handleSearchLocate = useCallback(() => {
     if (!searchQuery.trim()) return;
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
@@ -268,7 +252,6 @@ export default function PlotsPage() {
     }
   }, [searchQuery, parsedData]);
 
-  // Scroll to top on load from search
   useEffect(() => {
     if (fromSearch) window.scrollTo({ top: 0, behavior: 'instant' });
   }, [fromSearch]);
@@ -290,7 +273,6 @@ export default function PlotsPage() {
       />
 
       <div className="relative z-[2] flex flex-col min-h-screen">
-        {/* Header */}
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm sticky top-0 z-30">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -307,7 +289,6 @@ export default function PlotsPage() {
           </div>
         </header>
 
-        {/* Filters */}
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
           <div className="max-w-7xl mx-auto space-y-3">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -326,7 +307,6 @@ export default function PlotsPage() {
                 </button>
               )}
 
-              {/* Search input */}
               <div className="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-600" />
                 <Input
@@ -354,7 +334,6 @@ export default function PlotsPage() {
                 <SlidersHorizontal className="h-4 w-4 mr-1" /> Filters
               </Button>
 
-              {/* Status legend */}
               <div className="flex items-center gap-1.5 flex-wrap ml-auto">
                 {Object.entries(STATUS_COLORS).map(([label, bgClass]) => (
                   <LegendItem key={label} label={label} colorClass={bgClass}
@@ -385,7 +364,6 @@ export default function PlotsPage() {
           </div>
         </div>
 
-        {/* Main Grid Area */}
         <main className="flex-grow p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-full mx-auto pb-20">
             {isLoading ? (
@@ -419,10 +397,8 @@ export default function PlotsPage() {
           </div>
         </main>
 
-        {/* Tooltip */}
         {isTooltipVisible && hoverData && <Tooltip data={hoverData} visible={isTooltipVisible} />}
 
-        {/* Edit Dialog */}
         {isEditModalOpen && (
           <Suspense fallback={null}>
             <PlotEditDialog
