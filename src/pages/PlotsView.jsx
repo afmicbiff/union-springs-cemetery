@@ -55,7 +55,7 @@ const LegendItem = React.memo(function LegendItem({ label, colorClass, onClick, 
   );
 });
 
-export default function PlotsPage() {
+export default function PlotsView() {
   const queryClient = useQueryClient();
   const location = useLocation();
 
