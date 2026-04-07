@@ -1,5 +1,4 @@
-// Plots page v2
-import React, { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -10,9 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePlotsMapData } from "@/components/plots/usePlotsMapData";
-import debounce from 'lodash/debounce';
 import ResizableBackgroundImage from '@/components/plots/ResizableBackgroundImage';
-import SEOHead from '@/components/common/SEOHead';
 import DraggableMapContainer from "@/components/plots/DraggableMapContainer";
 import { toast } from "sonner";
 
@@ -26,12 +23,11 @@ const STATUS_COLORS = {
   'Not Usable': 'bg-gray-400',
 };
 
-const Tooltip = React.memo(({ data, visible }) => {
+const Tooltip = React.memo(function Tooltip({ data, visible }) {
   if (!visible || !data) return null;
   const isVet = data.Status === 'Veteran' || (data.Notes && data.Notes.toLowerCase().includes('vet'));
   const statusKey = isVet ? 'Veteran' : (STATUS_COLORS[data.Status] ? data.Status : 'Default');
   const bgClass = STATUS_COLORS[statusKey] || 'bg-gray-400';
-
   return (
     <div className="fixed z-[9999] inset-0 flex items-center justify-center pointer-events-none">
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-72 max-w-[85vw] pointer-events-none p-4">
@@ -49,15 +45,15 @@ const Tooltip = React.memo(({ data, visible }) => {
   );
 });
 
-const LegendItem = React.memo(({ label, colorClass, onClick, active }) => (
-  <button
-    type="button" onClick={onClick} aria-pressed={!!active}
-    className={`flex items-center gap-1.5 bg-white h-9 px-3 rounded-full border border-gray-200 shadow-sm hover:bg-green-50 shrink-0 touch-manipulation ${active ? 'ring-2 ring-green-500' : ''}`}
-  >
-    <div className={`w-3 h-3 rounded-full ${colorClass}`} />
-    <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
-  </button>
-));
+const LegendItem = React.memo(function LegendItem({ label, colorClass, onClick, active }) {
+  return (
+    <button type="button" onClick={onClick} aria-pressed={!!active}
+      className={`flex items-center gap-1.5 bg-white h-9 px-3 rounded-full border border-gray-200 shadow-sm hover:bg-green-50 shrink-0 touch-manipulation ${active ? 'ring-2 ring-green-500' : ''}`}>
+      <div className={`w-3 h-3 rounded-full ${colorClass}`} />
+      <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">{label}</span>
+    </button>
+  );
+});
 
 export default function PlotsPage() {
   const queryClient = useQueryClient();
@@ -103,30 +99,18 @@ export default function PlotsPage() {
 
   const parsedData = useMemo(() => {
     const raw = (plotEntities || []).map((p) => ({
-      _id: p.id,
-      _entity: 'Plot',
-      Section: p.section,
-      Row: p.row_number,
-      Grave: p.plot_number,
-      Status: p.status || 'Unknown',
-      'First Name': p.first_name,
-      'Last Name': p.last_name,
-      'Family Name': p.family_name,
-      Birth: p.birth_date,
-      Death: p.death_date,
-      Notes: p.notes || '',
-      _updated: p.updated_date,
-      ...p,
+      _id: p.id, _entity: 'Plot', Section: p.section, Row: p.row_number,
+      Grave: p.plot_number, Status: p.status || 'Unknown',
+      'First Name': p.first_name, 'Last Name': p.last_name,
+      'Family Name': p.family_name, Birth: p.birth_date, Death: p.death_date,
+      Notes: p.notes || '', _updated: p.updated_date, ...p,
     })).filter(r => r.Grave);
-
     const byNum = new Map();
     raw.forEach(item => {
       const num = String(item.Grave || '').trim();
       if (!num) return;
       const existing = byNum.get(num);
-      if (!existing || new Date(item._updated || 0) > new Date(existing._updated || 0)) {
-        byNum.set(num, item);
-      }
+      if (!existing || new Date(item._updated || 0) > new Date(existing._updated || 0)) byNum.set(num, item);
     });
     return Array.from(byNum.values());
   }, [plotEntities]);
@@ -180,20 +164,16 @@ export default function PlotsPage() {
   }, [updatePlotMutation]);
 
   const handleCreatePlot = useCallback(async (newPlotData) => {
-    try {
-      await base44.entities.Plot.create({
-        section: newPlotData.Section, row_number: newPlotData.Row, plot_number: newPlotData.Grave,
-        status: newPlotData.Status, first_name: newPlotData['First Name'], last_name: newPlotData['Last Name'],
-        family_name: newPlotData['Family Name'], birth_date: newPlotData.Birth, death_date: newPlotData.Death,
-        notes: newPlotData.Notes,
-      });
-      clearEntityCache('Plot');
-      queryClient.invalidateQueries({ queryKey: ['plots'] });
-      invalidatePlotsMap();
-      toast.success("Plot created");
-    } catch (err) {
-      toast.error(`Failed: ${err.message}`);
-    }
+    await base44.entities.Plot.create({
+      section: newPlotData.Section, row_number: newPlotData.Row, plot_number: newPlotData.Grave,
+      status: newPlotData.Status, first_name: newPlotData['First Name'], last_name: newPlotData['Last Name'],
+      family_name: newPlotData['Family Name'], birth_date: newPlotData.Birth, death_date: newPlotData.Death,
+      notes: newPlotData.Notes,
+    });
+    clearEntityCache('Plot');
+    queryClient.invalidateQueries({ queryKey: ['plots'] });
+    invalidatePlotsMap();
+    toast.success("Plot created");
   }, [queryClient, invalidatePlotsMap]);
 
   const handleHover = useCallback((e, data) => {
@@ -224,20 +204,13 @@ export default function PlotsPage() {
   const handleSearchLocate = useCallback(() => {
     if (!searchQuery.trim()) return;
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
-
     const term = searchQuery.toLowerCase().trim();
     const matches = parsedData.filter(p => {
       const text = [p.Grave, p.Row, p['First Name'], p['Last Name'], p['Family Name']].filter(Boolean).join(' ').toLowerCase();
       return text.includes(term);
     });
-
-    if (matches.length === 0) {
-      toast.info('No plots found matching your search');
-      return;
-    }
-
+    if (matches.length === 0) { toast.info('No plots found matching your search'); return; }
     toast.success(`Found ${matches.length} plot(s)`);
-
     const firstNum = parseInt(String(matches[0].Grave || '').replace(/\D/g, '')) || null;
     if (firstNum) {
       const el = document.querySelector(`[data-plot-num="${firstNum}"]`);
@@ -258,10 +231,7 @@ export default function PlotsPage() {
   }, [fromSearch]);
 
   const clearFilters = useCallback(() => {
-    setStatusFilter('');
-    setOwnerFilter('');
-    setPlotFilter('');
-    setSearchQuery('');
+    setStatusFilter(''); setOwnerFilter(''); setPlotFilter(''); setSearchQuery('');
   }, []);
 
   const hasFilters = statusFilter || ownerFilter || plotFilter;
@@ -272,7 +242,6 @@ export default function PlotsPage() {
         src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/693cd1f0c20a0662b5f281d5/7901d9501_GraveyardPICadobe2.jpg"
         contain
       />
-
       <div className="relative z-[2] flex flex-col min-h-screen">
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm sticky top-0 z-30">
           <div className="max-w-7xl mx-auto">
@@ -282,9 +251,7 @@ export default function PlotsPage() {
                 <p className="text-xs sm:text-sm text-gray-500">Explore our historic cemetery plots — layout matches the official spreadsheet.</p>
               </div>
               <div className="flex items-center justify-center md:justify-end space-x-3">
-                <Suspense fallback={null}>
-                  <MapControls />
-                </Suspense>
+                <Suspense fallback={null}><MapControls /></Suspense>
               </div>
             </div>
           </div>
@@ -298,28 +265,19 @@ export default function PlotsPage() {
                   <ArrowLeft className="w-4 h-4 mr-1" /> Back to Deceased Search
                 </Link>
               )}
-
               {fromSearch && targetPlotNum && (
                 <button onClick={locatePlot}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm shadow-lg bg-teal-600 text-white hover:bg-teal-700 ring-2 ring-teal-400 ring-offset-2 shrink-0 touch-manipulation"
                   style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-                  <MapPin className="w-4 h-4" />
-                  <span>Locate Grave #{targetPlotNum}</span>
+                  <MapPin className="w-4 h-4" /><span>Locate Grave #{targetPlotNum}</span>
                 </button>
               )}
-
               <div className="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-teal-600" />
-                <Input
-                  placeholder="Search name, plot #, family..."
-                  className="w-full h-10 pl-9 pr-24 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearchLocate()}
-                />
+                <Input placeholder="Search name, plot #, family..." className="w-full h-10 pl-9 pr-24 text-sm rounded-lg border-2 border-gray-200 focus:border-teal-500"
+                  value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearchLocate()} />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')}
-                    className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+                  <button onClick={() => setSearchQuery('')} className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
                     <X className="h-4 w-4" />
                   </button>
                 )}
@@ -329,27 +287,22 @@ export default function PlotsPage() {
                   </Button>
                 </div>
               </div>
-
               <Button variant="outline" onClick={() => setShowAdvanced(!showAdvanced)}
                 className={`h-10 px-3 text-sm font-medium shrink-0 ${showAdvanced ? 'border-teal-500 bg-teal-50 text-teal-700' : ''}`}>
                 <SlidersHorizontal className="h-4 w-4 mr-1" /> Filters
               </Button>
-
               <div className="flex items-center gap-1.5 flex-wrap ml-auto">
                 {Object.entries(STATUS_COLORS).map(([label, bgClass]) => (
                   <LegendItem key={label} label={label} colorClass={bgClass}
-                    onClick={() => setStatusFilter(prev => prev === label ? '' : label)}
-                    active={statusFilter === label} />
+                    onClick={() => setStatusFilter(prev => prev === label ? '' : label)} active={statusFilter === label} />
                 ))}
               </div>
-
               {hasFilters && (
                 <Button onClick={clearFilters} variant="ghost" className="h-10 px-3 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 shrink-0">
                   <X className="h-4 w-4 mr-1" /> Clear
                 </Button>
               )}
             </div>
-
             {showAdvanced && (
               <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -375,21 +328,14 @@ export default function PlotsPage() {
             ) : filteredData.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-64 text-gray-400">
                 <p className="text-lg font-medium">No plots match your filters</p>
-                {hasFilters && (
-                  <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>
-                )}
+                {hasFilters && <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>}
               </div>
             ) : (
               <DraggableMapContainer>
                 <div className="bg-white/50 rounded-lg border border-gray-200 overflow-auto map-zoom-container inline-block max-w-full">
                   <div className="p-4 inline-block map-zoom-inner origin-top-left">
                     <Suspense fallback={<div className="text-sm text-gray-500 flex items-center"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
-                      <ExcelGrid
-                        plots={filteredData}
-                        isAdmin={isAdmin}
-                        onHover={handleHover}
-                        onEdit={isAdmin ? handleEditClick : undefined}
-                      />
+                      <ExcelGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEditClick : undefined} />
                     </Suspense>
                   </div>
                 </div>
@@ -402,13 +348,8 @@ export default function PlotsPage() {
 
         {isEditModalOpen && (
           <Suspense fallback={null}>
-            <PlotEditDialog
-              isOpen={isEditModalOpen}
-              onClose={() => setIsEditModalOpen(false)}
-              plot={selectedPlotForModal}
-              onSave={handleUpdatePlot}
-              onCreate={handleCreatePlot}
-            />
+            <PlotEditDialog isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}
+              plot={selectedPlotForModal} onSave={handleUpdatePlot} onCreate={handleCreatePlot} />
           </Suspense>
         )}
       </div>
