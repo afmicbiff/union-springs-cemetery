@@ -118,8 +118,7 @@ const getUnplacedForSection = (sectionKey, plots) => {
     switch (String(sectionKey)) {
         case '3':
             [
-                [251,268],[326,348],[406,430],[489,512],[605,633],[688,711],[765,788],[821,843],[898,930]
-                // Note: plot 405 moved to Section 2
+                [251,268],[326,348],[406,430],[489,512],[605,629],[689,711],[770,788],[822,843],[899,922]
             ].forEach(([s,e]) => addRange(s,e));
             break;
         case '4':
@@ -127,8 +126,8 @@ const getUnplacedForSection = (sectionKey, plots) => {
             break;
         case '5':
             [
-                                  [228,236],[1001,1014],[1015,1026],
-                                      [1029,1042],[1043,1056],[577,580],[1057,1070],[1071,1084],[1085,1102]
+                [1001,1014],[1015,1028],
+                [1029,1042],[1043,1056],[1057,1070],[1071,1084],[1085,1100]
             ].forEach(([s,e]) => addRange(s,e));
             // All other plots in Section 5 that don't match these ranges will go to unplaced/fallback
             break;
@@ -454,40 +453,27 @@ const SectionRenderer = React.memo(({
                               } 
                             };
 
-                            const TARGET_HEIGHT = 35;
+                            const TARGET_HEIGHT = 20;
                             const columns = [];
 
                             // Col 0: Leading empty column
                             (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c0-lead'); columns.push(col); })();
-                            // Col 1: 228-236 + top padding (224-227 moved to Section 4)
-                            (() => { const col=[]; pushRange(col,228,236); pushBlanks(col, TARGET_HEIGHT - 9, 'c1-top'); columns.push(col); })();
-                            // Col 1b: skip - 299-302 moved to Section 4
-                            // Col 1.5: Full spacer column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c1half'); columns.push(col); })();
-                            // Col 2: 1001-1014
-                            (() => { const col=[]; pushRange(col,1001,1014); pushBlanks(col, TARGET_HEIGHT - 14, 'c2-top'); columns.push(col); })();
-                            // Col 3: 1015-1026
-                            (() => { const col=[]; pushRange(col,1015,1026); pushBlanks(col, TARGET_HEIGHT - 12, 'c3-top'); columns.push(col); })();
-                            // Col 4: 1029-1042
-                            (() => { const col=[]; pushRange(col,1029,1042); pushBlanks(col, TARGET_HEIGHT - 14, 'c4-top'); columns.push(col); })();
-                            // Col 5: 1043-1056 (543-546 moved to Section 4)
-                            (() => { const col=[]; pushRange(col,1043,1056); pushBlanks(col, TARGET_HEIGHT - 14, 'c5-top'); columns.push(col); })();
-                            // Col 6: 577-580, 4 blanks, 1057-1070, labels
-                            (() => { const col=[]; pushRange(col,577,580); pushBlanks(col,4,'c6'); pushRange(col,1057,1070); pushLabels(col,["1070-A U-7","1070-B U-7"]); pushBlanks(col, TARGET_HEIGHT - 22, 'c6-top'); columns.push(col); })();
-                            // Col 7: (659-664 moved to Section 4), 2 blanks, 1071-1084, labels
-                            (() => { const col=[]; pushBlanks(col,8,'c7'); pushRange(col,1071,1084); pushLabels(col,["1084-A U-7","1084-B U-7"]); pushBlanks(col, TARGET_HEIGHT - 24, 'c7-top'); columns.push(col); })();
-                            // Col 8: 7 blanks, 1085-1102
-                            (() => { const col=[]; pushBlanks(col,7,'c8'); pushRange(col,1085,1102); pushBlanks(col, TARGET_HEIGHT - 25, 'c8-top'); columns.push(col); })();
-                            // Col 8.5: Full spacer column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8half'); columns.push(col); })();
-                            // Col 9: (738-742 moved to Section 4) - just spacer now
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c9'); columns.push(col); })();
-                            // Col 10: (871-874 moved to Section 4) - just spacer now
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c10'); columns.push(col); })();
-                            // Col 11: spacer column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c11'); columns.push(col); })();
-                            // Col 12: Trailing empty column
-                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c12-trail'); columns.push(col); })();
+                            // Col 1: 1001-1014 (rows R-U, column 5)
+                            (() => { const col=[]; pushRange(col,1001,1014); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c1-top'); columns.push(col); })();
+                            // Col 2: 1015-1027 (rows R-U, column 5)
+                            (() => { const col=[]; pushRange(col,1015,1028); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c2-top'); columns.push(col); })();
+                            // Col 3: 1029-1042 (rows R-U, column 6)
+                            (() => { const col=[]; pushRange(col,1029,1042); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c3-top'); columns.push(col); })();
+                            // Col 4: 1043-1056 (rows R-U, column 6)
+                            (() => { const col=[]; pushRange(col,1043,1056); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 14), 'c4-top'); columns.push(col); })();
+                            // Col 5: 1057-1070 + labels (rows R-U, column 7)
+                            (() => { const col=[]; pushRange(col,1057,1070); pushLabels(col,["1070-A","1070-B"]); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c5-top'); columns.push(col); })();
+                            // Col 6: 1071-1084 + labels (rows R-U, column 7)
+                            (() => { const col=[]; pushRange(col,1071,1084); pushLabels(col,["1084-A","1084-B"]); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c6-top'); columns.push(col); })();
+                            // Col 7: 1085-1100 (rows R-U, column 8)
+                            (() => { const col=[]; pushRange(col,1085,1100); pushBlanks(col, Math.max(0, TARGET_HEIGHT - 16), 'c7-top'); columns.push(col); })();
+                            // Col 8: Trailing empty column
+                            (() => { const col=[]; pushBlanks(col, TARGET_HEIGHT, 'c8-trail'); columns.push(col); })();
 
                             // Add unplaced plots as final column
                             const { unplaced } = getUnplacedForSection('5', plots);
