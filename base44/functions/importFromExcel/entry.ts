@@ -177,6 +177,7 @@ Deno.serve(async (req) => {
           const ex = existingByNum.get(record.plot_number);
           if (ex) {
             const updates = {};
+            if (record.section && record.section !== ex.section) updates.section = record.section;
             if (record.row_number && record.row_number !== ex.row_number) updates.row_number = record.row_number;
             if (record.status && record.status !== ex.status) updates.status = record.status;
             if (record.first_name && record.first_name !== ex.first_name) updates.first_name = record.first_name;

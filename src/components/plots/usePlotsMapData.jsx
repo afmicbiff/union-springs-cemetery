@@ -22,6 +22,9 @@ function buildSectionFilter(sectionsToLoad) {
   const orClauses = [
     { section: { $in: normalized } },
     { section: { $in: withPrefixes } },
+    // Fetch plots with null/empty section — they'll be routed by plot number
+    { section: null },
+    { section: '' },
   ];
 
   // Also fetch Section 4 plots (they're routed to Section 2 in the UI)

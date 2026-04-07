@@ -380,11 +380,11 @@ const SectionRenderer = React.memo(({
                                     { start: 326, end: 348 },
                                     { start: 406, end: 430 },
                                     { start: 489, end: 512 },
-                                    { start: 605, end: 633 },
-                                    { start: 688, end: 711 },
-                                    { start: 765, end: 788 },
-                                    { start: 821, end: 843 },
-                                    { start: 898, end: 930 }
+                                    { start: 605, end: 629 },
+                                    { start: 689, end: 711 },
+                                    { start: 770, end: 788 },
+                                    { start: 822, end: 843 },
+                                    { start: 899, end: 922 }
                                 ];
                                 const spacers = [507,709,773,786,633,840,841,930];
                                 const renderedKeys = new Set();
@@ -765,9 +765,9 @@ export default function PlotsPage() {
       toast.success('Updated plots 326–348 to Section 3');
     };
 
-    // MAP ENTITIES TO UI FORMAT
+    // MAP ENTITIES TO UI FORMAT — deduplicate by plot_number + section
   const parsedData = useMemo(() => {
-      const arr = (plotEntities || []).map((p) => ({
+      const raw = (plotEntities || []).map((p) => ({
         _id: p.id,
         _entity: 'Plot',
         Section: p.section,
@@ -784,9 +784,28 @@ export default function PlotsPage() {
         photo_url_small: p.photo_url_small,
         photo_url_medium: p.photo_url_medium,
         photo_url_large: p.photo_url_large,
+        _updated: p.updated_date,
         ...p,
       })).filter(r => r.Grave);
-      return arr;
+
+      // Deduplicate: keep most recently updated record per plot_number
+      const byPlotNum = new Map();
+      raw.forEach(item => {
+        const num = String(item.Grave || '').trim();
+        if (!num) return;
+        const existing = byPlotNum.get(num);
+        if (!existing) {
+          byPlotNum.set(num, item);
+        } else {
+          // Keep the one with the most recent updated_date
+          const existingDate = new Date(existing._updated || 0).getTime();
+          const newDate = new Date(item._updated || 0).getTime();
+          if (newDate > existingDate) {
+            byPlotNum.set(num, item);
+          }
+        }
+      });
+      return Array.from(byPlotNum.values());
   }, [plotEntities]);
 
   // plotIndex removed — unused (hover uses data directly)
@@ -869,15 +888,21 @@ export default function PlotsPage() {
         const rowVal = String(item.Row || '');
         let sectionKey = rawSection ? rawSection.replace(/Section\s/i, '').trim() : '';
 
-        // Force key ranges into correct sections for proper rendering
+        // If section is empty/null, derive from plot number
         const graveNum = parseInt(String(item.Grave).replace(/\D/g, '')) || 0;
-        // Section 3 plots are now rendered as part of Section 2
+        if (!sectionKey && graveNum > 0) {
+            if (graveNum >= 1 && graveNum <= 184) sectionKey = '1';
+            else if (graveNum >= 1001 && graveNum <= 1200) sectionKey = '5';
+            else sectionKey = '2'; // S2/S3/S4 all route to '2'
+        }
+
+        // Section 3 plots are rendered as part of Section 2
         if (sectionKey === '3' || rawSection === 'Section 3') {
             sectionKey = '2';
         } else if (graveNum === 405 || graveNum === 896 || graveNum === 897) {
             sectionKey = '2';
         }
-        // All Section 4 plots are now displayed in Section 2
+        // All Section 4 plots are displayed in Section 2
         if (sectionKey === '4' || rawSection === 'Section 4') {
             sectionKey = '2';
         }

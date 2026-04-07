@@ -44,30 +44,14 @@ const S4_COLOR_CLASS = "bg-amber-100 border-amber-300";
 
 const Section2DnDGrid = memo(function Section2DnDGrid({ plots = [], section1Plots = [], baseColorClass = "", isAdmin = false, onHover, onEdit, statusColors }) {
 
-  // Build plot lookup map from all plots (includes both S2 and S3 plots now)
+  // Build plot lookup map from all plots (includes S2, S3, S4 plots)
+  // Data is already deduplicated by parsedData in Plots.jsx — just index by number
   const plotByNum = useMemo(() => {
     const map = new Map();
-    const sorted = [...(plots || [])].sort((a, b) => {
-      const da = new Date(a.created_date || 0).getTime();
-      const db = new Date(b.created_date || 0).getTime();
-      return da - db;
-    });
-
-    sorted.forEach(p => {
+    (plots || []).forEach(p => {
       const n = parseNum(p.Grave || p.plot_number);
-      if (n != null) {
-        const existing = map.get(n);
-        if (!existing) {
-          map.set(n, p);
-        } else {
-          const hasRow = p.Row || p.row_number;
-          const existingHasRow = existing.Row || existing.row_number;
-          if (hasRow && !existingHasRow) {
-            map.set(n, p);
-          } else if (hasRow === existingHasRow) {
-            map.set(n, p);
-          }
-        }
+      if (n != null && !map.has(n)) {
+        map.set(n, p);
       }
     });
     return map;
