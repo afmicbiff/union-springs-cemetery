@@ -89,7 +89,7 @@ const ExcelGridCell = memo(function ExcelGridCell({ item, isAdmin, onHover, onEd
 
   // Empty cell
   if (!item) {
-    return <div className="w-[70px] h-[38px] border-r border-gray-100/50" />;
+    return <div className="w-[65px] h-[36px] border-r border-gray-100/50" />;
   }
 
   const isVet = item.Status === 'Veteran' || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied');
@@ -103,7 +103,7 @@ const ExcelGridCell = memo(function ExcelGridCell({ item, isAdmin, onHover, onEd
   return (
     <div
       data-plot-num={plotNum}
-      className={`w-[70px] h-[38px] px-1 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors plot-element ${
+      className={`w-[65px] h-[36px] px-0.5 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors plot-element ${
         isBlinking ? 'animate-plot-blink ring-2 ring-green-500 ring-offset-1 z-50 relative' : ''
       }`}
       onClick={handleClick}
