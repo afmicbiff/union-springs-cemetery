@@ -53,28 +53,26 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 162 && plotNum <= 184) {
       return { row: ROWS - (plotNum - 161), col: 7 }; // bottom-up in col 7
     }
-    // NU plot 903 in col 7, right below plot 184 (row 78), so at row 77
-    if (plotNum === 903) {
-      return { row: 77, col: 7 }; // NOT USABLE in col 7
-    }
-    // 943-963 in col 7, further down
+    // 38 blank rows after plot 184 in col 7, then plots 943-963
     if (plotNum >= 943 && plotNum <= 963) {
+      // plot 184 is at row 78, skip 38 blanks (rows 77-40), 943 starts at row 39
       return { row: 39 - (plotNum - 943), col: 7 }; // bottom-up in col 7
     }
     // Col 8: plots 185-207, bottom-up beside 162-184 in col 7
     if (plotNum >= 185 && plotNum <= 207) {
       return { row: ROWS - (plotNum - 184), col: 8 }; // bottom-up in col 8
     }
-    // Col 9: NU(9207) at bottom, 208-226 going up, NU(227) at top
-    // Beside NU 903 in col 7. 903 is at row 77, so 9207 at row 77, 208 at row 76, etc.
+    // 38 blank rows after plot 207 in col 8, then plots 943-963 area
+    // Col 9: NOT USABLE(9207) at bottom, 208-226 going up, NOT USABLE(227) at top
+    // Beside 943-963 in col 7. 943 is at row 39, 944 at row 38, etc.
     if (plotNum === 9207) {
-      return { row: 77, col: 9 }; // bottom NOT USABLE beside NU 903
+      return { row: 39, col: 9 }; // bottom NOT USABLE in col 9
     }
     if (plotNum >= 208 && plotNum <= 226) {
-      return { row: 76 - (plotNum - 208), col: 9 }; // 208 at row 76, 226 at row 58
+      return { row: 38 - (plotNum - 208), col: 9 }; // 208 at row 38 (beside 944), 226 at row 20
     }
     if (plotNum === 227) {
-      return { row: 57, col: 9 }; // top NOT USABLE in col 9
+      return { row: 19, col: 9 }; // top NOT USABLE in col 9
     }
     return null; // unmapped plots don't appear on grid yet
   }
