@@ -53,6 +53,11 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 162 && plotNum <= 184) {
       return { row: ROWS - (plotNum - 161), col: 7 }; // bottom-up in col 7
     }
+    // 38 blank rows after plot 184 in col 7, then plots 943-963
+    if (plotNum >= 943 && plotNum <= 963) {
+      // plot 184 is at row 78, skip 38 blanks (rows 77-40), 943 starts at row 39
+      return { row: 39 - (plotNum - 943), col: 7 }; // bottom-up in col 7
+    }
     if (plotNum >= 185 && plotNum <= 207) {
       return { row: ROWS - (plotNum - 184), col: 8 }; // bottom-up in col 8
     }
