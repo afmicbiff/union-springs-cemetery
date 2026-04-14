@@ -238,16 +238,7 @@ export default function Layout({ children }) {
     { label: 'Home', path: '/', icon: Home },
     { label: 'Plan Your Visit', path: '/Visitor', icon: Calendar },
     { label: 'Deceased Search', path: '/search', icon: Search },
-    { 
-      label: 'Old Cementery Plots & Map', 
-      path: '/plots', 
-      icon: Map,
-      isDropdown: true,
-      items: [
-        { label: 'Old Plots and Map', path: '/plots', icon: Map },
-        { label: 'New Plots for Reservation', path: '/NewPlotsAndMap', icon: Map }
-      ]
-    },
+    { label: 'New Plots & Map', path: '/NewPlotsAndMap', icon: Map },
     { label: 'Services', path: '/services', icon: Info },
     { 
     label: 'Admin Dashboard', 

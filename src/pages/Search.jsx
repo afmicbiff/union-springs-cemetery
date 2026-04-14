@@ -49,11 +49,10 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
   // Build map URL using only the grave/plot number for searching
   const mapUrl = React.useMemo(() => {
     const params = new URLSearchParams();
-    // Only pass the plot number - the map will find it regardless of section
     if (plotNumber) params.set('plot', plotNumber);
     params.set('from', 'search');
     params.set('highlight', 'true');
-    return `${createPageUrl('Plots')}?${params.toString()}`;
+    return `${createPageUrl('NewPlotsAndMap')}?${params.toString()}`;
   }, [plotNumber]);
 
   if (!person) return null;
