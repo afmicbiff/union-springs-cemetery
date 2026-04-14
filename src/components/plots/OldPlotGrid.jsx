@@ -32,6 +32,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 1 && plotNum <= 23) {
       return { row: ROWS - plotNum, col: 0 }; // bottom-up in col 0
     }
+    if (plotNum >= 24 && plotNum <= 46) {
+      return { row: ROWS - (plotNum - 23), col: 1 }; // bottom-up in col 1
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
