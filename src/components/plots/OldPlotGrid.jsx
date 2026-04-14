@@ -67,6 +67,16 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 208 && plotNum <= 226) {
       return { row: 38 - (plotNum - 208), col: 8 }; // 208 at row 38, 226 at row 20
     }
+    // Col 10 (index 9): 228-268 bottom-up, 6 blanks, 269-302, 4 blanks, 1001-1014
+    if (plotNum >= 228 && plotNum <= 268) {
+      return { row: ROWS - (plotNum - 227), col: 9 }; // 228 at row 100, 268 at row 60
+    }
+    if (plotNum >= 269 && plotNum <= 302) {
+      return { row: 53 - (plotNum - 269), col: 9 }; // 269 at row 53, 302 at row 20
+    }
+    if (plotNum >= 1001 && plotNum <= 1014) {
+      return { row: 15 - (plotNum - 1001), col: 9 }; // 1001 at row 15, 1014 at row 2
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
