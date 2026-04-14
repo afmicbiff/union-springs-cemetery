@@ -63,17 +63,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       return { row: ROWS - (plotNum - 184), col: 8 }; // bottom-up in col 8
     }
     // 38 blank rows after plot 207 in col 8, then plots 943-963 area
-    // Col 9: NOT USABLE(9207) at bottom, 208-226 going up, NOT USABLE(227) at top
-    // Beside 943-963 in col 7. 943 is at row 39, 944 at row 38, etc.
-    if (plotNum === 9207) {
-      return { row: 39, col: 9 }; // bottom NOT USABLE in col 9
-    }
-    if (plotNum >= 208 && plotNum <= 226) {
-      return { row: 38 - (plotNum - 208), col: 9 }; // 208 at row 38 (beside 944), 226 at row 20
-    }
-    if (plotNum === 227) {
-      return { row: 19, col: 9 }; // top NOT USABLE in col 9
-    }
+    // Plots 208-227 and NU markers removed from grid
     return null; // unmapped plots don't appear on grid yet
   }
 
