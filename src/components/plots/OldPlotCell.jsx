@@ -67,6 +67,8 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   const lastName = item['Last Name'] || item.last_name || '';
   const display = lastName.length > 9 ? lastName.substring(0, 9) + '…' : lastName;
   const graveLabel = item.Grave || item.plot_number || '';
+  const isNotUsable = statusKey === 'Not Usable';
+  const displayLabel = isNotUsable ? 'N/U' : `#${graveLabel}`;
 
   return (
     <div
@@ -75,11 +77,11 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      title={`#${graveLabel} ${item.Row || item.row_number || ''} - ${statusKey}`}
+      title={isNotUsable ? 'Not Usable' : `#${graveLabel} ${item.Row || item.row_number || ''} - ${statusKey}`}
     >
       <div className={`w-2 h-2 rounded-full shrink-0 ${dotBg}`} />
       <div className="flex flex-col leading-none min-w-0 overflow-hidden">
-        <span className="text-[9px] font-bold text-gray-800 truncate">#{graveLabel}</span>
+        <span className="text-[9px] font-bold text-gray-800 truncate">{displayLabel}</span>
         {display && <span className="text-[7px] text-gray-500 truncate">{display}</span>}
       </div>
     </div>
