@@ -58,19 +58,21 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       // plot 184 is at row 78, skip 38 blanks (rows 77-40), 943 starts at row 39
       return { row: 39 - (plotNum - 943), col: 7 }; // bottom-up in col 7
     }
-    // Col 8: NOT USABLE(9207) at bottom, 208-226 going up, NOT USABLE(227) at top
+    // Col 8: plots 185-207, bottom-up beside 162-184 in col 7
+    if (plotNum >= 185 && plotNum <= 207) {
+      return { row: ROWS - (plotNum - 184), col: 8 }; // bottom-up in col 8
+    }
+    // 38 blank rows after plot 207 in col 8, then plots 943-963 area
+    // Col 9: NOT USABLE(9207) at bottom, 208-226 going up, NOT USABLE(227) at top
     // Beside 943-963 in col 7. 943 is at row 39, 944 at row 38, etc.
     if (plotNum === 9207) {
-      return { row: 39, col: 8 }; // bottom NOT USABLE in col 8
+      return { row: 39, col: 9 }; // bottom NOT USABLE in col 9
     }
     if (plotNum >= 208 && plotNum <= 226) {
-      return { row: 38 - (plotNum - 208), col: 8 }; // 208 at row 38 (beside 944), 226 at row 20
+      return { row: 38 - (plotNum - 208), col: 9 }; // 208 at row 38 (beside 944), 226 at row 20
     }
     if (plotNum === 227) {
-      return { row: 19, col: 8 }; // top NOT USABLE in col 8
-    }
-    if (plotNum >= 185 && plotNum <= 207) {
-      return { row: ROWS - (plotNum - 184), col: 9 }; // bottom-up in col 9
+      return { row: 19, col: 9 }; // top NOT USABLE in col 9
     }
     return null; // unmapped plots don't appear on grid yet
   }
