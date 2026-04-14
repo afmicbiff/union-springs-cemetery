@@ -2,171 +2,68 @@ import React, { memo, useMemo } from "react";
 import OldPlotCell from "./OldPlotCell";
 
 /**
- * Old Cemetery Plot Grid
- * 
- * Mirrors the uploaded spreadsheet layout:
- * - 9 cemetery columns, each with LEFT and RIGHT sub-columns
- * - Columns 1-4: Only rows A through E (Section 1)
- * - Columns 5-9: Rows A through U (Sections 2-5)
- *   - Rows R-U: Section 5 (plots 1001-1100, cols 5-8 only)
- * - Row A at bottom, Row U at top
+ * Old Cemetery Plot Grid — flat 101 rows × 19 columns.
+ * No row letters, no column headers, no section labels.
+ * Plots are placed by their plot_number into a grid via row/col mapping.
  */
 
-const ALL_ROWS = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U'];
-const SECTION1_ROWS = new Set(['A','B','C','D','E']);
-const SECTION5_ROWS = new Set(['R','S','T','U']);
-const ALL_COLS = [1,2,3,4,5,6,7,8,9];
+const ROWS = 101;
+const COLS = 19;
 
 export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
-  // Build lookup: "RowLetter-ColNum" -> [plots sorted by plot_number desc]
-  const plotsByRowCol = useMemo(() => {
+  // Build a lookup: plotNumber -> plot data
+  const plotsByNumber = useMemo(() => {
     const map = new Map();
     for (const p of (plots || [])) {
-      const rowNum = p.Row || p.row_number || '';
-      const match = rowNum.match(/^([A-U])\s*-\s*(\d+)$/i);
-      if (!match) continue;
-      const key = `${match[1].toUpperCase()}-${match[2]}`;
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(p);
-    }
-    for (const [, arr] of map) {
-      arr.sort((a, b) => {
-        const na = parseInt(String(a.Grave || a.plot_number || '').replace(/\D/g, '')) || 0;
-        const nb = parseInt(String(b.Grave || b.plot_number || '').replace(/\D/g, '')) || 0;
-        return nb - na;
-      });
+      const num = parseInt(String(p.Grave || p.plot_number || '').replace(/\D/g, ''), 10);
+      if (!Number.isFinite(num)) continue;
+      const existing = map.get(num);
+      if (!existing || new Date(p._updated || 0) > new Date(existing._updated || 0)) {
+        map.set(num, p);
+      }
     }
     return map;
   }, [plots]);
 
-  const getCell = (rowLetter, colNum) => {
-    const key = `${rowLetter}-${colNum}`;
-    const arr = plotsByRowCol.get(key) || [];
-    return { left: arr[0] || null, right: arr[1] || null };
-  };
-
-  const rowsTopToBottom = useMemo(() => [...ALL_ROWS].reverse(), []);
+  // Build grid: rows 0..100, cols 0..18
+  // We assign plot numbers sequentially: row 0 col 0 = plot 1, row 0 col 1 = plot 2, etc.
+  // Or we can map based on actual data positions.
+  // Since the spreadsheet has 9 column pairs (left/right) = 18 slots + 1 extra = 19,
+  // and plots are numbered sequentially, we map by number:
+  // Plot number N -> row = floor((N-1) / 19), col = (N-1) % 19
+  const grid = useMemo(() => {
+    const rows = [];
+    for (let r = 0; r < ROWS; r++) {
+      const row = [];
+      for (let c = 0; c < COLS; c++) {
+        const plotNum = r * COLS + c + 1; // 1-based
+        row.push(plotsByNumber.get(plotNum) || null);
+      }
+      rows.push(row);
+    }
+    return rows;
+  }, [plotsByNumber]);
 
   if (!plots || plots.length === 0) {
     return <div className="text-gray-400 text-center py-12">No plot data loaded</div>;
   }
 
   return (
-    <div className="inline-block select-none" style={{ minWidth: '1350px' }}>
-      {/* NORTH */}
-      <div className="text-center mb-2">
-        <span className="text-sm font-bold text-stone-600 tracking-[0.3em] uppercase">↑ NORTH ↑</span>
-      </div>
-
-      {/* Column headers */}
-      <div className="flex items-end mb-1">
-        <div className="w-7 shrink-0" />
-        {ALL_COLS.map(col => (
-          <div key={col} className="text-center" style={{ width: col <= 4 ? '136px' : '142px' }}>
-            <span className="text-[10px] font-bold text-gray-500">Col {col}</span>
+    <div className="inline-block select-none">
+      <div className="border border-gray-300 rounded overflow-hidden bg-white">
+        {grid.map((row, rIdx) => (
+          <div key={rIdx} className="flex border-b border-gray-100 last:border-b-0">
+            {row.map((item, cIdx) => (
+              <OldPlotCell
+                key={cIdx}
+                item={item}
+                isAdmin={isAdmin}
+                onHover={onHover}
+                onEdit={onEdit}
+              />
+            ))}
           </div>
         ))}
-        <div className="w-7 shrink-0" />
-      </div>
-
-      {/* Grid body */}
-      <div className="border border-gray-400 rounded overflow-hidden bg-white">
-        {rowsTopToBottom.map((rowLetter) => {
-          const showGap = rowLetter === 'Q';
-          const isS1 = SECTION1_ROWS.has(rowLetter);
-          const isS5 = SECTION5_ROWS.has(rowLetter);
-
-          return (
-            <React.Fragment key={rowLetter}>
-              {showGap && (
-                <div className="h-5 bg-stone-200 border-y border-stone-300 flex items-center justify-center">
-                  <span className="text-[9px] text-stone-500 font-bold tracking-wider uppercase">Section 5 ↑ / Sections 2-4 ↓</span>
-                </div>
-              )}
-              <div className="flex items-stretch border-b border-gray-200 last:border-b-0">
-                {/* Left row label */}
-                <div className="w-7 shrink-0 flex items-center justify-center bg-stone-100 border-r border-gray-300">
-                  <span className="text-[11px] font-bold text-stone-700">{rowLetter}</span>
-                </div>
-
-                {ALL_COLS.map(col => {
-                  const cell = getCell(rowLetter, col);
-                  const isSection1Col = col <= 4;
-                  const hasData = isSection1Col ? isS1 : true;
-                  const isS5Cell = isS5 && col >= 5 && col <= 8;
-                  const isS5Col9 = isS5 && col === 9; // Col 9 doesn't extend to Section 5
-                  const colWidth = isSection1Col ? '136px' : '142px';
-                  const borderClass = col === 4 ? 'border-r-2 border-r-stone-500' : 'border-r border-gray-200';
-                  
-                  let bgClass = 'bg-white';
-                  if (!hasData || isS5Col9) bgClass = 'bg-stone-100/60';
-                  else if (isS5Cell) bgClass = 'bg-purple-50/60';
-                  else if (isSection1Col) bgClass = 'bg-blue-50/40';
-                  else bgClass = 'bg-green-50/40';
-
-                  // MOW LANE: Row A, cols 5+ sometimes
-                  const isMowLane = rowLetter === 'A' && !isSection1Col && !cell.left && !cell.right;
-
-                  return (
-                    <div key={col} className={`flex ${borderClass} ${bgClass}`} style={{ width: colWidth, minHeight: '38px' }}>
-                      {!hasData || isS5Col9 ? (
-                        <div className="w-full" />
-                      ) : isMowLane ? (
-                        <div className="w-full flex items-center justify-center">
-                          <span className="text-[8px] font-bold text-amber-600 tracking-wider uppercase">Mow Lane</span>
-                        </div>
-                      ) : (
-                        <>
-                          <OldPlotCell item={cell.left} isAdmin={isAdmin} onHover={onHover} onEdit={onEdit} />
-                          <OldPlotCell item={cell.right} isAdmin={isAdmin} onHover={onHover} onEdit={onEdit} />
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {/* Right row label */}
-                <div className="w-7 shrink-0 flex items-center justify-center bg-stone-100 border-l border-gray-300">
-                  <span className="text-[11px] font-bold text-stone-700">{rowLetter}</span>
-                </div>
-              </div>
-            </React.Fragment>
-          );
-        })}
-      </div>
-
-      {/* Bottom column numbers */}
-      <div className="flex items-start mt-1">
-        <div className="w-7 shrink-0" />
-        {ALL_COLS.map(col => (
-          <div key={col} className="text-center" style={{ width: col <= 4 ? '136px' : '142px' }}>
-            <span className="text-[10px] font-bold text-gray-500">Col {col}</span>
-          </div>
-        ))}
-        <div className="w-7 shrink-0" />
-      </div>
-
-      {/* SOUTH */}
-      <div className="text-center mt-2">
-        <span className="text-sm font-bold text-stone-600 tracking-[0.3em] uppercase">↓ SOUTH ↓</span>
-      </div>
-
-      {/* Section labels */}
-      <div className="flex mt-3 gap-1">
-        <div className="w-7 shrink-0" />
-        <div className="bg-blue-100 border border-blue-200 rounded px-2 py-1 text-[10px] font-bold text-blue-800 text-center" style={{ width: '544px' }}>
-          Section 1 — Cols 1-4, Rows A-E
-        </div>
-        <div className="bg-green-100 border border-green-200 rounded px-2 py-1 text-[10px] font-bold text-green-800 text-center flex-1">
-          Sections 2-4 — Cols 5-9, Rows A-Q
-        </div>
-      </div>
-      <div className="flex mt-1 gap-1">
-        <div className="w-7 shrink-0" />
-        <div style={{ width: '544px' }} />
-        <div className="bg-purple-100 border border-purple-200 rounded px-2 py-1 text-[10px] font-bold text-purple-800 text-center" style={{ width: '568px' }}>
-          Section 5 — Cols 5-8, Rows R-U (Plots 1001-1100)
-        </div>
       </div>
 
       {/* Legend */}
