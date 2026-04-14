@@ -25,21 +25,25 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     return map;
   }, [plots]);
 
-  // Build grid: rows 0..100, cols 0..18
-  // We assign plot numbers sequentially: row 0 col 0 = plot 1, row 0 col 1 = plot 2, etc.
-  // Or we can map based on actual data positions.
-  // Since the spreadsheet has 9 column pairs (left/right) = 18 slots + 1 extra = 19,
-  // and plots are numbered sequentially, we map by number:
-  // Plot number N -> row = floor((N-1) / 19), col = (N-1) % 19
+  // Map plot number to grid position {row, col}.
+  // Plots 1-23: column 0, bottom-to-top (plot 1 at row 100, plot 23 at row 78).
+  // Additional plot ranges will be mapped here as they are defined.
+  function plotPosition(plotNum) {
+    if (plotNum >= 1 && plotNum <= 23) {
+      return { row: ROWS - plotNum, col: 0 }; // bottom-up in col 0
+    }
+    return null; // unmapped plots don't appear on grid yet
+  }
+
   const grid = useMemo(() => {
-    const rows = [];
-    for (let r = 0; r < ROWS; r++) {
-      const row = [];
-      for (let c = 0; c < COLS; c++) {
-        const plotNum = r * COLS + c + 1; // 1-based
-        row.push(plotsByNumber.get(plotNum) || null);
+    // Initialize empty grid
+    const rows = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+    // Place each plot by its number
+    for (const [num, plot] of plotsByNumber) {
+      const pos = plotPosition(num);
+      if (pos && pos.row >= 0 && pos.row < ROWS && pos.col >= 0 && pos.col < COLS) {
+        rows[pos.row][pos.col] = plot;
       }
-      rows.push(row);
     }
     return rows;
   }, [plotsByNumber]);
