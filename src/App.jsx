@@ -12,6 +12,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScaleReadiness from './pages/ScaleReadiness';
+import OldPlotsAndMap from './pages/OldPlotsAndMap';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -73,6 +74,16 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route
+        path="/OldPlotsAndMap"
+        element={
+          <LayoutWrapper currentPageName="OldPlotsAndMap">
+            <Suspense fallback={<RouteLoader />}>
+              <OldPlotsAndMap />
+            </Suspense>
+          </LayoutWrapper>
+        }
+      />
       <Route
         path="/ScaleReadiness"
         element={

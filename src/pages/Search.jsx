@@ -52,7 +52,7 @@ const ResultCard = memo(function ResultCard({ person, locationSearch }) {
     if (plotNumber) params.set('plot', plotNumber);
     params.set('from', 'search');
     params.set('highlight', 'true');
-    return `${createPageUrl('NewPlotsAndMap')}?${params.toString()}`;
+    return `${createPageUrl('OldPlotsAndMap')}?${params.toString()}`;
   }, [plotNumber]);
 
   if (!person) return null;
