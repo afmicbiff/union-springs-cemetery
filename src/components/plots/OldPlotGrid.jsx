@@ -58,6 +58,12 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       // plot 184 is at row 78, skip 38 blanks (rows 77-40), 943 starts at row 39
       return { row: 39 - (plotNum - 943), col: 7 }; // bottom-up in col 7
     }
+    // Col 9: beside col 7's 943 area — plots 208-227 + NOT USABLE at bottom
+    // Bottom NOT USABLE = grave 207 (N-5), then 208-226 going up, top NOT USABLE = grave 227 (Q-5)
+    if (plotNum >= 208 && plotNum <= 227) {
+      // 208 at row 38, 227 at row 19
+      return { row: 39 - 1 - (plotNum - 208), col: 9 }; // bottom-up in col 9
+    }
     if (plotNum >= 185 && plotNum <= 207) {
       return { row: ROWS - (plotNum - 184), col: 8 }; // bottom-up in col 8
     }
