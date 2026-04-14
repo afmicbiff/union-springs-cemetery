@@ -72,7 +72,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       return { row: ROWS - (plotNum - 227), col: 9 }; // 228 at row 100, 268 at row 60
     }
     if (plotNum >= 269 && plotNum <= 302) {
-      return { row: 53 - (plotNum - 269), col: 9 }; // 269 at row 53, 302 at row 20
+      return { row: 52 - (plotNum - 269), col: 9 }; // 269 at row 52, 302 at row 19
     }
     if (plotNum >= 1001 && plotNum <= 1014) {
       return { row: 15 - (plotNum - 1001), col: 9 }; // 1001 at row 15, 1014 at row 2
@@ -82,7 +82,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       return { row: ROWS - (plotNum - 302), col: 10 }; // 303 at row 100, 348 at row 55
     }
     if (plotNum >= 349 && plotNum <= 382) {
-      return { row: 52 - (plotNum - 349), col: 10 }; // 349 at row 52, 382 at row 19
+      return { row: 51 - (plotNum - 349), col: 10 }; // 349 at row 51, 382 at row 18
     }
     if (plotNum >= 1015 && plotNum <= 1028) {
       return { row: 15 - (plotNum - 1015), col: 10 }; // 1015 at row 15, 1028 at row 2
