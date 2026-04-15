@@ -130,6 +130,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 642 && plotNum <= 664) {
       return { row: 39 - (plotNum - 642), col: 14 }; // 642 at row 39, 664 at row 17
     }
+    if (plotNum >= 1071 && plotNum <= 1084) {
+      return { row: 14 - (plotNum - 1071), col: 14 }; // 1071 at row 14, 1084 at row 1
+    }
     if (plotNum === 665) {
       return { row: 99, col: 14 }; // 665 at row 99, MOW at row 100
     }
@@ -158,6 +161,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // Virtual N/U above 641 in col 15
     rows[40][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    // 2 blank plots above 664 in col 15
+    rows[16][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    rows[15][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     return rows;
   }, [plotsByNumber]);
 
