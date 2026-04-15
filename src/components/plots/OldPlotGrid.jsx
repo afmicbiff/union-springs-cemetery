@@ -94,12 +94,15 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 1029 && plotNum <= 1042) {
       return { row: 14 - (plotNum - 1029), col: 11 }; // 1029 at row 14, 1042 at row 1
     }
-    // Col 13 (index 12): 466-547 bottom-up, 3 blanks, 1043-1056
-    if (plotNum >= 466 && plotNum <= 547) {
-      return { row: ROWS - (plotNum - 465), col: 12 }; // 466 at row 100, 547 at row 19
+    // Col 13 (index 12): 466-507 bottom-up, 1 unusable, 508-547 continue up, 3 blanks, 1043-1056
+    if (plotNum >= 466 && plotNum <= 507) {
+      return { row: ROWS - (plotNum - 465), col: 12 }; // 466 at row 100, 507 at row 59
+    }
+    if (plotNum >= 508 && plotNum <= 547) {
+      return { row: 57 - (plotNum - 508), col: 12 }; // 508 at row 57, 547 at row 18
     }
     if (plotNum >= 1043 && plotNum <= 1056) {
-      return { row: 15 - (plotNum - 1043), col: 12 }; // 1043 at row 15, 1056 at row 2
+      return { row: 14 - (plotNum - 1043), col: 12 }; // 1043 at row 14, 1056 at row 1
     }
     // Col 14 (index 13): 582-629 bottom-up
     if (plotNum >= 582 && plotNum <= 629) {
@@ -118,6 +121,8 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
         rows[pos.row][pos.col] = plot;
       }
     }
+    // Insert virtual "Not Usable" plot between 507 and 508 in col 12
+    rows[58][12] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     return rows;
   }, [plotsByNumber]);
 
