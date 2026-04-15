@@ -108,8 +108,11 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 582 && plotNum <= 629) {
       return { row: ROWS - (plotNum - 581), col: 13 }; // 582 at row 100, 629 at row 53
     }
-    if (plotNum >= 548 && plotNum <= 581) {
-      return { row: 52 - (plotNum - 548), col: 13 }; // 548 at row 52, 581 at row 19
+    if (plotNum >= 548 && plotNum <= 559) {
+      return { row: 52 - (plotNum - 548), col: 13 }; // 548 at row 52, 559 at row 41
+    }
+    if (plotNum >= 560 && plotNum <= 581) {
+      return { row: 39 - (plotNum - 560), col: 13 }; // 560 at row 39, 581 at row 18
     }
     return null; // unmapped plots don't appear on grid yet
   }
@@ -124,8 +127,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
         rows[pos.row][pos.col] = plot;
       }
     }
-    // Insert virtual "Not Usable" plot between 507 and 508 in col 12
-    rows[58][12] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    // Insert virtual "Not Usable" plots (not in database)
+    rows[58][12] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 507 and 508
+    rows[40][13] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 559 and 560
     return rows;
   }, [plotsByNumber]);
 
