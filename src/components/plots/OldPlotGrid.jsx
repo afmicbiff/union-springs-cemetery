@@ -161,9 +161,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // Virtual N/U above 641 in col 15
     rows[40][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
-    // 2 blank plots above 664 in col 15
-    rows[16][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
-    rows[15][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    // 2 blank spacer plots between 664 and 1071 in col 15
+    rows[16][14] = { Grave: '', Status: '', _virtual: true };
+    rows[15][14] = { Grave: '', Status: '', _virtual: true };
     return rows;
   }, [plotsByNumber]);
 
