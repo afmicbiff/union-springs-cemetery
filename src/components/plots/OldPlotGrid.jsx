@@ -195,22 +195,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 739 && plotNum <= 742) {
       return { row: 20 - (plotNum - 739), col: 16 }; // 739 at row 20, 742 at row 17
     }
-    // Col 18 (index 17): 875-920 bottom-up above N/U at row 99
-    if (plotNum >= 875 && plotNum <= 920) {
-      return { row: 98 - (plotNum - 875), col: 17 }; // 875 at row 98, 920 at row 53
-    }
-    // Col 18: blank at row 52, then 844-854 at rows 51-41
-    if (plotNum >= 844 && plotNum <= 854) {
-      return { row: 51 - (plotNum - 844), col: 17 }; // 844 at row 51, 854 at row 41
-    }
-    // Col 18: blank at row 40, then 855-861 at rows 39-33
-    if (plotNum >= 855 && plotNum <= 861) {
-      return { row: 39 - (plotNum - 855), col: 17 }; // 855 at row 39, 861 at row 33
-    }
-    // Col 18: unknown at row 32, then 862-874 at rows 31-19
-    if (plotNum >= 862 && plotNum <= 874) {
-      return { row: 31 - (plotNum - 862), col: 17 }; // 862 at row 31, 874 at row 19
-    }
+
     return null; // unmapped plots don't appear on grid yet
   }
 
@@ -232,7 +217,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[100][15] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][16] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][17] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
-    rows[99][17] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U above MOW in col 18
+
     // Virtual "Unknown" placeholder above 709 in col 15
     rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // Virtual N/U above 641 in col 15
@@ -251,10 +236,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[45][16] = { Grave: '', Status: '', _virtual: true }; // blank between 795 and 796 in col 17
     rows[40][16] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U between 720 and 721 in col 17
     rows[21][16] = { Grave: '', Status: '', _virtual: true }; // blank between 738 and 739 in col 17
-    // Col 18 virtual spacers
-    rows[52][17] = { Grave: '', Status: '', _virtual: true }; // blank between 920 and 844
-    rows[40][17] = { Grave: '', Status: '', _virtual: true }; // blank between 854 and 855
-    rows[32][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown between 861 and 862
+
     return rows;
   }, [plotsByNumber]);
 
