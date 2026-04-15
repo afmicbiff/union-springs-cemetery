@@ -61,6 +61,11 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
 
   if (!item) return <div className="w-[68px] h-[38px] border-r border-gray-100/50" />;
 
+  // Blank spacer plots: no text, no dot, just an empty cell
+  if (item._virtual && !item.Grave && !item.Status) {
+    return <div className="w-[68px] h-[38px] border-r border-gray-200/50" />;
+  }
+
   const isVet = item.Status === 'Veteran' || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied');
   const statusKey = isVet ? 'Veteran' : (item.Status || 'Unknown');
   const dotBg = STATUS_BG[statusKey] || 'bg-gray-300';
