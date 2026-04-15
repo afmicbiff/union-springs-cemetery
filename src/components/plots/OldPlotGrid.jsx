@@ -8,7 +8,7 @@ import OldPlotCell from "./OldPlotCell";
  */
 
 const ROWS = 101;
-const COLS = 19;
+const COLS = 20;
 
 export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
   // Build a lookup: plotNumber -> plot data
@@ -211,6 +211,15 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 862 && plotNum <= 874) {
       return { row: 31 - (plotNum - 862), col: 17 }; // 862 at row 31, 874 at row 19
     }
+    // Col 19 (index 18): 48 blanks from bottom (rows 100-53), plots start at row 52
+    // 921-932 at rows 52-41
+    if (plotNum >= 921 && plotNum <= 932) {
+      return { row: 52 - (plotNum - 921), col: 18 }; // 921 at row 52, 932 at row 41
+    }
+    // blank at row 40, then 933-942 at rows 39-30
+    if (plotNum >= 933 && plotNum <= 942) {
+      return { row: 39 - (plotNum - 933), col: 18 }; // 933 at row 39, 942 at row 30
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
@@ -256,6 +265,8 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[52][17] = { Grave: '', Status: '', _virtual: true }; // blank between 920 and 844
     rows[40][17] = { Grave: '', Status: '', _virtual: true }; // blank between 854 and 855
     rows[32][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown between 861 and 862
+    // Col 19 virtual spacer
+    rows[40][18] = { Grave: '', Status: '', _virtual: true }; // blank between 932 and 933
 
     return rows;
   }, [plotsByNumber]);
