@@ -133,6 +133,11 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     // Insert virtual "Not Usable" plots (not in database)
     rows[58][12] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 507 and 508
     rows[40][13] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 559 and 560
+    // Insert virtual "MOW" plots at bottom of columns 15-18 (not in database)
+    rows[100][14] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
+    rows[100][15] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
+    rows[100][16] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
+    rows[100][17] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     return rows;
   }, [plotsByNumber]);
 
