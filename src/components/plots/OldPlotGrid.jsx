@@ -160,6 +160,10 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 1085 && plotNum <= 1100) {
       return { row: 15 - (plotNum - 1085), col: 15 }; // 1085 at row 15, 1100 at row 0
     }
+    // Col 17 (index 16): 799-840 bottom-up above MOW
+    if (plotNum >= 799 && plotNum <= 840) {
+      return { row: 99 - (plotNum - 799), col: 16 }; // 799 at row 99, 840 at row 58
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
