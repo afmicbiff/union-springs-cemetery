@@ -191,6 +191,10 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 721 && plotNum <= 738) {
       return { row: 39 - (plotNum - 721), col: 16 }; // 721 at row 39, 738 at row 22
     }
+    // Col 17: blank at row 21, then 739-742 at rows 20-17
+    if (plotNum >= 739 && plotNum <= 742) {
+      return { row: 20 - (plotNum - 739), col: 16 }; // 739 at row 20, 742 at row 17
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
@@ -229,6 +233,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[55][16] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown below 841
     rows[45][16] = { Grave: '', Status: '', _virtual: true }; // blank between 795 and 796 in col 17
     rows[40][16] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U between 720 and 721 in col 17
+    rows[21][16] = { Grave: '', Status: '', _virtual: true }; // blank between 738 and 739 in col 17
     return rows;
   }, [plotsByNumber]);
 
