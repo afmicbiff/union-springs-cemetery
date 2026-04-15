@@ -182,6 +182,7 @@ const GravePlot = React.memo(({ data, onHover, onClick }) => {
 
 const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHover, onPlotClick }) => {
   // Define the 8 column ranges for each row letter
+  // Ordered right-to-left visually: 101-108 on the right, 225-232 on the left
   const columnRanges = [
     { start: 225, end: 232, label: "225-232" },
     { start: 217, end: 224, label: "217-224" },
@@ -208,15 +209,26 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
       }
     });
 
+    // Sort each column descending so highest row number is at top, lowest at bottom
     Object.keys(groups).forEach((key) => {
       groups[key].sort((a, b) => {
         const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
         const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
-        return numA - numB;
+        return numB - numA; // descending: highest at top, lowest (101) at bottom
       });
     });
     return groups;
   }, [plots]);
+
+  // Find max column height to keep all columns same height
+  const maxHeight = useMemo(() => {
+    let max = 0;
+    columnRanges.forEach((range) => {
+      const len = (groupedByRange[range.label] || []).length;
+      if (len > max) max = len;
+    });
+    return max;
+  }, [groupedByRange]);
 
   return (
     <div id={`row-${rowLetter}`} className="relative">
@@ -231,22 +243,26 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
 
       {!isCollapsed && (
         <div className="border border-gray-300 rounded overflow-hidden bg-white">
-          {columnRanges.map((range) => {
-            const rangePlots = groupedByRange[range.label];
-            if (rangePlots.length === 0) return null;
-            return (
-              <div key={range.label} className="flex border-b border-gray-100 last:border-b-0">
-                {rangePlots.map((plot) => (
-                  <GravePlot
-                    key={plot.id}
-                    data={plot}
-                    onHover={onHover}
-                    onClick={onPlotClick}
-                  />
-                ))}
-              </div>
-            );
-          })}
+          {/* Grid: columns go right-to-left, plots go bottom-to-top within each column */}
+          <div className="flex">
+            {columnRanges.map((range) => {
+              const rangePlots = groupedByRange[range.label] || [];
+              if (rangePlots.length === 0) return null;
+              return (
+                <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0">
+                  {rangePlots.map((plot) => (
+                    <div key={plot.id} className="border-b border-gray-100 last:border-b-0">
+                      <GravePlot
+                        data={plot}
+                        onHover={onHover}
+                        onClick={onPlotClick}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
