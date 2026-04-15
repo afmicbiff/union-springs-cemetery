@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -192,6 +192,23 @@ export default function OldPlotsAndMap() {
   const clearFilters = useCallback(() => {
     setStatusFilter(''); setOwnerFilter(''); setPlotFilter(''); setSearchQuery('');
   }, []);
+
+  // Auto-locate plot when arriving from search
+  const autoLocatedRef = useRef(false);
+  useEffect(() => {
+    if (autoLocatedRef.current || !fromSearch || !targetPlotNum || isLoading || parsedData.length === 0) return;
+    autoLocatedRef.current = true;
+    // Small delay to let the grid render
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
+      const el = document.querySelector(`[data-plot-num="${targetPlotNum}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        setTimeout(() => window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } })), 500);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [fromSearch, targetPlotNum, isLoading, parsedData]);
 
   const hasFilters = statusFilter || ownerFilter || plotFilter;
 
