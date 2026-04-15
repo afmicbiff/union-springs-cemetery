@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Info, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ZoomPan from "@/components/common/ZoomPan";
 import debounce from "lodash/debounce";
@@ -18,18 +18,7 @@ const STATUS_COLORS = {
   Default: "bg-gray-300 border-gray-500",
 };
 
-const ROW_PALETTES = {
-  A: "bg-blue-100 border-blue-300 text-blue-900",
-  B: "bg-green-100 border-green-300 text-green-900",
-  C: "bg-rose-100 border-rose-300 text-rose-900",
-  D: "bg-amber-100 border-amber-300 text-amber-900",
-  E: "bg-purple-100 border-purple-300 text-purple-900",
-  F: "bg-lime-100 border-lime-300 text-lime-900",
-  G: "bg-cyan-100 border-cyan-300 text-cyan-900",
-  H: "bg-orange-100 border-orange-300 text-orange-900",
-  I: "bg-pink-100 border-pink-300 text-pink-900",
-  J: "bg-teal-100 border-teal-300 text-teal-900",
-};
+
 
 const Tooltip = React.memo(({ data, position, visible }) => {
   if (!visible || !data) return null;
@@ -145,21 +134,29 @@ const Tooltip = React.memo(({ data, position, visible }) => {
   );
 });
 
-const GravePlot = React.memo(({ data, baseColorClass, onHover, onClick }) => {
-  const [isHovered, setIsHovered] = useState(false);
+const STATUS_DOT = {
+  Available: 'bg-green-500',
+  "Pending Reservation": 'bg-amber-500',
+  Reserved: 'bg-yellow-400',
+  Occupied: 'bg-red-500',
+  Veteran: 'bg-blue-600',
+  Unavailable: 'bg-gray-500',
+  Unknown: 'bg-purple-500',
+  "Not Usable": 'bg-gray-400',
+  Default: 'bg-gray-300',
+};
 
+const GravePlot = React.memo(({ data, onHover, onClick }) => {
   if (data?.isSpacer) {
-    return (
-      <div className="w-16 h-8 m-0.5 border border-dashed border-gray-300 bg-gray-50/50 rounded-[1px]"></div>
-    );
+    return <div className="w-[68px] h-[38px] border-r border-gray-100/50" />;
   }
 
-  const statusColorFull = STATUS_COLORS[data.Status] || STATUS_COLORS.Default;
-  const statusBg = statusColorFull.split(" ").find((cls) => cls.startsWith("bg-")) || "bg-gray-400";
-
-  const baseClass = `${baseColorClass} opacity-90 hover:opacity-100 transition-transform`;
-  const hoverClass = `${baseColorClass.replace("100", "200")} scale-110 z-20 shadow-xl ring-2 ring-blue-400 ring-opacity-75`;
-  const activeClass = isHovered ? hoverClass : baseClass;
+  const isVet = data.Status === 'Veteran' || ((data.Notes || '').toLowerCase().includes('vet') && data.Status === 'Occupied');
+  const statusKey = isVet ? 'Veteran' : (data.Status || 'Unknown');
+  const dotBg = STATUS_DOT[statusKey] || STATUS_DOT.Default;
+  const lastName = data.lastname || data.FamilyName || '';
+  const display = lastName.length > 9 ? lastName.substring(0, 9) + '…' : lastName;
+  const graveLabel = data.Grave || '';
 
   return (
     <div
@@ -167,56 +164,24 @@ const GravePlot = React.memo(({ data, baseColorClass, onHover, onClick }) => {
         e.stopPropagation();
         if (onClick && data) onClick(data);
       }}
-      onMouseEnter={(e) => {
-        setIsHovered(true);
-        onHover(e, data);
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        onHover(null, null);
-      }}
-      className={`
-        relative transition-all duration-200 ease-in-out cursor-pointer
-        border rounded-[1px] 
-        flex flex-row items-center justify-between px-1.5
-        w-16 h-8 m-0.5 text-[8px] overflow-hidden select-none font-bold shadow-sm
-        ${activeClass}
-        plot-element
-      `}
-      title={`Row: ${data.Row}, Grave: ${data.Grave}`}
+      onMouseEnter={(e) => onHover(e, data)}
+      onMouseLeave={() => onHover(null, null)}
+      className="w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors plot-element"
+      title={`#${graveLabel} ${data.Row || ''} - ${statusKey}`}
     >
-      <span className="text-[10px] leading-none font-black text-gray-800">{data.Grave}</span>
-      <span className="text-[8px] leading-none text-gray-600 font-mono tracking-tighter truncate max-w-full">
-        {data.Row}
-      </span>
-      <div className={`w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm ${statusBg}`}></div>
+      <div className={`w-2 h-2 rounded-full shrink-0 ${dotBg}`} />
+      <div className="flex flex-col leading-none min-w-0 overflow-hidden">
+        <span className="text-[9px] font-bold text-gray-800 truncate">#{graveLabel}</span>
+        {display && <span className="text-[7px] text-gray-500 truncate">{display}</span>}
+      </div>
     </div>
   );
 });
 
-const LegendItem = React.memo(({ label, colorClass, onClick, active }) => {
-  const bgClass = colorClass.split(" ").find((c) => c.startsWith("bg-"));
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={!!active}
-      className={`flex flex-row items-center justify-center gap-2 bg-white h-10 md:h-12 px-4 rounded-full border border-gray-200 shadow-sm transition-colors hover:bg-green-100 ${
-        active ? "ring-2 ring-green-500" : ""
-      } min-w-[100px] w-auto text-center`}
-    >
-      <div className={`w-3 h-3 md:w-4 md:h-4 rounded-full border border-gray-300 ${bgClass} flex-shrink-0`}></div>
-      <span className="text-xs md:text-sm font-semibold text-gray-600 whitespace-nowrap">{label}</span>
-    </button>
-  );
-});
+
 
 const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHover, onPlotClick }) => {
-  const palette = ROW_PALETTES[rowLetter] || "bg-gray-100 border-gray-300 text-gray-900";
-  const [bgColor, borderColor, textColor] = palette.split(" ");
-
   // Define the 8 column ranges for each row letter
-  // Order: 225-232, 217-224, 209-216, 201-208, 125-132, 117-124, 109-116, 101-108 (right to left)
   const columnRanges = [
     { start: 225, end: 232, label: "225-232" },
     { start: 217, end: 224, label: "217-224" },
@@ -237,14 +202,12 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
 
     plots.forEach((plot) => {
       const rowNum = parseInt(String(plot.Row || "").replace(/\D/g, "")) || 0;
-      // Find which range this plot belongs to
       const range = columnRanges.find((r) => rowNum >= r.start && rowNum <= r.end);
       if (range) {
         groups[range.label].push(plot);
       }
     });
 
-    // Sort each group by the row number (ascending so bottom is first in flex-col-reverse)
     Object.keys(groups).forEach((key) => {
       groups[key].sort((a, b) => {
         const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
@@ -258,44 +221,32 @@ const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHove
   return (
     <div id={`row-${rowLetter}`} className="relative">
       <div
-        className="flex items-end mb-3 ml-1 cursor-pointer group select-none"
+        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
         onClick={() => onToggle(rowLetter)}
       >
-        <div
-          className={`mr-2 mb-1 p-1 rounded-full transition-colors ${
-            isCollapsed
-              ? "bg-gray-200 text-gray-600"
-              : `bg-white shadow-sm`
-          }`}
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
-        </div>
-        <h2 className={`text-2xl font-bold ${textColor}`}>Row {rowLetter}</h2>
+        {isCollapsed ? <ChevronRight size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
+        <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Row {rowLetter}</h2>
+        <span className="text-[10px] text-gray-400">{plots.length} plots</span>
       </div>
 
       {!isCollapsed && (
-        <div
-          className={`rounded-xl border-2 border-dashed p-6 transition-colors duration-500 ${borderColor} ${bgColor} bg-opacity-30`}
-        >
-          <div className="flex gap-4 justify-start pb-4">
-            {columnRanges.map((range) => (
-              <div
-                key={range.label}
-                className="flex flex-col-reverse gap-1 items-center justify-start min-w-[4rem] border-r border-dashed border-gray-300 last:border-0 pr-2"
-              >
-                <div className="text-[9px] text-gray-400 font-mono mt-1">{rowLetter}-{range.label}</div>
-                {groupedByRange[range.label].map((plot) => (
+        <div className="border border-gray-300 rounded overflow-hidden bg-white">
+          {columnRanges.map((range) => {
+            const rangePlots = groupedByRange[range.label];
+            if (rangePlots.length === 0) return null;
+            return (
+              <div key={range.label} className="flex border-b border-gray-100 last:border-b-0">
+                {rangePlots.map((plot) => (
                   <GravePlot
                     key={plot.id}
                     data={plot}
-                    baseColorClass={`${bgColor.replace("100", "100")} ${borderColor}`}
                     onHover={onHover}
                     onClick={onPlotClick}
                   />
                 ))}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -447,17 +398,15 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
   }
 
   return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 md:p-4">
-
-
+    <div className="inline-block select-none">
       {/* Map with Zoom/Pan */}
       <ZoomPan
-        className="w-full min-h-[70vh] md:min-h-[78vh] rounded-lg border border-gray-200 overflow-auto"
+        className="w-full min-h-[70vh] md:min-h-[78vh] rounded-lg border border-gray-200 overflow-auto bg-white/50"
         minScale={0.35}
         maxScale={2.5}
         initialScale={0.9}
       >
-        <div className="p-4 pt-2 inline-block min-w-max space-y-8">
+        <div className="p-4 inline-block min-w-max space-y-6">
           {rowLetters.length === 0 ? (
             <div className="text-sm text-gray-500">No plots found.</div>
           ) : (
@@ -475,6 +424,25 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
           )}
         </div>
       </ZoomPan>
+
+      {/* Legend */}
+      <div className="flex items-center gap-3 mt-4 flex-wrap">
+        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Legend:</span>
+        {[
+          ['bg-green-500', 'Available'],
+          ['bg-amber-500', 'Pending'],
+          ['bg-yellow-400', 'Reserved'],
+          ['bg-red-500', 'Occupied'],
+          ['bg-blue-600', 'Veteran'],
+          ['bg-gray-500', 'Unavailable'],
+          ['bg-purple-500', 'Unknown'],
+        ].map(([bg, label]) => (
+          <div key={label} className="flex items-center gap-1">
+            <div className={`w-2.5 h-2.5 rounded-full ${bg}`} />
+            <span className="text-[10px] text-gray-600">{label}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Tooltip */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
