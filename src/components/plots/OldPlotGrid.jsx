@@ -172,6 +172,10 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum === 8432) {
       return { row: 54, col: 16 };
     }
+    // Col 17: 843 at row 53 (above 8432)
+    if (plotNum === 843) {
+      return { row: 53, col: 16 };
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
