@@ -140,6 +140,18 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 743 && plotNum <= 786) {
       return { row: 99 - (plotNum - 743), col: 15 }; // 743 at row 99, 786 at row 56
     }
+    // Col 16 continued: 787-788 at rows 54-53
+    if (plotNum >= 787 && plotNum <= 788) {
+      return { row: 54 - (plotNum - 787), col: 15 }; // 787 at row 54, 788 at row 53
+    }
+    // Col 16: 712-713 at rows 51-50
+    if (plotNum >= 712 && plotNum <= 713) {
+      return { row: 51 - (plotNum - 712), col: 15 }; // 712 at row 51, 713 at row 50
+    }
+    // Col 16: 714-716 at rows 48-46
+    if (plotNum >= 714 && plotNum <= 716) {
+      return { row: 48 - (plotNum - 714), col: 15 }; // 714 at row 48, 715 at 47, 716 at 46
+    }
     return null; // unmapped plots don't appear on grid yet
   }
 
@@ -168,6 +180,10 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     // 2 blank spacer plots between 664 and 1071 in col 15
     rows[16][14] = { Grave: '', Status: '', _virtual: true };
     rows[15][14] = { Grave: '', Status: '', _virtual: true };
+    // Col 16 virtual plots
+    rows[55][15] = { Grave: '?', Status: 'Unknown', _virtual: true }; // Unknown above 786
+    rows[52][15] = { Grave: '', Status: '', _virtual: true }; // blank between 788 and 712
+    rows[49][15] = { Grave: '', Status: '', _virtual: true }; // blank between 713 and 714
     return rows;
   }, [plotsByNumber]);
 
