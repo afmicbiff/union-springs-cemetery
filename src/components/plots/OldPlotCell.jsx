@@ -62,8 +62,19 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   if (!item) return <div className="w-[68px] h-[38px] border-r border-gray-100/50" />;
 
   // Blank spacer plots: no text, no dot, just an empty cell
-  if (item._virtual && !item.Grave && !item.Status) {
+  // But allow virtual label cells that have a Last Name to render
+  if (item._virtual && !item.Grave && !item.Status && !(item['Last Name'] || item.last_name)) {
     return <div className="w-[68px] h-[38px] border-r border-gray-200/50" />;
+  }
+
+  // Virtual label-only cell (no grave, no status, but has name text)
+  if (item._virtual && !item.Grave && !item.Status && (item['Last Name'] || item.last_name)) {
+    const labelText = item['Last Name'] || item.last_name || '';
+    return (
+      <div className="w-[68px] h-[38px] px-0.5 flex items-center border-r border-gray-200/50" title={labelText}>
+        <span className="text-[7px] text-gray-700 font-semibold leading-tight line-clamp-2 overflow-hidden">{labelText}</span>
+      </div>
+    );
   }
 
   const isVet = item.Status === 'Veteran' || ((item.Notes || '').toLowerCase().includes('vet') && item.Status === 'Occupied');
