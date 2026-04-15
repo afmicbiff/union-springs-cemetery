@@ -146,7 +146,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[100][16] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][17] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     // Virtual "Unknown" placeholder above 709 in col 15
-    rows[55][14] = { Grave: '?', Status: 'Unknown', _virtual: true };
+    rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     return rows;
   }, [plotsByNumber]);
 
