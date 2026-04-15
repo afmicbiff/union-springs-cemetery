@@ -216,6 +216,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[100][15] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][16] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][17] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
+    rows[99][17] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U above MOW in col 18
     // Virtual "Unknown" placeholder above 709 in col 15
     rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // Virtual N/U above 641 in col 15
