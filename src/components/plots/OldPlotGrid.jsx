@@ -267,6 +267,8 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     rows[32][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown between 861 and 862
     // Col 19 virtual spacer
     rows[40][18] = { Grave: '', Status: '', _virtual: true }; // blank between 932 and 933
+    // Label above plot 1070 in col 14
+    rows[0][13] = { Grave: '', Status: '', 'Last Name': 'Kathy Martin Woodard & Michael Sheets', _virtual: true };
 
     return rows;
   }, [plotsByNumber]);
