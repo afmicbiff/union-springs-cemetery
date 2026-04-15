@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronDown, ChevronRight } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ZoomPan from "@/components/common/ZoomPan";
 import debounce from "lodash/debounce";
@@ -180,94 +180,21 @@ const GravePlot = React.memo(({ data, onHover, onClick }) => {
 
 
 
-const RowSection = React.memo(({ rowLetter, plots, isCollapsed, onToggle, onHover, onPlotClick }) => {
-  // Define the 8 column ranges for each row letter
-  // Ordered right-to-left visually: 101-108 on the right, 225-232 on the left
-  const columnRanges = [
-    { start: 225, end: 232, label: "225-232" },
-    { start: 217, end: 224, label: "217-224" },
-    { start: 209, end: 216, label: "209-216" },
-    { start: 201, end: 208, label: "201-208" },
-    { start: 125, end: 132, label: "125-132" },
-    { start: 117, end: 124, label: "117-124" },
-    { start: 109, end: 116, label: "109-116" },
-    { start: 101, end: 108, label: "101-108" },
-  ];
+// Column ranges define the 8 columns, ordered left-to-right visually
+// (225-232 on the left, 101-108 on the right)
+const COLUMN_RANGES = [
+  { start: 225, end: 232, label: "225-232" },
+  { start: 217, end: 224, label: "217-224" },
+  { start: 209, end: 216, label: "209-216" },
+  { start: 201, end: 208, label: "201-208" },
+  { start: 125, end: 132, label: "125-132" },
+  { start: 117, end: 124, label: "117-124" },
+  { start: 109, end: 116, label: "109-116" },
+  { start: 101, end: 108, label: "101-108" },
+];
 
-  // Group plots by the numeric part of Row into 8 columns
-  const groupedByRange = useMemo(() => {
-    const groups = {};
-    columnRanges.forEach((range) => {
-      groups[range.label] = [];
-    });
-
-    plots.forEach((plot) => {
-      const rowNum = parseInt(String(plot.Row || "").replace(/\D/g, "")) || 0;
-      const range = columnRanges.find((r) => rowNum >= r.start && rowNum <= r.end);
-      if (range) {
-        groups[range.label].push(plot);
-      }
-    });
-
-    // Sort each column descending so highest row number is at top, lowest at bottom
-    Object.keys(groups).forEach((key) => {
-      groups[key].sort((a, b) => {
-        const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
-        const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
-        return numB - numA; // descending: highest at top, lowest (101) at bottom
-      });
-    });
-    return groups;
-  }, [plots]);
-
-  // Find max column height to keep all columns same height
-  const maxHeight = useMemo(() => {
-    let max = 0;
-    columnRanges.forEach((range) => {
-      const len = (groupedByRange[range.label] || []).length;
-      if (len > max) max = len;
-    });
-    return max;
-  }, [groupedByRange]);
-
-  return (
-    <div id={`row-${rowLetter}`} className="relative">
-      <div
-        className="flex items-center gap-2 mb-2 cursor-pointer select-none"
-        onClick={() => onToggle(rowLetter)}
-      >
-        {isCollapsed ? <ChevronRight size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
-        <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Row {rowLetter}</h2>
-        <span className="text-[10px] text-gray-400">{plots.length} plots</span>
-      </div>
-
-      {!isCollapsed && (
-        <div className="border border-gray-300 rounded overflow-hidden bg-white">
-          {/* Grid: columns go right-to-left, plots go bottom-to-top within each column */}
-          <div className="flex">
-            {columnRanges.map((range) => {
-              const rangePlots = groupedByRange[range.label] || [];
-              if (rangePlots.length === 0) return null;
-              return (
-                <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0">
-                  {rangePlots.map((plot) => (
-                    <div key={plot.id} className="border-b border-gray-100 last:border-b-0">
-                      <GravePlot
-                        data={plot}
-                        onHover={onHover}
-                        onClick={onPlotClick}
-                      />
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-});
+// Row letters ordered top-to-bottom (J at top, A at bottom)
+const ROW_LETTERS = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
 
 export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
   const [searchInput, setSearchInput] = useState("");
@@ -275,7 +202,6 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
   const [hoverData, setHoverData] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [collapsedRows, setCollapsedRows] = useState({});
   const [statusFilter, setStatusFilter] = useState("All");
 
   const debouncedSetQuery = useMemo(() => debounce((v) => setSearchQuery(v), 250), []);
@@ -287,17 +213,11 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
     };
   }, [searchInput, debouncedSetQuery]);
 
-  // Sync external filters
   useEffect(() => {
-    if (filters?.search !== undefined) {
-      setSearchInput(filters.search || "");
-    }
-    if (filters?.status) {
-      setStatusFilter(filters.status);
-    }
+    if (filters?.search !== undefined) setSearchInput(filters.search || "");
+    if (filters?.status) setStatusFilter(filters.status);
   }, [filters?.search, filters?.status]);
 
-  // Fetch all NewPlotReservation1 records
   const { data: plots = [], isLoading } = useQuery({
     queryKey: ["newPlotReservation1-map"],
     queryFn: async () => base44.entities.NewPlotReservation1.list("Grave", 2000),
@@ -306,104 +226,82 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
     refetchOnWindowFocus: false,
   });
 
-  // Filter plots based on search and status
   const filteredPlots = useMemo(() => {
     return plots.filter((plot) => {
-      // Status filter
       const currentStatus = statusFilter !== "All" ? statusFilter : filters?.status;
-      if (currentStatus && currentStatus !== "All" && plot.Status !== currentStatus) {
-        return false;
-      }
-
-      // Search filter
+      if (currentStatus && currentStatus !== "All" && plot.Status !== currentStatus) return false;
       const query = searchQuery.toLowerCase();
       if (query) {
-        const searchable = [
-          plot.Grave,
-          plot.Row,
-          plot.FirstName,
-          plot.lastname,
-          plot.FamilyName,
-          plot.Notes,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+        const searchable = [plot.Grave, plot.Row, plot.FirstName, plot.lastname, plot.FamilyName, plot.Notes].filter(Boolean).join(" ").toLowerCase();
         if (!searchable.includes(query)) return false;
       }
-
-      // Owner filter
       if (filters?.owner) {
-        const family = String(plot.FamilyName || "").toLowerCase();
-        if (!family.includes(filters.owner.toLowerCase())) return false;
+        if (!String(plot.FamilyName || "").toLowerCase().includes(filters.owner.toLowerCase())) return false;
       }
-
-      // Plot number filter
       if (filters?.plot) {
         const plotStr = String(plot.Grave || "").toLowerCase();
         const wanted = filters.plot.toLowerCase();
         const numItem = parseInt(plotStr.replace(/\D/g, "")) || 0;
         const numWanted = /^[0-9]+$/.test(wanted) ? parseInt(wanted, 10) : null;
-        if (numWanted != null) {
-          if (numItem !== numWanted) return false;
-        } else if (!plotStr.includes(wanted)) {
-          return false;
-        }
+        if (numWanted != null) { if (numItem !== numWanted) return false; }
+        else if (!plotStr.includes(wanted)) return false;
       }
-
       return true;
     });
   }, [plots, searchQuery, statusFilter, filters?.status, filters?.owner, filters?.plot]);
 
-  // Group by row letter (A-J)
-  const groupedByRow = useMemo(() => {
-    const groups = {};
+  // Build unified grid: each row letter gets plots grouped into 8 columns
+  // Grid rows ordered J (top) → A (bottom), columns ordered 225-232 (left) → 101-108 (right)
+  const grid = useMemo(() => {
+    // Group all plots by row letter
+    const byLetter = {};
     filteredPlots.forEach((plot) => {
       const rowStr = String(plot.Row || "").toUpperCase();
-      const letterMatch = rowStr.match(/^([A-J])/);
-      const key = letterMatch ? letterMatch[1] : "Other";
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(plot);
+      const match = rowStr.match(/^([A-J])/);
+      const letter = match ? match[1] : null;
+      if (!letter) return;
+      if (!byLetter[letter]) byLetter[letter] = {};
+
+      const rowNum = parseInt(rowStr.replace(/\D/g, "")) || 0;
+      const range = COLUMN_RANGES.find((r) => rowNum >= r.start && rowNum <= r.end);
+      if (!range) return;
+      if (!byLetter[letter][range.label]) byLetter[letter][range.label] = [];
+      byLetter[letter][range.label].push(plot);
     });
-    return groups;
+
+    // Sort within each cell descending (highest number at top, lowest at bottom)
+    Object.values(byLetter).forEach((cols) => {
+      Object.keys(cols).forEach((key) => {
+        cols[key].sort((a, b) => {
+          const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
+          const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
+          return numB - numA;
+        });
+      });
+    });
+
+    return byLetter;
   }, [filteredPlots]);
 
-  const rowLetters = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'].filter(r => groupedByRow[r]);
+  const activeRowLetters = ROW_LETTERS.filter((r) => grid[r]);
 
   const handleHover = useCallback((e, data) => {
-    if (!data) {
-      setIsTooltipVisible(false);
-      return;
-    }
+    if (!data) { setIsTooltipVisible(false); return; }
     const rect = e.target.getBoundingClientRect();
     setMousePos({ x: rect.right, y: rect.top + rect.height / 2 });
     setHoverData(data);
     setIsTooltipVisible(true);
   }, []);
 
-  const toggleRow = useCallback((rowLetter) => {
-    setCollapsedRows((prev) => ({
-      ...prev,
-      [rowLetter]: !prev[rowLetter],
-    }));
-  }, []);
-
-  const handlePlotClick = useCallback(
-    (plot) => {
-      if (onPlotClick) {
-        onPlotClick({
-          id: plot.id,
-          plot_number: plot.Grave,
-          row_number: plot.Row,
-          status: plot.Status,
-          first_name: plot.FirstName,
-          last_name: plot.lastname,
-          family_name: plot.FamilyName,
-        });
-      }
-    },
-    [onPlotClick]
-  );
+  const handlePlotClick = useCallback((plot) => {
+    if (onPlotClick) {
+      onPlotClick({
+        id: plot.id, plot_number: plot.Grave, row_number: plot.Row,
+        status: plot.Status, first_name: plot.FirstName,
+        last_name: plot.lastname, family_name: plot.FamilyName,
+      });
+    }
+  }, [onPlotClick]);
 
   if (isLoading) {
     return (
@@ -415,28 +313,36 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
 
   return (
     <div className="inline-block select-none">
-      {/* Map with Zoom/Pan */}
       <ZoomPan
         className="w-full min-h-[70vh] md:min-h-[78vh] rounded-lg border border-gray-200 overflow-auto bg-white/50"
         minScale={0.35}
         maxScale={2.5}
         initialScale={0.9}
       >
-        <div className="p-4 inline-block min-w-max space-y-6">
-          {rowLetters.length === 0 ? (
+        <div className="p-4 inline-block min-w-max">
+          {activeRowLetters.length === 0 ? (
             <div className="text-sm text-gray-500">No plots found.</div>
           ) : (
-            rowLetters.map((rowLetter) => (
-              <RowSection
-                key={rowLetter}
-                rowLetter={rowLetter}
-                plots={groupedByRow[rowLetter]}
-                isCollapsed={collapsedRows[rowLetter]}
-                onToggle={toggleRow}
-                onHover={handleHover}
-                onPlotClick={handlePlotClick}
-              />
-            ))
+            <div className="border border-gray-300 rounded overflow-hidden bg-white">
+              {/* Unified grid: each row letter is a horizontal band, columns are vertical */}
+              <div className="flex">
+                {COLUMN_RANGES.map((range) => (
+                  <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0">
+                    {activeRowLetters.map((letter) => {
+                      const cellPlots = (grid[letter] && grid[letter][range.label]) || [];
+                      if (cellPlots.length === 0) {
+                        return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
+                      }
+                      return cellPlots.map((plot) => (
+                        <div key={plot.id} className="border-b border-gray-100 last:border-b-0">
+                          <GravePlot data={plot} onHover={handleHover} onClick={handlePlotClick} />
+                        </div>
+                      ));
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </ZoomPan>
@@ -460,7 +366,6 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
         ))}
       </div>
 
-      {/* Tooltip */}
       <Tooltip data={hoverData} visible={isTooltipVisible} position={mousePos} />
     </div>
   );
