@@ -448,50 +448,7 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
 
   return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-2 md:p-4">
-        {/* Legend */}
-      <div className="bg-white border-b border-gray-200 py-3 mb-4">
-        <div className="flex flex-wrap justify-center items-center gap-2 px-2">
-          <div className="w-full text-center mb-1 md:w-auto md:mb-0 md:mr-2">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider inline-flex items-center">
-              <Info size={14} className="mr-1" /> Status
-            </span>
-          </div>
-          <LegendItem
-            label="Available"
-            colorClass={STATUS_COLORS.Available}
-            onClick={() => setStatusFilter((prev) => (prev === "Available" ? "All" : "Available"))}
-            active={statusFilter === "Available"}
-          />
-          <LegendItem
-            label="Pending"
-            colorClass={STATUS_COLORS["Pending Reservation"]}
-            onClick={() =>
-              setStatusFilter((prev) =>
-                prev === "Pending Reservation" ? "All" : "Pending Reservation"
-              )
-            }
-            active={statusFilter === "Pending Reservation"}
-          />
-          <LegendItem
-            label="Reserved"
-            colorClass={STATUS_COLORS.Reserved}
-            onClick={() => setStatusFilter((prev) => (prev === "Reserved" ? "All" : "Reserved"))}
-            active={statusFilter === "Reserved"}
-          />
-          <LegendItem
-            label="Occupied"
-            colorClass={STATUS_COLORS.Occupied}
-            onClick={() => setStatusFilter((prev) => (prev === "Occupied" ? "All" : "Occupied"))}
-            active={statusFilter === "Occupied"}
-          />
-          <LegendItem
-            label="Veteran"
-            colorClass={STATUS_COLORS.Veteran}
-            onClick={() => setStatusFilter((prev) => (prev === "Veteran" ? "All" : "Veteran"))}
-            active={statusFilter === "Veteran"}
-          />
-        </div>
-      </div>
+
 
       {/* Map with Zoom/Pan */}
       <ZoomPan
