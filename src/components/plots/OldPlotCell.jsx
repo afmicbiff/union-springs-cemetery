@@ -16,10 +16,10 @@ if (typeof document !== 'undefined' && !document.getElementById('old-plot-blink-
   style.id = 'old-plot-blink-style';
   style.textContent = `
     @keyframes oldPlotBlink {
-      0%, 100% { box-shadow: 0 0 4px 2px rgba(34,197,94,0.5); border-color: #15803d; }
-      50% { box-shadow: 0 0 8px 4px rgba(74,222,128,0.6); border-color: #22c55e; }
+      0%, 100% { box-shadow: 0 0 8px 6px rgba(34,197,94,0.7); border-color: #15803d; background-color: rgba(74,222,128,0.25); }
+      50% { box-shadow: 0 0 16px 10px rgba(74,222,128,0.8); border-color: #22c55e; background-color: rgba(74,222,128,0.45); }
     }
-    .animate-old-plot-blink { animation: oldPlotBlink 1s ease-in-out infinite; }
+    .animate-old-plot-blink { animation: oldPlotBlink 0.8s ease-in-out infinite; }
   `;
   document.head.appendChild(style);
 }
@@ -89,7 +89,7 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   return (
     <div
       data-plot-num={plotNum}
-      className={`w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-2 ring-green-500 ring-offset-1 z-50 relative' : ''}`}
+      className={`w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
