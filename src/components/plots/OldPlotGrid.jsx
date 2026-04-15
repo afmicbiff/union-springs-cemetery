@@ -117,7 +117,10 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     if (plotNum >= 1057 && plotNum <= 1070) {
       return { row: 14 - (plotNum - 1057), col: 13 }; // 1057 at row 14, 1070 at row 1
     }
-    // Col 15 (index 14): plot 665 above MOW
+    // Col 15 (index 14): 667-709 bottom-up, then 665, then MOW at row 100
+    if (plotNum >= 667 && plotNum <= 709) {
+      return { row: 98 - (plotNum - 667), col: 14 }; // 667 at row 98, 709 at row 56
+    }
     if (plotNum === 665) {
       return { row: 99, col: 14 }; // 665 at row 99, MOW at row 100
     }
