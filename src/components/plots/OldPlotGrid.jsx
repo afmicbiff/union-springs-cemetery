@@ -85,7 +85,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
       return { row: 52 - (plotNum - 349), col: 10 }; // 349 at row 52, 382 at row 19
     }
     if (plotNum >= 1015 && plotNum <= 1028) {
-      return { row: 15 - (plotNum - 1015), col: 10 }; // 1015 at row 15, 1028 at row 2
+      return { row: 14 - (plotNum - 1015), col: 10 }; // 1015 at row 14, 1028 at row 1
     }
     // Col 12 (index 11): 383-464 bottom-up, 4 blanks, 1029-1042
     if (plotNum >= 383 && plotNum <= 464) {
