@@ -13,9 +13,9 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScaleReadiness from './pages/ScaleReadiness';
 import OldPlotsAndMap from './pages/OldPlotsAndMap';
+import NewPlotReservations from './pages/NewPlotReservations';
 
 const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
-const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -81,9 +81,7 @@ const AuthenticatedApp = () => {
         path="/NewPlotReservations"
         element={
           <LayoutWrapper currentPageName="NewPlotReservations">
-            <Suspense fallback={<RouteLoader />}>
-              <NewPlotReservations />
-            </Suspense>
+            <NewPlotReservations />
           </LayoutWrapper>
         }
       />
