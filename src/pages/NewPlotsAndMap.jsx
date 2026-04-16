@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
 import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
 import PlotFilters from "../components/plots/PlotFilters";
 import { base44 } from "@/api/base44Client";
@@ -6,8 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
 
+
 export default function NewPlotsAndMap() {
   const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
+  const isAdmin = user?.role === 'admin';
   const [activeTab, setActiveTab] = React.useState("reservation1");
   const [filters, setFilters] = React.useState({
     search: "",
@@ -37,6 +40,23 @@ export default function NewPlotsAndMap() {
     setSelectedPlot(plot || null);
     setShowRequest(true);
   }, []);
+  const handleDeleteA1 = async () => {
+    if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
+    const res = await base44.functions.invoke('deleteA1Plots', {});
+    const count = res.data?.deleted_count ?? 0;
+    alert(`Deleted ${count} A-1 plot(s).`);
+  };
+  const handlePopulateA1 = async () => {
+    if (!window.confirm('Fill A-1 (101–132) from NewPlot data?')) return;
+    const res = await base44.functions.invoke('populateA1Plots', {});
+    alert(res.data?.message || 'Done');
+  };
+  const handleDeleteA1Unplaced = async () => {
+    if (!window.confirm('Delete A-1 labeled but not placed NewPlot rows (e.g., 1334–1341)? This cannot be undone.')) return;
+    const res = await base44.functions.invoke('deleteA1UnplacedNewPlots', {});
+    const count = res.data?.deleted_count ?? 0;
+    alert(res.data?.message || `Deleted ${count} unplaced A-1 row(s).`);
+  };
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-6 shadow-sm">

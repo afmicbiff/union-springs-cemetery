@@ -181,6 +181,7 @@ const GravePlot = React.memo(({ data, onHover, onClick }) => {
 
 
 // Column ranges define the 8 columns, ordered left-to-right visually
+// (225-232 on the left, 101-113 on the right - extended by 5 for spacers after 1163)
 const COLUMN_RANGES = [
   { start: 225, end: 232, label: "225-232" },
   { start: 217, end: 224, label: "217-224" },
@@ -189,8 +190,14 @@ const COLUMN_RANGES = [
   { start: 125, end: 132, label: "125-132" },
   { start: 117, end: 124, label: "117-124" },
   { start: 109, end: 116, label: "109-116" },
-  { start: 101, end: 108, label: "101-108" },
+  { start: 101, end: 113, label: "101-113" },
 ];
+
+// Spacer config: insert 5 blank plots after Grave 1163 (Row H-105)
+const SPACER_CONFIG = {
+  afterGrave: '1163',
+  count: 5,
+};
 
 // Row letters ordered top-to-bottom (J at top, A at bottom)
 const ROW_LETTERS = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
@@ -323,28 +330,36 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
             <div className="text-sm text-gray-500">No plots found.</div>
           ) : (
             <div className="border border-gray-300 rounded overflow-hidden bg-white">
-              {/* Row-first layout: each visual row is a <div className="flex"> across all columns */}
-              {activeRowLetters.map((letter) => {
-                // For non-H letters, compute the max plots in any column so all columns stay same height
-                const colPlots = COLUMN_RANGES.map((range) => (grid[letter] && grid[letter][range.label]) || []);
-                const maxRows = Math.max(...colPlots.map((c) => c.length), 0);
-
-                // Render rows one-by-one so all columns align
-                return Array.from({ length: maxRows }, (_, rowIdx) => (
-                  <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
-                    {COLUMN_RANGES.map((range, colIdx) => {
-                      const plot = colPlots[colIdx][rowIdx];
-                      return plot ? (
-                        <div key={range.label} className="border-r border-gray-200 last:border-r-0">
-                          <GravePlot data={plot} onHover={handleHover} onClick={handlePlotClick} />
-                        </div>
-                      ) : (
-                        <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />
-                      );
+              {/* Unified grid: each row letter is a horizontal band, columns are vertical */}
+              <div className="flex">
+                {COLUMN_RANGES.map((range) => (
+                  <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0">
+                    {activeRowLetters.map((letter) => {
+                      const cellPlots = (grid[letter] && grid[letter][range.label]) || [];
+                      if (cellPlots.length === 0) {
+                        return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
+                      }
+                      // Build items list, injecting spacers after the target grave
+                      const items = [];
+                      cellPlots.forEach((plot) => {
+                        items.push({ type: 'plot', plot });
+                        if (plot.Grave === SPACER_CONFIG.afterGrave) {
+                          for (let s = 0; s < SPACER_CONFIG.count; s++) {
+                            items.push({ type: 'spacer', key: `spacer-${plot.Grave}-${s}` });
+                          }
+                        }
+                      });
+                      return items.map((item) => (
+                        item.type === 'spacer'
+                          ? <div key={item.key} className="w-[68px] h-[38px] border-b border-gray-100 bg-gray-50" />
+                          : <div key={item.plot.id} className="border-b border-gray-100 last:border-b-0">
+                              <GravePlot data={item.plot} onHover={handleHover} onClick={handlePlotClick} />
+                            </div>
+                      ));
                     })}
                   </div>
-                ));
-              })}
+                ))}
+              </div>
             </div>
           )}
         </div>
