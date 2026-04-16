@@ -339,15 +339,15 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                       if (cellPlots.length === 0) {
                         return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
                       }
-                      // Build items list, injecting spacers after the target grave
+                      // Build items list, injecting spacers before the target grave (so it sits right above the next plot)
                       const items = [];
                       cellPlots.forEach((plot) => {
-                        items.push({ type: 'plot', plot });
                         if (plot.Grave === SPACER_CONFIG.afterGrave) {
                           for (let s = 0; s < SPACER_CONFIG.count; s++) {
                             items.push({ type: 'spacer', key: `spacer-${plot.Grave}-${s}` });
                           }
                         }
+                        items.push({ type: 'plot', plot });
                       });
                       return items.map((item) => (
                         item.type === 'spacer'
