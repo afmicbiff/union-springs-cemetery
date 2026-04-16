@@ -50,32 +50,48 @@
 import { lazy } from 'react';
 import __Layout from './Layout.jsx';
 
-const Admin = lazy(() => import('./pages/Admin'));
-const Bylaws = lazy(() => import('./pages/Bylaws'));
-const Contact = lazy(() => import('./pages/Contact'));
-const EmployeeProfile = lazy(() => import('./pages/EmployeeProfile'));
-const Employees = lazy(() => import('./pages/Employees'));
-const History = lazy(() => import('./pages/History'));
-const Home = lazy(() => import('./pages/Home'));
-const ImageGallery = lazy(() => import('./pages/ImageGallery'));
-const ImageManager = lazy(() => import('./pages/ImageManager'));
-const MemberPortal = lazy(() => import('./pages/MemberPortal'));
-const Memorial = lazy(() => import('./pages/Memorial'));
-const NewPlotDetails = lazy(() => import('./pages/NewPlotDetails'));
-const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
-const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
-const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
+// Retry wrapper for dynamic imports — handles transient network/cache failures
+function lazyWithRetry(importFn) {
+  const component = lazy(() =>
+    importFn().catch((err) => {
+      // On failure, wait briefly then retry once
+      return new Promise((resolve) => setTimeout(resolve, 500))
+        .then(() => importFn())
+        .catch(() => {
+          // Final fallback: reload the page to bust the module cache
+          window.location.reload();
+          throw err;
+        });
+    })
+  );
+  return component;
+}
 
-const Privacy = lazy(() => import('./pages/Privacy'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Reports = lazy(() => import('./pages/Reports'));
-const ResendAck = lazy(() => import('./pages/ResendAck'));
-const ReservePlot = lazy(() => import('./pages/ReservePlot'));
-const Search = lazy(() => import('./pages/Search'));
-const SecurityDashboard = lazy(() => import('./pages/SecurityDashboard'));
-const SendEmail = lazy(() => import('./pages/SendEmail'));
-const Services = lazy(() => import('./pages/Services'));
-const Visitor = lazy(() => import('./pages/Visitor'));
+const Admin = lazyWithRetry(() => import('./pages/Admin'));
+const Bylaws = lazyWithRetry(() => import('./pages/Bylaws'));
+const Contact = lazyWithRetry(() => import('./pages/Contact'));
+const EmployeeProfile = lazyWithRetry(() => import('./pages/EmployeeProfile'));
+const Employees = lazyWithRetry(() => import('./pages/Employees'));
+const History = lazyWithRetry(() => import('./pages/History'));
+const Home = lazyWithRetry(() => import('./pages/Home'));
+const ImageGallery = lazyWithRetry(() => import('./pages/ImageGallery'));
+const ImageManager = lazyWithRetry(() => import('./pages/ImageManager'));
+const MemberPortal = lazyWithRetry(() => import('./pages/MemberPortal'));
+const Memorial = lazyWithRetry(() => import('./pages/Memorial'));
+const NewPlotDetails = lazyWithRetry(() => import('./pages/NewPlotDetails'));
+const NewPlotReservations = lazyWithRetry(() => import('./pages/NewPlotReservations'));
+const NewPlotsAndMap = lazyWithRetry(() => import('./pages/NewPlotsAndMap'));
+const NotificationSettings = lazyWithRetry(() => import('./pages/NotificationSettings'));
+const Privacy = lazyWithRetry(() => import('./pages/Privacy'));
+const Profile = lazyWithRetry(() => import('./pages/Profile'));
+const Reports = lazyWithRetry(() => import('./pages/Reports'));
+const ResendAck = lazyWithRetry(() => import('./pages/ResendAck'));
+const ReservePlot = lazyWithRetry(() => import('./pages/ReservePlot'));
+const Search = lazyWithRetry(() => import('./pages/Search'));
+const SecurityDashboard = lazyWithRetry(() => import('./pages/SecurityDashboard'));
+const SendEmail = lazyWithRetry(() => import('./pages/SendEmail'));
+const Services = lazyWithRetry(() => import('./pages/Services'));
+const Visitor = lazyWithRetry(() => import('./pages/Visitor'));
 
 
 export const PAGES = {
