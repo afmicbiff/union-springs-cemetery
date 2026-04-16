@@ -3,10 +3,19 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from 'lucide-react';
 
-const NewPlotReservation1Map = lazy(() => import("@/components/plots/NewPlotReservation1Map"));
-const PlotFilters = lazy(() => import("@/components/plots/PlotFilters"));
-const RequestPlotDialog = lazy(() => import("@/components/plots/RequestPlotDialog"));
-const NewPlotsBrowser = lazy(() => import("@/components/plots/NewPlotsBrowser"));
+function lazyRetry(fn) {
+  return lazy(() => fn().catch(() =>
+    new Promise(r => setTimeout(r, 500)).then(() => fn()).catch(() => {
+      window.location.reload();
+      return fn();
+    })
+  ));
+}
+
+const NewPlotReservation1Map = lazyRetry(() => import("@/components/plots/NewPlotReservation1Map"));
+const PlotFilters = lazyRetry(() => import("@/components/plots/PlotFilters"));
+const RequestPlotDialog = lazyRetry(() => import("@/components/plots/RequestPlotDialog"));
+const NewPlotsBrowser = lazyRetry(() => import("@/components/plots/NewPlotsBrowser"));
 
 const SectionLoader = () => (
   <div className="flex items-center justify-center py-12 text-gray-400">

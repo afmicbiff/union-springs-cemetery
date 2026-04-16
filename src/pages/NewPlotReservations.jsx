@@ -7,9 +7,18 @@ import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2 } from 'lucide-react';
 
-const PlotReservationsAdmin = lazy(() => import("@/components/admin/PlotReservationsAdmin"));
-const NewPlotReservation1Map = lazy(() => import("@/components/plots/NewPlotReservation1Map"));
-const NewPlotsBrowser = lazy(() => import("@/components/plots/NewPlotsBrowser"));
+function lazyRetry(fn) {
+  return lazy(() => fn().catch(() =>
+    new Promise(r => setTimeout(r, 500)).then(() => fn()).catch(() => {
+      window.location.reload();
+      return fn();
+    })
+  ));
+}
+
+const PlotReservationsAdmin = lazyRetry(() => import("@/components/admin/PlotReservationsAdmin"));
+const NewPlotReservation1Map = lazyRetry(() => import("@/components/plots/NewPlotReservation1Map"));
+const NewPlotsBrowser = lazyRetry(() => import("@/components/plots/NewPlotsBrowser"));
 
 const SectionLoader = () => (
   <div className="flex items-center justify-center py-12 text-gray-400">
