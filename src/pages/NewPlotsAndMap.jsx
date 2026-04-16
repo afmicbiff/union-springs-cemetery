@@ -1,10 +1,10 @@
 import React from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
-import PlotFilters from "../components/plots/PlotFilters";
-import RequestPlotDialog from "../components/plots/RequestPlotDialog";
-import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
+import NewPlotReservation1Map from "@/components/plots/NewPlotReservation1Map";
+import PlotFilters from "@/components/plots/PlotFilters";
+import RequestPlotDialog from "@/components/plots/RequestPlotDialog";
+import NewPlotsBrowser from "@/components/plots/NewPlotsBrowser";
 
 export default function NewPlotsAndMap() {
   const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
