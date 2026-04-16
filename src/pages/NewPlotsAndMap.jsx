@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import NewPlotReservation1Map from "@/components/plots/NewPlotReservation1Map";
-import PlotFilters from "@/components/plots/PlotFilters";
-import RequestPlotDialog from "@/components/plots/RequestPlotDialog";
-import NewPlotsBrowser from "@/components/plots/NewPlotsBrowser";
+import { Loader2 } from 'lucide-react';
+
+const NewPlotReservation1Map = lazy(() => import("@/components/plots/NewPlotReservation1Map"));
+const PlotFilters = lazy(() => import("@/components/plots/PlotFilters"));
+const RequestPlotDialog = lazy(() => import("@/components/plots/RequestPlotDialog"));
+const NewPlotsBrowser = lazy(() => import("@/components/plots/NewPlotsBrowser"));
+
+const SectionLoader = () => (
+  <div className="flex items-center justify-center py-12 text-gray-400">
+    <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading…
+  </div>
+);
 
 export default function NewPlotsAndMap() {
   const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
@@ -89,25 +97,31 @@ export default function NewPlotsAndMap() {
 
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <PlotFilters
-            filters={filters}
-            onFilterChange={setFilters}
-            statusOptions={["All","Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"]}
-          />
+          <Suspense fallback={<SectionLoader />}>
+            <PlotFilters
+              filters={filters}
+              onFilterChange={setFilters}
+              statusOptions={["All","Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"]}
+            />
+          </Suspense>
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-3 sm:p-6">
         <div className="space-y-6">
-          {activeTab === 'reservation1' ? (
-            <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
-          ) : (
-            <NewPlotsBrowser activeTab={activeTab === 'map' ? 'map' : 'data'} onTabChange={(tab) => setActiveTab(tab)} filters={filters} onPlotClick={handlePlotClick} />
-          )}
+          <Suspense fallback={<SectionLoader />}>
+            {activeTab === 'reservation1' ? (
+              <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
+            ) : (
+              <NewPlotsBrowser activeTab={activeTab === 'map' ? 'map' : 'data'} onTabChange={(tab) => setActiveTab(tab)} filters={filters} onPlotClick={handlePlotClick} />
+            )}
+          </Suspense>
         </div>
       </main>
 
-      <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
+      <Suspense fallback={null}>
+        <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
+      </Suspense>
     </div>
   );
 }
