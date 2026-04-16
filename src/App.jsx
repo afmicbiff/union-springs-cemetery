@@ -14,8 +14,8 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 const ScaleReadiness = lazy(() => import('./pages/ScaleReadiness'));
 const OldPlotsAndMap = lazy(() => import('./pages/OldPlotsAndMap'));
 
-const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
-const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
+import NewPlotsAndMap from './pages/NewPlotsAndMap';
+import NewPlotReservations from './pages/NewPlotReservations';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
