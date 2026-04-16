@@ -195,7 +195,6 @@ const COLUMN_RANGES = [
 // Spacer configs: insert blank rows between "above" plots (rowNum > afterRowNum) and "below" plots (rowNum <= afterRowNum)
 // Both H and I rows have a gap between -109 and -105
 const SPACER_CONFIGS = {
-  H: { afterRowNum: 105, count: 5 },
 };
 
 // Row letters ordered top-to-bottom (J at top, A at bottom)
