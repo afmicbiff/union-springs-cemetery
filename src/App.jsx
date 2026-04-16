@@ -15,6 +15,7 @@ import ScaleReadiness from './pages/ScaleReadiness';
 import OldPlotsAndMap from './pages/OldPlotsAndMap';
 
 const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
+const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -76,6 +77,16 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route
+        path="/NewPlotReservations"
+        element={
+          <LayoutWrapper currentPageName="NewPlotReservations">
+            <Suspense fallback={<RouteLoader />}>
+              <NewPlotReservations />
+            </Suspense>
+          </LayoutWrapper>
+        }
+      />
       <Route
         path="/NewPlotsAndMap"
         element={

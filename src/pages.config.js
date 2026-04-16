@@ -79,7 +79,6 @@ const ImageManager = lazyWithRetry(() => import('./pages/ImageManager'));
 const MemberPortal = lazyWithRetry(() => import('./pages/MemberPortal'));
 const Memorial = lazyWithRetry(() => import('./pages/Memorial'));
 const NewPlotDetails = lazyWithRetry(() => import('./pages/NewPlotDetails'));
-const NewPlotReservations = lazyWithRetry(() => import('./pages/NewPlotReservations'));
 const NotificationSettings = lazyWithRetry(() => import('./pages/NotificationSettings'));
 const Privacy = lazyWithRetry(() => import('./pages/Privacy'));
 const Profile = lazyWithRetry(() => import('./pages/Profile'));
@@ -106,7 +105,6 @@ export const PAGES = {
     "MemberPortal": MemberPortal,
     "Memorial": Memorial,
     "NewPlotDetails": NewPlotDetails,
-    "NewPlotReservations": NewPlotReservations,
     "NotificationSettings": NotificationSettings,
 
     "Privacy": Privacy,
