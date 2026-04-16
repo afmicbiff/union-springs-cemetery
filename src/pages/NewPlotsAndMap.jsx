@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
-import PlotFilters from "../components/plots/PlotFilters";
+import React from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
+import PlotFilters from "../components/plots/PlotFilters";
 import RequestPlotDialog from "../components/plots/RequestPlotDialog";
 import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
 
