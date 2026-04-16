@@ -193,9 +193,9 @@ const COLUMN_RANGES = [
   { start: 101, end: 113, label: "101-113" },
 ];
 
-// Spacer config: insert 5 blank plots after Grave 1163 (Row H-105)
+// Spacer config: insert 5 blank plots before Grave 1163 (Row H-105)
 const SPACER_CONFIG = {
-  afterGrave: '1163',
+  beforeGrave: '1163',
   count: 5,
 };
 
@@ -339,15 +339,15 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                       if (cellPlots.length === 0) {
                         return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
                       }
-                      // Build items list, injecting spacers after the target grave
+                      // Build items list, injecting spacers before the target grave
                       const items = [];
                       cellPlots.forEach((plot) => {
-                        items.push({ type: 'plot', plot });
-                        if (plot.Grave === SPACER_CONFIG.afterGrave) {
+                        if (plot.Grave === SPACER_CONFIG.beforeGrave) {
                           for (let s = 0; s < SPACER_CONFIG.count; s++) {
                             items.push({ type: 'spacer', key: `spacer-${plot.Grave}-${s}` });
                           }
                         }
+                        items.push({ type: 'plot', plot });
                       });
                       return items.map((item) => (
                         item.type === 'spacer'
