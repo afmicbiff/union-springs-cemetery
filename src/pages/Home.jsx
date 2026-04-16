@@ -8,6 +8,16 @@ import StructuredData from '@/components/common/StructuredData';
 // Critical above-the-fold component loaded immediately
 import HeroSection from '@/components/home/HeroSection';
 
+// Preload hero background image only when Home page mounts
+if (typeof document !== 'undefined' && !document.getElementById('hero-preload')) {
+  const link = document.createElement('link');
+  link.id = 'hero-preload';
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = 'https://images.unsplash.com/photo-1618529285090-e9b46bdc394c?q=45&w=1000&auto=format&fit=crop&fm=webp';
+  document.head.appendChild(link);
+}
+
 // Lazy load below-the-fold components for faster initial render on mobile
 const QuickAccessGrid = lazy(() => import('@/components/home/QuickAccessGrid'));
 const InfoSection = lazy(() => import('@/components/home/InfoSection'));

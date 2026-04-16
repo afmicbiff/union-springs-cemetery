@@ -11,8 +11,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ScaleReadiness from './pages/ScaleReadiness';
-import OldPlotsAndMap from './pages/OldPlotsAndMap';
+const ScaleReadiness = lazy(() => import('./pages/ScaleReadiness'));
+const OldPlotsAndMap = lazy(() => import('./pages/OldPlotsAndMap'));
 
 const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
 const NewPlotReservations = lazy(() => import('./pages/NewPlotReservations'));

@@ -29,6 +29,36 @@ function parseNum(g) {
   return Number.isFinite(n) ? n : null;
 }
 
+// Delegated event listener manager — one listener per event type instead of one per cell
+const blinkListeners = {
+  installed: false,
+  callbacks: new Map(), // plotNum -> setState callback
+  install() {
+    if (this.installed) return;
+    this.installed = true;
+    window.addEventListener('plot-start-blink', (e) => {
+      const num = e.detail?.targetPlotNum;
+      const cb = this.callbacks.get(num);
+      if (cb) cb(true);
+    });
+    window.addEventListener('plot-search-blink', (e) => {
+      const num = e.detail?.targetPlotNum;
+      const cb = this.callbacks.get(num);
+      if (cb) cb(true);
+    });
+    window.addEventListener('plot-stop-all-blink', () => {
+      this.callbacks.forEach((cb) => cb(false));
+    });
+  },
+  register(plotNum, cb) {
+    this.install();
+    this.callbacks.set(plotNum, cb);
+  },
+  unregister(plotNum) {
+    this.callbacks.delete(plotNum);
+  },
+};
+
 const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }) {
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkRef = useRef(false);
@@ -36,18 +66,9 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
 
   useEffect(() => {
     if (!item || plotNum == null) return;
-    const handleBlink = (e) => {
-      if (e.detail?.targetPlotNum === plotNum) { blinkRef.current = true; setIsBlinking(true); }
-    };
-    const handleStop = () => { if (blinkRef.current) { blinkRef.current = false; setIsBlinking(false); } };
-    window.addEventListener('plot-start-blink', handleBlink);
-    window.addEventListener('plot-search-blink', handleBlink);
-    window.addEventListener('plot-stop-all-blink', handleStop);
-    return () => {
-      window.removeEventListener('plot-start-blink', handleBlink);
-      window.removeEventListener('plot-search-blink', handleBlink);
-      window.removeEventListener('plot-stop-all-blink', handleStop);
-    };
+    const cb = (on) => { blinkRef.current = on; setIsBlinking(on); };
+    blinkListeners.register(plotNum, cb);
+    return () => blinkListeners.unregister(plotNum);
   }, [plotNum, item]);
 
   const handleClick = useCallback((e) => {
@@ -61,13 +82,10 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
 
   if (!item) return <div className="w-[68px] h-[38px] border-r border-gray-100/50" />;
 
-  // Blank spacer plots: no text, no dot, just an empty cell
-  // But allow virtual label cells that have a Last Name to render
   if (item._virtual && !item.Grave && !item.Status && !(item['Last Name'] || item.last_name)) {
     return <div className="w-[68px] h-[38px] border-r border-gray-200/50" />;
   }
 
-  // Virtual label-only cell (no grave, no status, but has name text)
   if (item._virtual && !item.Grave && !item.Status && (item['Last Name'] || item.last_name)) {
     const labelText = item['Last Name'] || item.last_name || '';
     return (
