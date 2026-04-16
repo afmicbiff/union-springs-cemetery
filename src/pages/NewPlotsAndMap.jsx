@@ -1,26 +1,8 @@
-import React, { useState, useCallback, lazy, Suspense } from 'react';
-import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
-
-function lazyRetry(fn) {
-  return lazy(() => fn().catch(() =>
-    new Promise(r => setTimeout(r, 500)).then(() => fn()).catch(() => {
-      window.location.reload();
-      return fn();
-    })
-  ));
-}
-
-const NewPlotReservation1Map = lazyRetry(() => import("@/components/plots/NewPlotReservation1Map"));
-const PlotFilters = lazyRetry(() => import("@/components/plots/PlotFilters"));
-const RequestPlotDialog = lazyRetry(() => import("@/components/plots/RequestPlotDialog"));
-
-const SectionLoader = () => (
-  <div className="flex items-center justify-center py-12 text-gray-400">
-    <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading…
-  </div>
-);
+import NewPlotReservation1Map from "@/components/plots/NewPlotReservation1Map";
+import PlotFilters from "@/components/plots/PlotFilters";
+import RequestPlotDialog from "@/components/plots/RequestPlotDialog";
 
 export default function NewPlotsAndMap() {
   const [filters, setFilters] = useState({
@@ -65,25 +47,19 @@ export default function NewPlotsAndMap() {
 
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <Suspense fallback={null}>
-            <PlotFilters
-              filters={filters}
-              onFilterChange={setFilters}
-              statusOptions={["All","Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"]}
-            />
-          </Suspense>
+          <PlotFilters
+            filters={filters}
+            onFilterChange={setFilters}
+            statusOptions={["All","Available","Pending Reservation","Reserved","Occupied","Veteran","Unavailable","Unknown","Not Usable"]}
+          />
         </div>
       </div>
 
       <main className="max-w-7xl mx-auto p-3 sm:p-6">
-        <Suspense fallback={<SectionLoader />}>
-          <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
-        </Suspense>
+        <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
       </main>
 
-      <Suspense fallback={null}>
-        <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
-      </Suspense>
+      <RequestPlotDialog open={showRequest} onOpenChange={setShowRequest} selectedPlot={selectedPlot} />
     </div>
   );
 }
