@@ -1,16 +1,22 @@
-import React from 'react';
-import NewPlotsBrowser from "../components/plots/NewPlotsBrowser";
-import NewPlotReservation1Map from "../components/plots/NewPlotReservation1Map";
-import PlotReservationsAdmin from "@/components/admin/PlotReservationsAdmin";
+import React, { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
-// v2 - cache bust
+const PlotReservationsAdmin = lazy(() => import("@/components/admin/PlotReservationsAdmin"));
+const NewPlotReservation1Map = lazy(() => import("@/components/plots/NewPlotReservation1Map"));
+const NewPlotsBrowser = lazy(() => import("@/components/plots/NewPlotsBrowser"));
+
+const SectionLoader = () => (
+  <div className="flex items-center justify-center py-12 text-gray-400">
+    <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading…
+  </div>
+);
+
 export default function NewPlotReservations() {
   const { data: user } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
   const { data: member } = useQuery({
@@ -27,12 +33,7 @@ export default function NewPlotReservations() {
     queryFn: async () => {
       if (!user?.email) return null;
       const result = await base44.entities.Employee.filter(
-        {
-          $or: [
-            { email: user.email },
-            { work_email: user.email }
-          ]
-        },
+        { $or: [{ email: user.email }, { work_email: user.email }] },
         null,
         1
       );
@@ -47,6 +48,7 @@ export default function NewPlotReservations() {
   const isMember = !!member;
   const isEmployee = !!employee;
   const isBoard = !!(employee && ((employee.title && /board/i.test(employee.title)) || (employee.role && /board/i.test(employee.role)) || employee.is_board_member));
+
   return (
     <div className="min-h-screen bg-gray-50 w-full">
       <header className="bg-white border-b border-gray-200 px-6 py-6 shadow-sm">
@@ -75,18 +77,24 @@ export default function NewPlotReservations() {
       <main className="max-w-7xl mx-auto p-6">
         {isAdmin && (
           <div className="mb-8">
-            <PlotReservationsAdmin />
+            <Suspense fallback={<SectionLoader />}>
+              <PlotReservationsAdmin />
+            </Suspense>
           </div>
         )}
         
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-4">New Plots Map</h2>
-          <NewPlotReservation1Map />
+          <Suspense fallback={<SectionLoader />}>
+            <NewPlotReservation1Map />
+          </Suspense>
         </div>
 
         <div className="mt-8 pt-8 border-t border-gray-200">
           <h2 className="text-xl font-bold text-gray-900 mb-4">Import Batches & Data</h2>
-          <NewPlotsBrowser />
+          <Suspense fallback={<SectionLoader />}>
+            <NewPlotsBrowser />
+          </Suspense>
         </div>
       </main>
     </div>
