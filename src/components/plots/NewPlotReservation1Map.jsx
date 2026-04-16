@@ -193,9 +193,13 @@ const COLUMN_RANGES = [
   { start: 101, end: 113, label: "101-113" },
 ];
 
-// Spacer config: insert 5 blank plots before Grave 1163 (Row H-105)
+// Spacer config: insert 5 blank rows before plot 1163's position (Row H-105)
+// This creates a horizontal band of spacers across all columns at the same vertical position
 const SPACER_CONFIG = {
-  beforeGrave: '1163',
+  // The row number position where spacers should be inserted (before this position)
+  beforeRowNum: 105,
+  // Only apply to row letter H
+  rowLetter: 'H',
   count: 5,
 };
 
@@ -339,12 +343,18 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                       if (cellPlots.length === 0) {
                         return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
                       }
-                      // Build items list, injecting spacers before the target grave
+                      // Build items list, injecting a horizontal band of spacers
+                      // For row H, insert spacers before the plot at row position 105
                       const items = [];
+                      let spacersInserted = false;
                       cellPlots.forEach((plot) => {
-                        if (plot.Grave === SPACER_CONFIG.beforeGrave) {
-                          for (let s = 0; s < SPACER_CONFIG.count; s++) {
-                            items.push({ type: 'spacer', key: `spacer-${plot.Grave}-${s}` });
+                        if (letter === SPACER_CONFIG.rowLetter && !spacersInserted) {
+                          const rowNum = parseInt(String(plot.Row || '').replace(/\D/g, '')) || 0;
+                          if (rowNum <= SPACER_CONFIG.beforeRowNum) {
+                            for (let s = 0; s < SPACER_CONFIG.count; s++) {
+                              items.push({ type: 'spacer', key: `spacer-${range.label}-${s}` });
+                            }
+                            spacersInserted = true;
                           }
                         }
                         items.push({ type: 'plot', plot });
