@@ -181,7 +181,6 @@ const GravePlot = React.memo(({ data, onHover, onClick }) => {
 
 
 // Column ranges define the 8 columns, ordered left-to-right visually
-// (225-232 on the left, 101-113 on the right - extended by 5 for spacers after 1163)
 const COLUMN_RANGES = [
   { start: 225, end: 232, label: "225-232" },
   { start: 217, end: 224, label: "217-224" },
@@ -190,15 +189,12 @@ const COLUMN_RANGES = [
   { start: 125, end: 132, label: "125-132" },
   { start: 117, end: 124, label: "117-124" },
   { start: 109, end: 116, label: "109-116" },
-  { start: 101, end: 113, label: "101-113" },
+  { start: 101, end: 108, label: "101-108" },
 ];
 
-// Spacer config: insert 5 blank rows before plot 1163's position (Row H-105)
-// This creates a horizontal band of spacers across all columns at the same vertical position
+// Spacer config: insert 5 blank horizontal rows inside row-letter H, before row number 105
 const SPACER_CONFIG = {
-  // The row number position where spacers should be inserted (before this position)
   beforeRowNum: 105,
-  // Only apply to row letter H
   rowLetter: 'H',
   count: 5,
 };
@@ -334,42 +330,79 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
             <div className="text-sm text-gray-500">No plots found.</div>
           ) : (
             <div className="border border-gray-300 rounded overflow-hidden bg-white">
-              {/* Unified grid: each row letter is a horizontal band, columns are vertical */}
-              <div className="flex">
-                {COLUMN_RANGES.map((range) => (
-                  <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0">
-                    {activeRowLetters.map((letter) => {
-                      const cellPlots = (grid[letter] && grid[letter][range.label]) || [];
-                      if (cellPlots.length === 0) {
-                        return <div key={letter} className="w-[68px] h-[38px] border-b border-gray-100" />;
+              {/* Row-first layout: each visual row is a <div className="flex"> across all columns */}
+              {activeRowLetters.map((letter) => {
+                // For non-H letters, compute the max plots in any column so all columns stay same height
+                const colPlots = COLUMN_RANGES.map((range) => (grid[letter] && grid[letter][range.label]) || []);
+                const maxRows = Math.max(...colPlots.map((c) => c.length), 0);
+
+                if (letter !== SPACER_CONFIG.rowLetter) {
+                  // Render rows one-by-one so all columns align
+                  return Array.from({ length: maxRows }, (_, rowIdx) => (
+                    <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
+                      {COLUMN_RANGES.map((range, colIdx) => {
+                        const plot = colPlots[colIdx][rowIdx];
+                        return plot ? (
+                          <div key={range.label} className="border-r border-gray-200 last:border-r-0">
+                            <GravePlot data={plot} onHover={handleHover} onClick={handlePlotClick} />
+                          </div>
+                        ) : (
+                          <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />
+                        );
+                      })}
+                    </div>
+                  ));
+                }
+
+                // For row H: build per-column item lists (plots only), then find the insertion index
+                // Insert SPACER_CONFIG.count full-width spacer rows before the first plot with rowNum <= beforeRowNum
+                const colItems = colPlots.map((plots) => {
+                  const items = [];
+                  let inserted = false;
+                  plots.forEach((plot) => {
+                    if (!inserted) {
+                      const rowNum = parseInt(String(plot.Row || '').replace(/\D/g, '')) || 0;
+                      if (rowNum <= SPACER_CONFIG.beforeRowNum) {
+                        for (let s = 0; s < SPACER_CONFIG.count; s++) items.push({ type: 'spacer' });
+                        inserted = true;
                       }
-                      // Build items list, injecting a horizontal band of spacers
-                      // For row H, insert spacers before the plot at row position 105
-                      const items = [];
-                      let spacersInserted = false;
-                      cellPlots.forEach((plot) => {
-                        if (letter === SPACER_CONFIG.rowLetter && !spacersInserted) {
-                          const rowNum = parseInt(String(plot.Row || '').replace(/\D/g, '')) || 0;
-                          if (rowNum <= SPACER_CONFIG.beforeRowNum) {
-                            for (let s = 0; s < SPACER_CONFIG.count; s++) {
-                              items.push({ type: 'spacer', key: `spacer-${range.label}-${s}` });
-                            }
-                            spacersInserted = true;
-                          }
+                    }
+                    items.push({ type: 'plot', plot });
+                  });
+                  return items;
+                });
+
+                const totalRows = Math.max(...colItems.map((c) => c.length), 0);
+
+                return Array.from({ length: totalRows }, (_, rowIdx) => {
+                  // Check if this entire row is a spacer row (all columns have spacer at this index)
+                  const isSpacer = colItems.every((col) => col[rowIdx]?.type === 'spacer');
+                  if (isSpacer) {
+                    return (
+                      <div key={`${letter}-spacer-${rowIdx}`} className="flex border-b border-gray-100">
+                        {COLUMN_RANGES.map((range) => (
+                          <div key={range.label} className="w-[68px] h-[38px] bg-gray-50 border-r border-gray-200 last:border-r-0" />
+                        ))}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
+                      {COLUMN_RANGES.map((range, colIdx) => {
+                        const item = colItems[colIdx][rowIdx];
+                        if (!item || item.type === 'spacer') {
+                          return <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />;
                         }
-                        items.push({ type: 'plot', plot });
-                      });
-                      return items.map((item) => (
-                        item.type === 'spacer'
-                          ? <div key={item.key} className="w-[68px] h-[38px] border-b border-gray-100 bg-gray-50" />
-                          : <div key={item.plot.id} className="border-b border-gray-100 last:border-b-0">
-                              <GravePlot data={item.plot} onHover={handleHover} onClick={handlePlotClick} />
-                            </div>
-                      ));
-                    })}
-                  </div>
-                ))}
-              </div>
+                        return (
+                          <div key={range.label} className="border-r border-gray-200 last:border-r-0">
+                            <GravePlot data={item.plot} onHover={handleHover} onClick={handlePlotClick} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                });
+              })}
             </div>
           )}
         </div>
