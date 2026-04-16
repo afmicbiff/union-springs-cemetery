@@ -192,11 +192,6 @@ const COLUMN_RANGES = [
   { start: 101, end: 108, label: "101-108" },
 ];
 
-// Spacer configs: insert blank rows between "above" plots (rowNum > afterRowNum) and "below" plots (rowNum <= afterRowNum)
-// Both H and I rows have a gap between -109 and -105
-const SPACER_CONFIGS = {
-};
-
 // Row letters ordered top-to-bottom (J at top, A at bottom)
 const ROW_LETTERS = ['J', 'I', 'H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
 
@@ -334,87 +329,21 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                 const colPlots = COLUMN_RANGES.map((range) => (grid[letter] && grid[letter][range.label]) || []);
                 const maxRows = Math.max(...colPlots.map((c) => c.length), 0);
 
-                const spacerConfig = SPACER_CONFIGS[letter];
-                if (!spacerConfig) {
-                  // Render rows one-by-one so all columns align
-                  return Array.from({ length: maxRows }, (_, rowIdx) => (
-                    <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
-                      {COLUMN_RANGES.map((range, colIdx) => {
-                        const plot = colPlots[colIdx][rowIdx];
-                        return plot ? (
-                          <div key={range.label} className="border-r border-gray-200 last:border-r-0">
-                            <GravePlot data={plot} onHover={handleHover} onClick={handlePlotClick} />
-                          </div>
-                        ) : (
-                          <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />
-                        );
-                      })}
-                    </div>
-                  ));
-                }
-
-                // For rows with spacers: split plots into "above gap" (rowNum > afterRowNum) and "below gap" (rowNum <= afterRowNum)
-                // Then build per-column arrays: above plots + N spacers + below plots
-                // All columns get the same number of spacers so horizontal alignment is maintained
-                const aboveCols = COLUMN_RANGES.map((range) =>
-                  (colPlots[COLUMN_RANGES.indexOf(range)] || []).filter(
-                    (p) => (parseInt(String(p.Row || '').replace(/\D/g, '')) || 0) > spacerConfig.afterRowNum
-                  )
-                );
-                const belowCols = COLUMN_RANGES.map((range) =>
-                  (colPlots[COLUMN_RANGES.indexOf(range)] || []).filter(
-                    (p) => (parseInt(String(p.Row || '').replace(/\D/g, '')) || 0) <= spacerConfig.afterRowNum
-                  )
-                );
-                const maxAbove = Math.max(...aboveCols.map((c) => c.length), 0);
-                const maxBelow = Math.max(...belowCols.map((c) => c.length), 0);
-
-                const colItems = COLUMN_RANGES.map((_, colIdx) => {
-                  const items = [];
-                  // Pad above section to maxAbove
-                  const above = aboveCols[colIdx];
-                  for (let i = 0; i < maxAbove; i++) {
-                    items.push(i < above.length ? { type: 'plot', plot: above[i] } : { type: 'empty' });
-                  }
-                  // Insert spacers
-                  for (let s = 0; s < spacerConfig.count; s++) items.push({ type: 'spacer' });
-                  // Below section
-                  const below = belowCols[colIdx];
-                  for (let i = 0; i < maxBelow; i++) {
-                    items.push(i < below.length ? { type: 'plot', plot: below[i] } : { type: 'empty' });
-                  }
-                  return items;
-                });
-
-                const totalRows = Math.max(...colItems.map((c) => c.length), 0);
-
-                return Array.from({ length: totalRows }, (_, rowIdx) => {
-                  const isSpacer = colItems[0]?.[rowIdx]?.type === 'spacer';
-                  if (isSpacer) {
-                    return (
-                      <div key={`${letter}-spacer-${rowIdx}`} className="flex border-b border-gray-100">
-                        {COLUMN_RANGES.map((range) => (
-                          <div key={range.label} className="w-[68px] h-[38px] bg-gray-50 border-r border-gray-200 last:border-r-0" />
-                        ))}
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
-                      {COLUMN_RANGES.map((range, colIdx) => {
-                        const item = colItems[colIdx][rowIdx];
-                        if (!item || item.type === 'empty' || item.type === 'spacer') {
-                          return <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />;
-                        }
-                        return (
-                          <div key={range.label} className="border-r border-gray-200 last:border-r-0">
-                            <GravePlot data={item.plot} onHover={handleHover} onClick={handlePlotClick} />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                });
+                // Render rows one-by-one so all columns align
+                return Array.from({ length: maxRows }, (_, rowIdx) => (
+                  <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
+                    {COLUMN_RANGES.map((range, colIdx) => {
+                      const plot = colPlots[colIdx][rowIdx];
+                      return plot ? (
+                        <div key={range.label} className="border-r border-gray-200 last:border-r-0">
+                          <GravePlot data={plot} onHover={handleHover} onClick={handlePlotClick} />
+                        </div>
+                      ) : (
+                        <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />
+                      );
+                    })}
+                  </div>
+                ));
               })}
             </div>
           )}
