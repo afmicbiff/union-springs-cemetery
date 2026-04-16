@@ -1,5 +1,5 @@
 import './App.css'
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -13,7 +13,8 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScaleReadiness from './pages/ScaleReadiness';
 import OldPlotsAndMap from './pages/OldPlotsAndMap';
-import NewPlotsAndMap from './pages/NewPlotsAndMap';
+
+const NewPlotsAndMap = lazy(() => import('./pages/NewPlotsAndMap'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -79,7 +80,9 @@ const AuthenticatedApp = () => {
         path="/NewPlotsAndMap"
         element={
           <LayoutWrapper currentPageName="NewPlotsAndMap">
-            <NewPlotsAndMap />
+            <Suspense fallback={<RouteLoader />}>
+              <NewPlotsAndMap />
+            </Suspense>
           </LayoutWrapper>
         }
       />
