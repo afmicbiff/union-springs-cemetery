@@ -35,7 +35,7 @@ export default function NewPlotsAndMap() {
           plot_number: plot.plot_number || ''
         }));
       }
-    } catch (_) {}
+    } catch (_) { /* storage unavailable */ }
     setSelectedPlot(plot || null);
     setShowRequest(true);
   }, []);
