@@ -80,7 +80,6 @@ const MemberPortal = lazyWithRetry(() => import('./pages/MemberPortal'));
 const Memorial = lazyWithRetry(() => import('./pages/Memorial'));
 const NewPlotDetails = lazyWithRetry(() => import('./pages/NewPlotDetails'));
 const NewPlotReservations = lazyWithRetry(() => import('./pages/NewPlotReservations'));
-const NewPlotsAndMap = lazyWithRetry(() => import(/* webpackChunkName: "NewPlotsAndMap" */ './pages/NewPlotsAndMap'));
 const NotificationSettings = lazyWithRetry(() => import('./pages/NotificationSettings'));
 const Privacy = lazyWithRetry(() => import('./pages/Privacy'));
 const Profile = lazyWithRetry(() => import('./pages/Profile'));
@@ -108,7 +107,6 @@ export const PAGES = {
     "Memorial": Memorial,
     "NewPlotDetails": NewPlotDetails,
     "NewPlotReservations": NewPlotReservations,
-    "NewPlotsAndMap": NewPlotsAndMap,
     "NotificationSettings": NotificationSettings,
 
     "Privacy": Privacy,
