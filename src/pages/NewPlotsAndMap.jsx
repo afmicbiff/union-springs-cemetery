@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from 'lucide-react';
@@ -15,7 +15,6 @@ function lazyRetry(fn) {
 const NewPlotReservation1Map = lazyRetry(() => import("@/components/plots/NewPlotReservation1Map"));
 const PlotFilters = lazyRetry(() => import("@/components/plots/PlotFilters"));
 const RequestPlotDialog = lazyRetry(() => import("@/components/plots/RequestPlotDialog"));
-const NewPlotsBrowser = lazyRetry(() => import("@/components/plots/NewPlotsBrowser"));
 
 const SectionLoader = () => (
   <div className="flex items-center justify-center py-12 text-gray-400">
@@ -24,58 +23,20 @@ const SectionLoader = () => (
 );
 
 export default function NewPlotsAndMap() {
-  const { data: user } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me().catch(() => null) });
-  const isAdmin = user?.role === 'admin';
-  const [activeTab, setActiveTab] = React.useState("reservation1");
-  const [filters, setFilters] = React.useState({
+  const [filters, setFilters] = useState({
     search: "",
     owner: "",
     plot: "",
     status: "All",
-    birthYearStart: "",
-    birthYearEnd: "",
-    deathYearStart: "",
-    deathYearEnd: "",
     section: "All"
   });
-  const [showRequest, setShowRequest] = React.useState(false);
-  const [selectedPlot, setSelectedPlot] = React.useState(null);
+  const [showRequest, setShowRequest] = useState(false);
+  const [selectedPlot, setSelectedPlot] = useState(null);
 
-  const handlePlotClick = React.useCallback((plot) => {
-    try {
-      if (plot?.id) {
-        localStorage.setItem('selected_plot_id', plot.id);
-        localStorage.setItem('selected_plot_details', JSON.stringify({
-          id: plot.id,
-          section: plot.section || '',
-          row_number: plot.row_number || '',
-          plot_number: plot.plot_number || ''
-        }));
-      }
-    } catch (_) { /* storage unavailable */ }
+  const handlePlotClick = useCallback((plot) => {
     setSelectedPlot(plot || null);
     setShowRequest(true);
   }, []);
-
-  const handleDeleteA1 = async () => {
-    if (!window.confirm('Delete A-1 plot records (101–132/A1*)? This cannot be undone.')) return;
-    const res = await base44.functions.invoke('deleteA1Plots', {});
-    const count = res.data?.deleted_count ?? 0;
-    alert(`Deleted ${count} A-1 plot(s).`);
-  };
-
-  const handlePopulateA1 = async () => {
-    if (!window.confirm('Fill A-1 (101–132) from NewPlot data?')) return;
-    const res = await base44.functions.invoke('populateA1Plots', {});
-    alert(res.data?.message || 'Done');
-  };
-
-  const handleDeleteA1Unplaced = async () => {
-    if (!window.confirm('Delete A-1 labeled but not placed NewPlot rows (e.g., 1334–1341)? This cannot be undone.')) return;
-    const res = await base44.functions.invoke('deleteA1UnplacedNewPlots', {});
-    const count = res.data?.deleted_count ?? 0;
-    alert(res.data?.message || `Deleted ${count} unplaced A-1 row(s).`);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 w-full">
@@ -95,18 +56,16 @@ export default function NewPlotsAndMap() {
               <span className="text-[0.6rem] sm:text-[0.7rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase">Cemetery - Shongaloo, LA</span>
             </div>
           </div>
-          <div className="mt-4 flex flex-col md:flex-row items-center md:justify-between gap-4">
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">New Plots for Reservation</h1>
-              <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
-            </div>
+          <div className="mt-4 text-center md:text-left">
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">New Plots for Reservation</h1>
+            <p className="text-sm text-gray-500">Explore newly available plots prepared for reservations.</p>
           </div>
         </div>
       </header>
 
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <Suspense fallback={<SectionLoader />}>
+          <Suspense fallback={null}>
             <PlotFilters
               filters={filters}
               onFilterChange={setFilters}
@@ -117,15 +76,9 @@ export default function NewPlotsAndMap() {
       </div>
 
       <main className="max-w-7xl mx-auto p-3 sm:p-6">
-        <div className="space-y-6">
-          <Suspense fallback={<SectionLoader />}>
-            {activeTab === 'reservation1' ? (
-              <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
-            ) : (
-              <NewPlotsBrowser activeTab={activeTab === 'map' ? 'map' : 'data'} onTabChange={(tab) => setActiveTab(tab)} filters={filters} onPlotClick={handlePlotClick} />
-            )}
-          </Suspense>
-        </div>
+        <Suspense fallback={<SectionLoader />}>
+          <NewPlotReservation1Map filters={filters} onPlotClick={handlePlotClick} />
+        </Suspense>
       </main>
 
       <Suspense fallback={null}>
