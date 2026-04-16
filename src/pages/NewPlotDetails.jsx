@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, ArrowLeft, Image as ImageIcon, Save, Pencil, X, Clock } from "lucide-react";
-// Module cache-bust: force fresh build
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import NewReservationDialog from "../components/plots/NewReservationDialog";
