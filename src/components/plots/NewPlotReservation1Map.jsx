@@ -192,9 +192,10 @@ const COLUMN_RANGES = [
   { start: 101, end: 108, label: "101-108" },
 ];
 
-// Spacer config: insert 5 blank horizontal rows inside row-letter H, before row number 105
+// Spacer config: insert 5 blank rows after the first plot with rowNum <= afterRowNum (descending sort)
+// H-109 is the last plot before the gap; spacers appear right after it, before H-105
 const SPACER_CONFIG = {
-  beforeRowNum: 105,
+  afterRowNum: 109,  // insert spacers after the first plot with rowNum <= this value
   rowLetter: 'H',
   count: 5,
 };
@@ -354,29 +355,43 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                   ));
                 }
 
-                // For row H: build per-column item lists (plots only), then find the insertion index
-                // Insert SPACER_CONFIG.count full-width spacer rows before the first plot with rowNum <= beforeRowNum
-                const colItems = colPlots.map((plots) => {
+                // For row H: split plots into "above gap" (rowNum > afterRowNum) and "below gap" (rowNum <= afterRowNum)
+                // Then build per-column arrays: above plots + N spacers + below plots
+                // All columns get the same number of spacers so horizontal alignment is maintained
+                const aboveCols = COLUMN_RANGES.map((range) =>
+                  (colPlots[COLUMN_RANGES.indexOf(range)] || []).filter(
+                    (p) => (parseInt(String(p.Row || '').replace(/\D/g, '')) || 0) > SPACER_CONFIG.afterRowNum
+                  )
+                );
+                const belowCols = COLUMN_RANGES.map((range) =>
+                  (colPlots[COLUMN_RANGES.indexOf(range)] || []).filter(
+                    (p) => (parseInt(String(p.Row || '').replace(/\D/g, '')) || 0) <= SPACER_CONFIG.afterRowNum
+                  )
+                );
+                const maxAbove = Math.max(...aboveCols.map((c) => c.length), 0);
+                const maxBelow = Math.max(...belowCols.map((c) => c.length), 0);
+
+                const colItems = COLUMN_RANGES.map((_, colIdx) => {
                   const items = [];
-                  let inserted = false;
-                  plots.forEach((plot) => {
-                    if (!inserted) {
-                      const rowNum = parseInt(String(plot.Row || '').replace(/\D/g, '')) || 0;
-                      if (rowNum <= SPACER_CONFIG.beforeRowNum) {
-                        for (let s = 0; s < SPACER_CONFIG.count; s++) items.push({ type: 'spacer' });
-                        inserted = true;
-                      }
-                    }
-                    items.push({ type: 'plot', plot });
-                  });
+                  // Pad above section to maxAbove
+                  const above = aboveCols[colIdx];
+                  for (let i = 0; i < maxAbove; i++) {
+                    items.push(i < above.length ? { type: 'plot', plot: above[i] } : { type: 'empty' });
+                  }
+                  // Insert spacers
+                  for (let s = 0; s < SPACER_CONFIG.count; s++) items.push({ type: 'spacer' });
+                  // Below section
+                  const below = belowCols[colIdx];
+                  for (let i = 0; i < maxBelow; i++) {
+                    items.push(i < below.length ? { type: 'plot', plot: below[i] } : { type: 'empty' });
+                  }
                   return items;
                 });
 
                 const totalRows = Math.max(...colItems.map((c) => c.length), 0);
 
                 return Array.from({ length: totalRows }, (_, rowIdx) => {
-                  // Check if this entire row is a spacer row (all columns have spacer at this index)
-                  const isSpacer = colItems.every((col) => col[rowIdx]?.type === 'spacer');
+                  const isSpacer = colItems[0]?.[rowIdx]?.type === 'spacer';
                   if (isSpacer) {
                     return (
                       <div key={`${letter}-spacer-${rowIdx}`} className="flex border-b border-gray-100">
@@ -390,7 +405,7 @@ export default function NewPlotReservation1Map({ filters = {}, onPlotClick }) {
                     <div key={`${letter}-${rowIdx}`} className="flex border-b border-gray-100 last:border-b-0">
                       {COLUMN_RANGES.map((range, colIdx) => {
                         const item = colItems[colIdx][rowIdx];
-                        if (!item || item.type === 'spacer') {
+                        if (!item || item.type === 'empty' || item.type === 'spacer') {
                           return <div key={range.label} className="w-[68px] h-[38px] border-r border-gray-200 last:border-r-0" />;
                         }
                         return (
