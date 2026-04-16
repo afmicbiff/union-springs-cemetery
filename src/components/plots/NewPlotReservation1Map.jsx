@@ -195,7 +195,7 @@ const COLUMN_RANGES = [
 // Spacer config: insert 5 blank rows after the first plot with rowNum <= afterRowNum (descending sort)
 // H-109 is the last plot before the gap; spacers appear right after it, before H-105
 const SPACER_CONFIG = {
-  afterRowNum: 104,  // insert spacers after the first plot with rowNum <= this value
+  afterRowNum: 105,  // insert spacers after the first plot with rowNum <= this value
   rowLetter: 'H',
   count: 5,
 };
