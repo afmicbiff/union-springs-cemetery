@@ -77,17 +77,35 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
   const grid = useMemo(() => buildGrid(plots), [plots]);
   const activeRows = useMemo(() => ROW_LETTERS.filter((r) => grid[r]), [grid]);
 
+  // When there are no plots, render an empty grid skeleton so borders remain visible.
   if (activeRows.length === 0) {
+    const EMPTY_ROWS = ["J", "I", "H", "G", "F", "E", "D", "C", "B", "A"];
     return (
-      <div className="text-sm text-gray-500 py-12 text-center" role="status">
-        No plots match your current filters.
+      <div
+        className="border-2 border-gray-500 rounded overflow-hidden bg-white"
+        role="grid"
+        aria-label="Cemetery plot map (empty)"
+      >
+        <div className="flex">
+          {COLUMN_RANGES.map((range) => (
+            <div key={range.label} className="flex flex-col border-r-2 border-gray-500 last:border-r-0">
+              {EMPTY_ROWS.map((letter) => (
+                <div
+                  key={`${letter}-${range.label}`}
+                  className="w-[68px] h-[38px] border-b-2 border-gray-400 last:border-b-0"
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      className="border border-gray-300 rounded overflow-hidden bg-white"
+      className="border-2 border-gray-500 rounded overflow-hidden bg-white"
       role="grid"
       aria-label="Cemetery plot map"
     >
@@ -112,14 +130,14 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
           }
 
           return (
-          <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0" role="rowgroup">
+          <div key={range.label} className="flex flex-col border-r-2 border-gray-500 last:border-r-0" role="rowgroup">
             {activeRows.map((letter) => {
               const cellPlots = grid[letter]?.[range.label] || [];
               const isBottomRow = letter.startsWith("_BOTTOM");
               if (cellPlots.length === 0) {
                 // Don't render empty placeholders for synthetic bottom rows
                 if (isBottomRow) return null;
-                return <div key={`${letter}-${range.label}`} className="w-[68px] h-[38px] border-b border-gray-100" aria-hidden="true" />;
+                return <div key={`${letter}-${range.label}`} className="w-[68px] h-[38px] border-b-2 border-gray-400" aria-hidden="true" />;
               }
 
               // Build items list with spacers
