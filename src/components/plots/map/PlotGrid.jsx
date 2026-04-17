@@ -75,6 +75,8 @@ function buildGrid(plots) {
   return byLetter;
 }
 
+const TOP_EMPTY_ROWS = 13;
+
 export default function PlotGrid({ plots, onHover, onPlotClick }) {
   const grid = useMemo(() => buildGrid(plots), [plots]);
   const activeRows = useMemo(() => ROW_LETTERS.filter((r) => grid[r]), [grid]);
@@ -133,6 +135,13 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
 
           return (
           <div key={range.label} className="flex flex-col border-r-2 border-gray-500 last:border-r-0" role="rowgroup">
+            {Array.from({ length: TOP_EMPTY_ROWS }, (_, i) => (
+              <div
+                key={`top-empty-${range.label}-${i}`}
+                className="w-[68px] h-[38px] border-b-2 border-gray-400"
+                aria-hidden="true"
+              />
+            ))}
             {activeRows.map((letter) => {
               const cellPlots = grid[letter]?.[range.label] || [];
               const isBottomRow = letter.startsWith("_BOTTOM");
