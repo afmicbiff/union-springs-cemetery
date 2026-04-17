@@ -7,7 +7,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 const COL1_TOTAL = 82;
 const COL2_TOTAL = 82;
-const COL3_TOTAL = 61;
+const COL3_TOTAL = 82;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
@@ -112,12 +112,13 @@ export default function NewPlots() {
               <div className="flex flex-col gap-1">
                 {col3Positions.map((pos) => {
                   const plot = col3Map[pos];
+                  const isBlank = pos >= 62 && pos <= 66;
                   return (
                     <PlotTile
                       key={`c3-${pos}`}
                       pos={pos}
                       plot={plot}
-                      isBlank={false}
+                      isBlank={isBlank}
                       onClick={() => setSelected({ position: pos, column: 3, plot })}
                     />
                   );
