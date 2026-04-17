@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import NewPlotEditDialog from "@/components/newplots/NewPlotEditDialog";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
+// New Plots grid page
 const TOTAL_PLOTS = 77;
 
 const STATUS_COLORS = {
