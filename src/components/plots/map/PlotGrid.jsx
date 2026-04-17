@@ -18,7 +18,6 @@ const SPACER_COUNT = 5;
 
 // Plot ranges to force to the bottom of their column (regardless of row number sort)
 const MOVE_TO_BOTTOM_RANGES = [
-  { min: 1103, max: 1163 },
   { min: 1180, max: 1240 },
   { min: 1257, max: 1317 },
   { min: 1334, max: 1394 },
