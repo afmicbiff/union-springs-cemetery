@@ -2,9 +2,14 @@
   "name": "NewPlotSimple",
   "type": "object",
   "properties": {
+    "column": {
+      "type": "number",
+      "default": 1,
+      "description": "Column number (1 = rightmost, higher = further left)"
+    },
     "position": {
       "type": "number",
-      "description": "Position in the column (1-77, top to bottom)"
+      "description": "Position in the column (1 = bottom, higher = top)"
     },
     "plot_number": {
       "type": "string",
