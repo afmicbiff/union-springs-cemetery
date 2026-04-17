@@ -244,8 +244,7 @@ export default function Layout({ children }) {
       icon: Map,
       isDropdown: true,
       items: [
-        { label: 'Old Plots & Map', path: '/OldPlotsAndMap', icon: Map },
-        { label: 'New Plots for Reservation', path: '/NewPlotsAndMap', icon: Map }
+        { label: 'Old Plots & Map', path: '/OldPlotsAndMap', icon: Map }
       ]
     },
     { label: 'Services', path: '/services', icon: Info },
