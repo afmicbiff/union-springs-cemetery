@@ -5,10 +5,10 @@ import { Loader2 } from "lucide-react";
 import NewPlotEditDialog from "@/components/newplots/NewPlotEditDialog";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-// Column configs: rightmost column first. Higher columns render further to the left.
+// Column config: column 1 (rightmost) = 82 plots with blanks at 62-66. Column 2 = 61 plots, no blanks.
 const COLUMNS = [
-  { column: 1, total: 82, blankStart: 62, blankEnd: 66 },
-  { column: 2, total: 61, blankStart: null, blankEnd: null },
+  { column: 2, total: 61, blanks: [] },
+  { column: 1, total: 82, blanks: [62, 63, 64, 65, 66] },
 ];
 
 const STATUS_COLORS = {
@@ -17,43 +17,6 @@ const STATUS_COLORS = {
   Occupied: "bg-red-100 border-red-400 hover:bg-red-200",
   Unavailable: "bg-gray-200 border-gray-400 hover:bg-gray-300",
 };
-
-function PlotCell({ plot, pos, isBlank, onClick }) {
-  const status = plot?.status || "Available";
-  const colorCls = isBlank ? "bg-white border-stone-300 hover:bg-stone-50" : (STATUS_COLORS[status] || STATUS_COLORS.Available);
-  const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
-  return (
-    <button
-      onClick={onClick}
-      className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
-      style={{ width: "150px", height: "75px" }}
-      title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
-    >
-      {!isBlank && (
-        <div className="flex flex-col items-start text-left w-full leading-tight">
-          <div className="flex items-baseline gap-2 w-full">
-            <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
-            {plot?.plot_number && (
-              <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
-            )}
-          </div>
-          <span className="text-[9px] text-stone-600">{status}</span>
-          {occupant && (
-            <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
-          )}
-          {plot?.family_name && (
-            <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
-          )}
-          {(plot?.birth_date || plot?.death_date) && (
-            <span className="text-[9px] text-stone-500 truncate w-full">
-              {plot?.birth_date || "?"} – {plot?.death_date || "?"}
-            </span>
-          )}
-        </div>
-      )}
-    </button>
-  );
-}
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -64,18 +27,16 @@ export default function NewPlots() {
     initialData: [],
   });
 
-  // Index plots by column -> position
   const plotsByColPos = useMemo(() => {
     const map = {};
     plots.forEach((p) => {
       const col = p.column || 1;
-      if (!map[col]) map[col] = {};
-      map[col][p.position] = p;
+      map[`${col}-${p.position}`] = p;
     });
     return map;
   }, [plots]);
 
-  const totalPlots = COLUMNS.reduce((sum, c) => sum + c.total, 0);
+  const totalPlotCount = COLUMNS.reduce((sum, c) => sum + c.total - c.blanks.length, 0);
 
   return (
     <div className="min-h-screen bg-stone-100 py-6 px-4">
@@ -85,7 +46,7 @@ export default function NewPlots() {
         <div className="text-center">
           <h1 className="text-3xl font-serif text-stone-900">New Plots</h1>
           <p className="text-stone-600 mt-1 text-sm">
-            {totalPlots} plots · 5 ft × 10 ft each · Click a plot to edit
+            {totalPlotCount} plots · 5 ft × 10 ft each · Click a plot to edit
           </p>
         </div>
 
@@ -104,23 +65,48 @@ export default function NewPlots() {
           </div>
         ) : (
           <div className="bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto overflow-x-auto" style={{ width: "fit-content", maxWidth: "100%" }}>
-            <div className="flex gap-3">
-              {/* Render columns with higher column numbers on the left */}
-              {[...COLUMNS].sort((a, b) => b.column - a.column).map((col) => {
-                const positions = Array.from({ length: col.total }, (_, i) => col.total - i);
+            <div className="flex gap-3 items-end">
+              {COLUMNS.map((colCfg) => {
+                const positions = Array.from({ length: colCfg.total }, (_, i) => colCfg.total - i);
                 return (
-                  <div key={col.column} className="flex flex-col gap-1">
+                  <div key={colCfg.column} className="flex flex-col gap-1">
                     {positions.map((pos) => {
-                      const plot = plotsByColPos[col.column]?.[pos];
-                      const isBlank = col.blankStart != null && pos >= col.blankStart && pos <= col.blankEnd;
+                      const plot = plotsByColPos[`${colCfg.column}-${pos}`];
+                      const isBlank = colCfg.blanks.includes(pos);
+                      const status = plot?.status || "Available";
+                      const colorCls = isBlank ? "bg-white border-stone-300 hover:bg-stone-50" : (STATUS_COLORS[status] || STATUS_COLORS.Available);
+                      const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
                       return (
-                        <PlotCell
-                          key={`${col.column}-${pos}`}
-                          plot={plot}
-                          pos={pos}
-                          isBlank={isBlank}
-                          onClick={() => setSelected({ position: pos, plot, column: col.column })}
-                        />
+                        <button
+                          key={`${colCfg.column}-${pos}`}
+                          onClick={() => setSelected({ position: pos, column: colCfg.column, plot })}
+                          className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
+                          style={{ width: "150px", height: "75px" }}
+                          title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
+                        >
+                          {!isBlank && (
+                            <div className="flex flex-col items-start text-left w-full leading-tight">
+                              <div className="flex items-baseline gap-2 w-full">
+                                <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
+                                {plot?.plot_number && (
+                                  <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
+                                )}
+                              </div>
+                              <span className="text-[9px] text-stone-600">{status}</span>
+                              {occupant && (
+                                <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
+                              )}
+                              {plot?.family_name && (
+                                <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
+                              )}
+                              {(plot?.birth_date || plot?.death_date) && (
+                                <span className="text-[9px] text-stone-500 truncate w-full">
+                                  {plot?.birth_date || "?"} – {plot?.death_date || "?"}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </button>
                       );
                     })}
                   </div>
@@ -136,6 +122,7 @@ export default function NewPlots() {
         onOpenChange={(v) => !v && setSelected(null)}
         plot={selected?.plot}
         position={selected?.position}
+        column={selected?.column}
       />
     </div>
   );

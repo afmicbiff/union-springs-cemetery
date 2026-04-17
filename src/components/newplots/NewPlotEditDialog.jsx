@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 const EMPTY = { status: "Available", first_name: "", last_name: "", family_name: "", birth_date: "", death_date: "", notes: "" };
 
-export default function NewPlotEditDialog({ open, onOpenChange, plot, position }) {
+export default function NewPlotEditDialog({ open, onOpenChange, plot, position, column }) {
   const plotNumber = plot?.plot_number;
   const rowLabel = plot?.row_label;
   const queryClient = useQueryClient();
@@ -39,7 +39,7 @@ export default function NewPlotEditDialog({ open, onOpenChange, plot, position }
       if (plot?.id) {
         return base44.entities.NewPlotSimple.update(plot.id, form);
       }
-      return base44.entities.NewPlotSimple.create({ ...form, position, plot_number: plotNumber, row_label: rowLabel, column: plot?.column || 1 });
+      return base44.entities.NewPlotSimple.create({ ...form, position, column: column || 1, plot_number: plotNumber, row_label: rowLabel });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["new-plots-simple"] });
