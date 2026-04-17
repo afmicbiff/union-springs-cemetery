@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import NewPlotEditDialog from "@/components/newplots/NewPlotEditDialog";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const TOTAL_PLOTS = 66;
+const TOTAL_PLOTS = 82;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
