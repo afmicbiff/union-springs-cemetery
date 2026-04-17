@@ -92,7 +92,26 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
       aria-label="Cemetery plot map"
     >
       <div className="flex">
-        {COLUMN_RANGES.map((range, colIdx) => (
+        {COLUMN_RANGES.map((range, colIdx) => {
+          // For column 7 (index 6), pre-compute overlay labels 1180-1249
+          // starting from the bottom-most plot going upward.
+          const overlayMap = new Map();
+          if (colIdx === 6) {
+            const plotIdsTopToBottom = [];
+            for (const letter of activeRows) {
+              const cellPlots = grid[letter]?.[range.label] || [];
+              for (const plot of cellPlots) plotIdsTopToBottom.push(plot.id);
+            }
+            const reversed = [...plotIdsTopToBottom].reverse();
+            let label = 1180;
+            for (const id of reversed) {
+              if (label > 1249) break;
+              overlayMap.set(id, label);
+              label += 1;
+            }
+          }
+
+          return (
           <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0" role="rowgroup">
             {activeRows.map((letter) => {
               const cellPlots = grid[letter]?.[range.label] || [];
@@ -121,7 +140,13 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                       <div key={item.key} className="w-[68px] h-[38px] border-b border-gray-100 bg-gray-50" aria-hidden="true" />
                     ) : (
                       <div key={item.key} className="border-b border-gray-100 last:border-b-0" role="gridcell">
-                        <GravePlotCell data={item.plot} onHover={onHover} onClick={onPlotClick} hideLabel={colIdx < 7} />
+                        <GravePlotCell
+                          data={item.plot}
+                          onHover={onHover}
+                          onClick={onPlotClick}
+                          hideLabel={colIdx < 7 && !overlayMap.has(item.plot.id)}
+                          overrideLabel={overlayMap.get(item.plot.id) ?? null}
+                        />
                       </div>
                     )
                   )}
@@ -129,7 +154,8 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
               );
             })}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
