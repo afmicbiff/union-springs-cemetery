@@ -16,6 +16,19 @@ const COLUMN_RANGES = [
 const SPACER_AFTER_GRAVE = "1163";
 const SPACER_COUNT = 5;
 
+// Plot ranges to force to the bottom of their column (regardless of row number sort)
+const MOVE_TO_BOTTOM_RANGES = [
+  { min: 1180, max: 1240 },
+  { min: 1257, max: 1317 },
+  { min: 1334, max: 1394 },
+];
+
+function isMoveToBottom(grave) {
+  const n = parseInt(String(grave || "").replace(/\D/g, ""), 10);
+  if (!n) return false;
+  return MOVE_TO_BOTTOM_RANGES.some((r) => n >= r.min && n <= r.max);
+}
+
 // Row letters ordered top-to-bottom (J at top, A at bottom)
 const ROW_LETTERS = ["J", "I", "H", "G", "F", "E", "D", "C", "B", "A"];
 
@@ -35,10 +48,13 @@ function buildGrid(plots) {
     byLetter[letter][range.label].push(plot);
   }
 
-  // Sort within each cell descending
+  // Sort within each cell descending, but push "move-to-bottom" plots to the end
   for (const cols of Object.values(byLetter)) {
     for (const key of Object.keys(cols)) {
       cols[key].sort((a, b) => {
+        const aBottom = isMoveToBottom(a.Grave);
+        const bBottom = isMoveToBottom(b.Grave);
+        if (aBottom !== bBottom) return aBottom ? 1 : -1;
         const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
         const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
         return numB - numA;
