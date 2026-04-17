@@ -12,7 +12,7 @@ const STATUS_DOT = {
   Default: "bg-gray-300",
 };
 
-const GravePlotCell = React.memo(function GravePlotCell({ data, onHover, onClick }) {
+const GravePlotCell = React.memo(function GravePlotCell({ data, onHover, onClick, hideLabel = false }) {
   if (!data || data.isSpacer) {
     return <div className="w-[68px] h-[38px] border-r border-gray-100/50" aria-hidden="true" />;
   }
@@ -52,8 +52,8 @@ const GravePlotCell = React.memo(function GravePlotCell({ data, onHover, onClick
     >
       <div className={`w-2 h-2 rounded-full shrink-0 ${dotBg}`} aria-hidden="true" />
       <div className="flex flex-col leading-none min-w-0 overflow-hidden">
-        <span className="text-[9px] font-bold text-gray-800 truncate">#{graveLabel}</span>
-        {display && <span className="text-[7px] text-gray-500 truncate">{display}</span>}
+        {!hideLabel && <span className="text-[9px] font-bold text-gray-800 truncate">#{graveLabel}</span>}
+        {!hideLabel && display && <span className="text-[7px] text-gray-500 truncate">{display}</span>}
       </div>
     </div>
   );

@@ -92,7 +92,7 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
       aria-label="Cemetery plot map"
     >
       <div className="flex">
-        {COLUMN_RANGES.map((range) => (
+        {COLUMN_RANGES.map((range, colIdx) => (
           <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0" role="rowgroup">
             {activeRows.map((letter) => {
               const cellPlots = grid[letter]?.[range.label] || [];
@@ -121,7 +121,7 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                       <div key={item.key} className="w-[68px] h-[38px] border-b border-gray-100 bg-gray-50" aria-hidden="true" />
                     ) : (
                       <div key={item.key} className="border-b border-gray-100 last:border-b-0" role="gridcell">
-                        <GravePlotCell data={item.plot} onHover={onHover} onClick={onPlotClick} />
+                        <GravePlotCell data={item.plot} onHover={onHover} onClick={onPlotClick} hideLabel={colIdx < 7} />
                       </div>
                     )
                   )}
