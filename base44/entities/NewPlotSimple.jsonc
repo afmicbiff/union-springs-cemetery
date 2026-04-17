@@ -4,7 +4,12 @@
   "properties": {
     "position": {
       "type": "number",
-      "description": "Position in the column (1-77, top to bottom)"
+      "description": "Position in the column (1 = bottom)"
+    },
+    "column": {
+      "type": "number",
+      "default": 1,
+      "description": "Column number (1 = rightmost, 2 = left of column 1, etc.)"
     },
     "plot_number": {
       "type": "string",
