@@ -72,16 +72,24 @@ export default function NewPlots() {
                     style={{ width: "150px", height: "75px" }}
                     title={`${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
                   >
-                    <div className="flex flex-col items-start text-left w-full">
+                    <div className="flex flex-col items-start text-left w-full leading-tight">
                       <div className="flex items-baseline gap-2 w-full">
                         <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
                         {plot?.plot_number && (
                           <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
                         )}
                       </div>
-                      <span className="text-[10px] text-stone-600">{status}</span>
+                      <span className="text-[9px] text-stone-600">{status}</span>
                       {occupant && (
-                        <span className="text-[11px] text-stone-800 truncate w-full">{occupant}</span>
+                        <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
+                      )}
+                      {plot?.family_name && (
+                        <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
+                      )}
+                      {(plot?.birth_date || plot?.death_date) && (
+                        <span className="text-[9px] text-stone-500 truncate w-full">
+                          {plot?.birth_date || "?"} – {plot?.death_date || "?"}
+                        </span>
                       )}
                     </div>
                   </button>
