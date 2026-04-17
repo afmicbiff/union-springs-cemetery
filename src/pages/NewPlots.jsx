@@ -61,8 +61,9 @@ export default function NewPlots() {
             <div className="flex flex-col gap-1">
               {positions.map((pos) => {
                 const plot = plotsByPosition[pos];
+                const isBlank = pos >= 62 && pos <= 66;
                 const status = plot?.status || "Available";
-                const colorCls = STATUS_COLORS[status] || STATUS_COLORS.Available;
+                const colorCls = isBlank ? "bg-white border-stone-300 hover:bg-stone-50" : (STATUS_COLORS[status] || STATUS_COLORS.Available);
                 const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
                 return (
                   <button
@@ -70,28 +71,30 @@ export default function NewPlots() {
                     onClick={() => setSelected({ position: pos, plot })}
                     className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
                     style={{ width: "150px", height: "75px" }}
-                    title={`${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
+                    title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
                   >
-                    <div className="flex flex-col items-start text-left w-full leading-tight">
-                      <div className="flex items-baseline gap-2 w-full">
-                        <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
-                        {plot?.plot_number && (
-                          <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
+                    {!isBlank && (
+                      <div className="flex flex-col items-start text-left w-full leading-tight">
+                        <div className="flex items-baseline gap-2 w-full">
+                          <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
+                          {plot?.plot_number && (
+                            <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
+                          )}
+                        </div>
+                        <span className="text-[9px] text-stone-600">{status}</span>
+                        {occupant && (
+                          <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
+                        )}
+                        {plot?.family_name && (
+                          <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
+                        )}
+                        {(plot?.birth_date || plot?.death_date) && (
+                          <span className="text-[9px] text-stone-500 truncate w-full">
+                            {plot?.birth_date || "?"} – {plot?.death_date || "?"}
+                          </span>
                         )}
                       </div>
-                      <span className="text-[9px] text-stone-600">{status}</span>
-                      {occupant && (
-                        <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
-                      )}
-                      {plot?.family_name && (
-                        <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
-                      )}
-                      {(plot?.birth_date || plot?.death_date) && (
-                        <span className="text-[9px] text-stone-500 truncate w-full">
-                          {plot?.birth_date || "?"} – {plot?.death_date || "?"}
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </button>
                 );
               })}
