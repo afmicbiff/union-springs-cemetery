@@ -56,8 +56,8 @@ export default function NewPlotEditDialog({ open, onOpenChange, plot, position }
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {plotNumber ? `Plot ${plotNumber}` : `Plot #${position}`}
-            {rowLabel && <span className="ml-2 text-sm font-normal text-stone-500">({rowLabel})</span>}
+            {rowLabel || `Plot #${position}`}
+            {plotNumber && <span className="ml-2 text-sm font-normal text-stone-500">#{plotNumber}</span>}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">

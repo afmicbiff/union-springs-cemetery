@@ -70,13 +70,13 @@ export default function NewPlots() {
                     onClick={() => setSelected({ position: pos, plot })}
                     className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
                     style={{ width: "150px", height: "75px" }}
-                    title={`Plot ${pos} - ${status}${occupant ? ` - ${occupant}` : ""}`}
+                    title={`${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
                   >
                     <div className="flex flex-col items-start text-left w-full">
                       <div className="flex items-baseline gap-2 w-full">
-                        <span className="text-sm font-bold text-stone-900">{plot?.plot_number || `#${pos}`}</span>
-                        {plot?.row_label && (
-                          <span className="text-[11px] font-medium text-stone-700">{plot.row_label}</span>
+                        <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
+                        {plot?.plot_number && (
+                          <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
                         )}
                       </div>
                       <span className="text-[10px] text-stone-600">{status}</span>
