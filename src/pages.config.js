@@ -79,7 +79,7 @@ const ImageManager = lazyWithRetry(() => import('./pages/ImageManager'));
 const MemberPortal = lazyWithRetry(() => import('./pages/MemberPortal'));
 const Memorial = lazyWithRetry(() => import('./pages/Memorial'));
 const NewPlotDetails = lazyWithRetry(() => import('./pages/NewPlotDetails'));
-const NewPlots = lazyWithRetry(() => import('./pages/NewPlots'));
+const NewPlots = lazyWithRetry(() => import('./pages/NewPlots.js'));
 const NotificationSettings = lazyWithRetry(() => import('./pages/NotificationSettings'));
 const Privacy = lazyWithRetry(() => import('./pages/Privacy'));
 const Profile = lazyWithRetry(() => import('./pages/Profile'));
