@@ -96,7 +96,10 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
           <div key={range.label} className="flex flex-col border-r border-gray-200 last:border-r-0" role="rowgroup">
             {activeRows.map((letter) => {
               const cellPlots = grid[letter]?.[range.label] || [];
+              const isBottomRow = letter.startsWith("_BOTTOM");
               if (cellPlots.length === 0) {
+                // Don't render empty placeholders for synthetic bottom rows
+                if (isBottomRow) return null;
                 return <div key={`${letter}-${range.label}`} className="w-[68px] h-[38px] border-b border-gray-100" aria-hidden="true" />;
               }
 
