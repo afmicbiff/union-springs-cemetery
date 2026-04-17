@@ -14,7 +14,7 @@ const COLUMN_RANGES = [
 ];
 
 const SPACER_AFTER_GRAVE = "1163";
-const SPACER_COUNT = 5;
+const SPACER_COUNT = 2;
 
 // Plot ranges to force to the bottom of their column (regardless of row number sort)
 const MOVE_TO_BOTTOM_RANGES = [
