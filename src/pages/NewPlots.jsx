@@ -29,7 +29,7 @@ export default function NewPlots() {
     return map;
   }, [plots]);
 
-  const positions = useMemo(() => Array.from({ length: TOTAL_PLOTS }, (_, i) => i + 1), []);
+  const positions = useMemo(() => Array.from({ length: TOTAL_PLOTS }, (_, i) => TOTAL_PLOTS - i), []);
 
   return (
     <div className="min-h-screen bg-stone-100 py-6 px-4">
