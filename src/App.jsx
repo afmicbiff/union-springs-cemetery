@@ -13,7 +13,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 const ScaleReadiness = lazy(() => import('./pages/ScaleReadiness'));
 const OldPlotsAndMap = lazy(() => import('./pages/OldPlotsAndMap'));
-const NewPlots = lazy(() => import('./pages/NewPlots'));
+
 
 
 
@@ -88,16 +88,7 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         }
       />
-      <Route
-        path="/NewPlots"
-        element={
-          <LayoutWrapper currentPageName="NewPlots">
-            <Suspense fallback={<RouteLoader />}>
-              <NewPlots />
-            </Suspense>
-          </LayoutWrapper>
-        }
-      />
+
       <Route
         path="/ScaleReadiness"
         element={
