@@ -33,9 +33,9 @@ function PlotTile({ pos, plot, isBlank, onClick }) {
       {!isBlank && (
         <div className="flex flex-col items-start text-left w-full leading-tight">
           <div className="flex items-baseline gap-2 w-full">
-            <span className="text-sm font-bold text-stone-900">{plot?.row_label || `#${pos}`}</span>
-            {plot?.plot_number && (
-              <span className="text-[10px] text-stone-500">#{plot.plot_number}</span>
+            <span className="text-sm font-bold text-stone-900">{plot?.plot_number ? `#${plot.plot_number}` : `#${pos}`}</span>
+            {plot?.row_label && (
+              <span className="text-[10px] text-stone-500">{plot.row_label}</span>
             )}
           </div>
           <span className="text-[9px] text-stone-600">{status}</span>
