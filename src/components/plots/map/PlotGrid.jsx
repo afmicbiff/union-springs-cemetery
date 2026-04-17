@@ -144,8 +144,8 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                           data={item.plot}
                           onHover={onHover}
                           onClick={onPlotClick}
-                          hideLabel={colIdx < 7 && !overlayMap.has(item.plot.id)}
-                          overrideLabel={overlayMap.get(item.plot.id) ?? null}
+                          hideLabel={true}
+                          overrideLabel={null}
                         />
                       </div>
                     )
