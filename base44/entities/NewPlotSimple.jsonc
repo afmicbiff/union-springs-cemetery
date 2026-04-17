@@ -1,0 +1,61 @@
+{
+  "name": "NewPlotSimple",
+  "type": "object",
+  "properties": {
+    "position": {
+      "type": "number",
+      "description": "Position in the column (1-77, top to bottom)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Available",
+        "Reserved",
+        "Occupied",
+        "Unavailable"
+      ],
+      "default": "Available"
+    },
+    "first_name": {
+      "type": "string"
+    },
+    "last_name": {
+      "type": "string"
+    },
+    "family_name": {
+      "type": "string"
+    },
+    "birth_date": {
+      "type": "string",
+      "description": "Date of birth"
+    },
+    "death_date": {
+      "type": "string",
+      "description": "Date of death"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "position"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
