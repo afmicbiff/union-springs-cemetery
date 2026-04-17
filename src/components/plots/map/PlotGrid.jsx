@@ -18,9 +18,12 @@ const COLUMN_RANGES = [
 const SPACER_AFTER_GRAVE = "1163";
 const SPACER_COUNT = 5;
 
+// Graves that should have a 5-row blank spacer inserted before them (above them visually)
+const SPACERS_BEFORE_GRAVE = { "1240": 5 };
+
 // Plot ranges to force to the bottom of their column (regardless of row number sort)
 const MOVE_TO_BOTTOM_RANGES = [
-  { min: 1180, max: 1240 },
+  { min: 1180, max: 1256 },
   { min: 1257, max: 1317 },
   { min: 1334, max: 1394 },
 ];
@@ -157,6 +160,12 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                 if (plot.Grave === SPACER_AFTER_GRAVE) {
                   for (let s = 0; s < SPACER_COUNT; s++) {
                     items.push({ type: "spacer", key: `spacer-${plot.Grave}-${s}` });
+                  }
+                }
+                const beforeCount = SPACERS_BEFORE_GRAVE[plot.Grave];
+                if (beforeCount) {
+                  for (let s = 0; s < beforeCount; s++) {
+                    items.push({ type: "spacer", key: `spacer-before-${plot.Grave}-${s}` });
                   }
                 }
                 items.push({ type: "plot", plot, key: plot.id });
