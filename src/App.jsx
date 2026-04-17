@@ -14,8 +14,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 const ScaleReadiness = lazy(() => import('./pages/ScaleReadiness'));
 const OldPlotsAndMap = lazy(() => import('./pages/OldPlotsAndMap'));
 
-import NewPlotsAndMap from './pages/NewPlotsAndMap';
-import NewPlotReservations from './pages/NewPlotReservations';
+
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -77,26 +76,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route
-        path="/NewPlotReservations"
-        element={
-          <LayoutWrapper currentPageName="NewPlotReservations">
-            <Suspense fallback={<RouteLoader />}>
-              <NewPlotReservations />
-            </Suspense>
-          </LayoutWrapper>
-        }
-      />
-      <Route
-        path="/NewPlotsAndMap"
-        element={
-          <LayoutWrapper currentPageName="NewPlotsAndMap">
-            <Suspense fallback={<RouteLoader />}>
-              <NewPlotsAndMap />
-            </Suspense>
-          </LayoutWrapper>
-        }
-      />
+
       <Route
         path="/OldPlotsAndMap"
         element={
