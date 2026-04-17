@@ -7,6 +7,13 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 
 // Column config: column 1 (rightmost) = 82 plots with blanks at 62-66. Column 2 = 61 plots, no blanks.
 const COLUMNS = [
+  { column: 9, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 8, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 7, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 6, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 5, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 4, total: 82, blanks: [62, 63, 64, 65, 66] },
+  { column: 3, total: 82, blanks: [62, 63, 64, 65, 66] },
   { column: 2, total: 82, blanks: [62, 63, 64, 65, 66] },
   { column: 1, total: 82, blanks: [62, 63, 64, 65, 66] },
 ];
