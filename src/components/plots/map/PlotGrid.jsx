@@ -30,7 +30,8 @@ function isMoveToBottom(grave) {
 }
 
 // Row letters ordered top-to-bottom (J at top, A at bottom)
-const ROW_LETTERS = ["J", "I", "H", "G", "F", "E", "D", "C", "B", "A"];
+// Synthetic "_BOTTOM_" letters hold plots forced to the bottom of their column.
+const ROW_LETTERS = ["J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "_BOTTOM1_", "_BOTTOM2_", "_BOTTOM3_"];
 
 function buildGrid(plots) {
   const byLetter = {};
@@ -38,23 +39,30 @@ function buildGrid(plots) {
     const rowStr = String(plot.Row || "").toUpperCase();
     const match = rowStr.match(/^([A-J])/);
     if (!match) continue;
-    const letter = match[1];
     const rowNum = parseInt(rowStr.replace(/\D/g, "")) || 0;
     const range = COLUMN_RANGES.find((r) => rowNum >= r.start && rowNum <= r.end);
     if (!range) continue;
+
+    // If plot should be moved to bottom, reassign to a synthetic bottom row
+    // so it appears below row A in its column.
+    let letter = match[1];
+    if (isMoveToBottom(plot.Grave)) {
+      // Use letter index to preserve original vertical order among bottom plots
+      const originalIdx = "JIHGFEDCBA".indexOf(letter);
+      if (originalIdx < 4) letter = "_BOTTOM1_";
+      else if (originalIdx < 8) letter = "_BOTTOM2_";
+      else letter = "_BOTTOM3_";
+    }
 
     if (!byLetter[letter]) byLetter[letter] = {};
     if (!byLetter[letter][range.label]) byLetter[letter][range.label] = [];
     byLetter[letter][range.label].push(plot);
   }
 
-  // Sort within each cell descending, but push "move-to-bottom" plots to the end
+  // Sort within each cell descending by row number
   for (const cols of Object.values(byLetter)) {
     for (const key of Object.keys(cols)) {
       cols[key].sort((a, b) => {
-        const aBottom = isMoveToBottom(a.Grave);
-        const bBottom = isMoveToBottom(b.Grave);
-        if (aBottom !== bBottom) return aBottom ? 1 : -1;
         const numA = parseInt(String(a.Row || "").replace(/\D/g, "")) || 0;
         const numB = parseInt(String(b.Row || "").replace(/\D/g, "")) || 0;
         return numB - numA;
