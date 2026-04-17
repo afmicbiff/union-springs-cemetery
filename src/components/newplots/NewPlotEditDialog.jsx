@@ -13,6 +13,8 @@ import { toast } from "sonner";
 const EMPTY = { status: "Available", first_name: "", last_name: "", family_name: "", birth_date: "", death_date: "", notes: "" };
 
 export default function NewPlotEditDialog({ open, onOpenChange, plot, position }) {
+  const plotNumber = plot?.plot_number;
+  const rowLabel = plot?.row_label;
   const queryClient = useQueryClient();
   const [form, setForm] = useState(EMPTY);
 
@@ -37,7 +39,7 @@ export default function NewPlotEditDialog({ open, onOpenChange, plot, position }
       if (plot?.id) {
         return base44.entities.NewPlotSimple.update(plot.id, form);
       }
-      return base44.entities.NewPlotSimple.create({ ...form, position });
+      return base44.entities.NewPlotSimple.create({ ...form, position, plot_number: plotNumber, row_label: rowLabel });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["new-plots-simple"] });
@@ -53,7 +55,10 @@ export default function NewPlotEditDialog({ open, onOpenChange, plot, position }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Plot #{position}</DialogTitle>
+          <DialogTitle>
+            {plotNumber ? `Plot ${plotNumber}` : `Plot #${position}`}
+            {rowLabel && <span className="ml-2 text-sm font-normal text-stone-500">({rowLabel})</span>}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div>

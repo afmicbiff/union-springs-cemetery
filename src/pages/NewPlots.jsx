@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import NewPlotEditDialog from "@/components/newplots/NewPlotEditDialog";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
-const TOTAL_PLOTS = 77;
+const TOTAL_PLOTS = 61;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
@@ -73,7 +73,12 @@ export default function NewPlots() {
                     title={`Plot ${pos} - ${status}${occupant ? ` - ${occupant}` : ""}`}
                   >
                     <div className="flex flex-col items-start text-left w-full">
-                      <span className="text-sm font-bold text-stone-900">Plot #{pos}</span>
+                      <div className="flex items-baseline gap-2 w-full">
+                        <span className="text-sm font-bold text-stone-900">{plot?.plot_number || `#${pos}`}</span>
+                        {plot?.row_label && (
+                          <span className="text-[11px] font-medium text-stone-700">{plot.row_label}</span>
+                        )}
+                      </div>
                       <span className="text-[10px] text-stone-600">{status}</span>
                       {occupant && (
                         <span className="text-[11px] text-stone-800 truncate w-full">{occupant}</span>

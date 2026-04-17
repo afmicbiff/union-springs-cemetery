@@ -6,6 +6,14 @@
       "type": "number",
       "description": "Position in the column (1-77, top to bottom)"
     },
+    "plot_number": {
+      "type": "string",
+      "description": "Plot number (e.g. 1103)"
+    },
+    "row_label": {
+      "type": "string",
+      "description": "Row label (e.g. A-101)"
+    },
     "status": {
       "type": "string",
       "enum": [
