@@ -81,7 +81,7 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
 
   // When there are no plots, render an empty grid skeleton so borders remain visible.
   if (activeRows.length === 0) {
-    const EMPTY_ROWS = ["J", "I", "H", "G", "F", "E", "D", "C", "B", "A"];
+    const EMPTY_ROWS = Array.from({ length: 77 }, (_, i) => `R${i + 1}`);
     return (
       <div
         className="border-2 border-gray-500 rounded overflow-hidden bg-white"
