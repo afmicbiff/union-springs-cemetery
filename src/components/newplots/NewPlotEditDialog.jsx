@@ -39,7 +39,7 @@ export default function NewPlotEditDialog({ open, onOpenChange, plot, position }
       if (plot?.id) {
         return base44.entities.NewPlotSimple.update(plot.id, form);
       }
-      return base44.entities.NewPlotSimple.create({ ...form, position, plot_number: plotNumber, row_label: rowLabel });
+      return base44.entities.NewPlotSimple.create({ ...form, position, plot_number: plotNumber, row_label: rowLabel, column: plot?.column || 1 });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["new-plots-simple"] });
