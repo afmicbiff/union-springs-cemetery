@@ -121,7 +121,7 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                       <div key={item.key} className="w-[68px] h-[38px] border-b border-gray-100 bg-gray-50" aria-hidden="true" />
                     ) : (
                       <div key={item.key} className="border-b border-gray-100 last:border-b-0" role="gridcell">
-                        <GravePlotCell data={item.plot} onHover={onHover} onClick={onPlotClick} hideLabel={colIdx < 7} />
+                        <GravePlotCell data={item.plot} onHover={onHover} onClick={onPlotClick} hideLabel={true} />
                       </div>
                     )
                   )}
