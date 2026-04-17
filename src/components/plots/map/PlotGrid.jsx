@@ -1,8 +1,10 @@
 import React, { useMemo } from "react";
 import GravePlotCell from "./GravePlotCell";
 
-// Column ranges define the 8 columns, ordered left-to-right visually
+// Column ranges define the 10 columns, ordered left-to-right visually
 const COLUMN_RANGES = [
+  { start: 241, end: 248, label: "241-248" },
+  { start: 233, end: 240, label: "233-240" },
   { start: 225, end: 232, label: "225-232" },
   { start: 217, end: 224, label: "217-224" },
   { start: 209, end: 216, label: "209-216" },
