@@ -164,7 +164,7 @@ export default function PlotGrid({ plots, onHover, onPlotClick }) {
                           data={item.plot}
                           onHover={onHover}
                           onClick={onPlotClick}
-                          hideLabel={true}
+                          hideLabel={false}
                           overrideLabel={null}
                         />
                       </div>
