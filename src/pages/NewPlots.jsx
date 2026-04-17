@@ -8,6 +8,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 const COL1_TOTAL = 82;
 const COL2_TOTAL = 82;
 const COL3_TOTAL = 82;
+const COL4_TOTAL = 61;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
@@ -64,19 +65,21 @@ export default function NewPlots() {
     initialData: [],
   });
 
-  const { col1Map, col2Map, col3Map } = useMemo(() => {
-    const c1 = {}, c2 = {}, c3 = {};
+  const { col1Map, col2Map, col3Map, col4Map } = useMemo(() => {
+    const c1 = {}, c2 = {}, c3 = {}, c4 = {};
     plots.forEach((p) => {
-      if (p.column === 3) c3[p.position] = p;
+      if (p.column === 4) c4[p.position] = p;
+      else if (p.column === 3) c3[p.position] = p;
       else if (p.column === 2) c2[p.position] = p;
       else c1[p.position] = p;
     });
-    return { col1Map: c1, col2Map: c2, col3Map: c3 };
+    return { col1Map: c1, col2Map: c2, col3Map: c3, col4Map: c4 };
   }, [plots]);
 
   const col1Positions = useMemo(() => Array.from({ length: COL1_TOTAL }, (_, i) => COL1_TOTAL - i), []);
   const col2Positions = useMemo(() => Array.from({ length: COL2_TOTAL }, (_, i) => COL2_TOTAL - i), []);
   const col3Positions = useMemo(() => Array.from({ length: COL3_TOTAL }, (_, i) => COL3_TOTAL - i), []);
+  const col4Positions = useMemo(() => Array.from({ length: COL4_TOTAL }, (_, i) => COL4_TOTAL - i), []);
 
   const totalPlots = plots.length;
 
@@ -108,7 +111,23 @@ export default function NewPlots() {
         ) : (
           <div className="bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto" style={{ width: "fit-content" }}>
             <div className="flex gap-4 items-end">
-              {/* Column 3 (far left) */}
+              {/* Column 4 (far left) */}
+              <div className="flex flex-col gap-1">
+                {col4Positions.map((pos) => {
+                  const plot = col4Map[pos];
+                  return (
+                    <PlotTile
+                      key={`c4-${pos}`}
+                      pos={pos}
+                      plot={plot}
+                      isBlank={false}
+                      onClick={() => setSelected({ position: pos, column: 4, plot })}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Column 3 (left) */}
               <div className="flex flex-col gap-1">
                 {col3Positions.map((pos) => {
                   const plot = col3Map[pos];
