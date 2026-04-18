@@ -238,19 +238,6 @@ export default function OldPlotsAndMap() {
         </div>
       </header>
 
-      {/* Aerial view */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
-        <div className="max-w-7xl mx-auto">
-          <img
-            src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
-            alt="Aerial view of Union Springs Cemetery"
-            className="w-full max-w-3xl mx-auto rounded-lg shadow-md border border-stone-200"
-            loading="lazy"
-          />
-          <p className="text-center text-xs text-stone-500 mt-2 italic">Aerial view of Union Springs Cemetery</p>
-        </div>
-      </div>
-
       {/* Filters bar */}
       <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
         <div className="max-w-7xl mx-auto space-y-3">
@@ -337,6 +324,15 @@ export default function OldPlotsAndMap() {
           ) : (
             <div className="overflow-auto rounded-lg border border-gray-200 bg-white/50 inline-block max-w-full">
               <div className="p-4 inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+                <div className="mb-4">
+                  <img
+                    src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
+                    alt="Aerial view of Union Springs Cemetery"
+                    className="max-w-2xl w-full rounded-lg shadow-md border border-stone-200"
+                    loading="lazy"
+                  />
+                  <p className="text-xs text-stone-500 mt-2 italic">Aerial view of Union Springs Cemetery</p>
+                </div>
                 <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
                   <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
                 </Suspense>
