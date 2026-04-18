@@ -322,7 +322,7 @@ export default function OldPlotsAndMap() {
               {hasFilters && <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>}
             </div>
           ) : (
-            <div className="overflow-auto rounded-lg border border-gray-200 bg-white/50 inline-block max-w-full">
+            <div className="overflow-auto inline-block max-w-full">
               <div className="p-4 inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
                 <div className="mb-4">
                   <img

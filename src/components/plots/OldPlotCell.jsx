@@ -80,16 +80,16 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   const handleMouseEnter = useCallback((e) => { if (onHover && item) onHover(e, item); }, [onHover, item]);
   const handleMouseLeave = useCallback(() => { if (onHover) onHover(null, null); }, [onHover]);
 
-  if (!item) return <div className="w-[68px] h-[38px] border-r border-gray-100/50" />;
+  if (!item) return <div className="w-[68px] h-[38px]" />;
 
   if (item._virtual && !item.Grave && !item.Status && !(item['Last Name'] || item.last_name)) {
-    return <div className="w-[68px] h-[38px] border-r border-gray-200/50" />;
+    return <div className="w-[68px] h-[38px]" />;
   }
 
   if (item._virtual && !item.Grave && !item.Status && (item['Last Name'] || item.last_name)) {
     const labelText = item['Last Name'] || item.last_name || '';
     return (
-      <div className="w-[68px] h-[38px] px-0.5 flex items-center border-r border-gray-200/50" title={labelText}>
+      <div className="w-[68px] h-[38px] px-0.5 flex items-center" title={labelText}>
         <span className="text-[7px] text-gray-700 font-semibold leading-tight line-clamp-2 overflow-hidden">{labelText}</span>
       </div>
     );
@@ -107,7 +107,7 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   return (
     <div
       data-plot-num={plotNum}
-      className={`w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 border-r border-gray-200/50 cursor-pointer hover:bg-yellow-50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
+      className={`w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

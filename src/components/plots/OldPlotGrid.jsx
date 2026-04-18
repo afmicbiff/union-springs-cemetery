@@ -281,9 +281,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
 
   return (
     <div className="inline-block select-none">
-      <div className="border border-gray-300 rounded overflow-hidden bg-white">
+      <div className="overflow-hidden">
         {grid.map((row, rIdx) => (
-          <div key={rIdx} className="flex border-b border-gray-100 last:border-b-0">
+          <div key={rIdx} className="flex">
             {row.map((item, cIdx) => (
               <OldPlotCell
                 key={cIdx}
