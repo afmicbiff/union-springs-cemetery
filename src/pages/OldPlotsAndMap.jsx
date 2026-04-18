@@ -336,8 +336,7 @@ export default function OldPlotsAndMap() {
                     minWidth={150}
                     minHeight={150}
                     label="Aerial Image"
-                    zIndex={activeLayer === 'image' ? 20 : 10}
-                    onFocus={() => setActiveLayer('image')}
+                    zIndex={1}
                   >
                     {({ width, height }) => (
                       <img
@@ -359,8 +358,7 @@ export default function OldPlotsAndMap() {
                     minWidth={300}
                     minHeight={300}
                     label="Plot Grid"
-                    zIndex={activeLayer === 'grid' ? 20 : 10}
-                    onFocus={() => setActiveLayer('grid')}
+                    zIndex={10}
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
