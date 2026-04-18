@@ -61,7 +61,7 @@ export default function NewPlots() {
 
   const { data: plots = [], isLoading } = useQuery({
     queryKey: ["new-plots-simple"],
-    queryFn: () => base44.entities.NewPlotSimple.list("position", 500),
+    queryFn: () => base44.entities.NewPlotSimple.list("position", 1000),
     initialData: [],
   });
 
