@@ -225,11 +225,11 @@ export default function OldPlotsAndMap() {
           </div>
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
-            <button onClick={() => setZoom(z => Math.max(0.3, z - 0.1))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.3}>
+            <button onClick={() => setZoom(z => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1}>
               <ZoomOut className="w-4 h-4 text-gray-600" />
             </button>
             <span className="text-xs font-mono text-gray-500 min-w-[36px] text-center">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom(z => Math.min(2, z + 0.1))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 2}>
+            <button onClick={() => setZoom(z => Math.min(2, +(z + 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 2}>
               <ZoomIn className="w-4 h-4 text-gray-600" />
             </button>
             <div className="w-px h-5 bg-gray-200 mx-0.5" />
