@@ -13,6 +13,7 @@ import OldPlotTooltip from "@/components/plots/OldPlotTooltip";
 
 const OldPlotGrid = lazy(() => import("@/components/plots/OldPlotGrid"));
 const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
+const DraggableResizable = lazy(() => import("@/components/plots/DraggableResizable"));
 
 const STATUS_COLORS = {
   Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',
@@ -34,6 +35,7 @@ export default function OldPlotsAndMap() {
   const [plotFilter, setPlotFilter] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [activeLayer, setActiveLayer] = useState('grid'); // 'grid' or 'image' - which is on top
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
@@ -322,19 +324,54 @@ export default function OldPlotsAndMap() {
               {hasFilters && <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>}
             </div>
           ) : (
-            <div className="overflow-auto inline-block max-w-full">
-              <div className="p-4 inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
-                <div className="mb-4">
-                  <img
-                    src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
-                    alt="Aerial view of Union Springs Cemetery"
-                    className="max-w-2xl w-full rounded-lg shadow-md border border-stone-200"
-                    loading="lazy"
-                  />
-                  <p className="text-xs text-stone-500 mt-2 italic">Aerial view of Union Springs Cemetery</p>
-                </div>
-                <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
-                  <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
+            <div className="relative w-full border border-gray-200 rounded-lg bg-stone-50 overflow-auto" style={{ height: '80vh', minHeight: '600px' }}>
+              <div className="relative" style={{ width: '3000px', height: '2000px' }}>
+                <Suspense fallback={null}>
+                  {/* Aerial image layer */}
+                  <DraggableResizable
+                    initialX={40}
+                    initialY={40}
+                    initialWidth={700}
+                    initialHeight={900}
+                    minWidth={150}
+                    minHeight={150}
+                    label="Aerial Image"
+                    zIndex={activeLayer === 'image' ? 20 : 10}
+                    onFocus={() => setActiveLayer('image')}
+                  >
+                    {({ width, height }) => (
+                      <img
+                        src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
+                        alt="Aerial view of Union Springs Cemetery"
+                        className="rounded-md shadow-md border border-stone-200 pointer-events-none"
+                        style={{ width, height, objectFit: 'fill' }}
+                        draggable={false}
+                      />
+                    )}
+                  </DraggableResizable>
+
+                  {/* Grid layer */}
+                  <DraggableResizable
+                    initialX={800}
+                    initialY={40}
+                    initialWidth={1400}
+                    initialHeight={900}
+                    minWidth={300}
+                    minHeight={300}
+                    label="Plot Grid"
+                    zIndex={activeLayer === 'grid' ? 20 : 10}
+                    onFocus={() => setActiveLayer('grid')}
+                  >
+                    {({ width, height }) => (
+                      <div className="w-full h-full overflow-auto bg-white/70 backdrop-blur-sm rounded-md border border-stone-200 p-2" style={{ width, height }}>
+                        <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+                          <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
+                            <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
+                          </Suspense>
+                        </div>
+                      </div>
+                    )}
+                  </DraggableResizable>
                 </Suspense>
               </div>
             </div>
