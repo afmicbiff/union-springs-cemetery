@@ -34,7 +34,7 @@ export default function OldPlotsAndMap() {
   const [ownerFilter, setOwnerFilter] = useState('');
   const [plotFilter, setPlotFilter] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.32);
   const [activeLayer, setActiveLayer] = useState('grid'); // 'grid' or 'image' - which is on top
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -233,7 +233,7 @@ export default function OldPlotsAndMap() {
               <ZoomIn className="w-4 h-4 text-gray-600" />
             </button>
             <div className="w-px h-5 bg-gray-200 mx-0.5" />
-            <button onClick={() => setZoom(1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom === 1}>
+            <button onClick={() => setZoom(0.32)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom === 0.32}>
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
           </div>
