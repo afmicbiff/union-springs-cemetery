@@ -60,8 +60,8 @@ const blinkListeners = {
 };
 
 const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, colIndex }) {
-  // Columns 1 and 2 (second & third columns) use 5ft×9ft plots instead of default 5ft×10ft
-  const sizeClass = (colIndex === 1 || colIndex === 2) ? 'w-[68px] h-[34px]' : 'w-[68px] h-[38px]';
+  // Columns 1-2: 5ft×9ft, Column 3: 5ft×11ft, others: 5ft×10ft
+  const sizeClass = (colIndex === 1 || colIndex === 2) ? 'w-[68px] h-[34px]' : colIndex === 3 ? 'w-[68px] h-[42px]' : 'w-[68px] h-[38px]';
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkRef = useRef(false);
   const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
