@@ -337,6 +337,7 @@ export default function OldPlotsAndMap() {
                     minHeight={150}
                     label="Aerial Image"
                     zIndex={1}
+                    locked
                   >
                     {({ width, height }) => (
                       <img
@@ -359,6 +360,7 @@ export default function OldPlotsAndMap() {
                     minHeight={300}
                     label="Plot Grid"
                     zIndex={10}
+                    locked
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>

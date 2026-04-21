@@ -16,6 +16,7 @@ export default function DraggableResizable({
   label = "",
   zIndex = 1,
   onFocus,
+  locked = false,
 }) {
   const [pos, setPos] = useState({ x: initialX, y: initialY });
   const [size, setSize] = useState({ width: initialWidth, height: initialHeight });
@@ -86,13 +87,15 @@ export default function DraggableResizable({
       onMouseDown={onFocus}
     >
       {/* Drag handle header */}
-      <div
-        onMouseDown={startDrag}
-        className="absolute -top-7 left-0 right-0 h-7 bg-stone-800/90 text-white text-xs px-2 flex items-center justify-between cursor-move rounded-t-md select-none hover:bg-stone-700"
-      >
-        <span className="font-medium">⋮⋮ {label}</span>
-        <span className="text-stone-400 text-[10px]">{Math.round(size.width)} × {Math.round(size.height)}</span>
-      </div>
+      {!locked && (
+        <div
+          onMouseDown={startDrag}
+          className="absolute -top-7 left-0 right-0 h-7 bg-stone-800/90 text-white text-xs px-2 flex items-center justify-between cursor-move rounded-t-md select-none hover:bg-stone-700"
+        >
+          <span className="font-medium">⋮⋮ {label}</span>
+          <span className="text-stone-400 text-[10px]">{Math.round(size.width)} × {Math.round(size.height)}</span>
+        </div>
+      )}
 
       {/* Content */}
       <div className="w-full h-full overflow-hidden">
@@ -100,14 +103,16 @@ export default function DraggableResizable({
       </div>
 
       {/* Resize handle */}
-      <div
-        onMouseDown={startResize}
-        className="absolute bottom-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-tl-md z-10"
-        style={{
-          clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
-        }}
-        title="Drag to resize"
-      />
+      {!locked && (
+        <div
+          onMouseDown={startResize}
+          className="absolute bottom-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-tl-md z-10"
+          style={{
+            clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+          }}
+          title="Drag to resize"
+        />
+      )}
     </div>
   );
 }
