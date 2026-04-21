@@ -154,31 +154,31 @@ export default function DraggableResizable({
         {typeof children === "function" ? children({ width: size.width, height: size.height }) : children}
       </div>
 
-      {/* Resize handles - all 4 corners */}
+      {/* Resize handles - all 4 corners (offset outward so they sit outside the overflow-hidden content wrapper) */}
       {!locked && (
         <>
           <div
             onMouseDown={(e) => startResize(e, "se")}
-            className="absolute bottom-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize z-10"
-            style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }}
+            className="absolute -bottom-2 -right-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-sm border-2 border-white shadow-md"
+            style={{ zIndex: 20 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "sw")}
-            className="absolute bottom-0 left-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize z-10"
-            style={{ clipPath: "polygon(0 0, 100% 100%, 0 100%)" }}
+            className="absolute -bottom-2 -left-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize rounded-sm border-2 border-white shadow-md"
+            style={{ zIndex: 20 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "ne")}
-            className="absolute top-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize z-10"
-            style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%)" }}
+            className="absolute -top-2 -right-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize rounded-sm border-2 border-white shadow-md"
+            style={{ zIndex: 20 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "nw")}
-            className="absolute top-0 left-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize z-10"
-            style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+            className="absolute -top-2 -left-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-sm border-2 border-white shadow-md"
+            style={{ zIndex: 20 }}
             title="Drag to resize"
           />
         </>
