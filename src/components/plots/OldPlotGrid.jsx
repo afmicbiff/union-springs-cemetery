@@ -275,18 +275,33 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     return rows;
   }, [plotsByNumber]);
 
+  // Transpose: render column-by-column so we can rotate each column independently
+  const columns = useMemo(() => {
+    const cols = Array.from({ length: COLS }, () => Array(ROWS).fill(null));
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        cols[c][r] = grid[r][c];
+      }
+    }
+    return cols;
+  }, [grid]);
+
   if (!plots || plots.length === 0) {
     return <div className="text-gray-400 text-center py-12">No plot data loaded</div>;
   }
 
   return (
     <div className="inline-block select-none">
-      <div className="overflow-hidden">
-        {grid.map((row, rIdx) => (
-          <div key={rIdx} className="flex">
-            {row.map((item, cIdx) => (
+      <div className="flex items-end overflow-visible">
+        {columns.map((col, cIdx) => (
+          <div
+            key={cIdx}
+            className="flex flex-col"
+            style={{ transform: 'rotate(1deg)', transformOrigin: 'bottom center' }}
+          >
+            {col.map((item, rIdx) => (
               <OldPlotCell
-                key={cIdx}
+                key={rIdx}
                 item={item}
                 isAdmin={isAdmin}
                 onHover={onHover}
