@@ -309,6 +309,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
                 isAdmin={isAdmin}
                 onHover={onHover}
                 onEdit={onEdit}
+                colIndex={cIdx}
               />
             ))}
           </div>

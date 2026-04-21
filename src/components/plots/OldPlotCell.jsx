@@ -59,7 +59,9 @@ const blinkListeners = {
   },
 };
 
-const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }) {
+const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, colIndex }) {
+  // Column 1 (second column) uses 5ft×9ft plots instead of default 5ft×10ft
+  const sizeClass = colIndex === 1 ? 'w-[68px] h-[34px]' : 'w-[68px] h-[38px]';
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkRef = useRef(false);
   const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
@@ -80,16 +82,16 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   const handleMouseEnter = useCallback((e) => { if (onHover && item) onHover(e, item); }, [onHover, item]);
   const handleMouseLeave = useCallback(() => { if (onHover) onHover(null, null); }, [onHover]);
 
-  if (!item) return <div className="w-[68px] h-[38px]" />;
+  if (!item) return <div className={sizeClass} />;
 
   if (item._virtual && !item.Grave && !item.Status && !(item['Last Name'] || item.last_name)) {
-    return <div className="w-[68px] h-[38px]" />;
+    return <div className={sizeClass} />;
   }
 
   if (item._virtual && !item.Grave && !item.Status && (item['Last Name'] || item.last_name)) {
     const labelText = item['Last Name'] || item.last_name || '';
     return (
-      <div className="w-[68px] h-[38px] px-0.5 flex items-center" title={labelText}>
+      <div className={`${sizeClass} px-0.5 flex items-center`} title={labelText}>
         <span className="text-[7px] text-gray-700 font-semibold leading-tight line-clamp-2 overflow-hidden">{labelText}</span>
       </div>
     );
@@ -107,7 +109,7 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit }
   return (
     <div
       data-plot-num={plotNum}
-      className={`w-[68px] h-[38px] px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
+      className={`${sizeClass} px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
