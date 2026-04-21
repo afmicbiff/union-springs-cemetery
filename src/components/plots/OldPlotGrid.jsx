@@ -303,7 +303,9 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
             style={
               cIdx === 0
                 ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom left' }
-                : cIdx >= 1 && cIdx < 10
+                : cIdx === 1
+                ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom left' }
+                : cIdx >= 2 && cIdx < 10
                 ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom left' }
                 : undefined
             }
