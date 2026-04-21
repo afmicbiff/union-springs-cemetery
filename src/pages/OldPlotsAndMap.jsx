@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, MapPin, ArrowLeft, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw, Lock, Unlock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ export default function OldPlotsAndMap() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zoom, setZoom] = useState(0.32);
   const [activeLayer, setActiveLayer] = useState('grid'); // 'grid' or 'image' - which is on top
+  const [gridLocked, setGridLocked] = useState(false);
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
@@ -223,6 +224,18 @@ export default function OldPlotsAndMap() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight font-serif">Old Plots & Map</h1>
             <p className="text-xs sm:text-sm text-gray-500">Historic cemetery plot grid — matches the official spreadsheet layout</p>
           </div>
+          <div className="flex items-center gap-2">
+          {/* Grid lock toggle */}
+          <Button
+            variant={gridLocked ? "default" : "outline"}
+            size="sm"
+            onClick={() => setGridLocked(prev => !prev)}
+            className={gridLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+            title={gridLocked ? "Grid is locked — click to unlock and move/resize" : "Grid is unlocked — click to lock in place"}
+          >
+            {gridLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+            {gridLocked ? "Unlock Grid" : "Lock Grid"}
+          </Button>
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
             <button onClick={() => setZoom(z => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1}>
@@ -251,6 +264,7 @@ export default function OldPlotsAndMap() {
             <button onClick={() => setZoom(0.32)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom === 0.32}>
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
+          </div>
           </div>
         </div>
       </header>
@@ -374,6 +388,7 @@ export default function OldPlotsAndMap() {
                     minHeight={300}
                     label="Plot Grid"
                     zIndex={10}
+                    locked={gridLocked}
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
