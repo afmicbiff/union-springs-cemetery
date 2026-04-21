@@ -11,7 +11,18 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-const ScaleReadiness = lazy(() => import('./pages/ScaleReadiness'));
+
+function lazyRetry(importFn) {
+  return lazy(() =>
+    importFn().catch(() =>
+      new Promise((r) => setTimeout(r, 500))
+        .then(() => importFn())
+        .catch((err) => { window.location.reload(); throw err; })
+    )
+  );
+}
+
+const ScaleReadiness = lazyRetry(() => import('./pages/ScaleReadiness'));
 
 
 
