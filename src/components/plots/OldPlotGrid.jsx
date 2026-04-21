@@ -8,7 +8,7 @@ import OldPlotCell from "./OldPlotCell";
  */
 
 const ROWS = 101;
-const COLS = 21;
+const COLS = 20;
 
 export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
   // Build a lookup: plotNumber -> plot data
@@ -29,12 +29,6 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
   // Plots 1-23: column 0, bottom-to-top (plot 1 at row 100, plot 23 at row 78).
   // Additional plot ranges will be mapped here as they are defined.
   function plotPosition(plotNum) {
-    const raw = plotPositionRaw(plotNum);
-    if (!raw) return null;
-    return { row: raw.row, col: raw.col + 1 };
-  }
-
-  function plotPositionRaw(plotNum) {
     if (plotNum >= 1 && plotNum <= 23) {
       return { row: ROWS - plotNum, col: 0 }; // bottom-up in col 0
     }
@@ -239,44 +233,44 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
         rows[pos.row][pos.col] = plot;
       }
     }
-    // Insert virtual "Not Usable" plots (not in database) — all shifted 1 col right
-    rows[58][13] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 507 and 508
-    rows[40][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 559 and 560
+    // Insert virtual "Not Usable" plots (not in database)
+    rows[58][12] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 507 and 508
+    rows[40][13] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // between 559 and 560
     // Insert virtual "MOW" plots at bottom of columns 15-18 (not in database)
+    rows[100][14] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][15] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][16] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
     rows[100][17] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
-    rows[100][18] = { Grave: 'MOW', Status: 'Not Usable', _virtual: true };
 
     // Virtual "Unknown" placeholder above 709 in col 15
-    rows[55][15] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    rows[55][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // Virtual N/U above 641 in col 15
-    rows[40][15] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
+    rows[40][14] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true };
     // 2 blank spacer plots between 664 and 1071 in col 15
-    rows[16][15] = { Grave: '', Status: '', _virtual: true };
-    rows[15][15] = { Grave: '', Status: '', _virtual: true };
+    rows[16][14] = { Grave: '', Status: '', _virtual: true };
+    rows[15][14] = { Grave: '', Status: '', _virtual: true };
     // Col 16 virtual plots
-    rows[55][16] = { Grave: '?', Status: 'Unknown', _virtual: true }; // Unknown above 786
-    rows[52][16] = { Grave: '', Status: '', _virtual: true }; // blank between 788 and 712
-    rows[49][16] = { Grave: '', Status: '', _virtual: true }; // blank between 713 and 714
-    rows[45][16] = { Grave: '', Status: '', _virtual: true }; // blank between 716 and 717
+    rows[55][15] = { Grave: '?', Status: 'Unknown', _virtual: true }; // Unknown above 786
+    rows[52][15] = { Grave: '', Status: '', _virtual: true }; // blank between 788 and 712
+    rows[49][15] = { Grave: '', Status: '', _virtual: true }; // blank between 713 and 714
+    rows[45][15] = { Grave: '', Status: '', _virtual: true }; // blank between 716 and 717
     // Col 17 virtual plots
-    rows[57][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown above 840
-    rows[55][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown below 841
-    rows[45][17] = { Grave: '', Status: '', _virtual: true }; // blank between 795 and 796 in col 17
-    rows[40][17] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U between 720 and 721 in col 17
-    rows[21][17] = { Grave: '', Status: '', _virtual: true }; // blank between 738 and 739 in col 17
+    rows[57][16] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown above 840
+    rows[55][16] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown below 841
+    rows[45][16] = { Grave: '', Status: '', _virtual: true }; // blank between 795 and 796 in col 17
+    rows[40][16] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U between 720 and 721 in col 17
+    rows[21][16] = { Grave: '', Status: '', _virtual: true }; // blank between 738 and 739 in col 17
     // Col 18 virtual plots
-    rows[99][18] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U above MOW in col 18
-    rows[52][18] = { Grave: '', Status: '', _virtual: true }; // blank between 920 and 844
-    rows[40][18] = { Grave: '', Status: '', _virtual: true }; // blank between 854 and 855
-    rows[32][18] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown between 861 and 862
+    rows[99][17] = { Grave: 'N/U', Status: 'Not Usable', _virtual: true }; // N/U above MOW in col 18
+    rows[52][17] = { Grave: '', Status: '', _virtual: true }; // blank between 920 and 844
+    rows[40][17] = { Grave: '', Status: '', _virtual: true }; // blank between 854 and 855
+    rows[32][17] = { Grave: '?', Status: 'Unknown', _virtual: true }; // unknown between 861 and 862
     // Col 19 virtual spacer
-    rows[40][19] = { Grave: '', Status: '', _virtual: true }; // blank between 932 and 933
+    rows[40][18] = { Grave: '', Status: '', _virtual: true }; // blank between 932 and 933
     // Label above plot 1070 in col 14
-    rows[0][14] = { Grave: '', Status: '', 'Last Name': 'Kathy Martin Woodard & Michael Sheets', _virtual: true };
+    rows[0][13] = { Grave: '', Status: '', 'Last Name': 'Kathy Martin Woodard & Michael Sheets', _virtual: true };
     // Label above plot 1084 in col 15
-    rows[0][15] = { Grave: '', Status: '', 'Last Name': 'Teddy, Brandy, Jerryn Sheets', _virtual: true };
+    rows[0][14] = { Grave: '', Status: '', 'Last Name': 'Teddy, Brandy, Jerryn Sheets', _virtual: true };
 
     return rows;
   }, [plotsByNumber]);
