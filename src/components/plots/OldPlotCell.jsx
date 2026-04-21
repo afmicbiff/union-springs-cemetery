@@ -60,7 +60,7 @@ const blinkListeners = {
 };
 
 const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, colIndex }) {
-  const sizeClass = 'w-[68px] h-[38px]';
+  const sizeClass = colIndex === 7 ? 'w-[95px] h-[38px]' : 'w-[68px] h-[38px]';
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkRef = useRef(false);
   const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
