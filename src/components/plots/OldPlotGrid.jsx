@@ -315,24 +315,6 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
         ))}
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-3 mt-4 flex-wrap">
-        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">Legend:</span>
-        {[
-          ['bg-green-500', 'Available'],
-          ['bg-yellow-400', 'Reserved'],
-          ['bg-red-500', 'Occupied'],
-          ['bg-blue-600', 'Veteran'],
-          ['bg-gray-500', 'Unavailable'],
-          ['bg-purple-500', 'Unknown'],
-          ['bg-gray-400', 'Not Usable'],
-        ].map(([bg, label]) => (
-          <div key={label} className="flex items-center gap-1">
-            <div className={`w-2.5 h-2.5 rounded-full ${bg}`} />
-            <span className="text-[10px] text-gray-600">{label}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 });
