@@ -37,6 +37,7 @@ export default function OldPlotsAndMap() {
   const [zoom, setZoom] = useState(0.32);
   const [activeLayer, setActiveLayer] = useState('grid'); // 'grid' or 'image' - which is on top
   const [gridLocked, setGridLocked] = useState(false);
+  const [imageLocked, setImageLocked] = useState(false);
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
@@ -225,6 +226,17 @@ export default function OldPlotsAndMap() {
             <p className="text-xs sm:text-sm text-gray-500">Historic cemetery plot grid — matches the official spreadsheet layout</p>
           </div>
           <div className="flex items-center gap-2">
+          {/* Image lock toggle */}
+          <Button
+            variant={imageLocked ? "default" : "outline"}
+            size="sm"
+            onClick={() => setImageLocked(prev => !prev)}
+            className={imageLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+            title={imageLocked ? "Image is locked — click to unlock and move/resize" : "Image is unlocked — click to lock in place"}
+          >
+            {imageLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+            {imageLocked ? "Unlock Image" : "Lock Image"}
+          </Button>
           {/* Grid lock toggle */}
           <Button
             variant={gridLocked ? "default" : "outline"}
@@ -366,6 +378,7 @@ export default function OldPlotsAndMap() {
                     minHeight={150}
                     label="Aerial Image"
                     zIndex={1}
+                    locked={imageLocked}
                   >
                     {({ width, height }) => (
                       <img
