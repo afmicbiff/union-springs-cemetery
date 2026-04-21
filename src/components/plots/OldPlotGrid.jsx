@@ -300,7 +300,13 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
           <div
             key={cIdx}
             className="flex flex-col"
-            style={cIdx < 10 ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom left' } : undefined}
+            style={
+              cIdx === 0
+                ? { transform: 'rotate(45deg)', transformOrigin: 'bottom left' }
+                : cIdx < 10
+                ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom left' }
+                : undefined
+            }
           >
             {col.map((item, rIdx) => (
               <OldPlotCell
