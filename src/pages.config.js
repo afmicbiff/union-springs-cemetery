@@ -81,6 +81,7 @@ const Memorial = lazyWithRetry(() => import('./pages/Memorial'));
 const NewPlotDetails = lazyWithRetry(() => import('./pages/NewPlotDetails'));
 const NewPlots = lazyWithRetry(() => import('./pages/NewPlots.jsx'));
 const NotificationSettings = lazyWithRetry(() => import('./pages/NotificationSettings'));
+const OldPlotsAndMap = lazyWithRetry(() => import('./pages/OldPlotsAndMap'));
 const Privacy = lazyWithRetry(() => import('./pages/Privacy'));
 const Profile = lazyWithRetry(() => import('./pages/Profile'));
 const Reports = lazyWithRetry(() => import('./pages/Reports'));
@@ -108,6 +109,7 @@ export const PAGES = {
     "NewPlotDetails": NewPlotDetails,
     "NewPlots": NewPlots,
     "NotificationSettings": NotificationSettings,
+    "OldPlotsAndMap": OldPlotsAndMap,
 
     "Privacy": Privacy,
     "Profile": Profile,
