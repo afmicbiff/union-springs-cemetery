@@ -86,7 +86,7 @@ export default function DraggableResizable({
       }}
       onMouseDown={onFocus}
     >
-      {/* Drag handle header */}
+      {/* Drag handle header (top) */}
       {!locked && (
         <div
           onMouseDown={startDrag}
@@ -94,6 +94,39 @@ export default function DraggableResizable({
         >
           <span className="font-medium">⋮⋮ {label}</span>
           <span className="text-stone-400 text-[10px]">{Math.round(size.width)} × {Math.round(size.height)}</span>
+        </div>
+      )}
+
+      {/* Drag handle - bottom edge */}
+      {!locked && (
+        <div
+          onMouseDown={startDrag}
+          className="absolute -bottom-4 left-0 right-0 h-4 bg-stone-800/60 hover:bg-stone-700/80 cursor-move rounded-b-md select-none flex items-center justify-center"
+          title="Drag to move"
+        >
+          <span className="text-white text-[10px] font-medium">⋮⋮</span>
+        </div>
+      )}
+
+      {/* Drag handle - left edge */}
+      {!locked && (
+        <div
+          onMouseDown={startDrag}
+          className="absolute -left-4 top-0 bottom-0 w-4 bg-stone-800/60 hover:bg-stone-700/80 cursor-move rounded-l-md select-none flex items-center justify-center"
+          title="Drag to move"
+        >
+          <span className="text-white text-[10px] font-medium" style={{ writingMode: 'vertical-rl' }}>⋮⋮</span>
+        </div>
+      )}
+
+      {/* Drag handle - right edge */}
+      {!locked && (
+        <div
+          onMouseDown={startDrag}
+          className="absolute -right-4 top-0 bottom-0 w-4 bg-stone-800/60 hover:bg-stone-700/80 cursor-move rounded-r-md select-none flex items-center justify-center"
+          title="Drag to move"
+        >
+          <span className="text-white text-[10px] font-medium" style={{ writingMode: 'vertical-rl' }}>⋮⋮</span>
         </div>
       )}
 

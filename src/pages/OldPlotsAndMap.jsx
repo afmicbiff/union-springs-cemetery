@@ -365,7 +365,7 @@ export default function OldPlotsAndMap() {
                     )}
                   </DraggableResizable>
 
-                  {/* Grid layer - overlaid on top of aerial image */}
+                  {/* Grid layer - overlaid on top of aerial image, movable/resizable */}
                   <DraggableResizable
                     initialX={40}
                     initialY={40}
@@ -375,7 +375,6 @@ export default function OldPlotsAndMap() {
                     minHeight={300}
                     label="Plot Grid"
                     zIndex={10}
-                    locked
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
