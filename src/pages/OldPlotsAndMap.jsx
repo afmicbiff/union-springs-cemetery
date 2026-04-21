@@ -352,7 +352,6 @@ export default function OldPlotsAndMap() {
                     minHeight={150}
                     label="Aerial Image"
                     zIndex={1}
-                    locked
                   >
                     {({ width, height }) => (
                       <img

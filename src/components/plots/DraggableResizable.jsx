@@ -48,22 +48,41 @@ export default function DraggableResizable({
     window.addEventListener("mouseup", onUp);
   }, [pos, onFocus]);
 
-  const startResize = useCallback((e) => {
+  // corner: 'se' | 'sw' | 'ne' | 'nw'
+  const startResize = useCallback((e, corner) => {
     e.preventDefault();
     e.stopPropagation();
     if (onFocus) onFocus();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origW = size.width;
-    const origH = size.height;
-    resizeRef.current = { startX, startY, origW, origH };
+    resizeRef.current = {
+      startX: e.clientX, startY: e.clientY,
+      origW: size.width, origH: size.height,
+      origX: pos.x, origY: pos.y,
+      corner,
+    };
 
     const onMove = (ev) => {
-      if (!resizeRef.current) return;
-      setSize({
-        width: Math.max(minWidth, resizeRef.current.origW + (ev.clientX - resizeRef.current.startX)),
-        height: Math.max(minHeight, resizeRef.current.origH + (ev.clientY - resizeRef.current.startY)),
-      });
+      const r = resizeRef.current;
+      if (!r) return;
+      const dx = ev.clientX - r.startX;
+      const dy = ev.clientY - r.startY;
+      let newW = r.origW, newH = r.origH, newX = r.origX, newY = r.origY;
+
+      if (r.corner.includes("e")) {
+        newW = Math.max(minWidth, r.origW + dx);
+      }
+      if (r.corner.includes("s")) {
+        newH = Math.max(minHeight, r.origH + dy);
+      }
+      if (r.corner.includes("w")) {
+        newW = Math.max(minWidth, r.origW - dx);
+        newX = r.origX + (r.origW - newW);
+      }
+      if (r.corner.includes("n")) {
+        newH = Math.max(minHeight, r.origH - dy);
+        newY = r.origY + (r.origH - newH);
+      }
+      setSize({ width: newW, height: newH });
+      setPos({ x: newX, y: newY });
     };
     const onUp = () => {
       resizeRef.current = null;
@@ -72,7 +91,7 @@ export default function DraggableResizable({
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-  }, [size, minWidth, minHeight, onFocus]);
+  }, [size, pos, minWidth, minHeight, onFocus]);
 
   return (
     <div
@@ -135,16 +154,34 @@ export default function DraggableResizable({
         {typeof children === "function" ? children({ width: size.width, height: size.height }) : children}
       </div>
 
-      {/* Resize handle */}
+      {/* Resize handles - all 4 corners */}
       {!locked && (
-        <div
-          onMouseDown={startResize}
-          className="absolute bottom-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-tl-md z-10"
-          style={{
-            clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
-          }}
-          title="Drag to resize"
-        />
+        <>
+          <div
+            onMouseDown={(e) => startResize(e, "se")}
+            className="absolute bottom-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize z-10"
+            style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }}
+            title="Drag to resize"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "sw")}
+            className="absolute bottom-0 left-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize z-10"
+            style={{ clipPath: "polygon(0 0, 100% 100%, 0 100%)" }}
+            title="Drag to resize"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "ne")}
+            className="absolute top-0 right-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize z-10"
+            style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%)" }}
+            title="Drag to resize"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "nw")}
+            className="absolute top-0 left-0 w-5 h-5 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize z-10"
+            style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+            title="Drag to resize"
+          />
+        </>
       )}
     </div>
   );
