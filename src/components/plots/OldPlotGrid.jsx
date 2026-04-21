@@ -294,7 +294,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
     <div className="inline-block select-none">
       <div
         className="flex items-end overflow-visible"
-        style={{ transform: 'rotate(-15deg)', transformOrigin: 'bottom left' }}
+        style={{ transform: 'rotate(25deg)', transformOrigin: 'bottom left' }}
       >
         {columns.map((col, cIdx) => (
           <div
