@@ -11,9 +11,20 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import OldPlotTooltip from "@/components/plots/OldPlotTooltip";
 
-const OldPlotGrid = lazy(() => import("@/components/plots/OldPlotGrid"));
-const PlotEditDialog = lazy(() => import("@/components/plots/PlotEditDialog"));
-const DraggableResizable = lazy(() => import("@/components/plots/DraggableResizable"));
+// Retry wrapper for child chunk imports — prevents white screen on stale cache
+function lazyRetry(importFn) {
+  return lazy(() =>
+    importFn().catch(() =>
+      new Promise((r) => setTimeout(r, 500))
+        .then(() => importFn())
+        .catch((err) => { window.location.reload(); throw err; })
+    )
+  );
+}
+
+const OldPlotGrid = lazyRetry(() => import("@/components/plots/OldPlotGrid"));
+const PlotEditDialog = lazyRetry(() => import("@/components/plots/PlotEditDialog"));
+const DraggableResizable = lazyRetry(() => import("@/components/plots/DraggableResizable"));
 
 const STATUS_COLORS = {
   Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',
@@ -35,7 +46,6 @@ export default function OldPlotsAndMap() {
   const [plotFilter, setPlotFilter] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zoom, setZoom] = useState(0.32);
-  const [activeLayer, setActiveLayer] = useState('grid'); // 'grid' or 'image' - which is on top
   const [gridLocked, setGridLocked] = useState(false);
   const [imageLocked, setImageLocked] = useState(false);
 
