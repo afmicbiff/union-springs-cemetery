@@ -302,15 +302,15 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
             className="flex flex-col"
             style={
               cIdx === 0
-                ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom center' }
+                ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom left' }
                 : cIdx === 1
-                ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom center' }
+                ? { transform: 'rotate(-7deg)', transformOrigin: 'bottom left' }
                 : cIdx === 2
-                ? { transform: 'rotate(-6.5deg)', transformOrigin: 'bottom center' }
+                ? { transform: 'rotate(-6.5deg)', transformOrigin: 'bottom left' }
                 : cIdx === 3
-                ? { transform: 'rotate(-6.5deg)', transformOrigin: 'bottom center' }
+                ? { transform: 'rotate(-6.5deg)', transformOrigin: 'bottom left' }
                 : cIdx >= 4 && cIdx < 10
-                ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom center' }
+                ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom left' }
                 : undefined
             }
           >
