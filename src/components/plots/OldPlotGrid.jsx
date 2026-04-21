@@ -301,9 +301,7 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
             key={cIdx}
             className="flex flex-col"
             style={
-              cIdx === 0
-                ? { transform: 'rotate(0deg)', transformOrigin: 'bottom left' }
-                : cIdx < 10
+              cIdx >= 1 && cIdx < 10
                 ? { transform: 'rotate(-4deg)', transformOrigin: 'bottom left' }
                 : undefined
             }
