@@ -297,7 +297,11 @@ export default memo(function OldPlotGrid({ plots, isAdmin, onHover, onEdit }) {
         style={{ transform: 'rotate(9deg)', transformOrigin: 'bottom left' }}
       >
         {columns.map((col, cIdx) => (
-          <div key={cIdx} className="flex flex-col">
+          <div
+            key={cIdx}
+            className="flex flex-col"
+            style={cIdx < 10 ? { transform: 'rotate(2deg)', transformOrigin: 'bottom left' } : undefined}
+          >
             {col.map((item, rIdx) => (
               <OldPlotCell
                 key={rIdx}
