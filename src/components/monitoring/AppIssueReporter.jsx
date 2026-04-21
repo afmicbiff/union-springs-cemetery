@@ -26,42 +26,24 @@ export default function AppIssueReporter() {
   }, [shouldSend]);
 
   useEffect(() => {
-    const recoveryFlag = 'app-issue-reload-attempted';
     const path = `${window.location.pathname}${window.location.search}`;
 
-    const buildReloadUrl = () => {
-      const url = new URL(window.location.href);
-      url.searchParams.set('recovered', '1');
-      url.searchParams.set('v', String(Date.now()));
-      return url.toString();
-    };
-
     const handleRuntimeIssue = (category, message, stack, details = {}) => {
-      const autoFixAttempted = RECOVERABLE_CHUNK_ERROR.test(message) && !window.sessionStorage.getItem(recoveryFlag);
+      const isChunkError = RECOVERABLE_CHUNK_ERROR.test(message);
       const payload = {
         category,
-        severity: autoFixAttempted ? 'high' : 'medium',
+        severity: isChunkError ? 'high' : 'medium',
         route: `${window.location.pathname}${window.location.search}`,
         summary: trim(message || 'Unknown app issue'),
         stack: trim(stack, 6000),
         user_agent: navigator.userAgent,
-        auto_fix_attempted: autoFixAttempted,
-        auto_fix_summary: autoFixAttempted ? 'Triggered one-time reload recovery for stale client assets.' : '',
+        auto_fix_attempted: false,
+        auto_fix_summary: isChunkError ? 'Recovery handled by lazyWithRetry + ChunkErrorBoundary.' : '',
         details
       };
 
-      if (autoFixAttempted) {
-        window.sessionStorage.setItem(recoveryFlag, String(Date.now()));
-        base44.functions.invoke('reportSystemIssue', payload)
-          .catch(() => null)
-          .finally(() => {
-            window.setTimeout(() => {
-              window.location.replace(buildReloadUrl());
-            }, 150);
-          });
-        return;
-      }
-
+      // Report only — do NOT reload here. The lazyWithRetry wrapper and
+      // ChunkErrorBoundary handle recovery to prevent competing reloads.
       sendIssue(payload);
     };
 
@@ -84,12 +66,6 @@ export default function AppIssueReporter() {
       if (message.includes('Authentication required to view users') || message.includes('No storage available for session')) return;
       handleRuntimeIssue('unhandled_rejection', message, stack, { path });
     };
-
-    if (window.location.search.includes('recovered=1')) {
-      window.setTimeout(() => {
-        window.sessionStorage.removeItem(recoveryFlag);
-      }, 30000);
-    }
 
     window.addEventListener('error', onError);
     window.addEventListener('unhandledrejection', onUnhandledRejection);

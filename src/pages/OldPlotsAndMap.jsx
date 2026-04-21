@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
@@ -10,21 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import OldPlotTooltip from "@/components/plots/OldPlotTooltip";
+import lazyWithRetry from "@/lib/lazyWithRetry";
 
-// Retry wrapper for child chunk imports — prevents white screen on stale cache
-function lazyRetry(importFn) {
-  return lazy(() =>
-    importFn().catch(() =>
-      new Promise((r) => setTimeout(r, 500))
-        .then(() => importFn())
-        .catch((err) => { window.location.reload(); throw err; })
-    )
-  );
-}
-
-const OldPlotGrid = lazyRetry(() => import("@/components/plots/OldPlotGrid"));
-const PlotEditDialog = lazyRetry(() => import("@/components/plots/PlotEditDialog"));
-const DraggableResizable = lazyRetry(() => import("@/components/plots/DraggableResizable"));
+const OldPlotGrid = lazyWithRetry(() => import("@/components/plots/OldPlotGrid"), 'OldPlotGrid');
+const PlotEditDialog = lazyWithRetry(() => import("@/components/plots/PlotEditDialog"), 'PlotEditDialog');
+const DraggableResizable = lazyWithRetry(() => import("@/components/plots/DraggableResizable"), 'DraggableResizable');
 
 const STATUS_COLORS = {
   Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',

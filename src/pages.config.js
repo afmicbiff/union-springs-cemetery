@@ -47,25 +47,8 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import { lazy } from 'react';
 import __Layout from './Layout.jsx';
-
-// Retry wrapper for dynamic imports — handles transient network/cache failures
-function lazyWithRetry(importFn) {
-  const component = lazy(() =>
-    importFn().catch((err) => {
-      // On failure, wait briefly then retry once
-      return new Promise((resolve) => setTimeout(resolve, 500))
-        .then(() => importFn())
-        .catch(() => {
-          // Final fallback: reload the page to bust the module cache
-          window.location.reload();
-          throw err;
-        });
-    })
-  );
-  return component;
-}
+import lazyWithRetry from './lib/lazyWithRetry';
 
 const Admin = lazyWithRetry(() => import('./pages/Admin'));
 const Bylaws = lazyWithRetry(() => import('./pages/Bylaws'));
