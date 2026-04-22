@@ -19,13 +19,6 @@ const COL7_TOTAL = 82;
 const COL8_TOTAL = 82;
 const COL9_TOTAL = 82;
 
-const STATUS_COLORS = {
-  Available: "bg-green-100 hover:bg-green-200",
-  Reserved: "bg-yellow-100 hover:bg-yellow-200",
-  Occupied: "bg-red-100 hover:bg-red-200",
-  Unavailable: "bg-gray-200 hover:bg-gray-300",
-};
-
 const STATUS_DOT = {
   Available: "bg-green-500",
   Reserved: "bg-yellow-400",
@@ -35,20 +28,19 @@ const STATUS_DOT = {
 
 function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   const status = plot?.status || "Available";
-  const colorCls = isBlank
-    ? "bg-transparent hover:bg-stone-50"
-    : (STATUS_COLORS[status] || STATUS_COLORS.Available);
+  const dotCls = STATUS_DOT[status] || STATUS_DOT.Available;
   const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
   const highlightCls = isHighlighted ? "ring-4 ring-teal-500 ring-offset-1 z-10 relative animate-pulse" : "";
   return (
     <button
       onClick={onClick}
-      className={`rounded flex items-center px-0.5 transition-all overflow-hidden ${colorCls} ${highlightCls}`}
+      className={`rounded flex items-center px-0.5 transition-all overflow-hidden hover:bg-stone-100 ${highlightCls}`}
       style={{ width: "38px", height: "19px" }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
       {!isBlank && (
         <div className="flex items-center gap-0.5 w-full leading-none">
+          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotCls}`} />
           <span className="text-[6px] font-bold text-stone-900 truncate">{plot?.plot_number || pos}</span>
           {plot?.row_label && (
             <span className="text-[5px] text-stone-600 truncate">{plot.row_label}</span>
