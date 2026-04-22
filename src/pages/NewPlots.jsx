@@ -27,7 +27,7 @@ function PlotTile({ pos, plot, isBlank, onClick }) {
     <button
       onClick={onClick}
       className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
-      style={{ width: "150px", height: "75px" }}
+      style={{ width: "38px", height: "19px" }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
       {!isBlank && (
