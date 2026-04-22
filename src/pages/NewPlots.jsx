@@ -142,6 +142,19 @@ export default function NewPlots() {
   const [containerSize, setContainerSize] = useState({ width: 900, height: 650 });
   const resizeRef = useRef(null);
 
+  // Natural size of the grid content (5 columns + gaps, 82 rows tall)
+  // Columns widths: 15 + 38*4 = 167px; 4 gaps of 16px = 64px; total = 231px
+  // Rows: 82 tiles of 19px + 81 gaps of 4px = 1558 + 324 = 1882px... actually gap-1 = 4px
+  // 82*19 + 81*4 = 1558 + 324 = 1882
+  const NATURAL_W = 15 + 38 * 4 + 16 * 4; // 231
+  const NATURAL_H = 82 * 19 + 81 * 4; // 1882
+
+  // Fit-scale: scales grid to fit the container (accounting for p-4 = 32px padding)
+  const fitScaleX = (containerSize.width - 32) / NATURAL_W;
+  const fitScaleY = (containerSize.height - 32) / NATURAL_H;
+  const effectiveScaleX = fitScaleX * zoom;
+  const effectiveScaleY = fitScaleY * zoom;
+
   const startResize = useCallback((e, dir) => {
     e.preventDefault();
     e.stopPropagation();
@@ -296,7 +309,7 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-              <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
+              <div className="inline-block origin-top-left" style={{ transform: `scale(${effectiveScaleX}, ${effectiveScaleY})`, transformOrigin: "top left" }}>
                 <div className="flex gap-4 items-end">
                   {/* Column 5 (far left) - 2ft × 10ft blank spacer plots */}
                   <div className="flex flex-col gap-1">
