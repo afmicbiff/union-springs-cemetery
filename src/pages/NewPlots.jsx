@@ -77,10 +77,11 @@ export default function NewPlots() {
     refetchOnWindowFocus: true,
   });
 
-  const { col1Map, col2Map, col3Map, col4Map, col6Map, col7Map, col8Map } = useMemo(() => {
-    const c1 = {}, c2 = {}, c3 = {}, c4 = {}, c6 = {}, c7 = {}, c8 = {};
+  const { col1Map, col2Map, col3Map, col4Map, col6Map, col7Map, col8Map, col9Map } = useMemo(() => {
+    const c1 = {}, c2 = {}, c3 = {}, c4 = {}, c6 = {}, c7 = {}, c8 = {}, c9 = {};
     plots.forEach((p) => {
-      if (p.column === 8) c8[p.position] = p;
+      if (p.column === 9) c9[p.position] = p;
+      else if (p.column === 8) c8[p.position] = p;
       else if (p.column === 7) c7[p.position] = p;
       else if (p.column === 6) c6[p.position] = p;
       else if (p.column === 4) c4[p.position] = p;
@@ -88,7 +89,7 @@ export default function NewPlots() {
       else if (p.column === 2) c2[p.position] = p;
       else c1[p.position] = p;
     });
-    return { col1Map: c1, col2Map: c2, col3Map: c3, col4Map: c4, col6Map: c6, col7Map: c7, col8Map: c8 };
+    return { col1Map: c1, col2Map: c2, col3Map: c3, col4Map: c4, col6Map: c6, col7Map: c7, col8Map: c8, col9Map: c9 };
   }, [plots]);
 
   const col1Positions = useMemo(() => Array.from({ length: COL1_TOTAL }, (_, i) => COL1_TOTAL - i), []);
@@ -98,6 +99,7 @@ export default function NewPlots() {
   const col6Positions = useMemo(() => Array.from({ length: COL6_TOTAL }, (_, i) => COL6_TOTAL - i), []);
   const col7Positions = useMemo(() => Array.from({ length: COL7_TOTAL }, (_, i) => COL7_TOTAL - i), []);
   const col8Positions = useMemo(() => Array.from({ length: COL8_TOTAL }, (_, i) => COL8_TOTAL - i), []);
+  const col9Positions = useMemo(() => Array.from({ length: COL9_TOTAL }, (_, i) => COL9_TOTAL - i), []);
 
   // Apply filters to determine visibility matches (still show all plots, but could be used for highlighting)
   const matchesFilter = useCallback((plot) => {
@@ -308,16 +310,17 @@ export default function NewPlots() {
 
               <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
                 <div className="flex gap-4 items-end">
-                  {/* Column 9 (far left) - 5ft × 10ft blank plots */}
+                  {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-1">
-                    {Array.from({ length: COL9_TOTAL }, (_, i) => COL9_TOTAL - i).map((pos) => (
-                      <div
-                        key={`c9-${pos}`}
-                        className="bg-white border border-stone-300 rounded"
-                        style={{ width: "38px", height: "19px" }}
-                        title={`Column 9, Plot ${pos} (5 ft × 10 ft)`}
-                      />
-                    ))}
+                    {col9Positions.map((pos) => {
+                      const plot = col9Map[pos];
+                      const isBlank = !plot;
+                      return (
+                        <PlotTile key={`c9-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
+                          isHighlighted={plot && highlightSet.has(plot.id)}
+                          onClick={() => setSelected({ position: pos, column: 9, plot })} />
+                      );
+                    })}
                   </div>
                   {/* Column 8 */}
                   <div className="flex flex-col gap-1">
