@@ -62,7 +62,9 @@ export default function NewPlots() {
   const { data: plots = [], isLoading } = useQuery({
     queryKey: ["new-plots-simple"],
     queryFn: () => base44.entities.NewPlotSimple.list("position", 1000),
-    initialData: [],
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   const { col1Map, col2Map, col3Map, col4Map } = useMemo(() => {
