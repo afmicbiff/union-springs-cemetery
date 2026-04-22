@@ -13,6 +13,7 @@ const COL1_TOTAL = 82;
 const COL2_TOTAL = 82;
 const COL3_TOTAL = 82;
 const COL4_TOTAL = 82;
+const COL5_TOTAL = 82;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
@@ -253,7 +254,18 @@ export default function NewPlots() {
             <div className="bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto overflow-auto" style={{ width: "fit-content", maxWidth: "100%" }}>
               <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
                 <div className="flex gap-4 items-end">
-                  {/* Column 4 (far left) */}
+                  {/* Column 5 (far left) - 2ft × 10ft blank spacer plots */}
+                  <div className="flex flex-col gap-1">
+                    {Array.from({ length: COL5_TOTAL }, (_, i) => COL5_TOTAL - i).map((pos) => (
+                      <div
+                        key={`c5-${pos}`}
+                        className="bg-white border border-stone-300 rounded"
+                        style={{ width: "15px", height: "19px" }}
+                        title={`Column 5, Plot ${pos} (2 ft × 10 ft)`}
+                      />
+                    ))}
+                  </div>
+                  {/* Column 4 */}
                   <div className="flex flex-col gap-1">
                     {col4Positions.map((pos) => {
                       const plot = col4Map[pos];
