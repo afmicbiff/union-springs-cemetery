@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
@@ -138,6 +138,35 @@ export default function NewPlots() {
   const totalPlots = plots.length;
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
+  // Resizable container state
+  const [containerSize, setContainerSize] = useState({ width: 900, height: 650 });
+  const resizeRef = useRef(null);
+
+  const startResize = useCallback((e, dir) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = containerSize.width;
+    const startH = containerSize.height;
+
+    const onMove = (ev) => {
+      let newW = startW;
+      let newH = startH;
+      if (dir.includes("e")) newW = Math.max(200, startW + (ev.clientX - startX));
+      if (dir.includes("w")) newW = Math.max(200, startW - (ev.clientX - startX));
+      if (dir.includes("s")) newH = Math.max(200, startH + (ev.clientY - startY));
+      if (dir.includes("n")) newH = Math.max(200, startH - (ev.clientY - startY));
+      setContainerSize({ width: newW, height: newH });
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [containerSize]);
+
   return (
     <div className="min-h-screen bg-stone-100">
       {/* Header */}
@@ -251,7 +280,22 @@ export default function NewPlots() {
               <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
             </div>
           ) : (
-            <div className="bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto overflow-auto" style={{ width: "fit-content", maxWidth: "100%" }}>
+            <div
+              ref={resizeRef}
+              className="relative bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto overflow-auto"
+              style={{ width: `${containerSize.width}px`, height: `${containerSize.height}px`, maxWidth: "100%" }}
+            >
+              {/* Edge resize handles */}
+              <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
+              <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
+              <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
+              <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
+              {/* Corner resize handles */}
+              <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
+              <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
+              <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
+              <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
+
               <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
                 <div className="flex gap-4 items-end">
                   {/* Column 5 (far left) - 2ft × 10ft blank spacer plots */}
