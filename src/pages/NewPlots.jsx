@@ -291,8 +291,16 @@ export default function NewPlots() {
           ) : (
             <div
               ref={resizeRef}
-              className="relative bg-transparent p-4 rounded-lg mx-auto overflow-auto"
-              style={{ width: `${containerSize.width}px`, height: `${containerSize.height}px`, maxWidth: "100%" }}
+              className="relative p-4 rounded-lg mx-auto overflow-auto"
+              style={{
+                width: `${containerSize.width}px`,
+                height: `${containerSize.height}px`,
+                maxWidth: "100%",
+                backgroundImage: "url('https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
             >
               {/* Edge resize handles */}
               <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
