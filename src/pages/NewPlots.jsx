@@ -26,29 +26,15 @@ function PlotTile({ pos, plot, isBlank, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`border-2 rounded flex items-center px-3 transition-all ${colorCls}`}
+      className={`border rounded flex items-center px-0.5 transition-all overflow-hidden ${colorCls}`}
       style={{ width: "38px", height: "19px" }}
-      title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
+      title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}${occupant ? "" : ""}`}
     >
       {!isBlank && (
-        <div className="flex flex-col items-start text-left w-full leading-tight">
-          <div className="flex items-baseline gap-2 w-full">
-            <span className="text-sm font-bold text-stone-900">{plot?.plot_number || `#${pos}`}</span>
-            {plot?.row_label && (
-              <span className="text-[11px] text-stone-600">{plot.row_label}</span>
-            )}
-          </div>
-          <span className="text-[9px] text-stone-600">{status}</span>
-          {occupant && (
-            <span className="text-[11px] font-medium text-stone-800 truncate w-full">{occupant}</span>
-          )}
-          {plot?.family_name && (
-            <span className="text-[10px] text-stone-600 italic truncate w-full">{plot.family_name}</span>
-          )}
-          {(plot?.birth_date || plot?.death_date) && (
-            <span className="text-[9px] text-stone-500 truncate w-full">
-              {plot?.birth_date || "?"} – {plot?.death_date || "?"}
-            </span>
+        <div className="flex items-center gap-0.5 w-full leading-none">
+          <span className="text-[6px] font-bold text-stone-900 truncate">{plot?.plot_number || pos}</span>
+          {plot?.row_label && (
+            <span className="text-[5px] text-stone-600 truncate">{plot.row_label}</span>
           )}
         </div>
       )}
