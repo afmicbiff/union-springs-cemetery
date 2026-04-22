@@ -14,6 +14,10 @@ const COL2_TOTAL = 82;
 const COL3_TOTAL = 82;
 const COL4_TOTAL = 82;
 const COL5_TOTAL = 82;
+const COL6_TOTAL = 82;
+const COL7_TOTAL = 82;
+const COL8_TOTAL = 82;
+const COL9_TOTAL = 82;
 
 const STATUS_COLORS = {
   Available: "bg-green-100 border-green-400 hover:bg-green-200",
@@ -298,7 +302,51 @@ export default function NewPlots() {
 
               <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
                 <div className="flex gap-4 items-end">
-                  {/* Column 5 (far left) - 2ft × 10ft blank spacer plots */}
+                  {/* Column 9 (far left) - 5ft × 10ft blank plots */}
+                  <div className="flex flex-col gap-1">
+                    {Array.from({ length: COL9_TOTAL }, (_, i) => COL9_TOTAL - i).map((pos) => (
+                      <div
+                        key={`c9-${pos}`}
+                        className="bg-white border border-stone-300 rounded"
+                        style={{ width: "38px", height: "19px" }}
+                        title={`Column 9, Plot ${pos} (5 ft × 10 ft)`}
+                      />
+                    ))}
+                  </div>
+                  {/* Column 8 - 5ft × 10ft blank plots */}
+                  <div className="flex flex-col gap-1">
+                    {Array.from({ length: COL8_TOTAL }, (_, i) => COL8_TOTAL - i).map((pos) => (
+                      <div
+                        key={`c8-${pos}`}
+                        className="bg-white border border-stone-300 rounded"
+                        style={{ width: "38px", height: "19px" }}
+                        title={`Column 8, Plot ${pos} (5 ft × 10 ft)`}
+                      />
+                    ))}
+                  </div>
+                  {/* Column 7 - 5ft × 10ft blank plots */}
+                  <div className="flex flex-col gap-1">
+                    {Array.from({ length: COL7_TOTAL }, (_, i) => COL7_TOTAL - i).map((pos) => (
+                      <div
+                        key={`c7-${pos}`}
+                        className="bg-white border border-stone-300 rounded"
+                        style={{ width: "38px", height: "19px" }}
+                        title={`Column 7, Plot ${pos} (5 ft × 10 ft)`}
+                      />
+                    ))}
+                  </div>
+                  {/* Column 6 - 5ft × 10ft blank plots */}
+                  <div className="flex flex-col gap-1">
+                    {Array.from({ length: COL6_TOTAL }, (_, i) => COL6_TOTAL - i).map((pos) => (
+                      <div
+                        key={`c6-${pos}`}
+                        className="bg-white border border-stone-300 rounded"
+                        style={{ width: "38px", height: "19px" }}
+                        title={`Column 6, Plot ${pos} (5 ft × 10 ft)`}
+                      />
+                    ))}
+                  </div>
+                  {/* Column 5 - 2ft × 10ft blank spacer plots */}
                   <div className="flex flex-col gap-1">
                     {Array.from({ length: COL5_TOTAL }, (_, i) => COL5_TOTAL - i).map((pos) => (
                       <div
