@@ -10,16 +10,21 @@ const STATUS_BG = {
   'Not Usable': 'bg-gray-400',
 };
 
-// Inject blink animation CSS once
+// Inject blink animation CSS once — lightweight opacity-only animation to avoid heavy repaints
 if (typeof document !== 'undefined' && !document.getElementById('old-plot-blink-style')) {
   const style = document.createElement('style');
   style.id = 'old-plot-blink-style';
   style.textContent = `
     @keyframes oldPlotBlink {
-      0%, 100% { box-shadow: 0 0 8px 6px rgba(34,197,94,0.7); border-color: #15803d; background-color: rgba(74,222,128,0.25); }
-      50% { box-shadow: 0 0 16px 10px rgba(74,222,128,0.8); border-color: #22c55e; background-color: rgba(74,222,128,0.45); }
+      0%, 100% { outline-color: rgba(34,197,94,1); }
+      50% { outline-color: rgba(34,197,94,0.3); }
     }
-    .animate-old-plot-blink { animation: oldPlotBlink 0.8s ease-in-out infinite; }
+    .animate-old-plot-blink {
+      outline: 3px solid rgba(34,197,94,1);
+      outline-offset: 1px;
+      animation: oldPlotBlink 1s ease-in-out infinite;
+      will-change: outline-color;
+    }
   `;
   document.head.appendChild(style);
 }
@@ -108,7 +113,7 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, 
   return (
     <div
       data-plot-num={plotNum}
-      className={`${sizeClass} px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors ${isBlinking ? 'animate-old-plot-blink ring-4 ring-green-400 ring-offset-2 z-50 relative rounded-sm border-2 border-green-600' : ''}`}
+      className={`${sizeClass} px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors relative ${isBlinking ? 'animate-old-plot-blink z-50 rounded-sm' : ''}`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
