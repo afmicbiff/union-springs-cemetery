@@ -313,8 +313,9 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-              <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
-                <div className="flex gap-0 items-end">
+              <div className="flex justify-end">
+                <div className="inline-block origin-top-right" style={{ transform: `scale(${zoom})`, transformOrigin: "top right" }}>
+                  <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
                     {col9Positions.map((pos) => {
@@ -421,6 +422,7 @@ export default function NewPlots() {
                           onClick={() => setSelected({ position: pos, column: 1, plot })} />
                       );
                     })}
+                  </div>
                   </div>
                 </div>
               </div>
