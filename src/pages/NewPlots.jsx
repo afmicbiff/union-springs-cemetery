@@ -147,11 +147,14 @@ export default function NewPlots() {
   const totalPlots = plots.length;
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
-  // Resizable container state
+  // Resizable container state - base size that gets scaled by zoom
   const BASE_WIDTH = 900;
-  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 650 });
+  const BASE_HEIGHT = 650;
+  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: BASE_HEIGHT });
   const resizeRef = useRef(null);
-  // Lock factor - grid scales proportionally with image width
+  // Image and grid scale together with zoom
+  const scaledWidth = containerSize.width * zoom;
+  const scaledHeight = containerSize.height * zoom;
   const lockScale = containerSize.width / BASE_WIDTH;
   const effectiveZoom = zoom * lockScale;
 
@@ -297,9 +300,8 @@ export default function NewPlots() {
               ref={resizeRef}
               className="relative p-4 rounded-lg mx-auto overflow-auto"
               style={{
-                width: `${containerSize.width}px`,
-                height: `${containerSize.height}px`,
-                maxWidth: "100%",
+                width: `${scaledWidth}px`,
+                height: `${scaledHeight}px`,
                 backgroundImage: "url('https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
