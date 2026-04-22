@@ -294,7 +294,7 @@ export default function NewPlots() {
           ) : (
             <div
               ref={resizeRef}
-              className="relative bg-white p-4 rounded-lg shadow-md border border-stone-200 mx-auto overflow-auto"
+              className="relative bg-transparent p-4 rounded-lg mx-auto overflow-auto"
               style={{ width: `${containerSize.width}px`, height: `${containerSize.height}px`, maxWidth: "100%" }}
             >
               {/* Edge resize handles */}
@@ -309,9 +309,9 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
               <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: "top left" }}>
-                <div className="flex gap-4 items-end">
+                <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col9Positions.map((pos) => {
                       const plot = col9Map[pos];
                       const isBlank = !plot;
@@ -323,7 +323,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 8 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col8Positions.map((pos) => {
                       const plot = col8Map[pos];
                       const isBlank = !plot;
@@ -335,7 +335,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 7 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col7Positions.map((pos) => {
                       const plot = col7Map[pos];
                       const isBlank = !plot;
@@ -347,7 +347,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 6 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col6Positions.map((pos) => {
                       const plot = col6Map[pos];
                       const isBlank = !plot;
@@ -359,7 +359,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 5 - 2ft × 10ft blank spacer plots */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {Array.from({ length: COL5_TOTAL }, (_, i) => COL5_TOTAL - i).map((pos) => (
                       <div
                         key={`c5-${pos}`}
@@ -370,7 +370,7 @@ export default function NewPlots() {
                     ))}
                   </div>
                   {/* Column 4 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col4Positions.map((pos) => {
                       const plot = col4Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
@@ -382,7 +382,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 3 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col3Positions.map((pos) => {
                       const plot = col3Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
@@ -394,7 +394,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 2 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col2Positions.map((pos) => {
                       const plot = col2Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
@@ -406,7 +406,7 @@ export default function NewPlots() {
                     })}
                   </div>
                   {/* Column 1 */}
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0">
                     {col1Positions.map((pos) => {
                       const plot = col1Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
