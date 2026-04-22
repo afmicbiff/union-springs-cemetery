@@ -20,10 +20,10 @@ const COL8_TOTAL = 82;
 const COL9_TOTAL = 82;
 
 const STATUS_COLORS = {
-  Available: "bg-green-100 border-green-400 hover:bg-green-200",
-  Reserved: "bg-yellow-100 border-yellow-400 hover:bg-yellow-200",
-  Occupied: "bg-red-100 border-red-400 hover:bg-red-200",
-  Unavailable: "bg-gray-200 border-gray-400 hover:bg-gray-300",
+  Available: "bg-green-100 hover:bg-green-200",
+  Reserved: "bg-yellow-100 hover:bg-yellow-200",
+  Occupied: "bg-red-100 hover:bg-red-200",
+  Unavailable: "bg-gray-200 hover:bg-gray-300",
 };
 
 const STATUS_DOT = {
@@ -36,14 +36,14 @@ const STATUS_DOT = {
 function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   const status = plot?.status || "Available";
   const colorCls = isBlank
-    ? "bg-white border-stone-300 hover:bg-stone-50"
+    ? "bg-transparent hover:bg-stone-50"
     : (STATUS_COLORS[status] || STATUS_COLORS.Available);
   const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
   const highlightCls = isHighlighted ? "ring-4 ring-teal-500 ring-offset-1 z-10 relative animate-pulse" : "";
   return (
     <button
       onClick={onClick}
-      className={`border rounded flex items-center px-0.5 transition-all overflow-hidden ${colorCls} ${highlightCls}`}
+      className={`rounded flex items-center px-0.5 transition-all overflow-hidden ${colorCls} ${highlightCls}`}
       style={{ width: "38px", height: "19px" }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
@@ -363,7 +363,7 @@ export default function NewPlots() {
                     {Array.from({ length: COL5_TOTAL }, (_, i) => COL5_TOTAL - i).map((pos) => (
                       <div
                         key={`c5-${pos}`}
-                        className="bg-white border border-stone-300 rounded"
+                        className="bg-transparent rounded"
                         style={{ width: "15px", height: "19px" }}
                         title={`Column 5, Plot ${pos} (2 ft × 10 ft)`}
                       />
