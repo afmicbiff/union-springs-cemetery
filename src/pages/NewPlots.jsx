@@ -34,18 +34,23 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded flex items-center px-0.5 transition-all overflow-hidden hover:bg-stone-100 ${highlightCls}`}
-      style={{ width: "38px", height: "19px" }}
+      className={`rounded flex items-center px-1 gap-1 transition-all hover:bg-stone-100 ${highlightCls}`}
+      style={{ width: "75px", height: "38px" }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
       {!isBlank && (
-        <div className="flex items-center gap-0.5 w-full leading-none">
-          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotCls}`} />
-          <span className="text-[6px] font-bold text-stone-900 truncate">{plot?.plot_number || pos}</span>
-          {plot?.row_label && (
-            <span className="text-[5px] text-stone-600 truncate">{plot.row_label}</span>
-          )}
-        </div>
+        <>
+          <div className={`w-2 h-2 rounded-full shrink-0 ${dotCls}`} />
+          <div className="flex flex-col leading-none min-w-0 text-left">
+            <span className="text-[9px] font-bold text-stone-800 truncate">#{plot?.plot_number || pos}</span>
+            {plot?.row_label && (
+              <span className="text-[7px] text-stone-500 truncate">{plot.row_label}</span>
+            )}
+            {(plot?.last_name || plot?.first_name) && (
+              <span className="text-[7px] text-stone-600 truncate">{[plot?.first_name, plot?.last_name].filter(Boolean).join(" ")}</span>
+            )}
+          </div>
+        </>
       )}
     </button>
   );
@@ -356,7 +361,7 @@ export default function NewPlots() {
                       <div
                         key={`c5-${pos}`}
                         className="bg-transparent rounded"
-                        style={{ width: "15px", height: "19px" }}
+                        style={{ width: "30px", height: "38px" }}
                         title={`Column 5, Plot ${pos} (2 ft × 10 ft)`}
                       />
                     ))}
