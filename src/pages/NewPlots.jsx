@@ -148,8 +148,12 @@ export default function NewPlots() {
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
   // Resizable container state
-  const [containerSize, setContainerSize] = useState({ width: 900, height: 650 });
+  const BASE_WIDTH = 900;
+  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 650 });
   const resizeRef = useRef(null);
+  // Lock factor - grid scales proportionally with image width
+  const lockScale = containerSize.width / BASE_WIDTH;
+  const effectiveZoom = zoom * lockScale;
 
   const startResize = useCallback((e, dir) => {
     e.preventDefault();
@@ -314,7 +318,7 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
               <div className="flex justify-end">
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${zoom})`, transformOrigin: "top right" }}>
+                <div className="inline-block origin-top-right" style={{ transform: `scale(${effectiveZoom})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
