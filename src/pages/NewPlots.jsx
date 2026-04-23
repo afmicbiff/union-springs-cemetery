@@ -299,7 +299,6 @@ export default function NewPlots() {
               style={{
                 width: `${containerSize.width}px`,
                 height: `${containerSize.height}px`,
-                maxWidth: "100%",
                 backgroundImage: "url('https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
