@@ -163,7 +163,7 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
-    return { width: BASE_WIDTH, height: BASE_HEIGHT };
+    return { width: BASE_WIDTH * 0.5, height: BASE_HEIGHT * 0.5 };
   });
   const resizeRef = useRef(null);
   // Lock factor — grid scales proportionally with image width (1:1 with container)
