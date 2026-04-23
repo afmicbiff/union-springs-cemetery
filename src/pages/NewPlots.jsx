@@ -26,7 +26,7 @@ const STATUS_DOT = {
   Unavailable: "bg-gray-500",
 };
 
-function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
+function PlotTile({ pos, plot, isBlank, onClick, isHighlighted, height = 38 }) {
   const status = plot?.status || "Available";
   const dotCls = STATUS_DOT[status] || STATUS_DOT.Available;
   const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
@@ -35,7 +35,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
     <button
       onClick={onClick}
       className={`rounded flex items-center px-1 gap-1 transition-all hover:bg-stone-100 ${highlightCls}`}
-      style={{ width: "75px", height: "38px" }}
+      style={{ width: "75px", height: `${height}px` }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
       {!isBlank && (
@@ -386,49 +386,49 @@ export default function NewPlots() {
                       />
                     ))}
                   </div>
-                  {/* Column 4 */}
+                  {/* Column 4 - 5ft × 11ft */}
                   <div className="flex flex-col gap-0">
                     {col4Positions.map((pos) => {
                       const plot = col4Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c4-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
+                        <PlotTile key={`c4-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 4, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 3 */}
+                  {/* Column 3 - 5ft × 11ft */}
                   <div className="flex flex-col gap-0">
                     {col3Positions.map((pos) => {
                       const plot = col3Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c3-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
+                        <PlotTile key={`c3-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 3, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 2 */}
+                  {/* Column 2 - 5ft × 11ft */}
                   <div className="flex flex-col gap-0">
                     {col2Positions.map((pos) => {
                       const plot = col2Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c2-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
+                        <PlotTile key={`c2-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 2, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 1 */}
+                  {/* Column 1 - 5ft × 11ft */}
                   <div className="flex flex-col gap-0">
                     {col1Positions.map((pos) => {
                       const plot = col1Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c1-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
+                        <PlotTile key={`c1-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 1, plot })} />
                       );
