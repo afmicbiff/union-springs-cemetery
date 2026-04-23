@@ -148,8 +148,8 @@ export default function NewPlots() {
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
   // Resizable container state
-  const BASE_WIDTH = 900;
-  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 650 });
+  const BASE_WIDTH = 1800;
+  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 1300 });
   const resizeRef = useRef(null);
   // Lock factor - grid scales proportionally with image width
   const lockScale = containerSize.width / BASE_WIDTH;
