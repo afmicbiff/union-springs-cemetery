@@ -297,16 +297,21 @@ export default function NewPlots() {
           ) : (
             <div
               ref={resizeRef}
-              className="relative p-4 rounded-lg mx-auto overflow-auto"
+              className="relative rounded-lg mx-auto"
               style={{
                 width: `${containerSize.width}px`,
                 height: `${containerSize.height}px`,
-                backgroundImage: "url('https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
               }}
             >
+              {/* Image layer — fills the container, positioned behind grid */}
+              <img
+                src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg"
+                alt="Aerial view"
+                className="absolute inset-0 w-full h-full object-fill rounded-lg pointer-events-none select-none"
+                style={{ zIndex: 1 }}
+                draggable={false}
+              />
+
               {/* Edge resize handles */}
               <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
               <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
@@ -318,7 +323,8 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-              <div className="flex justify-end">
+              {/* Grid layer — scales with zoom, positioned on top of image */}
+              <div className="absolute inset-0 p-4 flex justify-end" style={{ zIndex: 10 }}>
                 <div className="inline-block origin-top-right" style={{ transform: `scale(${effectiveZoom})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
