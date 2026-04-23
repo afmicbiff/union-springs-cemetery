@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw, Move } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +58,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 
 const STORAGE_KEY = "newPlotsContainerSize";
 const GRID_STORAGE_KEY = "newPlotsGridScale";
+const PAN_STORAGE_KEY = "newPlotsPanOffset";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -197,6 +198,53 @@ export default function NewPlots() {
     } catch {}
   }, [gridScale]);
 
+  // Pan offset — translates both the image and grid together. Persisted to localStorage.
+  const [panOffset, setPanOffset] = useState(() => {
+    if (typeof window === "undefined") return { x: 0, y: 0 };
+    try {
+      const saved = window.localStorage.getItem(PAN_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Number.isFinite(parsed?.x) && Number.isFinite(parsed?.y)) return parsed;
+      }
+    } catch {}
+    return { x: 0, y: 0 };
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(PAN_STORAGE_KEY, JSON.stringify(panOffset));
+    } catch {}
+  }, [panOffset]);
+
+  const [isPanning, setIsPanning] = useState(false);
+
+  const startPan = useCallback((e) => {
+    // Only pan on left mouse button and when clicking empty background (not buttons/handles)
+    if (e.button !== 0) return;
+    const target = e.target;
+    if (target.closest("button") || target.closest("[data-resize-handle]")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origX = panOffset.x;
+    const origY = panOffset.y;
+    setIsPanning(true);
+
+    const onMove = (ev) => {
+      setPanOffset({ x: origX + (ev.clientX - startX), y: origY + (ev.clientY - startY) });
+    };
+    const onUp = () => {
+      setIsPanning(false);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [panOffset]);
+
+  const resetPan = useCallback(() => setPanOffset({ x: 0, y: 0 }), []);
+
   // Grid-only resize — adjusts scaleX/scaleY independently (non-proportional allowed).
   const startGridResize = useCallback((e, dir) => {
     e.preventDefault();
@@ -295,6 +343,10 @@ export default function NewPlots() {
             <button onClick={() => setZoomPercent(100)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent === 100} title="Reset zoom">
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
+            <div className="w-px h-5 bg-gray-200 mx-0.5" />
+            <button onClick={resetPan} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40 flex items-center gap-1" disabled={panOffset.x === 0 && panOffset.y === 0} title="Reset pan position">
+              <Move className="w-4 h-4 text-gray-600" />
+            </button>
           </div>
         </div>
       </header>
@@ -374,10 +426,13 @@ export default function NewPlots() {
           ) : (
             <div
               ref={resizeRef}
+              onMouseDown={startPan}
               className="relative rounded-lg mx-auto"
               style={{
                 width: `${containerSize.width}px`,
                 height: `${containerSize.height}px`,
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+                cursor: isPanning ? "grabbing" : "grab",
               }}
             >
               {/* Image layer — fills the container, positioned behind grid */}
@@ -390,15 +445,15 @@ export default function NewPlots() {
               />
 
               {/* Edge resize handles */}
-              <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
-              <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
-              <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
-              <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
               {/* Corner resize handles */}
-              <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
-              <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
-              <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
-              <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
