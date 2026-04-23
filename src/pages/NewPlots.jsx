@@ -57,6 +57,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 }
 
 const STORAGE_KEY = "newPlotsContainerSize";
+const GRID_STORAGE_KEY = "newPlotsGridScale";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -176,6 +177,54 @@ export default function NewPlots() {
     } catch {}
   }, [containerSize]);
 
+  // Independent grid scale — scaleX and scaleY can be adjusted separately via grid handles.
+  // These multiply on top of lockScale (which follows the image container).
+  const [gridScale, setGridScale] = useState(() => {
+    if (typeof window === "undefined") return { x: 1, y: 1 };
+    try {
+      const saved = window.localStorage.getItem(GRID_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.x > 0 && parsed?.y > 0) return parsed;
+      }
+    } catch {}
+    return { x: 1, y: 1 };
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(GRID_STORAGE_KEY, JSON.stringify(gridScale));
+    } catch {}
+  }, [gridScale]);
+
+  // Grid-only resize — adjusts scaleX/scaleY independently (non-proportional allowed).
+  const startGridResize = useCallback((e, dir) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startSX = gridScale.x;
+    const startSY = gridScale.y;
+    // Pixels per full scale unit — tune for sensitivity
+    const PX_PER_UNIT = 600;
+
+    const onMove = (ev) => {
+      const dx = dir.includes("e") ? (ev.clientX - startX) : dir.includes("w") ? -(ev.clientX - startX) : 0;
+      const dy = dir.includes("s") ? (ev.clientY - startY) : dir.includes("n") ? -(ev.clientY - startY) : 0;
+      const newX = dir.match(/[ew]/) ? Math.max(0.1, Math.min(5, startSX + dx / PX_PER_UNIT)) : startSX;
+      const newY = dir.match(/[ns]/) ? Math.max(0.1, Math.min(5, startSY + dy / PX_PER_UNIT)) : startSY;
+      setGridScale({ x: newX, y: newY });
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [gridScale]);
+
+  const resetGridScale = useCallback(() => setGridScale({ x: 1, y: 1 }), []);
+
   // Zoom magnifier scales the whole container (image + grid together, 1:1).
   // Current zoom percent is derived from container width vs base width.
   const zoomPercent = Math.round(lockScale * 100);
@@ -247,6 +296,15 @@ export default function NewPlots() {
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
           </div>
+          {/* Grid scale indicator + reset (independent of image) */}
+          {(gridScale.x !== 1 || gridScale.y !== 1) && (
+            <button onClick={resetGridScale}
+              className="flex items-center gap-1.5 bg-orange-50 border border-orange-300 text-orange-700 rounded-lg px-2 py-1 text-xs font-mono hover:bg-orange-100 self-start md:self-auto"
+              title="Reset grid scale to 100% × 100%">
+              <span>Grid: {Math.round(gridScale.x * 100)}% × {Math.round(gridScale.y * 100)}%</span>
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -353,7 +411,16 @@ export default function NewPlots() {
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${lockScale})`, transformOrigin: "top right" }}>
+                <div className="relative inline-block origin-top-right" style={{ transform: `scale(${lockScale * gridScale.x}, ${lockScale * gridScale.y})`, transformOrigin: "top right" }}>
+                  {/* Grid-only resize handles (independent of image). Rendered at native scale, visually scaled along with grid. */}
+                  <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute -top-1 left-4 right-4 h-2 cursor-ns-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid height (top)" />
+                  <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute -bottom-1 left-4 right-4 h-2 cursor-ns-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid height (bottom)" />
+                  <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute -left-1 top-4 bottom-4 w-2 cursor-ew-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid width (left)" />
+                  <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute -right-1 top-4 bottom-4 w-2 cursor-ew-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid width (right)" />
+                  <div onMouseDown={(e) => startGridResize(e, "nw")} className="absolute -top-1.5 -left-1.5 w-4 h-4 cursor-nwse-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "ne")} className="absolute -top-1.5 -right-1.5 w-4 h-4 cursor-nesw-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "sw")} className="absolute -bottom-1.5 -left-1.5 w-4 h-4 cursor-nesw-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "se")} className="absolute -bottom-1.5 -right-1.5 w-4 h-4 cursor-nwse-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
