@@ -147,11 +147,14 @@ export default function NewPlots() {
   const totalPlots = plots.length;
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
-  // Resizable container state
+  // Resizable container state — image and grid are locked together at a fixed aspect ratio.
+  // Resizing any handle scales both dimensions uniformly (1:1 proportional).
   const BASE_WIDTH = 1800;
-  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 1300 });
+  const BASE_HEIGHT = 1300;
+  const ASPECT = BASE_WIDTH / BASE_HEIGHT;
+  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: BASE_HEIGHT });
   const resizeRef = useRef(null);
-  // Lock factor - grid scales proportionally with image width
+  // Lock factor — grid scales proportionally with image width
   const lockScale = containerSize.width / BASE_WIDTH;
   const effectiveZoom = zoom * lockScale;
 
@@ -161,15 +164,14 @@ export default function NewPlots() {
     const startX = e.clientX;
     const startY = e.clientY;
     const startW = containerSize.width;
-    const startH = containerSize.height;
 
     const onMove = (ev) => {
-      let newW = startW;
-      let newH = startH;
-      if (dir.includes("e")) newW = Math.max(200, startW + (ev.clientX - startX));
-      if (dir.includes("w")) newW = Math.max(200, startW - (ev.clientX - startX));
-      if (dir.includes("s")) newH = Math.max(200, startH + (ev.clientY - startY));
-      if (dir.includes("n")) newH = Math.max(200, startH - (ev.clientY - startY));
+      // Choose the larger delta so diagonal drags feel natural; horizontal/vertical handles still work.
+      const dx = dir.includes("e") ? (ev.clientX - startX) : dir.includes("w") ? -(ev.clientX - startX) : 0;
+      const dy = dir.includes("s") ? (ev.clientY - startY) : dir.includes("n") ? -(ev.clientY - startY) : 0;
+      const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy * ASPECT;
+      const newW = Math.max(200, startW + delta);
+      const newH = newW / ASPECT;
       setContainerSize({ width: newW, height: newH });
     };
     const onUp = () => {
