@@ -243,6 +243,58 @@ export default function NewPlots() {
     window.addEventListener("mouseup", onUp);
   }, [panOffset]);
 
+  // Touch gestures: 1 finger = pan, 2 fingers = pinch zoom (scales the container).
+  const touchStateRef = useRef(null);
+  const handleTouchStart = useCallback((e) => {
+    const target = e.target;
+    // Allow taps on plot buttons to pass through
+    if (e.touches.length === 1 && target.closest("button")) return;
+    if (e.touches.length === 1) {
+      // Single-finger pan
+      const t = e.touches[0];
+      touchStateRef.current = {
+        mode: "pan",
+        startX: t.clientX,
+        startY: t.clientY,
+        origX: panOffset.x,
+        origY: panOffset.y,
+      };
+      setIsPanning(true);
+    } else if (e.touches.length === 2) {
+      // Two-finger pinch zoom
+      const [a, b] = [e.touches[0], e.touches[1]];
+      const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      touchStateRef.current = {
+        mode: "pinch",
+        startDist: dist,
+        startWidth: containerSize.width,
+      };
+      setIsPanning(false);
+    }
+  }, [panOffset, containerSize]);
+
+  const handleTouchMove = useCallback((e) => {
+    const st = touchStateRef.current;
+    if (!st) return;
+    if (st.mode === "pan" && e.touches.length === 1) {
+      e.preventDefault();
+      const t = e.touches[0];
+      setPanOffset({ x: st.origX + (t.clientX - st.startX), y: st.origY + (t.clientY - st.startY) });
+    } else if (st.mode === "pinch" && e.touches.length === 2) {
+      e.preventDefault();
+      const [a, b] = [e.touches[0], e.touches[1]];
+      const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+      const ratio = dist / st.startDist;
+      const newW = Math.max(200, Math.min(BASE_WIDTH * 5, st.startWidth * ratio));
+      setContainerSize({ width: newW, height: newW / ASPECT });
+    }
+  }, [ASPECT]);
+
+  const handleTouchEnd = useCallback(() => {
+    touchStateRef.current = null;
+    setIsPanning(false);
+  }, []);
+
   const resetPan = useCallback(() => setPanOffset({ x: 0, y: 0 }), []);
 
   // Grid-only resize — adjusts scaleX/scaleY independently (non-proportional allowed).
@@ -284,16 +336,18 @@ export default function NewPlots() {
   }, [ASPECT]);
 
   const startResize = useCallback((e, dir) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
     const startX = e.clientX;
     const startY = e.clientY;
     const startW = containerSize.width;
 
     const onMove = (ev) => {
+      const point = ev.touches ? ev.touches[0] : ev;
+      if (!point) return;
       // Choose the larger delta so diagonal drags feel natural; horizontal/vertical handles still work.
-      const dx = dir.includes("e") ? (ev.clientX - startX) : dir.includes("w") ? -(ev.clientX - startX) : 0;
-      const dy = dir.includes("s") ? (ev.clientY - startY) : dir.includes("n") ? -(ev.clientY - startY) : 0;
+      const dx = dir.includes("e") ? (point.clientX - startX) : dir.includes("w") ? -(point.clientX - startX) : 0;
+      const dy = dir.includes("s") ? (point.clientY - startY) : dir.includes("n") ? -(point.clientY - startY) : 0;
       const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy * ASPECT;
       const newW = Math.max(200, startW + delta);
       const newH = newW / ASPECT;
@@ -302,9 +356,13 @@ export default function NewPlots() {
     const onUp = () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
   }, [containerSize, ASPECT]);
 
   return (
@@ -416,6 +474,11 @@ export default function NewPlots() {
         </div>
       </div>
 
+      {/* Mobile gesture hint */}
+      <div className="sm:hidden bg-teal-50 border-b border-teal-200 px-4 py-2 text-[11px] text-teal-800 text-center">
+        👆 Drag to pan · Pinch to zoom · Tap a plot to edit
+      </div>
+
       {/* Grid */}
       <main className="p-4 sm:p-6 overflow-auto">
         <div className="max-w-full mx-auto pb-20">
@@ -427,12 +490,17 @@ export default function NewPlots() {
             <div
               ref={resizeRef}
               onMouseDown={startPan}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
               className="relative rounded-lg mx-auto"
               style={{
                 width: `${containerSize.width}px`,
                 height: `${containerSize.height}px`,
                 transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
                 cursor: isPanning ? "grabbing" : "grab",
+                touchAction: "none",
               }}
             >
               {/* Image layer — fills the container, positioned behind grid */}
@@ -444,16 +512,16 @@ export default function NewPlots() {
                 draggable={false}
               />
 
-              {/* Edge resize handles */}
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
-              {/* Corner resize handles */}
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
+              {/* Edge resize handles — larger touch targets on mobile */}
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "n")} onTouchStart={(e) => startResize(e.touches[0], "n")} className="absolute top-0 left-2 right-2 h-2 sm:h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize top" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "s")} onTouchStart={(e) => startResize(e.touches[0], "s")} className="absolute bottom-0 left-2 right-2 h-2 sm:h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize bottom" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "w")} onTouchStart={(e) => startResize(e.touches[0], "w")} className="absolute top-2 bottom-2 left-0 w-2 sm:w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize left" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "e")} onTouchStart={(e) => startResize(e.touches[0], "e")} className="absolute top-2 bottom-2 right-0 w-2 sm:w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize right" />
+              {/* Corner resize handles — bigger on mobile for easier touch */}
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "nw")} onTouchStart={(e) => startResize(e.touches[0], "nw")} className="absolute top-0 left-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br touch-none" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "ne")} onTouchStart={(e) => startResize(e.touches[0], "ne")} className="absolute top-0 right-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl touch-none" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "sw")} onTouchStart={(e) => startResize(e.touches[0], "sw")} className="absolute bottom-0 left-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr touch-none" />
+              <div data-resize-handle onMouseDown={(e) => startResize(e, "se")} onTouchStart={(e) => startResize(e.touches[0], "se")} className="absolute bottom-0 right-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl touch-none" />
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
