@@ -26,7 +26,7 @@ const STATUS_DOT = {
   Unavailable: "bg-gray-500",
 };
 
-function PlotTile({ pos, plot, isBlank, onClick, isHighlighted, height = 38 }) {
+function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   const status = plot?.status || "Available";
   const dotCls = STATUS_DOT[status] || STATUS_DOT.Available;
   const occupant = plot ? [plot.first_name, plot.last_name].filter(Boolean).join(" ") : "";
@@ -35,7 +35,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted, height = 38 }) {
     <button
       onClick={onClick}
       className={`rounded flex items-center px-1 gap-1 transition-all hover:bg-stone-100 ${highlightCls}`}
-      style={{ width: "75px", height: `${height}px` }}
+      style={{ width: "75px", height: "38px" }}
       title={isBlank ? `Plot ${pos}` : `${plot?.row_label || `Plot ${pos}`}${plot?.plot_number ? ` (#${plot.plot_number})` : ""} - ${status}${occupant ? ` - ${occupant}` : ""}`}
     >
       {!isBlank && (
@@ -299,8 +299,8 @@ export default function NewPlots() {
               ref={resizeRef}
               className="relative rounded-lg mx-auto"
               style={{
-                width: `${containerSize.width * zoom}px`,
-                height: `${containerSize.height * zoom}px`,
+                width: `${containerSize.width}px`,
+                height: `${containerSize.height}px`,
               }}
             >
               {/* Image layer — fills the container, positioned behind grid */}
@@ -324,7 +324,7 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
-              <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale * zoom}px` }}>
+              <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
                 <div className="inline-block origin-top-right" style={{ transform: `scale(${effectiveZoom})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
@@ -386,49 +386,49 @@ export default function NewPlots() {
                       />
                     ))}
                   </div>
-                  {/* Column 4 - 5ft × 11ft */}
+                  {/* Column 4 */}
                   <div className="flex flex-col gap-0">
                     {col4Positions.map((pos) => {
                       const plot = col4Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c4-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
+                        <PlotTile key={`c4-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 4, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 3 - 5ft × 11ft */}
+                  {/* Column 3 */}
                   <div className="flex flex-col gap-0">
                     {col3Positions.map((pos) => {
                       const plot = col3Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c3-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
+                        <PlotTile key={`c3-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 3, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 2 - 5ft × 11ft */}
+                  {/* Column 2 */}
                   <div className="flex flex-col gap-0">
                     {col2Positions.map((pos) => {
                       const plot = col2Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c2-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
+                        <PlotTile key={`c2-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 2, plot })} />
                       );
                     })}
                   </div>
-                  {/* Column 1 - 5ft × 11ft */}
+                  {/* Column 1 */}
                   <div className="flex flex-col gap-0">
                     {col1Positions.map((pos) => {
                       const plot = col1Map[pos];
                       const isBlank = pos >= 62 && pos <= 66;
                       return (
-                        <PlotTile key={`c1-${pos}`} pos={pos} plot={plot} isBlank={isBlank} height={42}
+                        <PlotTile key={`c1-${pos}`} pos={pos} plot={plot} isBlank={isBlank}
                           isHighlighted={plot && highlightSet.has(plot.id)}
                           onClick={() => setSelected({ position: pos, column: 1, plot })} />
                       );
