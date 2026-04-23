@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
@@ -56,9 +56,10 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   );
 }
 
+const STORAGE_KEY = "newPlotsContainerSize";
+
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
-  const [zoom, setZoom] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [ownerFilter, setOwnerFilter] = useState("");
@@ -148,15 +149,42 @@ export default function NewPlots() {
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
   // Resizable container state — image and grid are locked together at a fixed aspect ratio.
-  // Resizing any handle scales both dimensions uniformly (1:1 proportional).
+  // Resizing any handle (or using the zoom magnifier) scales both dimensions uniformly (1:1 proportional).
+  // Size is persisted to localStorage so it stays the same across page visits.
   const BASE_WIDTH = 1800;
   const BASE_HEIGHT = 1300;
   const ASPECT = BASE_WIDTH / BASE_HEIGHT;
-  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: BASE_HEIGHT });
+  const [containerSize, setContainerSize] = useState(() => {
+    if (typeof window === "undefined") return { width: BASE_WIDTH, height: BASE_HEIGHT };
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.width > 0 && parsed?.height > 0) return parsed;
+      }
+    } catch {}
+    return { width: BASE_WIDTH, height: BASE_HEIGHT };
+  });
   const resizeRef = useRef(null);
-  // Lock factor — grid scales proportionally with image width
+  // Lock factor — grid scales proportionally with image width (1:1 with container)
   const lockScale = containerSize.width / BASE_WIDTH;
-  const effectiveZoom = zoom * lockScale;
+
+  // Persist container size whenever it changes
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(containerSize));
+    } catch {}
+  }, [containerSize]);
+
+  // Zoom magnifier scales the whole container (image + grid together, 1:1).
+  // Current zoom percent is derived from container width vs base width.
+  const zoomPercent = Math.round(lockScale * 100);
+  const setZoomPercent = useCallback((pct) => {
+    const clamped = Math.max(1, Math.min(500, pct));
+    const newW = (BASE_WIDTH * clamped) / 100;
+    const newH = newW / ASPECT;
+    setContainerSize({ width: newW, height: newH });
+  }, [ASPECT]);
 
   const startResize = useCallback((e, dir) => {
     e.preventDefault();
@@ -180,7 +208,7 @@ export default function NewPlots() {
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-  }, [containerSize]);
+  }, [containerSize, ASPECT]);
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -192,30 +220,30 @@ export default function NewPlots() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight font-serif mt-1">New Plots</h1>
             <p className="text-xs sm:text-sm text-gray-500">{totalPlots} plots · 5 ft × 10 ft each · Click a plot to edit</p>
           </div>
-          {/* Zoom controls */}
+          {/* Zoom controls — scales the whole container (image + grid together, 1:1) */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5 self-start md:self-auto">
-            <button onClick={() => setZoom((z) => Math.max(0.01, +(z - 0.05).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.01} title="Zoom out">
+            <button onClick={() => setZoomPercent(zoomPercent - 5)} className="p-1.5 rounded hover:bg-gray-100" title="Zoom out">
               <ZoomOut className="w-4 h-4 text-gray-600" />
             </button>
             <div className="flex items-center">
               <input
                 type="number"
                 min="1"
-                max="100"
-                value={Math.round(zoom * 100)}
+                max="500"
+                value={zoomPercent}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
-                  if (Number.isFinite(val) && val > 0) setZoom(Math.max(0.01, Math.min(1, val / 100)));
+                  if (Number.isFinite(val) && val > 0) setZoomPercent(val);
                 }}
                 className="w-14 text-xs font-mono text-gray-700 text-center border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
               />
               <span className="text-xs font-mono text-gray-500 ml-0.5">%</span>
             </div>
-            <button onClick={() => setZoom((z) => Math.min(1, +(z + 0.05).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 1} title="Zoom in">
+            <button onClick={() => setZoomPercent(zoomPercent + 5)} className="p-1.5 rounded hover:bg-gray-100" title="Zoom in">
               <ZoomIn className="w-4 h-4 text-gray-600" />
             </button>
             <div className="w-px h-5 bg-gray-200 mx-0.5" />
-            <button onClick={() => setZoom(1)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom === 1} title="Reset zoom">
+            <button onClick={() => setZoomPercent(100)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent === 100} title="Reset zoom">
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
           </div>
@@ -325,7 +353,7 @@ export default function NewPlots() {
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${effectiveZoom})`, transformOrigin: "top right" }}>
+                <div className="inline-block origin-top-right" style={{ transform: `scale(${lockScale})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
