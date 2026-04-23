@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
@@ -147,11 +147,38 @@ export default function NewPlots() {
   const totalPlots = plots.length;
   const highlightSet = highlightedIds.size > 0 ? highlightedIds : filteredHighlightIds;
 
-  // Fixed canvas dimensions — zoom scales both image and grid proportionally
+  // Resizable container state
   const BASE_WIDTH = 1800;
-  const BASE_HEIGHT = 1300;
-  const containerWidth = BASE_WIDTH * zoom;
-  const containerHeight = BASE_HEIGHT * zoom;
+  const [containerSize, setContainerSize] = useState({ width: BASE_WIDTH, height: 1300 });
+  const resizeRef = useRef(null);
+  // Lock factor - grid scales proportionally with image width
+  const lockScale = containerSize.width / BASE_WIDTH;
+  const effectiveZoom = zoom * lockScale;
+
+  const startResize = useCallback((e, dir) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = containerSize.width;
+    const startH = containerSize.height;
+
+    const onMove = (ev) => {
+      let newW = startW;
+      let newH = startH;
+      if (dir.includes("e")) newW = Math.max(200, startW + (ev.clientX - startX));
+      if (dir.includes("w")) newW = Math.max(200, startW - (ev.clientX - startX));
+      if (dir.includes("s")) newH = Math.max(200, startH + (ev.clientY - startY));
+      if (dir.includes("n")) newH = Math.max(200, startH - (ev.clientY - startY));
+      setContainerSize({ width: newW, height: newH });
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [containerSize]);
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -165,24 +192,24 @@ export default function NewPlots() {
           </div>
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5 self-start md:self-auto">
-            <button onClick={() => setZoom((z) => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1} title="Zoom out">
+            <button onClick={() => setZoom((z) => Math.max(0.01, +(z - 0.05).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.01} title="Zoom out">
               <ZoomOut className="w-4 h-4 text-gray-600" />
             </button>
             <div className="flex items-center">
               <input
                 type="number"
-                min="10"
-                max="500"
+                min="1"
+                max="100"
                 value={Math.round(zoom * 100)}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
-                  if (Number.isFinite(val) && val > 0) setZoom(Math.max(0.1, Math.min(5, val / 100)));
+                  if (Number.isFinite(val) && val > 0) setZoom(Math.max(0.01, Math.min(1, val / 100)));
                 }}
                 className="w-14 text-xs font-mono text-gray-700 text-center border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
               />
               <span className="text-xs font-mono text-gray-500 ml-0.5">%</span>
             </div>
-            <button onClick={() => setZoom((z) => Math.min(5, +(z + 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 5} title="Zoom in">
+            <button onClick={() => setZoom((z) => Math.min(1, +(z + 0.05).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 1} title="Zoom in">
               <ZoomIn className="w-4 h-4 text-gray-600" />
             </button>
             <div className="w-px h-5 bg-gray-200 mx-0.5" />
@@ -267,18 +294,30 @@ export default function NewPlots() {
             </div>
           ) : (
             <div
-              className="relative p-4 rounded-lg mx-auto"
+              ref={resizeRef}
+              className="relative p-4 rounded-lg mx-auto overflow-auto"
               style={{
-                width: `${containerWidth}px`,
-                height: `${containerHeight}px`,
+                width: `${containerSize.width}px`,
+                height: `${containerSize.height}px`,
                 backgroundImage: "url('https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/02100bab5_GraveyardPICadobe2.jpg')",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundRepeat: "no-repeat",
               }}
             >
+              {/* Edge resize handles */}
+              <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
+              <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
+              <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
+              <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
+              {/* Corner resize handles */}
+              <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
+              <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
+              <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
+              <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
+
               <div className="flex justify-end">
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${zoom})`, transformOrigin: "top right" }}>
+                <div className="inline-block origin-top-right" style={{ transform: `scale(${effectiveZoom})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
