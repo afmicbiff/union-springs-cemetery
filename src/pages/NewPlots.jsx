@@ -57,6 +57,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 }
 
 const STORAGE_KEY = "newPlotsContainerSize";
+const GRID_STORAGE_KEY = "newPlotsGridScale";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -169,12 +170,64 @@ export default function NewPlots() {
   // Lock factor — grid scales proportionally with image width (1:1 with container)
   const lockScale = containerSize.width / BASE_WIDTH;
 
+  // Independent grid scale (X and Y) — multiplies on top of lockScale so the grid
+  // can be resized independently of the image. Persisted to localStorage.
+  const [gridScale, setGridScale] = useState(() => {
+    if (typeof window === "undefined") return { x: 1, y: 1 };
+    try {
+      const saved = window.localStorage.getItem(GRID_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.x > 0 && parsed?.y > 0) return parsed;
+      }
+    } catch {}
+    return { x: 1, y: 1 };
+  });
+
   // Persist container size whenever it changes
   useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(containerSize));
     } catch {}
   }, [containerSize]);
+
+  // Persist grid scale whenever it changes
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(GRID_STORAGE_KEY, JSON.stringify(gridScale));
+    } catch {}
+  }, [gridScale]);
+
+  // Independent grid resize — orange handles. Scales grid X and/or Y relative to the container.
+  const startGridResize = useCallback((e, dir) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startSX = gridScale.x;
+    const startSY = gridScale.y;
+    // Use container size as a reference so drag distance maps intuitively to scale changes.
+    const refW = containerSize.width;
+    const refH = containerSize.height;
+
+    const onMove = (ev) => {
+      let nx = startSX;
+      let ny = startSY;
+      if (dir.includes("e")) nx = Math.max(0.1, startSX + (ev.clientX - startX) / refW);
+      if (dir.includes("w")) nx = Math.max(0.1, startSX - (ev.clientX - startX) / refW);
+      if (dir.includes("s")) ny = Math.max(0.1, startSY + (ev.clientY - startY) / refH);
+      if (dir.includes("n")) ny = Math.max(0.1, startSY - (ev.clientY - startY) / refH);
+      setGridScale({ x: nx, y: ny });
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }, [gridScale, containerSize]);
+
+  const resetGridScale = useCallback(() => setGridScale({ x: 1, y: 1 }), []);
 
   // Zoom magnifier scales the whole container (image + grid together, 1:1).
   // Current zoom percent is derived from container width vs base width.
@@ -351,9 +404,21 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
+              {/* Grid-independent resize handles (orange) — resize grid only, not image */}
+              <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute left-1/3 right-1/3 h-2 cursor-ns-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ top: "6px" }} title="Resize grid (top)" />
+              <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute left-1/3 right-1/3 h-2 cursor-ns-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ bottom: "6px" }} title="Resize grid (bottom)" />
+              <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute top-1/3 bottom-1/3 w-2 cursor-ew-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ left: "6px" }} title="Resize grid (left)" />
+              <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute top-1/3 bottom-1/3 w-2 cursor-ew-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ right: "6px" }} title="Resize grid (right)" />
+              {/* Reset grid scale button */}
+              {(gridScale.x !== 1 || gridScale.y !== 1) && (
+                <button onClick={resetGridScale} className="absolute z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-1 rounded shadow" style={{ top: "6px", right: "6px" }} title="Reset grid size">
+                  Reset Grid
+                </button>
+              )}
+
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${lockScale})`, transformOrigin: "top right" }}>
+                <div className="relative inline-block origin-top-right" style={{ transform: `scale(${lockScale * gridScale.x}, ${lockScale * gridScale.y})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
