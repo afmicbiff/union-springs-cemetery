@@ -59,7 +59,18 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 const STORAGE_KEY = "newPlotsContainerSize";
 const GRID_STORAGE_KEY = "newPlotsGridScale";
 
+const ADMIN_ROLES = ['admin', 'President', 'Vice President', 'Legal', 'Treasurer', 'Secretary', 'Caretaker', 'Administrator'];
+
 export default function NewPlots() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    base44.auth.me()
+      .then((u) => { if (mounted) setIsAdmin(ADMIN_ROLES.includes(u?.role)); })
+      .catch(() => { if (mounted) setIsAdmin(false); });
+    return () => { mounted = false; };
+  }, []);
+
   const [selected, setSelected] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -433,11 +444,15 @@ export default function NewPlots() {
                   <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
                   <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-                  {/* Independent grid resize handles (orange) — resize the grid on 4 sides without affecting the image */}
-                  <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid top (independent)" />
-                  <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
-                  <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
-                  <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
+                  {/* Independent grid resize handles (orange) — admin only */}
+                  {isAdmin && (
+                    <>
+                      <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid top (independent)" />
+                      <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
+                      <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
+                      <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
+                    </>
+                  )}
                 </>
               )}
 
