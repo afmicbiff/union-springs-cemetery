@@ -23,7 +23,7 @@ const InfoSection = memo(function InfoSection() {
                 variant="outline" className="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background shadow-sm h-9 border-2 border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white font-serif uppercase tracking-widest px-6 sm:px-10 py-4 sm:py-6 text-xs sm:text-sm rounded-sm transition-colors duration-300 touch-manipulation active:scale-[0.98]">
 
                 
-                 Read Our History
+                 INTERACTIVE TOWN AND CEMETERY HISTORY TOUR
                </Button>
              </Link>
           </div>
