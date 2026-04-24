@@ -207,7 +207,7 @@ export default function NewPlots() {
         if (parsed?.x > 0 && parsed?.y > 0) return parsed;
       }
     } catch {}
-    return { x: 0.47, y: 0.40 };
+    return { x: 0.59, y: 0.39 };
   });
 
   // Persist container size whenever it changes
@@ -438,11 +438,6 @@ export default function NewPlots() {
                   <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
                   <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
                   <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
-                  {(gridScale.x !== 1 || gridScale.y !== 1) && (
-                    <button onClick={resetGridScale} className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow" title="Reset grid scale">
-                      Reset Grid ({Math.round(gridScale.x * 100)}×{Math.round(gridScale.y * 100)}%)
-                    </button>
-                  )}
                 </>
               )}
 
