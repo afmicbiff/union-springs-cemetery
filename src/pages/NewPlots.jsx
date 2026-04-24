@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw, Move } from "lucide-react";
+import { Loader2, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,7 +58,6 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 
 const STORAGE_KEY = "newPlotsContainerSize";
 const GRID_STORAGE_KEY = "newPlotsGridScale";
-const PAN_STORAGE_KEY = "newPlotsPanOffset";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -198,105 +197,6 @@ export default function NewPlots() {
     } catch {}
   }, [gridScale]);
 
-  // Pan offset — translates both the image and grid together. Persisted to localStorage.
-  const [panOffset, setPanOffset] = useState(() => {
-    if (typeof window === "undefined") return { x: 0, y: 0 };
-    try {
-      const saved = window.localStorage.getItem(PAN_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Number.isFinite(parsed?.x) && Number.isFinite(parsed?.y)) return parsed;
-      }
-    } catch {}
-    return { x: 0, y: 0 };
-  });
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(PAN_STORAGE_KEY, JSON.stringify(panOffset));
-    } catch {}
-  }, [panOffset]);
-
-  const [isPanning, setIsPanning] = useState(false);
-
-  const startPan = useCallback((e) => {
-    // Only pan on left mouse button and when clicking empty background (not buttons/handles)
-    if (e.button !== 0) return;
-    const target = e.target;
-    if (target.closest("button") || target.closest("[data-resize-handle]")) return;
-    e.preventDefault();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origX = panOffset.x;
-    const origY = panOffset.y;
-    setIsPanning(true);
-
-    const onMove = (ev) => {
-      setPanOffset({ x: origX + (ev.clientX - startX), y: origY + (ev.clientY - startY) });
-    };
-    const onUp = () => {
-      setIsPanning(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [panOffset]);
-
-  // Touch gestures: 1 finger = pan, 2 fingers = pinch zoom (scales the container).
-  const touchStateRef = useRef(null);
-  const handleTouchStart = useCallback((e) => {
-    const target = e.target;
-    // Allow taps on plot buttons to pass through
-    if (e.touches.length === 1 && target.closest("button")) return;
-    if (e.touches.length === 1) {
-      // Single-finger pan
-      const t = e.touches[0];
-      touchStateRef.current = {
-        mode: "pan",
-        startX: t.clientX,
-        startY: t.clientY,
-        origX: panOffset.x,
-        origY: panOffset.y,
-      };
-      setIsPanning(true);
-    } else if (e.touches.length === 2) {
-      // Two-finger pinch zoom
-      const [a, b] = [e.touches[0], e.touches[1]];
-      const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-      touchStateRef.current = {
-        mode: "pinch",
-        startDist: dist,
-        startWidth: containerSize.width,
-      };
-      setIsPanning(false);
-    }
-  }, [panOffset, containerSize]);
-
-  const handleTouchMove = useCallback((e) => {
-    const st = touchStateRef.current;
-    if (!st) return;
-    if (st.mode === "pan" && e.touches.length === 1) {
-      e.preventDefault();
-      const t = e.touches[0];
-      setPanOffset({ x: st.origX + (t.clientX - st.startX), y: st.origY + (t.clientY - st.startY) });
-    } else if (st.mode === "pinch" && e.touches.length === 2) {
-      e.preventDefault();
-      const [a, b] = [e.touches[0], e.touches[1]];
-      const dist = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-      const ratio = dist / st.startDist;
-      const newW = Math.max(200, Math.min(BASE_WIDTH * 5, st.startWidth * ratio));
-      setContainerSize({ width: newW, height: newW / ASPECT });
-    }
-  }, [ASPECT]);
-
-  const handleTouchEnd = useCallback(() => {
-    touchStateRef.current = null;
-    setIsPanning(false);
-  }, []);
-
-  const resetPan = useCallback(() => setPanOffset({ x: 0, y: 0 }), []);
-
   // Grid-only resize — adjusts scaleX/scaleY independently (non-proportional allowed).
   const startGridResize = useCallback((e, dir) => {
     e.preventDefault();
@@ -336,18 +236,16 @@ export default function NewPlots() {
   }, [ASPECT]);
 
   const startResize = useCallback((e, dir) => {
-    if (e.preventDefault) e.preventDefault();
-    if (e.stopPropagation) e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
     const startX = e.clientX;
     const startY = e.clientY;
     const startW = containerSize.width;
 
     const onMove = (ev) => {
-      const point = ev.touches ? ev.touches[0] : ev;
-      if (!point) return;
       // Choose the larger delta so diagonal drags feel natural; horizontal/vertical handles still work.
-      const dx = dir.includes("e") ? (point.clientX - startX) : dir.includes("w") ? -(point.clientX - startX) : 0;
-      const dy = dir.includes("s") ? (point.clientY - startY) : dir.includes("n") ? -(point.clientY - startY) : 0;
+      const dx = dir.includes("e") ? (ev.clientX - startX) : dir.includes("w") ? -(ev.clientX - startX) : 0;
+      const dy = dir.includes("s") ? (ev.clientY - startY) : dir.includes("n") ? -(ev.clientY - startY) : 0;
       const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy * ASPECT;
       const newW = Math.max(200, startW + delta);
       const newH = newW / ASPECT;
@@ -356,13 +254,9 @@ export default function NewPlots() {
     const onUp = () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend", onUp);
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    window.addEventListener("touchmove", onMove, { passive: false });
-    window.addEventListener("touchend", onUp);
   }, [containerSize, ASPECT]);
 
   return (
@@ -401,11 +295,16 @@ export default function NewPlots() {
             <button onClick={() => setZoomPercent(100)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent === 100} title="Reset zoom">
               <RotateCcw className="w-4 h-4 text-gray-600" />
             </button>
-            <div className="w-px h-5 bg-gray-200 mx-0.5" />
-            <button onClick={resetPan} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40 flex items-center gap-1" disabled={panOffset.x === 0 && panOffset.y === 0} title="Reset pan position">
-              <Move className="w-4 h-4 text-gray-600" />
-            </button>
           </div>
+          {/* Grid scale indicator + reset (independent of image) */}
+          {(gridScale.x !== 1 || gridScale.y !== 1) && (
+            <button onClick={resetGridScale}
+              className="flex items-center gap-1.5 bg-orange-50 border border-orange-300 text-orange-700 rounded-lg px-2 py-1 text-xs font-mono hover:bg-orange-100 self-start md:self-auto"
+              title="Reset grid scale to 100% × 100%">
+              <span>Grid: {Math.round(gridScale.x * 100)}% × {Math.round(gridScale.y * 100)}%</span>
+              <RotateCcw className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -474,11 +373,6 @@ export default function NewPlots() {
         </div>
       </div>
 
-      {/* Mobile gesture hint */}
-      <div className="sm:hidden bg-teal-50 border-b border-teal-200 px-4 py-2 text-[11px] text-teal-800 text-center">
-        👆 Drag to pan · Pinch to zoom · Tap a plot to edit
-      </div>
-
       {/* Grid */}
       <main className="p-4 sm:p-6 overflow-auto">
         <div className="max-w-full mx-auto pb-20">
@@ -489,18 +383,10 @@ export default function NewPlots() {
           ) : (
             <div
               ref={resizeRef}
-              onMouseDown={startPan}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onTouchCancel={handleTouchEnd}
               className="relative rounded-lg mx-auto"
               style={{
                 width: `${containerSize.width}px`,
                 height: `${containerSize.height}px`,
-                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-                cursor: isPanning ? "grabbing" : "grab",
-                touchAction: "none",
               }}
             >
               {/* Image layer — fills the container, positioned behind grid */}
@@ -512,20 +398,29 @@ export default function NewPlots() {
                 draggable={false}
               />
 
-              {/* Edge resize handles — larger touch targets on mobile */}
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "n")} onTouchStart={(e) => startResize(e.touches[0], "n")} className="absolute top-0 left-2 right-2 h-2 sm:h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize top" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "s")} onTouchStart={(e) => startResize(e.touches[0], "s")} className="absolute bottom-0 left-2 right-2 h-2 sm:h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize bottom" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "w")} onTouchStart={(e) => startResize(e.touches[0], "w")} className="absolute top-2 bottom-2 left-0 w-2 sm:w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize left" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "e")} onTouchStart={(e) => startResize(e.touches[0], "e")} className="absolute top-2 bottom-2 right-0 w-2 sm:w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20 touch-none" title="Resize right" />
-              {/* Corner resize handles — bigger on mobile for easier touch */}
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "nw")} onTouchStart={(e) => startResize(e.touches[0], "nw")} className="absolute top-0 left-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br touch-none" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "ne")} onTouchStart={(e) => startResize(e.touches[0], "ne")} className="absolute top-0 right-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl touch-none" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "sw")} onTouchStart={(e) => startResize(e.touches[0], "sw")} className="absolute bottom-0 left-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr touch-none" />
-              <div data-resize-handle onMouseDown={(e) => startResize(e, "se")} onTouchStart={(e) => startResize(e.touches[0], "se")} className="absolute bottom-0 right-0 w-5 h-5 sm:w-3 sm:h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl touch-none" />
+              {/* Edge resize handles */}
+              <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
+              <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
+              <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
+              <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
+              {/* Corner resize handles */}
+              <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
+              <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
+              <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
+              <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
-                <div className="inline-block origin-top-right" style={{ transform: `scale(${lockScale * gridScale.x}, ${lockScale * gridScale.y})`, transformOrigin: "top right" }}>
+                <div className="relative inline-block origin-top-right" style={{ transform: `scale(${lockScale * gridScale.x}, ${lockScale * gridScale.y})`, transformOrigin: "top right" }}>
+                  {/* Grid-only resize handles (independent of image). Rendered at native scale, visually scaled along with grid. */}
+                  <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute -top-1 left-4 right-4 h-2 cursor-ns-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid height (top)" />
+                  <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute -bottom-1 left-4 right-4 h-2 cursor-ns-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid height (bottom)" />
+                  <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute -left-1 top-4 bottom-4 w-2 cursor-ew-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid width (left)" />
+                  <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute -right-1 top-4 bottom-4 w-2 cursor-ew-resize bg-orange-400/50 hover:bg-orange-500/80 z-30 rounded" title="Resize grid width (right)" />
+                  <div onMouseDown={(e) => startGridResize(e, "nw")} className="absolute -top-1.5 -left-1.5 w-4 h-4 cursor-nwse-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "ne")} className="absolute -top-1.5 -right-1.5 w-4 h-4 cursor-nesw-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "sw")} className="absolute -bottom-1.5 -left-1.5 w-4 h-4 cursor-nesw-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
+                  <div onMouseDown={(e) => startGridResize(e, "se")} className="absolute -bottom-1.5 -right-1.5 w-4 h-4 cursor-nwse-resize bg-orange-500 hover:bg-orange-600 z-30 rounded-sm border border-white shadow" title="Resize grid" />
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
