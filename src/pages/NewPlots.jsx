@@ -57,7 +57,6 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
 }
 
 const STORAGE_KEY = "newPlotsContainerSize";
-const GRID_STORAGE_KEY = "newPlotsGridScale";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -176,8 +175,6 @@ export default function NewPlots() {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(containerSize));
     } catch {}
   }, [containerSize]);
-
-  // Grid is permanently locked 1:1 with the image. Only the zoom magnifier changes their size together.
 
   // Zoom magnifier scales the whole container (image + grid together, 1:1).
   // Current zoom percent is derived from container width vs base width.
