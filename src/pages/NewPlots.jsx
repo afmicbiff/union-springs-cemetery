@@ -155,8 +155,25 @@ export default function NewPlots() {
   const BASE_WIDTH = 1800;
   const BASE_HEIGHT = 1300;
   const ASPECT = BASE_WIDTH / BASE_HEIGHT;
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  const [viewportWidth, setViewportWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setViewportWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const [containerSize, setContainerSize] = useState(() => {
     if (typeof window === "undefined") return { width: BASE_WIDTH, height: BASE_HEIGHT };
+    // On mobile, always auto-fit the viewport — ignore saved size
+    if (window.innerWidth < 768) {
+      const w = window.innerWidth - 16;
+      return { width: w, height: w / ASPECT };
+    }
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -166,6 +183,15 @@ export default function NewPlots() {
     } catch {}
     return { width: BASE_WIDTH, height: BASE_HEIGHT };
   });
+
+  // Keep mobile container fit to viewport on orientation/resize
+  useEffect(() => {
+    if (isMobile) {
+      const w = viewportWidth - 16;
+      setContainerSize({ width: w, height: w / ASPECT });
+    }
+  }, [isMobile, viewportWidth, ASPECT]);
+
   const resizeRef = useRef(null);
   // Lock factor — grid scales proportionally with image width (1:1 with container)
   const lockScale = containerSize.width / BASE_WIDTH;
@@ -266,12 +292,12 @@ export default function NewPlots() {
   return (
     <div className="min-h-screen bg-stone-100">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 shadow-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2 sm:py-4 shadow-sm sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3">
           <div>
             <Breadcrumbs items={[{ label: "New Plots" }]} />
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight font-serif mt-1">New Plots</h1>
-            <p className="text-xs sm:text-sm text-gray-500">{totalPlots} plots · 5 ft × 10 ft each · Click a plot to edit</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 tracking-tight font-serif mt-1">New Plots</h1>
+            <p className="text-[11px] sm:text-sm text-gray-500">{totalPlots} plots · 5 ft × 10 ft each · Tap a plot to edit</p>
           </div>
           {/* Zoom controls — scales the whole container (image + grid together, 1:1) */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5 self-start md:self-auto">
@@ -304,8 +330,8 @@ export default function NewPlots() {
       </header>
 
       {/* Filters bar */}
-      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3">
-        <div className="max-w-7xl mx-auto space-y-3">
+      <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-2 sm:py-3">
+        <div className="max-w-7xl mx-auto space-y-2 sm:space-y-3">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Search */}
             <div className="relative w-full sm:w-auto sm:min-w-[280px] sm:max-w-sm">
@@ -369,8 +395,8 @@ export default function NewPlots() {
       </div>
 
       {/* Grid */}
-      <main className="p-4 sm:p-6 overflow-auto">
-        <div className="max-w-full mx-auto pb-20">
+      <main className="p-2 sm:p-6 overflow-auto">
+        <div className="max-w-full mx-auto pb-10 sm:pb-20">
           {isLoading ? (
             <div className="flex justify-center py-10">
               <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
@@ -393,26 +419,31 @@ export default function NewPlots() {
                 draggable={false}
               />
 
-              {/* Edge resize handles */}
-              <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
-              <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
-              <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
-              <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
-              {/* Corner resize handles */}
-              <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
-              <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
-              <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
-              <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
+              {/* Resize handles — hidden on mobile (touch devices) */}
+              {!isMobile && (
+                <>
+                  {/* Edge resize handles */}
+                  <div onMouseDown={(e) => startResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize top" />
+                  <div onMouseDown={(e) => startResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize bottom" />
+                  <div onMouseDown={(e) => startResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize left" />
+                  <div onMouseDown={(e) => startResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-teal-400/40 hover:bg-teal-500/70 z-20" title="Resize right" />
+                  {/* Corner resize handles */}
+                  <div onMouseDown={(e) => startResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-br" />
+                  <div onMouseDown={(e) => startResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-bl" />
+                  <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
+                  <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-              {/* Independent grid resize handles (orange) — resize the grid on 4 sides without affecting the image */}
-              <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid top (independent)" />
-              <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
-              <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
-              <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
-              {(gridScale.x !== 1 || gridScale.y !== 1) && (
-                <button onClick={resetGridScale} className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow" title="Reset grid scale">
-                  Reset Grid ({Math.round(gridScale.x * 100)}×{Math.round(gridScale.y * 100)}%)
-                </button>
+                  {/* Independent grid resize handles (orange) — resize the grid on 4 sides without affecting the image */}
+                  <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid top (independent)" />
+                  <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
+                  <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
+                  <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
+                  {(gridScale.x !== 1 || gridScale.y !== 1) && (
+                    <button onClick={resetGridScale} className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow" title="Reset grid scale">
+                      Reset Grid ({Math.round(gridScale.x * 100)}×{Math.round(gridScale.y * 100)}%)
+                    </button>
+                  )}
+                </>
               )}
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
