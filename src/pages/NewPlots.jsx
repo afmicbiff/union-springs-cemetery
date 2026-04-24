@@ -404,15 +404,14 @@ export default function NewPlots() {
               <div onMouseDown={(e) => startResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tr" />
               <div onMouseDown={(e) => startResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-teal-500 hover:bg-teal-600 z-20 rounded-tl" />
 
-              {/* Grid-independent resize handles (orange) — resize grid only, not image */}
-              <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute left-1/3 right-1/3 h-2 cursor-ns-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ top: "6px" }} title="Resize grid (top)" />
-              <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute left-1/3 right-1/3 h-2 cursor-ns-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ bottom: "6px" }} title="Resize grid (bottom)" />
-              <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute top-1/3 bottom-1/3 w-2 cursor-ew-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ left: "6px" }} title="Resize grid (left)" />
-              <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute top-1/3 bottom-1/3 w-2 cursor-ew-resize bg-orange-400/60 hover:bg-orange-500 z-30 rounded" style={{ right: "6px" }} title="Resize grid (right)" />
-              {/* Reset grid scale button */}
+              {/* Independent grid resize handles (orange) — resize the grid on 4 sides without affecting the image */}
+              <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid top (independent)" />
+              <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-4 left-1/2 -translate-x-1/2 w-20 h-2 cursor-ns-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid bottom (independent)" />
+              <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute left-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid left (independent)" />
+              <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-20 cursor-ew-resize bg-orange-400/80 hover:bg-orange-500 z-30 rounded shadow" title="Resize grid right (independent)" />
               {(gridScale.x !== 1 || gridScale.y !== 1) && (
-                <button onClick={resetGridScale} className="absolute z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-1 rounded shadow" style={{ top: "6px", right: "6px" }} title="Reset grid size">
-                  Reset Grid
+                <button onClick={resetGridScale} className="absolute top-2 left-1/2 -translate-x-1/2 z-30 bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded shadow" title="Reset grid scale">
+                  Reset Grid ({Math.round(gridScale.x * 100)}×{Math.round(gridScale.y * 100)}%)
                 </button>
               )}
 
