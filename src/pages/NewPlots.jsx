@@ -164,7 +164,7 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
-    return { width: BASE_WIDTH * 0.5, height: BASE_HEIGHT * 0.5 };
+    return { width: BASE_WIDTH, height: BASE_HEIGHT };
   });
   const resizeRef = useRef(null);
   // Lock factor — grid scales proportionally with image width (1:1 with container)
@@ -181,7 +181,7 @@ export default function NewPlots() {
         if (parsed?.x > 0 && parsed?.y > 0) return parsed;
       }
     } catch {}
-    return { x: 1, y: 1 };
+    return { x: 0.47, y: 0.40 };
   });
 
   // Persist container size whenever it changes
