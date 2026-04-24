@@ -56,11 +56,7 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   );
 }
 
-// Bumped key version to reset any old saved sizes so the new locked default takes effect
-const STORAGE_KEY = "newPlotsContainerSize_v2";
-// Default opening size — image and grid locked together at this exact size
-const DEFAULT_WIDTH = 900;
-const DEFAULT_HEIGHT = 650;
+const STORAGE_KEY = "newPlotsContainerSize";
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -159,7 +155,7 @@ export default function NewPlots() {
   const BASE_HEIGHT = 1300;
   const ASPECT = BASE_WIDTH / BASE_HEIGHT;
   const [containerSize, setContainerSize] = useState(() => {
-    if (typeof window === "undefined") return { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT };
+    if (typeof window === "undefined") return { width: BASE_WIDTH, height: BASE_HEIGHT };
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -167,10 +163,10 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
-    return { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT };
+    return { width: BASE_WIDTH * 0.5, height: BASE_HEIGHT * 0.5 };
   });
   const resizeRef = useRef(null);
-  // Single scale — image and grid are locked 1:1 to container size
+  // Lock factor — grid scales proportionally with image width (1:1 with container)
   const lockScale = containerSize.width / BASE_WIDTH;
 
   // Persist container size whenever it changes
