@@ -56,8 +56,11 @@ function PlotTile({ pos, plot, isBlank, onClick, isHighlighted }) {
   );
 }
 
-const STORAGE_KEY = "newPlotsContainerSize";
-const GRID_SCALE_KEY = "newPlotsGridScale";
+// Bumped key version to reset any old saved sizes so the new locked default takes effect
+const STORAGE_KEY = "newPlotsContainerSize_v2";
+// Default opening size — image and grid locked together at this exact size
+const DEFAULT_WIDTH = 900;
+const DEFAULT_HEIGHT = 650;
 
 export default function NewPlots() {
   const [selected, setSelected] = useState(null);
@@ -156,7 +159,7 @@ export default function NewPlots() {
   const BASE_HEIGHT = 1300;
   const ASPECT = BASE_WIDTH / BASE_HEIGHT;
   const [containerSize, setContainerSize] = useState(() => {
-    if (typeof window === "undefined") return { width: BASE_WIDTH, height: BASE_HEIGHT };
+    if (typeof window === "undefined") return { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT };
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -164,24 +167,11 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
-    return { width: BASE_WIDTH * 0.5, height: BASE_HEIGHT * 0.5 };
+    return { width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT };
   });
   const resizeRef = useRef(null);
-  // Container scale — used by image (locked to container size)
+  // Single scale — image and grid are locked 1:1 to container size
   const lockScale = containerSize.width / BASE_WIDTH;
-
-  // Independent grid scale multiplier (on top of container scale) — resized separately
-  const [gridScale, setGridScale] = useState(() => {
-    if (typeof window === "undefined") return 1;
-    try {
-      const saved = window.localStorage.getItem(GRID_SCALE_KEY);
-      const parsed = saved ? parseFloat(saved) : 1;
-      return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-    } catch { return 1; }
-  });
-  useEffect(() => {
-    try { window.localStorage.setItem(GRID_SCALE_KEY, String(gridScale)); } catch {}
-  }, [gridScale]);
 
   // Persist container size whenever it changes
   useEffect(() => {
@@ -223,31 +213,6 @@ export default function NewPlots() {
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
   }, [containerSize, ASPECT]);
-
-  // Independent grid resize — scales the grid only (not the image)
-  const startGridResize = useCallback((e, dir) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startScale = gridScale;
-    // Use 1000px as a reference span for 1.0 of grid scale delta
-    const REF = 1000;
-
-    const onMove = (ev) => {
-      const dx = dir.includes("e") ? (ev.clientX - startX) : dir.includes("w") ? -(ev.clientX - startX) : 0;
-      const dy = dir.includes("s") ? (ev.clientY - startY) : dir.includes("n") ? -(ev.clientY - startY) : 0;
-      const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const next = Math.max(0.1, Math.min(5, startScale + delta / REF));
-      setGridScale(next);
-    };
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [gridScale]);
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -392,17 +357,7 @@ export default function NewPlots() {
 
               {/* Grid layer — scales with zoom, positioned on top of image */}
               <div className="absolute inset-0 flex justify-end" style={{ zIndex: 10, padding: "16px", paddingRight: `${16 + (225 + 100 - 200 - 25) * lockScale}px` }}>
-                <div className="relative inline-block origin-top-right" style={{ transform: `scale(${lockScale * gridScale})`, transformOrigin: "top right" }}>
-                  {/* Grid-only resize handles (4 sides + 4 corners) — independent from image */}
-                  <div onMouseDown={(e) => startGridResize(e, "n")} className="absolute top-0 left-2 right-2 h-1.5 cursor-ns-resize bg-amber-400/50 hover:bg-amber-500/80 z-30" title="Resize grid top" />
-                  <div onMouseDown={(e) => startGridResize(e, "s")} className="absolute bottom-0 left-2 right-2 h-1.5 cursor-ns-resize bg-amber-400/50 hover:bg-amber-500/80 z-30" title="Resize grid bottom" />
-                  <div onMouseDown={(e) => startGridResize(e, "w")} className="absolute top-2 bottom-2 left-0 w-1.5 cursor-ew-resize bg-amber-400/50 hover:bg-amber-500/80 z-30" title="Resize grid left" />
-                  <div onMouseDown={(e) => startGridResize(e, "e")} className="absolute top-2 bottom-2 right-0 w-1.5 cursor-ew-resize bg-amber-400/50 hover:bg-amber-500/80 z-30" title="Resize grid right" />
-                  <div onMouseDown={(e) => startGridResize(e, "nw")} className="absolute top-0 left-0 w-3 h-3 cursor-nwse-resize bg-amber-500 hover:bg-amber-600 z-30 rounded-br" />
-                  <div onMouseDown={(e) => startGridResize(e, "ne")} className="absolute top-0 right-0 w-3 h-3 cursor-nesw-resize bg-amber-500 hover:bg-amber-600 z-30 rounded-bl" />
-                  <div onMouseDown={(e) => startGridResize(e, "sw")} className="absolute bottom-0 left-0 w-3 h-3 cursor-nesw-resize bg-amber-500 hover:bg-amber-600 z-30 rounded-tr" />
-                  <div onMouseDown={(e) => startGridResize(e, "se")} className="absolute bottom-0 right-0 w-3 h-3 cursor-nwse-resize bg-amber-500 hover:bg-amber-600 z-30 rounded-tl" />
-                  <div className="inline-block">
+                <div className="inline-block origin-top-right" style={{ transform: `scale(${lockScale})`, transformOrigin: "top right" }}>
                   <div className="flex gap-0 items-end">
                   {/* Column 9 (far left) */}
                   <div className="flex flex-col gap-0">
@@ -510,7 +465,6 @@ export default function NewPlots() {
                           onClick={() => setSelected({ position: pos, column: 1, plot })} />
                       );
                     })}
-                  </div>
                   </div>
                   </div>
                 </div>
