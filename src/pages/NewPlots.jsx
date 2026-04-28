@@ -167,12 +167,10 @@ export default function NewPlots() {
   const BASE_HEIGHT = 1300;
   const ASPECT = BASE_WIDTH / BASE_HEIGHT;
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
-  const [viewportWidth, setViewportWidth] = useState(() => typeof window !== "undefined" ? window.innerWidth : 1200);
 
   useEffect(() => {
     const onResize = () => {
       setIsMobile(window.innerWidth < 768);
-      setViewportWidth(window.innerWidth);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -180,11 +178,7 @@ export default function NewPlots() {
 
   const [containerSize, setContainerSize] = useState(() => {
     if (typeof window === "undefined") return { width: BASE_WIDTH, height: BASE_HEIGHT };
-    // On mobile, always auto-fit the viewport — ignore saved size
-    if (window.innerWidth < 768) {
-      const w = window.innerWidth - 16;
-      return { width: w, height: w / ASPECT };
-    }
+    // Restore saved size on every device (including mobile) so user-chosen zoom persists.
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -192,16 +186,13 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
+    // First-time visitors on mobile get an auto-fit default; desktop gets BASE size.
+    if (window.innerWidth < 768) {
+      const w = window.innerWidth - 16;
+      return { width: w, height: w / ASPECT };
+    }
     return { width: BASE_WIDTH, height: BASE_HEIGHT };
   });
-
-  // Keep mobile container fit to viewport on orientation/resize
-  useEffect(() => {
-    if (isMobile) {
-      const w = viewportWidth - 16;
-      setContainerSize({ width: w, height: w / ASPECT });
-    }
-  }, [isMobile, viewportWidth, ASPECT]);
 
   const resizeRef = useRef(null);
   // Lock factor — grid scales proportionally with image width (1:1 with container)
