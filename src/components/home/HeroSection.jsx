@@ -260,7 +260,7 @@ const HeroSection = memo(function HeroSection() {
                 <MapPin className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> Old Cemetery Plots
               </Button>
             </Link>
-            <Link to={createPageUrl('NewPlotsAndMap')} className="w-full">
+            <Link to={createPageUrl('NewPlots')} className="w-full">
               <Button variant="secondary" className="w-full bg-stone-100 hover:bg-white active:bg-stone-200 text-stone-900 font-serif tracking-wider sm:tracking-widest px-4 sm:px-8 py-4 sm:py-6 text-base sm:text-lg rounded-sm shadow-lg touch-manipulation active:scale-[0.98]">
                 <Map className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> New Plots
               </Button>
