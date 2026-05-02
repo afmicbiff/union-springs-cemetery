@@ -186,11 +186,7 @@ export default function NewPlots() {
         if (parsed?.width > 0 && parsed?.height > 0) return parsed;
       }
     } catch {}
-    // First-time visitors on mobile get an auto-fit default; desktop gets BASE size.
-    if (window.innerWidth < 768) {
-      const w = window.innerWidth - 16;
-      return { width: w, height: w / ASPECT };
-    }
+    // First-time visitors on every device start with the large full-size map.
     return { width: BASE_WIDTH, height: BASE_HEIGHT };
   });
 
