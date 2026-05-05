@@ -160,31 +160,55 @@ export default function DraggableResizable({
         {typeof children === "function" ? children({ width: size.width, height: size.height }) : children}
       </div>
 
-      {/* Resize handles - all 4 corners (offset outward so they sit outside the overflow-hidden content wrapper) */}
+      {/* Resize handles - all sides and corners */}
       {!locked && (
         <>
           <div
+            onMouseDown={(e) => startResize(e, "n")}
+            className="absolute -top-2 left-6 right-6 h-4 bg-teal-600/70 hover:bg-teal-700 cursor-ns-resize rounded-sm border border-white shadow-md"
+            style={{ zIndex: 20 }}
+            title="Drag to resize top"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "s")}
+            className="absolute -bottom-2 left-6 right-6 h-4 bg-teal-600/70 hover:bg-teal-700 cursor-ns-resize rounded-sm border border-white shadow-md"
+            style={{ zIndex: 20 }}
+            title="Drag to resize bottom"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "w")}
+            className="absolute -left-2 top-6 bottom-6 w-4 bg-teal-600/70 hover:bg-teal-700 cursor-ew-resize rounded-sm border border-white shadow-md"
+            style={{ zIndex: 20 }}
+            title="Drag to resize left"
+          />
+          <div
+            onMouseDown={(e) => startResize(e, "e")}
+            className="absolute -right-2 top-6 bottom-6 w-4 bg-teal-600/70 hover:bg-teal-700 cursor-ew-resize rounded-sm border border-white shadow-md"
+            style={{ zIndex: 20 }}
+            title="Drag to resize right"
+          />
+          <div
             onMouseDown={(e) => startResize(e, "se")}
             className="absolute -bottom-2 -right-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-sm border-2 border-white shadow-md"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 21 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "sw")}
             className="absolute -bottom-2 -left-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize rounded-sm border-2 border-white shadow-md"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 21 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "ne")}
             className="absolute -top-2 -right-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nesw-resize rounded-sm border-2 border-white shadow-md"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 21 }}
             title="Drag to resize"
           />
           <div
             onMouseDown={(e) => startResize(e, "nw")}
             className="absolute -top-2 -left-2 w-6 h-6 bg-teal-600 hover:bg-teal-700 cursor-nwse-resize rounded-sm border-2 border-white shadow-md"
-            style={{ zIndex: 20 }}
+            style={{ zIndex: 21 }}
             title="Drag to resize"
           />
         </>
