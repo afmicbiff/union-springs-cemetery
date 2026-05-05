@@ -387,8 +387,8 @@ export default function OldPlotsAndMap() {
                   <DraggableResizable
                     initialX={1142}
                     initialY={423}
-                    initialWidth={716}
-                    initialHeight={1155}
+                    initialWidth={748}
+                    initialHeight={1341}
                     minWidth={150}
                     minHeight={150}
                     label="Aerial Image"
@@ -413,8 +413,8 @@ export default function OldPlotsAndMap() {
                   <DraggableResizable
                     initialX={1126}
                     initialY={364}
-                    initialWidth={748}
-                    initialHeight={1272}
+                    initialWidth={734}
+                    initialHeight={1396}
                     minWidth={300}
                     minHeight={300}
                     label="Plot Grid"
