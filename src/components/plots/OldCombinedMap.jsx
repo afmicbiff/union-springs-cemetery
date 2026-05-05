@@ -18,7 +18,7 @@ export default function OldCombinedMap({ plots, isAdmin, onHover, onEdit, zoomPa
             draggable={false}
           />
 
-          <div className="absolute" style={{ left: "820px", top: "40px", width: "700px", height: "1240px" }}>
+          <div className="absolute" style={{ left: "40px", top: "40px", width: "700px", height: "900px" }}>
             <div className="inline-block origin-top-left" style={{ transform: "scale(0.32)", transformOrigin: "top left" }}>
               <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
                 <OldPlotGrid plots={plots} isAdmin={isAdmin} onHover={onHover} onEdit={onEdit} />
