@@ -411,8 +411,8 @@ export default function OldPlotsAndMap() {
                   <DraggableResizable
                     initialX={40}
                     initialY={40}
-                    initialWidth={729}
-                    initialHeight={1253}
+                    initialWidth={748}
+                    initialHeight={1272}
                     minWidth={300}
                     minHeight={300}
                     label="Plot Grid"
