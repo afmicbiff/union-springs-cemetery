@@ -265,26 +265,26 @@ export default function OldPlotsAndMap() {
           )}
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
-            <button onClick={() => setZoom(z => Math.max(0.01, +(z - 0.01).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.01}>
+            <button onClick={() => setZoom(z => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1}>
               <ZoomOut className="w-4 h-4 text-gray-600" />
             </button>
             <div className="flex items-center">
               <input
                 type="number"
                 min="1"
-                max="100"
+                max="500"
                 value={Math.round(zoom * 100)}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   if (Number.isFinite(val) && val > 0) {
-                    setZoom(Math.max(0.01, Math.min(1, val / 100)));
+                    setZoom(Math.max(0.01, Math.min(5, val / 100)));
                   }
                 }}
                 className="w-14 text-xs font-mono text-gray-700 text-center border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
               />
               <span className="text-xs font-mono text-gray-500 ml-0.5">%</span>
             </div>
-            <button onClick={() => setZoom(z => Math.min(1, +(z + 0.01).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 1}>
+            <button onClick={() => setZoom(z => Math.min(2, +(z + 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 2}>
               <ZoomIn className="w-4 h-4 text-gray-600" />
             </button>
             <div className="w-px h-5 bg-gray-200 mx-0.5" />
