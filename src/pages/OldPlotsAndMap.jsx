@@ -397,13 +397,15 @@ export default function OldPlotsAndMap() {
                     resetKey={layoutResetKey}
                   >
                     {({ width, height }) => (
-                      <img
-                        src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
-                        alt="Aerial view of Union Springs Cemetery"
-                        className="rounded-md shadow-md border border-stone-200 pointer-events-none"
-                        style={{ width, height, objectFit: 'fill' }}
-                        draggable={false}
-                      />
+                      <div className="w-full h-full overflow-hidden rounded-md shadow-md border border-stone-200">
+                        <img
+                          src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
+                          alt="Aerial view of Union Springs Cemetery"
+                          className="w-full h-full pointer-events-none select-none"
+                          style={{ objectFit: 'fill' }}
+                          draggable={false}
+                        />
+                      </div>
                     )}
                   </DraggableResizable>
 
