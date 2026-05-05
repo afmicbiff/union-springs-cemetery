@@ -385,10 +385,10 @@ export default function OldPlotsAndMap() {
                 <Suspense fallback={null}>
                   {/* Aerial image layer */}
                   <DraggableResizable
-                    initialX={40}
-                    initialY={40}
-                    initialWidth={729}
-                    initialHeight={1253}
+                    initialX={1142}
+                    initialY={423}
+                    initialWidth={716}
+                    initialHeight={1155}
                     minWidth={150}
                     minHeight={150}
                     label="Aerial Image"
