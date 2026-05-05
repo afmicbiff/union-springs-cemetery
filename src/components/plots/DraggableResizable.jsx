@@ -73,6 +73,7 @@ export default function DraggableResizable({
       const dy = ev.clientY - r.startY;
       let newW = r.origW, newH = r.origH, newX = r.origX, newY = r.origY;
 
+      // Resize width (X) and height (Y) independently — no proportional/1:1 locking.
       if (r.corner.includes("e")) {
         newW = Math.max(minWidth, r.origW + dx);
       }
