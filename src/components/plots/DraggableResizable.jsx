@@ -17,10 +17,16 @@ export default function DraggableResizable({
   zIndex = 1,
   onFocus,
   locked = false,
+  resetKey = 0,
 }) {
   const [pos, setPos] = useState({ x: initialX, y: initialY });
   const [size, setSize] = useState({ width: initialWidth, height: initialHeight });
   const dragRef = useRef(null);
+
+  useEffect(() => {
+    setPos({ x: initialX, y: initialY });
+    setSize({ width: initialWidth, height: initialHeight });
+  }, [resetKey, initialX, initialY, initialWidth, initialHeight]);
   const resizeRef = useRef(null);
 
   const startDrag = useCallback((e) => {

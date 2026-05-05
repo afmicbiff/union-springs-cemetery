@@ -38,6 +38,7 @@ export default function OldPlotsAndMap() {
   const [zoom, setZoom] = useState(0.32);
   const [gridLocked, setGridLocked] = useState(false);
   const [imageLocked, setImageLocked] = useState(false);
+  const [layoutResetKey, setLayoutResetKey] = useState(0);
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
@@ -226,28 +227,42 @@ export default function OldPlotsAndMap() {
             <p className="text-xs sm:text-sm text-gray-500">Historic cemetery plot grid — matches the official spreadsheet layout</p>
           </div>
           <div className="flex items-center gap-2">
-          {/* Image lock toggle */}
-          <Button
-            variant={imageLocked ? "default" : "outline"}
-            size="sm"
-            onClick={() => setImageLocked(prev => !prev)}
-            className={imageLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
-            title={imageLocked ? "Image is locked — click to unlock and move/resize" : "Image is unlocked — click to lock in place"}
-          >
-            {imageLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
-            {imageLocked ? "Unlock Image" : "Lock Image"}
-          </Button>
-          {/* Grid lock toggle */}
-          <Button
-            variant={gridLocked ? "default" : "outline"}
-            size="sm"
-            onClick={() => setGridLocked(prev => !prev)}
-            className={gridLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
-            title={gridLocked ? "Grid is locked — click to unlock and move/resize" : "Grid is unlocked — click to lock in place"}
-          >
-            {gridLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
-            {gridLocked ? "Unlock Grid" : "Lock Grid"}
-          </Button>
+          {isAdmin && (
+            <>
+              {/* Image lock toggle */}
+              <Button
+                variant={imageLocked ? "default" : "outline"}
+                size="sm"
+                onClick={() => setImageLocked(prev => !prev)}
+                className={imageLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+                title={imageLocked ? "Image is locked — click to unlock and move/resize" : "Image is unlocked — click to lock in place"}
+              >
+                {imageLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+                {imageLocked ? "Unlock Image" : "Lock Image"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => { setLayoutResetKey(k => k + 1); setZoom(0.32); }}
+                className="border-gray-300"
+                title="Reset image and plot grid to the saved starting size and position"
+              >
+                <RotateCcw className="w-4 h-4 mr-1.5" />
+                Reset
+              </Button>
+              {/* Grid lock toggle */}
+              <Button
+                variant={gridLocked ? "default" : "outline"}
+                size="sm"
+                onClick={() => setGridLocked(prev => !prev)}
+                className={gridLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+                title={gridLocked ? "Grid is locked — click to unlock and move/resize" : "Grid is unlocked — click to lock in place"}
+              >
+                {gridLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+                {gridLocked ? "Unlock Grid" : "Lock Grid"}
+              </Button>
+            </>
+          )}
           {/* Zoom controls */}
           <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
             <button onClick={() => setZoom(z => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1}>
@@ -379,6 +394,7 @@ export default function OldPlotsAndMap() {
                     label="Aerial Image"
                     zIndex={1}
                     locked={imageLocked}
+                    resetKey={layoutResetKey}
                   >
                     {({ width, height }) => (
                       <img
@@ -402,6 +418,7 @@ export default function OldPlotsAndMap() {
                     label="Plot Grid"
                     zIndex={10}
                     locked={gridLocked}
+                    resetKey={layoutResetKey}
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
