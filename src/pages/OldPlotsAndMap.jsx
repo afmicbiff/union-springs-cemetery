@@ -385,10 +385,12 @@ export default function OldPlotsAndMap() {
                     style={{ left: 40, top: 40, width: 700, height: 900, objectFit: 'fill', zIndex: 1 }}
                     draggable={false}
                   />
-                  <div className="absolute p-2" style={{ left: 820, top: 40, width: 700, height: 900, zIndex: 10 }}>
-                    <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
-                      <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
-                    </Suspense>
+                  <div className="absolute p-2 overflow-visible" style={{ left: 40, top: 40, width: 700, height: 900, zIndex: 10 }}>
+                    <div className="inline-block origin-top-left" style={{ transform: 'scale(0.32)', transformOrigin: 'top left' }}>
+                      <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
+                        <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
+                      </Suspense>
+                    </div>
                   </div>
                 </div>
               </div>
