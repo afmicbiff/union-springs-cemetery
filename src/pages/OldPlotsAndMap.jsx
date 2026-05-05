@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { base44 } from "@/api/base44Client";
 import { filterEntity, clearEntityCache } from "@/components/gov/dataClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, MapPin, ArrowLeft, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Loader2, MapPin, ArrowLeft, Search, X, SlidersHorizontal, ZoomIn, ZoomOut, RotateCcw, Lock, Unlock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,9 @@ import { toast } from "sonner";
 import OldPlotTooltip from "@/components/plots/OldPlotTooltip";
 import lazyWithRetry from "@/lib/lazyWithRetry";
 
-const OldCombinedMap = lazyWithRetry(() => import("@/components/plots/OldCombinedMap"), 'OldCombinedMap');
+const OldPlotGrid = lazyWithRetry(() => import("@/components/plots/OldPlotGrid"), 'OldPlotGrid');
 const PlotEditDialog = lazyWithRetry(() => import("@/components/plots/PlotEditDialog"), 'PlotEditDialog');
+const DraggableResizable = lazyWithRetry(() => import("@/components/plots/DraggableResizable"), 'DraggableResizable');
 
 const STATUS_COLORS = {
   Available: 'bg-green-500', Reserved: 'bg-yellow-400', Occupied: 'bg-red-500',
@@ -34,8 +35,9 @@ export default function OldPlotsAndMap() {
   const [ownerFilter, setOwnerFilter] = useState('');
   const [plotFilter, setPlotFilter] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const zoomPanRef = useRef(null);
-  const [zoomPercent, setZoomPercent] = useState(100);
+  const [zoom, setZoom] = useState(0.32);
+  const [gridLocked, setGridLocked] = useState(false);
+  const [imageLocked, setImageLocked] = useState(false);
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const fromSearch = params.get('from') === 'search';
@@ -159,9 +161,8 @@ export default function OldPlotsAndMap() {
     window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
     const el = document.querySelector(`[data-plot-num="${targetPlotNum}"]`);
     if (el) {
-      zoomPanRef.current?.centerOnElement?.(el, 'center', () => {
-        window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } }));
-      });
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      setTimeout(() => window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } })), 400);
     } else {
       toast.info(`Plot #${targetPlotNum} not found in the grid`);
     }
@@ -181,12 +182,13 @@ export default function OldPlotsAndMap() {
     if (firstNum) {
       const el = document.querySelector(`[data-plot-num="${firstNum}"]`);
       if (el) {
-        zoomPanRef.current?.centerOnElement?.(el, 'center', () => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        setTimeout(() => {
           matches.forEach(m => {
             const n = parseInt(String(m.Grave || '').replace(/\D/g, '')) || null;
             if (n) window.dispatchEvent(new CustomEvent('plot-search-blink', { detail: { targetPlotNum: n } }));
           });
-        });
+        }, 400);
       }
     }
   }, [searchQuery, parsedData]);
@@ -205,30 +207,14 @@ export default function OldPlotsAndMap() {
       window.dispatchEvent(new CustomEvent('plot-stop-all-blink'));
       const el = document.querySelector(`[data-plot-num="${targetPlotNum}"]`);
       if (el) {
-        zoomPanRef.current?.centerOnElement?.(el, 'center', () => {
-          window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } }));
-        });
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        setTimeout(() => window.dispatchEvent(new CustomEvent('plot-start-blink', { detail: { targetPlotNum } })), 500);
       }
     }, 600);
     return () => clearTimeout(timer);
   }, [fromSearch, targetPlotNum, isLoading, parsedData]);
 
   const hasFilters = statusFilter || ownerFilter || plotFilter;
-
-  const zoomOut = useCallback(() => {
-    zoomPanRef.current?.zoomBy?.(1 / 1.15);
-    setZoomPercent((z) => Math.max(20, Math.round(z / 1.15)));
-  }, []);
-
-  const zoomIn = useCallback(() => {
-    zoomPanRef.current?.zoomBy?.(1.15);
-    setZoomPercent((z) => Math.min(500, Math.round(z * 1.15)));
-  }, []);
-
-  const resetView = useCallback(() => {
-    zoomPanRef.current?.reset?.();
-    setZoomPercent(100);
-  }, []);
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -240,30 +226,57 @@ export default function OldPlotsAndMap() {
             <p className="text-xs sm:text-sm text-gray-500">Historic cemetery plot grid — matches the official spreadsheet layout</p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Zoom controls — scales the aerial image and plot grid together */}
-            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
-              <button onClick={zoomOut} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent <= 20} title="Zoom out">
-                <ZoomOut className="w-4 h-4 text-gray-600" />
-              </button>
-              <div className="flex items-center">
-                <input
-                  type="number"
-                  min="20"
-                  max="500"
-                  value={zoomPercent}
-                  readOnly
-                  className="w-14 text-xs font-mono text-gray-700 text-center border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
-                />
-                <span className="text-xs font-mono text-gray-500 ml-0.5">%</span>
-              </div>
-              <button onClick={zoomIn} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent >= 500} title="Zoom in">
-                <ZoomIn className="w-4 h-4 text-gray-600" />
-              </button>
-              <div className="w-px h-5 bg-gray-200 mx-0.5" />
-              <button onClick={resetView} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoomPercent === 100} title="Reset view">
-                <RotateCcw className="w-4 h-4 text-gray-600" />
-              </button>
+          {/* Image lock toggle */}
+          <Button
+            variant={imageLocked ? "default" : "outline"}
+            size="sm"
+            onClick={() => setImageLocked(prev => !prev)}
+            className={imageLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+            title={imageLocked ? "Image is locked — click to unlock and move/resize" : "Image is unlocked — click to lock in place"}
+          >
+            {imageLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+            {imageLocked ? "Unlock Image" : "Lock Image"}
+          </Button>
+          {/* Grid lock toggle */}
+          <Button
+            variant={gridLocked ? "default" : "outline"}
+            size="sm"
+            onClick={() => setGridLocked(prev => !prev)}
+            className={gridLocked ? "bg-red-600 hover:bg-red-700 text-white" : "border-gray-300"}
+            title={gridLocked ? "Grid is locked — click to unlock and move/resize" : "Grid is unlocked — click to lock in place"}
+          >
+            {gridLocked ? <Lock className="w-4 h-4 mr-1.5" /> : <Unlock className="w-4 h-4 mr-1.5" />}
+            {gridLocked ? "Unlock Grid" : "Lock Grid"}
+          </Button>
+          {/* Zoom controls */}
+          <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm px-1 py-0.5">
+            <button onClick={() => setZoom(z => Math.max(0.1, +(z - 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom <= 0.1}>
+              <ZoomOut className="w-4 h-4 text-gray-600" />
+            </button>
+            <div className="flex items-center">
+              <input
+                type="number"
+                min="1"
+                max="500"
+                value={Math.round(zoom * 100)}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (Number.isFinite(val) && val > 0) {
+                    setZoom(Math.max(0.01, Math.min(5, val / 100)));
+                  }
+                }}
+                className="w-14 text-xs font-mono text-gray-700 text-center border border-gray-200 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500"
+              />
+              <span className="text-xs font-mono text-gray-500 ml-0.5">%</span>
             </div>
+            <button onClick={() => setZoom(z => Math.min(2, +(z + 0.1).toFixed(2)))} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom >= 2}>
+              <ZoomIn className="w-4 h-4 text-gray-600" />
+            </button>
+            <div className="w-px h-5 bg-gray-200 mx-0.5" />
+            <button onClick={() => setZoom(0.32)} className="p-1.5 rounded hover:bg-gray-100 disabled:opacity-40" disabled={zoom === 0.32}>
+              <RotateCcw className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
           </div>
         </div>
       </header>
@@ -352,15 +365,57 @@ export default function OldPlotsAndMap() {
               {hasFilters && <Button variant="outline" onClick={clearFilters} className="mt-3">Clear Filters</Button>}
             </div>
           ) : (
-            <Suspense fallback={null}>
-              <OldCombinedMap
-                plots={filteredData}
-                isAdmin={isAdmin}
-                onHover={handleHover}
-                onEdit={isAdmin ? handleEdit : undefined}
-                zoomPanRef={zoomPanRef}
-              />
-            </Suspense>
+            <div className="relative w-full border border-gray-200 rounded-lg bg-stone-50 overflow-auto" style={{ height: '80vh', minHeight: '600px' }}>
+              <div className="relative" style={{ width: '3000px', height: '2000px' }}>
+                <Suspense fallback={null}>
+                  {/* Aerial image layer */}
+                  <DraggableResizable
+                    initialX={40}
+                    initialY={40}
+                    initialWidth={700}
+                    initialHeight={900}
+                    minWidth={150}
+                    minHeight={150}
+                    label="Aerial Image"
+                    zIndex={1}
+                    locked={imageLocked}
+                  >
+                    {({ width, height }) => (
+                      <img
+                        src="https://media.base44.com/images/public/693cd1f0c20a0662b5f281d5/a21339067_GraveyardPICadobe2.jpg"
+                        alt="Aerial view of Union Springs Cemetery"
+                        className="rounded-md shadow-md border border-stone-200 pointer-events-none"
+                        style={{ width, height, objectFit: 'fill' }}
+                        draggable={false}
+                      />
+                    )}
+                  </DraggableResizable>
+
+                  {/* Grid layer - overlaid on top of aerial image, movable/resizable */}
+                  <DraggableResizable
+                    initialX={820}
+                    initialY={40}
+                    initialWidth={700}
+                    initialHeight={900}
+                    minWidth={300}
+                    minHeight={300}
+                    label="Plot Grid"
+                    zIndex={10}
+                    locked={gridLocked}
+                  >
+                    {({ width, height }) => (
+                      <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
+                        <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+                          <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
+                            <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
+                          </Suspense>
+                        </div>
+                      </div>
+                    )}
+                  </DraggableResizable>
+                </Suspense>
+              </div>
+            </div>
           )}
         </div>
       </main>

@@ -113,7 +113,7 @@ const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, 
   return (
     <div
       data-plot-num={plotNum}
-      className={`plot-element ${sizeClass} px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors relative ${isBlinking ? 'animate-old-plot-blink z-50 rounded-sm' : ''}`}
+      className={`${sizeClass} px-0.5 flex items-center gap-0.5 cursor-pointer hover:bg-yellow-50/50 transition-colors relative ${isBlinking ? 'animate-old-plot-blink z-50 rounded-sm' : ''}`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
