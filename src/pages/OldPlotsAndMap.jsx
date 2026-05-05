@@ -245,7 +245,7 @@ export default function OldPlotsAndMap() {
                 size="sm"
                 onClick={() => { setLayoutResetKey(k => k + 1); setZoom(0.32); }}
                 className="border-gray-300"
-                title="Reset image and plot grid to the same starting size and position"
+                title="Reset image and plot grid to the saved starting size and position"
               >
                 <RotateCcw className="w-4 h-4 mr-1.5" />
                 Reset
@@ -409,7 +409,7 @@ export default function OldPlotsAndMap() {
 
                   {/* Grid layer - overlaid on top of aerial image, movable/resizable */}
                   <DraggableResizable
-                    initialX={40}
+                    initialX={820}
                     initialY={40}
                     initialWidth={700}
                     initialHeight={900}
