@@ -422,7 +422,13 @@ export default function OldPlotsAndMap() {
                   >
                     {({ width, height }) => (
                       <div className="w-full h-full overflow-auto p-2" style={{ width, height }}>
-                        <div className="inline-block origin-top-left" style={{ transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
+                        <div
+                          className="inline-block origin-top-left"
+                          style={{
+                            transform: `scale(${zoom * (width / 748)}, ${zoom * (height / 1272)})`,
+                            transformOrigin: 'top left'
+                          }}
+                        >
                           <Suspense fallback={<div className="flex items-center text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mr-2" />Loading grid…</div>}>
                             <OldPlotGrid plots={filteredData} isAdmin={isAdmin} onHover={handleHover} onEdit={isAdmin ? handleEdit : undefined} />
                           </Suspense>
