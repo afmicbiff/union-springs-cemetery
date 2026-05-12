@@ -67,7 +67,7 @@ const blinkListeners = {
 const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, colIndex }) {
   const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
   const sizeClass = plotNum >= 1 && plotNum <= 23
-    ? 'w-[83px] h-[38px]'
+    ? 'w-[83px] h-[41px]'
     : plotNum === 24
       ? 'w-[83px] h-[41px]'
       : plotNum >= 25 && plotNum <= 207
