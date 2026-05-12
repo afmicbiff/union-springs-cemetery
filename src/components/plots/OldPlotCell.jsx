@@ -65,12 +65,10 @@ const blinkListeners = {
 };
 
 const OldPlotCell = memo(function OldPlotCell({ item, isAdmin, onHover, onEdit, colIndex }) {
-  const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
-  const sizeClass = plotNum >= 1 && plotNum <= 23
-    ? 'w-[100px] h-[50.05px]'
-    : (colIndex === 6 || colIndex === 7) ? 'w-[95px] h-[38px]' : (colIndex >= 0 && colIndex <= 5) ? 'w-[75px] h-[38px]' : 'w-[68px] h-[38px]';
+  const sizeClass = (colIndex === 6 || colIndex === 7) ? 'w-[95px] h-[38px]' : (colIndex >= 0 && colIndex <= 5) ? 'w-[75px] h-[38px]' : 'w-[68px] h-[38px]';
   const [isBlinking, setIsBlinking] = useState(false);
   const blinkRef = useRef(false);
+  const plotNum = item ? parseNum(item.Grave || item.plot_number) : null;
 
   useEffect(() => {
     if (!item || plotNum == null) return;
